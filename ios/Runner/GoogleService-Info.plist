@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>975716064608-d2ff219g0j77e33vdmaft9euhn8nqlad.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.975716064608-d2ff219g0j77e33vdmaft9euhn8nqlad</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>975716064608-6tevbjue75th1mga8ukejcggh9nbf9da.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBmX3-mlp3rXJwbbPIoF09p3EjJEbOAg0g</string>
+	<key>GCM_SENDER_ID</key>
+	<string>975716064608</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.doctak.ios</string>
+	<key>PROJECT_ID</key>
+	<string>doctak-322cc</string>
+	<key>STORAGE_BUCKET</key>
+	<string>doctak-322cc.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:975716064608:ios:ac7a51c1bd0561a5749205</string>
+	<key>DATABASE_URL</key>
+	<string>https://doctak-322cc-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

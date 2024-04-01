@@ -1,0 +1,93 @@
+{
+  "project_info": {
+    "project_number": "975716064608",
+    "firebase_url": "https://doctak-322cc-default-rtdb.firebaseio.com",
+    "project_id": "doctak-322cc",
+    "storage_bucket": "doctak-322cc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975716064608:android:c1a4889c2863e014749205",
+        "android_client_info": {
+          "package_name": "com.kt.doctak"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975716064608-6tevbjue75th1mga8ukejcggh9nbf9da.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kt.doctak",
+            "certificate_hash": "f45b028027815e9f45e5498fa39d49fd4670402b"
+          }
+        },
+        {
+          "client_id": "975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "975716064608-coi3ro178313fuatut7octgh5ju0tn3h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dinosoftlabs.POPUP",
+                "app_store_id": "231231231"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975716064608:android:5c4bbe180a8cd794749205",
+        "android_client_info": {
+          "package_name": "com.kt.doctak.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "975716064608-coi3ro178313fuatut7octgh5ju0tn3h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dinosoftlabs.POPUP",
+                "app_store_id": "231231231"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

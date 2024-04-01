@@ -1,0 +1,100 @@
+{
+  "lbl_home": "بيت",
+  "lbl_get_started": "البدء",
+  "lbl_next": "التالي",
+  "lbl_skip": "يتخطى",
+  "msg_consult_only_with": "استشر فقط الطبيب الذي تثق به",
+  "msg_find_a_lot_of_specialist":
+  "ابحث عن الكثير من الأطباء المتخصصين في مكان واحد",
+  "msg_get_connect_our": "احصل على اتصال بمشاورتنا عبر الإنترنت\n",
+  "msg_let_s_get_started": "هيا بنا نبدأ!",
+  "msg_login_to_enjoy_the":
+  "قم بتسجيل الدخول لتستمتع بالميزات التي قدمناها، وحافظ على صحتك!",
+
+  "lbl_login": "تسجيل الدخول",
+  "lbl_or": "أو",
+  "msg_don_t_have_an_account": "ليس لديك حساب؟",
+  "msg_forgot_password": "هل نسيت كلمة السر؟",
+  "msg_sign_in_with_apple": "تسجيل الدخول مع أبل",
+  "msg_sign_in_with_facebook": "قم بتسجيل الدخول باستخدام الفيسبوك",
+  "msg_sign_in_with_google": "الدخول مع جوجل",
+
+  "lbl_enter_your_name1": "أدخل أسمك",
+  "lbl_enter_your_name2": "أدخل أسمك",
+  "lbl_enter_your_phone": "أدخل هاتفك",
+  "lbl_log_in2": "تسجيل الدخول",
+  "msg_already_have_an": "هل لديك حساب؟",
+  "msg_i_agree_to_the_medidoc":
+  "أوافق على شروط خدمة medidoc\nوسياسة الخصوصية\n",
+
+  "lbl_go_to_home": "اذهب إلى الصفحة الرئيسية", "lbl_success": "نجاح",
+  "msg_your_account_has": "لقد كان حسابك\nسجلت بنجاح",
+
+  "lbl_xyz_gmail_com": "xyz@gmail.com",
+
+  "lbl_email": "بريد إلكتروني",
+  "lbl_phone": "هاتف",
+  "msg_enter_your_email2":
+  "أدخل بريدك الإلكتروني أو رقم هاتفك، وسنرسل لك رمز التأكيد\n",
+  "msg_forgot_your_password": "نسيت كلمة السر؟",
+
+  "lbl_1234567890": "1234567890",
+
+  "lbl_08528188": "08528188*** ",
+  "lbl_resend": "إعادة إرسال",
+  "lbl_verify": "يؤكد",
+  "msg_didn_t_receive_the": "لم تتلق الرمز؟",
+  "msg_enter_code_that":
+  "أدخل الرمز الذي أرسلناه إلى رقمك 08528188***\n",
+  "msg_enter_code_that2": "أدخل الرمز الذي أرسلناه إلى رقمك\n ",
+  "msg_enter_verification": "أدخل رمز التحقق",
+
+  "lbl_create_password": "إنشاء كلمة المرور",
+  "msg_confirm_password": "تأكيد كلمة المرور",
+  "msg_create_new_password": "إنشاء كلمة مرور جديدة",
+  "msg_create_your_new": "قم بإنشاء كلمة المرور الجديدة لتسجيل الدخول",
+  "msg_enter_new_password": "أدخل كلمة المرور الجديدة",
+  "lbl_doctor": "طبيب",
+  "lbl_hospital": "مستشفى",
+  "lbl_learn_more": "يتعلم أكثر",
+  "msg_early_protection": "الحماية المبكرة ل\nصحة عائلتك",
+  "msg_find_your_desire": "بحث عن رغبتك\nالحل الصحي",
+  "msg_search_doctor_drugs": "بحث الطبيب والأدوية والمقالات ...\n",
+  "msg_network_err": "خطأ في الشبكة",
+  "msg_something_went_wrong": "هناك خطأ ما!",
+  "err_msg_please_enter_valid_email": "الرجاء إدخال بريد إلكتروني صحيح",
+  "err_msg_please_enter_valid_password": "الرجاء إدخال كلمة مرور صالحة",
+  "err_msg_please_enter_valid_text": "الرجاء إدخال نص صالح",
+  "err_msg_please_enter_valid_phone_number": "الرجاء إدخال رقم هاتف صحيح",
+  "auction_product_screen_": "تحتاج إلى تسجيل الدخول",
+  "lbl_doctak": "Doctak.net",
+  "lbl_payment_detail": "تفاصيل الدفع",
+  "lbl_payment_method": "طريقة الدفع او السداد",
+  "lbl_read_more": "اقرأ أكثر",
+  "lbl_see_all": "اظهار الكل",
+  "lbl_send_otp": "أرسل كلمة مرور لمرة واحدة",
+  "lbl_sign_up": "اشتراك",
+  "lbl_top_doctor": "طبيب أعلى",
+  "lbl_total": "المجموع",
+  "msg_enter_your_email": "أدخل بريدك الإلكتروني",
+  "msg_enter_your_password": "ادخل رقمك السري",
+  "msg_hello_how_can_i": "مرحبا، كيف أستطيع مساعدتك؟",
+  "msg_swipe_back_to_menu": "اسحب مرة أخرى إلى القائمة",
+
+  "lbl_jobs": "وظائف",
+  "lbl_drug_list": "قائمة المخدرات",
+  "lbl_conference": "مؤتمر",
+  "lbl_guidelines": "القواعد الارشادية",
+  "lbl_moh_update": "تحديثات وزارة الصحة",
+  "lbl_library_magazines": "المكتبة والمجلات",
+  "lbl_CME": "CME",
+  "lbl_world_news": "اخبار العالم",
+  "lbl_suggestions": "اقتراحات",
+  "lbl_discounts": "خصومات",
+  "lbl_share_app": "شارك التطبيق",
+  "lbl_rate_us": "قيمنا",
+  "lbl_logout": "تسجيل خروج",
+  "lbl_delete_account": "حذف الحساب"
+
+
+}
