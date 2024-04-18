@@ -74,7 +74,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                   borderRadius: BorderRadius.all(Radius.circular(10))
                   
                 ),
-                  child:  const Text("ChatGPT",style:TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                  child:  const Text("DocTak AI",style:TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
               // color: context.cardColor,
               // icon: Image.asset(
               //   'assets/images/chatgpt.png',
