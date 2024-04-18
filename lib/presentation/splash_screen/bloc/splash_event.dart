@@ -18,6 +18,7 @@ class LoadDropdownData1 extends SplashEvent {
   @override
   List<Object?> get props => [countryName,searchTerms];
 }
+
 class LoadDropdownData extends SplashEvent {
   // CountriesModel? countriesModel;
    String countryFlag;
@@ -28,4 +29,5 @@ class LoadDropdownData extends SplashEvent {
   @override
   List<Object?> get props => [countryFlag,typeValue,searchTerms,isExpired];
 }
+
 

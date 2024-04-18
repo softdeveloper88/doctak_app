@@ -32,7 +32,7 @@ class Posts {
   int? total;
 
   Posts(
-      {this.currentPage,
+      { this.currentPage,
         this.data,
         this.firstPageUrl,
         this.from,

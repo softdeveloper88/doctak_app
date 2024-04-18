@@ -2,6 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
+import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import '../../../data/models/countries_model/countries_model.dart';
 import 'splash_event.dart';
@@ -12,6 +14,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   SplashBloc() : super(CountriesDataInitial()) {
     on<LoadDropdownData>(_listCountryList);
     on<LoadDropdownData1>(_listCountryList1);
+
     // on<UpdateFirstDropdownValue>(_listCountryList);
     // on<UpdateFirstDropdownValue>(_listCountryList);
   }
@@ -19,8 +22,8 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   Future<void> _listCountryList(LoadDropdownData event,
       Emitter<SplashState> emit) async {
     var firstDropdownValues = await _onGetCountries();
-    print("DD ${firstDropdownValues!.countries!}");
-    emit(CountriesDataLoaded(countriesModel: firstDropdownValues,
+    // print("DD ${firstDropdownValues!.countries!}");
+    emit(CountriesDataLoaded(countriesModel: firstDropdownValues!,
         countryFlag: event.countryFlag,
         typeValue: event.typeValue,
         searchTerms: event.searchTerms));
@@ -66,4 +69,5 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       // emit(CountriesDataError('$e'));
     }
   }
+
 }

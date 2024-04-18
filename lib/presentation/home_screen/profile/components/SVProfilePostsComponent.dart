@@ -1,4 +1,6 @@
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/profile_model/interest_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
@@ -7,8 +9,9 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/profile/components/my_post_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
+import 'package:doctak_app/widgets/custom_text_form_field.dart';
+import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../fragments/profile_screen/bloc/profile_state.dart';
@@ -164,7 +167,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(8.0),
       child: Form(
         key: _formKey,
         child: Column(
@@ -176,12 +178,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               children: [
                 _buildField(
                   index: 0,
+                  icon: Icons.person,
                   label: 'First Name',
                   value: widget.profileBloc.userProfile?.user?.firstName ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.firstName = value,
                 ),
                 _buildField(
+                  icon: Icons.person,
                   index: 0,
                   label: 'Last Name',
                   value: widget.profileBloc.userProfile?.user?.lastName ?? '',
@@ -197,19 +201,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 // ),
                 _buildField(
                   index: 0,
+                  icon: Icons.phone,
                   label: 'Phone',
                   value: widget.profileBloc.userProfile?.user?.phone ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.phone = value,
                 ),
-                _buildField(
+                _buildDateField(
                   index: 0,
                   label: 'Date of Birth',
                   value: widget.profileBloc.userProfile?.user?.dob ?? '',
-                  onSave: (value) =>
-                      widget.profileBloc.userProfile?.user?.dob = value,
+                  onSave: (value) {
+                    setState(() {
+                      print(value);
+                    widget.profileBloc.userProfile?.user?.dob = value;
+                    });
+
+                    },
                 ),
                 _buildField(
+                  icon: Icons.numbers_rounded,
                   index: 0,
                   label: 'License No',
                   value: widget.profileBloc.userProfile?.user?.licenseNo ?? '',
@@ -230,110 +241,126 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 //   onSave: (value) =>
                 //       widget.profileBloc.userProfile?.user?.city = value,
                 // ),
-                if (isEditModeMap[0]!)BlocBuilder<ProfileBloc, ProfileState>(
-                    bloc: widget.profileBloc,
-                    builder: (context, state) {
-                      if (state is PaginationLoadedState) {
-                        return Column(
-                          children: [
-                            const SizedBox(height: 10),
-                            CustomDropdownButtonFormField(
-                              items: state.firstDropdownValues,
-                              value: state.selectedFirstDropdownValue,
-                              width: double.infinity,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 0,
-                              ),
-                              onChanged: (String? newValue) {
-                                widget.profileBloc.country=newValue!;
-
-                                widget.profileBloc.add(UpdateFirstDropdownValue(newValue!));
-                              },
-                            ),
-                            const SizedBox(height: 10),
-                            CustomDropdownButtonFormField(
-                              items: state.secondDropdownValues,
-                              value: state.selectedSecondDropdownValue,
-                              width: double.infinity,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 0,
-                              ),
-                              onChanged: (String? newValue) {
-                                widget.profileBloc.stateName=newValue!;
-                                widget.profileBloc.add(UpdateSpecialtyDropdownValue(state.selectedSecondDropdownValue));
-                                widget.profileBloc.add(UpdateUniversityDropdownValues(newValue!));
-                              },
-                            ),
-                            if (AppData.userType == "doctor")
+                if (isEditModeMap[0]!)
+                  BlocBuilder<ProfileBloc, ProfileState>(
+                      bloc: widget.profileBloc,
+                      builder: (context, state) {
+                        if (state is PaginationLoadedState) {
+                          return Column(
+                            children: [
                               const SizedBox(height: 10),
-                            if (AppData.userType == "doctor")
                               CustomDropdownButtonFormField(
-                                items: state.specialtyDropdownValue,
-                                value: state.selectedSpecialtyDropdownValue,
-                                width: double.infinity,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 0,
-                                ),
-                                onChanged:(String? newValue) {
-                                  print(newValue);
-                                  print("Specialty $newValue");
-                                  widget.profileBloc.specialtyName=newValue!;
-                                 widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue!));
-                                },
-                              ),
-                            if (AppData.userType != "doctor")
-                              const SizedBox(height: 10),
-                            if (AppData.userType != "doctor")
-                              CustomDropdownButtonFormField(
-                                items: state.universityDropdownValue,
-                                value: state.selectedUniversityDropdownValue == ''
-                                        ? null
-                                        : state.selectedUniversityDropdownValue,
+                                items: state.firstDropdownValues,
+                                value: state.selectedFirstDropdownValue,
                                 width: double.infinity,
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 10,
                                   vertical: 0,
                                 ),
                                 onChanged: (String? newValue) {
-                                  print(newValue);
-                                  widget.profileBloc.university=newValue!;
-                                  // selectedNewUniversity=newValue;
+                                  widget.profileBloc.country = newValue!;
+
+                                  widget.profileBloc.add(UpdateFirstDropdownValue(newValue));
+                                  // widget.profileBloc.add(UpdateSecondDropdownValues(newValue));
+
+                                  },
+                              ),
+                              const SizedBox(height: 10),
+                              CustomDropdownButtonFormField(
+                                items: state.secondDropdownValues,
+                                value: state.selectedSecondDropdownValue,
+                                width: double.infinity,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 0,
+                                ),
+                                onChanged: (String? newValue) {
+                                  widget.profileBloc.stateName = newValue!;
+                                  widget.profileBloc.add(
+                                      UpdateSpecialtyDropdownValue(
+                                          state.selectedSecondDropdownValue));
                                   widget.profileBloc.add(
                                       UpdateUniversityDropdownValues(
-                                          newValue!));
+                                          newValue));
                                 },
                               ),
-                            // if (AppData.userType!="doctor")
-                            //   const SizedBox(height: 10),
-                            // if (AppData.userType != "doctor" &&
-                            //     state.selectedUniversityDropdownValue ==
-                            //         'Add new University')
-                          ],
-                        );
-                      } else {
-                        return Container(
-                          child: Text('No widget $state'),
-                        );
-                      }
-                    }),
+                              if (AppData.userType == "doctor")
+                                const SizedBox(height: 10),
+                              if (AppData.userType == "doctor")
+                                CustomDropdownButtonFormField(
+                                  items: state.specialtyDropdownValue,
+                                  value: state.selectedSpecialtyDropdownValue,
+                                  width: double.infinity,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 0,
+                                  ),
+                                  onChanged: (String? newValue) {
+                                    print(newValue);
+                                    print("Specialty $newValue");
+                                    widget.profileBloc.specialtyName =
+                                        newValue!;
+                                    widget.profileBloc.add(
+                                        UpdateSpecialtyDropdownValue(
+                                            newValue!));
+                                  },
+                                ),
+                              if (AppData.userType != "doctor")
+                                const SizedBox(height: 10),
+                              if (AppData.userType != "doctor")
+                                CustomDropdownButtonFormField(
+                                  items: state.universityDropdownValue,
+                                  value:
+                                      state.selectedUniversityDropdownValue ==
+                                              ''
+                                          ? null
+                                          : state
+                                              .selectedUniversityDropdownValue,
+                                  width: double.infinity,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 0,
+                                  ),
+                                  onChanged: (String? newValue) {
+                                    print(newValue);
+                                    widget.profileBloc.university = newValue!;
+                                    // selectedNewUniversity=newValue;
+                                    widget.profileBloc.add(
+                                        UpdateUniversityDropdownValues(
+                                            newValue));
+                                  },
+                                ),
+                              // if (AppData.userType!="doctor")
+                              //   const SizedBox(height: 10),
+                              // if (AppData.userType != "doctor" &&
+                              //     state.selectedUniversityDropdownValue ==
+                              //         'Add new University')
+                            ],
+                          );
+                        } else {
+                          return Container(
+                            child: Text('No widget $state'),
+                          );
+                        }
+                      }),
               ],
             ),
+            Divider(color: Colors.grey,),
+
             _buildCard(
               title: 'Professional Information',
               categoryIndex: 1,
               children: [
                 _buildField(
+                  icon: Icons.location_on,
                   index: 1,
                   label: 'Address',
                   value: widget.profileBloc.userProfile?.profile?.address ?? '',
-                  onSave: (value) =>
-                      widget.profileBloc.userProfile?.profile?.address = value,
+                  onSave: (value) => widget.profileBloc.userProfile?.profile?.address = value,
                 ),
-                const Divider(),
+                // const Divider(),
                 _buildField(
+                  icon: Icons.account_circle,
                   index: 1,
                   label: 'About Me',
                   value: widget.profileBloc.userProfile?.profile?.aboutMe ?? '',
@@ -341,18 +368,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       widget.profileBloc.userProfile!.profile?.aboutMe = value,
                   maxLines: 3,
                 ),
-                const Divider(),
+                // const Divider(),
                 _buildField(
+                  icon: Icons.location_on,
                   index: 1,
                   label: 'Birth Place',
-                  value:
-                      widget.profileBloc.userProfile?.profile?.birthplace ?? '',
+                  value: widget.profileBloc.userProfile?.profile?.birthplace ?? '',
                   onSave: (value) => widget
                       .profileBloc.userProfile!.profile?.birthplace = value,
                   maxLines: 3,
                 ),
-                const Divider(),
+                // const Divider(),
                 _buildField(
+                  icon: Icons.sports,
                   index: 1,
                   label: 'Hobbies',
                   value: widget.profileBloc.userProfile?.profile?.hobbies ?? '',
@@ -360,17 +388,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       widget.profileBloc.userProfile!.profile?.hobbies = value,
                   maxLines: 3,
                 ),
-                const Divider(),
+                // const Divider(),
                 _buildField(
+                  icon: Icons.live_help,
                   index: 1,
                   label: 'Lives In',
                   value: widget.profileBloc.userProfile?.profile?.livesIn ?? '',
-                  onSave: (value) =>
-                      widget.profileBloc.userProfile!.profile?.livesIn = value,
+                  onSave: (value) => widget.profileBloc.userProfile!.profile?.livesIn = value,
                   maxLines: 3,
                 ),
               ],
             ),
+            Divider(color: Colors.grey,),
+
             _buildCard(
               title: 'Work Information',
               categoryIndex: 2,
@@ -389,6 +419,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
               ],
             ),
+            Divider(color: Colors.grey,),
+
             _buildCard(
               title: 'Interested Information',
               categoryIndex: 2,
@@ -405,6 +437,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
               ],
             ),
+            Divider(color: Colors.grey,),
+
             // _buildCard(
             //   title: 'Additional Information',
             //   categoryIndex: 3,
@@ -445,10 +479,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required int categoryIndex,
     required List<Widget> children,
   }) {
-    return Card(
-      elevation: 4,
+    return Container(
+      margin: const EdgeInsets.only(top: 4.0),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -473,26 +507,58 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildField({
-    required int index,
-    required String label,
-    required String value,
-    void Function(String)? onSave,
-    int? maxLines,
-  }) {
+  Widget _buildField(
+      {required int index,
+      required String label,
+      required String value,
+      void Function(String)? onSave,
+      int? maxLines,
+      required IconData icon}) {
     return isEditModeMap[index]!
-        ? TextFormField(
-            initialValue: value,
-            decoration: InputDecoration(
-                labelText: label,
-                labelStyle: const TextStyle(
-                    color: Colors.blueGrey, fontWeight: FontWeight.bold)),
-            maxLines: maxLines,
-            onSaved: (v) => onSave?.call(v!),
+        ? Container(
+            margin: const EdgeInsets.only(top: 4),
+            child: CustomTextField(
+                hintText: label,
+                textInputType: TextInputType.text,
+                prefix: Container(
+                    margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+                    child: Icon(
+                      icon,
+                      size: 24.adaptSize,
+                      color: Colors.blueGrey,
+                      // imagePath: Icon(Icons),
+                      // height: 24.adaptSize,
+                      // width: 24.adaptSize
+                    )),
+                prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                initialValue: value,
+                maxLines: maxLines,
+                onSaved: (v) { onSave?.call(v);},
+                contentPadding:
+                    EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
           )
-        : Text(
-            '$label: $value',
-            style: const TextStyle(fontSize: 16),
+      // ?  TextFormField(
+      //           initialValue: value,
+      //           decoration: InputDecoration(
+      //               labelText: label,
+      //               labelStyle: const TextStyle(
+      //                   color: Colors.blueGrey, fontWeight: FontWeight.bold)),
+      //           maxLines: maxLines,
+      //           onSaved: (v) => onSave?.call(v!),
+      //         )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${capitalizeWords(label)}:',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              Text(
+                capitalizeWords(value),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
           );
   }
 
@@ -515,42 +581,49 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(height: 10),
                     _buildField(
+                      icon: Icons.work,
                       index: 2,
                       label: 'Company Name',
                       value: entry.name ?? '',
                       onSave: (value) => entry.name = value,
                     ),
                     _buildField(
+                      icon: Icons.type_specimen,
                       index: 2,
                       label: 'Position',
                       value: entry.position ?? "",
                       onSave: (value) => entry.position = value,
                     ),
                     _buildField(
+                      icon: Icons.location_on,
                       index: 2,
                       label: 'Address',
                       value: entry.address ?? "",
                       onSave: (value) => entry.address = value,
                     ),
                     _buildField(
+                      icon: Icons.description,
                       index: 2,
                       label: 'Degree',
                       value: entry.degree ?? "",
                       onSave: (value) => entry.degree = value,
                     ),
                     _buildField(
+                      icon: Icons.book,
                       index: 2,
                       label: 'Courses',
                       value: entry.courses ?? "",
                       onSave: (value) => entry.courses = value,
                     ),
                     _buildField(
+                      icon: Icons.book,
                       index: 2,
                       label: 'Work Type',
                       value: entry.workType ?? "",
                       onSave: (value) => entry.workType = value,
                     ),
                     _buildField(
+                        icon: Icons.description,
                         index: 2,
                         label: 'Description',
                         value: entry.description ?? "",
@@ -606,12 +679,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(height: 10),
                     _buildField(
+                      icon: Icons.description,
                       index: 2,
                       label: 'Interest Type',
                       value: entry.interestType ?? '',
                       onSave: (value) => entry.interestType = value,
                     ),
                     _buildField(
+                      icon: Icons.description,
                       index: 2,
                       label: 'Interest Details',
                       value: entry.interestDetails ?? "",
@@ -638,101 +713,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   UserProfilePrivacyModel userProfile = UserProfilePrivacyModel();
 
   Widget _buildPrivacyInfoFields() {
-    // return Column(
-    //   children: [
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'About me privacy',
-    //       value: userProfile.aboutMePrivacy??'lock',
-    //       onSave: (value) => userProfile.aboutMePrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Address privacy',
-    //       value: userProfile.addressPrivacy??'lock',
-    //       onSave: (value) => userProfile.addressPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Birth place privacy',
-    //       value: userProfile.birthPlacePrivacy??'lock',
-    //       onSave: (value) => userProfile.birthPlacePrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Language privacy',
-    //       value: userProfile.languagePrivacy??'lock',
-    //       onSave: (value) => userProfile.languagePrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Live in privacy',
-    //       value: userProfile.liveInPrivacy??'lock',
-    //       onSave: (value) => userProfile.liveInPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Email privacy',
-    //       value: userProfile.emailPrivacy??'lock',
-    //       onSave: (value) => userProfile.emailPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Gender Privacy',
-    //       value: userProfile.genderPrivacy??'lock',
-    //       onSave: (value) => userProfile.genderPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Phone Privacy',
-    //       value: userProfile.phonePrivacy??'lock',
-    //       onSave: (value) => userProfile.phonePrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'License number Privacy',
-    //       value: userProfile.licenseNumberPrivacy??'lock',
-    //       onSave: (value) => userProfile.licenseNumberPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Specialty Privacy',
-    //       value: userProfile.specialtyPrivacy??'lock',
-    //       onSave: (value) => userProfile.specialtyPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Country Privacy',
-    //       value: userProfile.countryPrivacy??'lock',
-    //       onSave: (value) => userProfile.countryPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'City Privacy',
-    //       value: userProfile.cityPrivacy??'lock',
-    //       onSave: (value) => userProfile.cityPrivacy = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //     _buildDropdownField(
-    //       index: 4,
-    //       label: 'Country Origin Privacy',
-    //       value: userProfile.countryOrigin??'lock',
-    //       onSave: (value) => userProfile.countryOrigin = value,
-    //       options: ['lock', 'group', 'globe'],
-    //     ),
-    //   ],
-    // );
     return Column(
       children: widget.profileBloc.userProfile!.privacySetting!.map((item) {
         // if(item.visibility!='crickete update d') {
@@ -779,67 +759,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             },
             decoration: InputDecoration(labelText: label),
           )
-        : Text(
-            '$label: $value',
-            style: const TextStyle(fontSize: 16),
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${capitalizeWords(label)}:',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              Text(
+                capitalizeWords(value),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
           );
   }
-
-  // Widget _buildDropdownField({
-  //   required int index,
-  //   required String label,
-  //   required String value,
-  //   void Function(String)? onSave,
-  //   required List<String> options,
-  // }) {
-  //   return isEditModeMap[index]!
-  //       ? DropdownButtonFormField<String>(
-  //     value: value,
-  //     items: options.map((option) {
-  //       return DropdownMenuItem<String>(
-  //         value: option,
-  //         child: Text(option),
-  //       );
-  //     }).toList(),
-  //     onChanged: (selectedValue) {
-  //       if (selectedValue != value) {
-  //         // Check if the selected value is different
-  //         onSave?.call(selectedValue!);
-  //       }
-  //     },
-  //     decoration: InputDecoration(labelText: label),
-  //   )
-  //       : Text(
-  //     '$label: $value',
-  //     style: const TextStyle(fontSize: 16),
-  //   );
-  // }
-  // Widget _buildDropdownField({
-  //   required int index,
-  //   required String label,
-  //   required String value,
-  //   void Function(String)? onSave,
-  //   required List<String> options,
-  // }) {
-  //   return isEditModeMap[index]!
-  //       ? DropdownButtonFormField<String>(
-  //     value: value,
-  //     items: options.map((option) {
-  //       return DropdownMenuItem<String>(
-  //         value: option,
-  //         child: Text(option),
-  //       );
-  //     }).toList(),
-  //     onChanged: (selectedValue) {
-  //       onSave?.call(selectedValue!);
-  //     },
-  //     decoration: InputDecoration(labelText: label),
-  //   )
-  //       : Text(
-  //     '$label: $value',
-  //     style: const TextStyle(fontSize: 16),
-  //   );
-  // }
 
   Widget _buildEditIcon(int categoryIndex) {
     return IconButton(
@@ -879,45 +813,150 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: const Text('Save'),
     );
   }
-
   Widget _buildDateField({
     required int index,
     required String label,
     required String value,
     void Function(String)? onSave,
   }) {
-    return isEditModeMap[index]!
-        ? TextFormField(
-            readOnly: true,
-            onTap: () async {
-              final pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(1900),
-                lastDate: DateTime(2101),
-              );
+    // Create a TextEditingController for the text field
+    TextEditingController textEditingController = TextEditingController(text: value);
 
-              if (pickedDate != null) {
-                setState(() {});
-                onSave?.call(pickedDate.toIso8601String().toString());
-              }
-            },
-            decoration: InputDecoration(labelText: label),
-            controller: TextEditingController(text: value),
-          )
-        : Text(
-            '$label: $value',
-            style: const TextStyle(fontSize: 16),
+    return isEditModeMap[index]!
+        ? Container(
+      margin: const EdgeInsets.only(top: 4),
+      child: CustomTextFormField(
+        hintText: label,
+        isReadOnly: true,
+        textInputType: TextInputType.datetime,
+        controller: textEditingController, // Pass the controller here
+        onTap: () async {
+          final pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2101),
           );
+          if (pickedDate != null) {
+            print(pickedDate);
+            DateTime dateTime = DateTime.parse(pickedDate.toIso8601String());
+
+// Format the DateTime object to display only the date portion
+            String formattedDate = "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
+
+            // Update the text field value when a date is selected
+            textEditingController.text = formattedDate;
+            // Call onSave if provided
+
+            onSave?.call(formattedDate);
+          }
+        },
+        prefix: Container(
+          margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+          child: Icon(
+            Icons.date_range_outlined,
+            size: 24.adaptSize,
+            color: Colors.blueGrey,
+          ),
+        ),
+        prefixConstraints: BoxConstraints(maxHeight: 56.v),
+        validator: (value) {
+          return null;
+        },
+        contentPadding:
+        EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v),
+      ),
+    )
+        : Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          '${capitalizeWords(label)}:',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          capitalizeWords(value),
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    );
   }
+
+  // Widget _buildDateField({
+  //   required int index,
+  //   required String label,
+  //   required String value,
+  //   void Function(String)? onSave,
+  // }) {
+  //   return isEditModeMap[index]!
+  //       ? Container(
+  //           margin: const EdgeInsets.only(top: 4),
+  //           child: CustomTextFormField(
+  //               hintText: label,
+  //               textInputType: TextInputType.datetime,
+  //               isReadOnly: true,
+  //               initialValue: value,
+  //               onTap: () async {
+  //                 final pickedDate = await showDatePicker(
+  //                   context: context,
+  //                   initialDate: DateTime.now(),
+  //                   firstDate: DateTime(1900),
+  //                   lastDate: DateTime(2101),
+  //                 );
+  //
+  //                 if (pickedDate != null) {
+  //                   print(pickedDate);
+  //                   setState(() {
+  //
+  //                   onSave?.call(pickedDate.toIso8601String().toString());
+  //                   });
+  //
+  //                 }
+  //               },
+  //               onSaved: (v) => onSave!.call(v),
+  //               prefix: Container(
+  //                   margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+  //                   child: Icon(
+  //                     Icons.date_range_outlined,
+  //                     size: 24.adaptSize,
+  //                     color: Colors.blueGrey,
+  //                     // imagePath: Icon(Icons),
+  //                     // height: 24.adaptSize,
+  //                     // width: 24.adaptSize
+  //                   )),
+  //               prefixConstraints: BoxConstraints(maxHeight: 56.v),
+  //               validator: (value) {
+  //                 // if (value == null ||
+  //                 //     (!isValidEmail(value,
+  //                 //         isRequired: true))) {
+  //                 //   return translation(context)
+  //                 //       .err_msg_please_enter_valid_email;
+  //                 // }
+  //                 return null;
+  //               },
+  //               contentPadding: EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
+  //         )
+  //       :  Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       Text(
+  //         '${capitalizeWords(label)}:',
+  //         style:
+  //         const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+  //       ),
+  //       Text(
+  //         capitalizeWords(value),
+  //         style: const TextStyle(fontSize: 16),
+  //       ),
+  //     ],
+  //   );
+  // }
 
 // Function to print updated information
   void printUpdatedInformation() {
-    print('Updated User Profile Information:');
-    print('First Name: ${widget.profileBloc.userProfile?.user?.firstName}');
-    print('Last Name: ${widget.profileBloc.userProfile?.user?.lastName}');
-    // Add similar print statements for other fields you want to track
-    // ...
     widget.profileBloc.add(UpdateProfileEvent(
       userProfile: widget.profileBloc.userProfile,
       interestModel: widget.profileBloc.interestList,

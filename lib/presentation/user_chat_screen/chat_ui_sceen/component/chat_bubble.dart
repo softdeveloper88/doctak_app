@@ -299,6 +299,14 @@ class ChatBubble extends StatelessWidget {
                             child: AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
                           ),
                         )
+                      else if (attachmentJson!.endsWith('wav'))
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Container(
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
+                            child: AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
+                          ),
+                        )
                       else if(attachmentJson!.endsWith('mp4'))
                         VideoPlayerWidget(videoUrl: '${AppData.imageUrl}$attachmentJson')
                         else Padding(

@@ -1,3 +1,5 @@
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
@@ -51,7 +53,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
             const Divider(color: Colors.grey,),
             ListTile(
 
-              title: Text(
+              title: const Text(
                 'App Language',
                 style: TextStyle(
                   fontSize: 18.0,
@@ -96,18 +98,19 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                 },
               ),
             ),
+            // const Divider(color: Colors.grey,),
+            // const ListTile(
+            //   title: Text(
+            //     'Reset Password',
+            //     style: TextStyle(
+            //       fontSize: 18.0,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            //
+            // ),
             const Divider(color: Colors.grey,),
-            const ListTile(
-              title: Text(
-                'Reset Password',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-            ),
-            const Divider(color: Colors.grey,),
+            if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
           ],
         ),
       ),

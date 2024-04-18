@@ -3,10 +3,13 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '/core/app_export.dart';
 
@@ -22,308 +25,46 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
   bool isDoctorRole = true;
 
   DropdownBloc() : super(DropdownInitial()) {
-    // Register the event handler for LoadDropdownValues
-    // on<LoadDropdownValues>((event, emit) async {
-    //   try {
-    //     // Simulate fetching dynamic values from an API or other source
-    //     List<String>? firstDropdownValues = await _onGetCountries();
-    //     emit(DropdownLoaded(
-    //       firstDropdownValues!,
-    //       firstDropdownValues.first,
-    //       [],
-    //       'Select Country',
-    //     ));
-    //   } catch (e) {
-    //     emit(DropdownError('Failed to load dropdown values'));
-    //   }
-    // });
-    // Register the event handler for UpdateSecondDropdownValues
-    // on<UpdateSecondDropdownValues>((event, emit) async {
-    //   // Simulate fetching second dropdown values based on the first dropdown selection
-    //   List<String> secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue);
-    //   emit(DropdownLoaded(
-    //     (state as DropdownLoaded).firstDropdownValues,
-    //     (state as DropdownLoaded).selectedFirstDropdownValue,
-    //     secondDropdownValues,
-    //     secondDropdownValues.first,
-    //   ));
-    // });
     on<LoadDropdownValues>(_loadDropdownValues);
-    // on<UpdateFirstDropdownValue>(_updateFirstDropdownValue);
-    // on<UpdateSecondDropdownValues>(_updateSecondDropdownValues);
-    // on<UpdateSpecialtyDropdownValue>(_updateSpecialtyDropdownValues);
-    // on<UpdateUniversityDropdownValues>(_updateUniversityDropdownValues);
-    on<TogglePasswordVisibility>(_changePasswordVisibility);
+     on<TogglePasswordVisibility>(_changePasswordVisibility);
     on<ChangeDoctorRole>(_changeDoctorRole);
     on<SignUpButtonPressed>(_onSignUpButtonPressed);
-    // on<Check>(_changePasswordVisibility);
-  }
+    on<SocialButtonPressed>(_onSocialLoginProfileCompletePressed);
 
-  void _updateFirstDropdownValue(
-      UpdateFirstDropdownValue event, Emitter<DropdownState> emit) {
-    emit(DropdownLoaded(
-      (state as DropdownLoaded).firstDropdownValues,
-      event.newValue,
-      [],
-      'Select State',
-      (state as DropdownLoaded).specialtyDropdownValue,
-      'select Specialty',
-      [],
-      '',
-      false,
-      (state as DropdownLoaded).isDoctorRole,
-    ));
-    print("DD ${event.newValue}");
-    add(UpdateSecondDropdownValues(event.newValue));
   }
 
   void _loadDropdownValues(
       LoadDropdownValues event, Emitter<DropdownState> emit) async {
     try {
       // Simulate fetching dynamic values from an API or other source
-      emit(DataLoaded(false, true));
+
+      emit(DataLoaded(false, true,false,{}));
       print('daa');
     } catch (e) {
       emit(DropdownError('Failed to load dropdown values1'));
     }
   }
 
-  // void _updateSecondDropdownValues(UpdateSecondDropdownValues event,
-  //     Emitter<DropdownState> emit) async {
-  //   // Simulate fetching second dropdown values based on the first dropdown selection
-  //   List<String> secondDropdownValues = await _onGetStates(
-  //       event.selectedFirstDropdownValue);
-  //   List<String>? universityDropdownValues = await _onGetUniversities(
-  //       secondDropdownValues!.first);
-  //   // log(universityDropdownValues!.toList().toString());
-  //   emit(DropdownLoaded(
-  //     (state as DropdownLoaded).firstDropdownValues,
-  //     (state as DropdownLoaded).selectedFirstDropdownValue,
-  //     secondDropdownValues,
-  //     secondDropdownValues.first,
-  //     (state as DropdownLoaded).specialtyDropdownValue,
-  //     (state as DropdownLoaded).selectedSpecialtyDropdownValue,
-  //     [],
-  //     '',
-  //     !(state as DropdownLoaded).isPasswordVisible,
-  //     (state as DropdownLoaded).isDoctorRole,
-  //   ));
-  //   print("DD ${secondDropdownValues.first}");
-  // }
-
-  // void _updateUniversityDropdownValues(UpdateUniversityDropdownValues event,
-  //     Emitter<DropdownState> emit) async {
-  //   // Simulate fetching second dropdown values based on the first dropdown selection
-  //   List<String>? secondDropdownValues = await _onGetUniversities(
-  //       event.selectedStateDropdownValue);
-  //   emit(DropdownLoaded(
-  //     (state as DropdownLoaded).firstDropdownValues,
-  //     (state as DropdownLoaded).selectedFirstDropdownValue,
-  //     (state as DropdownLoaded).secondDropdownValues,
-  //     (state as DropdownLoaded).selectedSecondDropdownValue,
-  //     (state as DropdownLoaded).specialtyDropdownValue,
-  //     (state as DropdownLoaded).selectedSpecialtyDropdownValue,
-  //     secondDropdownValues ?? [],
-  //     secondDropdownValues?.first == '' ? ' ' : secondDropdownValues?.first,
-  //     !(state as DropdownLoaded).isPasswordVisible,
-  //     (state as DropdownLoaded).isDoctorRole,
-  //   ));
-  // }
-  //
-  // void _updateSpecialtyDropdownValues(UpdateSpecialtyDropdownValue event,
-  //     Emitter<DropdownState> emit) async {
-  //   // Simulate fetching second dropdown values based on the first dropdown selection
-  //   List<String>? secondDropdownValues = await _onGetSpecialty();
-  //   emit(DropdownLoaded(
-  //     (state as DropdownLoaded).firstDropdownValues,
-  //     (state as DropdownLoaded).selectedFirstDropdownValue,
-  //     (state as DropdownLoaded).secondDropdownValues,
-  //     (state as DropdownLoaded).selectedSecondDropdownValue,
-  //     secondDropdownValues!,
-  //     secondDropdownValues.first,
-  //     [],
-  //     '',
-  //     !(state as DropdownLoaded).isPasswordVisible,
-  //     (state as DropdownLoaded).isDoctorRole,
-  //   ));
-  // }
 
   void _changePasswordVisibility(
       TogglePasswordVisibility event, Emitter<DropdownState> emit) {
     emit(DataLoaded(
       !(state as DataLoaded).isPasswordVisible,
       (state as DataLoaded).isDoctorRole,
+        false,
+        (state as DataLoaded).response
     ));
+
   }
 
   void _changeDoctorRole(ChangeDoctorRole event, Emitter<DropdownState> emit) {
     emit(DataLoaded(
       !(state as DataLoaded).isPasswordVisible,
       (state as DataLoaded).isDoctorRole,
+      false,
+
+        (state as DataLoaded).response,
     ));
-  }
-
-  // @override
-  // Stream<DropdownState> mapEventToState(DropdownEvent event) async* {
-  //   if (event is LoadDropdownValues) {
-  //     try {
-  //       // Simulate fetching dynamic values from an API or other source
-  //       List<String>? firstDropdownValues = await _onGetCountries();
-  //       List<String>? specialtyDropdownValues = await _onGetSpecialty();
-  //       yield DropdownLoaded(
-  //           firstDropdownValues!,
-  //           firstDropdownValues.first,
-  //           [],
-  //           'select States',
-  //           specialtyDropdownValues!,
-  //           specialtyDropdownValues.first,
-  //           [],
-  //           ' Select University',
-  //           false,
-  //           (state as DropdownLoaded).isDoctorRole
-  //       );
-  //     } catch (e) {
-  //       yield DropdownError('Failed to load dropdown valuess');
-  //     }
-  //   } else if (event is UpdateFirstDropdownValue) {
-  //     yield DropdownLoaded(
-  //       (state as DropdownLoaded).firstDropdownValues,
-  //       event.newValue,
-  //       (state as DropdownLoaded).secondDropdownValues,
-  //       'Select country',
-  //       (state as DropdownLoaded).specialtyDropdownValue,
-  //       '',
-  //       (state as DropdownLoaded).universityDropdownValue,
-  //       (state as DropdownLoaded).selectedUniversityDropdownValue,
-  //       false,
-  //       (state as DropdownLoaded).isDoctorRole,
-  //
-  //       // DropdownItem(0, 'Select Second Dropdown'),
-  //     );
-  //     print("123" + event.newValue);
-  //
-  //     add(UpdateSecondDropdownValues(event.newValue));
-  //   } else if (event is UpdateSecondDropdownValues) {
-  //     // Simulate fetching second dropdown values based on the selection made in the first dropdown
-  //     List<String>? secondDropdownValues = await _onGetStates(
-  //         event.selectedFirstDropdownValue);
-  //     yield DropdownLoaded(
-  //         (state as DropdownLoaded).firstDropdownValues,
-  //         (state as DropdownLoaded).selectedFirstDropdownValue,
-  //         secondDropdownValues!,
-  //         secondDropdownValues.first,
-  //         (state as DropdownLoaded).specialtyDropdownValue,
-  //         (state as DropdownLoaded).selectedSpecialtyDropdownValue,
-  //         (state as DropdownLoaded).universityDropdownValue,
-  //         (state as DropdownLoaded).selectedUniversityDropdownValue,
-  //         false,
-  //         (state as DropdownLoaded).isDoctorRole
-  //     );
-  //     print("123" + event.selectedFirstDropdownValue);
-  //     add(UpdateUniversityDropdownValues(event.selectedFirstDropdownValue));
-  //   } else if (event is UpdateUniversityDropdownValues) {
-  //     yield DropdownLoaded(
-  //         (state as DropdownLoaded).firstDropdownValues,
-  //         (state as DropdownLoaded).selectedFirstDropdownValue,
-  //         (state as DropdownLoaded).secondDropdownValues,
-  //         (state as DropdownLoaded).selectedSecondDropdownValue,
-  //         (state as DropdownLoaded).specialtyDropdownValue,
-  //         (state as DropdownLoaded).selectedSpecialtyDropdownValue,
-  //         (state as DropdownLoaded).universityDropdownValue,
-  //         (state as DropdownLoaded).selectedUniversityDropdownValue,
-  //         false,
-  //         (state as DropdownLoaded).isDoctorRole);
-  //   }
-  // }
-
-  Future<List<String>?> _onGetCountries() async {
-    // emit(DataLoading());
-    try {
-      final response = await apiService.getCountries();
-      print(response.countries!.length.toString());
-      if (response.countries!.isNotEmpty) {
-        // emit(DataSuccess(countriesModel: response));
-        List<String> list = [];
-        // list.add('Select Country');
-        for (var element in response.countries!) {
-          list.add(element.countryName!);
-        }
-        return list;
-      } else {
-        return [];
-        // emit(DataFailure(error: 'Failed to load data'));
-      }
-    } catch (e) {
-      print(e);
-      // emit(DataFailure(error: 'An error occurred'));
-    }
-  }
-
-  Future<List<String>?> _onGetSpecialty() async {
-    // emit(DataLoading());
-    try {
-      final response = await apiService.getSpecialty();
-      if (response.data!.isNotEmpty) {
-        // emit(DataSuccess(countriesModel: response));
-        List<String> list = [];
-        list.add('select Specialty');
-        response.data!.forEach((element) {
-          list.add(element['name']!);
-        });
-        return list;
-      } else {
-        return [];
-        // emit(DataFailure(error: 'Failed to load data'));
-      }
-    } catch (e) {
-      print(e);
-      // emit(DataFailure(error: 'An error occurred'));
-    }
-  }
-
-  _onGetStates(String value) async {
-    // emit(DataLoading());
-    try {
-      final response = await apiService.getStates(value);
-      // if (response.data!.isNotEmpty) {
-      // emit(DataSuccess(countriesModel: response));
-      List<String> list = [];
-      response.data!.forEach((element) {
-        list.add(element['state_name']!);
-      });
-      return list;
-    } catch (e) {
-      print(e);
-      // emit(DataFailure(error: 'An error occurred'));
-    }
-  }
-
-  Future<List<String>>? _onGetUniversities(String value) async {
-    // emit(DataLoading());
-    try {
-      final response = await apiService.getUniversityByStates(value);
-      print(response.data);
-      // if (response.data!.isNotEmpty) {
-      // emit(DataSuccess(countriesModel: response));
-      log('response ${response.data}');
-      List<String> list = [];
-      // list.clear();
-      // list.add('Add new University');
-      response.data?.forEach((element) {
-        if (element['name'] != null) {
-          list.add(element['name']!);
-        }
-      });
-      return list;
-      // } else {
-      //   return [];
-      //   // emit(DataFailure(error: 'Failed to load data'));
-      // }
-    } catch (e) {
-      return [];
-      print(e);
-      // emit(DataFailure(error: 'An error occurred'));
-    }
   }
 
   void _onSignUpButtonPressed(SignUpButtonPressed event, Emitter<DropdownState> emit) async {
@@ -333,23 +74,118 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       final response = await apiService.register(
           event.firstName, event.lastName,event.username, event.password, event.userType);
       if (response.response.statusCode == 200) {
-        // print('rese ${JsonEncoder(response.data['message'])}');
-        ProgressDialogUtils.hideProgressDialog();
-        // var data=JsonDecoder(response.response.data);
-        // var d=jsonEncode(data);
-        // print(data);
-        print('rese ${response.response.data}');
 
-        emit(DropdownLoaded1(response: response.response.data));
+        ProgressDialogUtils.hideProgressDialog();
+        print('rese ${response.response.data}');
+        emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
+            (state as DataLoaded).isDoctorRole,true, response.response.data));
+
+        // emit(DropdownLoaded1(response: response.response.data));
       } else {
-        emit(DropdownLoaded1(response: response.response.data));
+        emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
+            (state as DataLoaded).isDoctorRole,true, response.response.data));
         print('rese ${response.response.data}');
         ProgressDialogUtils.hideProgressDialog();
         // emit(LoginFailure(error: 'Invalid credentials'));
       }
     } catch (e) {
       print(e);
-      emit(DropdownLoaded1(response: ''));
+      // emit(DropdownLoaded1(response: ));
+
+      ProgressDialogUtils.hideProgressDialog();
+
+      // emit(LoginFailure(error: 'An error occurred'));
+    }
+  }
+  void _onSocialLoginProfileCompletePressed(SocialButtonPressed event, Emitter<DropdownState> emit) async {
+    ProgressDialogUtils.showProgressDialog();
+    try {
+
+      print(event.token);
+      final response = await apiService.completeProfile(
+           'Bearer ${event.token}',
+          event.firstName, event.lastName,event.country,event.state,event.phone,event.userType);
+    if(response.user!.userType !=null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', response.token ?? '');
+      await prefs.setString('userId', response.user?.id ?? '');
+      await prefs.setString('name',
+          '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}');
+      await prefs.setString('profile_pic', response.user?.profilePic ?? '');
+      await prefs.setString('email', response.user?.email ?? '');
+      await prefs.setString('phone', response.user?.phone ?? '');
+      await prefs.setString('background', response.user?.background ?? '');
+      await prefs.setString('specialty', response.user?.specialty ?? '');
+      await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
+      await prefs.setString('title', response.user?.title ?? '');
+      await prefs.setString('city', response.user?.city ?? '');
+      await prefs.setString(
+          'countryOrigin', response.user?.countryOrigin ?? '');
+      await prefs.setString('college', response.user?.college ?? '');
+      await prefs.setString('clinicName', response.user?.clinicName ?? '');
+      await prefs.setString('dob', response.user?.dob ?? '');
+      await prefs.setString('user_type', response.user?.userType ?? '');
+      await prefs.setString(
+          'countryName', response.country?.countryName ?? '');
+      await prefs.setString('currency', response.country?.currency ?? '');
+      if (response.university != null) {
+        await prefs.setString('university', response.university?.name ?? '');
+      }
+      await prefs.setString(
+          'practicingCountry', response.user?.practicingCountry ?? '');
+      await prefs.setString('gender', response.user?.gender ?? '');
+      await prefs.setString('country', response.user?.country.toString() ?? '');
+      String? userToken = prefs.getString('token') ?? '';
+      String? userId = prefs.getString('userId') ?? '';
+      String? name = prefs.getString('name') ?? '';
+      String? profile_pic = prefs.getString('profile_pic') ?? '';
+      String? background = prefs.getString('background') ?? '';
+      String? email = prefs.getString('email') ?? '';
+      String? specialty = prefs.getString('specialty') ?? '';
+      String? userType = prefs.getString('user_type') ?? '';
+      String? university = prefs.getString('university') ?? '';
+      String? countryName = prefs.getString('country') ?? '';
+      String? currency = prefs.getString('currency') ?? '';
+
+      if (userToken != '') {
+        AppData.userToken = userToken;
+        AppData.logInUserId = userId;
+        AppData.name = name;
+        AppData.profile_pic = profile_pic;
+        AppData.university = university;
+        AppData.userType = userType;
+        AppData.background = background;
+        AppData.email = email;
+        AppData.specialty = specialty;
+        AppData.countryName = countryName;
+        AppData.currency = currency;
+
+        emit(SocialLoginSuccess());
+      }
+
+      ProgressDialogUtils.hideProgressDialog();
+      print("hello${response.toJson()}");
+    }else{
+      emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
+          (state as DataLoaded).isDoctorRole,true, {}));
+
+    }
+        // emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
+        //     (state as DataLoaded).isDoctorRole,true, response.response.data));
+
+        // emit(DropdownLoaded1(response: response.response.data));
+      // } else {
+      //   emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
+      //       (state as DataLoaded).isDoctorRole,true, response.response.data));
+      //   print('rese ${response.response.data}');
+      //   ProgressDialogUtils.hideProgressDialog();
+      //   // emit(LoginFailure(error: 'Invalid credentials'));
+      // }
+    } catch (e) {
+      print(e);
+      emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
+          (state as DataLoaded).isDoctorRole,true, {}));
+
 
       ProgressDialogUtils.hideProgressDialog();
 
@@ -357,6 +193,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     }
   }
 }
+
 //
 //   _changeCheckBox(
 //     ChangeCheckBoxEvent event,

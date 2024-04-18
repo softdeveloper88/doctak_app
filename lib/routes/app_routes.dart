@@ -68,7 +68,7 @@ class AppRoutes {
 
   static Map<String, WidgetBuilder> get routes => {
         // onboardingOneScreen: OnboardingOneScreen.builder,
-        loginScreen: LoginScreen.builder,
+        // loginScreen: LoginScreen.builder,
         // signUpScreen: SignUpScreen.builder,
         // resetPasswordEmailTabContainerScreen:
         //     ResetPasswordEmailTabContainerScreen.builder,

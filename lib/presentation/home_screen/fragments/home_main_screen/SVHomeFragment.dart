@@ -4,11 +4,16 @@ import 'package:doctak_app/presentation/home_screen/home/components/SVPostCompon
 import 'package:doctak_app/presentation/home_screen/home/components/SVStoryComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
+import '../../../../ads_setting/ads_widget/banner_ads_widget.dart';
 import '../../../../localization/app_localization.dart';
 import '../../../chat_gpt_screen/ChatDetailScreen.dart';
 import 'bloc/home_bloc.dart';
@@ -30,6 +35,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   @override
   void initState() {
     homeBloc.add(PostLoadPageEvent(page: 1));
+    homeBloc.add(AdsSettingEvent());
     super.initState();
   }
 
@@ -60,24 +66,33 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
           actions: [
-            IconButton(
-              color: context.cardColor,
-              icon: Image.asset(
-                'assets/ai/ai-icon.png',
-                width: 24,
-                height: 22,
-                fit: BoxFit.fill,
-                color: context.iconColor,
-              ),
+            TextButton(
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.lightBlue,
+                  borderRadius: BorderRadius.all(Radius.circular(10))
+                  
+                ),
+                  child:  const Text("ChatGPT",style:TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+              // color: context.cardColor,
+              // icon: Image.asset(
+              //   'assets/images/chatgpt.png',
+              //   width: 30,
+              //   height: 30,
+              //   fit: BoxFit.fill,
+              //   color: context.iconColor,
+              // ),
               onPressed: () async {
                 const ChatDetailScreen().launch(context);
               },
             ),
             IconButton(
               color: context.cardColor,
-              icon: Icon(
-                CupertinoIcons.chat_bubble_fill,
-                size: 24,
+              icon:
+              // Image.asset('assets/images/chat.png',height: 24,width: 24,
+                Icon(CupertinoIcons.chat_bubble_2,
+                size: 30,
                 color: context.iconColor,
               ),
               onPressed: () async {
@@ -86,17 +101,16 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             ),
           ],
         ),
-        drawer: Drawer(
-          backgroundColor: context.cardColor,
-          child: SVHomeDrawerComponent().cornerRadiusWithClipRRect(0),
-        ),
+        drawer:  SVHomeDrawerComponent(),
+
         body: CustomScrollView(
             shrinkWrap: true,
             controller: _mainScrollController,
             physics: const BouncingScrollPhysics(),
             slivers: <Widget>[
               // SliverList(delegate: SliverChildListDelegate([
-              //   SVStoryComponent(),
+              //
+              //   // SVStoryComponent(),
               //   // 10.height,
               // ])),
               SliverList(

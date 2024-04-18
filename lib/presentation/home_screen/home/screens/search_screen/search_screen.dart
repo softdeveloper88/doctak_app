@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:doctak_app/ads_setting/ad_setting.dart';
+import 'package:doctak_app/ads_setting/ads_widget/banner_ad_manager.dart';
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
@@ -7,6 +10,8 @@ import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:intl/intl.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
@@ -40,23 +45,62 @@ class _SearchScreenState extends State<SearchScreen>
   SearchPeopleBloc searchPeopleBloc = SearchPeopleBloc();
   HomeBloc homeBloc = HomeBloc();
 
-  @override
-  void initState() {
-    // drugsBloc.add(
-    //   LoadPageEvent(
-    //       page: 1,
-    //       countryId: AppData.countryName,
-    //       searchTerm: '',
-    //       type: 'Brand'),
-    // );
-    super.initState();
-    // _scrollController = ScrollController()..addListener(_onScroll);
-  }
+  // @override
+  // void dispose() {
+  //   _bannerAd!.dispose();
+  //   super.dispose();
+  // }
+  //
+  // @override
+  // void initState() {
+  //   getBannerAds();
+  //   super.initState();
+  // }
+  // bool isLoaded = false;
+  // bool isActive = true;
+  // BannerAd? _bannerAd;
+  //
+  // getBannerAds() {
+  //   _bannerAd = BannerAd(
+  //       size: AdSize.banner,
+  //       adUnitId: AdmobSetting.bannerUnit,
+  //       listener: BannerAdListener(onAdClosed: (Ad ad) {
+  //         debugPrint("Ad Closed");
+  //       }, onAdFailedToLoad: (Ad ad, LoadAdError error) {
+  //         setState(() {
+  //           isLoaded = false;
+  //         });
+  //       }, onAdLoaded: (Ad ad) {
+  //         setState(() {
+  //           isLoaded = true;
+  //         });
+  //         debugPrint('Ad Loaded');
+  //       }, onAdOpened: (Ad ad) {
+  //         debugPrint('Ad opened');
+  //       }),
+  //       request: const AdRequest());
+  //
+  //   _bannerAd!.load();
+  // }
+  // Widget bannerAdLoaded() {
+  //   if (isLoaded == true) {
+  //     return Padding(
+  //       padding: const EdgeInsets.all(8.0),
+  //       child: SizedBox(
+  //         height: _bannerAd!.size.height.toDouble(),
+  //         child: AdWidget(
+  //           ad: _bannerAd!,
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     return const SizedBox(
+  //       height: 8,
+  //     );
+  //   }
+  // }
   var selectedValue;
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  // final BannerAdManager _bannerAdManager = BannerAdManager();
 
   @override
   Widget build(BuildContext context) {
@@ -316,7 +360,7 @@ class _SearchScreenState extends State<SearchScreen>
                                               vertical: 0,
                                             ),
                                             onChanged: (String? newValue) {
-                                              print("ddd ${state.countryFlag}");
+
                                               var index = state
                                                   .countriesModel.countries!
                                                   .indexWhere((element) =>
@@ -369,7 +413,7 @@ class _SearchScreenState extends State<SearchScreen>
                                     );
 
                                     return const Center(
-                                        child: Text('Unknown state'));
+                                        child: Text(''));
                                   }
                                 }),
                                 BlocConsumer<SearchBloc, SearchState>(
@@ -407,7 +451,7 @@ class _SearchScreenState extends State<SearchScreen>
                                       return const Expanded(
                                           child: Center(
                                               child: Text(
-                                                  'Something went wrong')));
+                                                  '')));
                                     }
                                   },
                                 ),
@@ -436,7 +480,7 @@ class _SearchScreenState extends State<SearchScreen>
                                   // print(state.drugsModel.length);
                                   // return _buildPostList(context);
                                   final bloc = searchPeopleBloc;
-                                  return ListView.builder(
+                                  return bloc.searchPeopleData.isEmpty?const Center(child: Text("No Result Found"),) : ListView.builder(
                                     padding: const EdgeInsets.all(16),
                                     shrinkWrap: true,
                                     // physics: const NeverScrollableScrollPhysics(),
@@ -496,7 +540,8 @@ class _SearchScreenState extends State<SearchScreen>
                             ),
 
                           ]),
-                    )
+                    ),
+                    if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
                   ],
                 ),
               ),
@@ -511,7 +556,7 @@ class _SearchScreenState extends State<SearchScreen>
     print("bloc$bloc");
     print("len${bloc.drugsData.length}");
     return Expanded(
-      child: ListView.builder(
+      child: bloc.drugsData.isEmpty? const Center(child: Text('No Jobs Result found'),):ListView.builder(
         itemCount: bloc.drugsData.length,
         itemBuilder: (context, index) {
           if (bloc.pageNumber <= bloc.numberOfPage) {
@@ -548,8 +593,9 @@ class _SearchScreenState extends State<SearchScreen>
                     'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
                     style: secondaryTextStyle(color: svGetBodyColor())),
                 const SizedBox(height: 5),
-                Text(bloc.drugsData[index].description ?? 'N/A',
-                    style: secondaryTextStyle(color: svGetBodyColor())),
+                HtmlWidget(
+                  bloc.drugsData[index].description ?? '<p>N/A</p>',
+                ),
                 const SizedBox(height: 5),
                 Text(
                     "Location: ${bloc.drugsData[index].location ?? 'N/A'}",

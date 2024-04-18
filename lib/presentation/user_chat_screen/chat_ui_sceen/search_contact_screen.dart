@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/components/SVSearchCardComponent.dart';
@@ -50,12 +51,11 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
         title:  Text('Search Contacts',style: boldTextStyle(),),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.only(left: 8.0),
-
               height: 60,
               margin: const EdgeInsets.only(left: 16.0, right: 16.0),
               decoration: BoxDecoration(
@@ -138,19 +138,46 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(4.0),
+                            padding: const EdgeInsets.all(10.0),
                             child: ListTile(
-                              leading: GestureDetector(
+                              leading:GestureDetector(
                                 onTap: (){
                                   SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
+
                                 },
-                                child: CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: CachedNetworkImageProvider(
-                                      '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}'
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage: CachedNetworkImageProvider(
+                                      '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}',
+                                    ),
                                   ),
                                 ),
                               ),
+                              // GestureDetector(
+                              //   onTap: (){
+                              //     SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
+                              //   },
+                              //   child: CircleAvatar(
+                              //     radius: 30,
+                              //     backgroundImage: CachedNetworkImageProvider(
+                              //         '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}'
+                              //     ),
+                              //   ),
+                              // ),
                               title: Text(
                                 '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',
                                 style: const TextStyle(
@@ -187,6 +214,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                 }
               },
             ),
+            if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
 
             // Add your list or search results display here
           ],

@@ -13,9 +13,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
+import '../../utils/shimmer_widget.dart';
 import '../screens/comment_screen/SVCommentScreen.dart';
 import 'full_screen_image_page.dart';
 
@@ -46,11 +48,56 @@ class _SVPostComponentState extends State<SVPostComponent> {
         }
       },
       builder: (context, state) {
-        print("state $state");
+
         if (state is PostPaginationLoadingState) {
-          return const Center(child: CircularProgressIndicator());
+          return  ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 3, // Display 3 shimmering tiles when loading
+            itemBuilder: (context, index) {
+              return Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                // Base color of the shimmer
+                highlightColor: Colors.grey[100]!,
+                // Highlight color of the shimmer
+                child: Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.white,
+                        ),
+                        title: Container(
+                          width: double.infinity,
+                          height: 10.0,
+                          color: Colors.white,
+                        ),
+                        subtitle: Container(
+                          width: double.infinity,
+                          height: 10.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: 300,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          // Shimmer effect color
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+          // return const Center(child: CircularProgressIndicator());
         } else if (state is PostPaginationLoadedState) {
-          // print(state.drugsModel.length);
+
           return widget.homeBloc.postList.isEmpty? const Center(child: Text("No result Found")) :ListView.builder(
             scrollDirection: Axis.vertical,
             physics: const BouncingScrollPhysics(),
@@ -61,7 +108,6 @@ class _SVPostComponentState extends State<SVPostComponent> {
                   widget.homeBloc.add(PostCheckIfNeedMoreDataEvent(index: index));
                 }
               }
-              print(widget.homeBloc.postList[index].backgroundColor);
               return widget.homeBloc.numberOfPage != widget.homeBloc.pageNumber - 1 &&
                   index >= widget.homeBloc.postList.length - 1
                   ? const Center(
@@ -99,11 +145,43 @@ class _SVPostComponentState extends State<SVPostComponent> {
                             mainAxisAlignment: MainAxisAlignment.end,
 
                             children: [
-                              Text(timeAgo.format(DateTime.parse(widget.homeBloc.postList[index].createdAt!)),
-                                  style: secondaryTextStyle(
-                                      color: svGetBodyColor(), size: 12)),
-                              IconButton(onPressed: () {},
-                                  icon: const Icon(Icons.more_horiz)),
+                              Flexible(
+                                child: Text(timeAgo.format(DateTime.parse(widget.homeBloc.postList[index].createdAt!)),
+                                    style: secondaryTextStyle(
+                                        color: svGetBodyColor(), size: 12)),
+                              ),
+                              if(widget.homeBloc.postList[index].userId==AppData.logInUserId) PopupMenuButton(
+                                itemBuilder: (context) {
+                                  return [
+                                    PopupMenuItem(
+                                      child: Builder(
+                                          builder: (context) {
+                                            return Column(
+                                              children: ["Delete"].map((String item) {
+                                                return PopupMenuItem(
+                                                  value: item,
+                                                  child: Text(item),
+                                                );
+                                              }).toList(),
+                                            );
+                                          }
+                                      ),
+                                    ),
+                                  ];
+                                },
+                                onSelected: (value) {
+                                  if(value=='Delete'){
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return showAlertDialog(context,widget.homeBloc.postList[index].id??0);
+                                      },
+                                    );
+                                  }
+                                },
+                              )
+                              // IconButton(onPressed: () {},
+                              //     icon: const Icon(Icons.more_horiz)),
                             ],
                           ).paddingSymmetric(horizontal: 8),
                         ),
@@ -163,16 +241,16 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                 // setState(() {});
                               },
                             ),
-                            Image.asset(
-                              'images/socialv/icons/ic_Send.png',
-                              height: 22,
-                              width: 22,
-                              fit: BoxFit.cover,
-                              color: context.iconColor,
-                            ).onTap(() {
-                              // svShowShareBottomSheet(context,);
-                            }, splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent),
+                            // Image.asset(
+                            //   'images/socialv/icons/ic_Send.png',
+                            //   height: 22,
+                            //   width: 22,
+                            //   fit: BoxFit.cover,
+                            //   color: context.iconColor,
+                            // ).onTap(() {
+                            //   // svShowShareBottomSheet(context,);
+                            // }, splashColor: Colors.transparent,
+                            //     highlightColor: Colors.transparent),
                           ],
                         ),
                         Text('${widget.homeBloc.postList[index].comments?.length??0
@@ -465,6 +543,62 @@ class _SVPostComponentState extends State<SVPostComponent> {
       //       );
 
   }
+  showAlertDialog(BuildContext context, int id) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: const Text(
+        "Cancel",
+        style: TextStyle(color: Colors.red),
+      ),
+      onPressed: () {
+        setState(() {
+          Navigator.of(context).pop('dismiss');
+        });
+      },
+    );
+    Widget continueButton = TextButton(
+      child: const Text("Yes", style: TextStyle(color: Colors.black)),
+      onPressed: () async {
+
+          widget.homeBloc.add(DeletePostEvent(postId:id));
+          setState(() {
+            Navigator.of(context).pop();
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Post Delete Successfully',
+              ),
+            ),
+          );
+        // } else {
+        //   setState(() {
+        //     _isLoading = false;
+        //     Navigator.of(context).pop();
+        //   });
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(
+        //       content: Text(
+        //         response['message'],
+        //       ),
+        //     ),
+        //   );
+        // }
+      },
+    );
+
+    // set up the AlertDialog
+    return AlertDialog(
+      title: const Text("Warning"),
+      content: const Text("Would you like to Delete?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+  }
 
   Future<void> _launchURL(context,String urlString) async {
     Uri url = Uri.parse(urlString);
@@ -636,7 +770,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
       builder: (context, constraints) {
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: bgColor,
+            color:(image?.isNotEmpty == true || media?.isNotEmpty == true)? Colors.white:bgColor,
             borderRadius: BorderRadius.circular(5.0),
           ),
           child: Padding(
@@ -651,7 +785,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     text: textToShow,
                     style: TextStyle(
                       fontSize: 14.0,
-                      color: textColor,
+                      color:(image?.isNotEmpty == true || media?.isNotEmpty == true)? Colors.black:Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                     linkStyle: const TextStyle(
@@ -829,8 +963,7 @@ class PhotoGrid extends StatefulWidget {
 }
 bool findIsLiked(post) {
   for (var like in post ?? []) {
-    print(like.userId);
-    print(AppData.logInUserId);
+
     if (like.userId == AppData.logInUserId) {
       return true; // User has liked the post
     }
@@ -871,8 +1004,7 @@ class _PhotoGridState extends State<PhotoGrid> {
         // If no more are remaining return a simple image widget
         if (remaining == 0) {
           if (urlType == "image") {
-            print(urlType);
-            print(imageUrl);
+
             return GestureDetector(
               child: Image.network(
                 imageUrl,
@@ -883,8 +1015,7 @@ class _PhotoGridState extends State<PhotoGrid> {
               onTap: () => widget.onImageClicked(index),
             );
           } else {
-            print(urlType);
-            print(imageUrl);
+
             return GestureDetector(
               child: VideoPlayerWidget(
                 videoUrl: imageUrl,
@@ -933,8 +1064,7 @@ class _PhotoGridState extends State<PhotoGrid> {
         }
       } else {
         if (urlType == "image") {
-          print(urlType);
-          print(imageUrl);
+
           return GestureDetector(
             child: CachedNetworkImage(
               imageUrl: imageUrl,
@@ -945,8 +1075,7 @@ class _PhotoGridState extends State<PhotoGrid> {
             onTap: () => widget.onImageClicked(index),
           );
         } else {
-          print(urlType);
-          print(imageUrl);
+
           return GestureDetector(
             child: VideoPlayerWidget(
               videoUrl: imageUrl,

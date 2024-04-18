@@ -39,8 +39,7 @@ class CustomDropdownField extends StatelessWidget {
       width: width??90.w,
       height: height??50,
       // width: getProportionateScreenWidth(0.5),
-      child:
-      DropdownButtonFormField<String>(
+      child: DropdownButtonFormField<String>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
         value: value,
         decoration: _buildDecoration(),
@@ -76,9 +75,9 @@ class CustomDropdownField extends StatelessWidget {
             items.length,
                 (index) =>
                 DropdownMenuItem<String>(
-                  value: items[index].flag,
+                  value: items[index].countryName,
                   child: Text(
-                    items[index].flag??'',
+                    items[index].countryName??'',
                     overflow: TextOverflow.visible,
                     style:
                     const TextStyle(
@@ -97,7 +96,7 @@ class CustomDropdownField extends StatelessWidget {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius ?? 8),
       borderSide: const BorderSide(
-        color: Colors.black26,
+        color: Colors.transparent,
       ),
     );
   }

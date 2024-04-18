@@ -1,37 +1,4 @@
-// // ignore_for_file: must_be_immutable
-//
-// part of 'login_bloc.dart';
-//
-// /// Abstract class for all events that can be dispatched from the
-// ///Login widget.
-// ///
-// /// Events must be immutable and implement the [Equatable] interface.
-// @immutable
-// abstract class LoginEvent extends Equatable {}
-//
-// /// Event that is dispatched when the Login widget is first created.
-// class LoginInitialEvent extends LoginEvent {
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// ///Event that is dispatched when the user calls the https://nodedemo.dhiwise.co/device/auth/login API.
-// class CreateLoginEvent extends LoginEvent {
-//   // CreateLoginEvent();
-//   // @override
-//   // List<PostLoginDeviceAuthReq?> get props => [
-//   //
-//   // ];
-//
-//   CreateLoginEvent();
-//   @override
-//   List<Object> get props => [
-//
-//   ];
-//
-// }
-//
-// ///Event for changing password visibility
+
 import 'package:equatable/equatable.dart';
 
 abstract class LoginEvent extends Equatable {}
@@ -60,4 +27,17 @@ class LoginButtonPressed extends LoginEvent {
 
   @override
   List<Object> get props => [username, password];
+}
+class SocialLoginButtonPressed extends LoginEvent {
+  final String email;
+  final String firstName;
+  final String lastName;
+  final bool isSocialLogin;
+  final String provider;
+  final String token;
+
+  SocialLoginButtonPressed({required this.email, required this.firstName,required this.lastName,required this.isSocialLogin,required this.provider,required this.token});
+
+  @override
+  List<Object> get props => [email, firstName,lastName,isSocialLogin,provider,token];
 }

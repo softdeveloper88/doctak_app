@@ -126,13 +126,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       messagePageNumber = 1;
       emit(PaginationLoadingState());
     }
-    try {
+    // try {
       MessageModel response = await postService.getRoomMessenger(
           'Bearer ${AppData.userToken}',
           '$messagePageNumber',
           event.userId!,
           event.roomId!);
-      roomId = response.roomId;
+      roomId = response.roomId.toString();
       print(roomId);
       messageNumberOfPage = response.lastPage ?? 0;
       if (messagePageNumber < messageNumberOfPage + 1) {
@@ -144,13 +144,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(contactsList));
-    } catch (e) {
-      print(e);
-
-      emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //
+    //   emit(PaginationLoadedState());
+    //
+    //   // emit(DataError('An error occurred $e'));
+    // }
   }
 
   _onSendMessages(SendMessageEvent event, Emitter<ChatState> emit) async {
@@ -160,7 +160,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     print(event.message);
     print(event.file);
     print(event.attachmentType);
-    try {
+    // try {
       print("hii${event.file}");
       SendMessageModel response;
       if (event.file != '') {
@@ -173,7 +173,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           event.message!,
           event.file!,
         );
-        print("hii_file${event.file}");
+        print("hii_file${response.body}");
       } else {
         response = await postService.sendMessageWithoutFile(
           'Bearer ${AppData.userToken}',
@@ -198,13 +198,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(contactsList));
-    } catch (e) {
-      print(e);
-
-      emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //
+    //   emit(PaginationLoadedState());
+    //
+    //   // emit(DataError('An error occurred $e'));
+    // }
   }
 
   _selectedFile(SelectedFiles event, Emitter<ChatState> emit) async {

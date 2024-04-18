@@ -1,4 +1,5 @@
 // ignore_for_file: must_be_immutable
+import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_resp.dart';
 import 'package:equatable/equatable.dart';
 /// Represents the state of Login in the application.
 // part 'login_bloc.dart';
@@ -23,12 +24,18 @@ class LoginInitial extends LoginState {}
 class LoginLoading extends LoginState {}
 
 class LoginSuccess extends LoginState {
-  final String username;
-
-  LoginSuccess({required this.username});
+  final String isEmailVerified;
+  LoginSuccess({required this.isEmailVerified});
 
   @override
-  List<Object> get props => [username];
+  List<Object> get props => [isEmailVerified];
+}
+class SocialLoginSuccess extends LoginState {
+  final PostLoginDeviceAuthResp response;
+  SocialLoginSuccess({required this.response});
+
+  @override
+  List<Object> get props => [response];
 }
 
 class LoginFailure extends LoginState {

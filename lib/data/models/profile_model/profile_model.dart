@@ -87,7 +87,7 @@ class PrivacySetting {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
-  String? id;
+  int? id;
   String? userId;
   String? recordType;
   dynamic recordId;

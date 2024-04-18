@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
+import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_ask_question_response.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
@@ -25,12 +27,15 @@ import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'api_service.g.dart';
 
 @RestApi(
-    baseUrl: "http://pharmadoc.net/api/v1") // replace with your API base URL
+    // baseUrl: "http://pharmadoc.net/api/v1") // replace with your API base URL
+    baseUrl: "https://doctak.net/api/v1") // replace with your API base URL
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
@@ -41,15 +46,43 @@ abstract class ApiService {
       @Field("password") String password,
       @Field("device_type") String deviceType,
       @Field("device_id") String deviceId);
+  @FormUrlEncoded()
+  @POST("/login")
+  Future<PostLoginDeviceAuthResp> loginWithSocial(
+      @Field("email") String username,
+      @Field("first_name") String firstName,
+      @Field("last_name") String lastName,
+      @Field("device_type") String deviceType,
+      @Field("device_id") String deviceId,
+      @Field("isSocialLogin") bool isSocialLogin,
+      @Field("provider") String provider,
+      @Field("token") String token,
+      );
 
   @FormUrlEncoded()
   @POST("/register")
-  Future<HttpResponse> register(
+  Future<HttpResponse<Map<String, String>>> register(
       @Field("first_name") String firstName,
       @Field("last_name") String lastName,
       @Field("email") String email,
       @Field("password") String password,
       @Field("user_type") String userType);
+
+  @FormUrlEncoded()
+  @POST("/complete-profile")
+  Future<PostLoginDeviceAuthResp> completeProfile(
+      @Header('Authorization') String token,
+      @Field("first_name") String firstName,
+      @Field("last_name") String lastName,
+      @Field("country") String country,
+      @Field("state") String state,
+      @Field("phone") String phone,
+      @Field("user_type") String userType);
+
+  @FormUrlEncoded()
+  @POST("/forgot_password")
+  Future<HttpResponse> forgotPassword(
+  @Field("email") String email);
 
   @FormUrlEncoded()
   @GET("/country-list")
@@ -280,6 +313,7 @@ abstract class ApiService {
       @Query('license_no') String licenseNo,
       @Query('specialty') String specialty,
       @Query('dob') String dob,
+      @Query('gender') String gender,
       @Query('country') String country,
       @Query('city') String city,
       @Query('country_origin') String countryOrigin,
@@ -355,6 +389,18 @@ abstract class ApiService {
   @MultiPart()
   @POST("/upload-cover-pic")
   Future<HttpResponse> uploadCoverPicture(@Header('Authorization') String token,
-  @Part(name: 'profile_pic' ) String filePath);
+  @Part(name: 'background' ) String filePath);
+
+  @FormUrlEncoded()
+  @GET("/advertisement-types")
+  Future<List<AdsTypeModel>> advertisementTypes(@Header('Authorization') String token,);
+
+  @FormUrlEncoded()
+  @GET("/advertisement-setting")
+  Future<AdsSettingModel> advertisementSetting(@Header('Authorization') String token);
+
+  @FormUrlEncoded()
+  @POST("/delete_post")
+  Future<HttpResponse> deletePost(@Header('Authorization') String token,@Query('post_id') String postId);
 
 }

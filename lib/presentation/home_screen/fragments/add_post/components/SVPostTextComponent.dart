@@ -27,6 +27,8 @@ class SVPostTextComponent extends StatelessWidget {
           color: colorValue, borderRadius: radius(SVAppCommonRadius)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+
+
         children: [
           TextField(
             style: const TextStyle(color: Colors.white),
@@ -41,17 +43,15 @@ class SVPostTextComponent extends StatelessWidget {
                 hintText: 'Whats On Your Mind',
                 hintStyle: secondaryTextStyle(size: 14, color: Colors.white)),
           ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                  onPressed: onColorChange!(),
-                  icon: const Icon(
-                    Icons.color_lens,
-                    color: Colors.white,
-                    size: 40,
-                  )),
-            ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+                onPressed: onColorChange!(),
+                icon: const Icon(
+                  Icons.color_lens,
+                  color: Colors.black,
+                  size: 40,
+                )),
           )
         ],
       ),

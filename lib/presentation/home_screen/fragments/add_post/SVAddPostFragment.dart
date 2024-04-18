@@ -138,13 +138,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
           height: context.height(),
           child: Column(
             children: [
-              SizedBox(
-                height: 250,
-                child: SVPostTextComponent(
-                  onColorChange: () => changeColor,
-                  colorValue: currentColor,
-                    searchPeopleBloc:searchPeopleBloc,
-                ),
+              SVPostTextComponent(
+                onColorChange: () => changeColor,
+                colorValue: currentColor,
+                  searchPeopleBloc:searchPeopleBloc,
               ),
               OtherFeatureComponent(
                 onColorChange: () => changeColor,

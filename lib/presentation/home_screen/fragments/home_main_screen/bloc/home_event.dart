@@ -27,6 +27,12 @@ class PostLikeEvent extends HomeEvent{
   @override
   List<Object?> get props => [postId];
 }
+class DeletePostEvent extends HomeEvent{
+  int? postId;
+  DeletePostEvent({this.postId});
+  @override
+  List<Object?> get props => [postId];
+}
 class ChangeCheckBoxEvent extends HomeEvent {
   ChangeCheckBoxEvent({required this.value});
 
@@ -56,5 +62,11 @@ class PostCheckIfNeedMoreDataEvent extends HomeEvent {
   PostCheckIfNeedMoreDataEvent({required this.index});
   @override
   List<Object?> get props => [index];
+}
+class AdsSettingEvent extends HomeEvent {
+
+  AdsSettingEvent();
+  @override
+  List<Object?> get props => [];
 }
 

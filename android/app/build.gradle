@@ -86,5 +86,7 @@ dependencies {
     // Add the dependency for the Firebase SDK for Google Analytics
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.android.gms:play-services-ads:20.5.0'
+    implementation project(path: ':google_mobile_ads')
 
 }

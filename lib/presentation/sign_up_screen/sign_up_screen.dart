@@ -1,22 +1,32 @@
-import 'dart:convert';
-
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
+import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/sign_up_success_dialog/sign_up_success_dialog.dart';
-import 'package:doctak_app/widgets/app_bar/appbar_leading_image.dart';
-import 'package:doctak_app/widgets/app_bar/appbar_subtitle_two.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
+import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../widgets/app_bar/appbar_title.dart';
+import '../home_screen/fragments/profile_screen/bloc/profile_state.dart';
+import '../home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import '../home_screen/utils/SVCommon.dart';
 import 'bloc/sign_up_bloc.dart';
+import 'component/error_dialog.dart';
 
 // ignore_for_file: must_be_immutable
 class SignUpScreen extends StatefulWidget {
-  SignUpScreen({Key? key}) : super(key: key);
+
+  SignUpScreen(
+      {this.isSocialLogin=false, this.firstName, this.lastName, this.token, Key? key})
+      : super(key: key);
+  bool? isSocialLogin;
+  String? firstName = '';
+  String? lastName = '';
+  String? token = '';
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -26,10 +36,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   DropdownBloc dropdownBloc = DropdownBloc();
+  ProfileBloc profileBloc = ProfileBloc();
 
   @override
   void initState() {
+    print(widget.isSocialLogin);
     dropdownBloc.add(LoadDropdownValues());
+    profileBloc.add(UpdateFirstDropdownValue(''));
+
+    firstnameController = TextEditingController(text: widget.firstName);
+    lastNameController = TextEditingController(text: widget.lastName);
     print('object');
     super.initState();
   }
@@ -37,9 +53,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // static Widget builder(BuildContext context) {
   String? selectedNewUniversity = '';
 
-  final TextEditingController firstnameController = TextEditingController();
+  TextEditingController? firstnameController;
 
-  final TextEditingController lastNameController = TextEditingController();
+  TextEditingController? lastNameController;
 
   final TextEditingController emailController = TextEditingController();
 
@@ -53,6 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   FocusNode focusNode3 = FocusNode();
   FocusNode focusNode4 = FocusNode();
   FocusNode focusNode5 = FocusNode();
+  FocusNode focusNode6 = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -85,344 +102,399 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           bloc: dropdownBloc,
                                           builder: (context, state) {
                                             if (state is DataLoaded) {
-                                              return Container(
-                                                width: 500.v,
-                                                // height: 15.w,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.blueGrey[300],
-                                                    borderRadius:
-                                                    const BorderRadius.all(
-                                                        Radius.circular(
-                                                            15))),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          state.isDoctorRole =
-                                                          true;
-                                                          dropdownBloc
-                                                              .isDoctorRole =
-                                                          true;
-                                                          dropdownBloc.add(
-                                                              ChangeDoctorRole());
-                                                        },
-                                                        child: Container(
-                                                          padding:
-                                                          const EdgeInsets
-                                                              .all(10),
-                                                          // width: 210.v,
-                                                          height: 50.v,
-                                                          decoration: BoxDecoration(
-                                                              color: !state
-                                                                  .isDoctorRole
-                                                                  ? Colors
-                                                                  .blueGrey[
-                                                              300]
-                                                                  : Colors.blue,
-                                                              borderRadius:
-                                                              const BorderRadius
-                                                                  .all(
-                                                                  Radius
-                                                                      .circular(
-                                                                      15))),
-                                                          child: Center(
-                                                              child: Text(
-                                                                "Doctor",
-                                                                style: GoogleFonts
-                                                                    .poppins(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                    12),
-                                                                // style: CustomTextStyles
-                                                                //     .titleMediumOnPrimaryContainer,
-                                                              )),
+                                              return Column(
+                                                children: [
+                                                  Container(
+                                                    width: 500.v,
+                                                    // height: 15.w,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .blueGrey[300],
+                                                        borderRadius:
+                                                        const BorderRadius
+                                                            .all(
+                                                            Radius.circular(
+                                                                15))),
+                                                    child: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: InkWell(
+                                                            onTap: () {
+                                                              state
+                                                                  .isDoctorRole =
+                                                              true;
+                                                              dropdownBloc
+                                                                  .isDoctorRole =
+                                                              true;
+                                                              dropdownBloc.add(
+                                                                  ChangeDoctorRole());
+                                                            },
+                                                            child: Container(
+                                                              padding:
+                                                              const EdgeInsets
+                                                                  .all(10),
+                                                              // width: 210.v,
+                                                              height: 50.v,
+                                                              decoration: BoxDecoration(
+                                                                  color: !state
+                                                                      .isDoctorRole
+                                                                      ? Colors
+                                                                      .blueGrey[
+                                                                  300]
+                                                                      : Colors
+                                                                      .blue,
+                                                                  borderRadius:
+                                                                  const BorderRadius
+                                                                      .all(
+                                                                      Radius
+                                                                          .circular(
+                                                                          15))),
+                                                              child: Center(
+                                                                  child: Text(
+                                                                    "Doctor",
+                                                                    style: GoogleFonts
+                                                                        .poppins(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                        12),
+                                                                    // style: CustomTextStyles
+                                                                    //     .titleMediumOnPrimaryContainer,
+                                                                  )),
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          state.isDoctorRole =
-                                                          false;
-                                                          dropdownBloc.add(
-                                                              ChangeDoctorRole());
-                                                          dropdownBloc
-                                                              .isDoctorRole =
-                                                          false;
-                                                        },
-                                                        child: Container(
-                                                          padding:
-                                                          const EdgeInsets
-                                                              .all(10),
-                                                          // width: 200.v,
-                                                          height: 50.v,
-                                                          decoration: BoxDecoration(
-                                                              color: state
-                                                                  .isDoctorRole
-                                                                  ? Colors
-                                                                  .blueGrey[
-                                                              300]
-                                                                  : Colors.blue,
-                                                              borderRadius:
-                                                              const BorderRadius
-                                                                  .all(
-                                                                  Radius
-                                                                      .circular(
-                                                                      15))),
-                                                          child: Center(
-                                                              child: Text(
-                                                                "Medical student",
-                                                                style: GoogleFonts
-                                                                    .poppins(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                    12),
-                                                                // style: CustomTextStyles
-                                                                //     .titleMediumOnPrimaryContainer,
-                                                              )),
+                                                        Expanded(
+                                                          child: InkWell(
+                                                            onTap: () {
+                                                              state
+                                                                  .isDoctorRole =
+                                                              false;
+                                                              dropdownBloc.add(
+                                                                  ChangeDoctorRole());
+                                                              dropdownBloc
+                                                                  .isDoctorRole =
+                                                              false;
+                                                            },
+                                                            child: Container(
+                                                              padding:
+                                                              const EdgeInsets
+                                                                  .all(10),
+                                                              // width: 200.v,
+                                                              height: 50.v,
+                                                              decoration: BoxDecoration(
+                                                                  color: state
+                                                                      .isDoctorRole
+                                                                      ? Colors
+                                                                      .blueGrey[
+                                                                  300]
+                                                                      : Colors
+                                                                      .blue,
+                                                                  borderRadius:
+                                                                  const BorderRadius
+                                                                      .all(
+                                                                      Radius
+                                                                          .circular(
+                                                                          15))),
+                                                              child: Center(
+                                                                  child: Text(
+                                                                    "Medical student",
+                                                                    style: GoogleFonts
+                                                                        .poppins(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                        12),
+                                                                    // style: CustomTextStyles
+                                                                    //     .titleMediumOnPrimaryContainer,
+                                                                  )),
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ),
+                                                      ],
                                                     ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                  SizedBox(height: 16.v),
+                                                  _buildName(context),
+                                                  SizedBox(height: 16.v),
+                                                  _buildName1(context),
+                                                  SizedBox(height: 16.v),
+                                                  if(widget.isSocialLogin == false) _buildEmail(
+                                                      context),
+                                                  if(widget.isSocialLogin  == false) SizedBox(
+                                                      height: 16.v),
+                                                  if(widget.isSocialLogin == false) CustomTextFormField(
+                                                      focusNode: focusNode4,
+                                                      controller:
+                                                      passwordController,
+                                                      hintText: translation(
+                                                          context)
+                                                          .lbl_create_password,
+                                                      textInputAction:
+                                                      TextInputAction.done,
+                                                      textInputType:
+                                                      TextInputType
+                                                          .visiblePassword,
+                                                      prefix: Container(
+                                                          margin:
+                                                          EdgeInsets.fromLTRB(
+                                                              24.h,
+                                                              16.v,
+                                                              16.h,
+                                                              16.v),
+                                                          child: CustomImageView(
+                                                              color: Colors
+                                                                  .black54,
+                                                              imagePath:
+                                                              ImageConstant
+                                                                  .imgLocation,
+                                                              height:
+                                                              24.adaptSize,
+                                                              width: 24
+                                                                  .adaptSize)),
+                                                      prefixConstraints:
+                                                      BoxConstraints(
+                                                          maxHeight: 56.v),
+                                                      suffix: InkWell(
+                                                          onTap: () {
+                                                            dropdownBloc.add(
+                                                                TogglePasswordVisibility());
+                                                          },
+                                                          child: Container(
+                                                              margin: EdgeInsets
+                                                                  .fromLTRB(
+                                                                  30.h,
+                                                                  16.v,
+                                                                  24.h,
+                                                                  16.v),
+                                                              child:
+                                                              state
+                                                                  .isPasswordVisible
+                                                                  ? Icon(
+                                                                Icons
+                                                                    .visibility_off,
+                                                                color:
+                                                                Colors.black54,
+                                                                size:
+                                                                24.adaptSize,
+                                                              )
+                                                                  : Icon(
+                                                                Icons
+                                                                    .visibility,
+                                                                color:
+                                                                Colors.black54,
+                                                                size:
+                                                                24.adaptSize,
+                                                              ))),
+                                                      suffixConstraints: BoxConstraints(
+                                                          maxHeight: 56.v),
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            (!isValidPassword(
+                                                                value,
+                                                                isRequired:
+                                                                true))) {
+                                                          return translation(
+                                                              context)
+                                                              .err_msg_please_enter_valid_password;
+                                                        }
+                                                        return null;
+                                                      },
+                                                      obscureText: state
+                                                          .isPasswordVisible),
+                                                  if(widget.isSocialLogin == false) SizedBox(
+                                                      height: 28.v),
+                                                  if(widget.isSocialLogin == false) CustomTextFormField(
+                                                      focusNode: focusNode5,
+                                                      controller:
+                                                      confirmPasswordController,
+                                                      hintText: translation(
+                                                          context)
+                                                          .msg_confirm_password,
+                                                      textInputAction:
+                                                      TextInputAction.done,
+                                                      textInputType:
+                                                      TextInputType.text,
+                                                      prefix: Container(
+                                                          margin: EdgeInsets
+                                                              .fromLTRB(
+                                                              24.h,
+                                                              16.v,
+                                                              16.h,
+                                                              16.v),
+                                                          child: CustomImageView(
+                                                              color: Colors
+                                                                  .black54,
+                                                              imagePath: ImageConstant
+                                                                  .imgLocation,
+                                                              height:
+                                                              24.adaptSize,
+                                                              width: 24
+                                                                  .adaptSize)),
+                                                      prefixConstraints:
+                                                      BoxConstraints(
+                                                          maxHeight: 56.v),
+                                                      suffix: InkWell(
+                                                          onTap: () {
+                                                            dropdownBloc.add(
+                                                                TogglePasswordVisibility());
+                                                          },
+                                                          child: Container(
+                                                              margin: EdgeInsets
+                                                                  .fromLTRB(
+                                                                  30.h,
+                                                                  16.v,
+                                                                  24.h,
+                                                                  16.v),
+                                                              child:
+                                                              state
+                                                                  .isPasswordVisible
+                                                                  ? Icon(
+                                                                Icons
+                                                                    .visibility_off,
+                                                                color:
+                                                                Colors.black54,
+                                                                size:
+                                                                24.adaptSize,
+                                                              )
+                                                                  : Icon(
+                                                                Icons
+                                                                    .visibility,
+                                                                color:
+                                                                Colors.black54,
+                                                                size:
+                                                                24.adaptSize,
+                                                              ))),
+                                                      // child: CustomImageView(color: Colors.black54, imagePath: ImageConstant.imgEye, height: 24.adaptSize, width: 24.adaptSize))),
+                                                      suffixConstraints:
+                                                      BoxConstraints(
+                                                          maxHeight: 56.v),
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            (!isValidPassword(
+                                                                value,
+                                                                isRequired:
+                                                                true))) {
+                                                          return translation(
+                                                              context)
+                                                              .err_msg_please_enter_valid_password;
+                                                        }
+                                                        return null;
+                                                      },
+                                                      obscureText: state
+                                                          .isPasswordVisible),
+                                                  if(widget.isSocialLogin == true)_buildPhone(
+                                                      context),
+                                                  if(widget.isSocialLogin == false) SizedBox(
+                                                      height: 28.v),
+
+                                                ],
                                               );
                                             } else {
                                               return Container();
                                             }
                                           }),
-                                      SizedBox(height: 16.v),
-                                      _buildName(context),
-                                      SizedBox(height: 16.v),
-                                      _buildName1(context),
-                                      SizedBox(height: 16.v),
-                                      _buildEmail(context),
-                                      // const SizedBox(height: 10),
-                                      // CustomDropdownButtonFormField(
-                                      //   items: state.firstDropdownValues,
-                                      //   value: state
-                                      //       .selectedFirstDropdownValue,
-                                      //   width: double.infinity,
-                                      //   contentPadding:
-                                      //       const EdgeInsets.symmetric(
-                                      //     horizontal: 10,
-                                      //     vertical: 0,
-                                      //   ),
-                                      //   onChanged: (String? newValue) {
-                                      //     print(newValue);
-                                      //     BlocProvider.of<DropdownBloc>(
-                                      //             context)
-                                      //         .add(
-                                      //             UpdateFirstDropdownValue(
-                                      //                 newValue!));
-                                      //   },
-                                      // ),
-                                      // const SizedBox(height: 10),
-                                      // CustomDropdownButtonFormField(
-                                      //   items: state.secondDropdownValues,
-                                      //   value: state
-                                      //       .selectedSecondDropdownValue,
-                                      //   width: double.infinity,
-                                      //   contentPadding:
-                                      //       const EdgeInsets.symmetric(
-                                      //     horizontal: 10,
-                                      //     vertical: 0,
-                                      //   ),
-                                      //   onChanged: (String? newValue) {
-                                      //     // print(newValue);
-                                      //     // BlocProvider.of<DropdownBloc>(
-                                      //     //     context)
-                                      //     //     .add(UpdateSecondDropdownValues(
-                                      //     //     state
-                                      //     //         .selectedFirstDropdownValue));
-                                      //     BlocProvider.of<DropdownBloc>(
-                                      //             context)
-                                      //         .add(
-                                      //             UpdateUniversityDropdownValues(
-                                      //                 newValue!));
-                                      //   },
-                                      // ),
-                                      // if (state.isDoctorRole)
-                                      //   const SizedBox(height: 10),
-                                      // if (state.isDoctorRole)
-                                      //   CustomDropdownButtonFormField(
-                                      //     items: state
-                                      //         .specialtyDropdownValue,
-                                      //     value: state
-                                      //         .selectedSpecialtyDropdownValue,
-                                      //     width: double.infinity,
-                                      //     contentPadding:
-                                      //         const EdgeInsets.symmetric(
-                                      //       horizontal: 10,
-                                      //       vertical: 0,
-                                      //     ),
-                                      //     onChanged: (String? newValue) {
-                                      //       print(newValue);
-                                      //       // BlocProvider.of<DropdownBloc>(
-                                      //       //     context)
-                                      //       //     .add(UpdateSecondDropdownValues(
-                                      //       //     state
-                                      //       //         .selectedSpecialtyDropdownValue));
-                                      //     },
-                                      //   ),
-                                      // if (!state.isDoctorRole)
-                                      //   const SizedBox(height: 10),
-                                      // if (!state.isDoctorRole)
-                                      //   CustomDropdownButtonFormField(
-                                      //     items: state
-                                      //         .universityDropdownValue,
-                                      //     value: state.selectedUniversityDropdownValue ==
-                                      //             ''
-                                      //         ? null
-                                      //         : state
-                                      //             .selectedUniversityDropdownValue,
-                                      //     width: double.infinity,
-                                      //     contentPadding:
-                                      //         const EdgeInsets.symmetric(
-                                      //       horizontal: 10,
-                                      //       vertical: 0,
-                                      //     ),
-                                      //     onChanged: (String? newValue) {
-                                      //       print(newValue);
-                                      //       // selectedNewUniversity=newValue;
-                                      //       BlocProvider.of<DropdownBloc>(
-                                      //               context)
-                                      //           .add(
-                                      //               UpdateUniversityDropdownValues(
-                                      //                   newValue!));
-                                      //     },
-                                      //   ),
-                                      // if (!state.isDoctorRole)
-                                      //   const SizedBox(height: 10),
-                                      // if (!state.isDoctorRole &&
-                                      //     state.selectedUniversityDropdownValue ==
-                                      //         'Add new University')
-                                      //   _buildName(context),
-                                      SizedBox(height: 16.v),
-                                      CustomTextFormField(
-                                          focusNode: focusNode4,
-                                          controller: passwordController,
-                                          hintText: translation(context)
-                                              .lbl_create_password,
-                                          textInputAction: TextInputAction.done,
-                                          textInputType:
-                                          TextInputType.visiblePassword,
-                                          prefix: Container(
-                                              margin: EdgeInsets.fromLTRB(
-                                                  24.h, 16.v, 16.h, 16.v),
-                                              child: CustomImageView(
-                                                  color: Colors.black54,
-                                                  imagePath:
-                                                  ImageConstant.imgLocation,
-                                                  height: 24.adaptSize,
-                                                  width: 24.adaptSize)),
-                                          prefixConstraints:
-                                          BoxConstraints(maxHeight: 56.v),
-                                          suffix: InkWell(
-                                              onTap: () {
-                                                dropdownBloc.add(
-                                                    TogglePasswordVisibility());
-                                              },
-                                              child: Container(
-                                                  margin: EdgeInsets.fromLTRB(
-                                                      30.h, 16.v, 24.h, 16.v),
-                                                  child: CustomImageView(
-                                                      color: Colors.black54,
-                                                      imagePath:
-                                                      ImageConstant.imgEye,
-                                                      height: 24.adaptSize,
-                                                      width: 24.adaptSize))),
-                                          suffixConstraints:
-                                          BoxConstraints(maxHeight: 56.v),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                (!isValidPassword(value,
-                                                    isRequired: true))) {
-                                              return translation(context)
-                                                  .err_msg_please_enter_valid_password;
+                                      if(widget.isSocialLogin==true)
+                                        BlocBuilder<ProfileBloc, ProfileState>(
+                                          bloc: profileBloc,
+                                          builder: (context, state) {
+
+                                            if (state is PaginationLoadedState) {
+                                              return Column(
+                                                  children: [
+                                                    const SizedBox(height: 10),
+                                                    CustomDropdownButtonFormField(
+                                                      items: state
+                                                          .firstDropdownValues,
+                                                      value: state
+                                                          .selectedFirstDropdownValue,
+                                                      width: double.infinity,
+                                                      contentPadding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 0,
+                                                      ),
+                                                      onChanged: (
+                                                          String? newValue) {
+                                                        profileBloc
+                                                            .country =
+                                                        newValue!;
+                                                        // profileBloc.add(UpdateFirstDropdownValue(newValue));
+                                                        profileBloc.add(UpdateSecondDropdownValues(newValue));
+                                                      },
+                                                    ),
+                                                    const SizedBox(height: 10),
+                                                    CustomDropdownButtonFormField(
+                                                      items: state
+                                                          .secondDropdownValues,
+                                                      value: state
+                                                          .selectedSecondDropdownValue,
+                                                      width: double.infinity,
+                                                      contentPadding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 0,
+                                                      ),
+                                                      onChanged: (
+                                                          String? newValue) {
+                                                        profileBloc.stateName =
+                                                        newValue!;
+
+                                                      },
+                                                    ),
+                                                    const SizedBox(height: 10),
+                                                  ]);
+                                            }else{
+                                              return Container(child:Text('ddd$state'));
                                             }
-                                            return null;
-                                          },
-                                          obscureText:
-                                          dropdownBloc.isVisiblePassword),
-                                      SizedBox(height: 28.v),
-                                      CustomTextFormField(
-                                          focusNode: focusNode5,
-                                          controller: confirmPasswordController,
-                                          hintText: translation(context)
-                                              .msg_confirm_password,
-                                          textInputAction: TextInputAction.done,
-                                          textInputType:
-                                          TextInputType.visiblePassword,
-                                          prefix: Container(
-                                              margin: EdgeInsets.fromLTRB(
-                                                  24.h, 16.v, 16.h, 16.v),
-                                              child: CustomImageView(
-                                                  color: Colors.black54,
-                                                  imagePath:
-                                                  ImageConstant.imgLocation,
-                                                  height: 24.adaptSize,
-                                                  width: 24.adaptSize)),
-                                          prefixConstraints:
-                                          BoxConstraints(maxHeight: 56.v),
-                                          suffix: InkWell(
-                                              onTap: () {
-                                                dropdownBloc.add(
-                                                    TogglePasswordVisibility());
-                                              },
-                                              child: Container(
-                                                  margin: EdgeInsets.fromLTRB(
-                                                      30.h, 16.v, 24.h, 16.v),
-                                                  child: CustomImageView(
-                                                      color: Colors.black54,
-                                                      imagePath:
-                                                      ImageConstant.imgEye,
-                                                      height: 24.adaptSize,
-                                                      width: 24.adaptSize))),
-                                          suffixConstraints:
-                                          BoxConstraints(maxHeight: 56.v),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                (!isValidPassword(value,
-                                                    isRequired: true))) {
-                                              return translation(context)
-                                                  .err_msg_please_enter_valid_password;
-                                            }
-                                            return null;
-                                          },
-                                          obscureText:
-                                          dropdownBloc.isVisiblePassword),
-                                      SizedBox(height: 28.v),
+                                          }),
                                       BlocListener<DropdownBloc, DropdownState>(
                                           listener: (context, state) {
-                                            if (state is DropdownLoaded1) {
-                                              var jsonString = state.response
-                                                  .toString();
-                                              jsonString =
-                                                  jsonString.replaceAll(
-                                                      '{', '{"');
-                                              jsonString =
-                                                  jsonString.replaceAll(
-                                                      ': ', '": "');
-                                              jsonString =
-                                                  jsonString.replaceAll(
-                                                      ', ', '", "');
-                                              jsonString =
-                                                  jsonString.replaceAll(
-                                                      '}', '"}');
+                                            if (state is DataLoaded) {
+                                              if (state.isSubmit) {
+                                                print(state.response['success'] );
+                                                if (state.response['success']) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                        content: Text(
+                                                            state.response[
+                                                            'message'])),
+                                                  );
+                                                  Navigator.pushAndRemoveUntil(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              LoginScreen()),
+                                                          (route) => false);
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                        content: Text(
+                                                            state.response[
+                                                            'message'])),
+                                                  );
+                                                  _showErrorDialog(
+                                                      state.response['errors']);
+                                                }
+                                              }
+                                            }else if (state is SocialLoginSuccess) {
 
-                                              var data = jsonDecode(jsonString);
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(content: Text(
-                                                    data['message'])),);
-                                              Navigator.pushAndRemoveUntil(
-                                                  context, MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      LoginScreen()), (
-                                                  route) => false);
+                                                  Navigator.pushAndRemoveUntil(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const SVDashboardScreen()),
+                                                          (route) => false);
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                        content: Text(
+                                                           'Something went wrong')),
+                                                  );
+
                                             }
                                           },
                                           bloc: dropdownBloc,
@@ -458,15 +530,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ])))))));
   }
 
+  void _showErrorDialog(Map<String, dynamic> errors) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ErrorDialog(errors: errors);
+      },
+    );
+  }
+
   /// Section Widget
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  _buildAppBar(BuildContext context) {
     return CustomAppBar(
-        leadingWidth: 56.h,
-        leading: AppbarLeadingImage(
-            imagePath: ImageConstant.imgIconChevronLeft,
-            margin: EdgeInsets.only(left: 32.h, top: 8.v, bottom: 8.v)),
-        centerTitle: true,
-        title: AppbarSubtitleTwo(text: translation(context).lbl_sign_up));
+      height: 150,
+      leadingWidth: 56.h,
+      centerTitle: true,
+      title: Column(
+        children: [
+          Image.asset(
+            'assets/logo/logo.png',
+            width: 400.v,
+            height: 100.h,
+          ),
+          AppbarTitle(text: widget.isSocialLogin ?? false
+              ? "Complete Profile"
+              : translation(context).lbl_sign_up),
+        ],
+      ),
+    );
   }
 
   /// Section Widget
@@ -518,6 +609,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Section Widget
   Widget _buildPhone(BuildContext context) {
     return CustomTextFormField(
+      focusNode: focusNode6,
         textInputType: TextInputType.phone,
         controller: phoneController,
         hintText: translation(context).lbl_enter_your_phone,
@@ -576,15 +668,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Displays a dialog with the [SignUpSuccessDialog] content.
   onTapSignUp(BuildContext context) {
     print(emailController.text.toString());
-    dropdownBloc.add(SignUpButtonPressed(
-        username: emailController.text.toString(),
-        password: passwordController.text.toString(),
-        firstName: firstnameController.text.toString(),
-        lastName: lastNameController.text.toString(),
-        userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student'
-      // replace with real input
-    ));
-
+    if (widget.isSocialLogin == false) {
+      if (passwordController.text != confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Password should be match'),
+        ));
+      } else {
+        dropdownBloc.add(SignUpButtonPressed(
+            username: emailController.text.toString(),
+            password: passwordController.text.toString(),
+            firstName: firstnameController!.text.toString(),
+            lastName: lastNameController!.text.toString(),
+            userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student'
+          // replace with real input
+        ));
+      }
+    } else {
+      dropdownBloc.add(SocialButtonPressed(
+          token: widget.token ?? '',
+          firstName: firstnameController!.text.toString(),
+          lastName: lastNameController!.text.toString(),
+          phone: phoneController!.text.toString(),
+          country: profileBloc.country??'United Arab Emirates',
+          state: profileBloc.stateName??"DUBAI",
+          userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student'
+        // replace with real input
+      ));
+    }
     // showDialog(
     //     context: context,
     //     builder: (_) => AlertDialog(
@@ -597,8 +707,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   /// Navigates to the loginScreen when the action is triggered.
   onTapTxtLogIn(BuildContext context) {
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>LoginScreen()), (route) => false);
-
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (route) => false);
   }
 }
 // class DropdownWidget extends StatefulWidget {

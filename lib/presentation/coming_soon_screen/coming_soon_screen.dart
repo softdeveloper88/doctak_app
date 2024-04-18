@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class ComingSoonScreen extends StatelessWidget {
   const ComingSoonScreen({Key? key}) : super(key: key);
@@ -27,26 +28,36 @@ class ComingSoonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
+    return Scaffold(
+      appBar:AppBar(
+        backgroundColor: context.cardColor,
+        iconTheme: IconThemeData(color: context.iconColor),
+        title: Text('Coming Soon', style: boldTextStyle(size: 20)),
+        elevation: 0,
+        centerTitle: true,
+
       ),
-      child: AspectRatio(
-        aspectRatio: aspectRatio, // Adjust the aspect ratio as needed
-        child: ClipRRect(
+       body: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          child: Image.asset(
-            imagePath,
-            fit: BoxFit.cover,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: AspectRatio(
+          aspectRatio: aspectRatio, // Adjust the aspect ratio as needed
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),

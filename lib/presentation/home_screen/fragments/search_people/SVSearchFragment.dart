@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_state.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../../ads_setting/ads_widget/banner_ads_widget.dart';
 import '../../utils/SVCommon.dart';
 
 class SVSearchFragment extends StatefulWidget {
@@ -116,12 +118,12 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
             // buildWhen: (previous, current) => current is! SearchPeopleState,
             listener: (BuildContext context, SearchPeopleState state) {
               if (state is SearchPeopleDataError) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    content: Text(state.errorMessage),
-                  ),
-                );
+                // showDialog(
+                //   context: context,
+                //   builder: (context) => AlertDialog(
+                //     content: Text(state.errorMessage),
+                //   ),
+                // );
               }
             },
 
@@ -157,7 +159,6 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
                              bloc: bloc,
                               element: bloc.searchPeopleData[index],
                               onTap: () {
-
                                 if (bloc.searchPeopleData[index]
                                         .isFollowedByCurrentUser ??
                                     false) {
@@ -196,6 +197,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
               }
             },
           ),
+          if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(

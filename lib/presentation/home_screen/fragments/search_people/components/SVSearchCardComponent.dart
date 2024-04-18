@@ -1,9 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/models/SVSearchModel.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../bloc/search_people_bloc.dart';
@@ -99,30 +103,53 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                widget.element.profilePic == ''
-                    ? Image.asset('images/socialv/faces/face_5.png', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(8)
-                    : Image.network('${AppData.imageUrl}${widget.element.profilePic.validate()}', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(8),
-                20.width,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(widget.element.firstName.validate(), style: boldTextStyle()),
-                        6.width,
-                        widget.element.isCurrentUser.validate()
-                            ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-                            : Offstage(),
-                      ],
+            Expanded(
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: (){
+                      SVProfileFragment(userId:widget.element.id).launch(context);
+
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: widget.element.profilePic == ''
+                          ? Image.asset('images/socialv/faces/face_5.png', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(8).cornerRadiusWithClipRRect(8)
+                          : CachedNetworkImage(imageUrl: '${AppData.imageUrl}${widget.element.profilePic.validate()}', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(30),
                     ),
-                    6.height,
-                    Text(widget.element.userType.validate(), style: secondaryTextStyle(color: svGetBodyColor())),
-                  ],
-                ),
-              ],
+                  ),
+                  20.width,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(width: 150, child: Text("${widget.element.firstName.validate()} ${widget.element.lastName.validate()}",overflow: TextOverflow.clip, style: boldTextStyle())),
+                          6.width,
+                          widget.element.isCurrentUser.validate()
+                              ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
+                              : Offstage(),
+                        ],
+                      ),
+                      6.height,
+                      Text(widget.element.userType.validate(), style: secondaryTextStyle(color: svGetBodyColor())),
+                    ],
+                  ),
+                ],
+              ),
             ),
             isLoading
                 ? const CircularProgressIndicator():  AppButton(

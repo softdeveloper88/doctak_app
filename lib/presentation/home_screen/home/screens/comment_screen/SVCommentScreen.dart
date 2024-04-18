@@ -62,12 +62,12 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
             }
           },
           builder: (context, state) {
-            print("state $state");
+
             if (state is PaginationLoadingState) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
-              return ListView.builder(
+              return commentBloc.postList.isEmpty? const Center(child: Text('No comments'),):ListView.builder(
                   scrollDirection: Axis.vertical,
                   itemCount: commentBloc.postList.length,
                   itemBuilder: (context, index) {

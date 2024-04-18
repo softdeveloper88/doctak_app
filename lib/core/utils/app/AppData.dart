@@ -1,12 +1,15 @@
 
+import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
+import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
+
 class AppData {
   // https://pharmadoc.net/
-  static var base = "http://pharmadoc.net/";
-  static var basePath = "http://pharmadoc.net/public/";
+  static var base = "https://doctak.net/";
+  static var basePath = "https://doctak.net/public/";
   static var imageUrl = "https://doctak-file.s3.ap-south-1.amazonaws.com/";
-  static var remoteUrl = "http://pharmadoc.net/api/v1";
-  static var userProfileUrl = "http://pharmadoc.net/";
-  static const chatifyUrl = "http://pharmadoc.net/chatify/api/";
+  static var remoteUrl = "https://doctak.net/api/v1";
+  static var userProfileUrl = "https://doctak.net/";
+  static const chatifyUrl = "https://doctak.net/chatify/api/";
 
   static String? userToken;
   static var name = "";
@@ -29,6 +32,12 @@ class AppData {
   static String university="";
   static String currency="";
   static String countryName="";
+  static List<AdsTypeModel> listAdsType=[];
+  static  AdsSettingModel adsSettingModel=AdsSettingModel();
+  /// Ads Setting
+  static bool? isShowGoogleBannerAds;
+  static String? androidBannerAdsId;
+  static String? iosBannerAdsId;
   // LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
   // static AgoraRtmClient? _client;

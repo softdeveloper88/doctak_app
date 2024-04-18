@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -8,7 +9,9 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -51,16 +54,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Drugs List', style: boldTextStyle(size: 20)),
-        elevation: 0,
-        centerTitle: true,
-        actions: const [
-          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-        ],
-      ),
       body: Column(
         children: [
           BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
@@ -81,33 +74,138 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       element.flag;
                 }
               }
-              return Row(
+              return Column(
                 children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      margin: const EdgeInsets.only(
-                          left: 16, top: 16.0, bottom: 16.0),
-                      decoration: BoxDecoration(
-                          color: context.cardColor, borderRadius: radius(8)),
-                      child: AppTextField(
-                        textFieldType: TextFieldType.NAME,
-                        onChanged: (searchTxt) async {
-                          if (_debounce?.isActive ?? false) _debounce?.cancel();
+                  AppBar(
+                    backgroundColor: svGetScaffoldColor(),
+                    iconTheme: IconThemeData(color: context.iconColor),
+                    title: Row(
+                      children: [
+                        Expanded(child: Center(child: Text('Drugs List', style: boldTextStyle(size: 20)))),
+                        Expanded(
+                          child: CustomDropdownField(
+                            items: state.countriesModel.countries ?? [],
+                            value: state.countriesModel.countries!.first.countryName,
+                            width: 50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 0,
+                            ),
+                            onChanged: (String? newValue) {
+                              print("ddd ${state.countryFlag}");
+                              var index = state.countriesModel.countries!
+                                  .indexWhere((element) => newValue == element.countryName);
+                              var countryId =
+                                  state.countriesModel.countries![index].id;
+                              // BlocProvider.of<DrugsBloc>(context).add(
+                              //   GetPost(
+                              //       page: '1',
+                              //       countryId: countryId.toString(),
+                              //       searchTerm: '',
+                              //       type: state.typeValue),
+                              // );
+                              // countryId = countryIds.toString();
+                              BlocProvider.of<SplashBloc>(context).add(
+                                  LoadDropdownData(countryId.toString(),
+                                      state.typeValue, state.searchTerms ?? '', ''));
+                              drugsBloc.add(LoadPageEvent(
+                                  page: 1,
+                                  countryId: countryId.toString(),
+                                  searchTerm: state.searchTerms ?? "",
+                                  type: state.typeValue));
+                          
+                              // BlocProvider.of<DrugsBloc>(context)
+                              //     .add(UpdateFirstDropdownValue(newValue!));
+                            },
+                          ),
+                        ),
 
-                          _debounce =
-                              Timer(const Duration(milliseconds: 500), () {
+                      ],
+                    ),
+                    elevation: 0,
+                    centerTitle: true,
+                    actions: const [
+                      // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          margin: const EdgeInsets.only(
+                              left: 16, top: 16.0, bottom: 16.0),
+                          decoration: BoxDecoration(
+                              color: context.cardColor, borderRadius: radius(8)),
+                          child: AppTextField(
+                            textFieldType: TextFieldType.NAME,
+                            onChanged: (searchTxt) async {
+                              if (_debounce?.isActive ?? false) _debounce?.cancel();
+
+                              _debounce =
+                                  Timer(const Duration(milliseconds: 500), () {
+                                // BlocProvider.of<DrugsBloc>(context).add(
+                                //   GetPost(
+                                //       page: '1',
+                                //       countryId: "1",
+                                //       searchTerm: searchTxt,
+                                //       type: state.typeValue),
+                                // );
+                                BlocProvider.of<SplashBloc>(context).add(
+                                    LoadDropdownData(
+                                        state.countryFlag,
+                                        state.typeValue,
+                                        searchTxt ?? '',
+                                        ''));
+                                drugsBloc.add(LoadPageEvent(
+                                    page: 1,
+                                    countryId: state.countryFlag != ''
+                                        ? state.countryFlag
+                                        : '${state.countriesModel.countries?.first.id ?? 1}',
+                                    searchTerm: searchTxt,
+                                    type: state.typeValue));
+                              });
+                              // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                            },
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Search Here',
+                              hintStyle:
+                                  secondaryTextStyle(color: svGetBodyColor()),
+                              suffixIcon: Image.asset(
+                                      'images/socialv/icons/ic_Search.png',
+                                      height: 16,
+                                      width: 16,
+                                      fit: BoxFit.cover,
+                                      color: svGetBodyColor())
+                                  .paddingAll(16),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: CustomDropdownButtonFormField(
+                          items: list1,
+                          value: list1.first,
+                          width: 100,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 0,
+                          ),
+                          onChanged: (String? newValue) {
+                            print(newValue);
                             // BlocProvider.of<DrugsBloc>(context).add(
                             //   GetPost(
                             //       page: '1',
-                            //       countryId: "1",
-                            //       searchTerm: searchTxt,
-                            //       type: state.typeValue),
+                            //       countryId: state.countryFlag,
+                            //       searchTerm: '',
+                            //       type: newValue!),
                             // );
                             BlocProvider.of<SplashBloc>(context).add(
                                 LoadDropdownData(
                                     state.countryFlag,
-                                    state.typeValue,
+                                    newValue ?? "Brand",
                                     state.searchTerms ?? '',
                                     ''));
                             drugsBloc.add(LoadPageEvent(
@@ -115,99 +213,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                 countryId: state.countryFlag != ''
                                     ? state.countryFlag
                                     : '${state.countriesModel.countries?.first.id ?? 1}',
-                                searchTerm: searchTxt,
-                                type: state.typeValue));
-                          });
-                          // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                        },
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Search Here',
-                          hintStyle:
-                              secondaryTextStyle(color: svGetBodyColor()),
-                          suffixIcon: Image.asset(
-                                  'images/socialv/icons/ic_Search.png',
-                                  height: 16,
-                                  width: 16,
-                                  fit: BoxFit.cover,
-                                  color: svGetBodyColor())
-                              .paddingAll(16),
+                                searchTerm: state.searchTerms ?? '',
+                                type: newValue!));
+                          },
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: CustomDropdownButtonFormField(
-                      items: list1,
-                      value: list1.first,
-                      width: 100,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 0,
-                      ),
-                      onChanged: (String? newValue) {
-                        print(newValue);
-                        // BlocProvider.of<DrugsBloc>(context).add(
-                        //   GetPost(
-                        //       page: '1',
-                        //       countryId: state.countryFlag,
-                        //       searchTerm: '',
-                        //       type: newValue!),
-                        // );
-                        BlocProvider.of<SplashBloc>(context).add(
-                            LoadDropdownData(
-                                state.countryFlag,
-                                newValue ?? "Brand",
-                                state.searchTerms ?? '',
-                                ''));
-                        drugsBloc.add(LoadPageEvent(
-                            page: 1,
-                            countryId: state.countryFlag != ''
-                                ? state.countryFlag
-                                : '${state.countriesModel.countries?.first.id ?? 1}',
-                            searchTerm: state.searchTerms ?? '',
-                            type: newValue!));
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CustomDropdownField(
-                      items: state.countriesModel.countries ?? [],
-                      value: state.countriesModel.countries!.first.flag,
-                      width: 50,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 0,
-                      ),
-                      onChanged: (String? newValue) {
-                        print("ddd ${state.countryFlag}");
-                        var index = state.countriesModel.countries!
-                            .indexWhere((element) => newValue == element.flag);
-                        var countryId =
-                            state.countriesModel.countries![index].id;
-                        // BlocProvider.of<DrugsBloc>(context).add(
-                        //   GetPost(
-                        //       page: '1',
-                        //       countryId: countryId.toString(),
-                        //       searchTerm: '',
-                        //       type: state.typeValue),
-                        // );
-                        // countryId = countryIds.toString();
-                        BlocProvider.of<SplashBloc>(context).add(
-                            LoadDropdownData(countryId.toString(),
-                                state.typeValue, state.searchTerms ?? '', ''));
-                        drugsBloc.add(LoadPageEvent(
-                            page: 1,
-                            countryId: countryId.toString(),
-                            searchTerm: state.searchTerms ?? "",
-                            type: state.typeValue));
 
-                        // BlocProvider.of<DrugsBloc>(context)
-                        //     .add(UpdateFirstDropdownValue(newValue!));
-                      },
-                    ),
+                    ],
                   ),
                 ],
               );
@@ -231,12 +243,12 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
             // buildWhen: (previous, current) => current is! DrugsState,
             listener: (BuildContext context, DrugsState state) {
               if (state is DataError) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    content: Text(state.errorMessage),
-                  ),
-                );
+                // showDialog(
+                //   context: context,
+                //   builder: (context) => AlertDialog(
+                //     content: Text(state.errorMessage),
+                //   ),
+                // );
               }
             },
             builder: (context, state) {
@@ -259,6 +271,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               }
             },
           ),
+          if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
         ],
       ),
     );
@@ -269,7 +282,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
     print("bloc$bloc");
     print("len${bloc.drugsData.length}");
     return Expanded(
-      child: ListView.builder(
+      child: bloc.drugsData.isEmpty?const Center(child: Text("No Drugs Found"),) : ListView.builder(
         itemCount: bloc.drugsData.length,
         itemBuilder: (context, index) {
           if (bloc.pageNumber <= bloc.numberOfPage) {

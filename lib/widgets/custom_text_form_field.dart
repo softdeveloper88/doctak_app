@@ -28,10 +28,14 @@ class CustomTextFormField extends StatelessWidget {
     this.borderDecoration,
     this.fillColor,
     this.filled = false,
+    this.isReadOnly = false,
+    this.onTap,
+    this.initialValue,
+    this.onSaved,
     this.validator,
   }) : super(
-          key: key,
-        );
+    key: key,
+  );
 
   final Alignment? alignment;
 
@@ -75,37 +79,55 @@ class CustomTextFormField extends StatelessWidget {
 
   final bool? filled;
 
+  final bool? isReadOnly;
+  final Function? onTap;
+  final Function(String)? onSaved;
+  final String? initialValue;
+
   final FormFieldValidator<String>? validator;
 
   @override
   Widget build(BuildContext context) {
     return alignment != null
         ? Align(
-            alignment: alignment ?? Alignment.center,
-            child: textFormFieldWidget(context),
-          )
+      alignment: alignment ?? Alignment.center,
+      child: textFormFieldWidget(context),
+    )
         : textFormFieldWidget(context);
   }
 
-  Widget textFormFieldWidget(BuildContext context) => SizedBox(
+  Widget textFormFieldWidget(BuildContext context) =>
+      SizedBox(
         width: width ?? double.maxFinite,
         child: TextFormField(
-          scrollPadding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          controller: controller,
-          focusNode: focusNode ?? FocusNode(),
-          autofocus: autofocus!,
-          style: secondaryTextStyle(color: SVAppColorPrimary),
-          // style: textStyle ?? CustomTextStyles.titleMediumMedium,
-          obscureText: obscureText!,
-          textInputAction: textInputAction,
-          keyboardType: textInputType,
-          maxLines: maxLines ?? 1,
-          decoration: decoration,
-          validator: validator,
-        ),
-      );
-  InputDecoration get decoration => InputDecoration(
+            readOnly: isReadOnly ?? false,
+            scrollPadding:
+            EdgeInsets.only(bottom: MediaQuery
+                .of(context)
+                .viewInsets
+                .bottom),
+            controller: controller,
+            focusNode: focusNode ?? FocusNode(),
+            autofocus: autofocus!,
+            onTap:()=>onTap ==null ? (){} : onTap!(),
+            onSaved:(v) { onSaved??(v??'');},
+        initialValue: initialValue,
+        style: secondaryTextStyle(color: SVAppColorPrimary),
+        // style: textStyle ?? CustomTextStyles.titleMediumMedium,
+        obscureText: obscureText!,
+        textInputAction: textInputAction,
+        keyboardType: textInputType,
+        maxLines: maxLines ?? 1,
+        decoration: decoration,
+        validator: validator,
+      )
+
+  ,
+
+  );
+
+  InputDecoration get decoration =>
+      InputDecoration(
         hintText: hintText ?? "",
         hintStyle: hintStyle ?? theme.textTheme.bodyLarge,
         prefixIcon: prefix,
@@ -145,7 +167,8 @@ class CustomTextFormField extends StatelessWidget {
 
 /// Extension on [CustomTextFormField] to facilitate inclusion of all types of border style etc
 extension TextFormFieldStyleHelper on CustomTextFormField {
-  static OutlineInputBorder get outlineGrayTL8 => OutlineInputBorder(
+  static OutlineInputBorder get outlineGrayTL8 =>
+      OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.h),
         borderSide: BorderSide(
           color: appTheme.gray300,

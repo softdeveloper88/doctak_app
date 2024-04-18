@@ -18,19 +18,21 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   final int nextPageTrigger = 1;
 
   JobsBloc() : super(PaginationInitialState()) {
-    on<LoadPageEvent>(_onGetJobs);
+    on<JobLoadPageEvent>(_onGetJobs);
     on<GetPost>(_onGetJobs1);
-    on<CheckIfNeedMoreDataEvent>((event, emit) async {
+    on<JobCheckIfNeedMoreDataEvent>((event, emit) async {
       // emit(PaginationLoadingState());
       if (event.index == drugsData.length - nextPageTrigger) {
-        add(LoadPageEvent(page: pageNumber));
+        add(JobLoadPageEvent(page: pageNumber));
       }
     });
   }
 
-  _onGetJobs(LoadPageEvent event, Emitter<JobsState> emit) async {
+  _onGetJobs(JobLoadPageEvent event, Emitter<JobsState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
+    print('search text ${event.searchTerm}');
+    print('country id ${event.countryId}');
     if (event.page == 1) {
       drugsData.clear();
       pageNumber=1;

@@ -18,19 +18,19 @@ class GetPost extends JobsEvent {
   List<Object> get props => [page,countryId,searchTerm];
 }
 
-class LoadPageEvent extends JobsEvent {
+class JobLoadPageEvent extends JobsEvent {
 int? page;
 final String? countryId;
 String? isExpired='New';
 final String? searchTerm;
 
-LoadPageEvent({this.page,this.countryId,this.isExpired,this.searchTerm});
+JobLoadPageEvent({this.page,this.countryId,this.isExpired,this.searchTerm});
 @override
 List<Object?> get props => [page,countryId,isExpired,searchTerm];
 }
-class CheckIfNeedMoreDataEvent extends JobsEvent {
+class JobCheckIfNeedMoreDataEvent extends JobsEvent {
   final int index;
-  CheckIfNeedMoreDataEvent({required this.index});
+  JobCheckIfNeedMoreDataEvent({required this.index});
   @override
   List<Object?> get props => [index];
 }

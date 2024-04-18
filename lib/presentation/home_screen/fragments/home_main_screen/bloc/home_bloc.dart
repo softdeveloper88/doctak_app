@@ -20,6 +20,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<PostLoadPageEvent>(_onGetPosts);
     on<LoadSearchPageEvent>(_onGetSearchPosts);
     on<PostLikeEvent>(_onPostLike);
+    on<DeletePostEvent>(_onDeletePost);
+    on<AdsSettingEvent>(_adsSettingApi);
     on<PostCheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == postList.length - nextPageTrigger) {
         add(PostLoadPageEvent(page: pageNumber));
@@ -126,7 +128,64 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // emit(DataError('An error occurred $e'));
     }
   }
+  _onDeletePost(DeletePostEvent event, Emitter<HomeState> emit) async {
 
+    // try {
+      var response = await postService.deletePost(
+        'Bearer ${AppData.userToken}',
+        event.postId.toString(),
+      );
+      postList.removeAt(postList.indexWhere((element) => element.id==event.postId));
+      // int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
+      // bool isLike=postList[index].likes!.where((element) => element.postId.toString()==event.postId.toString()).isEmpty;
+      // if(isLike) {
+      //   postList[index].likes!.add(Likes(
+      //       id: 1,
+      //       userId: AppData.logInUserId,
+      //       postId: event.postId.toString()
+      //   ));
+      // }else{
+      //
+      //   postList[index].likes!.removeLast();
+      // }
+      // numberOfPage = response.posts?.lastPage ?? 0;
+      // if (pageNumber < numberOfPage + 1) {
+      //   pageNumber = pageNumber + 1;
+      // }
+      // numberOfPage = response.posts?.lastPage ?? 0;
+      // if (pageNumber < numberOfPage + 1) {
+      //   pageNumber = pageNumber + 1;
+      //   postList.addAll(response.postComments ?? []);
+      // }
+     print(response.data);
+      emit(PostPaginationLoadedState());
+
+      // emit(DataLoaded(postList));
+    // } catch (e) {
+    //   print(e);
+    //
+    //   emit(PostPaginationLoadedState());
+    //
+    //   // emit(DataError('An error occurred $e'));
+    // }
+  }
+  Future<void> _adsSettingApi(AdsSettingEvent event,
+      Emitter<HomeState> emit) async {
+    try {
+    AppData.adsSettingModel = await postService.advertisementSetting('Bearer ${AppData.userToken}');
+    print("dot ${AppData.adsSettingModel.data}");
+
+    AppData.listAdsType = await postService.advertisementTypes('Bearer ${AppData.userToken}',);
+    AppData.isShowGoogleBannerAds=(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty) &&((AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty??false));
+    AppData.androidBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.androidId;
+    AppData.iosBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.iosId;
+    print(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty);
+    print(AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty);
+    print("dot ${AppData.listAdsType.length}");
+    } catch (e) {
+      // emit(CountriesDataError('$e'));
+    }
+  }
 //  _onGetPosts1(GetPost event, Emitter<HomeState> emit) async {
 //   emit(DataInitial());
 //   // ProgressDialogUtils.showProgressDialog();

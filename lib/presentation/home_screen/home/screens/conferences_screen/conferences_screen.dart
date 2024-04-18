@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
@@ -137,7 +139,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                     ],
                   );
                 } else if (state is DataError) {
-                  return Center(child: Text('Error: ${state}'));
+                  return Center(child: Text('Error: $state'));
                 } else {
                   return Center(child: Text('Unknown state$state'));
                 }
@@ -247,7 +249,6 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                     BlocProvider.of<SplashBloc>(context).add(
                       LoadDropdownData1('', ''),
                     );
-
                     return Center(child: Text('Unknown state$state'));
                   }
                 }),
@@ -288,6 +289,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 }
               },
             ),
+            if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
           ],
         ));
   }
@@ -297,7 +299,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
     print("bloc$bloc");
     print("len${bloc.conferenceList.length}");
     return Expanded(
-      child: ListView.builder(
+      child:bloc.conferenceList.isEmpty?const Center(child: Text("No Conference Found"),) : ListView.builder(
         itemCount: bloc.conferenceList.length,
         itemBuilder: (context, index) {
           if (index == bloc.conferenceList.length - bloc.nextPageTrigger) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
@@ -7,10 +8,10 @@ import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_scre
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import 'bloc/guideline_event.dart';
 
 class GuidelinesScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
     _debounce?.cancel();
     super.dispose();
   }
+
   @override
   void initState() {
     guidelineBloc.add(
@@ -44,62 +46,60 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
+          iconTheme: IconThemeData(color: context.iconColor),
           elevation: 0,
+          centerTitle: true,
           backgroundColor: svGetScaffoldColor(),
-          title: Container(
-            padding: const EdgeInsets.only(left: 8.0),
-
-                  decoration: BoxDecoration(
-                      color: context.cardColor, borderRadius: radius(8)),
-                  child: AppTextField(
-                    onChanged: (searchTxt) async {
-    if (_debounce?.isActive ?? false) _debounce?.cancel();
-
-    _debounce =
-    Timer(const Duration(milliseconds: 500), ()
-    {
-      guidelineBloc.add(
-        LoadPageEvent(
-          page: 1,
-          searchTerm: searchTxt,
-        ),
-      );
-      // guidelineBloc.add(SearchFieldData(
-      //    searchTxt,
-      // ));
-    });
-                    },
-                    textFieldType: TextFieldType.NAME,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Search Here ',
-                      hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                      suffixIcon: Image.asset(
-                          'images/socialv/icons/ic_Search.png',
-                          height: 16,
-                          width: 16,
-                          fit: BoxFit.cover,
-                          color: svGetBodyColor())
-                          .paddingAll(16),
-                    ),
-                  ),
-                )
-              ),
+          title:  Text('Guidelines', style: boldTextStyle(size: 18))),
       body: Column(
         children: [
+          Container(
+            padding: const EdgeInsets.only(left: 8.0),
+            margin: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+                color: context.cardColor, borderRadius: radius(8)),
+            child: AppTextField(
+              onChanged: (searchTxt) async {
+                if (_debounce?.isActive ?? false) _debounce?.cancel();
+
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  guidelineBloc.add(
+                    LoadPageEvent(
+                      page: 1,
+                      searchTerm: searchTxt,
+                    ),
+                  );
+                  // guidelineBloc.add(SearchFieldData(
+                  //    searchTxt,
+                  // ));
+                });
+              },
+              textFieldType: TextFieldType.NAME,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Search Here ',
+                hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
+                        height: 16,
+                        width: 16,
+                        fit: BoxFit.cover,
+                        color: svGetBodyColor())
+                    .paddingAll(16),
+              ),
+            ),
+          ),
           BlocConsumer<GuidelinesBloc, GuidelineState>(
             bloc: guidelineBloc,
             // listenWhen: (previous, current) => current is PaginationLoadedState,
             // buildWhen: (previous, current) => current is! PaginationLoadedState,
             listener: (BuildContext context, GuidelineState state) {
               if (state is DataError) {
-                showDialog(
-                  context: context,
-                  builder: (context) =>
-                      AlertDialog(
-                        content: Text(state.errorMessage),
-                      ),
-                );
+                // showDialog(
+                //   context: context,
+                //   builder: (context) => AlertDialog(
+                //     content: Text(state.errorMessage),
+                //   ),
+                // );
               }
             },
             builder: (context, state) {
@@ -117,19 +117,19 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     shrinkWrap: true,
                     // physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-                      if(bloc.pageNumber <= bloc.numberOfPage) {
-                        if (index == bloc.guidelinesList.length -
-                            bloc.nextPageTrigger) {
+                      if (bloc.pageNumber <= bloc.numberOfPage) {
+                        if (index ==
+                            bloc.guidelinesList.length - bloc.nextPageTrigger) {
                           bloc.add(CheckIfNeedMoreDataEvent(index: index));
                         }
                       }
                       return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                          index >= bloc.guidelinesList.length - 1
+                              index >= bloc.guidelinesList.length - 1
                           ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
+                              child: CircularProgressIndicator(),
+                            )
                           : _buildDiseaseAndGuidelinesItem(
-                          bloc.guidelinesList[index]);
+                              bloc.guidelinesList[index]);
 
                       // SVProfileFragment().launch(context);
                     },
@@ -151,6 +151,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
               }
             },
           ),
+          if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(
@@ -176,15 +177,16 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       //   ),
       // ),
     );
-
   }
 
   Map<String, bool> expandedMap = {};
 
   Widget _buildDiseaseAndGuidelinesItem(Data item) {
     expandedMap[item.diseaseName!] ??= false;
-    String description = item.description!.replaceAll('\r', '').replaceAll(
-        '\n', '').replaceAll('\u0002', ' ');
+    String description = item.description!
+        .replaceAll('\r', '')
+        .replaceAll('\n', '')
+        .replaceAll('\u0002', ' ');
     // print(description);
     String trimmedDescription = _trimDescription(description, 100);
     return Container(
@@ -210,7 +212,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 setState(() {
                   // Toggle expanded state
                   expandedMap[item.diseaseName ?? ''] =
-                  !expandedMap[item.diseaseName]!;
+                      !expandedMap[item.diseaseName]!;
                 });
               },
               child: Html(
@@ -269,7 +271,6 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       // Check if the URL can be launched
 
       await launchUrl(fileUri); // Launch the URL
-
     } catch (e) {
       // Handle errors or show an alert to the user
       ScaffoldMessenger.of(context).showSnackBar(
@@ -281,11 +282,9 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
     }
   }
 
-
   String _trimDescription(String description, int wordLimit) {
     List<String> words = description.split(' ');
     if (words.length <= wordLimit) return description;
     return '${words.take(wordLimit).join(' ')}...';
   }
-
 }

@@ -6,6 +6,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_scre
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_state.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SuggestionScreen extends StatefulWidget {
@@ -98,6 +99,14 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: context.cardColor,
+        iconTheme: IconThemeData(color: context.iconColor),
+        title: Text('Suggestion', style: boldTextStyle(size: 20)),
+        elevation: 0,
+        centerTitle: true,
+
+      ),
       body: AnimatedBackground(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

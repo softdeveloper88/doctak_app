@@ -17,23 +17,6 @@ class TogglePasswordVisibility extends DropdownEvent {}
 class SignUpData extends DropdownEvent {}
 class ChangeDoctorRole extends DropdownEvent {}
 
-class UpdateFirstDropdownValue extends DropdownEvent {
-  final String newValue;
-  UpdateFirstDropdownValue(this.newValue);
-}
-
-class UpdateSecondDropdownValues extends DropdownEvent {
-  final String selectedFirstDropdownValue;
-  UpdateSecondDropdownValues(this.selectedFirstDropdownValue);
-}
-class UpdateSpecialtyDropdownValue extends DropdownEvent {
-  final String newValue;
-  UpdateSpecialtyDropdownValue(this.newValue);
-}
-class UpdateUniversityDropdownValues extends DropdownEvent {
-  final String selectedStateDropdownValue;
-  UpdateUniversityDropdownValues(this.selectedStateDropdownValue);
-}
 /// Event that is dispatched when the SignUp widget is first created.
 // class SignUpInitialEvent extends SignUpEvent {
 //   @override
@@ -47,12 +30,9 @@ class ChangePasswordVisibilityEvent extends DropdownEvent {
   bool value;
 
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value,];
 }
-//
-// ///Event for changing checkbox
+
 class ChangeCheckBoxEvent extends DropdownEvent {
   ChangeCheckBoxEvent({required this.value});
 
@@ -74,6 +54,20 @@ class SignUpButtonPressed extends DropdownEvent {
 
   @override
   List<Object> get props => [username, password,firstName,lastName,userType];
+}
+class SocialButtonPressed extends DropdownEvent {
+  final String token;
+  final String firstName;
+  final String lastName;
+  final String phone;
+  final String country;
+  final String state;
+  final String userType;
+
+  SocialButtonPressed({required this.token,required this.firstName,required this.lastName,required this.phone,required this.country,required this.state,required this.userType});
+
+  @override
+  List<Object> get props => [token,firstName,lastName,phone,country,state,userType];
 }
 // class GetCountries extends SignUpEvent {
 //   GetCountries();

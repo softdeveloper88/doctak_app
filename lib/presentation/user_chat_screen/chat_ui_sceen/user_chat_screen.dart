@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
@@ -149,19 +150,36 @@ class _UserChatScreenState extends State<UserChatScreen> {
                         child: CircularProgressIndicator(),
                       )
                           : Card(
+
                         elevation: 2,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: ListTile(
-                          leading: GestureDetector(
-                            onTap: (){
-                              // SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
+                          leading: InkWell(
+                            onTap: () {
+                              // Handle profile picture tap
                             },
-                            child: CircleAvatar(
-                              radius: 30,
-                              backgroundImage: CachedNetworkImageProvider(
-                                  '${AppData.imageUrl}${bloc.contactsList[index].profilePic}'),
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 30,
+                                backgroundImage: CachedNetworkImageProvider(
+                                  '${AppData.imageUrl}${bloc.contactsList[index].profilePic}',
+                                ),
+                              ),
                             ),
                           ),
                           title: Text(
@@ -169,21 +187,32 @@ class _UserChatScreenState extends State<UserChatScreen> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
+                              color: Colors.black87,
                             ),
                           ),
                           subtitle: Text(
                             bloc.contactsList[index].latestMessage ?? 'No recent messages',
-                            style: const TextStyle(fontSize: 14),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
                           ),
                           onTap: () {
-                            ChatRoomScreen(username: '${bloc.contactsList[index].firstName} ${bloc.contactsList[index].lastName}',profilePic: '${bloc.contactsList[index].profilePic}',id: '',roomId: '${bloc.contactsList[index].roomId}',).launch(context);
+                            ChatRoomScreen(
+                              username: '${bloc.contactsList[index].firstName} ${bloc.contactsList[index].lastName}',
+                              profilePic: '${bloc.contactsList[index].profilePic}',
+                              id: '',
+                              roomId: '${bloc.contactsList[index].roomId}',
+                            ).launch(context);
                             // Add navigation logic or any other action on contact tap
                           },
-                        ),
+                        )
+
                       );
                     },
                   ),
-                ),
+                )else  Expanded(child: Center(child: Text("No chat found",style: boldTextStyle(size: 16)),)),
+                if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
               ],
             );
           } else if (state is DataError) {

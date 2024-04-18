@@ -11,6 +11,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import to use Clipboard
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -185,6 +186,51 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           } else if (state1 is DataLoaded) {
             print('response ${state1.response.toString()}');
             return Scaffold(
+              appBar: AppBar(
+                title:Builder(
+                  builder: (context) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          // Wrap the Text widget with Expanded
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  chatWithAi.length > 50
+                                      ? '${chatWithAi.substring(0, 50)}...'
+                                      : chatWithAi,
+                                  style: boldTextStyle(),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: isLoadingMessages
+                                    ?  TypingIndicators(
+                                    color: svGetBodyColor(),
+                                    size:
+                                    2.0) // Custom typing indicator
+                                    : const Text(""),
+                                onPressed: () {},
+                              )
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.home_filled),
+                          color: svGetBodyColor(),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
                 drawer: Drawer(
                   child: AnimatedBackground(
                       child: Column(
@@ -288,258 +334,211 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     ],
                   )),
                 ),
-                body: AnimatedBackground(
-                  child: Column(
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Builder(
-                          builder: (context) {
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  // Wrap the Text widget with Expanded
-                                  child: Row(
-                                    children: [
-                                      Padding(
-                                        padding:  EdgeInsets.all(8.0),
-                                        child: Text(
-                                          chatWithAi.length > 50
-                                              ? '${chatWithAi.substring(0, 50)}...'
-                                              : chatWithAi,
-                                          style: boldTextStyle(),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: isLoadingMessages
-                                            ?  TypingIndicators(
-                                                color: svGetBodyColor(),
-                                                size:
-                                                    2.0) // Custom typing indicator
-                                            : const Text(""),
-                                        onPressed: () {},
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.menu),
-                                  color: svGetBodyColor(),
-                                  onPressed: () {
-                                    Scaffold.of(context).openDrawer();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: state1.response1.messages!.length,
-                          itemBuilder: (context, index) {
-                            Messages message =
-                                state1.response1.messages![index];
-                            return Column(
-                              children: [
-                                ChatBubble(
-                                  text: message.question ?? '',
-                                  isUserMessage: true,
-                                ),
-                                ChatBubble(
-                                  text: message.response ?? "",
-                                  isUserMessage: false,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(10.0),
-                        // Add margin of 10.0 to all sides
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        padding: const EdgeInsets.all(4.0),
-                        child: TextField(
-                          controller: textController,
-                          minLines: 1,
-                          // Minimum lines
-                          maxLines: null,
-                          // Allows for unlimited lines
-                          decoration: InputDecoration(
-                            hintText: 'Ask DocTak AI',
-                            border: InputBorder.none,
-                            suffixIcon: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                    colors: [
-                                      Color(0xFF0A1F18),
-                                      Color(0xFF56DEB5)
-                                    ],
-                                    stops: [0.37, 1.0],
-                                  ),
-                                ),
-                                child: IconButton(
-                                  icon: isWriting
-                                      ? const TypingIndicators(
-                                          color: Colors.white,
-                                          size: 2.0) // Custom typing indicator
-                                      : const Icon(Icons.send,
-                                          color: Colors.white),
-                                  onPressed: () async {
-                                    String question =
-                                        textController.text.trim();
-                                    if (question.isEmpty) return;
-                                    // String sessionId = selectedSessionId.toString();
-                                    var tempId =
-                                        -1; // Unique temporary ID for the response
-                                    setState(() {
-                                      var myMessage = Messages(
-                                          id: -1,
-                                          gptSessionId:
-                                              selectedSessionId.toString(),
-                                          question: question,
-                                          response: '...',
-                                          createdAt: DateTime.now().toString(),
-                                          updatedAt: DateTime.now().toString());
-                                      state1.response1.messages!.add(myMessage);
-                                      BlocProvider.of<ChatGPTBloc>(context).add(
-                                        GetPost(
-                                          sessionId: selectedSessionId.toString(),
-                                          question:
-                                              question, // replace with real input
-                                        ),
-                                      );
-                                      textController.clear();
-                                      scrollToBottom();
-                                    });
-                                    // // Add the temporary message (User's question)
-                                    // // setState(() {
-                                    // // message.add(myMessage);
-                                    // // scrollToBottom();
-                                    // // });
-                                    //
-                                    try {
-                                      //   for (int i = 0; i <= state1.response2.content!.length; i++) {
-                                      //     await Future.delayed(const Duration(
-                                      //         milliseconds:
-                                      //             100)); // Delay to simulate typing speed
-                                      //
-                                      //     int index = state1.response1.messages!
-                                      //         .indexWhere((msg) => msg.id == -1);
-                                      //     if (index != -1) {
-                                      //       // Update the temporary message with gradually more characters of the response
-                                      //       String typingText = state1
-                                      //           .response2.content!
-                                      //           .substring(0, i);
-                                      //       state1.response1.messages![index] =
-                                      //           Messages(
-                                      //               id: -1,
-                                      //               gptSessionId: state1.response.sessions!.first??'',
-                                      //               question: question,
-                                      //               response: typingText,
-                                      //               createdAt:
-                                      //                   DateTime.now().toString(),
-                                      //               updatedAt: DateTime.now()
-                                      //                   .toString());
-                                      //       print(typingText);
-                                      //       if (state1
-                                      //               .response2.content!.length ==
-                                      //           i) {
-                                      //         state1.response1.messages![index] =
-                                      //             Messages(
-                                      //                 id: -1,
-                                      //                 gptSessionId: state1.response.sessions!.first??'',
-                                      //                 question: question,
-                                      //                 response: typingText,
-                                      //                 createdAt: DateTime.now()
-                                      //                     .toString(),
-                                      //                 updatedAt: DateTime.now()
-                                      //                     .toString());
-                                      //       }
-                                      //     }
-                                      //   }
-                                      // ChatGPTResponse newMessage =
-                                      //     await askQuestion(
-                                      //         sessionId, question);
+                body: Column(
+                  children: <Widget>[
+                    // const SizedBox(height: 10,),
 
-                                      // for (int i = 0;
-                                      //     i <= state1.response2.content!.length;
-                                      //     i++) {
-                                      //   await Future.delayed(const Duration(
-                                      //       milliseconds:
-                                      //           1)); // Delay to simulate typing speed
-                                      //
-                                      //   // setState(() {
-                                      //     int index = state1.response1.messages!.indexWhere(
-                                      //         (msg) => msg.id == tempId);
-                                      //     if (index != -1) {
-                                      //       // Update the temporary message with gradually more characters of the response
-                                      //       String typingText = state1.response2.content!.substring(0, i);
-                                      //       state1.response1.messages![index] = Messages(
-                                      //           id: tempId,
-                                      //           gptSessionId: state1.response.sessions!.first??'',
-                                      //           question: question,
-                                      //           response: typingText,
-                                      //           createdAt:
-                                      //               DateTime.now().toString(),
-                                      //           updatedAt:
-                                      //               DateTime.now().toString());
-                                      //       if (state1.response2.content!.length ==
-                                      //           i) {
-                                      //         state1.response1.messages![index] = Messages(
-                                      //             id: -1,
-                                      //             gptSessionId: state1.response.sessions!.first??'',
-                                      //             question: question,
-                                      //             response: typingText,
-                                      //             createdAt:
-                                      //                 DateTime.now().toString(),
-                                      //             updatedAt: DateTime.now()
-                                      //                 .toString());
-                                      //       }
-                                      //     }
-                                      //   // });
-                                      //   scrollToBottom();
-                                      // }
-                                      // setState(() {
-                                      isWriting = false;
-                                      // });
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: Text('Error: $e')));
-                                    }
-                                  },
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        itemCount: state1.response1.messages!.length,
+                        itemBuilder: (context, index) {
+                          Messages message =
+                              state1.response1.messages![index];
+                          return Column(
+                            children: [
+                              ChatBubble(
+                                text: message.question ?? '',
+                                isUserMessage: true,
+                              ),
+                              ChatBubble(
+                                text: message.response ?? "",
+                                isUserMessage: false,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.all(10.0),
+                      // Add margin of 10.0 to all sides
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      padding: const EdgeInsets.all(4.0),
+                      child: TextField(
+                        controller: textController,
+                        minLines: 1,
+                        // Minimum lines
+                        maxLines: null,
+                        // Allows for unlimited lines
+                        decoration: InputDecoration(
+                          hintText: 'Ask DocTak AI',
+                          border: InputBorder.none,
+                          suffixIcon: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30.0),
+                                gradient: const LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [
+                                    Colors.blueAccent,
+                                    Colors.blue
+                                  ],
+                                  stops: [0.37, 1.0],
                                 ),
+                              ),
+                              child: IconButton(
+                                icon: isWriting
+                                    ? const TypingIndicators(
+                                        color: Colors.white,
+                                        size: 2.0) // Custom typing indicator
+                                    : const Icon(Icons.send,
+                                        color: Colors.white),
+                                onPressed: () async {
+                                  String question =
+                                      textController.text.trim();
+                                  if (question.isEmpty) return;
+                                  // String sessionId = selectedSessionId.toString();
+                                  var tempId =
+                                      -1; // Unique temporary ID for the response
+                                  setState(() {
+                                    var myMessage = Messages(
+                                        id: -1,
+                                        gptSessionId:
+                                            selectedSessionId.toString(),
+                                        question: question,
+                                        response: '...',
+                                        createdAt: DateTime.now().toString(),
+                                        updatedAt: DateTime.now().toString());
+                                    state1.response1.messages!.add(myMessage);
+                                    BlocProvider.of<ChatGPTBloc>(context).add(
+                                      GetPost(
+                                        sessionId: selectedSessionId.toString(),
+                                        question:
+                                            question, // replace with real input
+                                      ),
+                                    );
+                                    textController.clear();
+                                    scrollToBottom();
+                                  });
+                                  // // Add the temporary message (User's question)
+                                  // // setState(() {
+                                  // // message.add(myMessage);
+                                  // // scrollToBottom();
+                                  // // });
+                                  //
+                                  try {
+                                    //   for (int i = 0; i <= state1.response2.content!.length; i++) {
+                                    //     await Future.delayed(const Duration(
+                                    //         milliseconds:
+                                    //             100)); // Delay to simulate typing speed
+                                    //
+                                    //     int index = state1.response1.messages!
+                                    //         .indexWhere((msg) => msg.id == -1);
+                                    //     if (index != -1) {
+                                    //       // Update the temporary message with gradually more characters of the response
+                                    //       String typingText = state1
+                                    //           .response2.content!
+                                    //           .substring(0, i);
+                                    //       state1.response1.messages![index] =
+                                    //           Messages(
+                                    //               id: -1,
+                                    //               gptSessionId: state1.response.sessions!.first??'',
+                                    //               question: question,
+                                    //               response: typingText,
+                                    //               createdAt:
+                                    //                   DateTime.now().toString(),
+                                    //               updatedAt: DateTime.now()
+                                    //                   .toString());
+                                    //       print(typingText);
+                                    //       if (state1
+                                    //               .response2.content!.length ==
+                                    //           i) {
+                                    //         state1.response1.messages![index] =
+                                    //             Messages(
+                                    //                 id: -1,
+                                    //                 gptSessionId: state1.response.sessions!.first??'',
+                                    //                 question: question,
+                                    //                 response: typingText,
+                                    //                 createdAt: DateTime.now()
+                                    //                     .toString(),
+                                    //                 updatedAt: DateTime.now()
+                                    //                     .toString());
+                                    //       }
+                                    //     }
+                                    //   }
+                                    // ChatGPTResponse newMessage =
+                                    //     await askQuestion(
+                                    //         sessionId, question);
+
+                                    // for (int i = 0;
+                                    //     i <= state1.response2.content!.length;
+                                    //     i++) {
+                                    //   await Future.delayed(const Duration(
+                                    //       milliseconds:
+                                    //           1)); // Delay to simulate typing speed
+                                    //
+                                    //   // setState(() {
+                                    //     int index = state1.response1.messages!.indexWhere(
+                                    //         (msg) => msg.id == tempId);
+                                    //     if (index != -1) {
+                                    //       // Update the temporary message with gradually more characters of the response
+                                    //       String typingText = state1.response2.content!.substring(0, i);
+                                    //       state1.response1.messages![index] = Messages(
+                                    //           id: tempId,
+                                    //           gptSessionId: state1.response.sessions!.first??'',
+                                    //           question: question,
+                                    //           response: typingText,
+                                    //           createdAt:
+                                    //               DateTime.now().toString(),
+                                    //           updatedAt:
+                                    //               DateTime.now().toString());
+                                    //       if (state1.response2.content!.length ==
+                                    //           i) {
+                                    //         state1.response1.messages![index] = Messages(
+                                    //             id: -1,
+                                    //             gptSessionId: state1.response.sessions!.first??'',
+                                    //             question: question,
+                                    //             response: typingText,
+                                    //             createdAt:
+                                    //                 DateTime.now().toString(),
+                                    //             updatedAt: DateTime.now()
+                                    //                 .toString());
+                                    //       }
+                                    //     }
+                                    //   // });
+                                    //   scrollToBottom();
+                                    // }
+                                    // setState(() {
+                                    isWriting = false;
+                                    // });
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                            content: Text('Error: $e')));
+                                  }
+                                },
                               ),
                             ),
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                ).paddingTop(20));
+                      ),
+                    )
+                  ],
+                ));
           } else if (state1 is DataError) {
             return Scaffold(
-                body: Container(child: Text(state1.errorMessage.toString())));
+                body: Text(state1.errorMessage.toString()));
           } else {
-            return Container(
-              child: const Text('error'),
-            );
+            return const Text('error');
           }
         }));
   }

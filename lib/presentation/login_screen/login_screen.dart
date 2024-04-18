@@ -1,226 +1,407 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
+import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/validation_functions.dart';
+import 'package:doctak_app/presentation/forgot_password/forgot_password.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/SVHomeFragment.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_event.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_state.dart';
 import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
 import 'package:doctak_app/widgets/app_bar/appbar_title.dart';
-import 'package:nb_utils/nb_utils.dart';
-
-import '../home_screen/utils/SVCommon.dart';
-import 'bloc/login_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/core/utils/validation_functions.dart';
-import 'package:doctak_app/widgets/app_bar/appbar_leading_image.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
-import 'package:doctak_app/widgets/custom_elevated_button.dart';
 import 'package:doctak_app/widgets/custom_outlined_button.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
-import 'package:doctak_app/domain/googleauth/google_auth_helper.dart';
-import 'package:doctak_app/domain/facebookauth/facebook_auth_helper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:nb_utils/nb_utils.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:http/http.dart' as http;
+
+import '../../core/utils/app/AppData.dart';
+import '../home_screen/utils/SVCommon.dart';
+import 'bloc/login_bloc.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  LoginBloc loginBloc = LoginBloc();
+  Future<void> sendVerificationLink(String email, BuildContext context) async {
+    // Show the loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Disallow dismissing while loading
+      builder: (BuildContext context) {
+        return const SimpleDialog(
+          title: Text('Sending Verification Link'),
+          children: [
+            Center(
+              child: CircularProgressIndicator(),
+            ),
+          ],
+        );
+      },
+    );
 
-  static Widget builder(BuildContext context) {
-    return BlocProvider<LoginBloc>(
-        create: (context) => LoginBloc(), child: LoginScreen());
+    try {
+      final response = await http.post(
+        Uri.parse('${AppData.remoteUrl}/send-verification-link'),
+        body: {'email': email},
+      );
+
+      // Close the loading dialog
+      Navigator.of(context).pop();
+
+      if (response.statusCode == 200) {
+        // Successful API call, handle the response if needed
+        // Show success Snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Verification link sent successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 422) {
+        // Validation error or user email not found
+        // Show error Snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Validation error or user email not found'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 404) {
+        // User already verified
+        // Show info Snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('User already verified'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        // Something went wrong
+        // Show error Snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle network errors or other exceptions
+      // Close the loading dialog
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
+  FocusNode focusNode1=FocusNode();
+  FocusNode focusNode2=FocusNode();
+  void showVerifyMessage(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Verify Account'),
+          content: const Text('Please verify your account.'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                // Add your logic for resending the verification link here
+
+                String email = emailController.text;
+                sendVerificationLink(email,context);
+              },
+              child: const Text('Resend Link'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: _buildAppBar(context),
-            body: BlocListener<LoginBloc, LoginState>(
-                listener: (context, state) {
-                  if (state is LoginSuccess) {
+    return GestureDetector(
+      onTap: (){
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: _buildAppBar(context),
+          body: BlocListener<LoginBloc, LoginState>(
+              bloc: loginBloc,
+              listener: (context, state) {
+                if (state is LoginSuccess) {
+                  if (state.isEmailVerified == '') {
+                    showVerifyMessage(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Login successfully'),
+                        content: Text('hello'),
                         backgroundColor: Colors.green,
                       ),
                     );
-                    Navigator.push (
+                    return;
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Login successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => SVDashboardScreen(),
+                    ),
+                  );
+                  // Navigate to the home screen or perform desired action
+                } else if (state is SocialLoginSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Social Login successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  if (state.response.user?.userType != null) {
+                    if (state.response.recentCreated == false) {
+                      print(state.response.toJson());
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              const SVDashboardScreen(),
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => SignUpScreen(
+                              isSocialLogin: true,
+                              firstName: state.response.user?.firstName ?? '',
+                              lastName: state.response.user?.lastName ?? '',
+                              token: state.response.token ?? ''),
+                        ),
+                      );
+                    }
+                  } else {
+                    Navigator.push(
                       context,
-                      MaterialPageRoute (
-                        builder: (BuildContext context) =>  SVDashboardScreen(),
-                      ),
-                    );
-                    // Navigate to the home screen or perform desired action
-                  } else if (state is LoginFailure) {
-                    // Show an error message
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.error),
-                        backgroundColor: Colors.red,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => SignUpScreen(
+                            isSocialLogin: true,
+                            firstName: state.response.user?.firstName ?? '',
+                            lastName: state.response.user?.lastName ?? '',
+                            token: state.response.token ?? ''
+                        ),
                       ),
                     );
                   }
-                },
-                child: SizedBox(
-                    width: SizeUtils.width,
-                    child: SingleChildScrollView(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                        child: Form(
-                            key: _formKey,
-                            child: Container(
-                                width: double.maxFinite,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 24.h, vertical: 39.v),
-                                child: Column(children: [
-                                  CustomTextFormField(
-                                      controller: emailController,
-                                      hintText: translation(context).msg_enter_your_email,
-                                      textInputType: TextInputType.emailAddress,
-                                      prefix: Container(
-                                          margin: EdgeInsets.fromLTRB(
-                                              24.h, 16.v, 16.h, 16.v),
-                                          child: CustomImageView(
-                                              color: Colors.blueGrey,
-                                              imagePath:
-                                                  ImageConstant.imgCheckmark,
-                                              height: 24.adaptSize,
-                                              width: 24.adaptSize)),
-                                      prefixConstraints:
-                                          BoxConstraints(maxHeight: 56.v),
-                                      validator: (value) {
-                                        if (value == null ||
-                                            (!isValidEmail(value,
-                                                isRequired: true))) {
-                                          return translation(context).err_msg_please_enter_valid_email
-                                              ;
-                                        }
-                                        return null;
-                                      },
-                                      contentPadding: EdgeInsets.only(
-                                          top: 18.v,
-                                          right: 30.h,
-                                          bottom: 18.v)),
-                                  SizedBox(height: 16.v),
-                                  BlocBuilder<LoginBloc, LoginState>(
-                                      builder: (context, state) {
-                                    return CustomTextFormField(
-                                        controller: passwordController,
-                                        hintText: translation(context).msg_enter_new_password,
-                                        textInputAction: TextInputAction.done,
-                                        textInputType:
-                                            TextInputType.visiblePassword,
-                                        prefix: Container(
-                                            margin: EdgeInsets.fromLTRB(
-                                                24.h, 16.v, 16.h, 16.v),
-                                            child: CustomImageView(
-                                                color: Colors.blueGrey,
-                                                imagePath:
-                                                    ImageConstant.imgLocation,
-                                                height: 24.adaptSize,
-                                                width: 24.adaptSize)),
-                                        prefixConstraints:
-                                            BoxConstraints(maxHeight: 56.v),
-                                        suffix: InkWell(
-                                            onTap: () {
-                                              context.read<LoginBloc>().add(
-                                                  ChangePasswordVisibilityEvent(
-                                                      value: !state
-                                                          .isShowPassword));
-                                            },
-                                            child: Container(
-                                                margin: EdgeInsets.fromLTRB(
-                                                    30.h, 16.v, 24.h, 16.v),
-                                                child: CustomImageView(
-                                                    color: Colors.blueGrey,
-                                                    imagePath:
-                                                        ImageConstant.imgEye,
-                                                    height: 24.adaptSize,
-                                                    width: 24.adaptSize))),
-                                        suffixConstraints:
-                                            BoxConstraints(maxHeight: 56.v),
-                                        validator: (value) {
-                                          if (value == null ||
-                                              (!isValidPassword(value,
-                                                  isRequired: true))) {
-                                            return translation(context).err_msg_please_enter_valid_password
-                                                ;
-                                          }
-                                          return null;
-                                        },
-                                        obscureText: state.isShowPassword);
-                                  }),
-                                  SizedBox(height: 10.v),
-                                  Align(
-                                      alignment: Alignment.centerRight,
-                                      child: GestureDetector(
-                                          onTap: () {
-                                            onTapTxtForgotPassword(context);
-                                          },
-                                          child: Text(translation(context).msg_forgot_password,
-                                              style: CustomTextStyles
-                                                  .titleSmallPrimary))),
-                                  SizedBox(height: 32.v),
-                                  svAppButton(
-                                    context: context,
-                                    text: 'LOGIN',
-                                    onTap: () {
-                                            BlocProvider.of<LoginBloc>(context).add(
-                                              LoginButtonPressed(
-                                                username: emailController.text,
-                                                // replace with real input
-                                                password: passwordController
-                                                    .text, // replace with real input
-                                              ),
-                                            );
+                  // Navigate to the home screen or perform desired action
+                } else if (state is LoginFailure) {
+                  // Show an error message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.error),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: SizedBox(
+                  width: SizeUtils.width,
+                  child: SingleChildScrollView(
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom),
+                      child: Form(
+                          key: _formKey,
+                          child: Container(
+                              width: double.maxFinite,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 24.h, vertical: 39.v),
+                              child: Column(children: [
+                                CustomTextFormField(
+                                  focusNode: focusNode1,
+                                    controller: emailController,
+                                    hintText: translation(context)
+                                        .msg_enter_your_email,
+                                    textInputType: TextInputType.emailAddress,
+                                    prefix: Container(
+                                        margin: EdgeInsets.fromLTRB(
+                                            24.h, 16.v, 16.h, 16.v),
+                                        child: CustomImageView(
+                                            color: Colors.blueGrey,
+                                            imagePath:
+                                                ImageConstant.imgCheckmark,
+                                            height: 24.adaptSize,
+                                            width: 24.adaptSize)),
+                                    prefixConstraints:
+                                        BoxConstraints(maxHeight: 56.v),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          (!isValidEmail(value,
+                                              isRequired: true))) {
+                                        return translation(context)
+                                            .err_msg_please_enter_valid_email;
+                                      }
+                                      return null;
                                     },
-                                  ),
-                                  SizedBox(height: 25.v),
-                                  Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Padding(
-                                          padding: EdgeInsets.only(left: 48.h),
-                                          child: Row(children: [
-                                            Padding(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 1.v),
-                                                child: Text(
-                                                    translation(context).msg_don_t_have_an_account
-                                                        ,
-                                                    style: CustomTextStyles
-                                                        .bodyMediumGray600)),
-                                            GestureDetector(
-                                                onTap: () {
-                                                  onTapTxtSignUp(context);
-                                                },
-                                                child: Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 4.h),
-                                                    child: Text(
-                                                        translation(context).lbl_sign_up,
-                                                        style: CustomTextStyles
-                                                            .titleSmallPrimarySemiBold)))
-                                          ]))),
-                                  SizedBox(height: 34.v),
-                                  _buildORDivider(context),
-                                  SizedBox(height: 29.v),
-                                  _buildSocial(context),
-                                  SizedBox(height: 5.v)
-                                ]))))))));
+                                    contentPadding: EdgeInsets.only(
+                                        top: 18.v,
+                                        right: 30.h,
+                                        bottom: 18.v)),
+                                SizedBox(height: 16.v),
+                                BlocBuilder<LoginBloc, LoginState>(
+                                    bloc: loginBloc,
+                                    builder: (context, state) {
+                                      return CustomTextFormField(
+                                        focusNode: focusNode2,
+                                          controller: passwordController,
+                                          hintText: translation(context)
+                                              .msg_enter_new_password,
+                                          textInputAction:
+                                              TextInputAction.done,
+                                          textInputType:
+                                              TextInputType.visiblePassword,
+                                          prefix: Container(
+                                              margin: EdgeInsets.fromLTRB(
+                                                  24.h, 16.v, 16.h, 16.v),
+                                              child: CustomImageView(
+                                                  color: Colors.blueGrey,
+                                                  imagePath: ImageConstant
+                                                      .imgLocation,
+                                                  height: 24.adaptSize,
+                                                  width: 24.adaptSize)),
+                                          prefixConstraints:
+                                              BoxConstraints(maxHeight: 56.v),
+                                          suffix: InkWell(
+                                              onTap: () {
+                                                context.read<LoginBloc>().add(
+                                                    ChangePasswordVisibilityEvent(
+                                                        value: !state
+                                                            .isShowPassword));
+                                              },
+                                              child: Container(
+                                                  margin: EdgeInsets.fromLTRB(
+                                                      30.h, 16.v, 24.h, 16.v),
+                                                  child: CustomImageView(
+                                                      color: Colors.blueGrey,
+                                                      imagePath: ImageConstant
+                                                          .imgEye,
+                                                      height: 24.adaptSize,
+                                                      width: 24.adaptSize))),
+                                          suffixConstraints:
+                                              BoxConstraints(maxHeight: 56.v),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                (!isValidPassword(value,
+                                                    isRequired: true))) {
+                                              return translation(context)
+                                                  .err_msg_please_enter_valid_password;
+                                            }
+                                            return null;
+                                          },
+                                          obscureText: state.isShowPassword);
+                                    }),
+                                SizedBox(height: 10.v),
+                                Align(
+                                    alignment: Alignment.centerRight,
+                                    child: GestureDetector(
+                                        onTap: () {
+                                          onTapTxtForgotPassword(context);
+                                        },
+                                        child: Text(
+                                            translation(context)
+                                                .msg_forgot_password,
+                                            style: CustomTextStyles
+                                                .titleSmallPrimary))),
+                                SizedBox(height: 32.v),
+                                svAppButton(
+                                  context: context,
+                                  text: 'LOGIN',
+                                  onTap: () {
+                                    loginBloc.add(
+                                      LoginButtonPressed(
+                                        username: emailController.text,
+                                        // replace with real input
+                                        password: passwordController
+                                            .text, // replace with real input
+                                      ),
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 25.v),
+                                Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                        padding: EdgeInsets.only(left: 48.h),
+                                        child: Row(children: [
+                                          Padding(
+                                              padding: EdgeInsets.only(
+                                                  bottom: 1.v),
+                                              child: Text(
+                                                  translation(context)
+                                                      .msg_don_t_have_an_account,
+                                                  style: CustomTextStyles
+                                                      .bodyMediumGray600)),
+                                          GestureDetector(
+                                              onTap: () {
+                                                onTapTxtSignUp(context);
+                                              },
+                                              child: Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 4.h),
+                                                  child: Text(
+                                                      translation(context)
+                                                          .lbl_sign_up,
+                                                      style: CustomTextStyles
+                                                          .titleSmallPrimarySemiBold)))
+                                        ]))),
+                                SizedBox(height: 34.v),
+                                _buildORDivider(context),
+                                SizedBox(height: 29.v),
+                                _buildSocial(context),
+                                SizedBox(height: 5.v)
+                              ]))))))),
+    );
   }
 
   /// Section Widget
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  _buildAppBar(BuildContext context) {
     return CustomAppBar(
-        leadingWidth: 56.h,
-        leading: AppbarLeadingImage(
-            imagePath: ImageConstant.imgIconChevronLeft,
-            margin: EdgeInsets.only(left: 32.h, top: 8.v, bottom: 8.v)),
-        centerTitle: true,
-        title: AppbarTitle(text: translation(context).lbl_login));
+      height: 140,
+      leadingWidth: 56.h,
+      centerTitle: true,
+      title: Column(
+        children: [
+          Image.asset(
+            'assets/logo/logo.png',
+            width: 400.v,
+            height: 100.h,
+          ),
+          AppbarTitle(text: translation(context).lbl_login),
+        ],
+      ),
+    );
   }
 
   /// Section Widget
@@ -252,10 +433,14 @@ class LoginScreen extends StatelessWidget {
                   height: 20.v,
                   width: 19.h)),
           onPressed: () {
-            onTapSignInWithGoogle(context);
+            onPressedGoogleLogin();
+            // onTapSignInWithGoogle(context);
           }),
       SizedBox(height: 16.v),
-      CustomOutlinedButton(
+     if(Platform.isIOS) CustomOutlinedButton(
+          onPressed: () {
+            signInWithApple();
+          },
           text: translation(context).msg_sign_in_with_apple,
           leftIcon: Container(
               margin: EdgeInsets.only(right: 30.h),
@@ -269,39 +454,165 @@ class LoginScreen extends StatelessWidget {
   }
 
   onTapTxtForgotPassword(BuildContext context) {
-    // TODO: implement Actions
+    ForgotPassword().launch(context);
   }
-
 
   onTapTxtSignUp(BuildContext context) {
     // TODO: implement Actions
     SignUpScreen().launch(context);
     // Navigator.pushNamed(context, AppRoutes.signUpScreen);
   }
-  onTapSignInWithGoogle(BuildContext context) async {
-    await GoogleAuthHelper().googleSignInProcess().then((googleUser) {
-      if (googleUser != null) {
-        //TODO Actions to be performed after signin
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('user data is empty')));
-      }
-    }).catchError((onError) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(onError.toString())));
-    });
+
+  onPressedGoogleLogin() async {
+    try {
+      // GoogleSignIn().signOut();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      print(googleUser.toString());
+
+      GoogleSignInAuthentication googleSignInAuthentication =
+          await googleUser!.authentication;
+      String accessToken = googleSignInAuthentication.accessToken!;
+      // await FirebaseMessaging.instance.getToken().then((token) async {
+      //   print('token$googleUser');
+      loginBloc.add(SocialLoginButtonPressed(
+          email: googleUser.email,
+          firstName: googleUser.displayName!.split(' ').first,
+          lastName: googleUser.displayName!.split(' ').last,
+          isSocialLogin: true,
+          provider: 'google',
+          token: 'accessToken'));
+      // performLogin(
+      //     'google', googleUser.displayName!, googleUser.email, accessToken);
+      // // var loginResponse = await RemoteService().getSocialLoginResponse(
+      //     'google', googleUser.displayName!, googleUser.email, googleUser.id, token!);
+      // if (loginResponse.result == false) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text(
+      //         loginResponse.message ?? '',
+      //         style: const TextStyle(fontFamily: "Robotic"),
+      //       ),
+      //       backgroundColor: Colors.green,
+      //     ),
+      //   );
+      // } else {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text(
+      //         loginResponse.message ?? '',
+      //         style: const TextStyle(fontFamily: "Robotic"),
+      //       ),
+      //       backgroundColor: Colors.green,
+      //     ),
+      //   );
+      // }
+      GoogleSignIn().disconnect();
+      // });
+    } on Exception catch (e) {
+      print('error is ....... $e');
+      // TODO
+    }
   }
 
-  onTapSignInWithFacebook(BuildContext context) async {
-    await FacebookAuthHelper().facebookSignInProcess().then((facebookUser) {
-      //TODO Actions to be performed after signin
-    }).catchError((onError) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(onError.toString())));
-    });
+  String generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  /// Returns the sha256 hash of [input] in hex notation.
+  String sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  signInWithApple() async {
+    // To prevent replay attacks with the credential returned from Apple, we
+    // include a nonce in the credential request. When signing in with
+    // Firebase, the nonce in the id token returned by Apple, is expected to
+    // match the sha256 hash of `rawNonce`.
+    // await FirebaseMessaging.instance.getToken().then((token) async {
+    //   print('token$token');
+    final rawNonce = generateNonce();
+    final nonce = sha256ofString(rawNonce);
+
+    // Request credential for the currently signed in Apple account.
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: nonce,
+    );
+
+    // Create an `OAuthCredential` from the credential returned by Apple.
+    final oauthCredential = OAuthProvider('apple.com').credential(
+      idToken: appleCredential.identityToken,
+      rawNonce: rawNonce,
+    );
+
+    // print(oauthCredential.signInMethod.);
+    // Sign in the user with Firebase. If the nonce we generated earlier does
+    // not match the nonce in `appleCredential.identityToken`, sign in will fail.
+    var response =
+        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+    // performLogin('apple', response.user?.displayName ?? '', response.user?.email ?? '', response.user!.uid??'');
+    loginBloc.add(SocialLoginButtonPressed(
+        email: response.user?.email ?? ' ',
+        firstName: response.user?.displayName!.split(' ').first ?? ' ',
+        lastName: response.user?.displayName!.split(' ').last ?? ' ',
+        isSocialLogin: true,
+        provider: 'apple',
+        token: response.user!.uid ?? ''));
+    print("${appleCredential.givenName} ${appleCredential.familyName}");
+    // var loginResponse = await AuthRepository().getSocialLoginResponse(
+    //     'google',
+    //     response.user?.displayName ?? '',
+    //     response.user?.email ?? '',
+    //     response.user?.uid ?? '',
+    //     access_token: appleCredential.identityToken,
+    //     deviceToken: token);
+    // print(appleCredential);
+    // print(response);
+    // print(loginResponse);
+    // if (loginResponse.result == false) {
+    //   // ToastComponent.showDialog(loginResponse.message ?? '',
+    //   //     gravity: Toast.center, duration: Toast.lengthLong);
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         loginResponse.message ?? '',
+    //         style: const TextStyle(fontFamily: "Robotic"),
+    //       ),
+    //       backgroundColor: Colors.green,
+    //     ),
+    //   );
+    // } else {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         loginResponse.message ?? '',
+    //         style: const TextStyle(fontFamily: "Robotic"),
+    //       ),
+    //       backgroundColor: Colors.green,
+    //     ),
+    //   );
+    // ToastComponent.showDialog(loginResponse.message ?? '',
+    //     gravity: Toast.center, duration: Toast.lengthLong);
+    // AuthHelper().setUserData(loginResponse);
+    // Navigator.of(context).pushNamedAndRemoveUntil(
+    //   MainScreen.routeName,
+    //       (route) => false,
+    // );
+    // }
+    GoogleSignIn().disconnect();
+    // });
   }
 }
-
 // class LoginScreen extends StatefulWidget {
 //   LoginScreen({Key? key}) : super(key: key);
 //

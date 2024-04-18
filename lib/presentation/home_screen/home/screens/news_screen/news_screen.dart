@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/news_model/news_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_state.dart';
@@ -132,7 +133,7 @@ class _NewsScreenState extends State<NewsScreen> {
                           }
                         },
                       ),
-
+                      if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
                     ],
                   ),
                 ),
@@ -141,7 +142,7 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Widget buildNewsTab(List<NewsModel> news) {
-    return ListView.builder(
+    return news.isEmpty? const Center(child: Text('No News found'),):ListView.builder(
             itemCount: news.length,
             itemBuilder: (context, index) {
               final article = news[index];

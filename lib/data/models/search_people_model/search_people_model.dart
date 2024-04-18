@@ -138,7 +138,7 @@ class Data {
   String? profilePic;
   String? userType;
   String? specialty;
-  String? followersCount;
+  int? followersCount;
   bool? isFollowedByCurrentUser;
   bool? isCurrentUser;
 

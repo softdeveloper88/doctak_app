@@ -4,6 +4,7 @@ import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -101,9 +102,26 @@ class _SplashScreenState extends State<SplashScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/logo/logo.png', height: 50, width: 52, fit: BoxFit.cover,),
+              Expanded(
+                child: Center(
+                  child: Material(
+                      borderRadius: BorderRadius.circular(10),
+                      elevation: 10,
+                          child: Container(
+                            height: 100,
+                            width: 100,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10)
+                              ),
+                              child: Image.asset('assets/logo/icon.png', height: 80, width: 80, fit: BoxFit.contain,))),
+                ),
+              ),
               8.width,
-              Text("Doctak.net", style: primaryTextStyle(color: Colors.white, size: 40, weight: FontWeight.w500)),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("Doctak.net", style: primaryTextStyle(color: Colors.white, size: 40, weight: FontWeight.w500)),
+              ),
             ],
           ),
         ],

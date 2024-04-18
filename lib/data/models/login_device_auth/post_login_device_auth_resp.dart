@@ -6,19 +6,22 @@ class PostLoginDeviceAuthResp {
       this.success, 
       this.user, 
       this.token, 
-      this.university, 
+      this.recentCreated,
+      this.university,
       this.country,});
 
   PostLoginDeviceAuthResp.fromJson(dynamic json) {
     success = json['success'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     token = json['token'];
+    recentCreated = json['recent_created'];
     university = json['university'] != null ? University.fromJson(json['university']) : null;
     country = json['country'] != null ? Country.fromJson(json['country']) : null;
   }
   bool? success;
   User? user;
   String? token;
+  bool? recentCreated;
   University? university;
   Country? country;
 
@@ -29,6 +32,7 @@ class PostLoginDeviceAuthResp {
       map['user'] = user?.toJson();
     }
     map['token'] = token;
+    map['recent_created'] = recentCreated;
     if (university != null) {
       map['university'] = university?.toJson();
     }
@@ -67,7 +71,7 @@ class Country {
   String? countryName;
   String? createdAt;
   String? updatedAt;
-  String? isRegistered;
+  dynamic isRegistered;
   String? countryCode;
   String? countryMask;
   String? currency;
@@ -275,34 +279,34 @@ class User {
   String? firstName;
   String? lastName;
   String? email;
-  dynamic token;
+  String? token;
   String? phone;
   String? licenseNo;
   String? specialty;
-  String? status;
-  String? role;
-  dynamic gender;
-  dynamic dob;
-  dynamic clinicName;
-  dynamic college;
-  dynamic countryOrigin;
+  dynamic status;
+  dynamic? role;
+   String? gender;
+   String? dob;
+   String? clinicName;
+   String? college;
+   String? countryOrigin;
   String? profilePic;
-  dynamic practicingCountry;
-  dynamic otpCode;
-  String? balance;
-  dynamic title;
-  dynamic city;
-  String? country;
-  dynamic isAdmin;
+   String? practicingCountry;
+   String? otpCode;
+  dynamic balance;
+   String? title;
+   String? city;
+  dynamic country;
+  String? isAdmin;
   String? createdAt;
   String? updatedAt;
-  String? activeStatus;
-  dynamic avatar;
-  String? darkMode;
-  dynamic messengerColor;
+  dynamic activeStatus;
+  String? avatar;
+  dynamic darkMode;
+  String? messengerColor;
   String? name;
   String? emailVerifiedAt;
-  dynamic background;
+  String? background;
   String? userType;
 
   Map<String, dynamic> toJson() {
