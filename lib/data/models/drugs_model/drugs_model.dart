@@ -152,8 +152,8 @@ class Data {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
-  String? id;
-  String? druglistId;
+  int? id;
+  int? druglistId;
   String? tradeName;
   String? genericName;
   String? strength;

@@ -350,8 +350,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       UpdateSpecialtyDropdownValue1 event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
     List<String>? secondDropdownValues = await _onGetSpecialty();
-    specialtyList=secondDropdownValues;
-    print(specialtyList!.length);
+    specialtyList=secondDropdownValues??[];
   }
 
   Future<List<String>?> _onGetCountries() async {

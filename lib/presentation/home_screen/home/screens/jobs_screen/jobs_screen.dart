@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:story_view/story_view.dart';
 
 import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
@@ -81,6 +82,10 @@ class _JobsScreenState extends State<JobsScreen> {
                 ],
               );
             } else if (state is CountriesDataLoaded) {
+              if(profileBloc.specialtyList!.isEmpty){
+                profileBloc.add(UpdateSpecialtyDropdownValue1(''));
+
+              }
               List<String> list1 = ['New', 'Expired'];
               for (var element in state.countriesModel.countries!) {
                 if (element.flag == state.countryFlag) {
@@ -232,10 +237,10 @@ class _JobsScreenState extends State<JobsScreen> {
                                   controller: _controller,
                                   textFieldType: TextFieldType.NAME,
                                   onChanged: (searchTxt) async {
-                                    if (_debounce?.isActive ?? false)
-                                      _debounce?.cancel();
-                                    _debounce = Timer(const Duration(milliseconds: 500), () {
-                                          _filterSuggestions(searchTxt);
+                                    // if (_debounce?.isActive ?? false)
+                                    //   _debounce?.cancel();
+                                    // _debounce = Timer(const Duration(milliseconds: 500), () {
+                                    //       _filterSuggestions(searchTxt);
                                           isShownSuggestion=true;
                                       // jobsBloc.add(
                                       //   GetPost(
@@ -244,20 +249,20 @@ class _JobsScreenState extends State<JobsScreen> {
                                       //     searchTerm: searchTxt,
                                       //   ),
                                       // );
-                                      BlocProvider.of<SplashBloc>(context).add(
-                                          LoadDropdownData(
-                                              state.countryFlag,
-                                              state.typeValue,
-                                              searchTxt ?? '',
-                                              state.isExpired));
-                                      jobsBloc.add(JobLoadPageEvent(
-                                        page: 1,
-                                        countryId: state.countryFlag != ''
-                                            ? state.countryFlag
-                                            : '${state.countriesModel.countries?.first.id ?? 1}',
-                                        searchTerm: searchTxt,
-                                      ));
-                                    });
+                                      // BlocProvider.of<SplashBloc>(context).add(
+                                      //     LoadDropdownData(
+                                      //         state.countryFlag,
+                                      //         state.typeValue,
+                                      //         searchTxt ?? '',
+                                      //         state.isExpired));
+                                      // jobsBloc.add(JobLoadPageEvent(
+                                      //   page: 1,
+                                      //   countryId: state.countryFlag != ''
+                                      //       ? state.countryFlag
+                                      //       : '${state.countriesModel.countries?.first.id ?? 1}',
+                                      //   searchTerm: searchTxt,
+                                      // ));
+                                    // });
                                     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
                                   },
                                   decoration: InputDecoration(
@@ -265,13 +270,31 @@ class _JobsScreenState extends State<JobsScreen> {
                                     hintText: 'Search Here',
                                     hintStyle:
                                         secondaryTextStyle(color: svGetBodyColor()),
-                                    suffixIcon: Image.asset(
-                                            'images/socialv/icons/ic_Search.png',
-                                            height: 16,
-                                            width: 16,
-                                            fit: BoxFit.cover,
-                                            color: svGetBodyColor())
-                                        .paddingAll(16),
+                                    suffixIcon: GestureDetector(
+                                      onTap:(){
+                                        isShownSuggestion=true;
+                                        BlocProvider.of<SplashBloc>(context).add(
+                                            LoadDropdownData(
+                                                state.countryFlag,
+                                                state.typeValue,
+                                                _controller.text ?? '',
+                                                state.isExpired));
+                                        jobsBloc.add(JobLoadPageEvent(
+                                          page: 1,
+                                          countryId: state.countryFlag != ''
+                                              ? state.countryFlag
+                                              : '${state.countriesModel.countries?.first.id ?? 1}',
+                                          searchTerm: _controller.text,
+                                        ));
+                                      },
+                                      child: Image.asset(
+                                              'images/socialv/icons/ic_Search.png',
+                                              height: 16,
+                                              width: 16,
+                                              fit: BoxFit.cover,
+                                              color: svGetBodyColor())
+                                          .paddingAll(16),
+                                    ),
                                   ),
                                 ),
                                 ),
@@ -310,40 +333,44 @@ class _JobsScreenState extends State<JobsScreen> {
                           ],
                         ),
                       ),
-
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: CustomDropdownButtonFormField(
-                          items: list1,
-                          value: list1.first,
-                          width: 100,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 0,
+                      IntrinsicHeight(
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: CustomDropdownButtonFormField(
+                              items: list1,
+                              value: list1.first,
+                              width: 100,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 0,
+                              ),
+                              onChanged: (String? newValue) {
+                                print(newValue);
+                                // jobsBloc.add(
+                                //   GetPost(
+                                //       page: '1',
+                                //       countryId: state.countryFlag,
+                                //       searchTerm: '',
+                                //       type: newValue!),
+                                // );
+                                BlocProvider.of<SplashBloc>(context).add(
+                                    LoadDropdownData(
+                                        state.countryFlag,
+                                        newValue ?? "",
+                                        state.searchTerms ?? '',
+                                        newValue!));
+                                jobsBloc.add(JobLoadPageEvent(
+                                    page: 1,
+                                    countryId: state.countryFlag != ''
+                                        ? state.countryFlag
+                                        : '${state.countriesModel.countries?.first.id ?? 1}',
+                                    searchTerm: state.searchTerms ?? '',
+                                    isExpired: newValue));
+                              },
+                            ),
                           ),
-                          onChanged: (String? newValue) {
-                            print(newValue);
-                            // jobsBloc.add(
-                            //   GetPost(
-                            //       page: '1',
-                            //       countryId: state.countryFlag,
-                            //       searchTerm: '',
-                            //       type: newValue!),
-                            // );
-                            BlocProvider.of<SplashBloc>(context).add(
-                                LoadDropdownData(
-                                    state.countryFlag,
-                                    newValue ?? "",
-                                    state.searchTerms ?? '',
-                                    newValue!));
-                            jobsBloc.add(JobLoadPageEvent(
-                                page: 1,
-                                countryId: state.countryFlag != ''
-                                    ? state.countryFlag
-                                    : '${state.countriesModel.countries?.first.id ?? 1}',
-                                searchTerm: state.searchTerms ?? '',
-                                isExpired: newValue));
-                          },
                         ),
                       ),
                     ],
@@ -455,7 +482,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                     color: svGetBodyColor())),
                             const SizedBox(height: 5),
                             HtmlWidget(
-                              bloc.drugsData[index].description ?? '<p>N/A</p>',
+                              '<p>${bloc.drugsData[index].description}</p>',
                             ),
                             const SizedBox(height: 5),
                             Text(

@@ -4,6 +4,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'drugs_event.dart';
@@ -39,7 +40,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
       print(event.type);
     }
     // ProgressDialogUtils.showProgressDialog();
-    try {
+    // try {
       DrugsModel response = await postService.getDrugsList(
           'Bearer ${AppData.userToken}',
           '${pageNumber}',
@@ -51,16 +52,17 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
         pageNumber = pageNumber + 1;
         drugsData.addAll(response.data?.data ?? []);
       }
+      print(drugsData.toList());
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(drugsData));
-    } catch (e) {
-      print(e);
-
-      emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //
+    //   emit(PaginationLoadedState());
+    //
+    //   // emit(DataError('An error occurred $e'));
+    // }
   }
 
   _onGetJobs1(GetPost event, Emitter<DrugsState> emit) async {
