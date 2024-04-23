@@ -62,7 +62,7 @@ class _SVStoryComponentState extends State<SVStoryComponent> {
                       fit: BoxFit.cover,
                     ).cornerRadiusWithClipRRect(SVAppCommonRadius),
                   ).onTap(() {
-                    SVStoryScreen(story: storyList[index]).launch(context);
+                    // SVStoryScreen(story: storyList[index]).launch(context);
                   }),
                   10.height,
                   Text(storyList[index].name.validate(), style: secondaryTextStyle(size: 12, color: context.iconColor, weight: FontWeight.w500)),
