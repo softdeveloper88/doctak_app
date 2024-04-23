@@ -15,7 +15,6 @@ import 'package:doctak_app/presentation/home_screen/store/AppStore.dart';
 import 'package:doctak_app/presentation/home_screen/utils/AppTheme.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
-import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -37,12 +36,14 @@ var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
-  await Firebase.initializeApp(options: const FirebaseOptions(
-    apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
-    appId: "1:975716064608:android:c1a4889c2863e014749205",
-    messagingSenderId: "975716064608",
-    projectId: "doctak-322cc",
-  ),);
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
+      appId: "1:975716064608:android:c1a4889c2863e014749205",
+      messagingSenderId: "975716064608",
+      projectId: "doctak-322cc",
+    ),
+  );
   appStore.toggleDarkMode(value: false);
   WidgetsFlutterBinding.ensureInitialized();
   await Upgrader.clearSavedSettings(); //live update
@@ -151,7 +152,7 @@ class _MyAppState extends State<MyApp> {
                             AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         locale: _locale,
-                        home:  const ForceUpgradePage(),
+                        home: const ForceUpgradePage(),
                         // initialRoute: AppRoutes.splashScreen,
                         // routes: AppRoutes.routes,
                       ));
