@@ -9,9 +9,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/blo
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -574,75 +572,118 @@ class _JobsScreenState extends State<JobsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                  Text(selectedIndex==0 ? "New":"Expired",style: GoogleFonts.poppins(color:Colors.red,fontWeight:FontWeight.w500,fontSize:kDefaultFontSize),),
-                                  const Icon(Icons.bookmark_border),
-                                ],),
+                                    Text(
+                                      selectedIndex == 0 ? "New" : "Expired",
+                                      style: GoogleFonts.poppins(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: kDefaultFontSize),
+                                    ),
+                                    const Icon(Icons.bookmark_border),
+                                  ],
+                                ),
                                 Text(
                                   bloc.drugsData[index].jobTitle ?? "",
-                                  style:  GoogleFonts.poppins(color:Colors.black,fontWeight:FontWeight.bold,fontSize:18),
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
                                 ),
                                 const SizedBox(height: 5),
-                                Text(
-                                    bloc.drugsData[index].companyName ?? 'N/A',
+                                Text(bloc.drugsData[index].companyName ?? 'N/A',
                                     style: secondaryTextStyle(
                                         color: svGetBodyColor())),
                                 const SizedBox(height: 10),
                                 Row(
                                   children: <Widget>[
-                                    const Icon(Icons.location_on,size: 20,color: Colors.grey,),
-                                    const SizedBox(width: 5,),
+                                    const Icon(
+                                      Icons.location_on,
+                                      size: 20,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
                                     Expanded(
                                       child: Text(
-                                          bloc.drugsData[index].location ?? 'N/A',
+                                          bloc.drugsData[index].location ??
+                                              'N/A',
                                           style: secondaryTextStyle(
                                               color: svGetBodyColor())),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 20),
-                                Text(
-                                    'Apply Date',
-                                  style:  GoogleFonts.poppins(color:Colors.black,fontWeight:FontWeight.w400,fontSize:14)),
+                                Text('Apply Date',
+                                    style: GoogleFonts.poppins(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14)),
                                 Row(
                                   children: [
                                     Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                            'Date From',
+                                        Text('Date From',
                                             style: secondaryTextStyle(
                                                 color: svGetBodyColor())),
                                         Row(
                                           children: <Widget>[
-                                            const Icon(Icons.date_range_outlined,size: 20,color: Colors.grey,),
-                                            const SizedBox(width: 5,),
+                                            const Icon(
+                                              Icons.date_range_outlined,
+                                              size: 20,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
                                             Text(
-                                                DateFormat('MMM dd, yyyy').format(DateTime.parse(bloc.drugsData[index].createdAt ?? 'N/A'.toString())),
+                                                DateFormat('MMM dd, yyyy')
+                                                    .format(DateTime.parse(bloc
+                                                            .drugsData[index]
+                                                            .createdAt ??
+                                                        'N/A'.toString())),
                                                 style: secondaryTextStyle(
                                                     color: svGetBodyColor())),
                                           ],
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(width: 20,),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
-                                        Text(
-                                            'Date To',
+                                        Text('Date To',
                                             style: secondaryTextStyle(
                                                 color: svGetBodyColor())),
                                         Row(
                                           children: <Widget>[
-                                            const Icon(Icons.date_range_outlined,size: 20,color: Colors.grey,),
-                                            const SizedBox(width: 5,),
+                                            const Icon(
+                                              Icons.date_range_outlined,
+                                              size: 20,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
                                             Text(
-                                                DateFormat('MMM dd, yyyy').format(DateTime.parse(bloc.drugsData[index].lastDate ?? 'N/A'.toString())),
+                                                DateFormat('MMM dd, yyyy')
+                                                    .format(DateTime.parse(bloc
+                                                            .drugsData[index]
+                                                            .lastDate ??
+                                                        'N/A'.toString())),
                                                 style: secondaryTextStyle(
                                                     color: svGetBodyColor())),
                                           ],
@@ -666,7 +707,6 @@ class _JobsScreenState extends State<JobsScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 5),
-
                                 Padding(
                                   padding: const EdgeInsets.only(top: 16),
                                   child: Column(
@@ -675,9 +715,9 @@ class _JobsScreenState extends State<JobsScreen> {
                                     children: [
                                       TextButton(
                                         onPressed: () async {
-                                          final Uri url = Uri.parse(bloc
-                                              .drugsData[index]
-                                              .link!); // Assuming job.link is a non-null String
+                                          // final Uri url = Uri.parse(bloc
+                                          //     .drugsData[index]
+                                          //     .link!); // Assuming job.link is a non-null String
                                           // Show dialog asking the user to confirm navigation
                                           final shouldLeave =
                                               await showDialog<bool>(

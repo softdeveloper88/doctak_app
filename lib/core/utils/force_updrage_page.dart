@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/doctak_firebase_remoteConfig.dart';
-import 'package:doctak_app/core/utils/doctak_package_info.dart';
 import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
