@@ -8,7 +8,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_scre
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -215,17 +215,10 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       !expandedMap[item.diseaseName]!;
                 });
               },
-              child: Html(
-                data: expandedMap[item.diseaseName]!
+              child: HtmlWidget(
+                 expandedMap[item.diseaseName]!
                     ? "<p>$description</p>"
                     : "<p>$trimmedDescription</p>",
-                style: {
-                  '#': Style(
-                    fontFamily: "Robotic",
-                    textAlign: TextAlign.justify,
-                    color: Colors.grey[900],
-                  ),
-                },
               ),
               // Text(
               //   expandedMap[item.diseaseName]!

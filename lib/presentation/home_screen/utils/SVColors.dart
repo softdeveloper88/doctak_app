@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 const SVAppColorPrimary = Color(0xFF2F65B9);
 
 //Section BG / page BG
-const SVAppLayoutBackground = Color(0xFFF4F7F6);
+const SVAppLayoutBackground = Color(0xFFFFFFFF);
 const SVAppSectionBackground = Color(0xFFFFFFFF);
 const SVAppBorderColor = Color(0xFFD9DFEB);
 // Tertiary

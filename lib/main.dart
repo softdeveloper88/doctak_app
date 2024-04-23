@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:doctak_app/core/utils/doctak_firebase_remoteConfig.dart';
+import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -15,6 +17,7 @@ import 'package:doctak_app/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -34,10 +37,16 @@ var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
+  await Firebase.initializeApp(options: const FirebaseOptions(
+    apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
+    appId: "1:975716064608:android:c1a4889c2863e014749205",
+    messagingSenderId: "975716064608",
+    projectId: "doctak-322cc",
+  ),);
   appStore.toggleDarkMode(value: false);
   WidgetsFlutterBinding.ensureInitialized();
   await Upgrader.clearSavedSettings(); //live update
-
+  await DoctakFirebaseRemoteConfig.initialize();
   AdmobSetting appOpenAdManager = AdmobSetting()..loadAd();
   // WidgetsBinding.instance!.addObserver(AppLifecycle(appOpenAdManager: appOpenAdManager));
   AdmobSetting.initialization();
@@ -142,7 +151,7 @@ class _MyAppState extends State<MyApp> {
                             AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         locale: _locale,
-                        home:  UpgradeAlert(child:  const SplashScreen()),
+                        home:  const ForceUpgradePage(),
                         // initialRoute: AppRoutes.splashScreen,
                         // routes: AppRoutes.routes,
                       ));
