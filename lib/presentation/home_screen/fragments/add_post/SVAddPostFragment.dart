@@ -11,6 +11,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../main.dart';
 import '../../utils/SVColors.dart';
+import '../../utils/SVCommon.dart';
 import 'bloc/add_post_bloc.dart';
 import 'components/SVPostOptionsComponent.dart';
 import 'components/SVPostTextComponent.dart';
@@ -80,11 +81,12 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: context.cardColor,
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
           surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: context.iconColor),
-        backgroundColor: context.cardColor,
+        backgroundColor: svGetScaffoldColor(),
+
         title: Text('New Post', style: boldTextStyle(size: 18)),
         elevation: 0,
         centerTitle: true,
