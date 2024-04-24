@@ -36,14 +36,18 @@ var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
-      appId: "1:975716064608:android:c1a4889c2863e014749205",
-      messagingSenderId: "975716064608",
-      projectId: "doctak-322cc",
-    ),
-  );
+  if(Platform.isAndroid) {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
+        appId: "1:975716064608:android:c1a4889c2863e014749205",
+        messagingSenderId: "975716064608",
+        projectId: "doctak-322cc",
+      ),
+    );
+  }else{
+    await Firebase.initializeApp();
+  }
   appStore.toggleDarkMode(value: false);
   WidgetsFlutterBinding.ensureInitialized();
   await Upgrader.clearSavedSettings(); //live update

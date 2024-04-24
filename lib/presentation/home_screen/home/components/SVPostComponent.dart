@@ -207,23 +207,32 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     //   width: context.width() - 32,
                     //   fit: BoxFit.cover,
                     // ).cornerRadiusWithClipRRect(SVAppCommonRadius).center(),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('${widget.homeBloc.postList[index].likes?.length??0
+                              .validate()} Likes', style: secondaryTextStyle(
+                              color: svGetBodyColor())),
+                          Text('${widget.homeBloc.postList[index].comments?.length??0
+                              .validate()} comments', style: secondaryTextStyle(
+                              color: svGetBodyColor())),
+                        ],
+                      ),
+                    ),
+                    const Divider(color: Colors.grey,thickness: 0.2,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
+                        Column(
                           children: [
-                            Image.asset(
-                              'images/socialv/icons/ic_Chat.png',
-                              height: 22,
-                              width: 22,
-                              fit: BoxFit.cover,
-                              color: context.iconColor,
-                            ).onTap(() {
-                               SVCommentScreen(id:widget.homeBloc.postList[index].id??0).launch(context);
-                            }, splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent),
-                            IconButton(
-                              icon: findIsLiked(widget.homeBloc.postList[index].likes)
+                            InkWell(
+                              onTap: (){
+                                widget.homeBloc.add(PostLikeEvent(postId:widget.homeBloc.postList[index].id??0));
+
+                              },
+                               child:findIsLiked(widget.homeBloc.postList[index].likes)
                                   ? Image.asset(
                                   'images/socialv/icons/ic_HeartFilled.png',
                                   height: 20, width: 22, fit: BoxFit.fill)
@@ -234,28 +243,43 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                 fit: BoxFit.cover,
                                 color: context.iconColor,
                               ),
-                              onPressed: () {
-
-                                widget.homeBloc.add(PostLikeEvent(postId:widget.homeBloc.postList[index].id??0));
-                                // !postList[index].like.validate();
-                                // setState(() {});
-                              },
                             ),
-                            // Image.asset(
-                            //   'images/socialv/icons/ic_Send.png',
-                            //   height: 22,
-                            //   width: 22,
-                            //   fit: BoxFit.cover,
-                            //   color: context.iconColor,
-                            // ).onTap(() {
-                            //   // svShowShareBottomSheet(context,);
-                            // }, splashColor: Colors.transparent,
-                            //     highlightColor: Colors.transparent),
+                            Text('Like', style: secondaryTextStyle(
+                                color: svGetBodyColor())),
                           ],
                         ),
-                        Text('${widget.homeBloc.postList[index].comments?.length??0
-                            .validate()} comments', style: secondaryTextStyle(
-                            color: svGetBodyColor())),
+                        Column(
+                          children: [
+                            Image.asset(
+                              'images/socialv/icons/ic_Chat.png',
+                              height: 22,
+                              width: 22,
+                              fit: BoxFit.cover,
+                              color: context.iconColor,
+                            ).onTap(() {
+                              SVCommentScreen(id:widget.homeBloc.postList[index].id??0).launch(context);
+                            }, splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent),
+                            Text('Comment', style: secondaryTextStyle(
+                                color: svGetBodyColor())),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Image.asset(
+                              'images/socialv/icons/ic_Send.png',
+                              height: 22,
+                              width: 22,
+                              fit: BoxFit.cover,
+                              color: context.iconColor,
+                            ).onTap(() {
+                              // svShowShareBottomSheet(context,);
+                            }, splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent),
+                            Text('Send', style: secondaryTextStyle(
+                                color: svGetBodyColor())),
+                          ],
+                        ),
                       ],
                     ).paddingSymmetric(horizontal: 16),
                     // const Divider(indent: 16, endIndent: 16, height: 20),

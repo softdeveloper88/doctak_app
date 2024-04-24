@@ -16,6 +16,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../ads_setting/ads_widget/banner_ads_widget.dart';
 import '../../../../localization/app_localization.dart';
 import '../../../chat_gpt_screen/ChatDetailScreen.dart';
+import '../../utils/SVColors.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
@@ -66,32 +67,25 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
           actions: [
-            TextButton(
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Colors.lightBlue,
-                  borderRadius: BorderRadius.all(Radius.circular(10))
-                  
-                ),
-                  child:  const Text("DocTak AI",style:TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
-              // color: context.cardColor,
-              // icon: Image.asset(
-              //   'assets/images/chatgpt.png',
-              //   width: 30,
-              //   height: 30,
-              //   fit: BoxFit.fill,
-              //   color: context.iconColor,
-              // ),
-              onPressed: () async {
+            AppButton(
+              shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
+              text: 'DocTak Ai',
+              textStyle: secondaryTextStyle(color: Colors.white, size: 10),
+              onTap: () {
                 const ChatDetailScreen().launch(context);
               },
+              elevation: 0,
+              color: SVAppColorPrimary,
+              width: 70,
+              height: 25,
+              padding: const EdgeInsets.all(0),
             ),
             IconButton(
               color: context.cardColor,
               icon:
               // Image.asset('assets/images/chat.png',height: 24,width: 24,
-                Icon(CupertinoIcons.chat_bubble_2,
+              Icon(
+                CupertinoIcons.chat_bubble_2,
                 size: 30,
                 color: context.iconColor,
               ),

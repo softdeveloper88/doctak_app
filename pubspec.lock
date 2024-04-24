@@ -509,10 +509,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_auth
-      sha256: "8ca05d45c47451586b753e7e9040378e87cdd72220a73d3a343600dd7b138181"
+      sha256: a35269247d7b23703bab35ecdb50462944ac1fcdfcf359a7071506c4ad830bfb
       url: "https://pub.dev"
     source: hosted
-    version: "4.17.7"
+    version: "4.19.2"
   firebase_auth_platform_interface:
     dependency: transitive
     description:
@@ -2062,10 +2062,10 @@ packages:
     dependency: "direct main"
     description:
       name: story_view
-      sha256: e1a647ef0682e46a3de5254a46ac3b809b5c2a509998365966958f977a127db4
+      sha256: ab64063569178e405b643ab11bdc28d6e85333191e3c8b5556e864fe6c5b2a5a
       url: "https://pub.dev"
     source: hosted
-    version: "0.14.0"
+    version: "0.16.5"
   stream_channel:
     dependency: transitive
     description:

@@ -72,7 +72,7 @@ Color svGetScaffoldColor() {
   if (appStore.isDarkMode) {
     return appBackgroundColorDark;
   } else {
-    return SVAppLayoutBackground;
+    return defaultBgColor;
   }
 }
 

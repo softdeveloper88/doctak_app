@@ -25,7 +25,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
     if (selectedIndex == 0) {
       return SVHomeFragment();
     } else if (selectedIndex == 1) {
-      return const SearchScreen();
+      return  SearchScreen(backPress: (){
+        setState(() {
+          selectedIndex=0;
+        });
+      });
     } else if (selectedIndex == 2) {
       return const SVAddPostFragment();
     } else if (selectedIndex == 3) {

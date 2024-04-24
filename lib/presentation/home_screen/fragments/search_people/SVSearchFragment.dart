@@ -89,9 +89,18 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
       body: Column(
         children: [
           Container(
-            margin: const EdgeInsets.only(left: 16.0, right: 16.0),
+            padding: const EdgeInsets.only(left: 8.0),
+            margin: const EdgeInsets.only(
+              left: 16,
+              top: 16.0,
+              bottom: 16.0,
+              right: 16,
+            ),
             decoration: BoxDecoration(
-                color: context.cardColor, borderRadius: radius(8)),
+                color: context.dividerColor.withOpacity(0.4),
+                borderRadius: radius(5),
+                border: Border.all(
+                    color: Colors.black, width: 0.3)),
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: AppTextField(
