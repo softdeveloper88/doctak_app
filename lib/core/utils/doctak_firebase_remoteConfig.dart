@@ -34,4 +34,5 @@ class DoctakFirebaseRemoteConfig {
 
   String getRecommendedMinimumVersion() =>
       remoteConfig.getString('recommendedMinimumVersion');
+
 }

@@ -15,10 +15,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
-<<<<<<< Updated upstream
-=======
-// import 'package:story_view/story_view.dart';
->>>>>>> Stashed changes
+
 
 import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
@@ -133,15 +130,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                         newValue == element.countryName);
                                 var countryId =
                                     state.countriesModel.countries![index].id;
-                                // jobsBloc.add(
-                                //   GetPost(
-                                //       page: '1',
-                                //       countryId: countryId.toString(),
-                                //       searchTerm: '',
-                                //       type: state.typeValue),
-                                // );
-                                // countryId = countryIds.toString();
-                                BlocProvider.of<SplashBloc>(context).add(
+                                    BlocProvider.of<SplashBloc>(context).add(
                                     LoadDropdownData(
                                         countryId.toString(),
                                         state.typeValue,
@@ -541,9 +530,7 @@ class _JobsScreenState extends State<JobsScreen> {
 
   Widget _buildPostList(BuildContext context) {
     final bloc = jobsBloc;
-    print("bloc$bloc");
-    print("len${bloc.drugsData.length}");
-    return Expanded(
+      return Expanded(
       child: bloc.drugsData.isEmpty
           ? const Center(
               child: Text("No Jobs Found"),
@@ -637,13 +624,13 @@ class _JobsScreenState extends State<JobsScreen> {
                                       children: [
                                         Text('Date From',
                                             style: secondaryTextStyle(
-                                                color: svGetBodyColor())),
+                                                color: Colors.black)),
                                         Row(
                                           children: <Widget>[
                                             const Icon(
                                               Icons.date_range_outlined,
                                               size: 20,
-                                              color: Colors.grey,
+                                              color: Colors.black,
                                             ),
                                             const SizedBox(
                                               width: 5,
@@ -671,13 +658,13 @@ class _JobsScreenState extends State<JobsScreen> {
                                       children: [
                                         Text('Date To',
                                             style: secondaryTextStyle(
-                                                color: svGetBodyColor())),
+                                                color: Colors.black,)),
                                         Row(
                                           children: <Widget>[
                                             const Icon(
                                               Icons.date_range_outlined,
                                               size: 20,
-                                              color: Colors.grey,
+                                              color: Colors.black,
                                             ),
                                             const SizedBox(
                                               width: 5,
@@ -699,7 +686,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                 Text(
                                     'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
                                     style: secondaryTextStyle(
-                                        color: svGetBodyColor())),
+                                        color: Colors.black,)),
                                 const SizedBox(height: 5),
                                 Row(
                                   children: [

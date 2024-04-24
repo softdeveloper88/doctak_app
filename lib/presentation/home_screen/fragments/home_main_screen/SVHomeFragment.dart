@@ -83,8 +83,10 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             IconButton(
               color: context.cardColor,
               icon:
-              // Image.asset('assets/images/chat.png',height: 24,width: 24,
+
+
               Icon(
+
                 CupertinoIcons.chat_bubble_2,
                 size: 30,
                 color: context.iconColor,
@@ -95,8 +97,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             ),
           ],
         ),
-        drawer:  SVHomeDrawerComponent(),
-
+        drawer: SVHomeDrawerComponent(),
         body: CustomScrollView(
             shrinkWrap: true,
             controller: _mainScrollController,
@@ -117,17 +118,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 SVPostComponent(homeBloc),
               ])),
             ]));
-    // body: Column(
-    //   crossAxisAlignment: CrossAxisAlignment.stretch,
-    //   children: [
-    //     16.height,
-    //     SVStoryComponent(),
-    //     10.height,
-    //     UserChatComponent(),
-    //     10.height,
-    //     Expanded(child: SVPostComponent(homeBloc)),
-    //     16.height,
-    //   ],
-    // ));
+
   }
 }
