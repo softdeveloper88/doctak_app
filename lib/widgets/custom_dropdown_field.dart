@@ -36,7 +36,7 @@ class CustomDropdownField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width??90.w,
+      width: width??100.w,
       height: height??50,
       // width: getProportionateScreenWidth(0.5),
       child: DropdownButtonFormField<String>(
@@ -57,19 +57,7 @@ class CustomDropdownField extends StatelessWidget {
           // color: Colors.black,
         )
             : null,
-        // decoration: InputDecoration(
-        //   filled: true,
-        //   hintText: hint,
-        //   fillColor: Colors.white,
-        //   border: _outLinedInputBorder(),
-        //   enabledBorder: _outLinedInputBorder(),
-        //   focusedBorder: _outLinedInputBorder(),
-        //   contentPadding: contentPadding ??
-        //       const EdgeInsets.symmetric(
-        //         horizontal: 6,
-        //         // vertical: 13,
-        //       ),
-        // ),
+        isExpanded: true, // Force to take available space
         items: [
           ...List.generate(
             items.length,
