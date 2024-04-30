@@ -95,7 +95,6 @@ import 'voice_message_view1.dart';
 //   }
 // }
 
-
 class AudioViewer extends StatefulWidget {
   const AudioViewer({
     required this.audio,
@@ -118,15 +117,15 @@ class _AudioViewerState extends State<AudioViewer> {
   @override
   void initState() {
     // player.onPlayerComplete.listen(( state) {
-    //   setState(() {
-    //   //   isPlaying  =  PlayerState.stopped;
+    //   setState(()  {
+    //     // player.stop();
     //     duration=0.0;
     //   });
     // });
     player.onPlayerStateChanged.listen((PlayerState state) {
-        // setState(() {
+        setState(() {
           isPlaying = state == PlayerState.playing;
-        // });
+        });
     });
 
     player.onDurationChanged.listen((Duration d) {
@@ -299,12 +298,13 @@ class ChatBubble extends StatelessWidget {
                             child: AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
                           ),
                         )
-                      else if (attachmentJson!.endsWith('wav'))
+                      else if (attachmentJson!.endsWith('m4a'))
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: Container(
                             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
-                            child: AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
+                            child:
+                            AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
                           ),
                         )
                       else if(attachmentJson!.endsWith('mp4'))

@@ -6,12 +6,14 @@ import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/personal_info_screen/personal_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/profile/components/my_post_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../fragments/profile_screen/bloc/profile_state.dart';
@@ -30,23 +32,10 @@ class SVProfilePostsComponent extends StatefulWidget {
 class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
   int selectedIndex = 0;
 
-  List<String> allPostList = [
-    'images/socialv/posts/post_one.png',
-    'images/socialv/posts/post_two.png',
-    'images/socialv/posts/post_three.png',
-    'images/socialv/posts/post_one.png',
-    'images/socialv/posts/post_two.png',
-    'images/socialv/posts/post_three.png',
-    'images/socialv/posts/post_one.png',
-    'images/socialv/posts/post_two.png',
-    'images/socialv/posts/post_three.png',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
           color: context.cardColor, borderRadius: radius(SVAppContainerRadius)),
       child: Column(
@@ -80,6 +69,11 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
                         : SVAppColorPrimary.withOpacity(0.5),
                   ),
                 ],
+              ),
+              Container(
+                color: Colors.grey,
+                width: 1,
+                height: 20,
               ),
               Column(
                 children: [
@@ -130,11 +124,124 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
               //           childAspectRatio: 1,
               //         ),
               //       )
-              : EditProfileScreen(widget.profileBloc),
+              : AboutWidget(profileBloc: widget.profileBloc,)
+          // EditProfileScreen(widget.profileBloc),
         ],
       ),
     );
   }
+}
+
+class AboutWidget extends StatelessWidget {
+   AboutWidget({required this.profileBloc,super.key});
+  ProfileBloc profileBloc;
+  @override
+  Widget build(BuildContext context) {
+    return _buildScrollview(context,profileBloc);
+  }
+}
+
+Widget _buildColumnlockone(BuildContext context,profileBloc) {
+  return Column(
+    children: [
+      _buildRowinterested(
+        onTap: (){
+          PersonalInfoScreen(profileBloc:profileBloc).launch(context);
+        },
+        context,
+        imageOne: 'assets/icon/ic_lock.svg',
+        interested: "Personal Information",
+      ),
+      SizedBox(height: 10.v),
+      _buildRowinterested(
+        onTap: (){},
+        context,
+        imageOne: 'assets/icon/ic_frame.svg',
+        interested: "Professional Information",
+      ),
+      SizedBox(height: 10.v),
+      _buildRowinterested(
+        onTap: (){},
+        context,
+        imageOne: 'assets/icon/ic_calendar.svg',
+        interested: "Work Information",
+      ),
+      SizedBox(height: 10.v),
+      _buildRowinterested(
+        onTap: (){},
+        context,
+        imageOne: 'assets/icon/ic_person.svg',
+        interested: "Interested Information",
+      ),
+      SizedBox(height: 10.v),
+      _buildRowinterested(
+        onTap: (){},
+        context,
+        imageOne: 'assets/icon/ic_privacy.svg',
+        interested: "Privacy Information",
+      ),
+    ],
+  );
+}
+
+/// Section Widget
+Widget _buildScrollview(BuildContext context,profileBloc) {
+  return SingleChildScrollView(
+    child: Padding(
+      padding: EdgeInsets.only(top: 20.v),
+      child: Column(
+        children: [_buildColumnlockone(context,profileBloc)],
+      ),
+    ),
+  );
+}
+
+/// Common widget
+Widget _buildRowinterested(
+  BuildContext context, {
+  required Function onTap,
+  required String imageOne,
+  required String interested,
+}) {
+  return GestureDetector(
+    onTap: ()=>onTap(),
+    child: Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 15.h,
+        vertical: 18.v,
+      ),
+      decoration: AppDecoration.fillGray.copyWith(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CustomImageView(
+            color: Colors.black,
+            imagePath: imageOne,
+            height: 25.adaptSize,
+            width: 25.adaptSize,
+            margin: EdgeInsets.only(top: 4.v),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+              left: 15.h,
+              top: 1.v,
+            ),
+            child: Text(
+              interested,
+              style: GoogleFonts.poppins(fontSize: 18),
+            ),
+          ),
+          Spacer(),
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 25.adaptSize,
+          )
+        ],
+      ),
+    ),
+  );
 }
 
 class EditProfileScreen extends StatefulWidget {
@@ -214,10 +321,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onSave: (value) {
                     setState(() {
                       print(value);
-                    widget.profileBloc.userProfile?.user?.dob = value;
+                      widget.profileBloc.userProfile?.user?.dob = value;
                     });
-
-                    },
+                  },
                 ),
                 _buildField(
                   icon: Icons.numbers_rounded,
@@ -260,10 +366,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 onChanged: (String? newValue) {
                                   widget.profileBloc.country = newValue!;
 
-                                  widget.profileBloc.add(UpdateFirstDropdownValue(newValue));
+                                  widget.profileBloc
+                                      .add(UpdateFirstDropdownValue(newValue));
                                   // widget.profileBloc.add(UpdateSecondDropdownValues(newValue));
-
-                                  },
+                                },
                               ),
                               const SizedBox(height: 10),
                               CustomDropdownButtonFormField(
@@ -280,8 +386,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       UpdateSpecialtyDropdownValue(
                                           state.selectedSecondDropdownValue));
                                   widget.profileBloc.add(
-                                      UpdateUniversityDropdownValues(
-                                          newValue));
+                                      UpdateUniversityDropdownValues(newValue));
                                 },
                               ),
                               if (AppData.userType == "doctor")
@@ -345,18 +450,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       }),
               ],
             ),
-            Divider(color: Colors.grey,),
-
+            const Divider(
+              color: Colors.grey,
+            ),
             _buildCard(
               title: 'Professional Information',
               categoryIndex: 1,
               children: [
                 _buildField(
                   icon: Icons.location_on,
-                  index: 1,
+                   index: 1,
                   label: 'Address',
                   value: widget.profileBloc.userProfile?.profile?.address ?? '',
-                  onSave: (value) => widget.profileBloc.userProfile?.profile?.address = value,
+                  onSave: (value) =>
+                      widget.profileBloc.userProfile?.profile?.address = value,
                 ),
                 // const Divider(),
                 _buildField(
@@ -373,7 +480,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   icon: Icons.location_on,
                   index: 1,
                   label: 'Birth Place',
-                  value: widget.profileBloc.userProfile?.profile?.birthplace ?? '',
+                  value:
+                      widget.profileBloc.userProfile?.profile?.birthplace ?? '',
                   onSave: (value) => widget
                       .profileBloc.userProfile!.profile?.birthplace = value,
                   maxLines: 3,
@@ -394,13 +502,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   index: 1,
                   label: 'Lives In',
                   value: widget.profileBloc.userProfile?.profile?.livesIn ?? '',
-                  onSave: (value) => widget.profileBloc.userProfile!.profile?.livesIn = value,
+                  onSave: (value) =>
+                      widget.profileBloc.userProfile!.profile?.livesIn = value,
                   maxLines: 3,
                 ),
               ],
             ),
-            Divider(color: Colors.grey,),
-
+            const Divider(
+              color: Colors.grey,
+            ),
             _buildCard(
               title: 'Work Information',
               categoryIndex: 2,
@@ -419,7 +529,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
               ],
             ),
-            Divider(color: Colors.grey,),
+            Divider(
+              color: Colors.grey,
+            ),
 
             _buildCard(
               title: 'Interested Information',
@@ -437,7 +549,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
               ],
             ),
-            Divider(color: Colors.grey,),
+            Divider(
+              color: Colors.grey,
+            ),
 
             // _buildCard(
             //   title: 'Additional Information',
@@ -533,19 +647,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 prefixConstraints: BoxConstraints(maxHeight: 56.v),
                 initialValue: value,
                 maxLines: maxLines,
-                onSaved: (v) { onSave?.call(v);},
+                onSaved: (v) {
+                  onSave?.call(v);
+                },
                 contentPadding:
                     EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
           )
-      // ?  TextFormField(
-      //           initialValue: value,
-      //           decoration: InputDecoration(
-      //               labelText: label,
-      //               labelStyle: const TextStyle(
-      //                   color: Colors.blueGrey, fontWeight: FontWeight.bold)),
-      //           maxLines: maxLines,
-      //           onSaved: (v) => onSave?.call(v!),
-      //         )
+        // ?  TextFormField(
+        //           initialValue: value,
+        //           decoration: InputDecoration(
+        //               labelText: label,
+        //               labelStyle: const TextStyle(
+        //                   color: Colors.blueGrey, fontWeight: FontWeight.bold)),
+        //           maxLines: maxLines,
+        //           onSaved: (v) => onSave?.call(v!),
+        //         )
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -813,6 +929,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: const Text('Save'),
     );
   }
+
   Widget _buildDateField({
     required int index,
     required String label,
@@ -820,69 +937,73 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     void Function(String)? onSave,
   }) {
     // Create a TextEditingController for the text field
-    TextEditingController textEditingController = TextEditingController(text: value);
+    TextEditingController textEditingController =
+        TextEditingController(text: value);
 
     return isEditModeMap[index]!
         ? Container(
-      margin: const EdgeInsets.only(top: 4),
-      child: CustomTextFormField(
-        hintText: label,
-        isReadOnly: true,
-        textInputType: TextInputType.datetime,
-        controller: textEditingController, // Pass the controller here
-        onTap: () async {
-          final pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(1900),
-            lastDate: DateTime(2101),
-          );
-          if (pickedDate != null) {
-            print(pickedDate);
-            DateTime dateTime = DateTime.parse(pickedDate.toIso8601String());
+            margin: const EdgeInsets.only(top: 4),
+            child: CustomTextFormField(
+              hintText: label,
+              isReadOnly: true,
+              textInputType: TextInputType.datetime,
+              controller: textEditingController,
+              // Pass the controller here
+              onTap: () async {
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime(2101),
+                );
+                if (pickedDate != null) {
+                  print(pickedDate);
+                  DateTime dateTime =
+                      DateTime.parse(pickedDate.toIso8601String());
 
 // Format the DateTime object to display only the date portion
-            String formattedDate = "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
+                  String formattedDate =
+                      "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
 
-            // Update the text field value when a date is selected
-            textEditingController.text = formattedDate;
-            // Call onSave if provided
+                  // Update the text field value when a date is selected
+                  textEditingController.text = formattedDate;
+                  // Call onSave if provided
 
-            onSave?.call(formattedDate);
-          }
-        },
-        prefix: Container(
-          margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
-          child: Icon(
-            Icons.date_range_outlined,
-            size: 24.adaptSize,
-            color: Colors.blueGrey,
-          ),
-        ),
-        prefixConstraints: BoxConstraints(maxHeight: 56.v),
-        validator: (value) {
-          return null;
-        },
-        contentPadding:
-        EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v),
-      ),
-    )
+                  onSave?.call(formattedDate);
+                }
+              },
+              prefix: Container(
+                margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+                child: Icon(
+                  Icons.date_range_outlined,
+                  size: 24.adaptSize,
+                  color: Colors.blueGrey,
+                ),
+              ),
+              prefixConstraints: BoxConstraints(maxHeight: 56.v),
+              validator: (value) {
+                return null;
+              },
+              contentPadding:
+                  EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v),
+            ),
+          )
         : Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          '${capitalizeWords(label)}:',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Text(
-          capitalizeWords(value),
-          style: const TextStyle(fontSize: 16),
-        ),
-      ],
-    );
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${capitalizeWords(label)}:',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                capitalizeWords(value),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          );
   }
 
   // Widget _buildDateField({

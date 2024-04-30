@@ -176,12 +176,12 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                   child: Image.asset('images/socialv/icons/ic_CameraPost.png',
                       height: 32, width: 32, fit: BoxFit.cover)),
               // Image.asset('images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
-              GestureDetector(
-                  onTap: () {
-                    checkInPlaceBottomSheet(context, widget.searchPeopleBloc);
-                  },
-                  child: Image.asset('images/socialv/icons/ic_Location.png',
-                      height: 32, width: 32, fit: BoxFit.cover)),
+              // GestureDetector(
+              //     onTap: () {
+              //       checkInPlaceBottomSheet(context, widget.searchPeopleBloc);
+              //     },
+              //     child: Image.asset('images/socialv/icons/ic_Location.png',
+              //         height: 32, width: 32, fit: BoxFit.cover)),
               // Image.asset('images/socialv/icons/ic_Paper.png',
               //     height: 32, width: 32, fit: BoxFit.cover),
             ],

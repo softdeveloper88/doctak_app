@@ -273,7 +273,9 @@ class LoginScreen extends StatelessWidget {
                                 BlocBuilder<LoginBloc, LoginState>(
                                     bloc: loginBloc,
                                     builder: (context, state) {
+                                      print(state.isShowPassword);
                                       return CustomTextFormField(
+
                                         focusNode: focusNode2,
                                           controller: passwordController,
                                           hintText: translation(context)
@@ -291,22 +293,32 @@ class LoginScreen extends StatelessWidget {
                                                       .imgLocation,
                                                   height: 24.adaptSize,
                                                   width: 24.adaptSize)),
-                                          prefixConstraints:
-                                              BoxConstraints(maxHeight: 56.v),
+                                          prefixConstraints: BoxConstraints(maxHeight: 56.v),
                                           suffix: InkWell(
                                               onTap: () {
-                                                context.read<LoginBloc>().add(ChangePasswordVisibilityEvent(value: !state.isShowPassword));
+                                                loginBloc.add(ChangePasswordVisibilityEvent(value: !state.isShowPassword));
 
                                               },
                                               child: Container(
                                                   margin: EdgeInsets.fromLTRB(
                                                       30.h, 16.v, 24.h, 16.v),
-                                                  child: CustomImageView(
-                                                      color: Colors.blueGrey,
-                                                      imagePath: ImageConstant
-                                                          .imgEye,
-                                                      height: 24.adaptSize,
-                                                      width: 24.adaptSize))),
+                                                  child:  state.isShowPassword
+                                                      ? Icon(
+                                                    Icons
+                                                        .visibility_off,
+                                                    color:
+                                                    Colors.black54,
+                                                    size:
+                                                    24.adaptSize,
+                                                  )
+                                                      : Icon(
+                                                    Icons
+                                                        .visibility,
+                                                    color:
+                                                    Colors.black54,
+                                                    size:
+                                                    24.adaptSize,
+                                                  ))),
                                           suffixConstraints:
                                               BoxConstraints(maxHeight: 56.v),
                                           validator: (value) {

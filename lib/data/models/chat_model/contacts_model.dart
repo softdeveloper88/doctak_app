@@ -69,7 +69,7 @@ class Contacts {
     latestMessage = json['latest_message'];
     latestMessageTime = json['latest_message_time'];
   }
-  String? roomId;
+  dynamic roomId;
   String? createdAt;
   String? firstName;
   String? lastName;

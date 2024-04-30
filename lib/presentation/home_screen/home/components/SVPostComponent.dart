@@ -35,16 +35,14 @@ class _SVPostComponentState extends State<SVPostComponent> {
   Widget build(BuildContext context) {
     return BlocConsumer<HomeBloc, HomeState>(
       bloc: widget.homeBloc,
-      // listenWhen: (previous, current) => current is DrugsState,
-      // buildWhen: (previous, current) => current is! DrugsState,
-      listener: (BuildContext context, HomeState state) {
+       listener: (BuildContext context, HomeState state) {
         if (state is PostDataError) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              content: Text(state.errorMessage),
-            ),
-          );
+          // showDialog(
+          //   context: context,
+          //   builder: (context) => AlertDialog(
+          //     content: Text(state.errorMessage),
+          //   ),
+          // );
         }
       },
       builder: (context, state) {

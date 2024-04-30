@@ -36,12 +36,12 @@ class _UserChatScreenState extends State<UserChatScreen> {
               SearchContactScreen().launch(context);
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              // Add more options functionality
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.more_vert),
+          //   onPressed: () {
+          //     // Add more options functionality
+          //   },
+          // ),
         ],
       ),
       body: BlocConsumer<ChatBloc, ChatState>(
@@ -57,7 +57,6 @@ class _UserChatScreenState extends State<UserChatScreen> {
           }
         },
         builder: (context, state) {
-          print("state $state");
           if (state is PaginationLoadingState) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is PaginationLoadedState) {

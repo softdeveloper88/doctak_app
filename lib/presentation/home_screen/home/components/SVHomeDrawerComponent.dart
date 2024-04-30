@@ -16,7 +16,9 @@ import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/web_screen/web_page_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -87,204 +89,237 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
   Widget build(BuildContext context) {
     List<SVDrawerModel> options = getDrawerOptions(context);
 
-    return Container(
-      color:context.cardColor,
-      width: 300,
-      child: ListView(
-        children: [
-          // 10.height,
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.end,
-          //   children: [
-          //     Padding(
-          //       padding: const EdgeInsets.only(right: 8.0),
-          //       child: Switch(
-          //         onChanged: (val) {
-          //           appStore.toggleDarkMode(value: val);
-          //         },
-          //         value: appStore.isDarkMode,
-          //         activeColor: SVAppColorPrimary,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          40.height,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          color: SVAppColorPrimary,
+          width: 300,
+          child: ListView(
             children: [
-              CachedNetworkImage(
-                      imageUrl: AppData.imageUrl + AppData.profile_pic,
-                      height: 62,
-                      width: 62,
-                      fit: BoxFit.cover)
-                  .cornerRadiusWithClipRRect(8),
-              16.width,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppData.userType == 'doctor'
-                          ? "Dr. ${capitalizeWords(AppData.name)}"
-                          : capitalizeWords(AppData.name), // User's name
-                      style: boldTextStyle(size: 18),
+              // 10.height,
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.end,
+              //   children: [
+              //     Padding(
+              //       padding: const EdgeInsets.only(right: 8.0),
+              //       child: Switch(
+              //         onChanged: (val) {
+              //           appStore.toggleDarkMode(value: val);
+              //         },
+              //         value: appStore.isDarkMode,
+              //         activeColor: SVAppColorPrimary,
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              40.height,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CachedNetworkImage(
+                          imageUrl: AppData.imageUrl + AppData.profile_pic,
+                          height: 62,
+                          width: 62,
+                          fit: BoxFit.cover)
+                      .cornerRadiusWithClipRRect(8),
+                  16.width,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppData.userType == 'doctor'
+                              ? "Dr. ${capitalizeWords(AppData.name)}"
+                              : capitalizeWords(AppData.name), // User's name
+                          style: boldTextStyle(size: 18,color: Colors.white),
+                        ),
+                        2.height,
+                        Text(
+                            textAlign: TextAlign.center,
+                            AppData.userType == 'doctor'
+                                ? AppData.specialty
+                                : "${AppData.university}\n Student",
+                            // User's specialty
+                            style: secondaryTextStyle(color: Colors.white)),
+                      ],
                     ),
-                    2.height,
-                    Text(
-                        textAlign: TextAlign.center,
-                        AppData.userType == 'doctor'
-                            ? AppData.specialty
-                            : "${AppData.university}\n Student",
-                        // User's specialty
-                        style: secondaryTextStyle(color: svGetBodyColor())),
-                  ],
+                  ),
+                  // IconButton(
+                  //   icon: Image.asset('images/socialv/icons/ic_CloseSquare.png',
+                  //       height: 16,
+                  //       width: 16,
+                  //       fit: BoxFit.cover,
+                  //       color: context.iconColor),
+                  //   onPressed: () {
+                  //     finish(context);
+                  //   },
+                  // ),
+                ],
+              ).paddingOnly(left: 16, right: 8, bottom: 20, top: 0),
+              20.height,
+              // if(AppData.isShowGoogleBannerAds??false)bannerAdLoaded(),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.map((e) {
+                  int index = options.indexOf(e);
+                  return SettingItemWidget(
+                    trailing:const Icon(Icons.arrow_forward_ios_rounded,color: Colors.white,size: 25,),
+                    decoration: BoxDecoration(
+                        color: selectedIndex == index
+                            ? SVAppColorPrimary.withAlpha(30)
+                            : SVAppColorPrimary),
+                    title: e.title.validate(),
+                    titleTextStyle: boldTextStyle(size: 14,color: Colors.white),
+                    leading: Image.asset(e.image.validate(),
+                        height: 22,
+                        width: 22,
+                        fit: BoxFit.cover,
+                        color: Colors.white),
+                    onTap: () {
+                      selectedIndex = index;
+                      setState(() {});
+                      if (selectedIndex == options.length - 1) {
+                        finish(context);
+                      }
+                      if (selectedIndex == 0) {
+                        finish(context);
+                        const JobsScreen().launch(context);
+                      } else if (selectedIndex == 1) {
+                        finish(context);
+                        const DrugsListScreen().launch(context);
+                        print(selectedIndex);
+                      } else if (selectedIndex == 2) {
+                        finish(context);
+                        print(selectedIndex);
+
+                        ConferencesScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 3) {
+                        finish(context);
+                        print(selectedIndex);
+                        const GuidelinesScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 4) {
+                        finish(context);
+                        print(selectedIndex);
+                        const ComingSoonScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 5) {
+                        finish(context);
+                        print(selectedIndex);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 6) {
+                        finish(context);
+                        print(selectedIndex);
+                        const ComingSoonScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 7) {
+                        finish(context);
+                        print(selectedIndex);
+                        NewsScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 8) {
+                        finish(context);
+                        print(selectedIndex);
+                        const ComingSoonScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 9) {
+                        finish(context);
+                        print(selectedIndex);
+                        const SuggestionScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 10) {
+                        finish(context);
+                        print(selectedIndex);
+                        const AppSettingScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 11) {
+                        finish(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => WebPageScreen(
+                                    page_name: 'Privacy Policy',
+                                    url: 'https://doctak.net/privacy-policy')));
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 12) {
+                        finish(context);
+                        print(selectedIndex);
+                        // ComingSoonScreen().launch(context);
+                        logoutAccount(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 13) {
+                        print(selectedIndex);
+                        deleteAccount(context);
+                        // finish(context);
+                        // SVGroupProfileScreen().launch(context);
+                      }
+                      // else if (selectedIndex == 13) {
+                      //
+                      //   finish(context);
+                      //   print(selectedIndex);
+                      //
+                      //   // SVGroupProfileScreen().launch(context);
+                      // }else if (selectedIndex == 14) {
+                      //   finish(context);
+                      //   print(selectedIndex);
+                      //
+                      //   // SVGroupProfileScreen().launch(context);
+                      // }
+                    },
+                  );
+                }).toList(),
+              ),
+              const Divider(indent: 16, endIndent: 16,color: Colors.white,),
+              Center(
+                child: SnapHelperWidget<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  onSuccess: (data) => Text(data.version,
+                      style: boldTextStyle(color: Colors.white)),
                 ),
               ),
-              IconButton(
-                icon: Image.asset('images/socialv/icons/ic_CloseSquare.png',
-                    height: 16,
-                    width: 16,
-                    fit: BoxFit.cover,
-                    color: context.iconColor),
-                onPressed: () {
-                  finish(context);
-                },
-              ),
+              20.height,
             ],
-          ).paddingOnly(left: 16, right: 8, bottom: 20, top: 0),
-          20.height,
-          // if(AppData.isShowGoogleBannerAds??false)bannerAdLoaded(),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: options.map((e) {
-              int index = options.indexOf(e);
-              return SettingItemWidget(
-                decoration: BoxDecoration(
-                    color: selectedIndex == index
-                        ? SVAppColorPrimary.withAlpha(30)
-                        : context.cardColor),
-                title: e.title.validate(),
-                titleTextStyle: boldTextStyle(size: 14),
-                leading: Image.asset(e.image.validate(),
-                    height: 22,
-                    width: 22,
-                    fit: BoxFit.cover,
-                    color: SVAppColorPrimary),
-                onTap: () {
-                  selectedIndex = index;
-                  setState(() {});
-                  if (selectedIndex == options.length - 1) {
-                    finish(context);
-                  }
-                  if (selectedIndex == 0) {
-                    finish(context);
-                    const JobsScreen().launch(context);
-                  } else if (selectedIndex == 1) {
-                    finish(context);
-                    const DrugsListScreen().launch(context);
-                    print(selectedIndex);
-                  } else if (selectedIndex == 2) {
-                    finish(context);
-                    print(selectedIndex);
-
-                    ConferencesScreen().launch(context);
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 3) {
-                    finish(context);
-                    print(selectedIndex);
-                    const GuidelinesScreen().launch(context);
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 4) {
-                    finish(context);
-                    print(selectedIndex);
-                    ComingSoonScreen().launch(context);
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 5) {
-                    finish(context);
-                    print(selectedIndex);
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 6) {
-                    finish(context);
-                    print(selectedIndex);
-                    ComingSoonScreen().launch(context);
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 7) {
-                    finish(context);
-                    print(selectedIndex);
-                    NewsScreen().launch(context);
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 8) {
-                    finish(context);
-                    print(selectedIndex);
-                    ComingSoonScreen().launch(context);
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 9) {
-                    finish(context);
-                    print(selectedIndex);
-                    const SuggestionScreen().launch(context);
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 10) {
-                    finish(context);
-                    print(selectedIndex);
-                    AppSettingScreen().launch(context);
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 11) {
-                    finish(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WebPageScreen(
-                                page_name: 'Privacy Policy',
-                                url: 'https://doctak.net/privacy-policy')));
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 12) {
-                    finish(context);
-                    print(selectedIndex);
-                    // ComingSoonScreen().launch(context);
-                    logoutAccount(context);
-
-                    // SVGroupProfileScreen().launch(context);
-                  } else if (selectedIndex == 13) {
-                    print(selectedIndex);
-                    deleteAccount(context);
-                    // finish(context);
-                    // SVGroupProfileScreen().launch(context);
-                  }
-                  // else if (selectedIndex == 13) {
-                  //
-                  //   finish(context);
-                  //   print(selectedIndex);
-                  //
-                  //   // SVGroupProfileScreen().launch(context);
-                  // }else if (selectedIndex == 14) {
-                  //   finish(context);
-                  //   print(selectedIndex);
-                  //
-                  //   // SVGroupProfileScreen().launch(context);
-                  // }
-                },
-              );
-            }).toList(),
           ),
-          const Divider(indent: 16, endIndent: 16),
-          Center(
-            child: SnapHelperWidget<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              onSuccess: (data) => Text(data.version,
-                  style: boldTextStyle(color: svGetBodyColor())),
+        ),
+        Stack(
+          children:[
+            Container(
+              color: SVAppColorPrimary,
+              // decoration: const BoxDecoration(
+              //     color: Colors.white,
+              //     borderRadius: BorderRadius.only(topRight: Radius.circular(300),bottomRight: Radius.circular(300))
+              // ),
+              width: 20,
             ),
-          ),
-          20.height,
-        ],
-      ),
+            InkWell(
+              onTap: (){
+                finish(context);
+              },
+              child: Container(
+              decoration: const BoxDecoration(
+                color: SVAppColorPrimary,
+                borderRadius: BorderRadius.only(topRight: Radius.circular(300),bottomRight: Radius.circular(300))
+              ),
+              margin: const EdgeInsets.only(top: 50),
+              width: 50,
+              height: 100,
+              child:  const Icon(Icons.arrow_back_ios_new_rounded,color: Colors.white,size: 40,),
+                        ),
+            ),
+        ])
+      ],
     );
   }
 
@@ -328,7 +363,6 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
       },
     );
   }
-
   deleteAccount(BuildContext context) async {
     return showDialog(
       context: context,
@@ -372,7 +406,6 @@ Since this is a security-sensitive operation, you eventually are asked to login 
       },
     );
   }
-
   Future<bool> deleteUserAccount() async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/delete-account');
     try {
@@ -396,7 +429,6 @@ Since this is a security-sensitive operation, you eventually are asked to login 
     }
     return false;
   }
-
   Future<bool> logoutUserAccount() async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/logout');
     try {

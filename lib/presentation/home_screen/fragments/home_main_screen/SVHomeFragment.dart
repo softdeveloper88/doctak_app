@@ -20,8 +20,8 @@ import '../../utils/SVColors.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
-  SVHomeFragment({Key? key}) : super(key: key);
-
+  SVHomeFragment({required this.openDrawer,Key? key}) : super(key: key);
+  Function openDrawer;
   @override
   State<SVHomeFragment> createState() => _SVHomeFragmentState();
 }
@@ -60,9 +60,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               fit: BoxFit.cover,
               color: context.iconColor,
             ),
-            onPressed: () {
-              scaffoldKey.currentState?.openDrawer();
-            },
+            onPressed: ()=>widget.openDrawer(),
           ),
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
@@ -97,7 +95,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             ),
           ],
         ),
-        drawer: SVHomeDrawerComponent(),
         body: CustomScrollView(
             shrinkWrap: true,
             controller: _mainScrollController,

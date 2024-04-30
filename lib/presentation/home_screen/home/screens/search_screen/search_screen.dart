@@ -145,9 +145,8 @@ class _SearchScreenState extends State<SearchScreen>
         appBar:AppBar(
           surfaceTintColor: Colors.transparent,
           iconTheme: IconThemeData(color: context.iconColor),
-          title:  Center(
-                      child: Text('Search',
-                          style: boldTextStyle(size: 18))),
+          title: Text('Search',
+                          style: boldTextStyle(size: 18)),
 
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -166,8 +165,8 @@ class _SearchScreenState extends State<SearchScreen>
               padding: const EdgeInsets.only(left: 8.0),
               margin: const EdgeInsets.only(
                 left: 16,
-                top: 16.0,
-                bottom: 16.0,
+                top: 0.0,
+                bottom: 0.0,
                 right: 16,
               ),
               decoration: BoxDecoration(
@@ -257,7 +256,6 @@ class _SearchScreenState extends State<SearchScreen>
                           children: [
                             /// Posts search Data Here
                             SVPostComponent(homeBloc),
-
                             /// Jobs Search Data Here
                             Column(
                               children: [

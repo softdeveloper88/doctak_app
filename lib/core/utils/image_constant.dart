@@ -1,9 +1,10 @@
 class ImageConstant {
   // Image folder path
   static String imagePath = 'assets/images';
+  static String imageIcon = 'assets/icon';
 
   // Splash Screen images
-  static String imgVector = '$imagePath/img_vector.svg';
+  static String imgVector = '$imagePath/ic_vector.svg';
 
   // Onboarding One images
   static String img7xm1 = '$imagePath/img_7xm_1.png';
@@ -20,7 +21,7 @@ class ImageConstant {
   static String imgApple = '$imagePath/img_apple.svg';
 
   // Sign Up images
-  static String imgLock = '$imagePath/img_lock.svg';
+  static String imgLock = '$imagePath/ic_lock.svg';
 
   // Sign Up - Success images
   static String imgCheckmarkPrimary = '$imagePath/img_checkmark_primary.svg';
@@ -150,7 +151,7 @@ class ImageConstant {
   static String imgHealthvitLLys163x163 =
       '$imagePath/img_healthvit_l_lys_163x163.png';
 
-  static String imgFavorite = '$imagePath/img_favorite.svg';
+  static String imgFavorite = '$imagePath/ic_favorite.svg';
 
   static String imgCartPrimary = '$imagePath/img_cart_primary.svg';
 
@@ -230,7 +231,7 @@ class ImageConstant {
 
   static String imgMessage = '$imagePath/img_message.svg';
 
-  static String imgCalendar = '$imagePath/img_calendar.svg';
+  static String imgCalendar = '$imagePath/ic_calendar.svg';
 
   static String imgLockGray500 = '$imagePath/img_lock_gray_500.svg';
 
@@ -259,5 +260,5 @@ class ImageConstant {
 
   static String imgSettingsGray500 = '$imagePath/img_settings_gray_500.svg';
 
-  static String imageNotFound = 'assets/images/image_not_found.png';
+  static String imageNotFound = 'assets/images/ic_not_found_img.png';
 }

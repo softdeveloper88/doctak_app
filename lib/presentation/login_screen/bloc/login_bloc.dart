@@ -202,6 +202,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     ChangePasswordVisibilityEvent event,
     Emitter<LoginState> emit,
   ) {
-    emit(state.copyWith(isShowPassword: event.value));
+    emit(LoginState(isShowPassword: event.value));
+    // emit(state.copyWith(isShowPassword: event.value));
   }
 }

@@ -51,43 +51,43 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
           color: SVDividerColor, borderRadius: radius(SVAppCommonRadius)),
       child: Column(
         children: [
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: feelings.length,
-              itemBuilder: (context, index) {
-                Feeling feeling = feelings[index];
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                    widget.searchPeopleBloc.feeling = feeling.emoji;
-                    selectedFeeling = feeling;
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: selectedFeeling != feeling
-                            ? Colors.lightBlueAccent.withOpacity(0.4)
-                            : Colors.lightBlue,
-                        borderRadius: radius(10)),
-                    padding: const EdgeInsets.all(6),
-                    margin: const EdgeInsets.all(3),
-                    child: Row(
-                      children: [
-                        Text(feeling.emoji),
-                        Text(feeling.name),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const Divider(
-            height: 5,
-            color: Colors.grey,
-          ),
+          // SizedBox(
+          //   height: 40,
+          //   child: ListView.builder(
+          //     scrollDirection: Axis.horizontal,
+          //     itemCount: feelings.length,
+          //     itemBuilder: (context, index) {
+          //       Feeling feeling = feelings[index];
+          //       return GestureDetector(
+          //         onTap: () {
+          //           setState(() {
+          //           widget.searchPeopleBloc.feeling = feeling.emoji;
+          //           selectedFeeling = feeling;
+          //           });
+          //         },
+          //         child: Container(
+          //           decoration: BoxDecoration(
+          //               color: selectedFeeling != feeling
+          //                   ? Colors.lightBlueAccent.withOpacity(0.3)
+          //                   : Colors.lightBlue,
+          //               borderRadius: radius(10)),
+          //           padding: const EdgeInsets.all(6),
+          //           margin: const EdgeInsets.all(3),
+          //           child: Row(
+          //             children: [
+          //               Text(feeling.emoji),
+          //               Text(feeling.name),
+          //             ],
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
+          // const Divider(
+          //   height: 5,
+          //   color: Colors.grey,
+          // ),
           Row(
             children: [
               InkWell(
@@ -118,7 +118,6 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                 child: BlocBuilder<AddPostBloc, AddPostState>(
                   bloc: widget.searchPeopleBloc,
                   builder: (context, state) {
-                    print("states Location ${state}");
                     if (state is PaginationLoadedState) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -169,47 +168,47 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
               ),
             ],
           ),
-          const Divider(
-            height: 5,
-            color: Colors.grey,
-          ),
-          Row(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.lightBlueAccent.withOpacity(0.4),
-                    borderRadius: radius(10)),
-                padding: const EdgeInsets.all(4),
-                child: const Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      color: Colors.blue,
-                    ),
-                    Text(
-                      'Location:',
-                      style: TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-              BlocBuilder<AddPostBloc, AddPostState>(
-                bloc: widget.searchPeopleBloc,
-                builder: (context, state) {
-                  print("states Location ${state}");
-                  if (state is PaginationLoadedState) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(widget.searchPeopleBloc.locationName ?? "",style:  boldTextStyle(),),
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
-              ),
-            ],
-          ),
+          // const Divider(
+          //   height: 5,
+          //   color: Colors.grey,
+          // ),
+          // Row(
+          //   children: [
+          //     Container(
+          //       decoration: BoxDecoration(
+          //           color: Colors.lightBlueAccent.withOpacity(0.4),
+          //           borderRadius: radius(10)),
+          //       padding: const EdgeInsets.all(4),
+          //       child: const Row(
+          //         children: [
+          //           Icon(
+          //             Icons.location_on,
+          //             color: Colors.blue,
+          //           ),
+          //           Text(
+          //             'Location:',
+          //             style: TextStyle(
+          //                 color: Colors.blue, fontWeight: FontWeight.bold),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //     BlocBuilder<AddPostBloc, AddPostState>(
+          //       bloc: widget.searchPeopleBloc,
+          //       builder: (context, state) {
+          //         print("states Location ${state}");
+          //         if (state is PaginationLoadedState) {
+          //           return Padding(
+          //             padding: const EdgeInsets.all(8.0),
+          //             child: Text(widget.searchPeopleBloc.locationName ?? "",style:  boldTextStyle(),),
+          //           );
+          //         } else {
+          //           return Container();
+          //         }
+          //       },
+          //     ),
+          //   ],
+          // ),
           // SizedBox(
           //   height: 40,
           //   child: ListView.builder(

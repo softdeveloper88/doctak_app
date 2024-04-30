@@ -75,7 +75,6 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                 vertical: 0,
                               ),
                               onChanged: (String? newValue) {
-                                print(newValue);
                                 conferenceBloc.add(
                                   LoadPageEvent(
                                     page: 1,
@@ -165,10 +164,17 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                           child: Container(
                             padding: const EdgeInsets.only(left: 8.0),
                             margin: const EdgeInsets.only(
-                                left: 16, top: 16.0, bottom: 16.0, right: 16.0),
+                              left: 16,
+                              top: 16.0,
+                              bottom: 16.0,
+                              right: 16,
+                            ),
                             decoration: BoxDecoration(
-                                color: context.cardColor,
-                                borderRadius: radius(8)),
+                                color: context.dividerColor.withOpacity(0.4),
+                                borderRadius: radius(5),
+                                border: Border.all(
+                                    color: Colors.black, width: 0.3)),
+
                             child: AppTextField(
                               textFieldType: TextFieldType.NAME,
                               onChanged: (searchTxt) async {
@@ -244,12 +250,12 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                     BlocProvider.of<SplashBloc>(context).add(
                       LoadDropdownData1('', ''),
                     );
-                    return Center(child: Text('Error: ${state}'));
+                    return const Center();
                   } else {
                     BlocProvider.of<SplashBloc>(context).add(
                       LoadDropdownData1('', ''),
                     );
-                    return Center(child: Text('Unknown state$state'));
+                    return const Center();
                   }
                 }),
             BlocConsumer<ConferenceBloc, ConferenceState>(
@@ -267,7 +273,6 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 }
               },
               builder: (context, state) {
-                print("state $state");
                 if (state is PaginationLoadingState) {
                   return const Expanded(
                       child: Center(

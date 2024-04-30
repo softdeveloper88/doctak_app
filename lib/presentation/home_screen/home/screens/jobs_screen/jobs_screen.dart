@@ -45,7 +45,7 @@ class _JobsScreenState extends State<JobsScreen> {
   @override
   void initState() {
     jobsBloc.add(
-      JobLoadPageEvent(page: 1, countryId: '1', searchTerm: ''),
+      JobLoadPageEvent(page: 1, countryId: '1',isExpired: 'New', searchTerm: ''),
     );
     profileBloc.add(UpdateSpecialtyDropdownValue1(''));
     super.initState();
@@ -95,10 +95,10 @@ class _JobsScreenState extends State<JobsScreen> {
                   profileBloc.add(UpdateSpecialtyDropdownValue1(''));
                 }
                 for (var element in state.countriesModel.countries!) {
-                  if (element.flag == state.countryFlag) {
+                  if (element.countryName == state.countryFlag) {
                     selectedValue =
-                        state.countriesModel.countries?.first.flag ??
-                            element.flag;
+                        state.countriesModel.countries?.first.countryName ??
+                            element.countryName;
                   }
                 }
                 return Column(
@@ -273,7 +273,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                 },
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: 'Search Here',
+                                  hintText: 'Search by Specialty',
                                   hintStyle: secondaryTextStyle(
                                       color: svGetBodyColor()),
                                   suffixIcon: GestureDetector(
@@ -692,7 +692,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                   children: [
                                     Expanded(
                                       child: HtmlWidget(
-                                        '<pre>${bloc.drugsData[index].description}</pre>',
+                                        '<p>${bloc.drugsData[index].description}</p>',
                                       ),
                                     ),
                                   ],

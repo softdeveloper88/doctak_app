@@ -44,7 +44,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) => Scaffold(
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: svGetScaffoldColor(),
           title: Text('Profile', style: boldTextStyle(size: 20)),
@@ -145,7 +145,8 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                         )
                       ],
                     ),
-                    16.height,
+                    4.height,
+                     Divider(color: Colors.grey[200],endIndent: 16,indent: 16,),
                     SVProfilePostsComponent(profileBloc,),
                     16.height,
                   ],

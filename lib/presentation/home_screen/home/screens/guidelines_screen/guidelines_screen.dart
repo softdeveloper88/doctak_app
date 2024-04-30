@@ -44,20 +44,34 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: Colors.white,
+
       appBar: AppBar(
           iconTheme: IconThemeData(color: context.iconColor),
           elevation: 0,
           centerTitle: true,
-          backgroundColor: svGetScaffoldColor(),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          backgroundColor: Colors.white,
           title:  Text('Guidelines', style: boldTextStyle(size: 18))),
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.only(left: 8.0),
-            margin: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.only(
+              left: 16,
+              top: 16.0,
+              bottom: 16.0,
+              right: 16,
+            ),
             decoration: BoxDecoration(
-                color: context.cardColor, borderRadius: radius(8)),
+                color: context.dividerColor.withOpacity(0.4),
+                borderRadius: radius(5),
+                border: Border.all(
+                    color: Colors.black, width: 0.3)),
             child: AppTextField(
               onChanged: (searchTxt) async {
                 if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -112,7 +126,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 // return _buildPostList(context);
                 final bloc = guidelineBloc;
                 return Expanded(
-                  child: ListView.separated(
+                  child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     shrinkWrap: true,
                     // physics: const NeverScrollableScrollPhysics(),
@@ -132,9 +146,6 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                               bloc.guidelinesList[index]);
 
                       // SVProfileFragment().launch(context);
-                    },
-                    separatorBuilder: (BuildContext context, int index) {
-                      return const Divider(height: 20);
                     },
                     itemCount: bloc.guidelinesList.length,
                   ),
@@ -193,7 +204,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: svGetScaffoldColor(),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -202,7 +213,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
           ListTile(
             title: Text(
               item.diseaseName ?? '',
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -234,7 +245,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
             ),
           ),
           Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: TextButton(
               onPressed: () {
                 if (expandedMap[item.diseaseName]!) {

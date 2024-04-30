@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/theme/app_decoration.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -43,6 +44,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
       DropdownButtonFormField<String>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
         value: value,
+        isExpanded: true,
         decoration: _buildDecoration(),
         iconSize: isTextBold ? 20.0 : 0.0,
         style: TextStyle(
@@ -111,7 +113,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
       focusedBorder: _outLinedInputBorder(),
       // prefixIcon: prefix,
       // prefixIconConstraints: prefixConstraints,
-      fillColor: Colors.white30,
+      fillColor: AppDecoration.fillGray.color,
       filled: true,
       isDense: true,
       contentPadding: const EdgeInsets.only(

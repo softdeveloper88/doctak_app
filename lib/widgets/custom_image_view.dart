@@ -34,7 +34,7 @@ class CustomImageView extends StatelessWidget {
     this.radius,
     this.margin,
     this.border,
-    this.placeHolder = 'assets/images/image_not_found.png',
+    this.placeHolder = 'assets/images/ic_not_found_img.png',
   });
 
   @override
@@ -97,7 +97,7 @@ class CustomImageView extends StatelessWidget {
               width: width,
               fit: fit ?? BoxFit.contain,
               colorFilter: ColorFilter.mode(
-                  this.color ?? Colors.transparent, BlendMode.srcIn),
+                  color ?? Colors.transparent, BlendMode.srcIn),
             ),
           );
         case ImageType.file:
@@ -147,11 +147,11 @@ class CustomImageView extends StatelessWidget {
 
 extension ImageTypeExtension on String {
   ImageType get imageType {
-    if (this.startsWith('http') || this.startsWith('https')) {
+    if (startsWith('http') || startsWith('https')) {
       return ImageType.network;
-    } else if (this.endsWith('.svg')) {
+    } else if (endsWith('.svg')) {
       return ImageType.svg;
-    } else if (this.startsWith('file://')) {
+    } else if (startsWith('file://')) {
       return ImageType.file;
     } else {
       return ImageType.png;

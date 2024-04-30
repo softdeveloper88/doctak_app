@@ -10,6 +10,7 @@ import 'fragments/add_post/SVAddPostFragment.dart';
 import 'fragments/home_main_screen/SVHomeFragment.dart';
 import 'fragments/profile_screen/SVProfileFragment.dart';
 import 'fragments/search_people/SVSearchFragment.dart';
+import 'home/components/SVHomeDrawerComponent.dart';
 
 class SVDashboardScreen extends StatefulWidget {
   const SVDashboardScreen({Key? key}) : super(key: key);
@@ -17,13 +18,18 @@ class SVDashboardScreen extends StatefulWidget {
   @override
   State<SVDashboardScreen> createState() => _SVDashboardScreenState();
 }
+var scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _SVDashboardScreenState extends State<SVDashboardScreen> {
   int selectedIndex = 0;
 
   Widget getFragment() {
     if (selectedIndex == 0) {
-      return SVHomeFragment();
+      return SVHomeFragment(openDrawer: (){
+
+        scaffoldKey.currentState?.openDrawer();
+
+      },);
     } else if (selectedIndex == 1) {
       return  SearchScreen(backPress: (){
         setState(() {
@@ -37,7 +43,9 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
     } else if (selectedIndex == 4) {
       return SVProfileFragment();
     }
-    return SVHomeFragment();
+    return SVHomeFragment(openDrawer: (){
+      scaffoldKey.currentState?.openDrawer();
+    });
   }
 
   @override
@@ -65,6 +73,8 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
         body: getFragment(),
+        key: scaffoldKey,
+        drawer: SVHomeDrawerComponent(),
         bottomNavigationBar: BottomNavigationBar(
           showSelectedLabels: false,
           type: BottomNavigationBarType.fixed,

@@ -140,7 +140,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messagesList.addAll(response.messages ?? []);
         // messagesList=messagesList.reversed.toList();
       }
-
+print(response.toJson());
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(contactsList));
@@ -166,12 +166,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (event.file != '') {
         response = await postService.sendMessage(
           'Bearer ${AppData.userToken}',
-          event.userId!,
-          event.roomId!,
-          event.receiverId!,
-          event.attachmentType!,
-          event.message!,
-          event.file!,
+          event.userId??'',
+          event.roomId??'',
+          event.receiverId??'',
+          event.attachmentType??'',
+          event.message??'',
+          event.file??'',
         );
         print("hii_file${response.body}");
       } else {

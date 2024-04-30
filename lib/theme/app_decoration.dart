@@ -11,8 +11,8 @@ class AppDecoration {
   static BoxDecoration get fillBlue => BoxDecoration(
         color: appTheme.blue50,
       );
-  static BoxDecoration get fillGray => BoxDecoration(
-        color: appTheme.gray300,
+  static BoxDecoration get fillGray => const BoxDecoration(
+        color: Color(0XFFF6F6F6),
       );
   static BoxDecoration get fillOnErrorContainer => BoxDecoration(
         color: theme.colorScheme.onErrorContainer,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const SVAppColorPrimary = Color(0xFF2F65B9);
+const SVAppColorPrimary = Color(0xFF359CF6);
 
 //Section BG / page BG
 const SVAppLayoutBackground = Color(0xFFFFFFFF);
