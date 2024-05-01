@@ -70,6 +70,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
+
                 widget.userProfile?.coverPicture == null ||
                         widget.userProfile?.coverPicture ==
                             'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
@@ -78,17 +79,19 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                         width: context.width(),
                         height: 130,
                         fit: BoxFit.cover,
-                      ).cornerRadiusWithClipRRectOnly(
-                        topLeft: SVAppCommonRadius.toInt(),
-                        topRight: SVAppCommonRadius.toInt())
+                      )
+                    .cornerRadiusWithClipRRectOnly(
+                        bottomLeft: SVAppCommonRadius.toInt(),
+                        bottomRight: SVAppCommonRadius.toInt())
                     : CachedNetworkImage(
                         imageUrl: '${widget.userProfile?.coverPicture}',
-                        height: 130,
+                        height: 140,
                         fit: BoxFit.cover,
                         width: double.maxFinite,
                       ).cornerRadiusWithClipRRectOnly(
-                        topLeft: SVAppCommonRadius.toInt(),
-                        topRight: SVAppCommonRadius.toInt()),
+                        bottomLeft: 20,
+                        bottomRight: 20),
+
                 Positioned(
                   bottom: 0,
                   child: GestureDetector(

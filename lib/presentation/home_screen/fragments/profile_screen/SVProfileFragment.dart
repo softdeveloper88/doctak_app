@@ -45,23 +45,23 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
     return Observer(
       builder: (_) => Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: svGetScaffoldColor(),
-          title: Text('Profile', style: boldTextStyle(size: 20)),
-          elevation: 0,
-          centerTitle: true,
-          iconTheme: IconThemeData(color: context.iconColor),
-          // actions: [
-          //   Switch(
-          //     onChanged: (val) {
-          //       appStore.toggleDarkMode(value: val);
-          //     },
-          //     value: appStore.isDarkMode,
-          //     activeColor: SVAppColorPrimary,
-          //   ),
-          //   //IconButton(onPressed: () {}, icon: Icon(Icons.more_horiz)),
-          // ],
-        ),
+        // appBar: AppBar(
+        //   backgroundColor: svGetScaffoldColor(),
+        //   // title: Text('Profile', style: boldTextStyle(size: 20)),
+        //   elevation: 0,
+        //   centerTitle: true,
+        //   iconTheme: IconThemeData(color: context.iconColor),
+        //   // actions: [
+        //   //   Switch(
+        //   //     onChanged: (val) {
+        //   //       appStore.toggleDarkMode(value: val);
+        //   //     },
+        //   //     value: appStore.isDarkMode,
+        //   //     activeColor: SVAppColorPrimary,
+        //   //   ),
+        //   //   //IconButton(onPressed: () {}, icon: Icon(Icons.more_horiz)),
+        //   // ],
+        // ),
         body: BlocConsumer<ProfileBloc, ProfileState>(
           listener: (BuildContext context, ProfileState state) {},
           bloc: profileBloc,

@@ -7,6 +7,8 @@ import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/personal_info_screen/personal_info_screen.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/privacy_info_screen/privacy_info_screen.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/professional_info_screen/professional_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/profile/components/my_post_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
@@ -154,7 +156,10 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
       ),
       SizedBox(height: 10.v),
       _buildRowinterested(
-        onTap: (){},
+        onTap: (){
+          ProfessionalInfoScreen(profileBloc:profileBloc).launch(context);
+
+        },
         context,
         imageOne: 'assets/icon/ic_frame.svg',
         interested: "Professional Information",
@@ -175,7 +180,10 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
       ),
       SizedBox(height: 10.v),
       _buildRowinterested(
-        onTap: (){},
+        onTap: (){
+          PrivacyInfoScreen(profileBloc:profileBloc).launch(context);
+
+        },
         context,
         imageOne: 'assets/icon/ic_privacy.svg',
         interested: "Privacy Information",
@@ -856,7 +864,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     void Function(String)? onSave,
     required List<String> options,
   }) {
-    // Filter out 'crickete update d.' if it exists
+
     options = options.where((opt) => opt != 'crickete update d.').toList();
 
     return isEditModeMap[index]!

@@ -66,7 +66,8 @@ class ProfileDateWidget extends StatelessWidget {
                 onSave?.call(formattedDate);
               }
             },
-            prefix: Container(
+            prefix: const SizedBox(width: 10,),
+            suffix: Container(
               margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
               child: Icon(
                 Icons.date_range_outlined,
@@ -103,60 +104,3 @@ class ProfileDateWidget extends StatelessWidget {
   }
 }
 
-Widget _buildField(
-    {required int index,
-      required String label,
-      required bool isEditModeMap,
-      required String value,
-      void Function(String)? onSave,
-      int? maxLines,
-      required IconData icon}) {
-  return isEditModeMap
-      ? Container(
-    margin: const EdgeInsets.only(top: 4),
-    child: CustomTextField(
-        hintText: label,
-        textInputType: TextInputType.text,
-        prefix: Container(
-            margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
-            child: Icon(
-              icon,
-              size: 24.adaptSize,
-              color: Colors.blueGrey,
-              // imagePath: Icon(Icons),
-              // height: 24.adaptSize,
-              // width: 24.adaptSize
-            )),
-        prefixConstraints: BoxConstraints(maxHeight: 56.v),
-        initialValue: value,
-        maxLines: maxLines,
-        onSaved: (v) {
-          onSave?.call(v);
-        },
-        contentPadding:
-        EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
-  )
-  // ?  TextFormField(
-  //           initialValue: value,
-  //           decoration: InputDecoration(
-  //               labelText: label,
-  //               labelStyle: const TextStyle(
-  //                   color: Colors.blueGrey, fontWeight: FontWeight.bold)),
-  //           maxLines: maxLines,
-  //           onSaved: (v) => onSave?.call(v!),
-  //         )
-      : Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(
-        '${capitalizeWords(label)}:',
-        style:
-        const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-      Text(
-        capitalizeWords(value),
-        style: const TextStyle(fontSize: 16),
-      ),
-    ],
-  );
-}

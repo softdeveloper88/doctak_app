@@ -49,16 +49,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     filled: true,
                     fillColor: AppDecoration.fillGray.color,
                     textInputType: TextInputType.text,
-                    prefix: Container(
-                        margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
-                        child: Icon(
-                          widget.icon,
-                          size: 24.adaptSize,
-                          color: Colors.blueGrey,
-                          // imagePath: Icon(Icons),
-                          // height: 24.adaptSize,
-                          // width: 24.adaptSize
-                        )),
+                    prefix: const SizedBox(width: 10,),
                     prefixConstraints: BoxConstraints(maxHeight: 56.v),
                     initialValue: widget.value,
                     maxLines: widget.maxLines,
@@ -71,20 +62,23 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             ],
           );
     } else {
-      return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${capitalizeWords(widget.label!)}:',
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              Text(
-                capitalizeWords(widget.value!),
-                style: const TextStyle(fontSize: 16),
-              ),
-            ],
-          );
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${capitalizeWords(widget.label!)}:',
+                  style:
+                      const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  capitalizeWords(widget.value!),
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+      );
     }
   }
 }
