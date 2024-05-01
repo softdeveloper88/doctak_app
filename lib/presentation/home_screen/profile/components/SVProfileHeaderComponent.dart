@@ -85,7 +85,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                         bottomRight: SVAppCommonRadius.toInt())
                     : CachedNetworkImage(
                         imageUrl: '${widget.userProfile?.coverPicture}',
-                        height: 140,
+                        height: 130,
                         fit: BoxFit.cover,
                         width: double.maxFinite,
                       ).cornerRadiusWithClipRRectOnly(
@@ -131,17 +131,17 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                     child: Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.white, width: 2),
-                          borderRadius: radius(18)),
+                          borderRadius: radius(200)),
                       child: widget.userProfile?.profilePicture == null
                           ? Image.asset('images/socialv/faces/face_5.png',
-                                  height: 88, width: 88, fit: BoxFit.cover)
+                                  height: 100, width: 100, fit: BoxFit.cover)
                               .cornerRadiusWithClipRRect(SVAppCommonRadius)
                           : Image.network(
                                   '${widget.userProfile?.profilePicture.validate()}',
-                                  height: 88,
-                                  width: 88,
+                                  height: 100,
+                                  width: 100,
                                   fit: BoxFit.cover)
-                              .cornerRadiusWithClipRRect(SVAppCommonRadius),
+                              .cornerRadiusWithClipRRect(200),
                     ),
                   ),
                 ),
