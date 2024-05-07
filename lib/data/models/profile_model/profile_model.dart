@@ -220,9 +220,9 @@ class User {
   String? lastName;
   String? licenseNo;
   String? specialty;
-  dynamic clinicName;
+  String? clinicName;
   String? phone;
-  dynamic college;
+  String? college;
   String? city;
   String? dob;
   String? id;

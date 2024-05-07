@@ -105,17 +105,17 @@ Widget svAppButton(
     {required String text,
     required Function onTap,
     double? width,
+    Color? color,
     required BuildContext context}) {
   return AppButton(
-    shapeBorder:
-        RoundedRectangleBorder(borderRadius: radius(SVAppCommonRadius)),
+    shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
     text: text,
     textStyle: boldTextStyle(color: Colors.white),
     onTap: onTap,
     elevation: 0,
-    color: SVAppColorPrimary,
+    color: color??SVAppColorPrimary,
     width: width ?? context.width() - 32,
-    height: 56,
+    height: 50,
   );
 }
 

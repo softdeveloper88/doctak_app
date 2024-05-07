@@ -84,7 +84,7 @@ class _UserChatComponentState extends State<UserChatComponent> {
                                   color: SVAppColorPrimary, width: 2),
                               borderRadius: radius(14),
                             ),
-                            child: chatBloc.contactsList[index].profilePic!.isEmpty
+                            child: chatBloc.contactsList[index].profilePic?.isEmpty??true
                                 ? Image.asset('images/socialv/faces/face_2.png',
                                     height: 58,
                                     width: 58,

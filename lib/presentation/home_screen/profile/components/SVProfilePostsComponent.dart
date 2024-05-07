@@ -6,9 +6,11 @@ import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/interested_info_screen/interested_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/personal_info_screen/personal_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/privacy_info_screen/privacy_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/professional_info_screen/professional_info_screen.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/work_info_screen/work_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/profile/components/my_post_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
@@ -127,7 +129,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
               //         ),
               //       )
               : AboutWidget(profileBloc: widget.profileBloc,)
-          // EditProfileScreen(widget.profileBloc),
+         // : EditProfileScreen(widget.profileBloc),
         ],
       ),
     );
@@ -166,14 +168,20 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
       ),
       SizedBox(height: 10.v),
       _buildRowinterested(
-        onTap: (){},
+        onTap: (){
+          WorkInfoScreen(profileBloc:profileBloc).launch(context);
+
+        },
         context,
         imageOne: 'assets/icon/ic_calendar.svg',
         interested: "Work Information",
       ),
       SizedBox(height: 10.v),
       _buildRowinterested(
-        onTap: (){},
+        onTap: (){
+          InterestedInfoScreen(profileBloc:profileBloc).launch(context);
+
+        },
         context,
         imageOne: 'assets/icon/ic_person.svg',
         interested: "Interested Information",
@@ -241,7 +249,7 @@ Widget _buildRowinterested(
               style: GoogleFonts.poppins(fontSize: 18),
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Icon(
             Icons.arrow_forward_ios_rounded,
             size: 25.adaptSize,
@@ -537,7 +545,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
               ],
             ),
-            Divider(
+            const Divider(
               color: Colors.grey,
             ),
 
@@ -557,10 +565,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
               ],
             ),
-            Divider(
+            const Divider(
               color: Colors.grey,
             ),
-
             // _buildCard(
             //   title: 'Additional Information',
             //   categoryIndex: 3,
@@ -784,7 +791,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildInterestedInfoFields() {
-    int i = 1;
     return Column(
       children: widget.profileBloc.interestList!
           .map(

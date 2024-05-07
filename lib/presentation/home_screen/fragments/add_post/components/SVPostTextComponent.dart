@@ -21,13 +21,12 @@ class SVPostTextComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16,right: 16),
+      // margin: const EdgeInsets.only(left: 16,right: 8),
       decoration: BoxDecoration(
-          color: colorValue, borderRadius: radius(SVAppCommonRadius)),
+          color: Colors.white, borderRadius: radius(SVAppCommonRadius)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-
 
         children: [
           TextField(
@@ -41,17 +40,30 @@ class SVPostTextComponent extends StatelessWidget {
             decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Whats On Your Mind',
-                hintStyle: secondaryTextStyle(size: 14, color: Colors.white)),
+                hintStyle: secondaryTextStyle(size: 14, color: Colors.black)),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-                onPressed: onColorChange!(),
-                icon: const Icon(
-                  Icons.color_lens,
-                  color: Colors.black,
-                  size: 40,
-                )),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                   height: 30,width: 30,decoration: BoxDecoration(
+                  color: colorValue,
+                  border: Border.all(color: Colors.black,width: 1),
+                  borderRadius: BorderRadius.circular(100)
+                ),),
+              ),Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                    onPressed: onColorChange!(),
+                    icon: const Icon(
+                      Icons.color_lens,
+                      color: Colors.black,
+                      size: 40,
+                    )),
+              ),
+            ],
           )
         ],
       ),

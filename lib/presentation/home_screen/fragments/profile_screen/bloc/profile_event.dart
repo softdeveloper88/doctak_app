@@ -59,6 +59,8 @@ class UpdateProfilePicEvent extends ProfileEvent {
 }
 
 class UpdateProfileEvent extends ProfileEvent {
+  int? updateProfileSection;
+
   UserProfile? userProfile;
   List<InterestModel>? interestModel;
   List<WorkEducationModel>? workEducationModel;
@@ -67,13 +69,14 @@ class UpdateProfileEvent extends ProfileEvent {
 
   UpdateProfileEvent(
       {this.userProfile,
+      this.updateProfileSection,
       this.interestModel,
       this.workEducationModel,
       this.userProfilePrivacyModel});
 
   @override
   List<Object?> get props =>
-      [userProfile, interestModel, workEducationModel, userProfilePrivacyModel];
+      [updateProfileSection,userProfile, interestModel, workEducationModel, userProfilePrivacyModel];
 }
 
 class LoadPageEvent1 extends ProfileEvent {

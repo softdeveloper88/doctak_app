@@ -4,7 +4,7 @@ import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ProfileWidget extends StatefulWidget {
+class ProfileWidget extends StatelessWidget {
   ProfileWidget(
       {this.index,
       this.label,
@@ -24,13 +24,8 @@ class ProfileWidget extends StatefulWidget {
   IconData? icon;
 
   @override
-  State<ProfileWidget> createState() => _ProfileWidgetState();
-}
-
-class _ProfileWidgetState extends State<ProfileWidget> {
-  @override
   Widget build(BuildContext context) {
-    if (widget.isEditModeMap ?? false) {
+    if (isEditModeMap ?? false) {
       return Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,23 +33,23 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
-                  widget.label ?? '',
+                  label ?? '',
                   style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500,),
                 ),
               ),
               Container(
                 margin: const EdgeInsets.only(top: 4),
                 child: CustomTextField(
-                    hintText: widget.label,
+                    hintText: label,
                     filled: true,
                     fillColor: AppDecoration.fillGray.color,
                     textInputType: TextInputType.text,
                     prefix: const SizedBox(width: 10,),
                     prefixConstraints: BoxConstraints(maxHeight: 56.v),
-                    initialValue: widget.value,
-                    maxLines: widget.maxLines,
+                    initialValue: value,
+                    maxLines: maxLines,
                     onSaved: (v) {
-                      widget.onSave?.call(v);
+                      onSave?.call(v);
                     },
                     contentPadding:
                         EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
@@ -68,12 +63,12 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${capitalizeWords(widget.label!)}:',
+                  '${capitalizeWords(label??'')}:',
                   style:
                       const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  capitalizeWords(widget.value!),
+                  capitalizeWords(value!),
                   style: const TextStyle(fontSize: 16),
                 ),
               ],

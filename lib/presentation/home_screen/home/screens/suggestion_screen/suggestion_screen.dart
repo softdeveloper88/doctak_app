@@ -100,6 +100,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: const Icon(Icons.arrow_back_ios)),
+
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
         title: Text('Suggestion', style: boldTextStyle(size: 20)),

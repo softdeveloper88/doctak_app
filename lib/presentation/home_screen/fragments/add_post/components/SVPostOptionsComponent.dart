@@ -9,6 +9,8 @@ import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:video_player/video_player.dart';
@@ -87,7 +89,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       width: context.width(),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: svGetScaffoldColor(),
+        color: Colors.white,
         borderRadius: radiusOnly(
             topRight: SVAppContainerRadius, topLeft: SVAppContainerRadius),
       ),
@@ -98,7 +100,6 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                SizedBox(height: 50,),
                 BlocBuilder<AddPostBloc, AddPostState>(
                     builder: (context, state) {
                   if (state is PaginationLoadedState) {
@@ -145,36 +146,61 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const SizedBox(height: 16,),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: () {
-                  openImages();
-                },
-                child: Container(
-                  height: 62,
-                  width: 52,
-                  // color: context.cardColor,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child:const Icon(Icons.image_outlined,size: 30,color: Colors.grey,),
-                  // Image.asset('images/socialv/icons/ic_CameraPost.png',
-                  //     height: 22, width: 22, fit: BoxFit.cover),
-                ),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      openImages();
+                    },
+                    child: const SizedBox(
+                      height: 32,
+                      width: 32,
+                      // color: context.cardColor,
+                      child:Icon(Icons.image_outlined,size: 32,color: Colors.grey,),
+                      // Image.asset('images/socialv/icons/ic_CameraPost.png',
+                      //     height: 22, width: 22, fit: BoxFit.cover),
+                    ),
+                  ),
+                  const SizedBox(width: 10,),
+                  Text('From Gallery',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:Colors.black,fontSize:kDefaultFontSize),)
+
+                ],
               ),
-              GestureDetector(
-                  onTap: () {
-                    openVideo();
-                  },
-                  child: Image.asset('images/socialv/icons/ic_Video.png',
-                      height: 32, width: 32, fit: BoxFit.cover)),
-              GestureDetector(
-                  onTap: () {
-                    openCamera();
-                  },
-                  child: Image.asset('images/socialv/icons/ic_CameraPost.png',
-                      height: 32, width: 32, fit: BoxFit.cover)),
+              Divider(color: Colors.grey[300],),
+              Row(
+                children: <Widget>[
+                  GestureDetector(
+                      onTap: () {
+                        openVideo();
+                      },
+                      child: Image.asset('images/socialv/icons/ic_Video.png',
+                          height: 32, width: 32, fit: BoxFit.cover)),
+                  const SizedBox(width: 10,),
+                   Text('Take Video',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:Colors.black,fontSize:kDefaultFontSize),)
+                ],
+              ),
+              Divider(color: Colors.grey[300],),
+
+              Row(
+                children: [
+                  GestureDetector(
+                      onTap: () {
+                        openCamera();
+                      },
+                      child: Image.asset('images/socialv/icons/ic_CameraPost.png',
+                          height: 32, width: 32, fit: BoxFit.cover)),
+                  const SizedBox(width: 10,),
+                  Text('Take Picture',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:Colors.black,fontSize:kDefaultFontSize),)
+
+                ],
+              ),
+              Divider(color: Colors.grey[300],),
+
               // Image.asset('images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
               // GestureDetector(
               //     onTap: () {

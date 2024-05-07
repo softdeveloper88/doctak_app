@@ -235,7 +235,7 @@ class Application {
     // profilePic = json['profile_pic'];
   }
 
-  String? id;
+  dynamic id;
 
   // String? name;
   // String? profilePic;

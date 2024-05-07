@@ -173,15 +173,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       Emitter<HomeState> emit) async {
     try {
     AppData.adsSettingModel = await postService.advertisementSetting('Bearer ${AppData.userToken}');
-    print("dot ${AppData.adsSettingModel.data}");
-
+    print("ads data  ${AppData.adsSettingModel.toJson()}");
     AppData.listAdsType = await postService.advertisementTypes('Bearer ${AppData.userToken}',);
     AppData.isShowGoogleBannerAds=(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty) &&((AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty??false));
     AppData.androidBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.androidId;
     AppData.iosBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.iosId;
     print(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty);
     print(AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty);
-    print("dot ${AppData.listAdsType.length}");
+    // print("dot ${AppData.listAdsType.length}");
     } catch (e) {
       // emit(CountriesDataError('$e'));
     }

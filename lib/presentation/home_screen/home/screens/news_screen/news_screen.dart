@@ -72,9 +72,15 @@ class _NewsScreenState extends State<NewsScreen> {
         child: Scaffold(
             backgroundColor: svGetScaffoldColor(),
             appBar: AppBar(
+              leading: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Icon(Icons.arrow_back_ios)),
+
               backgroundColor: svGetScaffoldColor(),
               iconTheme: IconThemeData(color: context.iconColor),
-              title: Text('Jobs', style: boldTextStyle(size: 18)),
+              title: Text('World News', style: boldTextStyle(size: 18)),
               elevation: 0,
               centerTitle: true,
               actions: const [

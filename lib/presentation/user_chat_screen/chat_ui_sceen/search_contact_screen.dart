@@ -47,6 +47,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:svGetScaffoldColor(),
       appBar: AppBar(
         title:  Text('Search Contacts',style: boldTextStyle(),),
       ),
@@ -135,71 +136,74 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                           ? const Center(
                         child: CircularProgressIndicator(),
                       )
-                          :  Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: ListTile(
-                            leading:GestureDetector(
-                              onTap: (){
-                                SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
+                          :  Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Material(
+                                                    elevation: 2,
+                                                    shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: ListTile(
+                              leading:GestureDetector(
+                                onTap: (){
+                                  SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
 
-                              },
-                              child: Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 3),
+                                },
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage: CachedNetworkImageProvider(
+                                      '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}',
                                     ),
-                                  ],
-                                ),
-                                child: CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: CachedNetworkImageProvider(
-                                    '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}',
                                   ),
                                 ),
                               ),
-                            ),
-                            // GestureDetector(
-                            //   onTap: (){
-                            //     SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
-                            //   },
-                            //   child: CircleAvatar(
-                            //     radius: 30,
-                            //     backgroundImage: CachedNetworkImageProvider(
-                            //         '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}'
-                            //     ),
-                            //   ),
-                            // ),
-                            title: Text(
-                              '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                              // GestureDetector(
+                              //   onTap: (){
+                              //     SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
+                              //   },
+                              //   child: CircleAvatar(
+                              //     radius: 30,
+                              //     backgroundImage: CachedNetworkImageProvider(
+                              //         '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}'
+                              //     ),
+                              //   ),
+                              // ),
+                              title: Text(
+                                '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
-                            ),
-                            trailing: const Icon(
-                              Icons.chat, // Use the chat icon or any other icon you prefer
-                              color: Colors.blue, // Set the color of the icon
-                            ),
-                            onTap: () {
-                              ChatRoomScreen(username: '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',profilePic: '${bloc.searchContactsList[index].profilePic}',id: '${bloc.searchContactsList[index].id}',roomId: '',).launch(context);
+                              trailing: const Icon(
+                                Icons.chat, // Use the chat icon or any other icon you prefer
+                                color: Colors.blue, // Set the color of the icon
+                              ),
+                              onTap: () {
+                                ChatRoomScreen(username: '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',profilePic: '${bloc.searchContactsList[index].profilePic}',id: '${bloc.searchContactsList[index].id}',roomId: '',).launch(context);
 
-                              // Add navigation logic or any other action on contact tap
-                            },
-                          ),
-                        ),
-                      );
+                                // Add navigation logic or any other action on contact tap
+                              },
+                            ),
+                                                    ),
+                                                  ),
+                          );
                       // SVProfileFragment().launch(context);
                     },
                     itemCount: bloc.searchContactsList.length,

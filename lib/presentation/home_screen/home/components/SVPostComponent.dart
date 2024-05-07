@@ -129,25 +129,39 @@ class _SVPostComponentState extends State<SVPostComponent> {
                               height: 50,
                               width: 50,
                               fit: BoxFit.cover,
-                            ).cornerRadiusWithClipRRect(0),
+                            ).cornerRadiusWithClipRRect(20),
                             12.width,
-                            Text(widget.homeBloc.postList[index].user?.name??'',
-                                style: boldTextStyle()),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(widget.homeBloc.postList[index].user?.name??'',
+                                        style: boldTextStyle()),
+                                    Image.asset('images/socialv/icons/ic_TickSquare.png',
+                                        height: 14, width: 14, fit: BoxFit.cover),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text(timeAgo.format(DateTime.parse(widget.homeBloc.postList[index].createdAt!)),
+                                        style: secondaryTextStyle(
+                                            color: svGetBodyColor(), size: 12)),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 8.0),
+                                      child: Icon(Icons.access_time,size: 20,color: Colors.grey,),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
                             4.width,
-                            Image.asset('images/socialv/icons/ic_TickSquare.png',
-                                height: 14, width: 14, fit: BoxFit.cover),
                           ],
                         ).paddingSymmetric(horizontal: 16),
                         Expanded(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
-
                             children: [
-                              Flexible(
-                                child: Text(timeAgo.format(DateTime.parse(widget.homeBloc.postList[index].createdAt!)),
-                                    style: secondaryTextStyle(
-                                        color: svGetBodyColor(), size: 12)),
-                              ),
                               if(widget.homeBloc.postList[index].userId==AppData.logInUserId) PopupMenuButton(
                                 itemBuilder: (context) {
                                   return [

@@ -25,6 +25,11 @@ bool isEditModeMap = false;
 
 class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
   @override
+  void initState() {
+    isEditModeMap=false;
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +44,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
             child: const Icon(Icons.arrow_back_ios)),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
-          CustomImageView(
+          if (widget.profileBloc.isMe) CustomImageView(
             onTap: () {
               setState(() {
                 isEditModeMap =!isEditModeMap;

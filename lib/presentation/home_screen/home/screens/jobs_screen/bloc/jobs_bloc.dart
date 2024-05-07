@@ -40,7 +40,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       print(event.searchTerm);
     }
     // ProgressDialogUtils.showProgressDialog();
-    try {
+    // try {
       JobsModel response = await postService.getJobsList(
           'Bearer ${AppData.userToken}',
           '${pageNumber}',
@@ -55,13 +55,13 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(drugsData));
-    } catch (e) {
-      print(e);
-
-      // emit(PaginationLoadedState());
-
-      emit(DataError('No Data Found'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //
+    //   // emit(PaginationLoadedState());
+    //
+    //   emit(DataError('No Data Found'));
+    // }
   }
 
   _onGetJobs1(GetPost event, Emitter<JobsState> emit) async {

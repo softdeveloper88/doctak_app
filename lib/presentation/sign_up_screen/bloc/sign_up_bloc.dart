@@ -76,7 +76,6 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       if (response.response.statusCode == 200) {
 
         ProgressDialogUtils.hideProgressDialog();
-        print('rese ${response.response.data}');
         emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
             (state as DataLoaded).isDoctorRole,true, response.response.data));
 
@@ -105,6 +104,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       final response = await apiService.completeProfile(
            'Bearer ${event.token}',
           event.firstName, event.lastName,event.country,event.state,event.phone,event.userType);
+
     if(response.user!.userType !=null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', response.token ?? '');

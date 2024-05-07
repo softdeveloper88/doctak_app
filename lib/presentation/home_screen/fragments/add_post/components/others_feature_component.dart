@@ -45,10 +45,10 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16),
+      // margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: SVDividerColor, borderRadius: radius(SVAppCommonRadius)),
+          color: Colors.white, borderRadius: radius(SVAppCommonRadius)),
       child: Column(
         children: [
           // SizedBox(
@@ -95,20 +95,21 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                   svShowShareBottomSheet(context, widget.searchPeopleBloc);
                 },
                 child: Container(
+
                   decoration: BoxDecoration(
-                      color: Colors.lightBlueAccent.withOpacity(0.4),
+                      color:scaffoldLightColor,
                       borderRadius: radius(10)),
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(8),
                   child: const Row(
                     children: [
                       Icon(
                         Icons.tag_outlined,
-                        color: Colors.blue,
+                        color: cardBackgroundBlackDark,
                       ),
                       Text(
                         'Tags Friends:',
                         style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
+                            color: cardBackgroundBlackDark, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),

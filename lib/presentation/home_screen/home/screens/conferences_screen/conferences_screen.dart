@@ -51,6 +51,12 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
         backgroundColor: svGetScaffoldColor(),
         appBar: AppBar(
           // toolbarHeight: 200,
+          leading: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: const Icon(Icons.arrow_back_ios)),
+
           backgroundColor: svGetScaffoldColor(),
           iconTheme: IconThemeData(color: context.iconColor),
           title: BlocConsumer<SplashBloc, SplashState>(

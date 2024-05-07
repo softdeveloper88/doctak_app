@@ -38,7 +38,7 @@ class ForgotBloc extends Bloc<ForgotEvent, ForgotState> {
         "Accept": "application/json",
       },
     );
-      print("response ${response.statusCode}");
+
       if (response.statusCode==200) {
         ProgressDialogUtils.hideProgressDialog();
 

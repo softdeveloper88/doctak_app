@@ -36,7 +36,7 @@ class ForgotPassword extends StatelessWidget {
                if(data['success']) {
                  ScaffoldMessenger.of(context).showSnackBar(
                    SnackBar(
-                     content: Text(data['message'][0]),
+                     content: Text(data['message']),
                      backgroundColor: Colors.green,
                    ),
                  );
@@ -50,7 +50,7 @@ class ForgotPassword extends StatelessWidget {
                }else{
                  ScaffoldMessenger.of(context).showSnackBar(
                    SnackBar(
-                     content: Text(data['message'][0]),
+                     content: Text(data['message']),
                      backgroundColor: Colors.red,
                    ),
                  );

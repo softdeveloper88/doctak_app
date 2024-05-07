@@ -215,55 +215,68 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // try {
     // print((specialtyName ?? event.userProfile?.user?.specialty ?? ''));
    int privacyLength=event.userProfile?.privacySetting?.length??0;
-    final response = await postService.getProfileUpdate(
-      'Bearer ${AppData.userToken}',
-      event.userProfile?.user?.firstName ?? '',
-      event.userProfile?.user?.lastName ?? "",
-      event.userProfile?.user?.phone ?? '',
-      event.userProfile?.user?.licenseNo ?? " ",
-      specialtyName ?? event.userProfile?.user?.specialty ?? '',
-      event.userProfile?.user?.dob ?? "",
+   if(event.updateProfileSection==1) {
+     final response = await postService.getProfileUpdate(
+       'Bearer ${AppData.userToken}',
+       event.userProfile?.user?.firstName ?? '',
+       event.userProfile?.user?.lastName ?? "",
+       event.userProfile?.user?.phone ?? '',
+       event.userProfile?.user?.licenseNo ?? " ",
+       specialtyName ?? event.userProfile?.user?.specialty ?? '',
+       event.userProfile?.user?.dob ?? "",
        'male',
-      country ?? event.userProfile?.user?.country ?? 'United Arab Emirates',
-      stateName ?? event.userProfile?.user?.city ?? 'Dubai',
-      country ?? event.userProfile?.user?.country ?? "United Arab Emirates",
-      // event.userProfile?.privacySetting?[3].visibility ?? 'globe',
-      // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
-      // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
-      // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
-      privacyLength >= 3 ? event.userProfile?.privacySetting![3].visibility ?? 'globe':'globe',
-      privacyLength >= 4 ? event.userProfile?.privacySetting![4].visibility ?? 'globe':'globe',
-      privacyLength >= 5 ? event.userProfile?.privacySetting![5].visibility ?? 'globe':'globe',
-      privacyLength >= 8 ? event.userProfile?.privacySetting![8].visibility ?? 'globe':'globe',
-      'globe',
-      'globe',
-      privacyLength >= 10 ? event.userProfile?.privacySetting![10].visibility ?? 'globe':'globe',
-      privacyLength >= 11 ? event.userProfile?.privacySetting![11].visibility ?? 'globe':'globe',
-      privacyLength >= 12 ? event.userProfile?.privacySetting![12].visibility ?? 'globe':'globe',
-    );
-
-
-    // final response1 = await postService.getWorkEducationUpdate(
-    //     'Bearer ${AppData.userToken}', event.workEducationModel ?? []);
-    //
-    // print(response1.data);
-    // final response3 = await postService.getInterestsUpdate(
-    //     'Bearer ${AppData.userToken}', event.interestModel!);
-    //
-
-    final response2 = await postService.updateAboutMe(
-      'Bearer ${AppData.userToken}',
-      event.userProfile?.profile?.aboutMe ?? '...',
-      event.userProfile?.profile?.address ?? '...',
-      event.userProfile?.profile?.birthplace ?? '...',
-      event.userProfile?.profile?.livesIn ?? '...',
-      privacyLength >= 0 ?   event.userProfile?.privacySetting![0].visibility ?? 'lock':'lock',
-      privacyLength >= 1 ?  event.userProfile?.privacySetting![1].visibility ?? 'lock':'lock',
-      privacyLength >= 2 ?  event.userProfile?.privacySetting![2].visibility ?? 'lock':'lock',
-      privacyLength >= 6 ?  event.userProfile?.privacySetting![6].visibility ?? 'lock':'lock',
-      privacyLength >= 7 ? event.userProfile?.privacySetting![7].visibility ?? 'lock':'lock',
-    );
-
+       country ?? event.userProfile?.user?.country ?? 'United Arab Emirates',
+       stateName ?? event.userProfile?.user?.city ?? 'Dubai',
+       country ?? event.userProfile?.user?.country ?? "United Arab Emirates",
+       // event.userProfile?.privacySetting?[3].visibility ?? 'globe',
+       // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
+       // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
+       // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
+       privacyLength >= 3 ? event.userProfile?.privacySetting![3].visibility ??
+           'globe' : 'globe',
+       privacyLength >= 4 ? event.userProfile?.privacySetting![4].visibility ??
+           'globe' : 'globe',
+       privacyLength >= 5 ? event.userProfile?.privacySetting![5].visibility ??
+           'globe' : 'globe',
+       privacyLength >= 8 ? event.userProfile?.privacySetting![8].visibility ??
+           'globe' : 'globe',
+       'globe',
+       'globe',
+       privacyLength >= 10 ? event.userProfile?.privacySetting![10]
+           .visibility ?? 'globe' : 'globe',
+       privacyLength >= 11 ? event.userProfile?.privacySetting![11]
+           .visibility ?? 'globe' : 'globe',
+       privacyLength >= 12 ? event.userProfile?.privacySetting![12]
+           .visibility ?? 'globe' : 'globe',
+     );
+   }else if(event.updateProfileSection==2) {
+     // final response1 = await postService.getWorkEducationUpdate(
+     //     'Bearer ${AppData.userToken}', event.workEducationModel ?? []);
+     //
+     // print(response1.data);
+     // final response3 = await postService.getInterestsUpdate(
+     //     'Bearer ${AppData.userToken}', event.interestModel!);
+     //
+print(event.userProfile?.profile?.aboutMe??'');
+     final response2 = await postService.updateAboutMe(
+       'Bearer ${AppData.userToken}',
+       event.userProfile?.profile?.aboutMe ?? '...',
+       event.userProfile?.profile?.address ?? '...',
+       event.userProfile?.profile?.birthplace ?? '...',
+       event.userProfile?.profile?.livesIn ?? '...',
+       privacyLength >= 0 ? event.userProfile?.privacySetting![0].visibility ??
+           'lock' : 'lock',
+       privacyLength >= 1 ? event.userProfile?.privacySetting![1].visibility ??
+           'lock' : 'lock',
+       privacyLength >= 2 ? event.userProfile?.privacySetting![2].visibility ??
+           'lock' : 'lock',
+       privacyLength >= 6 ? event.userProfile?.privacySetting![6].visibility ??
+           'lock' : 'lock',
+       privacyLength >= 7 ? event.userProfile?.privacySetting![7].visibility ??
+           'lock' : 'lock',
+     );
+     print(response2.response);
+   }
     // final response3 = await postService.getPlacesLivedUpdate(
     //   'Bearer ${AppData.userToken}',
     //   '','',

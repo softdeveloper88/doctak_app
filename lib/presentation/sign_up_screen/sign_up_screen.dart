@@ -452,7 +452,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           listener: (context, state) {
                                             if (state is DataLoaded) {
                                               if (state.isSubmit) {
-                                                print(state.response['success'] );
+                                                print(state.response  );
                                                 if (state.response['success']) {
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(

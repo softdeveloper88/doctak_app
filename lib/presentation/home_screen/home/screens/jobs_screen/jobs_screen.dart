@@ -16,7 +16,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-
 import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
 import '../../../../splash_screen/bloc/splash_state.dart';
@@ -45,7 +44,8 @@ class _JobsScreenState extends State<JobsScreen> {
   @override
   void initState() {
     jobsBloc.add(
-      JobLoadPageEvent(page: 1, countryId: '1',isExpired: 'New', searchTerm: ''),
+      JobLoadPageEvent(
+          page: 1, countryId: '1', isExpired: 'New', searchTerm: ''),
     );
     profileBloc.add(UpdateSpecialtyDropdownValue1(''));
     super.initState();
@@ -130,7 +130,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                         newValue == element.countryName);
                                 var countryId =
                                     state.countriesModel.countries![index].id;
-                                    BlocProvider.of<SplashBloc>(context).add(
+                                BlocProvider.of<SplashBloc>(context).add(
                                     LoadDropdownData(
                                         countryId.toString(),
                                         state.typeValue,
@@ -530,7 +530,7 @@ class _JobsScreenState extends State<JobsScreen> {
 
   Widget _buildPostList(BuildContext context) {
     final bloc = jobsBloc;
-      return Expanded(
+    return Expanded(
       child: bloc.drugsData.isEmpty
           ? const Center(
               child: Text("No Jobs Found"),
@@ -658,7 +658,8 @@ class _JobsScreenState extends State<JobsScreen> {
                                       children: [
                                         Text('Date To',
                                             style: secondaryTextStyle(
-                                                color: Colors.black,)),
+                                              color: Colors.black,
+                                            )),
                                         Row(
                                           children: <Widget>[
                                             const Icon(
@@ -686,16 +687,14 @@ class _JobsScreenState extends State<JobsScreen> {
                                 Text(
                                     'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
                                     style: secondaryTextStyle(
-                                        color: Colors.black,)),
+                                      color: Colors.black,
+                                    )),
                                 const SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: HtmlWidget(
-                                        '<p>${bloc.drugsData[index].description}</p>',
-                                      ),
-                                    ),
-                                  ],
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: HtmlWidget(
+                                    '<p>${bloc.drugsData[index].description}</p>',
+                                  ),
                                 ),
                                 const SizedBox(height: 5),
                                 Padding(
