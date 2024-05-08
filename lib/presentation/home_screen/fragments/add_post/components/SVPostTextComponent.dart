@@ -30,13 +30,13 @@ class SVPostTextComponent extends StatelessWidget {
 
         children: [
           TextField(
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.black),
             autofocus: false,
             maxLines: 5,
             onChanged: (value){
               searchPeopleBloc.add(TextFieldEvent(value));
               },
-            cursorColor: Colors.white,
+            cursorColor: Colors.black,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Whats On Your Mind',

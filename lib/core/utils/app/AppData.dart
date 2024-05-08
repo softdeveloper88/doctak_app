@@ -38,6 +38,10 @@ class AppData {
   static bool? isShowGoogleBannerAds;
   static String? androidBannerAdsId;
   static String? iosBannerAdsId;
+ /// Native Ads Setting
+  static bool? isShowGoogleNativeAds;
+  static String? androidNativeAdsId;
+  static String? iosNativeAdsId;
   // LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
   // static AgoraRtmClient? _client;

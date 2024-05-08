@@ -15,7 +15,7 @@ TextEditingController commentController=TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       color: svGetScaffoldColor(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -24,7 +24,7 @@ TextEditingController commentController=TextEditingController();
           Row(
             children: [
               16.width,
-              Image.network(AppData.imageUrl + AppData.profile_pic, height: 48, width: 48, fit: BoxFit.cover).cornerRadiusWithClipRRect(8),
+              Image.network(AppData.imageUrl + AppData.profile_pic, height: 48, width: 48, fit: BoxFit.cover).cornerRadiusWithClipRRect(50),
               10.width,
               SizedBox(
                 width: context.width() * 0.6,
@@ -32,7 +32,7 @@ TextEditingController commentController=TextEditingController();
                   controller: commentController,
                   textFieldType: TextFieldType.OTHER,
                   decoration: InputDecoration(
-                    hintText: 'Write A Comment',
+                    hintText: 'Write a comment',
                     hintStyle: secondaryTextStyle(color: svGetBodyColor()),
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -46,7 +46,7 @@ TextEditingController commentController=TextEditingController();
                       postId: id, comment: commentController.text));
                   commentController.text='';
                 }
-              }, child: Text('Send', style: secondaryTextStyle(color: SVAppColorPrimary)))
+              }, child: Text('Post', style: secondaryTextStyle(color: SVAppColorPrimary)))
             ],
           ),
         ],

@@ -54,9 +54,9 @@ class Data {
   String? userId;
   String? advertisementType;
   dynamic deviceType;
-  String? isPaid;
+  dynamic isPaid;
   String? provider;
-  String? isAdvertisementOn;
+  dynamic isAdvertisementOn;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

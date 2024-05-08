@@ -43,8 +43,13 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
         title: Text('Comments', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                color: Colors.black),
+            onPressed:(){Navigator.pop(context);}
+        ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
         ],
       ),
       body: BlocConsumer<CommentBloc, CommentState>(
@@ -67,28 +72,33 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
               return const Center(child: CircularProgressIndicator());
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
-              return commentBloc.postList.isEmpty? const Center(child: Text('No comments'),):ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  itemCount: commentBloc.postList.length,
-                  itemBuilder: (context, index) {
-                    // if (commentBloc.pageNumber <=
-                    //     commentBloc.numberOfPage) {
-                    //   if (index ==
-                    //       commentBloc.postList.length -
-                    //           commentBloc.nextPageTrigger) {
-                    //     commentBloc
-                    //         .add(CheckIfNeedMoreDataEvent(index: index));
-                    //   }
-                    // }
-                    // return commentBloc.numberOfPage !=
-                    //     commentBloc.pageNumber - 1 &&
-                    //     index >= commentBloc.postList.length - 1
-                    //     ? const Center(
-                    //   child: CircularProgressIndicator(),
-                    // ) :
-                    return SVCommentComponent(
-                        comment: commentBloc.postList[index]);
-                  });
+              return commentBloc.postList.isEmpty? const Center(child: Text('No comments'),):Padding(
+                padding: const EdgeInsets.only(bottom: 60.0),
+                child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: commentBloc.postList.length,
+                    itemBuilder: (context, index) {
+                      // if (commentBloc.pageNumber <=
+                      //     commentBloc.numberOfPage) {
+                      //   if (index ==
+                      //       commentBloc.postList.length -
+                      //           commentBloc.nextPageTrigger) {
+                      //     commentBloc
+                      //         .add(CheckIfNeedMoreDataEvent(index: index));
+                      //   }
+                      // }
+                      // return commentBloc.numberOfPage !=
+                      //     commentBloc.pageNumber - 1 &&
+                      //     index >= commentBloc.postList.length - 1
+                      //     ? const Center(
+                      //   child: CircularProgressIndicator(),
+                      // ) :
+                      return SVCommentComponent(
+                          comment: commentBloc.postList[index]);
+                    }),
+              );
             } else {
               return const Center(child: Text("No Comment Found"));
             }

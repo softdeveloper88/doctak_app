@@ -59,12 +59,13 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     //   pageNumber = 1;
 
     // }
-    try {
+    // try {
       var response = await postService.makeComment(
         'Bearer ${AppData.userToken}',
         event.postId.toString(),
         event.comment ?? "",
       );
+      print(event.comment);
       postList.insert(
           0,
           PostComments(
@@ -85,12 +86,12 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(postList));
-    } catch (e) {
-      print(e);
-
-      emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //
+    //   emit(PaginationLoadedState());
+    //
+    //   // emit(DataError('An error occurred $e'));
+    // }
   }
 }

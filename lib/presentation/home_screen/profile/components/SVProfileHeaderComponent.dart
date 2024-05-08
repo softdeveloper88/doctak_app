@@ -91,7 +91,14 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                       ).cornerRadiusWithClipRRectOnly(
                         bottomLeft: 20,
                         bottomRight: 20),
-
+                        if(!widget.isMe!) Positioned(
+                            left: 16,
+                            top: 24,
+                            child: IconButton(
+                              onPressed: (){
+                                Navigator.pop(context);
+                              },
+                                icon: const Icon(Icons.arrow_back_ios,))),
                 Positioned(
                   bottom: 0,
                   child: GestureDetector(
@@ -136,8 +143,26 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                           ? Image.asset('images/socialv/faces/face_5.png',
                                   height: 100, width: 100, fit: BoxFit.cover)
                               .cornerRadiusWithClipRRect(SVAppCommonRadius)
-                          : Image.network(
-                                  '${widget.userProfile?.profilePicture.validate()}',
+                          : CachedNetworkImage(
+                          placeholder: (context, url) => Container(
+                            color:  Colors.transparent,
+                            height: 100,
+                            width: 100,
+                            child:Image.asset(
+                              'images/socialv/faces/face_5.png',
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+
+                          errorWidget: (context, url, error) => Image.asset(
+                            'images/socialv/faces/face_5.png',
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                                  imageUrl: '${widget.userProfile?.profilePicture.validate()}',
                                   height: 100,
                                   width: 100,
                                   fit: BoxFit.cover)

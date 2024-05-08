@@ -97,16 +97,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       );
 
       int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
-      bool isLike=postList[index].likes!.where((element) => element.postId.toString()==event.postId.toString()).isEmpty;
-      if(isLike) {
-        postList[index].likes!.add(Likes(
-            id: 1,
-            userId: AppData.logInUserId,
-            postId: event.postId.toString()
-        ));
-      }else{
-
-        postList[index].likes!.removeLast();
+      if(index>0) {
+        bool isLike = postList[index].likes!.where((element) =>
+        element.postId.toString() == event.postId.toString()).isEmpty;
+        if (isLike) {
+          postList[index].likes!.add(Likes(
+              id: 1,
+              userId: AppData.logInUserId,
+              postId: event.postId.toString()
+          ));
+        } else {
+          postList[index].likes!.removeLast();
+        }
       }
       // numberOfPage = response.posts?.lastPage ?? 0;
       // if (pageNumber < numberOfPage + 1) {
@@ -171,19 +173,26 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
   Future<void> _adsSettingApi(AdsSettingEvent event,
       Emitter<HomeState> emit) async {
-    try {
+    // try {
     AppData.adsSettingModel = await postService.advertisementSetting('Bearer ${AppData.userToken}');
     print("ads data  ${AppData.adsSettingModel.toJson()}");
     AppData.listAdsType = await postService.advertisementTypes('Bearer ${AppData.userToken}',);
-    AppData.isShowGoogleBannerAds=(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty) &&((AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty??false));
+
+    // banner ads
+    AppData.isShowGoogleBannerAds=(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty) &&((AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn ==1).isNotEmpty??false));
     AppData.androidBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.androidId;
     AppData.iosBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.iosId;
-    print(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty);
-    print(AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty);
-    // print("dot ${AppData.listAdsType.length}");
-    } catch (e) {
-      // emit(CountriesDataError('$e'));
-    }
+  // native ads
+    AppData.isShowGoogleNativeAds=(AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').isNotEmpty) &&((AppData.adsSettingModel.data?.where((element) => element.advertisementType=='native' && element.provider=='Google' && element.isAdvertisementOn==1).isNotEmpty??false));
+    AppData.androidNativeAdsId=AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').single.androidId;
+    AppData.iosNativeAdsId=AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').single.iosId;
+    print(AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').isNotEmpty);
+    print(AppData.adsSettingModel.data?.where((element) => element.advertisementType=='native' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty);
+    print("dot1 ${AppData.isShowGoogleBannerAds}");
+    print("dot ${AppData.isShowGoogleNativeAds}");
+    // } catch (e) {
+    //   // emit(CountriesDataError('$e'));
+    // }
   }
 //  _onGetPosts1(GetPost event, Emitter<HomeState> emit) async {
 //   emit(DataInitial());

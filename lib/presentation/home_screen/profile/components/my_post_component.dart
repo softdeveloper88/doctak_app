@@ -20,6 +20,8 @@ import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../fragments/home_main_screen/bloc/home_bloc.dart';
+
 class MyPostComponent extends StatefulWidget {
 
   MyPostComponent(this.profileBloc,  {super.key});
@@ -29,6 +31,64 @@ class MyPostComponent extends StatefulWidget {
 }
 
 class _MyPostComponentState extends State<MyPostComponent> {
+  HomeBloc homeBloc=HomeBloc();
+  showAlertDialog(BuildContext context, int id) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: const Text(
+        "Cancel",
+        style: TextStyle(color: Colors.red),
+      ),
+      onPressed: () {
+        setState(() {
+          Navigator.of(context).pop('dismiss');
+        });
+      },
+    );
+    Widget continueButton = TextButton(
+      child: const Text("Yes", style: TextStyle(color: Colors.black)),
+      onPressed: () async {
+
+        homeBloc.add(DeletePostEvent(postId:id));
+        setState(() {
+          Navigator.of(context).pop();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Post Delete Successfully',
+            ),
+          ),
+        );
+        // } else {
+        //   setState(() {
+        //     _isLoading = false;
+        //     Navigator.of(context).pop();
+        //   });
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(
+        //       content: Text(
+        //         response['message'],
+        //       ),
+        //     ),
+        //   );
+        // }
+      },
+    );
+
+    // set up the AlertDialog
+    return AlertDialog(
+      title: const Text("Warning"),
+      content: const Text("Would you like to Delete?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileBloc, ProfileState>(
@@ -37,19 +97,24 @@ class _MyPostComponentState extends State<MyPostComponent> {
       // buildWhen: (previous, current) => current is! DrugsState,
       listener: (BuildContext context, ProfileState state) {
         if (state is DataError) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              content: Text(state.errorMessage),
-            ),
-          );
+          // showDialog(
+          //   context: context,
+          //   builder: (context) => AlertDialog(
+          //     content: Text(state.errorMessage),
+          //   ),
+          // );
         }
       },
       builder: (context, state) {
-        print("state $state");
+        // print("state $state");
         if (state is PaginationLoadedState) {
           // print(state.drugsModel.length);
-          return ListView.builder(
+          return widget.profileBloc.postList.isEmpty? const SizedBox(
+            height: 200,
+            child: Center(
+              child: Text("No Post Found"),
+            ),
+          ) :ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             scrollDirection: Axis.vertical,
             itemCount: widget.profileBloc.postList.length,
@@ -77,33 +142,80 @@ class _MyPostComponentState extends State<MyPostComponent> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CachedNetworkImage(
-                              imageUrl: "${AppData.imageUrl}${widget.profileBloc.postList[index].user?.profilePic!.validate()}",
+                              imageUrl:"${AppData.imageUrl}${widget.profileBloc.postList[index].user?.profilePic!.validate()}",
                               height: 50,
                               width: 50,
                               fit: BoxFit.cover,
-                            ).cornerRadiusWithClipRRect(SVAppCommonRadius),
+                            ).cornerRadiusWithClipRRect(20),
                             12.width,
-                            Text(widget.profileBloc.postList[index].user!.name.validate(),
-                                style: boldTextStyle()),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(widget.profileBloc.postList[index].user?.name??'',
+                                        style: boldTextStyle()),
+                                    const SizedBox(width: 10,),
+                                    Image.asset('images/socialv/icons/ic_TickSquare.png',
+                                        height: 14, width: 14, fit: BoxFit.cover),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text(timeAgo.format(DateTime.parse(widget.profileBloc.postList[index].createdAt!)),
+                                        style: secondaryTextStyle(
+                                            color: svGetBodyColor(), size: 12)),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 8.0),
+                                      child: Icon(Icons.access_time,size: 20,color: Colors.grey,),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
                             4.width,
-                            Image.asset('images/socialv/icons/ic_TickSquare.png',
-                                height: 14, width: 14, fit: BoxFit.cover),
                           ],
                         ).paddingSymmetric(horizontal: 16),
                         Expanded(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(timeAgo.format(DateTime.parse(widget.profileBloc.postList[index].createdAt!)),
-                                  style: secondaryTextStyle(
-                                      color: svGetBodyColor(), size: 12)),
-                              IconButton(onPressed: () {},
-                                  icon: const Icon(Icons.more_horiz)),
+                              if(widget.profileBloc.postList[index].userId==AppData.logInUserId) PopupMenuButton(
+                                itemBuilder: (context) {
+                                  return [
+                                    PopupMenuItem(
+                                      child: Builder(
+                                          builder: (context) {
+                                            return Column(
+                                              children: ["Delete"].map((String item) {
+                                                return PopupMenuItem(
+                                                  value: item,
+                                                  child: Text(item),
+                                                );
+                                              }).toList(),
+                                            );
+                                          }
+                                      ),
+                                    ),
+                                  ];
+                                },
+                                onSelected: (value) {
+                                  if(value=='Delete'){
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return showAlertDialog(context,widget.profileBloc.postList[index].id??0);
+                                      },
+                                    );
+                                  }
+                                },
+                              )
+                              // IconButton(onPressed: () {},
+                              //     icon: const Icon(Icons.more_horiz)),
                             ],
-                          ).paddingSymmetric(horizontal: 4),
+                          ).paddingSymmetric(horizontal: 8),
                         ),
                       ],
                     ),
@@ -113,39 +225,47 @@ class _MyPostComponentState extends State<MyPostComponent> {
                         .isNotEmpty
                         ? _buildPlaceholderWithoutFile(context, widget.profileBloc.postList[index].title??'', widget.profileBloc.postList[index].backgroundColor??'#ffff',widget.profileBloc.postList[index].image,widget.profileBloc.postList[index].media)
                     // ? svRobotoText(
-                    // text: profileBloc.postList[index].title.validate(),
+                    // text: homeBloc.postList[index].title.validate(),
                     // textAlign: TextAlign.start).paddingSymmetric(
                     // horizontal: 16)
                         : const Offstage(),
                     widget.profileBloc.postList[index].title
                         .validate()
                         .isNotEmpty ? 16.height : const Offstage(),
-                    _buildMediaContent(context,index).cornerRadiusWithClipRRect(SVAppCommonRadius).center(),
+                    _buildMediaContent(context,index).cornerRadiusWithClipRRect(0).center(),
                     // Image.asset('',
-                    //   // profileBloc.postList[index].image?.validate(),
+                    //   // homeBloc.postList[index].image?.validate(),
                     //   height: 300,
                     //   width: context.width() - 32,
                     //   fit: BoxFit.cover,
                     // ).cornerRadiusWithClipRRect(SVAppCommonRadius).center(),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('${widget.profileBloc.postList[index].likes?.length??0
+                              .validate()} Likes', style: secondaryTextStyle(
+                              color: svGetBodyColor())),
+                          Text('${widget.profileBloc.postList[index].comments?.length??0
+                              .validate()} comments', style: secondaryTextStyle(
+                              color: svGetBodyColor())),
+                        ],
+                      ),
+                    ),
+                    const Divider(color: Colors.grey,thickness: 0.2,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
+                        Column(
                           children: [
-                            Image.asset(
-                              'images/socialv/icons/ic_Chat.png',
-                              height: 22,
-                              width: 22,
-                              fit: BoxFit.cover,
-                              color: context.iconColor,
-                            ).onTap(() {
-                              SVCommentScreen(id:widget.profileBloc.postList[index].id??0).launch(context);
+                            InkWell(
+                              onTap: (){
+                                print(widget.profileBloc.postList[index].id);
+                                homeBloc.add(PostLikeEvent(postId:widget.profileBloc.postList[index].id??0));
 
-                              // const SVCommentScreen().launch(context);
-                            }, splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent),
-                            IconButton(
-                              icon: findIsLiked(widget.profileBloc.postList[index].likes)
+                              },
+                              child:findIsLiked(widget.profileBloc.postList[index].likes)
                                   ? Image.asset(
                                   'images/socialv/icons/ic_HeartFilled.png',
                                   height: 20, width: 22, fit: BoxFit.fill)
@@ -156,12 +276,29 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                 fit: BoxFit.cover,
                                 color: context.iconColor,
                               ),
-                              onPressed: () {
-                                // profileBloc.postList[index].like =
-                                // !postList[index].like.validate();
-                                // setState(() {});
-                              },
                             ),
+                            Text('Like', style: secondaryTextStyle(
+                                color: svGetBodyColor())),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Image.asset(
+                              'images/socialv/icons/ic_Chat.png',
+                              height: 22,
+                              width: 22,
+                              fit: BoxFit.cover,
+                              color: context.iconColor,
+                            ).onTap(() {
+                              SVCommentScreen(id:widget.profileBloc.postList[index].id??0).launch(context);
+                            }, splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent),
+                            Text('Comment', style: secondaryTextStyle(
+                                color: svGetBodyColor())),
+                          ],
+                        ),
+                        Column(
+                          children: [
                             Image.asset(
                               'images/socialv/icons/ic_Send.png',
                               height: 22,
@@ -172,11 +309,10 @@ class _MyPostComponentState extends State<MyPostComponent> {
                               // svShowShareBottomSheet(context,);
                             }, splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent),
+                            Text('Send', style: secondaryTextStyle(
+                                color: svGetBodyColor())),
                           ],
                         ),
-                        Text('${widget.profileBloc.postList[index].comments?.length??0
-                            .validate()} comments', style: secondaryTextStyle(
-                            color: svGetBodyColor())),
                       ],
                     ).paddingSymmetric(horizontal: 16),
                     // const Divider(indent: 16, endIndent: 16, height: 20),
@@ -235,23 +371,23 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     //         ],
                     //       ),
                     //     ),
-                        10.width,
-                    //     RichText(
-                    //       text: TextSpan(
-                    //         text: 'Liked By ',
-                    //         style: secondaryTextStyle(
-                    //             color: svGetBodyColor(), size: 12),
-                    //         children: <TextSpan>[
-                    //           TextSpan(text: 'Ms.Mountain ',
-                    //               style: boldTextStyle(size: 12)),
-                    //           TextSpan(text: 'And ',
-                    //               style: secondaryTextStyle(
-                    //                   color: svGetBodyColor(), size: 12)),
-                    //           TextSpan(text: '${widget.profileBloc.postList[index].likes?.length??0} Others ',
-                    //               style: boldTextStyle(size: 12)),
-                    //         ],
-                    //       ),
-                    //     )
+                    //     10.width,
+                    // //     RichText(
+                    // //       text: TextSpan(
+                    // //         text: 'Liked By ',
+                    // //         style: secondaryTextStyle(
+                    // //             color: svGetBodyColor(), size: 12),
+                    // //         children: <TextSpan>[
+                    // //           TextSpan(text: 'Ms.Mountain ',
+                    // //               style: boldTextStyle(size: 12)),
+                    // //           TextSpan(text: 'And ',
+                    // //               style: secondaryTextStyle(
+                    // //                   color: svGetBodyColor(), size: 12)),
+                    // //           TextSpan(text: '${widget.profileBloc.postList[index].likes?.length??0} Others ',
+                    // //               style: boldTextStyle(size: 12)),
+                    // //         ],
+                    // //       ),
+                    // //     )
                     //   ],
                     // )
                   ],

@@ -89,17 +89,17 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                   ),
                   Text(profileBloc.userProfile?.user?.specialty ?? '',
                       style: secondaryTextStyle(color: svGetBodyColor())),
-                  24.height,
-                  if (widget.userId != null)
-                    AppButton(
-                      shapeBorder:
-                          RoundedRectangleBorder(borderRadius: radius(4)),
-                      text: 'Following',
-                      textStyle: boldTextStyle(color: Colors.white),
-                      onTap: () {},
-                      elevation: 0,
-                      color: SVAppColorPrimary,
-                    ),
+                  // 24.height,
+                  // if (widget.userId != null)
+                  //   AppButton(
+                  //     shapeBorder:
+                  //         RoundedRectangleBorder(borderRadius: radius(4)),
+                  //     text: 'Following',
+                  //     textStyle: boldTextStyle(color: Colors.white),
+                  //     onTap: () {},
+                  //     elevation: 0,
+                  //     color: SVAppColorPrimary,
+                  //   ),
                   24.height,
                   if(AppData.isShowGoogleBannerAds??false)BannerAdWidget(),
                   8.height,

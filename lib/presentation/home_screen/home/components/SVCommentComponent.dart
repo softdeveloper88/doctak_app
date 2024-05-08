@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 class SVCommentComponent extends StatefulWidget {
@@ -17,16 +18,17 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(4),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), // Added top margin
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.grey[100],
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), // Added top margin
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(12),
+      //
+      // ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start, // Align items from top
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               CircleAvatar(
                 radius: 24,
@@ -37,25 +39,29 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.comment.name ?? '',
+                    widget.comment.name ?? 'No Name',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(width: 4), // Added margin between name and verified icon
-                  const Icon(Icons.verified, color: Colors.blue, size: 18),
+                  const SizedBox(width: 6), // Added margin between name and verified icon
+                  Image.asset('images/socialv/icons/ic_TickSquare.png',
+                      height: 14, width: 14, fit: BoxFit.cover),
                 ],
               ),
               const Spacer(),
-              Text(
-                timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
+
             ],
           ),
           const SizedBox(height: 8),
           Text(
             widget.comment.comment ?? '',
-            style: TextStyle(color: Colors.grey[800], fontSize: 16),
+            style: GoogleFonts.poppins(color:Colors.grey[800],fontSize:16)
+            // TextStyle(color: Colors.grey[800], fontSize: 16),
           ),
+          Text(
+            timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
+          ),
+          Divider(color: Colors.grey[300],)
         ],
       ),
     );
