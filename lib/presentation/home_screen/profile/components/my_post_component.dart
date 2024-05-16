@@ -762,7 +762,7 @@ class _PhotoGridState extends State<PhotoGrid> {
     var images = buildImages();
 
     return SizedBox(
-      height: 200.h,
+      height: 200,
       child: GridView(
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(

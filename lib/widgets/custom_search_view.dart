@@ -104,21 +104,21 @@ class CustomSearchView extends StatelessWidget {
         hintStyle: hintStyle ?? theme.textTheme.labelLarge,
         prefixIcon: prefix ??
             Container(
-              margin: EdgeInsets.fromLTRB(16.h, 11.v, 8.h, 11.v),
+              margin: EdgeInsets.fromLTRB(16, 11, 8, 11),
               child: CustomImageView(
                 imagePath: ImageConstant.imgRewind,
-                height: 18.adaptSize,
-                width: 18.adaptSize,
+                height: 18,
+                width: 18,
               ),
             ),
         prefixIconConstraints: prefixConstraints ??
             BoxConstraints(
-              maxHeight: 40.v,
+              maxHeight: 40,
             ),
         suffixIcon: suffix ??
             Padding(
               padding: EdgeInsets.only(
-                right: 15.h,
+                right: 15,
               ),
               child: IconButton(
                 onPressed: () => controller!.clear(),
@@ -130,20 +130,20 @@ class CustomSearchView extends StatelessWidget {
             ),
         suffixIconConstraints: suffixConstraints ??
             BoxConstraints(
-              maxHeight: 40.v,
+              maxHeight: 40,
             ),
         isDense: true,
         contentPadding: contentPadding ??
             EdgeInsets.only(
-              top: 12.v,
-              right: 12.h,
-              bottom: 12.v,
+              top: 12,
+              right: 12,
+              bottom: 12,
             ),
         fillColor: fillColor ?? appTheme.whiteA700,
         filled: filled,
         border: borderDecoration ??
             OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6.h),
+              borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(
                 color: appTheme.gray300,
                 width: 1,
@@ -151,7 +151,7 @@ class CustomSearchView extends StatelessWidget {
             ),
         enabledBorder: borderDecoration ??
             OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6.h),
+              borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(
                 color: appTheme.gray300,
                 width: 1,
@@ -159,7 +159,7 @@ class CustomSearchView extends StatelessWidget {
             ),
         focusedBorder: borderDecoration ??
             OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6.h),
+              borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(
                 color: appTheme.gray300,
                 width: 1,

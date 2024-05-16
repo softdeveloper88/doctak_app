@@ -10,14 +10,18 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sound_record/flutter_sound_record.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
-import 'package:flutter_sound_record/flutter_sound_record.dart';
+import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../home_screen/utils/SVColors.dart';
 import 'component/chat_bubble.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -71,8 +75,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   int _recordDuration = 0;
   Timer? _timer;
   Timer? _ampTimer;
-  final FlutterSoundRecord _audioRecorder = FlutterSoundRecord(
-      );
+  final FlutterSoundRecord _audioRecorder = FlutterSoundRecord();
   Amplitude? _amplitude;
 
   @override
@@ -85,7 +88,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   @override
   void initState() {
+
     super.initState();
+    setStatusBarColor(Colors.white);
 
     // Handle completion
     print("id${widget.id}roomid${widget.roomId}");
@@ -97,6 +102,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // fetchMessages();
     // _createClient();
   }
+
   Future<void> _start() async {
     try {
       if (await _audioRecorder.hasPermission()) {
@@ -121,7 +127,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     _timer?.cancel();
     _ampTimer?.cancel();
     final String? path = await _audioRecorder.stop();
-   print(path);
+    print(path);
     setState(() => _isRecording = false);
     chatBloc.add(SendMessageEvent(
         userId: AppData.logInUserId,
@@ -132,7 +138,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         message: ''));
     scrollToBottom();
   }
-
 
   Future<void> _pause() async {
     _timer?.cancel();
@@ -157,12 +162,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       setState(() => _recordDuration++);
     });
 
-    _ampTimer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
+    _ampTimer =
+        Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
       _amplitude = await _audioRecorder.getAmplitude();
       setState(() {});
     });
   }
-
 
 //   void _createClient() async {
 //     _client =
@@ -319,7 +324,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 onTypingStopped();
                 chatBloc.add(LoadRoomMessageEvent(
                     page: 0, userId: widget.id, roomId: widget.roomId));
-
               });
 
               break;
@@ -582,8 +586,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         _scrollController.animateTo(
           0.0, // Scroll to the start of the list
           duration: const Duration(milliseconds: 500),
-          curve: Curves
-              .easeOut,
+          curve: Curves.easeOut,
         );
       }
     });
@@ -594,9 +597,63 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-        backgroundColor: Colors.grey[300],
+        backgroundColor:SVAppLayoutBackground,
         appBar: AppBar(
-          title: Text(widget.username),
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          toolbarHeight: 100,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          centerTitle: true,
+          title: Column(
+            children: [
+              Text(
+                widget.username,
+                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              Text(
+                '',
+                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w400),
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: widget.profilePic == ''
+                      ? Image.asset('images/socialv/faces/face_5.png',
+                              height: 56, width: 56, fit: BoxFit.cover)
+                          .cornerRadiusWithClipRRect(8)
+                          .cornerRadiusWithClipRRect(8)
+                      : CachedNetworkImage(
+                              imageUrl:
+                                  '${AppData.imageUrl}${widget.profilePic.validate()}',
+                              height: 56,
+                              width: 56,
+                              fit: BoxFit.cover)
+                          .cornerRadiusWithClipRRect(30),
+                ),
+              ],
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -621,7 +678,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   return const Expanded(
                       child: Center(child: CircularProgressIndicator()));
                 } else if (state is PaginationLoadedState) {
-
                   // print(state.drugsModel.length);
                   // return _buildPostList(context);
                   var bloc = chatBloc;
@@ -629,7 +685,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     child: ListView.builder(
                       padding: const EdgeInsets.all(8),
                       shrinkWrap: true,
-                        reverse: true,
+                      reverse: true,
                       controller: _scrollController,
                       // physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
@@ -654,14 +710,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                 child: CircularProgressIndicator(),
                               )
                             : ChatBubble(
-                                profile: bloc.messagesList[index].userId != widget.id?widget.profilePic:"${AppData.imageUrl}${widget.profilePic}",
-                                message: bloc.messagesList[index].body??'',
+                                profile: bloc.messagesList[index].userId !=
+                                        widget.id
+                                    ? widget.profilePic
+                                    : "${AppData.imageUrl}${widget.profilePic}",
+                                message: bloc.messagesList[index].body ?? '',
                                 isMe:
                                     bloc.messagesList[index].userId == widget.id
                                         ? false
                                         : true,
                                 attachmentJson: bloc.messagesList[index]
-                                    .attachment, // Pass the attachment JSON string
+                                    .attachment,
+                          createAt: bloc.messagesList[index].createdAt,
+                          // Pass the attachment JSON string
                               );
                         // SVProfileFragment().launch(context);
                       },
@@ -776,93 +837,112 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             if (_isDocumentFile(_selectedFile))
               _buildDocumentPreview(_selectedFile!),
             Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(32.0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                // borderRadius: BorderRadius.circular(0.0),
               ),
-              margin:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
               padding:
-                  const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
+                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
               child: Row(
                 children: [
-                  // Attachment button
-                  isLoading
-                      ? Container(
-                          width: 25,
-                          height: 25,
-                          margin: const EdgeInsets.all(8.0),
-                          child: const CircularProgressIndicator(),
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.attach_file),
-                          onPressed: () async {
-                            const permission = Permission.photos;
-                            if (await permission.isGranted) {
-                              _showFileOptions();
-                              // _selectFiles(context);
-                            } else if (await permission.isDenied) {
-                              final result = await permission.request();
-                              if (result.isGranted) {
-                                _showFileOptions();
-                                // _selectFiles(context);
-                                print("isGranted");
-                              } else if (result.isDenied) {
-                                print("isDenied");
-                              } else if (result.isPermanentlyDenied) {
-                                print("isPermanentlyDenied");
-                                _permissionDialog(context);
-                              }
-                            } else if (await permission.isPermanentlyDenied) {
-                              print("isPermanentlyDenied");
-                              _permissionDialog(context);
-                            }
-                            _showFileOptions();
-                          },
-                        ),
-                  const SizedBox(width: 8.0), // Add spacing
-                  Expanded(
-                    child: isRecording?const Text('Recording Start..'):TextField(
-                      controller: textController,
-                      decoration: const InputDecoration.collapsed(
-                        hintText: 'Type your message...',
-                      ),
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
-                      onChanged: (Text) {
-                        ontextFieldFocused(true);
-                      },
-                      onTapOutside: (text) {
-                        ontextFieldFocused(false);
-                      },
+                  Container(
+                    decoration: BoxDecoration(
+                      color: cardLightColor,
+                      // border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                  ),
-                  const SizedBox(width: 8.0), // Add spacing
-                  // Send button
-                  IconButton(
-                    onPressed: () async {
-                      // Handle send button press
-                      String message = textController.text;
-                      // onTriggerEventPressed(message);
-                      chatBloc.add(SendMessageEvent(
-                          userId: AppData.logInUserId,
-                          roomId: widget.roomId == ''
-                              ? chatBloc.roomId
-                              : widget.roomId,
-                          receiverId: widget.id,
-                          attachmentType: 'file',
-                          file: _selectedFile?.path ?? '',
-                          message: message));
-                      // sendMessage(message, 'text'); // Sending a text message
-                      textController.clear();
-                      setState(() {
-
-                      });
-                      _selectedFile = null;
-                      scrollToBottom();
-                    },
-                    icon: const Icon(Icons.send),
+                    child: Row(
+                      children: [
+                        isLoading
+                            ? Container(
+                                width: 25,
+                                height: 25,
+                                margin: const EdgeInsets.all(8.0),
+                                child: const CircularProgressIndicator(),
+                              )
+                            : IconButton(
+                                icon: const Icon(Icons.attach_file),
+                                onPressed: () async {
+                                  const permission = Permission.photos;
+                                  if (await permission.isGranted) {
+                                    _showFileOptions();
+                                    // _selectFiles(context);
+                                  } else if (await permission.isDenied) {
+                                    final result = await permission.request();
+                                    if (result.isGranted) {
+                                      _showFileOptions();
+                                      // _selectFiles(context);
+                                      print("isGranted");
+                                    } else if (result.isDenied) {
+                                      print("isDenied");
+                                    } else if (result.isPermanentlyDenied) {
+                                      print("isPermanentlyDenied");
+                                      _permissionDialog(context);
+                                    }
+                                  } else if (await permission
+                                      .isPermanentlyDenied) {
+                                    print("isPermanentlyDenied");
+                                    _permissionDialog(context);
+                                  }
+                                  _showFileOptions();
+                                },
+                              ),
+                        const SizedBox(width: 8.0), // Add spacing
+                        isRecording
+                            ? const Text('Recording Start..')
+                            : Container(
+                                width: 50.w,
+                                height: 40,
+                                padding:
+                                    const EdgeInsets.only(left: 8, right: 8),
+                                decoration: BoxDecoration(
+                                  color: cardLightColor,
+                                  // border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                child: Center(
+                                  child: TextField(
+                                    controller: textController,
+                                    decoration: const InputDecoration.collapsed(
+                                      hintText: 'Type your message...',
+                                    ),
+                                    maxLines: null,
+                                    keyboardType: TextInputType.multiline,
+                                    textInputAction: TextInputAction.newline,
+                                    onChanged: (Text) {
+                                      ontextFieldFocused(true);
+                                    },
+                                    onTapOutside: (text) {
+                                      ontextFieldFocused(false);
+                                    },
+                                  ),
+                                ),
+                              ),
+                        const SizedBox(width: 8.0), // Add spacing
+                        IconButton(
+                          onPressed: () async {
+                            // Handle send button press
+                            String message = textController.text;
+                            // onTriggerEventPressed(message);
+                            chatBloc.add(SendMessageEvent(
+                                userId: AppData.logInUserId,
+                                roomId: widget.roomId == ''
+                                    ? chatBloc.roomId
+                                    : widget.roomId,
+                                receiverId: widget.id,
+                                attachmentType: 'file',
+                                file: _selectedFile?.path ?? '',
+                                message: message));
+                            // sendMessage(message, 'text'); // Sending a text message
+                            textController.clear();
+                            setState(() {});
+                            _selectedFile = null;
+                            scrollToBottom();
+                          },
+                          icon: const Icon(Icons.send),
+                        ),
+                      ],
+                    ),
                   ),
                   GestureDetector(
                     onLongPress: () {
@@ -881,11 +961,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     },
                     child: Container(
                       height: 40,
-                      margin: const EdgeInsets.fromLTRB(5, 5, 0, 5),
+                      margin: const EdgeInsets.fromLTRB(16, 5, 5, 5),
                       decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
-                                color: isRecording ? Colors.white : Colors.black12,
+                                color:
+                                    isRecording ? Colors.white : Colors.black12,
                                 spreadRadius: 4)
                           ],
                           color: isRecording ? Colors.red : Colors.grey,
@@ -918,6 +999,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     }
     return true;
   }
+
   // final record = AudioRecorder();
   void startRecord() async {
     // if (await record.hasPermission()) {
@@ -928,16 +1010,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     //
     // }
     bool result = await FlutterSoundRecord().hasPermission();
-  recordFilePath=await getFilePath();
+    recordFilePath = await getFilePath();
 // Start recording
-    if(result) {
+    if (result) {
       await FlutterSoundRecord().start(
-        path:  recordFilePath,// required
+        path: recordFilePath, // required
         encoder: AudioEncoder.AAC, // by default
         bitRate: 128000, // by default
         // sampleRate: 44100, // by default
       );
-
     }
     // bool hasPermission = await checkPermission();
     // if (hasPermission) {
@@ -948,11 +1029,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // } else {}
     // setState(() {});
   }
-  void stopRecord() async {
 
+  void stopRecord() async {
     try {
       await FlutterSoundRecord().pause();
-     String? path= await FlutterSoundRecord().stop();
+      String? path = await FlutterSoundRecord().stop();
       // await FlutterSoundRecord().isRecording();
       // bool s = RecordMp3.instance.stop();
       // final path = await record.stop();
@@ -961,16 +1042,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
       // record.dispose();
       // if (!await FlutterSoundRecord().isPaused()) {
-        chatBloc.add(SendMessageEvent(
-            userId: AppData.logInUserId,
-            roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
-            receiverId: widget.id,
-            attachmentType: 'file',
-            file: path!,
-            message: ''));
-        scrollToBottom();
+      chatBloc.add(SendMessageEvent(
+          userId: AppData.logInUserId,
+          roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
+          receiverId: widget.id,
+          attachmentType: 'file',
+          file: path!,
+          message: ''));
+      scrollToBottom();
       // }
-    }catch(e){
+    } catch (e) {
       print(e);
     }
   }
@@ -987,6 +1068,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   //   }
   // }
   int i = 0;
+
   Future<String> getFilePath() async {
     Directory storageDirectory = await getApplicationDocumentsDirectory();
     String sdPath = "${storageDirectory.path}/record";
@@ -996,12 +1078,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     }
     return "$sdPath/test_${i++}.mp3";
   }
+
   void _startCall() {}
 
   bool _isImageFile(File? file) {
     // Check if the file is an image
     return true; // Implement your logic here
   }
+
   bool _isVideoFile(File? file) {
     // Check if the file is a video
     return false; // Implement your logic here

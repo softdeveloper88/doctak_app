@@ -49,7 +49,7 @@ class CustomRatingBar extends StatelessWidget {
         minRating: 0,
         direction: Axis.horizontal,
         allowHalfRating: false,
-        itemSize: itemSize ?? 14.v,
+        itemSize: itemSize ?? 14,
         unratedColor: unselectedColor,
         itemCount: itemCount ?? 4,
         updateOnDrag: true,

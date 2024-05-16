@@ -1,6 +1,6 @@
-import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/core/utils/size_utils.dart';
 import 'package:doctak_app/data/models/profile_model/interest_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
@@ -17,9 +17,12 @@ import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../../theme/app_decoration.dart';
+import '../../../../widgets/custom_image_view.dart';
 import '../../fragments/profile_screen/bloc/profile_state.dart';
 import '../../utils/SVColors.dart';
 
@@ -156,7 +159,7 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
         imageOne: 'assets/icon/ic_lock.svg',
         interested: "Personal Information",
       ),
-      SizedBox(height: 10.v),
+      const SizedBox(height: 10),
       _buildRowinterested(
         onTap: (){
           ProfessionalInfoScreen(profileBloc:profileBloc).launch(context);
@@ -166,7 +169,7 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
         imageOne: 'assets/icon/ic_frame.svg',
         interested: "Professional Information",
       ),
-      SizedBox(height: 10.v),
+      SizedBox(height: 10),
       _buildRowinterested(
         onTap: (){
           WorkInfoScreen(profileBloc:profileBloc).launch(context);
@@ -176,7 +179,7 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
         imageOne: 'assets/icon/ic_calendar.svg',
         interested: "Work Information",
       ),
-      SizedBox(height: 10.v),
+      SizedBox(height: 10),
       _buildRowinterested(
         onTap: (){
           InterestedInfoScreen(profileBloc:profileBloc).launch(context);
@@ -186,7 +189,7 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
         imageOne: 'assets/icon/ic_person.svg',
         interested: "Interested Information",
       ),
-      SizedBox(height: 10.v),
+      SizedBox(height: 10),
       _buildRowinterested(
         onTap: (){
           PrivacyInfoScreen(profileBloc:profileBloc).launch(context);
@@ -204,7 +207,7 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
 Widget _buildScrollview(BuildContext context,profileBloc) {
   return SingleChildScrollView(
     child: Padding(
-      padding: EdgeInsets.only(top: 20.v),
+      padding: EdgeInsets.only(top: 20),
       child: Column(
         children: [_buildColumnlockone(context,profileBloc)],
       ),
@@ -223,8 +226,8 @@ Widget _buildRowinterested(
     onTap: ()=>onTap(),
     child: Container(
       padding: EdgeInsets.symmetric(
-        horizontal: 15.h,
-        vertical: 18.v,
+        horizontal: 15,
+        vertical: 18,
       ),
       decoration: AppDecoration.fillGray.copyWith(
         borderRadius: BorderRadius.circular(10),
@@ -235,14 +238,14 @@ Widget _buildRowinterested(
           CustomImageView(
             color: Colors.black,
             imagePath: imageOne,
-            height: 25.adaptSize,
-            width: 25.adaptSize,
-            margin: EdgeInsets.only(top: 4.v),
+            height: 25,
+            width: 25,
+            margin: EdgeInsets.only(top: 4),
           ),
           Padding(
             padding: EdgeInsets.only(
-              left: 15.h,
-              top: 1.v,
+              left: 15,
+              top: 1,
             ),
             child: Text(
               interested,
@@ -252,7 +255,7 @@ Widget _buildRowinterested(
           const Spacer(),
           Icon(
             Icons.arrow_forward_ios_rounded,
-            size: 25.adaptSize,
+            size: 25,
           )
         ],
       ),
@@ -650,23 +653,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 hintText: label,
                 textInputType: TextInputType.text,
                 prefix: Container(
-                    margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+                    margin: EdgeInsets.fromLTRB(24, 16, 16, 16),
                     child: Icon(
                       icon,
-                      size: 24.adaptSize,
+                      size: 24,
                       color: Colors.blueGrey,
                       // imagePath: Icon(Icons),
-                      // height: 24.adaptSize,
-                      // width: 24.adaptSize
+                      // height: 24,
+                      // width: 24
                     )),
-                prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                prefixConstraints: BoxConstraints(maxHeight: 56),
                 initialValue: value,
                 maxLines: maxLines,
                 onSaved: (v) {
                   onSave?.call(v);
                 },
                 contentPadding:
-                    EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
+                    EdgeInsets.only(top: 18, right: 30, bottom: 18)),
           )
         // ?  TextFormField(
         //           initialValue: value,
@@ -987,19 +990,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 }
               },
               prefix: Container(
-                margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+                margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
                 child: Icon(
                   Icons.date_range_outlined,
-                  size: 24.adaptSize,
+                  size: 24,
                   color: Colors.blueGrey,
                 ),
               ),
-              prefixConstraints: BoxConstraints(maxHeight: 56.v),
+              prefixConstraints: BoxConstraints(maxHeight: 56),
               validator: (value) {
                 return null;
               },
               contentPadding:
-                  EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v),
+                  EdgeInsets.only(top: 18, right: 30, bottom: 18),
             ),
           )
         : Row(
@@ -1053,16 +1056,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   //               },
   //               onSaved: (v) => onSave!.call(v),
   //               prefix: Container(
-  //                   margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+  //                   margin: EdgeInsets.fromLTRB(24, 16.v, 16, 16),
   //                   child: Icon(
   //                     Icons.date_range_outlined,
-  //                     size: 24.adaptSize,
+  //                     size: 24,
   //                     color: Colors.blueGrey,
   //                     // imagePath: Icon(Icons),
-  //                     // height: 24.adaptSize,
-  //                     // width: 24.adaptSize
+  //                     // height: 24,
+  //                     // width: 24
   //                   )),
-  //               prefixConstraints: BoxConstraints(maxHeight: 56.v),
+  //               prefixConstraints: BoxConstraints(maxHeight: 56),
   //               validator: (value) {
   //                 // if (value == null ||
   //                 //     (!isValidEmail(value,
@@ -1072,7 +1075,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   //                 // }
   //                 return null;
   //               },
-  //               contentPadding: EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
+  //               contentPadding: EdgeInsets.only(top: 18.v, right: 30, bottom: 18)),
   //         )
   //       :  Row(
   //     mainAxisAlignment: MainAxisAlignment.spaceBetween,

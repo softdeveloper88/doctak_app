@@ -49,7 +49,7 @@ class CustomFloatingButton extends StatelessWidget {
           decoration: decoration ??
               BoxDecoration(
                 color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(27.h),
+                borderRadius: BorderRadius.circular(27),
               ),
           child: child,
         ),

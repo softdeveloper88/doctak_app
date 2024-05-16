@@ -16,18 +16,23 @@ import 'package:doctak_app/presentation/home_screen/utils/AppTheme.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
+import 'package:doctak_app/theme/bloc/theme_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 import 'package:upgrader/upgrader.dart';
 
 import 'ads_setting/ad_setting.dart';
-import 'core/app_export.dart';
 import 'core/network/my_https_override.dart';
+import 'core/utils/navigator_service.dart';
+import 'core/utils/pref_utils.dart';
+import 'localization/app_localization.dart';
 import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 
 AppStore appStore = AppStore();
@@ -36,6 +41,10 @@ var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.white, // navigation bar color
+    statusBarColor: Colors.white, // status bar color
+  ));
   if(Platform.isAndroid) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
@@ -114,9 +123,8 @@ class _MyAppState extends State<MyApp> {
             BlocProvider(create: (context) => AddPostBloc()),
             BlocProvider(create: (context) => ProfileBloc()),
             BlocProvider(create: (context) => ChatBloc()),
-            BlocProvider(
-                create: (context) => ThemeBloc(
-                      ThemeState(
+            BlocProvider(create: (context) => ThemeBloc(
+              ThemeState(
                         themeType: PrefUtils().getThemeData(),
                       ),
                     )),

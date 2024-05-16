@@ -52,10 +52,10 @@ class CustomPinCodeTextField extends StatelessWidget {
           FilteringTextInputFormatter.digitsOnly,
         ],
         pinTheme: PinTheme(
-          fieldHeight: 64.h,
-          fieldWidth: 64.h,
+          fieldHeight: 64,
+          fieldWidth: 64,
           shape: PinCodeFieldShape.box,
-          borderRadius: BorderRadius.circular(16.h),
+          borderRadius: BorderRadius.circular(16),
           selectedColor: theme.colorScheme.primary,
           selectedFillColor: appTheme.whiteA700,
           inactiveColor: Colors.transparent,

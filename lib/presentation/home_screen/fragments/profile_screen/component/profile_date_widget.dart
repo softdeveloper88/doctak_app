@@ -68,19 +68,19 @@ class ProfileDateWidget extends StatelessWidget {
             },
             prefix: const SizedBox(width: 10,),
             suffix: Container(
-              margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
-              child: Icon(
+              margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+              child: const Icon(
                 Icons.date_range_outlined,
-                size: 24.adaptSize,
+                size: 24,
                 color: Colors.blueGrey,
               ),
             ),
-            prefixConstraints: BoxConstraints(maxHeight: 56.v),
+            prefixConstraints: const BoxConstraints(maxHeight: 56),
             validator: (value) {
               return null;
             },
             contentPadding:
-            EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v),
+            const EdgeInsets.only(top: 18, right: 30, bottom: 18),
           ),
         ],
       ),

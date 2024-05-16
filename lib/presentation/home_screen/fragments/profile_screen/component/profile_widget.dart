@@ -45,14 +45,14 @@ class ProfileWidget extends StatelessWidget {
                     fillColor: AppDecoration.fillGray.color,
                     textInputType: TextInputType.text,
                     prefix: const SizedBox(width: 10,),
-                    prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                    prefixConstraints: BoxConstraints(maxHeight: 56),
                     initialValue: value,
                     maxLines: maxLines,
                     onSaved: (v) {
                       onSave?.call(v);
                     },
                     contentPadding:
-                        EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
+                        EdgeInsets.only(top: 18, right: 30, bottom: 18)),
               ),
             ],
           );
@@ -93,23 +93,23 @@ Widget _buildField(
               hintText: label,
               textInputType: TextInputType.text,
               prefix: Container(
-                  margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+                  margin: EdgeInsets.fromLTRB(24, 16, 16, 16),
                   child: Icon(
                     icon,
-                    size: 24.adaptSize,
+                    size: 24,
                     color: Colors.blueGrey,
                     // imagePath: Icon(Icons),
                     // height: 24.adaptSize,
                     // width: 24.adaptSize
                   )),
-              prefixConstraints: BoxConstraints(maxHeight: 56.v),
+              prefixConstraints: BoxConstraints(maxHeight: 56),
               initialValue: value,
               maxLines: maxLines,
               onSaved: (v) {
                 onSave?.call(v);
               },
               contentPadding:
-                  EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v)),
+                  EdgeInsets.only(top: 18, right: 30, bottom: 18)),
         )
       // ?  TextFormField(
       //           initialValue: value,

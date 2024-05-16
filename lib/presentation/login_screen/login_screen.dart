@@ -20,6 +20,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:http/http.dart' as http;
+import 'package:sizer/sizer.dart';
 
 import '../../core/utils/app/AppData.dart';
 import '../home_screen/utils/SVCommon.dart';
@@ -228,7 +229,7 @@ class LoginScreen extends StatelessWidget {
                 }
               },
               child: SizedBox(
-                  width: SizeUtils.width,
+                  width: 100.w,
                   child: SingleChildScrollView(
                       padding: EdgeInsets.only(
                           bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -237,7 +238,7 @@ class LoginScreen extends StatelessWidget {
                           child: Container(
                               width: double.maxFinite,
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 24.h, vertical: 39.v),
+                                  horizontal: 24, vertical: 39),
                               child: Column(children: [
                                 CustomTextFormField(
                                   focusNode: focusNode1,
@@ -247,15 +248,15 @@ class LoginScreen extends StatelessWidget {
                                     textInputType: TextInputType.emailAddress,
                                     prefix: Container(
                                         margin: EdgeInsets.fromLTRB(
-                                            24.h, 16.v, 16.h, 16.v),
+                                            24, 16, 16, 16),
                                         child: CustomImageView(
                                             color: Colors.blueGrey,
                                             imagePath:
                                                 ImageConstant.imgCheckmark,
-                                            height: 24.adaptSize,
-                                            width: 24.adaptSize)),
+                                            height: 24,
+                                            width: 24)),
                                     prefixConstraints:
-                                        BoxConstraints(maxHeight: 56.v),
+                                        BoxConstraints(maxHeight: 56),
                                     validator: (value) {
                                       if (value == null ||
                                           (!isValidEmail(value,
@@ -266,10 +267,10 @@ class LoginScreen extends StatelessWidget {
                                       return null;
                                     },
                                     contentPadding: EdgeInsets.only(
-                                        top: 18.v,
-                                        right: 30.h,
-                                        bottom: 18.v)),
-                                SizedBox(height: 16.v),
+                                        top: 18,
+                                        right: 30,
+                                        bottom: 18)),
+                                SizedBox(height: 16),
                                 BlocBuilder<LoginBloc, LoginState>(
                                     bloc: loginBloc,
                                     builder: (context, state) {
@@ -286,14 +287,14 @@ class LoginScreen extends StatelessWidget {
                                               TextInputType.visiblePassword,
                                           prefix: Container(
                                               margin: EdgeInsets.fromLTRB(
-                                                  24.h, 16.v, 16.h, 16.v),
+                                                  24, 16, 16, 16),
                                               child: CustomImageView(
                                                   color: Colors.blueGrey,
                                                   imagePath: ImageConstant
                                                       .imgLocation,
-                                                  height: 24.adaptSize,
-                                                  width: 24.adaptSize)),
-                                          prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                                                  height: 24,
+                                                  width: 24)),
+                                          prefixConstraints: BoxConstraints(maxHeight: 56),
                                           suffix: InkWell(
                                               onTap: () {
                                                 loginBloc.add(ChangePasswordVisibilityEvent(value: !state.isShowPassword));
@@ -301,7 +302,7 @@ class LoginScreen extends StatelessWidget {
                                               },
                                               child: Container(
                                                   margin: EdgeInsets.fromLTRB(
-                                                      30.h, 16.v, 24.h, 16.v),
+                                                      30, 16, 24, 16),
                                                   child:  state.isShowPassword
                                                       ? Icon(
                                                     Icons
@@ -309,7 +310,7 @@ class LoginScreen extends StatelessWidget {
                                                     color:
                                                     Colors.black54,
                                                     size:
-                                                    24.adaptSize,
+                                                    24,
                                                   )
                                                       : Icon(
                                                     Icons
@@ -317,10 +318,10 @@ class LoginScreen extends StatelessWidget {
                                                     color:
                                                     Colors.black54,
                                                     size:
-                                                    24.adaptSize,
+                                                    24,
                                                   ))),
                                           suffixConstraints:
-                                              BoxConstraints(maxHeight: 56.v),
+                                              BoxConstraints(maxHeight: 56),
                                           validator: (value) {
                                             if (value == null ||
                                                 (!isValidPassword(value,
@@ -332,7 +333,7 @@ class LoginScreen extends StatelessWidget {
                                           },
                                           obscureText: state.isShowPassword);
                                     }),
-                                SizedBox(height: 10.v),
+                                SizedBox(height: 10),
                                 Align(
                                     alignment: Alignment.centerRight,
                                     child: GestureDetector(
@@ -344,7 +345,7 @@ class LoginScreen extends StatelessWidget {
                                                 .msg_forgot_password,
                                             style: CustomTextStyles
                                                 .titleSmallPrimary))),
-                                SizedBox(height: 32.v),
+                                SizedBox(height: 32),
                                 svAppButton(
                                   context: context,
                                   text: 'LOGIN',
@@ -359,15 +360,15 @@ class LoginScreen extends StatelessWidget {
                                     );
                                   },
                                 ),
-                                SizedBox(height: 25.v),
+                                SizedBox(height: 25),
                                 Align(
                                     alignment: Alignment.centerLeft,
                                     child: Padding(
-                                        padding: EdgeInsets.only(left: 48.h),
+                                        padding: EdgeInsets.only(left: 48),
                                         child: Row(children: [
                                           Padding(
                                               padding: EdgeInsets.only(
-                                                  bottom: 1.v),
+                                                  bottom: 1),
                                               child: Text(
                                                   translation(context)
                                                       .msg_don_t_have_an_account,
@@ -379,18 +380,18 @@ class LoginScreen extends StatelessWidget {
                                               },
                                               child: Padding(
                                                   padding: EdgeInsets.only(
-                                                      left: 4.h),
+                                                      left: 4),
                                                   child: Text(
                                                       translation(context)
                                                           .lbl_sign_up,
                                                       style: CustomTextStyles
                                                           .titleSmallPrimarySemiBold)))
                                         ]))),
-                                SizedBox(height: 34.v),
+                                SizedBox(height: 34),
                                 _buildORDivider(context),
-                                SizedBox(height: 29.v),
+                                SizedBox(height: 29),
                                 _buildSocial(context),
-                                SizedBox(height: 5.v)
+                                SizedBox(height: 5)
                               ]))))))),
     );
   }
@@ -399,14 +400,14 @@ class LoginScreen extends StatelessWidget {
   _buildAppBar(BuildContext context) {
     return CustomAppBar(
       height: 140,
-      leadingWidth: 56.h,
+      leadingWidth: 56,
       centerTitle: true,
       title: Column(
         children: [
           Image.asset(
             'assets/logo/logo.png',
-            width: 400.v,
-            height: 100.h,
+            width: 400,
+            height: 100,
           ),
           AppbarTitle(text: translation(context).lbl_login),
         ],
@@ -421,12 +422,12 @@ class LoginScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-              padding: EdgeInsets.only(top: 8.v, bottom: 9.v),
-              child: SizedBox(width: 137.h, child: const Divider())),
+              padding: EdgeInsets.only(top: 8, bottom: 9),
+              child: SizedBox(width: 137, child: const Divider())),
           Text(translation(context).lbl_or, style: theme.textTheme.bodyLarge),
           Padding(
-              padding: EdgeInsets.only(top: 8.v, bottom: 9.v),
-              child: SizedBox(width: 137.h, child: const Divider()))
+              padding: EdgeInsets.only(top: 8, bottom: 9),
+              child: SizedBox(width: 137, child: const Divider()))
         ]);
   }
 
@@ -436,30 +437,30 @@ class LoginScreen extends StatelessWidget {
       CustomOutlinedButton(
           text: translation(context).msg_sign_in_with_google,
           leftIcon: Container(
-              margin: EdgeInsets.only(right: 30.h),
+              margin: EdgeInsets.only(right: 20),
               child: CustomImageView(
                   color: Colors.red,
                   imagePath: ImageConstant.imgGoogle,
-                  height: 20.v,
-                  width: 19.h)),
+                  height: 20,
+                  width: 19)),
           onPressed: () {
             onPressedGoogleLogin();
             // onTapSignInWithGoogle(context);
           }),
-      SizedBox(height: 16.v),
+      SizedBox(height: 16),
      if(Platform.isIOS) CustomOutlinedButton(
           onPressed: () {
             signInWithApple();
           },
           text: translation(context).msg_sign_in_with_apple,
           leftIcon: Container(
-              margin: EdgeInsets.only(right: 30.h),
+              margin: const EdgeInsets.only(right: 30),
               child: CustomImageView(
                   color: Colors.blueGrey,
                   imagePath: ImageConstant.imgApple,
-                  height: 20.v,
-                  width: 16.h))),
-      SizedBox(height: 16.v),
+                  height: 20,
+                  width: 16))),
+      const SizedBox(height: 16),
     ]);
   }
 

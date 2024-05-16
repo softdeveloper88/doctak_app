@@ -15,6 +15,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
@@ -52,17 +53,28 @@ class _JobsScreenState extends State<JobsScreen> {
   }
 
   void _filterSuggestions(String query) {
-    setState(() {
-      _filteredSuggestions = profileBloc.specialtyList!
-          .where((suggestion) =>
-              suggestion.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
+    try {
+      setState(() {
+        _filteredSuggestions = profileBloc.specialtyList!
+            .where((suggestion) =>
+                suggestion.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    } catch (e) {}
   }
 
   var selectedValue;
   bool isShownSuggestion = false;
   int selectedIndex = 0;
+
+  Future<void> _launchInBrowser(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    )) {
+      throw Exception('Could not launch $url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -724,9 +736,14 @@ class _JobsScreenState extends State<JobsScreen> {
                                                   child: const Text('No'),
                                                 ),
                                                 TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.of(context)
-                                                          .pop(true),
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(true);
+                                                    final Uri url = Uri.parse(
+                                                        bloc.drugsData[index]
+                                                            .link!);
+                                                    _launchInBrowser(url);
+                                                  },
                                                   child: const Text('Yes'),
                                                 ),
                                               ],

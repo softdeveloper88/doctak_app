@@ -1,6 +1,6 @@
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:flutter/material.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:sizer/sizer.dart';
 
 class CustomDropdownField extends StatelessWidget {
   CustomDropdownField({

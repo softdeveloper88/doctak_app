@@ -3,12 +3,12 @@ import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
-import 'package:doctak_app/presentation/sign_up_success_dialog/sign_up_success_dialog.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../widgets/app_bar/appbar_title.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_state.dart';
@@ -73,461 +73,460 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: _buildAppBar(context),
-            body: SizedBox(
-                width: SizeUtils.width,
-                child: SingleChildScrollView(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery
-                            .of(context)
-                            .viewInsets
-                            .bottom),
-                    child: Form(
-                        key: _formKey,
-                        child: Container(
-                            width: double.maxFinite,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 24.h, vertical: 39.v),
-                            child: Column(
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: _buildAppBar(context),
+        body: SizedBox(
+            width: 100.w,
+            child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery
+                        .of(context)
+                        .viewInsets
+                        .bottom),
+                child: Form(
+                    key: _formKey,
+                    child: Container(
+                        width: double.maxFinite,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 39),
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 16),
+                              Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  SizedBox(height: 16.v),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      BlocBuilder<DropdownBloc, DropdownState>(
-                                          bloc: dropdownBloc,
-                                          builder: (context, state) {
-                                            if (state is DataLoaded) {
-                                              return Column(
-                                                children: [
-                                                  Container(
-                                                    width: 500.v,
-                                                    // height: 15.w,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors
-                                                            .blueGrey[300],
-                                                        borderRadius:
-                                                        const BorderRadius
-                                                            .all(
-                                                            Radius.circular(
-                                                                15))),
-                                                    child: Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: InkWell(
-                                                            onTap: () {
-                                                              state
-                                                                  .isDoctorRole =
-                                                              true;
-                                                              dropdownBloc
-                                                                  .isDoctorRole =
-                                                              true;
-                                                              dropdownBloc.add(
-                                                                  ChangeDoctorRole());
-                                                            },
-                                                            child: Container(
-                                                              padding:
-                                                              const EdgeInsets
-                                                                  .all(10),
-                                                              // width: 210.v,
-                                                              height: 50.v,
-                                                              decoration: BoxDecoration(
-                                                                  color: !state
-                                                                      .isDoctorRole
-                                                                      ? Colors
-                                                                      .blueGrey[
-                                                                  300]
-                                                                      : Colors
-                                                                      .blue,
-                                                                  borderRadius:
-                                                                  const BorderRadius
-                                                                      .all(
-                                                                      Radius
-                                                                          .circular(
-                                                                          15))),
-                                                              child: Center(
-                                                                  child: Text(
-                                                                    "Doctor",
-                                                                    style: GoogleFonts
-                                                                        .poppins(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                        12),
-                                                                    // style: CustomTextStyles
-                                                                    //     .titleMediumOnPrimaryContainer,
-                                                                  )),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          child: InkWell(
-                                                            onTap: () {
-                                                              state
-                                                                  .isDoctorRole =
-                                                              false;
-                                                              dropdownBloc.add(
-                                                                  ChangeDoctorRole());
-                                                              dropdownBloc
-                                                                  .isDoctorRole =
-                                                              false;
-                                                            },
-                                                            child: Container(
-                                                              padding:
-                                                              const EdgeInsets
-                                                                  .all(10),
-                                                              // width: 200.v,
-                                                              height: 50.v,
-                                                              decoration: BoxDecoration(
-                                                                  color: state
-                                                                      .isDoctorRole
-                                                                      ? Colors
-                                                                      .blueGrey[
-                                                                  300]
-                                                                      : Colors
-                                                                      .blue,
-                                                                  borderRadius:
-                                                                  const BorderRadius
-                                                                      .all(
-                                                                      Radius
-                                                                          .circular(
-                                                                          15))),
-                                                              child: Center(
-                                                                  child: Text(
-                                                                    "Medical student",
-                                                                    style: GoogleFonts
-                                                                        .poppins(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                        12),
-                                                                    // style: CustomTextStyles
-                                                                    //     .titleMediumOnPrimaryContainer,
-                                                                  )),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 16.v),
-                                                  _buildName(context),
-                                                  SizedBox(height: 16.v),
-                                                  _buildName1(context),
-                                                  SizedBox(height: 16.v),
-                                                  if(widget.isSocialLogin == false) _buildEmail(
-                                                      context),
-                                                  if(widget.isSocialLogin  == false) SizedBox(
-                                                      height: 16.v),
-                                                  if(widget.isSocialLogin == false) CustomTextFormField(
-                                                      focusNode: focusNode4,
-                                                      controller:
-                                                      passwordController,
-                                                      hintText: translation(
-                                                          context)
-                                                          .lbl_create_password,
-                                                      textInputAction:
-                                                      TextInputAction.done,
-                                                      textInputType:
-                                                      TextInputType
-                                                          .visiblePassword,
-                                                      prefix: Container(
-                                                          margin:
-                                                          EdgeInsets.fromLTRB(
-                                                              24.h,
-                                                              16.v,
-                                                              16.h,
-                                                              16.v),
-                                                          child: CustomImageView(
-                                                              color: Colors
-                                                                  .black54,
-                                                              imagePath:
-                                                              ImageConstant
-                                                                  .imgLocation,
-                                                              height:
-                                                              24.adaptSize,
-                                                              width: 24
-                                                                  .adaptSize)),
-                                                      prefixConstraints:
-                                                      BoxConstraints(
-                                                          maxHeight: 56.v),
-                                                      suffix: InkWell(
-                                                          onTap: () {
-                                                            dropdownBloc.add(
-                                                                TogglePasswordVisibility());
-                                                          },
-                                                          child: Container(
-                                                              margin: EdgeInsets
-                                                                  .fromLTRB(
-                                                                  30.h,
-                                                                  16.v,
-                                                                  24.h,
-                                                                  16.v),
-                                                              child:
-                                                              state
-                                                                  .isPasswordVisible
-                                                                  ? Icon(
-                                                                Icons
-                                                                    .visibility_off,
-                                                                color:
-                                                                Colors.black54,
-                                                                size:
-                                                                24.adaptSize,
-                                                              )
-                                                                  : Icon(
-                                                                Icons
-                                                                    .visibility,
-                                                                color:
-                                                                Colors.black54,
-                                                                size:
-                                                                24.adaptSize,
-                                                              ))),
-                                                      suffixConstraints: BoxConstraints(
-                                                          maxHeight: 56.v),
-                                                      validator: (value) {
-                                                        if (value == null ||
-                                                            (!isValidPassword(
-                                                                value,
-                                                                isRequired:
-                                                                true))) {
-                                                          return translation(
-                                                              context)
-                                                              .err_msg_please_enter_valid_password;
-                                                        }
-                                                        return null;
-                                                      },
-                                                      obscureText: state
-                                                          .isPasswordVisible),
-                                                  if(widget.isSocialLogin == false) SizedBox(
-                                                      height: 28.v),
-                                                  if(widget.isSocialLogin == false) CustomTextFormField(
-                                                      focusNode: focusNode5,
-                                                      controller:
-                                                      confirmPasswordController,
-                                                      hintText: translation(
-                                                          context)
-                                                          .msg_confirm_password,
-                                                      textInputAction:
-                                                      TextInputAction.done,
-                                                      textInputType:
-                                                      TextInputType.text,
-                                                      prefix: Container(
-                                                          margin: EdgeInsets
-                                                              .fromLTRB(
-                                                              24.h,
-                                                              16.v,
-                                                              16.h,
-                                                              16.v),
-                                                          child: CustomImageView(
-                                                              color: Colors
-                                                                  .black54,
-                                                              imagePath: ImageConstant
-                                                                  .imgLocation,
-                                                              height:
-                                                              24.adaptSize,
-                                                              width: 24
-                                                                  .adaptSize)),
-                                                      prefixConstraints:
-                                                      BoxConstraints(
-                                                          maxHeight: 56.v),
-                                                      suffix: InkWell(
-                                                          onTap: () {
-                                                            dropdownBloc.add(
-                                                                TogglePasswordVisibility());
-                                                          },
-                                                          child: Container(
-                                                              margin: EdgeInsets
-                                                                  .fromLTRB(
-                                                                  30.h,
-                                                                  16.v,
-                                                                  24.h,
-                                                                  16.v),
-                                                              child:
-                                                              state
-                                                                  .isPasswordVisible
-                                                                  ? Icon(
-                                                                Icons
-                                                                    .visibility_off,
-                                                                color:
-                                                                Colors.black54,
-                                                                size:
-                                                                24.adaptSize,
-                                                              )
-                                                                  : Icon(
-                                                                Icons
-                                                                    .visibility,
-                                                                color:
-                                                                Colors.black54,
-                                                                size:
-                                                                24.adaptSize,
-                                                              ))),
-                                                      // child: CustomImageView(color: Colors.black54, imagePath: ImageConstant.imgEye, height: 24.adaptSize, width: 24.adaptSize))),
-                                                      suffixConstraints:
-                                                      BoxConstraints(
-                                                          maxHeight: 56.v),
-                                                      validator: (value) {
-                                                        if (value == null ||
-                                                            (!isValidPassword(
-                                                                value,
-                                                                isRequired:
-                                                                true))) {
-                                                          return translation(
-                                                              context)
-                                                              .err_msg_please_enter_valid_password;
-                                                        }
-                                                        return null;
-                                                      },
-                                                      obscureText: state
-                                                          .isPasswordVisible),
-                                                  if(widget.isSocialLogin == true)_buildPhone(
-                                                      context),
-                                                  if(widget.isSocialLogin == false) SizedBox(
-                                                      height: 28.v),
-
-                                                ],
-                                              );
-                                            } else {
-                                              return Container();
-                                            }
-                                          }),
-                                      if(widget.isSocialLogin==true)
-                                        BlocBuilder<ProfileBloc, ProfileState>(
-                                          bloc: profileBloc,
-                                          builder: (context, state) {
-
-                                            if (state is PaginationLoadedState) {
-                                              return Column(
+                                  BlocBuilder<DropdownBloc, DropdownState>(
+                                      bloc: dropdownBloc,
+                                      builder: (context, state) {
+                                        if (state is DataLoaded) {
+                                          return Column(
+                                            children: [
+                                              Container(
+                                                width: 500,
+                                                // height: 15.w,
+                                                decoration: BoxDecoration(
+                                                    color: Colors
+                                                        .blueGrey[300],
+                                                    borderRadius:
+                                                    const BorderRadius
+                                                        .all(
+                                                        Radius.circular(
+                                                            15))),
+                                                child: Row(
                                                   children: [
-                                                    const SizedBox(height: 10),
-                                                    CustomDropdownButtonFormField(
-                                                      items: state
-                                                          .firstDropdownValues,
-                                                      value: state
-                                                          .selectedFirstDropdownValue,
-                                                      width: double.infinity,
-                                                      contentPadding: const EdgeInsets
-                                                          .symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 0,
+                                                    Expanded(
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          state
+                                                              .isDoctorRole =
+                                                          true;
+                                                          dropdownBloc
+                                                              .isDoctorRole =
+                                                          true;
+                                                          dropdownBloc.add(
+                                                              ChangeDoctorRole());
+                                                        },
+                                                        child: Container(
+                                                          padding:
+                                                          const EdgeInsets
+                                                              .all(10),
+                                                          // width: 210,
+                                                          height: 50,
+                                                          decoration: BoxDecoration(
+                                                              color: !state
+                                                                  .isDoctorRole
+                                                                  ? Colors
+                                                                  .blueGrey[
+                                                              300]
+                                                                  : Colors
+                                                                  .blue,
+                                                              borderRadius:
+                                                              const BorderRadius
+                                                                  .all(
+                                                                  Radius
+                                                                      .circular(
+                                                                      15))),
+                                                          child: Center(
+                                                              child: Text(
+                                                                "Doctor",
+                                                                style: GoogleFonts
+                                                                    .poppins(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
+                                                                    12),
+                                                                // style: CustomTextStyles
+                                                                //     .titleMediumOnPrimaryContainer,
+                                                              )),
+                                                        ),
                                                       ),
-                                                      onChanged: (
-                                                          String? newValue) {
-                                                        profileBloc
-                                                            .country =
-                                                        newValue!;
-                                                        // profileBloc.add(UpdateFirstDropdownValue(newValue));
-                                                        profileBloc.add(UpdateSecondDropdownValues(newValue));
-                                                      },
                                                     ),
-                                                    const SizedBox(height: 10),
-                                                    CustomDropdownButtonFormField(
-                                                      items: state
-                                                          .secondDropdownValues,
-                                                      value: state
-                                                          .selectedSecondDropdownValue,
-                                                      width: double.infinity,
-                                                      contentPadding: const EdgeInsets
-                                                          .symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 0,
+                                                    Expanded(
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          state
+                                                              .isDoctorRole =
+                                                          false;
+                                                          dropdownBloc.add(
+                                                              ChangeDoctorRole());
+                                                          dropdownBloc
+                                                              .isDoctorRole =
+                                                          false;
+                                                        },
+                                                        child: Container(
+                                                          padding:
+                                                          const EdgeInsets
+                                                              .all(10),
+                                                          // width: 200,
+                                                          height: 50,
+                                                          decoration: BoxDecoration(
+                                                              color: state
+                                                                  .isDoctorRole
+                                                                  ? Colors
+                                                                  .blueGrey[
+                                                              300]
+                                                                  : Colors
+                                                                  .blue,
+                                                              borderRadius:
+                                                              const BorderRadius
+                                                                  .all(
+                                                                  Radius
+                                                                      .circular(
+                                                                      15))),
+                                                          child: Center(
+                                                              child: Text(
+                                                                "Medical student",
+                                                                style: GoogleFonts
+                                                                    .poppins(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
+                                                                    12),
+                                                                // style: CustomTextStyles
+                                                                //     .titleMediumOnPrimaryContainer,
+                                                              )),
+                                                        ),
                                                       ),
-                                                      onChanged: (
-                                                          String? newValue) {
-                                                        profileBloc.stateName =
-                                                        newValue!;
-
-                                                      },
                                                     ),
-                                                    const SizedBox(height: 10),
-                                                  ]);
-                                            }else{
-                                              return Container(child:Text('ddd$state'));
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 16),
+                                              _buildName(context),
+                                              const SizedBox(height: 16),
+                                              _buildName1(context),
+                                              const SizedBox(height: 16),
+                                              if(widget.isSocialLogin == false) _buildEmail(
+                                                  context),
+                                              if(widget.isSocialLogin  == false) const SizedBox(
+                                                  height: 16),
+                                              if(widget.isSocialLogin == false) CustomTextFormField(
+                                                  focusNode: focusNode4,
+                                                  controller:
+                                                  passwordController,
+                                                  hintText: translation(
+                                                      context)
+                                                      .lbl_create_password,
+                                                  textInputAction:
+                                                  TextInputAction.done,
+                                                  textInputType:
+                                                  TextInputType
+                                                      .visiblePassword,
+                                                  prefix: Container(
+                                                      margin:
+                                                      const EdgeInsets.fromLTRB(
+                                                          24,
+                                                          16,
+                                                          16,
+                                                          16),
+                                                      child: CustomImageView(
+                                                          color: Colors
+                                                              .black54,
+                                                          imagePath:
+                                                          ImageConstant
+                                                              .imgLocation,
+                                                          height:
+                                                          24,
+                                                          width: 24
+                                                              )),
+                                                  prefixConstraints:
+                                                  const BoxConstraints(
+                                                      maxHeight: 56),
+                                                  suffix: InkWell(
+                                                      onTap: () {
+                                                        dropdownBloc.add(
+                                                            TogglePasswordVisibility());
+                                                      },
+                                                      child: Container(
+                                                          margin: const EdgeInsets
+                                                              .fromLTRB(
+                                                              30,
+                                                              16,
+                                                              24,
+                                                              16),
+                                                          child:
+                                                          state
+                                                              .isPasswordVisible
+                                                              ? const Icon(
+                                                            Icons
+                                                                .visibility_off,
+                                                            color:
+                                                            Colors.black54,
+                                                            size:
+                                                            24,
+                                                          )
+                                                              : const Icon(
+                                                            Icons
+                                                                .visibility,
+                                                            color:
+                                                            Colors.black54,
+                                                            size:
+                                                            24,
+                                                          ))),
+                                                  suffixConstraints: const BoxConstraints(
+                                                      maxHeight: 56),
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        (!isValidPassword(
+                                                            value,
+                                                            isRequired:
+                                                            true))) {
+                                                      return translation(
+                                                          context)
+                                                          .err_msg_please_enter_valid_password;
+                                                    }
+                                                    return null;
+                                                  },
+                                                  obscureText: state
+                                                      .isPasswordVisible),
+                                              if(widget.isSocialLogin == false) const SizedBox(
+                                                  height: 28),
+                                              if(widget.isSocialLogin == false) CustomTextFormField(
+                                                  focusNode: focusNode5,
+                                                  controller:
+                                                  confirmPasswordController,
+                                                  hintText: translation(
+                                                      context)
+                                                      .msg_confirm_password,
+                                                  textInputAction:
+                                                  TextInputAction.done,
+                                                  textInputType:
+                                                  TextInputType.text,
+                                                  prefix: Container(
+                                                      margin: const EdgeInsets
+                                                          .fromLTRB(
+                                                          24,
+                                                          16,
+                                                          16,
+                                                          16),
+                                                      child: CustomImageView(
+                                                          color: Colors
+                                                              .black54,
+                                                          imagePath: ImageConstant
+                                                              .imgLocation,
+                                                          height:
+                                                          24,
+                                                          width: 24
+                                                              )),
+                                                  prefixConstraints:
+                                                  const BoxConstraints(
+                                                      maxHeight: 56),
+                                                  suffix: InkWell(
+                                                      onTap: () {
+                                                        dropdownBloc.add(
+                                                            TogglePasswordVisibility());
+                                                      },
+                                                      child: Container(
+                                                          margin: const EdgeInsets
+                                                              .fromLTRB(
+                                                              30,
+                                                              16,
+                                                              24,
+                                                              16),
+                                                          child:
+                                                          state
+                                                              .isPasswordVisible
+                                                              ? const Icon(
+                                                            Icons
+                                                                .visibility_off,
+                                                            color:
+                                                            Colors.black54,
+                                                            size:
+                                                            24,
+                                                          )
+                                                              : const Icon(
+                                                            Icons
+                                                                .visibility,
+                                                            color:
+                                                            Colors.black54,
+                                                            size:
+                                                            24,
+                                                          ))),
+                                                  // child: CustomImageView(color: Colors.black54, imagePath: ImageConstant.imgEye, height: 24, width: 24))),
+                                                  suffixConstraints:
+                                                  const BoxConstraints(
+                                                      maxHeight: 56),
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        (!isValidPassword(
+                                                            value,
+                                                            isRequired:
+                                                            true))) {
+                                                      return translation(
+                                                          context)
+                                                          .err_msg_please_enter_valid_password;
+                                                    }
+                                                    return null;
+                                                  },
+                                                  obscureText: state
+                                                      .isPasswordVisible),
+                                              if(widget.isSocialLogin == true)_buildPhone(
+                                                  context),
+                                              if(widget.isSocialLogin == false) const SizedBox(
+                                                  height: 28),
+
+                                            ],
+                                          );
+                                        } else {
+                                          return Container();
+                                        }
+                                      }),
+                                  if(widget.isSocialLogin==true)
+                                    BlocBuilder<ProfileBloc, ProfileState>(
+                                      bloc: profileBloc,
+                                      builder: (context, state) {
+
+                                        if (state is PaginationLoadedState) {
+                                          return Column(
+                                              children: [
+                                                const SizedBox(height: 10),
+                                                CustomDropdownButtonFormField(
+                                                  items: state
+                                                      .firstDropdownValues,
+                                                  value: state
+                                                      .selectedFirstDropdownValue,
+                                                  width: double.infinity,
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 0,
+                                                  ),
+                                                  onChanged: (
+                                                      String? newValue) {
+                                                    profileBloc
+                                                        .country =
+                                                    newValue!;
+                                                    // profileBloc.add(UpdateFirstDropdownValue(newValue));
+                                                    profileBloc.add(UpdateSecondDropdownValues(newValue));
+                                                  },
+                                                ),
+                                                const SizedBox(height: 10),
+                                                CustomDropdownButtonFormField(
+                                                  items: state
+                                                      .secondDropdownValues,
+                                                  value: state
+                                                      .selectedSecondDropdownValue,
+                                                  width: double.infinity,
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 0,
+                                                  ),
+                                                  onChanged: (
+                                                      String? newValue) {
+                                                    profileBloc.stateName =
+                                                    newValue!;
+
+                                                  },
+                                                ),
+                                                const SizedBox(height: 10),
+                                              ]);
+                                        }else{
+                                          return Container(child:Text('ddd$state'));
+                                        }
+                                      }),
+                                  BlocListener<DropdownBloc, DropdownState>(
+                                      listener: (context, state) {
+                                        if (state is DataLoaded) {
+                                          if (state.isSubmit) {
+                                            print(state.response  );
+                                            if (state.response['success']) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        state.response[
+                                                        'message'])),
+                                              );
+                                              Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          LoginScreen()),
+                                                      (route) => false);
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        state.response[
+                                                        'message'])),
+                                              );
+                                              _showErrorDialog(
+                                                  state.response['errors']);
                                             }
-                                          }),
-                                      BlocListener<DropdownBloc, DropdownState>(
-                                          listener: (context, state) {
-                                            if (state is DataLoaded) {
-                                              if (state.isSubmit) {
-                                                print(state.response  );
-                                                if (state.response['success']) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            state.response[
-                                                            'message'])),
-                                                  );
-                                                  Navigator.pushAndRemoveUntil(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              LoginScreen()),
-                                                          (route) => false);
-                                                } else {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            state.response[
-                                                            'message'])),
-                                                  );
-                                                  _showErrorDialog(
-                                                      state.response['errors']);
-                                                }
-                                              }
-                                            }else if (state is SocialLoginSuccess) {
+                                          }
+                                        }else if (state is SocialLoginSuccess) {
 
-                                                  Navigator.pushAndRemoveUntil(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              const SVDashboardScreen()),
-                                                          (route) => false);
-                                                } else {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                           'Something went wrong')),
-                                                  );
+                                              Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const SVDashboardScreen()),
+                                                      (route) => false);
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                       'Something went wrong')),
+                                              );
 
-                                            }
-                                          },
-                                          bloc: dropdownBloc,
-                                          child: _buildSignUp(context)),
+                                        }
+                                      },
+                                      bloc: dropdownBloc,
+                                      child: _buildSignUp(context)),
 
-                                      SizedBox(height: 26.v),
-                                      Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                              padding:
-                                              EdgeInsets.only(left: 44.h),
-                                              child: Row(children: [
-                                                Text("Already have an account",
-                                                    style: CustomTextStyles
-                                                        .bodyMediumGray600),
-                                                GestureDetector(
-                                                    onTap: () {
-                                                      onTapTxtLogIn(context);
-                                                    },
-                                                    child: Padding(
-                                                        padding:
-                                                        EdgeInsets.only(
-                                                            left: 4.h),
-                                                        child: Text(
-                                                            translation(context)
-                                                                .lbl_log_in2,
-                                                            style: CustomTextStyles
-                                                                .titleSmallPrimarySemiBold)))
-                                              ]))),
-                                      SizedBox(height: 5.v)
-                                    ],
-                                  ),
-                                ])))))));
+                                  const SizedBox(height: 26),
+                                  Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                          padding:
+                                          const EdgeInsets.only(left: 44),
+                                          child: Row(children: [
+                                            Text("Already have an account",
+                                                style: CustomTextStyles
+                                                    .bodyMediumGray600),
+                                            GestureDetector(
+                                                onTap: () {
+                                                  onTapTxtLogIn(context);
+                                                },
+                                                child: Padding(
+                                                    padding:
+                                                    const EdgeInsets.only(
+                                                        left: 4),
+                                                    child: Text(
+                                                        translation(context)
+                                                            .lbl_log_in2,
+                                                        style: CustomTextStyles
+                                                            .titleSmallPrimarySemiBold)))
+                                          ]))),
+                                  const SizedBox(height: 5)
+                                ],
+                              ),
+                            ]))))));
   }
 
   void _showErrorDialog(Map<String, dynamic> errors) {
@@ -543,14 +542,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   _buildAppBar(BuildContext context) {
     return CustomAppBar(
       height: 150,
-      leadingWidth: 56.h,
+      leadingWidth: 56,
       centerTitle: true,
       title: Column(
         children: [
           Image.asset(
             'assets/logo/logo.png',
-            width: 400.v,
-            height: 100.h,
+            width: 400,
+            height: 100,
           ),
           AppbarTitle(text: widget.isSocialLogin ?? false
               ? "Complete Profile"
@@ -567,20 +566,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         controller: firstnameController,
         hintText: translation(context).lbl_enter_your_name1,
         prefix: Container(
-            margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: CustomImageView(
                 color: Colors.black54,
                 imagePath: ImageConstant.imgLock,
-                height: 24.adaptSize,
-                width: 24.adaptSize)),
-        prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                height: 24,
+                width: 24)),
+        prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
             return translation(context).err_msg_please_enter_valid_text;
           }
           return null;
         },
-        contentPadding: EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v));
+        contentPadding: const EdgeInsets.only(top: 18, right: 30, bottom: 18));
   }
 
   /// Section Widget
@@ -590,20 +589,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         controller: lastNameController,
         hintText: translation(context).lbl_enter_your_name2,
         prefix: Container(
-            margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: CustomImageView(
                 color: Colors.black54,
                 imagePath: ImageConstant.imgLock,
-                height: 24.adaptSize,
-                width: 24.adaptSize)),
-        prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                height: 24,
+                width: 24)),
+        prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
             return translation(context).err_msg_please_enter_valid_text;
           }
           return null;
         },
-        contentPadding: EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v));
+        contentPadding: const EdgeInsets.only(top: 18, right: 30, bottom: 18));
   }
 
   /// Section Widget
@@ -614,20 +613,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         controller: phoneController,
         hintText: translation(context).lbl_enter_your_phone,
         prefix: Container(
-            margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: CustomImageView(
                 color: Colors.black54,
                 imagePath: ImageConstant.imgLock,
-                height: 24.adaptSize,
-                width: 24.adaptSize)),
-        prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                height: 24,
+                width: 24)),
+        prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
             return translation(context).err_msg_please_enter_valid_text;
           }
           return null;
         },
-        contentPadding: EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v));
+        contentPadding: const EdgeInsets.only(top: 18, right: 30, bottom: 18));
   }
 
   /// Section Widget
@@ -638,20 +637,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         hintText: translation(context).msg_enter_your_email2,
         textInputType: TextInputType.emailAddress,
         prefix: Container(
-            margin: EdgeInsets.fromLTRB(24.h, 16.v, 16.h, 16.v),
+            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: CustomImageView(
                 color: Colors.black54,
                 imagePath: ImageConstant.imgCheckmark,
-                height: 24.adaptSize,
-                width: 24.adaptSize)),
-        prefixConstraints: BoxConstraints(maxHeight: 56.v),
+                height: 24,
+                width: 24)),
+        prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (value == null || (!isValidEmail(value, isRequired: true))) {
             return translation(context).err_msg_please_enter_valid_email;
           }
           return null;
         },
-        contentPadding: EdgeInsets.only(top: 18.v, right: 30.h, bottom: 18.v));
+        contentPadding: const EdgeInsets.only(top: 18, right: 30, bottom: 18));
   }
 
   /// Section Widget

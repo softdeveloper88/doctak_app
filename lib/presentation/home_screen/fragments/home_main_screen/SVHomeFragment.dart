@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../../ads_setting/ads_widget/banner_ads_widget.dart';
 import '../../../../localization/app_localization.dart';

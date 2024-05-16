@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:sizer/sizer.dart';
 
 // ignore: must_be_immutable
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -32,7 +33,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      toolbarHeight: height ?? 40.v,
+      toolbarHeight: height ?? 40,
       automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
       leadingWidth: leadingWidth ?? 0,
@@ -46,7 +47,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size(
-        SizeUtils.width,
-        height ?? 40.v,
+        100.w,
+        height ?? 40,
       );
 }

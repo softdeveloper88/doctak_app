@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 const SVAppColorPrimary = Color(0xFF359CF6);
 
 //Section BG / page BG
-const SVAppLayoutBackground = Color(0xFFFFFFFF);
+const SVAppLayoutBackground = Color(0xFFF2F2F2);
 const SVAppSectionBackground = Color(0xFFFFFFFF);
 const SVAppBorderColor = Color(0xFFD9DFEB);
 const buttonUnSelectColor = Color(0xFFF2F2F2);

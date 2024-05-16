@@ -132,12 +132,12 @@ class CustomTextField extends StatelessWidget {
         suffixIcon: suffix,
         suffixIconConstraints: suffixConstraints,
         isDense: true,
-        contentPadding: contentPadding ?? EdgeInsets.symmetric(vertical: 18.v),
+        contentPadding: contentPadding ?? EdgeInsets.symmetric(vertical: 18),
         fillColor: fillColor,
         filled: filled,
         border: borderDecoration ??
             OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6.h),
+              borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(
                 color: appTheme.gray300,
                 width: 1,
@@ -145,7 +145,7 @@ class CustomTextField extends StatelessWidget {
             ),
         enabledBorder: borderDecoration ??
             OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6.h),
+              borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(
                 color: appTheme.gray300,
                 width: 1,
@@ -153,7 +153,7 @@ class CustomTextField extends StatelessWidget {
             ),
         focusedBorder: borderDecoration ??
             OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6.h),
+              borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(
                 color: theme.colorScheme.primary,
                 width: 1,
@@ -166,7 +166,7 @@ class CustomTextField extends StatelessWidget {
 extension TextFormFieldStyleHelper on CustomTextField {
   static OutlineInputBorder get outlineGrayTL8 =>
       OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.h),
+        borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
           color: appTheme.gray300,
           width: 1,

@@ -116,7 +116,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
               )
               : Column(
                 children: [
-                 if(index%3==0 && index!=0) NativeAdWidget(),
+                 if(index%5==0 && index!=0) NativeAdWidget(),
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     margin: const EdgeInsets.symmetric(vertical: 8),
@@ -1021,7 +1021,7 @@ class _PhotoGridState extends State<PhotoGrid> {
     var images = buildImages();
 
     return SizedBox(
-      height: 200.h,
+      height: 200,
       child: GridView(
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(

@@ -49,7 +49,7 @@ class ThemeHelper {
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.h),
+            borderRadius: BorderRadius.circular(8),
           ),
           visualDensity: const VisualDensity(
             vertical: -4,
@@ -63,10 +63,10 @@ class ThemeHelper {
           backgroundColor: Colors.transparent,
           side: BorderSide(
             color: appTheme.gray300,
-            width: 1.h,
+            width: 1,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.h),
+            borderRadius: BorderRadius.circular(8),
           ),
           visualDensity: const VisualDensity(
             vertical: -4,
@@ -113,67 +113,67 @@ class TextThemes {
   static TextTheme textTheme(ColorScheme colorScheme) => TextTheme(
         bodyLarge: TextStyle(
           color: appTheme.gray500,
-          fontSize: 16.fSize,
+          fontSize: 16,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w400,
         ),
         bodyMedium: TextStyle(
           color: appTheme.blueGray700,
-          fontSize: 14.fSize,
+          fontSize: 14,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w400,
         ),
         bodySmall: TextStyle(
           color: appTheme.gray500,
-          fontSize: 12.fSize,
+          fontSize: 12,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w400,
         ),
         displayMedium: TextStyle(
           color: appTheme.whiteA700,
-          fontSize: 50.fSize,
+          fontSize: 50,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w700,
         ),
         headlineSmall: TextStyle(
           color: colorScheme.onPrimary,
-          fontSize: 24.fSize,
+          fontSize: 24,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w700,
         ),
         labelLarge: TextStyle(
           color: appTheme.gray500,
-          fontSize: 12.fSize,
+          fontSize: 12,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w500,
         ),
         labelMedium: TextStyle(
           color: appTheme.gray500,
-          fontSize: 10.fSize,
+          fontSize: 10,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w500,
         ),
         labelSmall: TextStyle(
           color: appTheme.gray500,
-          fontSize: 8.fSize,
+          fontSize: 8,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w600,
         ),
         titleLarge: TextStyle(
           color: colorScheme.onPrimary,
-          fontSize: 22.fSize,
+          fontSize: 22,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w700,
         ),
         titleMedium: TextStyle(
           color: colorScheme.onPrimary,
-          fontSize: 16.fSize,
+          fontSize: 16,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w600,
         ),
         titleSmall: TextStyle(
           color: appTheme.gray500,
-          fontSize: 14.fSize,
+          fontSize: 14,
           fontFamily: 'Raleway',
           fontWeight: FontWeight.w500,
         ),

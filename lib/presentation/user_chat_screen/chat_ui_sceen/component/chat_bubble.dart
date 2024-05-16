@@ -6,6 +6,9 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:voice_message_package/voice_message_package.dart';
 
 import 'video_view.dart';
@@ -229,11 +232,13 @@ class ChatBubble extends StatelessWidget {
   final bool isMe;
   final String profile;
   final String? attachmentJson;
+  final String? createAt;
 
   const ChatBubble({
     Key? key,
     required this.message,
     required this.isMe,
+    required this.createAt,
     required this.profile,
     this.attachmentJson,
   }) : super(key: key);
@@ -247,90 +252,99 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isMe)
-            CircleAvatar(
-              backgroundImage: CachedNetworkImageProvider(profile),
-              radius: 16.0,
-            )
-          else
-            const SizedBox(width: 24.0),
+          // if (!isMe)
+          //   CircleAvatar(
+          //     backgroundImage: CachedNetworkImageProvider(profile),
+          //     radius: 16.0,
+          //   )
+          // else
+          //   const SizedBox(width: 24.0),
           const SizedBox(width: 8.0),
           Expanded(
             child: Align(
               alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                decoration: BoxDecoration(
-                  color: isMe ? Colors.blue : Colors.grey[200],
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(isMe ? 16.0 : 0.0),
-                    bottomRight: const Radius.circular(16.0),
-                    topRight: Radius.circular(isMe ? 0.0 : 16.0),
-                    bottomLeft: const Radius.circular(16.0),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      message,
-                      style: TextStyle(
-                        color: isMe ? Colors.white : Colors.black,
+              child: Column(
+                crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      color: isMe ? Colors.blue : Colors.grey[200],
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(10.0),
+                        bottomRight:  Radius.circular(isMe ? 0.0 : 10.0),
+                        topRight: Radius.circular(isMe ? 10.0 : 0.0),
+                        bottomLeft:  Radius.circular(isMe ? 10.0 :0.0),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    if (attachmentJson != null)
-                      if (attachmentJson!.endsWith('mp3'))
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Container(
-                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
-                            child: AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
-                          ),
-                        )
-                      else if (attachmentJson!.endsWith('m4a'))
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Container(
-                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
-                            child:
-                            AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
-                          ),
-                        )
-                      else if(attachmentJson!.endsWith('mp4'))
-                        VideoPlayerWidget(videoUrl: '${AppData.imageUrl}$attachmentJson')
-                        else Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Image.network(
-                            "${AppData.imageUrl}$attachmentJson",
-                            fit: BoxFit.cover,
-                            width: MediaQuery.of(context).size.width * 0.6, // Adjust as needed
-                            // height: 200, // You can set a fixed height if needed
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message,
+                          style: TextStyle(
+                            color: isMe ? Colors.white : Colors.black,
                           ),
                         ),
-                  ],
-                ),
+                        if (attachmentJson != null)
+                          if (attachmentJson!.endsWith('mp3'))
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Container(
+                                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
+                                child: AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
+                              ),
+                            )
+                          else if (attachmentJson!.endsWith('m4a'))
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Container(
+                                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
+                                child:
+                                AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
+                              ),
+                            )
+                          else if(attachmentJson!.endsWith('mp4'))
+                            VideoPlayerWidget(videoUrl: '${AppData.imageUrl}$attachmentJson')
+                            else Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Image.network(
+                                "${AppData.imageUrl}$attachmentJson",
+                                fit: BoxFit.cover,
+                                width: MediaQuery.of(context).size.width * 0.6, // Adjust as needed
+                                // height: 200, // You can set a fixed height if needed
+                              ),
+                            ),
+                      ],
+                    ),
+                  ),
+                  Align(alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Text(timeAgo.format(DateTime.parse(createAt.toString())),style: GoogleFonts.poppins(fontSize:12,color:Colors.black54),)),
+                  const SizedBox(height: 8,)
+                ],
               ),
             ),
           ),
           const SizedBox(width: 8.0),
-          if (isMe)
-            CircleAvatar(
-              backgroundImage: CachedNetworkImageProvider(AppData.imageUrl + AppData.profile_pic),
-              radius: 16.0,
-            )
-          else
-            const SizedBox(width: 24.0),
+          // if (isMe)
+            // CircleAvatar(
+            //   backgroundImage: CachedNetworkImageProvider(AppData.imageUrl + AppData.profile_pic),
+            //   radius: 16.0,
+            // )
+          // else
+          //   const SizedBox(width: 24.0),
         ],
       ),
     );

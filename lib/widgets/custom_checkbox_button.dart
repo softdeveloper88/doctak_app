@@ -91,8 +91,8 @@ class CustomCheckboxButton extends StatelessWidget {
             textStyle ?? CustomTextStyles.bodyMediumSFProDisplayErrorContainer,
       );
   Widget get checkboxWidget => SizedBox(
-        height: iconSize ?? 24.h,
-        width: iconSize ?? 24.h,
+        height: iconSize ?? 24,
+        width: iconSize ?? 24,
         child: Checkbox(
           visualDensity: VisualDensity(
             vertical: -4,
