@@ -15,7 +15,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import 'bloc/drugs_event.dart';
 import 'bloc/drugs_state.dart';
@@ -125,7 +127,14 @@ int selectedIndex=0;
                       ],
                     ),
                     elevation: 0,
+                    surfaceTintColor: Colors.white,
+
                     centerTitle: true,
+                    leading: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.black),
+                        onPressed:(){Navigator.pop(context);}
+                    ),
                     actions: const [
                       // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
                     ],
@@ -400,7 +409,7 @@ int selectedIndex=0;
                   child: CircularProgressIndicator(),
                 )
               : Container(
-                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  margin: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: context.cardColor,
@@ -410,22 +419,57 @@ int selectedIndex=0;
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        bloc.drugsData[index].tradeName ?? "",
-                        style: secondaryTextStyle(
-                            color: Colors.black,fontFamily:'Robotics', size: 18),
+                        bloc.drugsData[index].genericName ?? "",
+                        style: GoogleFonts.poppins(color:Colors.black,fontSize:14.sp,fontWeight:FontWeight.w500),
                       ),
                       const SizedBox(height: 5),
-                      Text(bloc.drugsData[index].genericName ?? 'N/A',
-                          style: secondaryTextStyle(color: svGetBodyColor())),
+                      Row(
+                        children: [
+                          Text(bloc.drugsData[index].strength ?? '',
+                              style: GoogleFonts.poppins(color:Colors.black,fontSize:10.sp,fontWeight:FontWeight.w400)),
+                          Text(' - ',
+                              style: GoogleFonts.poppins(color:Colors.black,fontSize:10.sp,fontWeight:FontWeight.w400)),
+                          Text(bloc.drugsData[index].packageSize ?? '',
+                              style: GoogleFonts.poppins(color:Colors.black,fontSize:10.sp,fontWeight:FontWeight.w400)),
+
+                        ],
+                      ),
                       const SizedBox(height: 5),
-                      Text(bloc.drugsData[index].strength ?? 'N/A',
-                          style: secondaryTextStyle(color: svGetBodyColor())),
+                      Text(bloc.drugsData[index].tradeName ?? 'N/A',
+                          style: GoogleFonts.poppins(color:Colors.black,fontSize:10.sp)),
+                      const SizedBox(height: 5),
                       const SizedBox(height: 10),
-                      Text(bloc.drugsData[index].manufacturerName ?? 'N/A',
-                          style: secondaryTextStyle(color: svGetBodyColor())),
-                      const SizedBox(height: 5),
-                      Text("${bloc.drugsData[index].mrp ?? '0'} ${AppData.currency}",
-                          style: secondaryTextStyle(color: svGetBodyColor())),
+                       Divider(color: Colors.grey[300],),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            flex: 6,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                 Text('Manufacturer Name',style: GoogleFonts.poppins(color:Colors.grey,fontSize:12.sp),),
+                                Text(bloc.drugsData[index].manufacturerName ?? '',
+                                  style: GoogleFonts.poppins(color:Colors.black,fontSize:12.sp),),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 4,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                   Text('Price',style: GoogleFonts.poppins(color:Colors.grey,fontSize:12.sp)),
+                                  Text("${bloc.drugsData[index].mrp ?? '0'} ${AppData.currency}",
+                                      style: GoogleFonts.poppins(color:Colors.black,fontSize:12.sp)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 );

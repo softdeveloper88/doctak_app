@@ -257,15 +257,17 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          children: [
-                            InkWell(
-                              onTap: (){
-                                print(widget.profileBloc.postList[index].id);
-                                homeBloc.add(PostLikeEvent(postId:widget.profileBloc.postList[index].id??0));
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
 
-                              },
-                              child:findIsLiked(widget.profileBloc.postList[index].likes)
+                          onTap: (){
+                            print(widget.profileBloc.postList[index].id);
+                            homeBloc.add(PostLikeEvent(postId:widget.profileBloc.postList[index].id??0));
+                          },
+                          child:Column(
+                            children: [
+                              findIsLiked(widget.profileBloc.postList[index].likes)
                                   ? Image.asset(
                                   'images/socialv/icons/ic_HeartFilled.png',
                                   height: 20, width: 22, fit: BoxFit.fill)
@@ -276,42 +278,51 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                 fit: BoxFit.cover,
                                 color: context.iconColor,
                               ),
-                            ),
-                            Text('Like', style: secondaryTextStyle(
-                                color: svGetBodyColor())),
-                          ],
+                              Text('Like', style: secondaryTextStyle(
+                                  color: svGetBodyColor())),
+                            ],
+                          ),
                         ),
-                        Column(
-                          children: [
-                            Image.asset(
-                              'images/socialv/icons/ic_Chat.png',
-                              height: 22,
-                              width: 22,
-                              fit: BoxFit.cover,
-                              color: context.iconColor,
-                            ).onTap(() {
-                              SVCommentScreen(id:widget.profileBloc.postList[index].id??0).launch(context);
-                            }, splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent),
-                            Text('Comment', style: secondaryTextStyle(
-                                color: svGetBodyColor())),
-                          ],
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+
+                          onTap:() {
+
+                          SVCommentScreen(id:widget.profileBloc.postList[index].id??0).launch(context);
+                          },
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                'images/socialv/icons/ic_Chat.png',
+                                height: 22,
+                                width: 22,
+                                fit: BoxFit.cover,
+                                color: context.iconColor,
+                              ),
+                              Text('Comment', style: secondaryTextStyle(
+                                  color: svGetBodyColor())),
+                            ],
+                          ),
                         ),
-                        Column(
-                          children: [
-                            Image.asset(
-                              'images/socialv/icons/ic_Send.png',
-                              height: 22,
-                              width: 22,
-                              fit: BoxFit.cover,
-                              color: context.iconColor,
-                            ).onTap(() {
-                              // svShowShareBottomSheet(context,);
-                            }, splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent),
-                            Text('Send', style: secondaryTextStyle(
-                                color: svGetBodyColor())),
-                          ],
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+
+                          onTap: (){
+                          },
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                'images/socialv/icons/ic_Send.png',
+                                height: 22,
+                                width: 22,
+                                fit: BoxFit.cover,
+                                color: context.iconColor,
+                              ), Text('Send', style: secondaryTextStyle(
+                                  color: svGetBodyColor())),
+                            ],
+                          ),
                         ),
                       ],
                     ).paddingSymmetric(horizontal: 16),

@@ -97,7 +97,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       );
 
       int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
-      if(index>0) {
+      if(index>=0) {
         bool isLike = postList[index].likes!.where((element) =>
         element.postId.toString() == event.postId.toString()).isEmpty;
         if (isLike) {
