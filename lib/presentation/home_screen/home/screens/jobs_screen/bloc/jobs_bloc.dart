@@ -2,6 +2,7 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/models/jobs_model/job_detail_model.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,11 +14,13 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> drugsData = [];
+  JobDetailModel jobDetailModel=JobDetailModel();
   final int nextPageTrigger = 1;
 
   JobsBloc() : super(PaginationInitialState()) {
     on<JobLoadPageEvent>(_onGetJobs);
     on<GetPost>(_onGetJobs1);
+    on<JobDetailPageEvent>(_onGetJobDetail);
     on<JobCheckIfNeedMoreDataEvent>((event, emit) async {
       // emit(PaginationLoadingState());
       if (event.index == drugsData.length - nextPageTrigger) {
@@ -54,6 +57,23 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       }
       emit(PaginationLoadedState());
 
+      // emit(DataLoaded(drugsData));
+    // } catch (e) {
+    //   print(e);
+    //
+    //   // emit(PaginationLoadedState());
+    //
+    //   emit(DataError('No Data Found'));
+    // }
+  }
+  _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
+    emit(PaginationLoadingState());
+    // try {
+      JobDetailModel response = await postService.getJobsDetails(
+          'Bearer ${AppData.userToken}',
+          event.jobId.toString());
+      jobDetailModel=response;
+      emit(PaginationLoadedState());
       // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   print(e);

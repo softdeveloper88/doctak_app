@@ -28,6 +28,14 @@ JobLoadPageEvent({this.page,this.countryId,this.isExpired,this.searchTerm});
 @override
 List<Object?> get props => [page,countryId,isExpired,searchTerm];
 }
+class JobDetailPageEvent extends JobsEvent {
+int? jobId;
+
+
+JobDetailPageEvent({this.jobId});
+@override
+List<Object?> get props => [jobId];
+}
 class JobCheckIfNeedMoreDataEvent extends JobsEvent {
   final int index;
   JobCheckIfNeedMoreDataEvent({required this.index});

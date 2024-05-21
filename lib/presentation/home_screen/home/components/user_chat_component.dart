@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/models/SVStoryModel.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -98,7 +99,9 @@ class _UserChatComponentState extends State<UserChatComponent> {
                                   ).cornerRadiusWithClipRRect(
                                     SVAppCommonRadius),
                           ).onTap(() {
-                            ChatRoomScreen(username: '${chatBloc.contactsList[index].firstName} ${chatBloc.contactsList[index].lastName}',profilePic: '${chatBloc.contactsList[index].profilePic}',id: '',roomId: '${chatBloc.contactsList[index].roomId}',).launch(context);
+                            print(chatBloc.contactsList[index].id);
+                            // ChatRoomScreen(username: '${chatBloc.contactsList[index].firstName} ${chatBloc.contactsList[index].lastName}',profilePic: '${chatBloc.contactsList[index].profilePic}',id: '',roomId: '${chatBloc.contactsList[index].roomId}',).launch(context);
+                            SVProfileFragment(userId:chatBloc.contactsList[index].id).launch(context);
 
                             // SVStoryScreen(story: storyList[index])
                             //     .launch(context);

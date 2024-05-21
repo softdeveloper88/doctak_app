@@ -41,10 +41,10 @@ var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.white, // navigation bar color
-    statusBarColor: Colors.white, // status bar color
-  ));
+  // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+  //   systemNavigationBarColor: Colors.white, // navigation bar color
+  //   statusBarColor: Colors.white, // status bar color
+  // ));
   if(Platform.isAndroid) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(

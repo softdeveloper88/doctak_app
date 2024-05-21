@@ -6,6 +6,7 @@ import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/material.dart';
@@ -917,7 +918,14 @@ class _SVPostComponentState extends State<SVPostComponent> {
               children: [
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
                   Linkify(
-                    onOpen: (link) => _launchURL(context, link.url),
+                    onOpen: (link) {
+                      if(link.url.contains('doctak/jobs-detail')){
+                        int jobID=Uri.parse(link.url).pathSegments.last.toInt();
+                        JobsDetailsScreen(jobId: jobID,).launch(context);
+                      }else {
+                        _launchURL(context, link.url);
+                      }
+                     },
                     text: textToShow,
                     style: TextStyle(
                       fontSize: 14.0,
@@ -937,7 +945,15 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     height: 200,
                     child: Center(
                       child: Linkify(
-                        onOpen: (link) => _launchURL(context, link.url),
+                        onOpen: (link) {
+                          if(link.url.contains('doctak/jobs-detail')){
+                          int jobID=Uri.parse(link.url).pathSegments.last.toInt();
+                          JobsDetailsScreen(jobId: jobID,).launch(context);
+                          }else {
+                            _launchURL(context, link.url);
+                          }
+                          },
+
                         text: textToShow,
                         style: TextStyle(
                           fontSize: 14.0,

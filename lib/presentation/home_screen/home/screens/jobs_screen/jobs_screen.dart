@@ -6,6 +6,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_state.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
@@ -560,231 +561,236 @@ class _JobsScreenState extends State<JobsScreen> {
                     ? const Center(
                         child: CircularProgressIndicator(),
                       )
-                    : Container(
-                        margin: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: context.cardColor,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Material(
-                          elevation: 4,
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      selectedIndex == 0 ? "New" : "Expired",
-                                      style: GoogleFonts.poppins(
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: kDefaultFontSize),
-                                    ),
-                                    const Icon(Icons.bookmark_border),
-                                  ],
-                                ),
-                                Text(
-                                  bloc.drugsData[index].jobTitle ?? "",
-                                  style: GoogleFonts.poppins(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(bloc.drugsData[index].companyName ?? 'N/A',
-                                    style: secondaryTextStyle(
-                                        color: svGetBodyColor())),
-                                const SizedBox(height: 10),
-                                Row(
-                                  children: <Widget>[
-                                    const Icon(
-                                      Icons.location_on,
-                                      size: 20,
-                                      color: Colors.grey,
-                                    ),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                          bloc.drugsData[index].location ??
-                                              'N/A',
-                                          style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                Text('Apply Date',
+                    : InkWell(
+                  onTap: (){
+                    JobsDetailsScreen(jobId:bloc.drugsData[index].id??0).launch(context);
+                  },
+                      child: Container(
+                          margin: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: context.cardColor,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Material(
+                            elevation: 4,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        selectedIndex == 0 ? "New" : "Expired",
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: kDefaultFontSize),
+                                      ),
+                                      const Icon(Icons.bookmark_border),
+                                    ],
+                                  ),
+                                  Text(
+                                    bloc.drugsData[index].jobTitle ?? "",
                                     style: GoogleFonts.poppins(
                                         color: Colors.black,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 14)),
-                                Row(
-                                  children: [
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Date From',
-                                            style: secondaryTextStyle(
-                                                color: Colors.black)),
-                                        Row(
-                                          children: <Widget>[
-                                            const Icon(
-                                              Icons.date_range_outlined,
-                                              size: 20,
-                                              color: Colors.black,
-                                            ),
-                                            const SizedBox(
-                                              width: 5,
-                                            ),
-                                            Text(
-                                                DateFormat('MMM dd, yyyy')
-                                                    .format(DateTime.parse(bloc
-                                                            .drugsData[index]
-                                                            .createdAt ??
-                                                        'N/A'.toString())),
-                                                style: secondaryTextStyle(
-                                                    color: svGetBodyColor())),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Text('Date To',
-                                            style: secondaryTextStyle(
-                                              color: Colors.black,
-                                            )),
-                                        Row(
-                                          children: <Widget>[
-                                            const Icon(
-                                              Icons.date_range_outlined,
-                                              size: 20,
-                                              color: Colors.black,
-                                            ),
-                                            const SizedBox(
-                                              width: 5,
-                                            ),
-                                            Text(
-                                                DateFormat('MMM dd, yyyy')
-                                                    .format(DateTime.parse(bloc
-                                                            .drugsData[index]
-                                                            .lastDate ??
-                                                        'N/A'.toString())),
-                                                style: secondaryTextStyle(
-                                                    color: svGetBodyColor())),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                    'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
-                                    style: secondaryTextStyle(
-                                      color: Colors.black,
-                                    )),
-                                const SizedBox(height: 5),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: HtmlWidget(
-                                    '<p>${bloc.drugsData[index].description}</p>',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18),
                                   ),
-                                ),
-                                const SizedBox(height: 5),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextButton(
-                                        onPressed: () async {
-                                          // final Uri url = Uri.parse(bloc
-                                          //     .drugsData[index]
-                                          //     .link!); // Assuming job.link is a non-null String
-                                          // Show dialog asking the user to confirm navigation
-                                          final shouldLeave =
-                                              await showDialog<bool>(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: const Text('Leave App'),
-                                              content: const Text(
-                                                  'Would you like to leave the app to view this content?'),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.of(context)
-                                                          .pop(false),
-                                                  child: const Text('No'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context)
-                                                        .pop(true);
-                                                    final Uri url = Uri.parse(
-                                                        bloc.drugsData[index]
-                                                            .link!);
-                                                    _launchInBrowser(url);
-                                                  },
-                                                  child: const Text('Yes'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                          // If the user confirmed, launch the URL
-                                          if (shouldLeave == true) {
-                                            // await launchUrl(url);
-                                          } else if (shouldLeave == false) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                  content: Text(
-                                                      'Leaving the app canceled.')),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                  content: Text(
-                                                      'Leaving the app canceled.')),
-                                            );
-                                          }
-                                        },
-                                        child: const Text(
-                                          'Apply ',
-                                          style: TextStyle(
-                                            color: Colors.blue,
-                                            decoration:
-                                                TextDecoration.underline,
-                                          ),
-                                        ),
+                                  const SizedBox(height: 5),
+                                  Text(bloc.drugsData[index].companyName ?? 'N/A',
+                                      style: secondaryTextStyle(
+                                          color: svGetBodyColor())),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: <Widget>[
+                                      const Icon(
+                                        Icons.location_on,
+                                        size: 20,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                            bloc.drugsData[index].location ??
+                                                'N/A',
+                                            style: secondaryTextStyle(
+                                                color: svGetBodyColor())),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 20),
+                                  Text('Apply Date',
+                                      style: GoogleFonts.poppins(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14)),
+                                  Row(
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Date From',
+                                              style: secondaryTextStyle(
+                                                  color: Colors.black)),
+                                          Row(
+                                            children: <Widget>[
+                                              const Icon(
+                                                Icons.date_range_outlined,
+                                                size: 20,
+                                                color: Colors.black,
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                  DateFormat('MMM dd, yyyy')
+                                                      .format(DateTime.parse(bloc
+                                                              .drugsData[index]
+                                                              .createdAt ??
+                                                          'N/A'.toString())),
+                                                  style: secondaryTextStyle(
+                                                      color: svGetBodyColor())),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Text('Date To',
+                                              style: secondaryTextStyle(
+                                                color: Colors.black,
+                                              )),
+                                          Row(
+                                            children: <Widget>[
+                                              const Icon(
+                                                Icons.date_range_outlined,
+                                                size: 20,
+                                                color: Colors.black,
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                  DateFormat('MMM dd, yyyy')
+                                                      .format(DateTime.parse(bloc
+                                                              .drugsData[index]
+                                                              .lastDate ??
+                                                          'N/A'.toString())),
+                                                  style: secondaryTextStyle(
+                                                      color: svGetBodyColor())),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                      'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
+                                      style: secondaryTextStyle(
+                                        color: Colors.black,
+                                      )),
+                                  const SizedBox(height: 5),
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: HtmlWidget(
+                                      '<p>${bloc.drugsData[index].description}</p>',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () async {
+                                            // final Uri url = Uri.parse(bloc
+                                            //     .drugsData[index]
+                                            //     .link!); // Assuming job.link is a non-null String
+                                            // Show dialog asking the user to confirm navigation
+                                            final shouldLeave =
+                                                await showDialog<bool>(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text('Leave App'),
+                                                content: const Text(
+                                                    'Would you like to leave the app to view this content?'),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(false),
+                                                    child: const Text('No'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop(true);
+                                                      final Uri url = Uri.parse(
+                                                          bloc.drugsData[index]
+                                                              .link!);
+                                                      _launchInBrowser(url);
+                                                    },
+                                                    child: const Text('Yes'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            // If the user confirmed, launch the URL
+                                            if (shouldLeave == true) {
+                                              // await launchUrl(url);
+                                            } else if (shouldLeave == false) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Leaving the app canceled.')),
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Leaving the app canceled.')),
+                                              );
+                                            }
+                                          },
+                                          child: const Text(
+                                            'Apply ',
+                                            style: TextStyle(
+                                              color: Colors.blue,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      );
+                    );
                 // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
               },
             ),

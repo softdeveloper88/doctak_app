@@ -95,11 +95,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         'Bearer ${AppData.userToken}',
         event.postId.toString(),
       );
-
+      print(response.data);
       int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
       if(index>=0) {
         bool isLike = postList[index].likes!.where((element) =>
-        element.postId.toString() == event.postId.toString()).isEmpty;
+        element.userId.toString() == AppData.logInUserId.toString()).isEmpty;
         if (isLike) {
           postList[index].likes!.add(Likes(
               id: 1,

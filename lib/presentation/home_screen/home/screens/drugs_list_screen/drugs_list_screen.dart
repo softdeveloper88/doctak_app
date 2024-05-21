@@ -40,7 +40,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
     drugsBloc.add(
       LoadPageEvent(
           page: 1,
-          countryId: AppData.countryName,
+          countryId: '1',
           searchTerm: '',
           type: 'Brand'),
     );
@@ -71,7 +71,7 @@ int selectedIndex=0;
                 ],
               );
             } else if (state is CountriesDataLoaded) {
-              List<String> list1 = ['Brand', 'Active'];
+
               for (var element in state.countriesModel.countries!) {
                 if (element.flag == state.countryFlag) {
                   selectedValue = state.countriesModel.countries?.first.flag ??
@@ -299,7 +299,7 @@ int selectedIndex=0;
                                     BlocProvider.of<SplashBloc>(context).add(
                                         LoadDropdownData(
                                             state.countryFlag,
-                                            "Active",
+                                            "Generic",
                                             state.searchTerms ?? '',
                                             ''));
                                     drugsBloc.add(LoadPageEvent(
@@ -308,10 +308,10 @@ int selectedIndex=0;
                                             ? state.countryFlag
                                             : '${state.countriesModel.countries?.first.id ?? 1}',
                                         searchTerm: state.searchTerms ?? '',
-                                        type: 'Active'));
+                                        type: 'Generic'));
                                   },
                                   child: Text(
-                                    'Active',
+                                    'Generic',
                                     style: TextStyle(
                                       color: SVAppColorPrimary,
                                       fontSize: 14,

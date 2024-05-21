@@ -39,6 +39,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
       print(event.searchTerm);
       print(event.type);
     }
+
     // ProgressDialogUtils.showProgressDialog();
     // try {
       DrugsModel response = await postService.getDrugsList(
@@ -46,7 +47,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
           '${pageNumber}',
           event.countryId??"1",
           event.searchTerm??'',
-          event.type??"Brand");
+          event.type=='Generic'?'Active':"Brand");
       numberOfPage = response.data?.lastPage ?? 0;
       if (pageNumber < numberOfPage+1) {
         pageNumber = pageNumber + 1;
@@ -70,7 +71,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
     // ProgressDialogUtils.showProgressDialog();
     print('33'+event.type);
     // emit(PaginationLoadingState());
-    try {
+    // try {
       final response = await postService.getDrugsList(
           'Bearer ${AppData.userToken}',
           "1",
@@ -82,11 +83,11 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
       drugsData.addAll(response.data?.data ?? []);
       emit(PaginationLoadedState());
       // emit(DataLoaded(drugsData));
-    } catch (e) {
-      // ProgressDialogUtils.hideProgressDialog();
-      print(e);
-
-      emit(DataError('No Data Found'));
-    }
+    // } catch (e) {
+    //   // ProgressDialogUtils.hideProgressDialog();
+    //   print(e);
+    //
+    //   emit(DataError('No Data Found'));
+    // }
   }
 }

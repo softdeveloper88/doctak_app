@@ -15,6 +15,7 @@ import 'package:doctak_app/data/models/conference_model/search_conference_model.
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
+import 'package:doctak_app/data/models/jobs_model/job_detail_model.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_resp.dart';
 import 'package:doctak_app/data/models/news_model/news_model.dart';
@@ -118,6 +119,12 @@ abstract class ApiService {
       @Query('country_id') String countryId,
       @Query('searchTerm') String searchTerm,
       @Query('expired_job') String expiredJob);
+
+  @FormUrlEncoded()
+  @POST("/jobs_detail")
+  Future<JobDetailModel> getJobsDetails(
+      @Header('Authorization') String token,
+      @Query('job_id') String jobId);
 
   @FormUrlEncoded()
   @GET("/search-jobs")

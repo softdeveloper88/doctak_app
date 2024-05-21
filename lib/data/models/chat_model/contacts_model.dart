@@ -52,8 +52,9 @@ Contacts contactsFromJson(String str) => Contacts.fromJson(json.decode(str));
 String contactsToJson(Contacts data) => json.encode(data.toJson());
 class Contacts {
   Contacts({
-      this.roomId, 
-      this.createdAt, 
+      this.id,
+      this.roomId,
+      this.createdAt,
       this.firstName, 
       this.lastName, 
       this.profilePic, 
@@ -61,6 +62,7 @@ class Contacts {
       this.latestMessageTime,});
 
   Contacts.fromJson(dynamic json) {
+    id = json['id'];
     roomId = json['room_id'];
     createdAt = json['created_at'];
     firstName = json['first_name'];
@@ -69,6 +71,7 @@ class Contacts {
     latestMessage = json['latest_message'];
     latestMessageTime = json['latest_message_time'];
   }
+  dynamic id;
   dynamic roomId;
   String? createdAt;
   String? firstName;
@@ -79,6 +82,7 @@ class Contacts {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+    map['id'] = id;
     map['room_id'] = roomId;
     map['created_at'] = createdAt;
     map['first_name'] = firstName;

@@ -471,6 +471,39 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<JobDetailModel> getJobsDetails(
+      String token,
+      String jobId,) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'job_id': jobId,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<JobsModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+        .compose(
+      _dio.options,
+      '/job_detail',
+      queryParameters: queryParameters,
+      data: _data,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
+    final value = JobDetailModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<JobsModel> getSearchJobsList(
       String token,
       String page,

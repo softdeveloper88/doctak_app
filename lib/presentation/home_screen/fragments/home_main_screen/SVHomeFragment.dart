@@ -80,10 +80,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             ),
             IconButton(
               color: context.cardColor,
-              icon:
-
-
-              Icon(
+              icon: Icon(
 
                 CupertinoIcons.chat_bubble_2,
                 size: 30,
