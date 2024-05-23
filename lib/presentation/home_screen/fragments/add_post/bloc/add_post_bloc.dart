@@ -14,7 +14,7 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 
 import 'add_post_event.dart';
-import 'add_post_state.dart';
+part 'add_post_state.dart';
 
 class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
   final ApiService postService = ApiService(Dio());
@@ -29,10 +29,9 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
   String latitude = '';
   String longitude = '';
   List<XFile> imagefiles = [];
-  String? feeling='';
-  String backgroundColor='';
-  String title='';
-
+  String? feeling = '';
+  String backgroundColor = '';
+  String title = '';
 
   AddPostBloc() : super(PaginationInitialState()) {
     on<LoadPageEvent>(_onGetUserInfo);
@@ -43,7 +42,6 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     on<AddPostDataEvent>(_addPostData);
     on<TextFieldEvent>(_addTitle);
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
-
       if (event.index == searchPeopleData.length - nextPageTrigger) {
         add(LoadPageEvent(page: pageNumber));
       }
@@ -51,7 +49,6 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
   }
 
   _checkInSearch(PlaceAddEvent event, Emitter<AddPostState> emit) async {
-
     if (event.page == 1) {
       searchPeopleData.clear();
       pageNumber = 1;
@@ -179,15 +176,15 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     ProgressDialogUtils.showProgressDialog();
     print(tagFriends.toString());
 
-    _uploadPost(title, locationName, latitude, longitude, backgroundColor, tagFriends.toString(), feeling??'');
-
+    _uploadPost(title, locationName, latitude, longitude, backgroundColor,
+        tagFriends.toString(), feeling ?? '');
   }
 
- _addTitle(TextFieldEvent event, Emitter<AddPostState> emit) async {
+  _addTitle(TextFieldEvent event, Emitter<AddPostState> emit) async {
     print('object $state');
     // if (state is PaginationLoadedState) {
     title = event.text;
-     emit(PaginationLoadedState());
+    emit(PaginationLoadedState());
     // emit(PaginationLoadedState(
     //     (state as PaginationLoadedState).selectTagFriend,
     //     (state as PaginationLoadedState).name,
@@ -197,7 +194,6 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     // imageFiles.add(
     //   await MultipartFile.fromFile('/data/user/0/com.kt.doctak/cache/7f8232ed-be18-4de3-ac18-86fdf0dc13ce1049105523341482043.jpg', filename: '7f8232ed-be18-4de3-ac18-86fdf0dc13ce1049105523341482043.png'),
     // );
-
   }
 
   Future<void> _uploadPost(
@@ -208,7 +204,6 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       String backgroundColor,
       String tagging,
       String feeling) async {
-
     var uri = Uri.parse("${AppData.remoteUrl}/new_post");
     var request = http.MultipartRequest('POST', uri)
       ..fields['title'] = title
@@ -218,9 +213,11 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       ..fields['background_color'] = backgroundColor
       ..fields['tagging'] = tagging
       ..fields['feeling'] = feeling
-      ..headers['Authorization'] = 'Bearer ${AppData.userToken}'; // Add token bearer header
+      ..headers['Authorization'] =
+          'Bearer ${AppData.userToken}'; // Add token bearer header
 
-    print('$title,$locationName,$latitude,$longitude,$backgroundColor,$tagging,$feeling');
+    print(
+        '$title,$locationName,$latitude,$longitude,$backgroundColor,$tagging,$feeling');
     for (var xFile in imagefiles) {
       String filePath =
           xFile.path; // Use the path property to get the file path

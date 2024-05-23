@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import '../../profile/components/SVProfileHeaderComponent.dart';
 import '../../profile/components/SVProfilePostsComponent.dart';
 import '../../utils/SVColors.dart';
@@ -90,16 +91,19 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                   Text(profileBloc.userProfile?.user?.specialty ?? '',
                       style: secondaryTextStyle(color: svGetBodyColor())),
                   // 24.height,
-                  // if (widget.userId != null)
-                  //   AppButton(
-                  //     shapeBorder:
-                  //         RoundedRectangleBorder(borderRadius: radius(4)),
-                  //     text: 'Following',
-                  //     textStyle: boldTextStyle(color: Colors.white),
-                  //     onTap: () {},
-                  //     elevation: 0,
-                  //     color: SVAppColorPrimary,
-                  //   ),
+                  if (widget.userId != null)
+                    AppButton(
+                      height: 60,
+                      shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
+                      text: 'Chat',
+                      textStyle: boldTextStyle(color: Colors.white),
+                      onTap: () {
+                        ChatRoomScreen(username: '${profileBloc.userProfile?.user?.firstName} ${profileBloc.userProfile?.user?.lastName}',profilePic: '${profileBloc.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',id: '${profileBloc.userProfile?.user?.id}',roomId: '',).launch(context);
+
+                      },
+                      elevation: 0,
+                      color: SVAppColorPrimary,
+                    ),
                   24.height,
                   if(AppData.isShowGoogleBannerAds??false)BannerAdWidget(),
                   8.height,

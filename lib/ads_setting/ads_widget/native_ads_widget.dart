@@ -1,5 +1,4 @@
 import 'package:doctak_app/ads_setting/ad_setting.dart';
-import 'package:doctak_app/core/app_export.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
@@ -15,11 +14,13 @@ class ForgotBloc extends Bloc<ForgotEvent, ForgotState> {
     followRedirects: true,
     maxRedirects: 5, // Set maximum number of redirects to follow
   )));
+
   ForgotBloc() : super(ForgotInitial()) {
     on<ForgotPasswordEvent>(_onLoginButtonPressed);
-
   }
-  void _onLoginButtonPressed(ForgotPasswordEvent event, Emitter<ForgotState> emit) async {
+
+  void _onLoginButtonPressed(
+      ForgotPasswordEvent event, Emitter<ForgotState> emit) async {
     ProgressDialogUtils.showProgressDialog();
     print("response ${event.username}");
 
@@ -39,21 +40,19 @@ class ForgotBloc extends Bloc<ForgotEvent, ForgotState> {
       },
     );
 
-      if (response.statusCode==200) {
-        ProgressDialogUtils.hideProgressDialog();
+    if (response.statusCode == 200) {
+      ProgressDialogUtils.hideProgressDialog();
 
-        emit(ForgotSuccess(response: response.body));
-      } else {
-        ProgressDialogUtils.hideProgressDialog();
+      emit(ForgotSuccess(response: response.body));
+    } else {
+      ProgressDialogUtils.hideProgressDialog();
 
-        emit(ForgotFailure(error: response.body));
-      }
+      emit(ForgotFailure(error: response.body));
+    }
     // } catch (e) {
     //   ProgressDialogUtils.hideProgressDialog();
     //   print(e);
     //   emit(ForgotFailure(error: 'An error occurred'));
     // }
   }
-
-
 }

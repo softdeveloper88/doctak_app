@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';

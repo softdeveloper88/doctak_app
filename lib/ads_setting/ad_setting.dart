@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class AdmobSetting {
   /// Maximum duration allowed between loading and showing the ad.
   final Duration maxCacheDuration = const Duration(hours: 4);
@@ -18,14 +17,14 @@ class AdmobSetting {
       ? 'ca-app-pub-3940256099942544/3419835294'
       : 'not set for ios';
 
-
   static String get bannerUnit {
     print("banner adsId ${AppData.androidBannerAdsId}");
     if (Platform.isAndroid) {
-      return AppData.androidBannerAdsId??'ca-app-pub-3940256099942544/6300978111';
+      return AppData.androidBannerAdsId ??
+          'ca-app-pub-3940256099942544/6300978111';
       // return 'ca-app-pub-3940256099942544/6300978111';
     } else if (Platform.isIOS) {
-      return AppData.iosBannerAdsId??'ca-app-pub-3940256099942544/2934735716';
+      return AppData.iosBannerAdsId ?? 'ca-app-pub-3940256099942544/2934735716';
       // return 'ca-app-pub-3940256099942544/2934735716';
     }
     throw UnsupportedError("Unsupported platform");
@@ -33,9 +32,10 @@ class AdmobSetting {
 
   static String get nativeAdUnitId {
     if (Platform.isAndroid) {
-      return AppData.androidNativeAdsId??'ca-app-pub-3940256099942544/2247696110';
+      return AppData.androidNativeAdsId ??
+          'ca-app-pub-3940256099942544/2247696110';
     } else if (Platform.isIOS) {
-      return AppData.iosNativeAdsId??'ca-app-pub-3940256099942544/3986624511';
+      return AppData.iosNativeAdsId ?? 'ca-app-pub-3940256099942544/3986624511';
     }
     throw UnsupportedError("Unsupported platform");
   }
@@ -66,10 +66,8 @@ class AdmobSetting {
           _appOpenAd = ad;
         },
         onAdFailedToLoad: (error) {
-
           print('AppOpenAd failed to load: $error');
-
-          },
+        },
       ),
     );
   }
@@ -228,216 +226,215 @@ class AdmobSetting {
     _appOpenAd!.show();
   }
 
-  // void navigateScreenRequired(
-  //     int screen, BuildContext context, SharedPreferences? prefs) {
-  //
-  //     switch (screen) {
-  //       case 1:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xffF9963D);
-  //           ResourcesPath.headerImagePath = 'assets/icons/orange_circle.svg';
-  //           ResourcesPath.phoneImagePath =
-  //           'assets/icons/orange_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/orangeloading.json';
-  //
-  //           pageRoutPushReplacement(
-  //               context,
-  //               PhoneTrackLocationScreen(
-  //                 email: prefs?.getString("user_email")??"",
-  //                 displayName: prefs?.getString("user_name")??"",
-  //                 password: prefs?.getString("user_password")??"",
-  //               ));
-  //         }
-  //         break;
-  //       case 2:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xff007EFD);
-  //           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
-  //           ResourcesPath.phoneImagePath = 'assets/icons/blue_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/blueloading.json';
-  //
-  //           pageRoutPushReplacement(
-  //               context,
-  //               PhoneRingToneScreen(
-  //                   email: prefs?.getString("user_email")??"",
-  //                   displayName: prefs?.getString("user_name")??"",
-  //                   password: prefs?.getString("user_password")??""));
-  //         }
-  //         break;
-  //       case 3:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xffF3514F);
-  //           ResourcesPath.headerImagePath = 'assets/icons/red_circle.svg';
-  //           ResourcesPath.phoneImagePath = 'assets/icons/red_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/redloading.json';
-  //           pageRoutPushReplacement(
-  //               context,
-  //               PhoneVibrateScreen(
-  //                   email: prefs?.getString("user_email")??"",
-  //                   displayName: prefs?.getString("user_name")??"",
-  //                   password: prefs?.getString("user_password")??""));
-  //         }
-  //         break;
-  //       case 4:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xff5954F8);
-  //           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
-  //           ResourcesPath.phoneImagePath =
-  //           'assets/icons/purple_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/purpleloading.json';
-  //
-  //              pageRoutPushReplacement(
-  //                  context,
-  //                  PhoneLastTryScreen(
-  //                      email: prefs?.getString("user_email") ?? "",
-  //                      displayName: prefs?.getString("user_name") ?? "",
-  //                      password: prefs?.getString("user_password") ?? ""));
-  //
-  //         }
-  //         break;
-  //       case 5:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xffF9963D);
-  //           ResourcesPath.headerImagePath = 'assets/icons/orange_circle.svg';
-  //           ResourcesPath.phoneImagePath =
-  //           'assets/icons/orange_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/orangeloading.json';
-  //
-  //           pageRoutPushReplacement(
-  //               context,
-  //               PhoneLockScreen(
-  //                   email: prefs?.getString("user_email")??"",
-  //                   displayName: prefs?.getString("user_name")??"",
-  //                   password: prefs?.getString("user_password")??""));
-  //         }
-  //         break;
-  //       case 6:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xff007EFD);
-  //           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
-  //           ResourcesPath.phoneImagePath = 'assets/icons/blue_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/blueloading.json';
-  //
-  //           pageRoutPushReplacement(
-  //               context,
-  //               PhoneEraseDataScreen(
-  //                   email: prefs?.getString("user_email")??"",
-  //                   displayName: prefs?.getString("user_name")??"",
-  //                   password: prefs?.getString("user_password")??""));
-  //         }
-  //         break;
-  //       case 7:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xffF3514F);
-  //           ResourcesPath.headerImagePath = 'assets/icons/red_circle.svg';
-  //           ResourcesPath.phoneImagePath = 'assets/icons/red_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/redoading.json';
-  //
-  //           pageRoutPushReplacement(context, const BatteryScreen());
-  //         }
-  //         break;
-  //       case 8:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xff5954F8);
-  //           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
-  //           ResourcesPath.phoneImagePath =
-  //           'assets/icons/purple_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/purpleloading.json';
-  //
-  //           pageRoutPushReplacement(context, const UnTouchPhoneScreen());
-  //         }
-  //         break;
-  //       case 9:
-  //         {
-  //           ColorsCode.primaryColor = const Color(0xffF9963D);
-  //           ResourcesPath.headerImagePath = 'assets/icons/orange_circle.svg';
-  //           ResourcesPath.phoneImagePath =
-  //           'assets/icons/orange_mobile_icon.svg';
-  //           ResourcesPath.loaderAnimationPath =
-  //           'assets/animations/orangeloading.json';
-  //
-  //           pageRoutPushReplacement(
-  //               context,
-  //               PhoneFlashLightScreen(
-  //                   email: prefs?.getString("user_email")??"",
-  //                   displayName: prefs?.getString("user_name")??"",
-  //                   password: prefs?.getString("user_password")??""));
-  //         }
-  //         break;
-  //       default:
-  //         debugPrint("no screen found");
-  //     }
-  //     // if (screen == "Location") {
-  //     //   pageRout(context, new FindLocationScreen(
-  //     //                 email: _auth.currentUser!.email!,
-  //     //                 displayName: _auth.currentUser!.displayName!,
-  //     //                 photoURL: _auth.currentUser!.photoURL!,
-  //     //                 uid: _auth.currentUser!.uid));
-  //     // } else if (screen == "Ring") {
-  //     //   pageRout(context, new RingToneScreen(
-  //     //       email: _auth.currentUser!.email!,
-  //     //       displayName: _auth.currentUser!.displayName!,
-  //     //       photoURL: _auth.currentUser!.photoURL!,
-  //     //       uid: _auth.currentUser!.uid));
-  //     //
-  //     // } else if (screen == "Vibrate") {
-  //     //   pageRout(context, new VibrateScreen(
-  //     //       email: _auth.currentUser!.email!,
-  //     //       displayName: _auth.currentUser!.displayName!,
-  //     //       photoURL: _auth.currentUser!.photoURL!,
-  //     //       uid: _auth.currentUser!.uid));
-  //     //
-  //     // } else if (screen == "LastTry") {
-  //     //   pageRout(context, new LastTryScreen(
-  //     //       email: _auth.currentUser!.email!,
-  //     //       displayName: _auth.currentUser!.displayName!,
-  //     //       photoURL: _auth.currentUser!.photoURL!,
-  //     //       uid: _auth.currentUser!.uid));
-  //     //
-  //     //   // pageRout(context, new DontTouchScreen(
-  //     //   // ));
-  //     //
-  //     // }else if (screen == "lockScreen") {
-  //     //   pageRout(context, new LockScreen(
-  //     //       email: _auth.currentUser!.email!,
-  //     //       displayName: _auth.currentUser!.displayName!,
-  //     //       photoURL: _auth.currentUser!.photoURL!,
-  //     //       uid: _auth.currentUser!.uid));
-  //     //
-  //     //   // pageRout(context, new DontTouchScreen(
-  //     //   // ));
-  //     //
-  //     // }else if (screen == "EraseData") {
-  //     //   pageRout(context, new EraseDataScreen(
-  //     //       email: _auth.currentUser!.email!,
-  //     //       displayName: _auth.currentUser!.displayName!,
-  //     //       photoURL: _auth.currentUser!.photoURL!,
-  //     //       uid: _auth.currentUser!.uid));
-  //     //
-  //     //   // pageRout(context, new DontTouchScreen(
-  //     //   // ));
-  //     //
-  //     // }else if (screen == "Unplug") {
-  //     //   pageRout(context, new BatteryScreen());
-  //     //
-  //     //   // pageRout(context, new DontTouchScreen(
-  //     //   // ));
-  //     //
-  //     // }else if (screen == "Touch") {
-  //     //   pageRout(context, new DontTouchScreen());
-  //
-  //     // pageRout(context, new DontTouchScreen(
-  //     // ));
-  //
-  //     // }
-  //   }
-
+// void navigateScreenRequired(
+//     int screen, BuildContext context, SharedPreferences? prefs) {
+//
+//     switch (screen) {
+//       case 1:
+//         {
+//           ColorsCode.primaryColor = const Color(0xffF9963D);
+//           ResourcesPath.headerImagePath = 'assets/icons/orange_circle.svg';
+//           ResourcesPath.phoneImagePath =
+//           'assets/icons/orange_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/orangeloading.json';
+//
+//           pageRoutPushReplacement(
+//               context,
+//               PhoneTrackLocationScreen(
+//                 email: prefs?.getString("user_email")??"",
+//                 displayName: prefs?.getString("user_name")??"",
+//                 password: prefs?.getString("user_password")??"",
+//               ));
+//         }
+//         break;
+//       case 2:
+//         {
+//           ColorsCode.primaryColor = const Color(0xff007EFD);
+//           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
+//           ResourcesPath.phoneImagePath = 'assets/icons/blue_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/blueloading.json';
+//
+//           pageRoutPushReplacement(
+//               context,
+//               PhoneRingToneScreen(
+//                   email: prefs?.getString("user_email")??"",
+//                   displayName: prefs?.getString("user_name")??"",
+//                   password: prefs?.getString("user_password")??""));
+//         }
+//         break;
+//       case 3:
+//         {
+//           ColorsCode.primaryColor = const Color(0xffF3514F);
+//           ResourcesPath.headerImagePath = 'assets/icons/red_circle.svg';
+//           ResourcesPath.phoneImagePath = 'assets/icons/red_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/redloading.json';
+//           pageRoutPushReplacement(
+//               context,
+//               PhoneVibrateScreen(
+//                   email: prefs?.getString("user_email")??"",
+//                   displayName: prefs?.getString("user_name")??"",
+//                   password: prefs?.getString("user_password")??""));
+//         }
+//         break;
+//       case 4:
+//         {
+//           ColorsCode.primaryColor = const Color(0xff5954F8);
+//           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
+//           ResourcesPath.phoneImagePath =
+//           'assets/icons/purple_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/purpleloading.json';
+//
+//              pageRoutPushReplacement(
+//                  context,
+//                  PhoneLastTryScreen(
+//                      email: prefs?.getString("user_email") ?? "",
+//                      displayName: prefs?.getString("user_name") ?? "",
+//                      password: prefs?.getString("user_password") ?? ""));
+//
+//         }
+//         break;
+//       case 5:
+//         {
+//           ColorsCode.primaryColor = const Color(0xffF9963D);
+//           ResourcesPath.headerImagePath = 'assets/icons/orange_circle.svg';
+//           ResourcesPath.phoneImagePath =
+//           'assets/icons/orange_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/orangeloading.json';
+//
+//           pageRoutPushReplacement(
+//               context,
+//               PhoneLockScreen(
+//                   email: prefs?.getString("user_email")??"",
+//                   displayName: prefs?.getString("user_name")??"",
+//                   password: prefs?.getString("user_password")??""));
+//         }
+//         break;
+//       case 6:
+//         {
+//           ColorsCode.primaryColor = const Color(0xff007EFD);
+//           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
+//           ResourcesPath.phoneImagePath = 'assets/icons/blue_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/blueloading.json';
+//
+//           pageRoutPushReplacement(
+//               context,
+//               PhoneEraseDataScreen(
+//                   email: prefs?.getString("user_email")??"",
+//                   displayName: prefs?.getString("user_name")??"",
+//                   password: prefs?.getString("user_password")??""));
+//         }
+//         break;
+//       case 7:
+//         {
+//           ColorsCode.primaryColor = const Color(0xffF3514F);
+//           ResourcesPath.headerImagePath = 'assets/icons/red_circle.svg';
+//           ResourcesPath.phoneImagePath = 'assets/icons/red_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/redoading.json';
+//
+//           pageRoutPushReplacement(context, const BatteryScreen());
+//         }
+//         break;
+//       case 8:
+//         {
+//           ColorsCode.primaryColor = const Color(0xff5954F8);
+//           ResourcesPath.headerImagePath = 'assets/icons/blue_circle.svg';
+//           ResourcesPath.phoneImagePath =
+//           'assets/icons/purple_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/purpleloading.json';
+//
+//           pageRoutPushReplacement(context, const UnTouchPhoneScreen());
+//         }
+//         break;
+//       case 9:
+//         {
+//           ColorsCode.primaryColor = const Color(0xffF9963D);
+//           ResourcesPath.headerImagePath = 'assets/icons/orange_circle.svg';
+//           ResourcesPath.phoneImagePath =
+//           'assets/icons/orange_mobile_icon.svg';
+//           ResourcesPath.loaderAnimationPath =
+//           'assets/animations/orangeloading.json';
+//
+//           pageRoutPushReplacement(
+//               context,
+//               PhoneFlashLightScreen(
+//                   email: prefs?.getString("user_email")??"",
+//                   displayName: prefs?.getString("user_name")??"",
+//                   password: prefs?.getString("user_password")??""));
+//         }
+//         break;
+//       default:
+//         debugPrint("no screen found");
+//     }
+//     // if (screen == "Location") {
+//     //   pageRout(context, new FindLocationScreen(
+//     //                 email: _auth.currentUser!.email!,
+//     //                 displayName: _auth.currentUser!.displayName!,
+//     //                 photoURL: _auth.currentUser!.photoURL!,
+//     //                 uid: _auth.currentUser!.uid));
+//     // } else if (screen == "Ring") {
+//     //   pageRout(context, new RingToneScreen(
+//     //       email: _auth.currentUser!.email!,
+//     //       displayName: _auth.currentUser!.displayName!,
+//     //       photoURL: _auth.currentUser!.photoURL!,
+//     //       uid: _auth.currentUser!.uid));
+//     //
+//     // } else if (screen == "Vibrate") {
+//     //   pageRout(context, new VibrateScreen(
+//     //       email: _auth.currentUser!.email!,
+//     //       displayName: _auth.currentUser!.displayName!,
+//     //       photoURL: _auth.currentUser!.photoURL!,
+//     //       uid: _auth.currentUser!.uid));
+//     //
+//     // } else if (screen == "LastTry") {
+//     //   pageRout(context, new LastTryScreen(
+//     //       email: _auth.currentUser!.email!,
+//     //       displayName: _auth.currentUser!.displayName!,
+//     //       photoURL: _auth.currentUser!.photoURL!,
+//     //       uid: _auth.currentUser!.uid));
+//     //
+//     //   // pageRout(context, new DontTouchScreen(
+//     //   // ));
+//     //
+//     // }else if (screen == "lockScreen") {
+//     //   pageRout(context, new LockScreen(
+//     //       email: _auth.currentUser!.email!,
+//     //       displayName: _auth.currentUser!.displayName!,
+//     //       photoURL: _auth.currentUser!.photoURL!,
+//     //       uid: _auth.currentUser!.uid));
+//     //
+//     //   // pageRout(context, new DontTouchScreen(
+//     //   // ));
+//     //
+//     // }else if (screen == "EraseData") {
+//     //   pageRout(context, new EraseDataScreen(
+//     //       email: _auth.currentUser!.email!,
+//     //       displayName: _auth.currentUser!.displayName!,
+//     //       photoURL: _auth.currentUser!.photoURL!,
+//     //       uid: _auth.currentUser!.uid));
+//     //
+//     //   // pageRout(context, new DontTouchScreen(
+//     //   // ));
+//     //
+//     // }else if (screen == "Unplug") {
+//     //   pageRout(context, new BatteryScreen());
+//     //
+//     //   // pageRout(context, new DontTouchScreen(
+//     //   // ));
+//     //
+//     // }else if (screen == "Touch") {
+//     //   pageRout(context, new DontTouchScreen());
+//
+//     // pageRout(context, new DontTouchScreen(
+//     // ));
+//
+//     // }
+//   }
 }

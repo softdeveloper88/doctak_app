@@ -18,31 +18,35 @@ import 'bloc/chat_gpt_event.dart';
 import 'bloc/chat_gpt_state.dart';
 import 'chat_delete_dialog.dart';
 
-class ChatHistoryScreen extends StatefulWidget {
+class ChatHistoryScreen extends StatelessWidget {
   ChatHistoryScreen(
       {required this.onTap, required this.onNewSessionTap, super.key});
 
   Function(Sessions) onTap;
   Function onNewSessionTap;
 
-  @override
-  State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
-}
+  // final ScrollController _scrollController = ScrollController();
 
-class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
-  final ScrollController _scrollController = ScrollController();
-
-  List<ChatGPTResponse> messages = []; // Add this line
-
+  List<ChatGPTResponse> messages = [];
+ // Add this line
   late Future<List<Session>> futureSessions;
-  int? selectedSessionId = 0; // State variable for tracking selected session
+
+  int? selectedSessionId = 0;
+ // State variable for tracking selected session
   Future<List<ChatGPTResponse>> futureMessages = Future.value([]);
+
   final TextEditingController textController = TextEditingController();
+
   bool isLoadingMessages = true;
+
   bool isEmptyPage = true;
+
   bool isDrawerOpen = false;
+
   bool isWriting = false;
+
   String chatWithAi = "Preparing DocTak AI.";
+
   bool isDeleteButtonClicked = false;
 
   @override
@@ -94,7 +98,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                       itemCount: state1.response.sessions?.length,
                       itemBuilder: (context, index) {
                         Sessions session = state1.response.sessions![index];
-                        bool isSelected = session.id == selectedSessionId;
+                        // bool isSelected = session.id == selectedSessionId;
                         return Slidable(
                             key: ValueKey(session.id),
                             // Use session's id as a unique key
@@ -137,7 +141,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                                 children: [
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () => widget.onTap(session),
+                                      onTap: () => onTap(session),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -216,7 +220,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                     child: svAppButton(
                       context: context,
                       // style: svAppButton(text: text, onTap: onTap, context: context),
-                      onTap: () => widget.onNewSessionTap(),
+                      onTap: () => onNewSessionTap(),
                       text: 'New Chat',
                     ),
                   ),

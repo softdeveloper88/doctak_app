@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:doctak_app/core/app_export.dart';
 
 class CustomSearchView extends StatelessWidget {
-  CustomSearchView({
+  const CustomSearchView({
     Key? key,
     this.alignment,
     this.width,
@@ -104,7 +104,7 @@ class CustomSearchView extends StatelessWidget {
         hintStyle: hintStyle ?? theme.textTheme.labelLarge,
         prefixIcon: prefix ??
             Container(
-              margin: EdgeInsets.fromLTRB(16, 11, 8, 11),
+              margin: const EdgeInsets.fromLTRB(16, 11, 8, 11),
               child: CustomImageView(
                 imagePath: ImageConstant.imgRewind,
                 height: 18,
@@ -112,12 +112,12 @@ class CustomSearchView extends StatelessWidget {
               ),
             ),
         prefixIconConstraints: prefixConstraints ??
-            BoxConstraints(
+            const BoxConstraints(
               maxHeight: 40,
             ),
         suffixIcon: suffix ??
             Padding(
-              padding: EdgeInsets.only(
+              padding: const EdgeInsets.only(
                 right: 15,
               ),
               child: IconButton(
@@ -129,12 +129,12 @@ class CustomSearchView extends StatelessWidget {
               ),
             ),
         suffixIconConstraints: suffixConstraints ??
-            BoxConstraints(
+            const BoxConstraints(
               maxHeight: 40,
             ),
         isDense: true,
         contentPadding: contentPadding ??
-            EdgeInsets.only(
+            const EdgeInsets.only(
               top: 12,
               right: 12,
               bottom: 12,

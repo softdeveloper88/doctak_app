@@ -4,17 +4,14 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/forgot_password/bloc/forgot_event.dart';
 import 'package:doctak_app/presentation/forgot_password/bloc/forgot_state.dart';
-import 'package:doctak_app/presentation/login_screen/bloc/login_state.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
-import 'package:doctak_app/widgets/app_bar/appbar_leading_image.dart';
 import 'package:doctak_app/widgets/app_bar/appbar_title.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../widgets/error_dialog.dart';
 import '../home_screen/utils/SVCommon.dart';
 import 'bloc/forgot_bloc.dart';
 
@@ -22,42 +19,42 @@ class ForgotPassword extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  ForgotBloc forgotBloc=ForgotBloc();
+  ForgotBloc forgotBloc = ForgotBloc();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: _buildAppBar(context),
         body: BlocListener<ForgotBloc, ForgotState>(
-          bloc: forgotBloc,
+            bloc: forgotBloc,
             listener: (context, state) {
               if (state is ForgotSuccess) {
-               var data=jsonDecode(state.response);
-               print(data);
-               if(data['success']) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                   SnackBar(
-                     content: Text(data['message']),
-                     backgroundColor: Colors.green,
-                   ),
-                 );
-                 Navigator.pushAndRemoveUntil(
-                     context,
-                     MaterialPageRoute(
-                       builder: (BuildContext context) => LoginScreen(),
-                     ),
-                         (route) => false);
-                 // Navigate to the home screen or perform desired action
-               }else{
-                 ScaffoldMessenger.of(context).showSnackBar(
-                   SnackBar(
-                     content: Text(data['message']),
-                     backgroundColor: Colors.red,
-                   ),
-                 );
-
-               }
-               } else if (state is ForgotFailure) {
+                var data = jsonDecode(state.response);
+                print(data);
+                if (data['success']) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(data['message']),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => LoginScreen(),
+                      ),
+                      (route) => false);
+                  // Navigate to the home screen or perform desired action
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(data['message']),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } else if (state is ForgotFailure) {
                 // Show an error message
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -81,16 +78,15 @@ class ForgotPassword extends StatelessWidget {
                             child: Column(children: [
                               CustomTextFormField(
                                   controller: emailController,
-                                  hintText: translation(context)
-                                      .msg_enter_your_email,
+                                  hintText:
+                                      translation(context).msg_enter_your_email,
                                   textInputType: TextInputType.emailAddress,
                                   prefix: Container(
                                       margin: const EdgeInsets.fromLTRB(
                                           24, 16, 16, 16),
                                       child: CustomImageView(
                                           color: Colors.blueGrey,
-                                          imagePath:
-                                              ImageConstant.imgCheckmark,
+                                          imagePath: ImageConstant.imgCheckmark,
                                           height: 24,
                                           width: 24)),
                                   prefixConstraints:
@@ -105,9 +101,7 @@ class ForgotPassword extends StatelessWidget {
                                     return null;
                                   },
                                   contentPadding: const EdgeInsets.only(
-                                      top: 18,
-                                      right: 30,
-                                      bottom: 18)),
+                                      top: 18, right: 30, bottom: 18)),
                               const SizedBox(height: 32),
                               svAppButton(
                                 context: context,
@@ -137,8 +131,12 @@ class ForgotPassword extends StatelessWidget {
                                                     .bodyMediumGray600)),
                                         GestureDetector(
                                             onTap: () {
-                                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>SignUpScreen()), (route) => false);
-
+                                              Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          SignUpScreen()),
+                                                  (route) => false);
                                             },
                                             child: Padding(
                                                 padding: const EdgeInsets.only(
@@ -159,20 +157,17 @@ class ForgotPassword extends StatelessWidget {
       height: 140,
       leadingWidth: 56,
       centerTitle: true,
-
       title: Column(
-         mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
             'assets/logo/logo.png',
             width: 400,
             height: 100,
           ),
-
           AppbarTitle(text: 'Forgot Password'),
         ],
       ),
     );
   }
-
 }

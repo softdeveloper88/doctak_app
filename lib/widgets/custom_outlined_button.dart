@@ -3,8 +3,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/widgets/base_button.dart';
 
 class CustomOutlinedButton extends BaseButton {
-  CustomOutlinedButton({
-    Key? key,
+  const CustomOutlinedButton({super.key,
     this.decoration,
     this.leftIcon,
     this.rightIcon,
@@ -49,8 +48,8 @@ class CustomOutlinedButton extends BaseButton {
   }
 
   Widget get buildOutlinedButtonWidget => Container(
-        height: this.height ?? 56,
-        width: this.width ?? double.maxFinite,
+        height: height ?? 56,
+        width: width ?? double.maxFinite,
         margin: margin,
         decoration: decoration,
         child: OutlinedButton(

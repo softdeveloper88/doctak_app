@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../bloc/add_post_bloc.dart';
-import '../bloc/add_post_state.dart';
 
 class Feeling {
   final String name;

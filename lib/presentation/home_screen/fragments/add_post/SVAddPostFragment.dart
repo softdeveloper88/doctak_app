@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';

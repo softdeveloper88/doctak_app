@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
@@ -28,8 +26,6 @@ import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'api_service.g.dart';
@@ -47,18 +43,19 @@ abstract class ApiService {
       @Field("password") String password,
       @Field("device_type") String deviceType,
       @Field("device_id") String deviceId);
+
   @FormUrlEncoded()
   @POST("/login")
   Future<PostLoginDeviceAuthResp> loginWithSocial(
-      @Field("email") String username,
-      @Field("first_name") String firstName,
-      @Field("last_name") String lastName,
-      @Field("device_type") String deviceType,
-      @Field("device_id") String deviceId,
-      @Field("isSocialLogin") bool isSocialLogin,
-      @Field("provider") String provider,
-      @Field("token") String token,
-      );
+    @Field("email") String username,
+    @Field("first_name") String firstName,
+    @Field("last_name") String lastName,
+    @Field("device_type") String deviceType,
+    @Field("device_id") String deviceId,
+    @Field("isSocialLogin") bool isSocialLogin,
+    @Field("provider") String provider,
+    @Field("token") String token,
+  );
 
   @FormUrlEncoded()
   @POST("/register")
@@ -82,8 +79,7 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @POST("/forgot_password")
-  Future<HttpResponse> forgotPassword(
-  @Field("email") String email);
+  Future<HttpResponse> forgotPassword(@Field("email") String email);
 
   @FormUrlEncoded()
   @GET("/country-list")
@@ -123,23 +119,24 @@ abstract class ApiService {
   @FormUrlEncoded()
   @POST("/jobs_detail")
   Future<JobDetailModel> getJobsDetails(
-      @Header('Authorization') String token,
-      @Query('job_id') String jobId);
+      @Header('Authorization') String token, @Query('job_id') String jobId);
 
   @FormUrlEncoded()
   @GET("/search-jobs")
   Future<JobsModel> getSearchJobsList(
-      @Header('Authorization') String token,
-      @Query('page') String page,
-      @Query('country') String countryId,
-      @Query('searchTerm') String searchTerm,);
+    @Header('Authorization') String token,
+    @Query('page') String page,
+    @Query('country') String countryId,
+    @Query('searchTerm') String searchTerm,
+  );
 
   @FormUrlEncoded()
   @GET("/search-post")
   Future<PostDataModel> getSearchPostList(
-      @Header('Authorization') String token,
-      @Query('page') String page,
-      @Query('search') String searchTerm,);
+    @Header('Authorization') String token,
+    @Query('page') String page,
+    @Query('search') String searchTerm,
+  );
 
   @FormUrlEncoded()
   @GET("/drug-search")
@@ -247,21 +244,23 @@ abstract class ApiService {
   // profile apis
   @FormUrlEncoded()
   @GET("/profile")
-  Future<UserProfile> getProfile(@Header('Authorization') String token,@Query('user_id') String userId);
+  Future<UserProfile> getProfile(
+      @Header('Authorization') String token, @Query('user_id') String userId);
 
   @FormUrlEncoded()
   @GET("/interests")
   Future<List<InterestModel>> getInterests(
-      @Header('Authorization') String token,@Query('user_id') String userId);
+      @Header('Authorization') String token, @Query('user_id') String userId);
 
   @FormUrlEncoded()
   @POST("/interests/update")
-  Future<HttpResponse> getInterestsUpdate(@Header('Authorization') String token,@Body() List<InterestModel> dataList);
+  Future<HttpResponse> getInterestsUpdate(@Header('Authorization') String token,
+      @Body() List<InterestModel> dataList);
 
   @FormUrlEncoded()
   @GET("/work-and-education")
   Future<List<WorkEducationModel>> getWorkEducation(
-      @Header('Authorization') String token,@Query('user_id') String userId);
+      @Header('Authorization') String token, @Query('user_id') String userId);
 
   @FormUrlEncoded()
   @POST("/work-and-education/update")
@@ -271,7 +270,8 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @GET("/places-lived")
-  Future<PlaceLiveModel> getPlacesLived(@Header('Authorization') String token,@Query('user_id') String userId);
+  Future<PlaceLiveModel> getPlacesLived(
+      @Header('Authorization') String token, @Query('user_id') String userId);
 
   @FormUrlEncoded()
   @POST("/places-lived/update")
@@ -285,7 +285,7 @@ abstract class ApiService {
   @FormUrlEncoded()
   @GET("/family-relationship")
   Future<FamilyRelationshipModel> getFamilyRelationship(
-      @Header('Authorization') String token,@Query('user_id') String userId);
+      @Header('Authorization') String token, @Query('user_id') String userId);
 
   @FormUrlEncoded()
   @POST("/family-relationship/update")
@@ -333,81 +333,99 @@ abstract class ApiService {
       @Query('country_privacy') String countryPrivacy,
       @Query('city_privacy') String cityPrivacy,
       @Query('country_origin_privacy') String countryOriginPrivacy);
+
   @FormUrlEncoded()
   @GET("/get-post-comments")
-  Future<PostCommentModel> getPostComments(@Header('Authorization') String token, @Query('post_id') String postId);
+  Future<PostCommentModel> getPostComments(
+      @Header('Authorization') String token, @Query('post_id') String postId);
 
   @FormUrlEncoded()
   @POST("/post-comment")
-  Future<HttpResponse> makeComment(@Header('Authorization') String token,@Query('post_id') String postId,@Query('comment') String comment);
+  Future<HttpResponse> makeComment(@Header('Authorization') String token,
+      @Query('post_id') String postId, @Query('comment') String comment);
 
   @FormUrlEncoded()
   @POST("/like")
-  Future<HttpResponse> like(@Header('Authorization') String token,@Query('post_id') String postId);
- // chat api
+  Future<HttpResponse> like(
+      @Header('Authorization') String token, @Query('post_id') String postId);
+
+  // chat api
   @FormUrlEncoded()
   @POST("/get-contacts")
-  Future<ContactsModel> getContacts(@Header('Authorization') String token,@Query('page') String page);
+  Future<ContactsModel> getContacts(
+      @Header('Authorization') String token, @Query('page') String page);
 
   @FormUrlEncoded()
   @POST("/search-contacts")
-  Future<SearchContactsModel> searchContacts(@Header('Authorization') String token,@Query('page') String page,@Query('keyword') String keyword);
+  Future<SearchContactsModel> searchContacts(
+      @Header('Authorization') String token,
+      @Query('page') String page,
+      @Query('keyword') String keyword);
 
   @FormUrlEncoded()
   @POST("/messenger")
-  Future<MessageModel> getRoomMessenger(@Header('Authorization') String token,@Query('page') String page,@Query('user_id') String userId,@Query('room_id') String roomId);
+  Future<MessageModel> getRoomMessenger(
+      @Header('Authorization') String token,
+      @Query('page') String page,
+      @Query('user_id') String userId,
+      @Query('room_id') String roomId);
 
   @MultiPart()
   @POST("/send-message")
-  Future<SendMessageModel> sendMessage(@Header('Authorization') String token,
-  @Field('user_id') String userId,
-  @Field('room_id') String roomId,
-  @Field('receiver_id') String receiverId,
-  @Field('attachment_type') String attachmentType,
-  @Field('message') String message,
-  @Part(name: 'file' ) String filePath);
-
-  @FormUrlEncoded()
-  @POST("/send-message")
-  Future<SendMessageModel> sendMessageWithoutFile(
+  Future<SendMessageModel> sendMessage(
       @Header('Authorization') String token,
       @Field('user_id') String userId,
       @Field('room_id') String roomId,
       @Field('receiver_id') String receiverId,
       @Field('attachment_type') String attachmentType,
       @Field('message') String message,
-      );
+      @Part(name: 'file') String filePath);
 
+  @FormUrlEncoded()
+  @POST("/send-message")
+  Future<SendMessageModel> sendMessageWithoutFile(
+    @Header('Authorization') String token,
+    @Field('user_id') String userId,
+    @Field('room_id') String roomId,
+    @Field('receiver_id') String receiverId,
+    @Field('attachment_type') String attachmentType,
+    @Field('message') String message,
+  );
 
   @FormUrlEncoded()
   @POST("/save-suggestion")
   Future<HttpResponse> saveSuggestion(
-      @Header('Authorization') String token,
-      @Field('name') String name,
-      @Field('phone') String phone,
-      @Field('email') String email,
-      @Field('message') String message,
-      );
+    @Header('Authorization') String token,
+    @Field('name') String name,
+    @Field('phone') String phone,
+    @Field('email') String email,
+    @Field('message') String message,
+  );
+
   @MultiPart()
   @POST("/upload-profile-pic")
-  Future<HttpResponse> uploadProfilePicture(@Header('Authorization') String token,
-  @Part(name: 'profile_pic' ) String filePath);
+  Future<HttpResponse> uploadProfilePicture(
+      @Header('Authorization') String token,
+      @Part(name: 'profile_pic') String filePath);
 
   @MultiPart()
   @POST("/upload-cover-pic")
   Future<HttpResponse> uploadCoverPicture(@Header('Authorization') String token,
-  @Part(name: 'background' ) String filePath);
+      @Part(name: 'background') String filePath);
 
   @FormUrlEncoded()
   @GET("/advertisement-types")
-  Future<List<AdsTypeModel>> advertisementTypes(@Header('Authorization') String token,);
+  Future<List<AdsTypeModel>> advertisementTypes(
+    @Header('Authorization') String token,
+  );
 
   @FormUrlEncoded()
   @GET("/advertisement-setting")
-  Future<AdsSettingModel> advertisementSetting(@Header('Authorization') String token);
+  Future<AdsSettingModel> advertisementSetting(
+      @Header('Authorization') String token);
 
   @FormUrlEncoded()
   @POST("/delete_post")
-  Future<HttpResponse> deletePost(@Header('Authorization') String token,@Query('post_id') String postId);
-
+  Future<HttpResponse> deletePost(
+      @Header('Authorization') String token, @Query('post_id') String postId);
 }

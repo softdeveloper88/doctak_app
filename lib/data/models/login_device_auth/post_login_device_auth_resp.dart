@@ -1,23 +1,33 @@
 import 'dart:convert';
-PostLoginDeviceAuthResp postLogingDeviceAuthReqsFromJson(String str) => PostLoginDeviceAuthResp.fromJson(json.decode(str));
-String postLogingDeviceAuthReqsToJson(PostLoginDeviceAuthResp data) => json.encode(data.toJson());
+
+PostLoginDeviceAuthResp postLogingDeviceAuthReqsFromJson(String str) =>
+    PostLoginDeviceAuthResp.fromJson(json.decode(str));
+
+String postLogingDeviceAuthReqsToJson(PostLoginDeviceAuthResp data) =>
+    json.encode(data.toJson());
+
 class PostLoginDeviceAuthResp {
   PostLoginDeviceAuthResp({
-      this.success, 
-      this.user, 
-      this.token, 
-      this.recentCreated,
-      this.university,
-      this.country,});
+    this.success,
+    this.user,
+    this.token,
+    this.recentCreated,
+    this.university,
+    this.country,
+  });
 
   PostLoginDeviceAuthResp.fromJson(dynamic json) {
     success = json['success'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     token = json['token'];
     recentCreated = json['recent_created'];
-    university = json['university'] != null ? University.fromJson(json['university']) : null;
-    country = json['country'] != null ? Country.fromJson(json['country']) : null;
+    university = json['university'] != null
+        ? University.fromJson(json['university'])
+        : null;
+    country =
+        json['country'] != null ? Country.fromJson(json['country']) : null;
   }
+
   bool? success;
   User? user;
   String? token;
@@ -41,21 +51,23 @@ class PostLoginDeviceAuthResp {
     }
     return map;
   }
-
 }
 
 Country countryFromJson(String str) => Country.fromJson(json.decode(str));
+
 String countryToJson(Country data) => json.encode(data.toJson());
+
 class Country {
   Country({
-      this.id, 
-      this.countryName, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.isRegistered, 
-      this.countryCode, 
-      this.countryMask, 
-      this.currency,});
+    this.id,
+    this.countryName,
+    this.createdAt,
+    this.updatedAt,
+    this.isRegistered,
+    this.countryCode,
+    this.countryMask,
+    this.currency,
+  });
 
   Country.fromJson(dynamic json) {
     id = json['id'];
@@ -67,6 +79,7 @@ class Country {
     countryMask = json['countryMask'];
     currency = json['currency'];
   }
+
   int? id;
   String? countryName;
   String? createdAt;
@@ -88,37 +101,40 @@ class Country {
     map['currency'] = currency;
     return map;
   }
-
 }
 
-University universityFromJson(String str) => University.fromJson(json.decode(str));
+University universityFromJson(String str) =>
+    University.fromJson(json.decode(str));
+
 String universityToJson(University data) => json.encode(data.toJson());
+
 class University {
   University({
-      this.id, 
-      this.name, 
-      this.address, 
-      this.city, 
-      this.stateId, 
-      this.countryId, 
-      this.zipCode, 
-      this.website, 
-      this.contactNumber, 
-      this.email, 
-      this.establishedYear, 
-      this.type, 
-      this.accreditation, 
-      this.facultyCount, 
-      this.studentPopulation, 
-      this.graduateProgramCount, 
-      this.undergraduateProgramCount, 
-      this.internationalStudentCount, 
-      this.scholarshipProgram, 
-      this.libraryCount, 
-      this.sportsFaculty, 
-      this.ranking, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.name,
+    this.address,
+    this.city,
+    this.stateId,
+    this.countryId,
+    this.zipCode,
+    this.website,
+    this.contactNumber,
+    this.email,
+    this.establishedYear,
+    this.type,
+    this.accreditation,
+    this.facultyCount,
+    this.studentPopulation,
+    this.graduateProgramCount,
+    this.undergraduateProgramCount,
+    this.internationalStudentCount,
+    this.scholarshipProgram,
+    this.libraryCount,
+    this.sportsFaculty,
+    this.ranking,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   University.fromJson(dynamic json) {
     id = json['id'];
@@ -146,6 +162,7 @@ class University {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
+
   int? id;
   String? name;
   dynamic address;
@@ -199,46 +216,48 @@ class University {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }
 
 User userFromJson(String str) => User.fromJson(json.decode(str));
+
 String userToJson(User data) => json.encode(data.toJson());
+
 class User {
   User({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.email, 
-      this.token, 
-      this.phone, 
-      this.licenseNo, 
-      this.specialty, 
-      this.status, 
-      this.role, 
-      this.gender, 
-      this.dob, 
-      this.clinicName, 
-      this.college, 
-      this.countryOrigin, 
-      this.profilePic, 
-      this.practicingCountry, 
-      this.otpCode, 
-      this.balance, 
-      this.title, 
-      this.city, 
-      this.country, 
-      this.isAdmin, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.activeStatus, 
-      this.avatar, 
-      this.darkMode, 
-      this.messengerColor, 
-      this.name, 
-      this.emailVerifiedAt, 
-      this.background, 
-      this.userType,});
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.token,
+    this.phone,
+    this.licenseNo,
+    this.specialty,
+    this.status,
+    this.role,
+    this.gender,
+    this.dob,
+    this.clinicName,
+    this.college,
+    this.countryOrigin,
+    this.profilePic,
+    this.practicingCountry,
+    this.otpCode,
+    this.balance,
+    this.title,
+    this.city,
+    this.country,
+    this.isAdmin,
+    this.createdAt,
+    this.updatedAt,
+    this.activeStatus,
+    this.avatar,
+    this.darkMode,
+    this.messengerColor,
+    this.name,
+    this.emailVerifiedAt,
+    this.background,
+    this.userType,
+  });
 
   User.fromJson(dynamic json) {
     id = json['id'];
@@ -275,6 +294,7 @@ class User {
     background = json['background'];
     userType = json['user_type'];
   }
+
   String? id;
   String? firstName;
   String? lastName;
@@ -284,18 +304,18 @@ class User {
   String? licenseNo;
   String? specialty;
   dynamic status;
-  dynamic? role;
-   String? gender;
-   String? dob;
-   String? clinicName;
-   String? college;
-   String? countryOrigin;
+  dynamic role;
+  String? gender;
+  String? dob;
+  String? clinicName;
+  String? college;
+  String? countryOrigin;
   String? profilePic;
-   String? practicingCountry;
-   String? otpCode;
+  String? practicingCountry;
+  String? otpCode;
   dynamic balance;
-   String? title;
-   String? city;
+  String? title;
+  String? city;
   dynamic country;
   String? isAdmin;
   String? createdAt;
@@ -346,5 +366,4 @@ class User {
     map['user_type'] = userType;
     return map;
   }
-
 }

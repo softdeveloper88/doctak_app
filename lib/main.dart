@@ -61,7 +61,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Upgrader.clearSavedSettings(); //live update
   await DoctakFirebaseRemoteConfig.initialize();
-  AdmobSetting appOpenAdManager = AdmobSetting()..loadAd();
+  // AdmobSetting appOpenAdManager = AdmobSetting()..loadAd();
   // WidgetsBinding.instance!.addObserver(AppLifecycle(appOpenAdManager: appOpenAdManager));
   AdmobSetting.initialization();
   MobileAds.instance.initialize();

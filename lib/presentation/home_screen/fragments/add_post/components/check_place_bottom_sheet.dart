@@ -8,7 +8,6 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../../core/app_export.dart';
 import '../../add_post/bloc/add_post_event.dart';
-import '../../add_post/bloc/add_post_state.dart';
 
 
 class CheckPlaceBottomSheet extends StatefulWidget {

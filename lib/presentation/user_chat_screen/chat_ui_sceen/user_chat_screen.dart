@@ -249,9 +249,8 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                           '${bloc.contactsList[index].firstName??''} ${bloc.contactsList[index].lastName??''}',
                                       profilePic:
                                           '${bloc.contactsList[index].profilePic}',
-                                      id: '',
-                                      roomId:
-                                          '${bloc.contactsList[index].roomId}',
+                                      id: '${bloc.contactsList[index].id}',
+                                      roomId: '${bloc.contactsList[index].roomId}',
                                     ).launch(context);
                                     // Add navigation logic or any other action on contact tap
                                   },

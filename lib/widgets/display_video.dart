@@ -1,7 +1,6 @@
 
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -42,9 +41,9 @@ class DisplayVideoState extends State<DisplayVideo> {
         ],
       ),
     )
-        : Container(
+        : const SizedBox(
       height: 200,
-      child: const Center(child: CircularProgressIndicator()),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 

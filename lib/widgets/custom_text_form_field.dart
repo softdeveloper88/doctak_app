@@ -5,7 +5,7 @@ import 'package:nb_utils/nb_utils.dart';
 import '../presentation/home_screen/utils/SVColors.dart';
 
 class CustomTextFormField extends StatelessWidget {
-  CustomTextFormField({
+  const CustomTextFormField({
     Key? key,
     this.alignment,
     this.width,
@@ -135,7 +135,7 @@ class CustomTextFormField extends StatelessWidget {
         suffixIcon: suffix,
         suffixIconConstraints: suffixConstraints,
         isDense: true,
-        contentPadding: contentPadding ?? EdgeInsets.symmetric(vertical: 18),
+        contentPadding: contentPadding ?? const EdgeInsets.symmetric(vertical: 18),
         fillColor: fillColor,
         filled: filled,
         border: borderDecoration ??

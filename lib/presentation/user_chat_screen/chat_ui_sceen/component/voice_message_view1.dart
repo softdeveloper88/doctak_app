@@ -64,7 +64,7 @@ class VoiceMessageView1 extends StatelessWidget {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              PlayPauseButton(controller: controller, color: color, size: size),
+              PlayPauseButton(controller: controller, color: color, size: size, playIcon: Icon(Icons.play_arrow), pauseIcon: Icon(Icons.pause_circle), refreshIcon: Icon(Icons.refresh), stopDownloadingIcon: Icon(Icons.stop), loadingColor: Colors.white,),
               SizedBox(width: 8), // Add space between buttons
               Expanded(
                 child: Column(

@@ -5,7 +5,6 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
-import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
@@ -15,8 +14,6 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import to use Clipboard
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -189,53 +186,59 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 backgroundColor: const Color(0xFFF2F2F2),
                 appBar: AppBar(
                   leading: GestureDetector(
-                    onTap: (){
-                       ChatHistoryScreen(onNewSessionTap: (){
-                         try {
-                           BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                           Navigator.of(context).pop();
+                    onTap: () {
+                      ChatHistoryScreen(
+                        onNewSessionTap: () {
+                          try {
+                            BlocProvider.of<ChatGPTBloc>(context)
+                                .add(GetNewChat());
+                            Navigator.of(context).pop();
 
-                           selectedSessionId =
-                               BlocProvider.of<ChatGPTBloc>(context)
-                                   .newChatSessionId;
+                            selectedSessionId =
+                                BlocProvider.of<ChatGPTBloc>(context)
+                                    .newChatSessionId;
 
-                           // Session newSession = await createNewChatSession();
-                           // setState(() {
-                           //   futureSessions = Future(() =>
-                           //       [newSession, ...(snapshot.data ?? [])]);
-                           // });
-                         } catch (e) {
-                           print(e);
-                         }
-                       },onTap: (session){
-                        chatWithAi = session.name!;
-                        isEmptyPage = false;
-                        selectedSessionId =
-                            session.id; // Update the selected session
-                        isLoadingMessages = true;
-                        // });
-                        BlocProvider.of<ChatGPTBloc>(context).add(
-                          GetMessages(
-                              sessionId: selectedSessionId.toString()),
-                        );
-                        // loadMessages(selectedSessionId.toString())
-                        //     .then((loadedMessages) {
-                        //   setState(() {
-                        //     messages = loadedMessages;
-                        //
-                        //     scrollToBottom();
-                        //     chatWithAi = session.name!;
-                        //
-                        //     isLoadingMessages = false;
-                        //   });
-                        // });
-                        Navigator.of(context).pop(); // This line will close the drawer
-
-                      },).launch(context);
+                            // Session newSession = await createNewChatSession();
+                            // setState(() {
+                            //   futureSessions = Future(() =>
+                            //       [newSession, ...(snapshot.data ?? [])]);
+                            // });
+                          } catch (e) {
+                            print(e);
+                          }
+                        },
+                        onTap: (session) {
+                          chatWithAi = session.name!;
+                          isEmptyPage = false;
+                          selectedSessionId =
+                              session.id; // Update the selected session
+                          isLoadingMessages = true;
+                          // });
+                          BlocProvider.of<ChatGPTBloc>(context).add(
+                            GetMessages(
+                                sessionId: selectedSessionId.toString()),
+                          );
+                          // loadMessages(selectedSessionId.toString())
+                          //     .then((loadedMessages) {
+                          //   setState(() {
+                          //     messages = loadedMessages;
+                          //
+                          //     scrollToBottom();
+                          //     chatWithAi = session.name!;
+                          //
+                          //     isLoadingMessages = false;
+                          //   });
+                          // });
+                          Navigator.of(context)
+                              .pop(); // This line will close the drawer
+                        },
+                      ).launch(context);
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: Image.asset('assets/icon/ic_chat_history.png',),
+                      child: Image.asset(
+                        'assets/icon/ic_chat_history.png',
+                      ),
                     ),
                   ),
                   centerTitle: true,
@@ -274,16 +277,16 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: (){
+                            onTap: () {
                               Navigator.of(context).pop();
                             },
                             child: Container(
                               padding: const EdgeInsets.all(8),
-                              decoration:  BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: cardLightColor
-                              ),
-                              child: Icon(Icons.cancel_outlined,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: cardLightColor),
+                              child: Icon(
+                                Icons.cancel_outlined,
                                 color: svGetBodyColor(),
                               ),
                             ),
@@ -435,7 +438,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                         children: [
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.only(left: 8,right: 8),
+                              padding: const EdgeInsets.only(left: 8, right: 8),
                               decoration: BoxDecoration(
                                 color: cardLightColor,
                                 // border: Border.all(color: Colors.grey),
@@ -454,7 +457,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                               ),
                             ),
                           ),
-                          
                           Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
@@ -481,8 +483,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   String question = textController.text.trim();
                                   if (question.isEmpty) return;
                                   // String sessionId = selectedSessionId.toString();
-                                  var tempId =
-                                      -1; // Unique temporary ID for the response
+                                  // var tempId =
+                                  //     -1; // Unique temporary ID for the response
                                   setState(() {
                                     var myMessage = Messages(
                                         id: -1,
