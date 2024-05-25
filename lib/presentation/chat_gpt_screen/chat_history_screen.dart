@@ -48,7 +48,7 @@ class ChatHistoryScreen extends StatelessWidget {
   String chatWithAi = "Preparing DocTak AI.";
 
   bool isDeleteButtonClicked = false;
-
+  ChatGPTBloc chatGPTBloc= ChatGPTBloc()..add(LoadDataValues());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,9 +67,9 @@ class ChatHistoryScreen extends StatelessWidget {
         ),
       ),
       backgroundColor: SVAppColorPrimary,
-      body: BlocProvider(
-          create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-          child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+      body:  BlocConsumer<ChatGPTBloc, ChatGPTState>(
+        listener: (context,state){},
+             bloc: chatGPTBloc,
               builder: (context, state1) {
             if (selectedSessionId == 0 && state1 is DataLoaded) {
               selectedSessionId = state1.response.newSessionId;
@@ -189,6 +189,8 @@ class ChatHistoryScreen extends StatelessWidget {
                                                 title: ' ${session.name??''}',
                                                 callback: ()  {
 
+                                                  chatGPTBloc.add(DeleteChatSession(session.id??0));
+                                                  Navigator.of(context).pop();
                                                 });
                                           });
                                     },
@@ -229,7 +231,7 @@ class ChatHistoryScreen extends StatelessWidget {
             } else {
               return Container();
             }
-          })),
+          }),
     );
   }
 }

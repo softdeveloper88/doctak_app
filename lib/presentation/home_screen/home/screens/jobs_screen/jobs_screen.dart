@@ -148,12 +148,12 @@ class _JobsScreenState extends State<JobsScreen> {
                                         countryId.toString(),
                                         state.typeValue,
                                         state.searchTerms ?? '',
-                                        state.isExpired));
+                                        state.isExpired??'New'));
                                 jobsBloc.add(JobLoadPageEvent(
                                     page: 1,
                                     countryId: countryId.toString(),
                                     searchTerm: state.searchTerms ?? "",
-                                    isExpired: state.isExpired));
+                                    isExpired: state.isExpired??'New'));
 
                                 // jobsBloc
                                 //     .add(UpdateFirstDropdownValue(newValue!));

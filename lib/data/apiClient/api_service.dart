@@ -182,14 +182,12 @@ abstract class ApiService {
   Future<HttpResponse> newChat(@Header('Authorization') String token);
 
   @FormUrlEncoded()
-  @GET("/delete-chatgpt-session")
-  Future<HttpResponse> deleteChatgptSession(
-      @Header('Authorization') String token, @Query('session_id') sessionId);
+  @POST("/delete-chatgpt-session")
+  Future<HttpResponse> deleteChatgptSession(@Header('Authorization') String token, @Query('session_id')String sessionId);
 
   @FormUrlEncoded()
   @GET("/conference-countries")
-  Future<HttpResponse> getConferenceCountries(
-      @Header('Authorization') String token);
+  Future<HttpResponse> getConferenceCountries(@Header('Authorization') String token);
 
   @FormUrlEncoded()
   @GET("/search-conferences")

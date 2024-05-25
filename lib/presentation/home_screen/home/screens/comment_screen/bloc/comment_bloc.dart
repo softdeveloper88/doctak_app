@@ -65,7 +65,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         event.postId.toString(),
         event.comment ?? "",
       );
-      print(event.comment);
+      print(response);
       postList.insert(
           0,
           PostComments(

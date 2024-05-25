@@ -218,38 +218,6 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                             ),
                           ),
                         ),
-                        // Padding(
-                        //   padding: const EdgeInsets.all(4.0),
-                        //   child: CustomDropdownButtonFormField(
-                        //     items: list,
-                        //     value: list.first,
-                        //     width: 100,
-                        //     contentPadding: const EdgeInsets.symmetric(
-                        //       horizontal: 10,
-                        //       vertical: 0,
-                        //     ),
-                        //     onChanged: (String? newValue) {
-                        //       print(newValue);
-                        //       BlocProvider.of<ConferenceBloc>(context).add(
-                        //         LoadPageEvent(
-                        //           page: 1,
-                        //           countryName: newValue!,
-                        //           searchTerm: state.searchTerms!,
-                        //         ),
-                        //       );
-                        //       BlocProvider.of<SplashBloc>(context).add(
-                        //           LoadDropdownData1(
-                        //               newValue, state.searchTerms ?? ''));
-                        //
-                        //       // BlocProvider.of<ConferenceBloc>(context).add(LoadPageEvent(
-                        //       //     page: 1,
-                        //       //     countryId: state.countryFlag != ''
-                        //       //         ? state.countryFlag
-                        //       //         : '${state.countriesModel.countries?.first.id ??1}',
-                        //       //     searchTerm: state.searchTerms ?? '',));
-                        //     },
-                        //   ),
-                        // ),
                       ],
                     );
                   } else if (state is DataError) {
@@ -468,30 +436,30 @@ class ConferenceWidget extends StatelessWidget {
     } else {
       return Container(
         margin: const EdgeInsets.all(8.0), // Add margin to the container
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.lightBlueAccent,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: const SizedBox(
-            width: double.infinity,
-            height: 300,
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: Text(
-                  'No Image Available',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        // child: DecoratedBox(
+        //   decoration: BoxDecoration(
+        //     color: Colors.lightBlueAccent,
+        //     borderRadius: BorderRadius.circular(10.0),
+        //   ),
+        //   child: const SizedBox(
+        //     width: double.infinity,
+        //     height: 300,
+        //     child: Padding(
+        //       padding: EdgeInsets.all(16.0),
+        //       child: Center(
+        //         child: Text(
+        //           'No Image Available',
+        //           textAlign: TextAlign.center,
+        //           style: TextStyle(
+        //             fontSize: 18.0,
+        //             color: Colors.white,
+        //             fontWeight: FontWeight.bold,
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
       );
     }
   }

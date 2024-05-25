@@ -29,7 +29,7 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
   void initState() {
     widget.searchPeopleBloc.add(LoadPageEvent(
       page: 1,
-      name: '',
+      name: ''
     ));
     super.initState();
     afterBuildCreated(() {

@@ -140,8 +140,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                         Text(
                             textAlign: TextAlign.center,
                             AppData.userType == 'doctor'
-                                ? AppData.specialty
-                                : "${AppData.university}\n Student",
+                                ? AppData.specialty:  AppData.userType == 'student'?
+                                 "${AppData.university}\n Student":AppData.specialty,
                             // User's specialty
                             style: secondaryTextStyle(color: Colors.white)),
                       ],

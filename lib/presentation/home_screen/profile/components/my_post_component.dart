@@ -106,9 +106,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
         }
       },
       builder: (context, state) {
-        // print("state $state");
+
         if (state is PaginationLoadedState) {
-          // print(state.drugsModel.length);
+
           return widget.profileBloc.postList.isEmpty? const SizedBox(
             height: 200,
             child: Center(
@@ -124,7 +124,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                   widget.profileBloc.add(CheckIfNeedMoreDataEvent(index: index));
                 }
               }
-              print(widget.profileBloc.postList[index].backgroundColor);
+
               return widget.profileBloc.numberOfPage != widget.profileBloc.pageNumber - 1 &&
                   index >= widget.profileBloc.postList.length - 1
                   ? const Center(
@@ -262,7 +262,6 @@ class _MyPostComponentState extends State<MyPostComponent> {
                           highlightColor: Colors.transparent,
 
                           onTap: (){
-                            print(widget.profileBloc.postList[index].id);
                             homeBloc.add(PostLikeEvent(postId:widget.profileBloc.postList[index].id??0));
                           },
                           child:Column(
@@ -288,7 +287,6 @@ class _MyPostComponentState extends State<MyPostComponent> {
                           highlightColor: Colors.transparent,
 
                           onTap:() {
-
                           SVCommentScreen(id:widget.profileBloc.postList[index].id??0).launch(context);
                           },
                           child: Column(
@@ -667,7 +665,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
     List<Widget> mediaWidgets = [];
 
     List<Map<String, String>> mediaUrls = [];
+    print(widget.profileBloc.postList[index].media);
     for (var media in widget.profileBloc.postList[index].media ?? []) {
+      print('media ${widget.profileBloc.postList[index].media}' );
       if (media.mediaType == 'image') {
         // mediaUrls.add("",AppData.imageUrl + media.mediaPath);
         Map<String, String> newMedia = {
@@ -758,8 +758,7 @@ class PhotoGrid extends StatefulWidget {
 }
 bool findIsLiked(post) {
   for (var like in post ?? []) {
-    print(like.userId);
-    print(AppData.logInUserId);
+
     if (like.userId == AppData.logInUserId) {
       return true; // User has liked the post
     }
@@ -800,8 +799,7 @@ class _PhotoGridState extends State<PhotoGrid> {
         // If no more are remaining return a simple image widget
         if (remaining == 0) {
           if (urlType == "image") {
-            print(urlType);
-            print(imageUrl);
+
             return GestureDetector(
               child: Image.network(
                 imageUrl,
@@ -812,8 +810,7 @@ class _PhotoGridState extends State<PhotoGrid> {
               onTap: () => widget.onImageClicked(index),
             );
           } else {
-            print(urlType);
-            print(imageUrl);
+
             return GestureDetector(
               child: VideoPlayerWidget(
                 videoUrl: imageUrl,
@@ -862,8 +859,6 @@ class _PhotoGridState extends State<PhotoGrid> {
         }
       } else {
         if (urlType == "image") {
-          print(urlType);
-          print(imageUrl);
           return GestureDetector(
             child: Image.network(
               imageUrl,
@@ -874,8 +869,6 @@ class _PhotoGridState extends State<PhotoGrid> {
             onTap: () => widget.onImageClicked(index),
           );
         } else {
-          print(urlType);
-          print(imageUrl);
           return GestureDetector(
             child: VideoPlayerWidget(
               videoUrl: imageUrl,

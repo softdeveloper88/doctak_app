@@ -814,18 +814,18 @@ class _ApiService implements ApiService {
   @override
   Future<HttpResponse<dynamic>> deleteChatgptSession(
       String token,
-      dynamic sessionId,
+      String sessionId,
       ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'session_id': sessionId.toJson()
+      r'session_id': sessionId
     };
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
     await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
-      method: 'GET',
+      method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',

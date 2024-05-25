@@ -34,8 +34,9 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     print('33 ${event.page}');
     print('search text ${event.searchTerm}');
     print('country id ${event.countryId}');
-    print('country id ${event.isExpired}');
+    print('isExpired ${event.isExpired}');
     if (event.page == 1) {
+      print('object clear');
       drugsData.clear();
       pageNumber=1;
       emit(PaginationLoadingState());

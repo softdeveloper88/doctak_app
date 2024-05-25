@@ -6,9 +6,11 @@ import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
+import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -132,18 +134,22 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
                                           children: [
-                                            CachedNetworkImage(
-                                              imageUrl:
-                                                  "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
-                                              height: 50,
-                                              width: 50,
-                                              fit: BoxFit.cover,
-                                            ).cornerRadiusWithClipRRect(20),
+                                            InkWell(
+                                              onTap: (){
+                                                SVProfileFragment(userId:widget.homeBloc.postList[index].user?.id).launch(context);
+                                              },
+                                              child: CachedNetworkImage(
+                                                imageUrl:
+                                                    "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
+                                                height: 50,
+                                                width: 50,
+                                                fit: BoxFit.cover,
+                                              ).cornerRadiusWithClipRRect(20),
+                                            ),
                                             12.width,
                                             Column(
                                               crossAxisAlignment:
