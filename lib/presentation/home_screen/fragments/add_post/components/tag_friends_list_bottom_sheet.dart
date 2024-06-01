@@ -41,7 +41,7 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: SVAppSectionBackground,
+      color: svGetScaffoldColor(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -194,8 +194,8 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
             builder: (context, state) {
               print("state $state");
               if (state is PaginationLoadingState) {
-                return const Expanded(
-                    child: Center(child: CircularProgressIndicator()));
+                return  Expanded(
+                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -214,8 +214,8 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
                       }
                       return bloc.numberOfPage != bloc.pageNumber - 1 &&
                               index >= bloc.searchPeopleData.length - 1
-                          ? const Center(
-                              child: CircularProgressIndicator(),
+                          ?  Center(
+                              child: CircularProgressIndicator(color: svGetBodyColor(),),
                             )
                           :
                           // InkWell(
@@ -272,6 +272,7 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Material(
                                   elevation: 2,
+                                  color: context.cardColor,
                                   borderRadius: BorderRadius.circular(10),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -351,7 +352,7 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
                                             ],
                                           ),
                                         ),
-                                        // isLoading ? const CircularProgressIndicator():  AppButton(
+                                        // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
                                         //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
                                         //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
                                         //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
@@ -385,7 +386,7 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
                                         //     });
                                         //   },
                                         //   child: isLoading
-                                        //       ? CircularProgressIndicator() // Show progress indicator if loading
+                                        //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
                                         //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
                                         //   style: ElevatedButton.styleFrom(
                                         //     // primary: Colors.blue, // Change button color as needed

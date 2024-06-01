@@ -72,7 +72,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     try {
       print(event.firstName);
       final response = await apiService.register(
-          event.firstName, event.lastName,event.username, event.password, event.userType);
+          event.firstName, event.lastName,event.username, event.password,event.country,event.state,event.specialty, event.userType);
       if (response.response.statusCode == 200) {
 
         ProgressDialogUtils.hideProgressDialog();
@@ -103,7 +103,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       print(event.token);
       final response = await apiService.completeProfile(
            'Bearer ${event.token}',
-          event.firstName, event.lastName,event.country,event.state,event.phone,event.userType);
+          event.firstName, event.lastName,event.country,event.state,event.specialty,event.phone,event.userType);
 
     if(response.user!.userType !=null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();

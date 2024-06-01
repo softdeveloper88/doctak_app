@@ -161,21 +161,20 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-        child:
-            BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
+        child: BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
           }
           if (state1 is DataInitial) {
-            return const Scaffold(
+            return  Scaffold(
               body: AnimatedBackground(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Center(child: CircularProgressIndicator()),
+                    Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
                   ],
                 ),
               ),
@@ -183,7 +182,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           } else if (state1 is DataLoaded) {
             print('response ${state1.response.toString()}');
             return Scaffold(
-                backgroundColor: const Color(0xFFF2F2F2),
+                backgroundColor:svGetBgColor(),
                 appBar: AppBar(
                   leading: GestureDetector(
                     onTap: () {
@@ -238,12 +237,13 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       padding: const EdgeInsets.all(12.0),
                       child: Image.asset(
                         'assets/icon/ic_chat_history.png',
+                        color: svGetBodyColor(),
                       ),
                     ),
                   ),
                   centerTitle: true,
-                  surfaceTintColor: Colors.white,
-                  backgroundColor: Colors.white,
+                  surfaceTintColor: context.cardColor,
+                  backgroundColor:  context.cardColor,
                   title: Builder(
                     builder: (context) {
                       return Row(
@@ -284,7 +284,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                  color: cardLightColor),
+                                  color: appStore.isDarkMode?svGetScaffoldColor():cardLightColor),
                               child: Icon(
                                 Icons.cancel_outlined,
                                 color: svGetBodyColor(),
@@ -547,7 +547,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       ),
                     ),
                     Container(
-                      color: Colors.white,
+                      color: context.cardColor,
                       // margin: const EdgeInsets.all(10.0),
                       // Add margin of 10.0 to all sides
                       // decoration: BoxDecoration(
@@ -562,7 +562,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             child: Container(
                               padding: const EdgeInsets.only(left: 8, right: 8),
                               decoration: BoxDecoration(
-                                color: cardLightColor,
+                                color: appStore.isDarkMode? svGetScaffoldColor():cardLightColor,
                                 // border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(20.0),
                               ),
@@ -782,7 +782,7 @@ class ChatBubble extends StatelessWidget {
                 spacing: 8.0,
                 children: [
                   CircleAvatar(
-                    backgroundColor: Colors.white,
+                    backgroundColor: svGetBodyColor(),
                     child: Image.asset(
                       'assets/logo/ic_web.png',
                       width: 25,

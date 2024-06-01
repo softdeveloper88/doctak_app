@@ -6,7 +6,9 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import '../../profile/components/SVProfileHeaderComponent.dart';
@@ -30,7 +32,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
   void initState() {
     print(widget.userId);
     if (widget.userId == null) {
-      print('object ${AppData.logInUserId}');
+      print('object1 ${AppData.logInUserId}');
       profileBloc.add(LoadPageEvent(userId: AppData.logInUserId, page: 1));
     } else {
       print('object ${widget.userId}');
@@ -44,7 +46,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor:svGetScaffoldColor(),
       // appBar: AppBar(
       //   backgroundColor: svGetScaffoldColor(),
       //   // title: Text('Profile', style: boldTextStyle(size: 20)),
@@ -67,7 +69,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
         bloc: profileBloc,
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return const Center(child: CircularProgressIndicator());
+            return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
           } else if (state is PaginationLoadedState) {
             return SingleChildScrollView(
               child: Column(
@@ -82,7 +84,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                     children: [
                       Text(
                           '${profileBloc.userProfile?.user?.firstName ?? ''} ${profileBloc.userProfile?.user?.lastName ?? ''}',
-                          style: boldTextStyle(size: 20)),
+                          style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 12.sp)),
                       4.width,
                       Image.asset('images/socialv/icons/ic_TickSquare.png',
                           height: 14, width: 14, fit: BoxFit.cover),

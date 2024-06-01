@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/group_screen/group_create_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
@@ -24,7 +25,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
 
   @override
   void initState() {
-    setStatusBarColor(Colors.white);
+    setStatusBarColor(svGetScaffoldColor());
 
     chatBloc.add(LoadPageEvent(page: 1));
     super.initState();
@@ -33,20 +34,20 @@ class _UserChatScreenState extends State<UserChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:Colors.white,
+      backgroundColor:svGetScaffoldColor(),
       appBar: AppBar(
-        surfaceTintColor: Colors.white,
-        backgroundColor: Colors.white,
+        surfaceTintColor: svGetScaffoldColor(),
+        backgroundColor: svGetScaffoldColor(),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.black),
+          icon:  Icon(Icons.arrow_back_ios_new_rounded,
+              color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
         title:  Text('Chats',style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon:  Icon(Icons.search,color: svGetBodyColor(),),
             onPressed: () {
               SearchContactScreen().launch(context);
             },
@@ -73,7 +74,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return const Center(child: CircularProgressIndicator());
+            return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
           } else if (state is PaginationLoadedState) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,8 +105,8 @@ class _UserChatScreenState extends State<UserChatScreen> {
                         }
                         return bloc.numberOfPage != bloc.pageNumber - 1 &&
                                 index >= bloc.groupList.length - 1
-                            ? const Center(
-                                child: CircularProgressIndicator(),
+                            ?  Center(
+                                child: CircularProgressIndicator(color: svGetBodyColor(),),
                               )
                             : GestureDetector(
                                 onTap: () {
@@ -132,8 +133,8 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                       title: Text(
                                         bloc.groupList[index].groupName ??
                                             'Unknown',
-                                        style: const TextStyle(
-                                          color: Colors.white,
+                                        style:  TextStyle(
+                                          color: svGetBodyColor(),
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
                                         ),
@@ -141,8 +142,8 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                       subtitle: Text(
                                         bloc.groupList[index].latestMessage ??
                                             '',
-                                        style: const TextStyle(
-                                          color: Colors.white70,
+                                        style:  TextStyle(
+                                          color: svGetBodyColor(),
                                           fontSize: 14,
                                         ),
                                       ),
@@ -176,8 +177,8 @@ class _UserChatScreenState extends State<UserChatScreen> {
                         }
                         return bloc.numberOfPage != bloc.pageNumber - 1 &&
                                 index >= bloc.contactsList.length - 1
-                            ? const Center(
-                                child: CircularProgressIndicator(),
+                            ?  Center(
+                                child: CircularProgressIndicator(color: svGetBodyColor() ,),
                               )
                             :
                             // Card(
@@ -326,7 +327,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                               overflow:
                                                                   TextOverflow
                                                                       .clip,
-                                                              style:GoogleFonts.poppins(color:Colors.black,fontWeight:FontWeight.w600,fontSize:16))),
+                                                              style:GoogleFonts.poppins(color:svGetBodyColor(),fontWeight:FontWeight.w600,fontSize:16))),
                                                       6.width,
                                                       // bloc.contactsList[index].isCurrentUser.validate()
                                                       //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
@@ -351,7 +352,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                         index].createdAt??'')),
                                             style: secondaryTextStyle(
                                                 color: svGetBodyColor(), size: 12)),
-                                        // isLoading ? const CircularProgressIndicator():  AppButton(
+                                        // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
                                         //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
                                         //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
                                         //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
@@ -385,7 +386,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                         //     });
                                         //   },
                                         //   child: isLoading
-                                        //       ? CircularProgressIndicator() // Show progress indicator if loading
+                                        //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
                                         //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
                                         //   style: ElevatedButton.styleFrom(
                                         //     // primary: Colors.blue, // Change button color as needed
@@ -422,9 +423,10 @@ class _UserChatScreenState extends State<UserChatScreen> {
       ),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
+      //     GroupCreateScreen().launch(context);
       //     // Add functionality to start a new chat
       //   },
-      //   child: const Icon(Icons.message),
+      //   child: const Icon(Icons.group),
       // ),
     );
   }

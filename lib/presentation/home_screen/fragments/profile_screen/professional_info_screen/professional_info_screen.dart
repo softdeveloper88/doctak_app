@@ -29,8 +29,10 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
+        surfaceTintColor: svGetScaffoldColor(),
         title: Text('Professional Information', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
@@ -47,11 +49,11 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                 isEditModeMap = !isEditModeMap;
               });
             },
-            color: Colors.black,
+            color: svGetBodyColor(),
             imagePath: 'assets/icon/ic_vector.svg',
             height: 25,
             width: 25,
-            margin: EdgeInsets.only(top: 4, right: 4),
+            margin: const EdgeInsets.only(top: 4, right: 16),
           ),
         ],
       ),
@@ -62,8 +64,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
             key: _formKey,
             child: Column(
               children: [
-
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.location_on,
                   index: 1,
@@ -72,10 +73,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   onSave: (value) => widget.profileBloc.userProfile?.profile?.address = value,),
                 // const Divider(),
                 if (!isEditModeMap)
-                  const Divider(
-                    color: Colors.grey,
-                  ),
-                ProfileWidget(
+                  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.account_circle,
                   index: 1,
@@ -86,10 +85,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   maxLines: 3,
                 ),
                 if (!isEditModeMap)
-                  const Divider(
-                    color: Colors.grey,
-                  ),
-                ProfileWidget(
+                  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.location_on,
                   index: 1,
@@ -98,10 +95,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   onSave: (value) => widget.profileBloc.userProfile!.profile?.birthplace = value,
                   maxLines: 3,
                 ),
-                if (!isEditModeMap)   const Divider(
-                    color: Colors.grey,
-                  ),
-                ProfileWidget(
+                if (!isEditModeMap)   Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.sports,
                   index: 1,
@@ -111,10 +106,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                       widget.profileBloc.userProfile!.profile?.hobbies = value,
                   maxLines: 3,
                 ),
-                if (!isEditModeMap) const Divider(
-                    color: Colors.grey,
-                  ),
-                ProfileWidget(
+                if (!isEditModeMap) Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.live_help,
                   index: 1,

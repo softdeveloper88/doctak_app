@@ -12,14 +12,15 @@ import '../../../../core/utils/app/AppData.dart';
 import '../../../../main.dart';
 import '../../utils/SVColors.dart';
 import '../../utils/SVCommon.dart';
+import '../home_main_screen/bloc/home_bloc.dart';
 import 'bloc/add_post_bloc.dart';
 import 'components/SVPostOptionsComponent.dart';
 import 'components/SVPostTextComponent.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
-  const SVAddPostFragment({Key? key}) : super(key: key);
-
+   SVAddPostFragment({required this.refresh,Key? key}) : super(key: key);
+  Function refresh;
   @override
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
 }
@@ -82,16 +83,15 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.white,
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
         leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        backgroundColor: Colors.white,
+        backgroundColor: context.cardColor,
         title: Text('New Post', style: boldTextStyle(size: 18)),
         elevation: 0,
         centerTitle: true,
@@ -110,6 +110,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(data['message'])),
                   );
+                  widget.refresh();
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -129,6 +130,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
               textStyle: secondaryTextStyle(color: Colors.white, size: 10),
               onTap: () {
                 searchPeopleBloc.add(AddPostDataEvent());
+
               },
               elevation: 0,
               color: SVAppColorPrimary,

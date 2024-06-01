@@ -88,7 +88,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       width: context.width(),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: svGetScaffoldColor(),
         borderRadius: radiusOnly(
             topRight: SVAppContainerRadius, topLeft: SVAppContainerRadius),
       ),
@@ -156,17 +156,17 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                     onTap: () {
                       openImages();
                     },
-                    child: const SizedBox(
+                    child:  SizedBox(
                       height: 32,
                       width: 32,
                       // color: context.cardColor,
-                      child:Icon(Icons.image_outlined,size: 32,color: Colors.grey,),
+                      child:Icon(Icons.image_outlined,size: 32,color:svGetBodyColor(),),
                       // Image.asset('images/socialv/icons/ic_CameraPost.png',
                       //     height: 22, width: 22, fit: BoxFit.cover),
                     ),
                   ),
                   const SizedBox(width: 10,),
-                  Text('From Gallery',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:Colors.black,fontSize:kDefaultFontSize),)
+                  Text('From Gallery',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
 
                 ],
               ),
@@ -178,9 +178,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                         openVideo();
                       },
                       child: Image.asset('images/socialv/icons/ic_Video.png',
+                          color:svGetBodyColor(),
                           height: 32, width: 32, fit: BoxFit.cover)),
                   const SizedBox(width: 10,),
-                   Text('Take Video',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:Colors.black,fontSize:kDefaultFontSize),)
+                   Text('Take Video',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
                 ],
               ),
               Divider(color: Colors.grey[300],),
@@ -192,9 +193,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                         openCamera();
                       },
                       child: Image.asset('images/socialv/icons/ic_CameraPost.png',
+                          color:svGetBodyColor(),
                           height: 32, width: 32, fit: BoxFit.cover)),
                   const SizedBox(width: 10,),
-                  Text('Take Picture',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:Colors.black,fontSize:kDefaultFontSize),)
+                  Text('Take Picture',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
 
                 ],
               ),

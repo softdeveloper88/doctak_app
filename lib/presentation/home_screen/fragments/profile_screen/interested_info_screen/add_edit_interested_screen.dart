@@ -20,7 +20,10 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetScaffoldColor(),
+
       appBar: AppBar(
+        surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
         title: Text('Add Interest', style: boldTextStyle(size: 20)),
         elevation: 0,
@@ -76,7 +79,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10),
-            ProfileWidget(
+            TextFieldEditWidget(
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
@@ -84,7 +87,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
               // value: entry.interestType ?? '',
               // onSave: (value) => entry.interestType = value,
             ),
-            ProfileWidget(
+            TextFieldEditWidget(
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,

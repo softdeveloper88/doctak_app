@@ -10,6 +10,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -66,6 +67,7 @@ class _JobsScreenState extends State<JobsScreen> {
 
   var selectedValue;
   bool isShownSuggestion = false;
+  bool isSearchShow = false;
   int selectedIndex = 0;
 
   Future<void> _launchInBrowser(Uri url) async {
@@ -117,6 +119,7 @@ class _JobsScreenState extends State<JobsScreen> {
                 return Column(
                   children: [
                     AppBar(
+                      surfaceTintColor:svGetScaffoldColor() ,
                       backgroundColor: svGetScaffoldColor(),
                       iconTheme: IconThemeData(color: context.iconColor),
                       title: Row(
@@ -125,6 +128,7 @@ class _JobsScreenState extends State<JobsScreen> {
                           Expanded(
                               child: Center(
                                   child: Text('Jobs',
+                                      textAlign: TextAlign.center,
                                       style: boldTextStyle(size: 18)))),
                           Expanded(
                             child: CustomDropdownField(
@@ -148,33 +152,52 @@ class _JobsScreenState extends State<JobsScreen> {
                                         countryId.toString(),
                                         state.typeValue,
                                         state.searchTerms ?? '',
-                                        state.isExpired??'New'));
+                                        state.isExpired ?? 'New'));
                                 jobsBloc.add(JobLoadPageEvent(
                                     page: 1,
                                     countryId: countryId.toString(),
                                     searchTerm: state.searchTerms ?? "",
-                                    isExpired: state.isExpired??'New'));
+                                    isExpired: state.isExpired ?? 'New'));
 
                                 // jobsBloc
                                 //     .add(UpdateFirstDropdownValue(newValue!));
                               },
                             ),
                           ),
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+
+                              });
+                              isSearchShow = !isSearchShow;
+                            },
+                            child: Icon(
+                                    isSearchShow
+                                        ? Icons.cancel_outlined
+                                        : CupertinoIcons.search,
+                                    size: 25,
+                                    // height: 16,
+                                    // width: 16,
+                                    // fit: BoxFit.cover,
+                                    color: svGetBodyColor())
+                                .paddingLeft(4),
+                          )
                         ],
                       ),
                       leading: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.black),
+                        icon:  Icon(Icons.arrow_back_ios_new_rounded,
+                            color:svGetBodyColor()),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       elevation: 0,
                       centerTitle: true,
                     ),
+                    Divider(color: Colors.grey[300],endIndent: 16,indent: 16,),
                     Column(
                       children: [
                         Column(
                           children: [
-                            Container(
+                            if(isSearchShow)  Container(
                               padding: const EdgeInsets.only(left: 8.0),
                               margin: const EdgeInsets.only(
                                 left: 16,
@@ -186,7 +209,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                   color: context.dividerColor.withOpacity(0.4),
                                   borderRadius: radius(5),
                                   border: Border.all(
-                                      color: Colors.black, width: 0.3)),
+                                      color: svGetBodyColor(), width: 0.3)),
                               child:
                                   // CustomDropdownSearch(
                                   //   onChanged: (searchTxt) {
@@ -517,8 +540,8 @@ class _JobsScreenState extends State<JobsScreen> {
               builder: (context, state) {
                 isShownSuggestion = false;
                 if (state is PaginationLoadingState) {
-                  return const Expanded(
-                      child: Center(child: CircularProgressIndicator()));
+                  return  Expanded(
+                      child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
                 } else if (state is PaginationLoadedState) {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
@@ -556,22 +579,26 @@ class _JobsScreenState extends State<JobsScreen> {
                     bloc.add(JobCheckIfNeedMoreDataEvent(index: index));
                   }
                 }
-                return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                        index >= bloc.drugsData.length - 1
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : InkWell(
-                  onTap: (){
-                    JobsDetailsScreen(jobId:bloc.drugsData[index].id??0).launch(context);
-                  },
-                      child: Container(
+                if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+                        index >= bloc.drugsData.length - 1) {
+                  return  Center(
+                        child: CircularProgressIndicator(color: svGetBodyColor(),),
+                      );
+                } else {
+                  return InkWell(
+                        onTap: () {
+                          JobsDetailsScreen(
+                                  jobId: bloc.drugsData[index].id ?? 0)
+                              .launch(context);
+                        },
+                        child: Container(
                           margin: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             color: context.cardColor,
                             borderRadius: BorderRadius.circular(5),
                           ),
                           child: Material(
+                            color:context.cardColor,
                             elevation: 4,
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(10)),
@@ -597,12 +624,14 @@ class _JobsScreenState extends State<JobsScreen> {
                                   Text(
                                     bloc.drugsData[index].jobTitle ?? "",
                                     style: GoogleFonts.poppins(
-                                        color: Colors.black,
+                                        color: svGetBodyColor(),
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18),
                                   ),
                                   const SizedBox(height: 5),
-                                  Text(bloc.drugsData[index].companyName ?? 'N/A',
+                                  Text(
+                                      bloc.drugsData[index].companyName ??
+                                          'N/A',
                                       style: secondaryTextStyle(
                                           color: svGetBodyColor())),
                                   const SizedBox(height: 10),
@@ -628,7 +657,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                   const SizedBox(height: 20),
                                   Text('Apply Date',
                                       style: GoogleFonts.poppins(
-                                          color: Colors.black,
+                                          color: svGetBodyColor(),
                                           fontWeight: FontWeight.w400,
                                           fontSize: 14)),
                                   Row(
@@ -641,23 +670,24 @@ class _JobsScreenState extends State<JobsScreen> {
                                         children: [
                                           Text('Date From',
                                               style: secondaryTextStyle(
-                                                  color: Colors.black)),
+                                                  color: svGetBodyColor())),
                                           Row(
                                             children: <Widget>[
-                                              const Icon(
+                                               Icon(
                                                 Icons.date_range_outlined,
                                                 size: 20,
-                                                color: Colors.black,
+                                                color: svGetBodyColor(),
                                               ),
                                               const SizedBox(
                                                 width: 5,
                                               ),
                                               Text(
                                                   DateFormat('MMM dd, yyyy')
-                                                      .format(DateTime.parse(bloc
-                                                              .drugsData[index]
-                                                              .createdAt ??
-                                                          'N/A'.toString())),
+                                                      .format(DateTime.parse(
+                                                          bloc.drugsData[index]
+                                                                  .createdAt ??
+                                                              'N/A'
+                                                                  .toString())),
                                                   style: secondaryTextStyle(
                                                       color: svGetBodyColor())),
                                             ],
@@ -675,24 +705,25 @@ class _JobsScreenState extends State<JobsScreen> {
                                         children: [
                                           Text('Date To',
                                               style: secondaryTextStyle(
-                                                color: Colors.black,
+                                                color: svGetBodyColor(),
                                               )),
                                           Row(
                                             children: <Widget>[
-                                              const Icon(
+                                               Icon(
                                                 Icons.date_range_outlined,
                                                 size: 20,
-                                                color: Colors.black,
+                                                color: svGetBodyColor(),
                                               ),
                                               const SizedBox(
                                                 width: 5,
                                               ),
                                               Text(
                                                   DateFormat('MMM dd, yyyy')
-                                                      .format(DateTime.parse(bloc
-                                                              .drugsData[index]
-                                                              .lastDate ??
-                                                          'N/A'.toString())),
+                                                      .format(DateTime.parse(
+                                                          bloc.drugsData[index]
+                                                                  .lastDate ??
+                                                              'N/A'
+                                                                  .toString())),
                                                   style: secondaryTextStyle(
                                                       color: svGetBodyColor())),
                                             ],
@@ -704,7 +735,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                   Text(
                                       'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
                                       style: secondaryTextStyle(
-                                        color: Colors.black,
+                                        color: svGetBodyColor(),
                                       )),
                                   const SizedBox(height: 5),
                                   SingleChildScrollView(
@@ -790,7 +821,8 @@ class _JobsScreenState extends State<JobsScreen> {
                             ),
                           ),
                         ),
-                    );
+                      );
+                }
                 // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
               },
             ),

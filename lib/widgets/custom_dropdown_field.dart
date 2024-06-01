@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
@@ -37,7 +38,7 @@ class CustomDropdownField extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width??100.w,
-      height: height??50,
+      height: height??60,
       // width: getProportionateScreenWidth(0.5),
       child: DropdownButtonFormField<String>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
@@ -54,29 +55,46 @@ class CustomDropdownField extends StatelessWidget {
             ? Icon(
           Icons.arrow_drop_down,
           size: 12.sp,
-          // color: Colors.black,
         )
             : null,
-        isExpanded: true, // Force to take available space
+        isExpanded: true,
         items: [
           ...List.generate(
             items.length,
-                (index) =>
-                DropdownMenuItem<String>(
-                  value: items[index].countryName,
-                  child: Text(
-                    items[index].countryName??'',
+                (index) => DropdownMenuItem<String>(
+              value: items[index].countryName,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    items[index].countryName ?? '',
                     overflow: TextOverflow.visible,
-                    style:
-                    const TextStyle(
-                      fontWeight:  FontWeight.bold ,
-                      color:  Colors.black ,
+                    style:  TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: svGetBodyColor(),
                     ),
                   ),
-                ),
+                ],
+              ),
+            ),
           ),
         ],
-      ),
+        selectedItemBuilder: (BuildContext context) {
+          return items.map((item) {
+            return Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                item.countryName ?? '',
+                style: TextStyle(
+                  color: isTextBold ? svGetBodyColor() : Colors.grey,
+                  fontSize: 12,
+                  fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            );
+          }).toList();
+        },
+      )
     );
   }
 
@@ -91,6 +109,7 @@ class CustomDropdownField extends StatelessWidget {
 
   _buildDecoration() {
     return InputDecoration(
+
       hintText: hint ?? '',
       hintStyle: _setFontStyle(),
       border: _outLinedInputBorder(),

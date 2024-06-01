@@ -100,6 +100,7 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
       padding: const EdgeInsets.only(top:8.0),
       child: Material(
         elevation: 2,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0,horizontal: 10),
@@ -153,7 +154,7 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                   ],
                 ),
               ),
-              isLoading ? const CircularProgressIndicator():  AppButton(
+              isLoading ?  CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
                 shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
                 text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
                 textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
@@ -187,7 +188,7 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
               //     });
               //   },
               //   child: isLoading
-              //       ? CircularProgressIndicator() // Show progress indicator if loading
+              //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
               //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
               //   style: ElevatedButton.styleFrom(
               //     // primary: Colors.blue, // Change button color as needed

@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ForceUpgradePage extends StatefulWidget {
@@ -129,7 +130,7 @@ bool? isUpdateAvailable;
         alignment: Alignment.center,
         children: [
           Image.asset(
-            'images/socialv/svSplashImage.jpg',
+            'assets/images/splash.png',
             height: context.height(),
             width: context.width(),
             fit: BoxFit.fill,
@@ -137,26 +138,24 @@ bool? isUpdateAvailable;
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: Center(
-                  child: Material(
-                      borderRadius: BorderRadius.circular(10),
-                      elevation: 10,
-                      child: Container(
-                          height: 100,
-                          width: 100,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: Image.asset('assets/logo/icon.png', height: 80, width: 80, fit: BoxFit.contain,))),
-                ),
-              ),
+              Center(
+                  child: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Image.asset(
+                        'assets/logo/logo.png',
+                        // height: 80,
+                        width: 80.w,
+                        fit: BoxFit.contain,
+                      ))),
               8.width,
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text("Doctak.net", style: primaryTextStyle(color: Colors.white, size: 40, weight: FontWeight.w500)),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(8.0),
+              //   child: Text("Doctak.net",
+              //       style: primaryTextStyle(
+              //           color: Colors.white,
+              //           size: 24,
+              //           weight: FontWeight.w500)),
+              // ),
             ],
           ),
         ],

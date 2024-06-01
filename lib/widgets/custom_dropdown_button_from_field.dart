@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/theme/app_decoration.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
@@ -44,6 +45,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
       DropdownButtonFormField<String>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
         value: value,
+        dropdownColor: svGetScaffoldColor(),
         isExpanded: true,
         decoration: _buildDecoration(),
         iconSize: isTextBold ? 20.0 : 0.0,
@@ -57,7 +59,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
             ? Icon(
           Icons.arrow_drop_down,
           size: 12.sp,
-          // color: Colors.black,
+          color: svGetBodyColor(),
         )
             : null,
         // decoration: InputDecoration(
@@ -83,9 +85,9 @@ class CustomDropdownButtonFormField extends StatelessWidget {
                     items[index],
                     overflow: TextOverflow.visible,
                     style:
-                    const TextStyle(
+                     TextStyle(
                       fontWeight:  FontWeight.bold ,
-                      color:  Colors.black ,
+                      color:  svGetBodyColor() ,
                     ),
                   ),
                 ),
@@ -98,8 +100,8 @@ class CustomDropdownButtonFormField extends StatelessWidget {
   OutlineInputBorder _outLinedInputBorder() {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius ?? 8),
-      borderSide: const BorderSide(
-        color: Colors.black26,
+      borderSide:  BorderSide(
+        color: svGetBodyColor(),
       ),
     );
   }

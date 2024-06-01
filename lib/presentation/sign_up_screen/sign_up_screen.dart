@@ -127,6 +127,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                           true;
                                                           dropdownBloc.add(
                                                               ChangeDoctorRole());
+                                                          setState(() {
+
+                                                          });
                                                         },
                                                         child: Container(
                                                           padding:
@@ -174,6 +177,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                           dropdownBloc
                                                               .isDoctorRole =
                                                           false;
+                                                          setState(() {
+
+                                                          });
                                                         },
                                                         child: Container(
                                                           padding:
@@ -393,18 +399,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           return Container();
                                         }
                                       }),
-                                  if(widget.isSocialLogin==true)
+                                  // if(widget.isSocialLogin==true)
                                     BlocBuilder<ProfileBloc, ProfileState>(
                                       bloc: profileBloc,
                                       builder: (context, state) {
 
                                         if (state is PaginationLoadedState) {
+
                                           return Column(
                                               children: [
                                                 const SizedBox(height: 10),
                                                 CustomDropdownButtonFormField(
-                                                  items: state
-                                                      .firstDropdownValues,
+                                                  items: state.firstDropdownValues,
                                                   value: state
                                                       .selectedFirstDropdownValue,
                                                   width: double.infinity,
@@ -418,8 +424,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                     profileBloc
                                                         .country =
                                                     newValue!;
-                                                    // profileBloc.add(UpdateFirstDropdownValue(newValue));
                                                     profileBloc.add(UpdateSecondDropdownValues(newValue));
+
                                                   },
                                                 ),
                                                 const SizedBox(height: 10),
@@ -439,12 +445,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                     profileBloc.stateName =
                                                     newValue!;
 
+                                                    profileBloc.add(
+                                                        UpdateSpecialtyDropdownValue(
+                                                            newValue));
+                                                  },
+                                                ),
+                                                const SizedBox(height: 10),
+                                               if(dropdownBloc.isDoctorRole) CustomDropdownButtonFormField(
+                                                  items: state.specialtyDropdownValue,
+                                                  value: state.selectedSpecialtyDropdownValue,
+                                                  width: double.infinity,
+                                                  contentPadding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 0,
+                                                  ),
+                                                  onChanged: (
+                                                      String? newValue) {
+                                                    profileBloc.specialtyName = newValue!;
+
                                                   },
                                                 ),
                                                 const SizedBox(height: 10),
                                               ]);
                                         }else{
-                                          return Container(child:Text('ddd$state'));
+                                          return Container(child:const Text(''));
                                         }
                                       }),
                                   BlocListener<DropdownBloc, DropdownState>(
@@ -565,13 +590,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         focusNode: focusNode1,
         controller: firstnameController,
         hintText: translation(context).lbl_enter_your_name1,
-        prefix: Container(
-            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-            child: CustomImageView(
-                color: Colors.black54,
-                imagePath: ImageConstant.imgLock,
-                height: 24,
-                width: 24)),
+    prefix: const SizedBox(width: 10,),
+    //     prefix: Container(
+    //         margin: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+    //         // child: CustomImageView(
+    //         //     color: Colors.black54,
+    //         //     imagePath: ImageConstant.imgLock,
+    //         //     height: 24,
+    //         //     width: 24)
+    // ),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
@@ -588,13 +615,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         focusNode: focusNode2,
         controller: lastNameController,
         hintText: translation(context).lbl_enter_your_name2,
-        prefix: Container(
-            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-            child: CustomImageView(
-                color: Colors.black54,
-                imagePath: ImageConstant.imgLock,
-                height: 24,
-                width: 24)),
+        prefix: const SizedBox(width: 10,),
+
+        // prefix: Container(
+        //     margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+        //     child: CustomImageView(
+        //         color: Colors.black54,
+        //         imagePath: ImageConstant.imgLock,
+        //         height: 24,
+        //         width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
@@ -612,13 +641,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         textInputType: TextInputType.phone,
         controller: phoneController,
         hintText: translation(context).lbl_enter_your_phone,
-        prefix: Container(
-            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-            child: CustomImageView(
-                color: Colors.black54,
-                imagePath: ImageConstant.imgLock,
-                height: 24,
-                width: 24)),
+        prefix: const SizedBox(width: 10,),
+        // prefix: Container(
+        //     margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+        //     child: CustomImageView(
+        //         color: Colors.black54,
+        //         imagePath: ImageConstant.imgLock,
+        //         height: 24,
+        //         width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
@@ -636,13 +666,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         controller: emailController,
         hintText: translation(context).msg_enter_your_email2,
         textInputType: TextInputType.emailAddress,
-        prefix: Container(
-            margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-            child: CustomImageView(
-                color: Colors.black54,
-                imagePath: ImageConstant.imgCheckmark,
-                height: 24,
-                width: 24)),
+        prefix: const SizedBox(width: 10,),
+
+        // prefix: Container(
+        //     margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+        //     child: CustomImageView(
+        //         color: Colors.black54,
+        //         imagePath: ImageConstant.imgCheckmark,
+        //         height: 24,
+        //         width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (value == null || (!isValidEmail(value, isRequired: true))) {
@@ -678,6 +710,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             password: passwordController.text.toString(),
             firstName: firstnameController!.text.toString(),
             lastName: lastNameController!.text.toString(),
+            country: profileBloc.country??'United Arab Emirates',
+            state: profileBloc.stateName??"DUBAI",
+            specialty: profileBloc.specialtyName??"",
             userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student'
           // replace with real input
         ));
@@ -687,9 +722,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           token: widget.token ?? '',
           firstName: firstnameController!.text.toString(),
           lastName: lastNameController!.text.toString(),
-          phone: phoneController!.text.toString(),
+          phone: phoneController.text.toString(),
           country: profileBloc.country??'United Arab Emirates',
           state: profileBloc.stateName??"DUBAI",
+          specialty: profileBloc.specialtyName??"",
           userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student'
         // replace with real input
       ));

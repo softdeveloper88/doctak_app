@@ -93,17 +93,17 @@ class _NewsScreenState extends State<NewsScreen> {
                 body: AnimatedBackground(
                   child: Column(
                     children: <Widget>[
-                      const Material(
-                        color: Colors.white, // Set the color of the TabBar
+                       Material(
+                        color: context.cardColor, // Set the color of the TabBar
                         child: TabBar(
-                          labelColor: Colors.black,
+                          labelColor: svGetBodyColor(),
                           // Set the color of the selected tab text
                           unselectedLabelColor: Colors.grey,
                           // Set the color of the unselected tab text
-                          indicatorColor: Colors.black,
+                          indicatorColor: svGetBodyColor(),
 
                           // Set the color of the tab indicator
-                          tabs: [
+                          tabs: const [
                             Tab(text: 'BBC News'),
                             Tab(text: 'CNN News'),
                           ],

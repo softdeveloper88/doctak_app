@@ -101,7 +101,7 @@ class _SearchScreenState extends State<SearchScreen>
   //   }
   // }
   var selectedValue;
-
+  bool isSearchShow=false;
   // final BannerAdManager _bannerAdManager = BannerAdManager();
   Widget _individualTab(String tabName) {
     return Row(
@@ -111,26 +111,26 @@ class _SearchScreenState extends State<SearchScreen>
           Container(
             height: 20,
             width: 1,
-            decoration: const BoxDecoration(
+            decoration:  BoxDecoration(
                 border: Border(
                     right: BorderSide(
-                        color: Colors.grey,
+                        color: svGetBodyColor(),
                         width: 1,
                         style: BorderStyle.solid))),
           ),
          Expanded(
           child: Tab(
-            text: tabName,
+            child: Text(tabName,style: GoogleFonts.poppins(color: svGetBodyColor()),),
           ),
         ),
         if (tabName == 'Jobs')
           Container(
             height: 20,
             width: 1,
-            decoration: const BoxDecoration(
+            decoration:  BoxDecoration(
                 border: Border(
                     right: BorderSide(
-                        color: Colors.grey,
+                        color: svGetBodyColor(),
                         width: 1,
                         style: BorderStyle.solid))),
           ),
@@ -143,26 +143,45 @@ class _SearchScreenState extends State<SearchScreen>
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: svGetScaffoldColor(),
         appBar:AppBar(
-          surfaceTintColor: Colors.transparent,
+          backgroundColor:  svGetScaffoldColor(),
+          surfaceTintColor:  svGetScaffoldColor(),
           iconTheme: IconThemeData(color: context.iconColor),
           title: Text('Search',
                           style: boldTextStyle(size: 18)),
 
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black),
+            icon:  Icon(Icons.arrow_back_ios_new_rounded,
+                color: svGetBodyColor()),
             onPressed:(){widget.backPress!();}
           ),
           elevation: 0,
           centerTitle: true,
+          actions: [
+            InkWell(
+              onTap: () {
+                setState(() {});
+                isSearchShow = !isSearchShow;
+              },
+              child: Icon(
+                  isSearchShow
+                      ? Icons.cancel_outlined
+                      : CupertinoIcons.search,
+                  size: 25,
+                  // height: 16,
+                  // width: 16,
+                  // fit: BoxFit.cover,
+                  color: svGetBodyColor())
+                  .paddingLeft(4),
+            ).paddingRight(16)
+          ],
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(thickness: 0.3,color: Colors.grey,endIndent: 20,indent: 20,),
-            sizedBox10,
-            Container(
+           if(isSearchShow) Container(
               padding: const EdgeInsets.only(left: 8.0),
               margin: const EdgeInsets.only(
                 left: 16,
@@ -173,7 +192,7 @@ class _SearchScreenState extends State<SearchScreen>
               decoration: BoxDecoration(
                   color: context.dividerColor.withOpacity(0.4),
                   borderRadius: radius(5),
-                  border: Border.all(color: Colors.black, width: 0.3)),
+                  border: Border.all(color: svGetBodyColor(), width: 0.3)),
               child: AppTextField(
                 textFieldType: TextFieldType.NAME,
                 onChanged: (searchTxt) async {
@@ -263,7 +282,7 @@ class _SearchScreenState extends State<SearchScreen>
                                 BlocBuilder<SplashBloc, SplashState>(
                                     builder: (context, state) {
                                   if (state is CountriesDataInitial) {
-                                    return const Column(
+                                    return  Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
@@ -272,7 +291,7 @@ class _SearchScreenState extends State<SearchScreen>
                                       children: [
                                         Center(
                                             child:
-                                                CircularProgressIndicator()),
+                                                CircularProgressIndicator(color: svGetBodyColor(),)),
                                       ],
                                     );
                                   } else if (state is CountriesDataLoaded) {
@@ -434,10 +453,10 @@ class _SearchScreenState extends State<SearchScreen>
                                   builder: (context, state) {
                                     print("state $state");
                                     if (state is PaginationLoadingState) {
-                                      return const Expanded(
+                                      return  Expanded(
                                           child: Center(
                                               child:
-                                                  CircularProgressIndicator()));
+                                                  CircularProgressIndicator(color: svGetBodyColor(),)));
                                     } else if (state
                                         is PaginationLoadedState) {
                                       // print(state.drugsModel.length);
@@ -477,8 +496,8 @@ class _SearchScreenState extends State<SearchScreen>
                                 print("state $state");
                                 if (state
                                     is SearchPeoplePaginationLoadingState) {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
+                                  return  Center(
+                                      child: CircularProgressIndicator(color: svGetBodyColor(),));
                                 } else if (state
                                     is SearchPeoplePaginationLoadedState) {
                                   // print(state.drugsModel.length);
@@ -510,9 +529,9 @@ class _SearchScreenState extends State<SearchScreen>
                                                         bloc.searchPeopleData
                                                                 .length -
                                                             1
-                                                ? const Center(
+                                                ?  Center(
                                                     child:
-                                                        CircularProgressIndicator(),
+                                                        CircularProgressIndicator(color: svGetBodyColor(),),
                                                   )
                                                 : SVSearchCardComponent(
                                                     bloc: bloc,
@@ -604,8 +623,8 @@ class _SearchScreenState extends State<SearchScreen>
                 }
                 return bloc.numberOfPage != bloc.pageNumber - 1 &&
                         index >= bloc.drugsData.length - 1
-                    ? const Center(
-                        child: CircularProgressIndicator(),
+                    ?  Center(
+                        child: CircularProgressIndicator(color: svGetBodyColor(),),
                       )
                     :  Container(
                   margin: const EdgeInsets.all(10),
@@ -614,6 +633,7 @@ class _SearchScreenState extends State<SearchScreen>
                     borderRadius: BorderRadius.circular(5),
                   ),
                   child: Material(
+                    color: context.cardColor,
                     elevation: 4,
                     borderRadius:
                     const BorderRadius.all(Radius.circular(10)),
@@ -639,7 +659,7 @@ class _SearchScreenState extends State<SearchScreen>
                           Text(
                             bloc.drugsData[index].jobTitle ?? "",
                             style: GoogleFonts.poppins(
-                                color: Colors.black,
+                                color: svGetBodyColor(),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18),
                           ),
@@ -670,7 +690,7 @@ class _SearchScreenState extends State<SearchScreen>
                           const SizedBox(height: 20),
                           Text('Apply Date',
                               style: GoogleFonts.poppins(
-                                  color: Colors.black,
+                                  color: svGetBodyColor(),
                                   fontWeight: FontWeight.w400,
                                   fontSize: 14)),
                           Row(

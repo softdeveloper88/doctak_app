@@ -1,11 +1,14 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custome_text_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sizer/sizer.dart';
 
-class ProfileWidget extends StatelessWidget {
-  ProfileWidget(
+class TextFieldEditWidget extends StatelessWidget {
+  TextFieldEditWidget(
       {this.index,
       this.label,
       this.isEditModeMap,
@@ -13,6 +16,7 @@ class ProfileWidget extends StatelessWidget {
       this.onSave,
       this.maxLines,
       this.icon,
+      this.textInputType,
       super.key});
 
   int? index;
@@ -22,6 +26,7 @@ class ProfileWidget extends StatelessWidget {
   Function(String)? onSave;
   int? maxLines;
   IconData? icon;
+  TextInputType? textInputType;
 
   @override
   Widget build(BuildContext context) {
@@ -43,34 +48,34 @@ class ProfileWidget extends StatelessWidget {
                     hintText: label,
                     filled: true,
                     fillColor: AppDecoration.fillGray.color,
-                    textInputType: TextInputType.text,
+                    textInputType: textInputType ?? TextInputType.text,
                     prefix: const SizedBox(width: 10,),
-                    prefixConstraints: BoxConstraints(maxHeight: 56),
+                    prefixConstraints: const BoxConstraints(maxHeight: 56),
                     initialValue: value,
                     maxLines: maxLines,
                     onSaved: (v) {
                       onSave?.call(v);
                     },
                     contentPadding:
-                        EdgeInsets.only(top: 18, right: 30, bottom: 18)),
+                        const EdgeInsets.only(top: 18, right: 30, bottom: 18)),
               ),
             ],
           );
     } else {
       return Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 16,bottom: 16),
         child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${capitalizeWords(label??'')}:',
-                  style:
-                      const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  capitalizeWords(label??''),
+                  style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  capitalizeWords(value!),
-                  style: const TextStyle(fontSize: 16),
-                ),
+                  capitalizeWords(value??''),
+                    style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
+
+    ),
               ],
             ),
       );

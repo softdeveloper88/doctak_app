@@ -68,6 +68,14 @@ Color svGetBodyColor() {
   }
 }
 
+Color svGetBgColor() {
+  if (appStore.isDarkMode) {
+    return appBackgroundColorDark;
+  } else {
+    return  SVCardGray;
+  }
+}
+
 Color svGetScaffoldColor() {
   if (appStore.isDarkMode) {
     return appBackgroundColorDark;

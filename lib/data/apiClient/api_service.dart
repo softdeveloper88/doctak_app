@@ -64,6 +64,9 @@ abstract class ApiService {
       @Field("last_name") String lastName,
       @Field("email") String email,
       @Field("password") String password,
+      @Field("country") String country,
+      @Field("state") String state,
+      @Field("specialty") String specialty,
       @Field("user_type") String userType);
 
   @FormUrlEncoded()
@@ -74,6 +77,7 @@ abstract class ApiService {
       @Field("last_name") String lastName,
       @Field("country") String country,
       @Field("state") String state,
+      @Field("specialty") String specialty,
       @Field("phone") String phone,
       @Field("user_type") String userType);
 

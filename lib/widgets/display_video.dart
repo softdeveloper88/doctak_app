@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import '../presentation/home_screen/utils/SVCommon.dart';
+
 class DisplayVideo extends StatefulWidget {
   final File selectedByte;
 
@@ -41,9 +43,9 @@ class DisplayVideoState extends State<DisplayVideo> {
         ],
       ),
     )
-        : const SizedBox(
+        :  SizedBox(
       height: 200,
-      child: Center(child: CircularProgressIndicator()),
+      child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
     );
   }
 

@@ -90,9 +90,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(PaginationLoadingState());
     // try {
     if (pageNumber == 1) {
-      print(event.userId);
+      print("data ${event.userId}");
       PostDataModel postDataModelResponse = await postService.getMyPosts(
-          'Bearer ${AppData.userToken}', '1', event.userId!);
+          'Bearer ${AppData.userToken}', '1', event.userId??'');
       print('repsones$postDataModelResponse');
       UserProfile response = await postService.getProfile(
           'Bearer ${AppData.userToken}', event.userId!);
@@ -313,8 +313,7 @@ print(event.userProfile?.profile?.aboutMe??'');
     secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue)??[];
      print(secondDropdownValues.toList());
     if (secondDropdownValues.isNotEmpty) {
-      List<String>? universityDropdownValues =
-          await _onGetUniversities(secondDropdownValues.first ?? '');
+      List<String>? universityDropdownValues = await _onGetUniversities(secondDropdownValues.first ?? '');
     }
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,

@@ -34,8 +34,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
+        surfaceTintColor: svGetScaffoldColor(),
         title: Text('Personal Information', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
@@ -52,11 +54,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 isEditModeMap =!isEditModeMap;
               });
             },
-            color: Colors.black,
+            color: svGetBodyColor(),
             imagePath: 'assets/icon/ic_vector.svg',
             height: 25,
             width: 25,
-            margin: const EdgeInsets.only(top: 4, right: 4),
+            margin: const EdgeInsets.only(top: 4, right: 16),
           ),
         ],
       ),
@@ -67,7 +69,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             key: _formKey,
             child: Column(
               children: [
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   index: 0,
                   icon: Icons.person,
@@ -76,8 +78,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.firstName = value,
                 ),
-                if(!isEditModeMap)  const Divider(color: Colors.grey,),
-                ProfileWidget(
+                if(!isEditModeMap)   Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
 
                   index: 0,
@@ -87,8 +89,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.lastName = value,
                 ),
-                if(!isEditModeMap)  const Divider(color: Colors.grey,),
-                ProfileWidget(
+                if(!isEditModeMap)   Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   index: 0,
                   icon: Icons.person,
@@ -96,7 +98,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   value: widget.profileBloc.userProfile?.user?.phone ?? '',
                   onSave: (value) => widget.profileBloc.userProfile?.user?.phone = value,
                 ),
-                if(!isEditModeMap) const Divider(color: Colors.grey,),
+                if(!isEditModeMap)  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
                 ProfileDateWidget(
                   isEditModeMap: isEditModeMap,
                   index: 0,
@@ -109,8 +111,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     });
                   },
                 ),
-                if(!isEditModeMap) const Divider(color: Colors.grey,),
-                ProfileWidget(
+                if(!isEditModeMap)  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.numbers_rounded,
                   index: 0,
@@ -119,23 +121,23 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   onSave: (value) =>
                   widget.profileBloc.userProfile?.user?.licenseNo = value,
                 ),
-                if(!isEditModeMap) const Divider(color: Colors.grey,),
-                if (!isEditModeMap) ProfileWidget(
+                if(!isEditModeMap)  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                if (!isEditModeMap) TextFieldEditWidget(
                   index: 0,
                   label: 'Country',
                   value: widget.profileBloc.userProfile?.user?.country ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.country = value,
                 ),
-                if(!isEditModeMap) const Divider(color: Colors.grey,),
-                if (!isEditModeMap) ProfileWidget(
+                if(!isEditModeMap)  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                if (!isEditModeMap) TextFieldEditWidget(
                   index: 0,
                   label: 'City',
                   value: widget.profileBloc.userProfile?.user?.city ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.city = value,
                 ),
-               if(!isEditModeMap) const Divider(color: Colors.grey,),
+               if(!isEditModeMap)  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
                 if (isEditModeMap)
                   BlocBuilder<ProfileBloc, ProfileState>(
                       bloc: widget.profileBloc,
@@ -253,9 +255,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             ],
                           );
                         } else {
-                          return Container(
-                            child: Text('No widget $state'),
-                          );
+                          return Text('No widget $state');
                         }
                       }),
                 10.height,

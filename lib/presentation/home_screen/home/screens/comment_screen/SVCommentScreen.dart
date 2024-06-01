@@ -6,6 +6,8 @@ import 'package:doctak_app/presentation/home_screen/models/SVCommentModel.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../utils/SVCommon.dart';
+
 class SVCommentScreen extends StatefulWidget {
   int id;
 
@@ -44,11 +46,11 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black),
+            icon:  Icon(Icons.arrow_back_ios_new_rounded,
+                color:svGetBodyColor()),
             onPressed:(){Navigator.pop(context);}
         ),
-        actions: [
+        actions: const [
           // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
         ],
       ),
@@ -69,7 +71,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
           builder: (context, state) {
 
             if (state is PaginationLoadingState) {
-              return const Center(child: CircularProgressIndicator());
+              return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
               return commentBloc.postList.isEmpty? const Center(child: Text('No comments'),):Padding(
@@ -93,7 +95,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                       //     commentBloc.pageNumber - 1 &&
                       //     index >= commentBloc.postList.length - 1
                       //     ? const Center(
-                      //   child: CircularProgressIndicator(),
+                      //   child: CircularProgressIndicator(color: svGetBodyColor(),),
                       // ) :
                       return SVCommentComponent(
                           comment: commentBloc.postList[index]);

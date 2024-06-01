@@ -38,11 +38,11 @@ class LoginScreen extends StatelessWidget {
       context: context,
       barrierDismissible: false, // Disallow dismissing while loading
       builder: (BuildContext context) {
-        return const SimpleDialog(
+        return  SimpleDialog(
           title: Text('Sending Verification Link'),
           children: [
             Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(color: svGetBodyColor(),),
             ),
           ],
         );

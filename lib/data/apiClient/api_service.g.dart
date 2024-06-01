@@ -108,6 +108,7 @@ class _ApiService implements ApiService {
       String lastName,
       String country,
       String state,
+      String specialty,
       String phone,
       String userType,
       ) async {
@@ -120,6 +121,7 @@ class _ApiService implements ApiService {
       'last_name': lastName,
       'country': country,
       'state': state,
+      'specialty': specialty,
       'phone': phone,
       'user_type': userType,
     };
@@ -150,6 +152,9 @@ class _ApiService implements ApiService {
       String lastName,
       String email,
       String password,
+      String country,
+      String state,
+      String specialty,
       String userType,
       ) async {
     final _extra = <String, dynamic>{};
@@ -160,6 +165,9 @@ class _ApiService implements ApiService {
       'last_name': lastName,
       'email': email,
       'password': password,
+      'country': country,
+      'state': state,
+      'specialty': specialty,
       'user_type': userType,
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(

@@ -1,43 +1,46 @@
-import 'package:doctak_app/main.dart';
-import 'package:doctak_app/presentation/home_screen/home/components/SVHomeDrawerComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
-import 'package:doctak_app/presentation/home_screen/home/components/SVStoryComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../../ads_setting/ads_widget/banner_ads_widget.dart';
 import '../../../../localization/app_localization.dart';
 import '../../../chat_gpt_screen/ChatDetailScreen.dart';
 import '../../utils/SVColors.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
-  SVHomeFragment({required this.openDrawer,Key? key}) : super(key: key);
+  SVHomeFragment({required this.homeBloc, required this.openDrawer, Key? key})
+      : super(key: key);
   Function openDrawer;
+  HomeBloc homeBloc;
+
   @override
   State<SVHomeFragment> createState() => _SVHomeFragmentState();
 }
 
 class _SVHomeFragmentState extends State<SVHomeFragment> {
-//   @override
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
-  HomeBloc homeBloc = HomeBloc();
+  // HomeBloc widget.homeBloc = HomeBloc();
   final ScrollController _mainScrollController = ScrollController();
 
   @override
   void initState() {
-    homeBloc.add(PostLoadPageEvent(page: 1));
-    homeBloc.add(AdsSettingEvent());
+    widget.homeBloc.add(PostLoadPageEvent(page: 1));
+    widget.homeBloc.add(AdsSettingEvent());
     super.initState();
+  }
+
+  Future<void> _refresh() async {
+    // Simulate network request
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() {
+      widget.homeBloc.add(PostLoadPageEvent(page: 1));
+      widget.homeBloc.add(AdsSettingEvent());
+    });
   }
 
   @override
@@ -48,7 +51,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     return Scaffold(
         // resizeToAvoidBottomInset: false,
         key: scaffoldKey,
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: svGetBgColor(),
         appBar: AppBar(
           backgroundColor: svGetScaffoldColor(),
           elevation: 0,
@@ -60,7 +63,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               fit: BoxFit.cover,
               color: context.iconColor,
             ),
-            onPressed: ()=>widget.openDrawer(),
+            onPressed: () => widget.openDrawer(),
           ),
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
@@ -81,7 +84,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             IconButton(
               color: context.cardColor,
               icon: Icon(
-
                 CupertinoIcons.chat_bubble_2,
                 size: 30,
                 color: context.iconColor,
@@ -92,26 +94,27 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             ),
           ],
         ),
-        body: CustomScrollView(
-            shrinkWrap: true,
-            controller: _mainScrollController,
-            physics: const BouncingScrollPhysics(),
-            slivers: <Widget>[
-              // SliverList(delegate: SliverChildListDelegate([
-              //
-              //   // SVStoryComponent(),
-              //   // 10.height,
-              // ])),
-              SliverList(
-                  delegate: SliverChildListDelegate([
-                UserChatComponent(),
-                // 10.height,
-              ])),
-              SliverList(
-                  delegate: SliverChildListDelegate([
-                SVPostComponent(homeBloc),
-              ])),
-            ]));
-
+        body: RefreshIndicator(
+            onRefresh: _refresh,
+            child: CustomScrollView(
+                shrinkWrap: true,
+                controller: _mainScrollController,
+                physics: const BouncingScrollPhysics(),
+                slivers: <Widget>[
+                  // SliverList(delegate: SliverChildListDelegate([
+                  //
+                  //   // SVStoryComponent(),
+                  //   // 10.height,
+                  // ])),
+                  SliverList(
+                      delegate: SliverChildListDelegate([
+                    UserChatComponent(),
+                    // 10.height,
+                  ])),
+                  SliverList(
+                      delegate: SliverChildListDelegate([
+                    SVPostComponent(widget.homeBloc),
+                  ])),
+                ])));
   }
 }

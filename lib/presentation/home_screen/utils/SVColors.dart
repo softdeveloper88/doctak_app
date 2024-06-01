@@ -10,9 +10,10 @@ const buttonUnSelectColor = Color(0xFFF2F2F2);
 // Tertiary
 
 const SVBodyWhite = Color(0xFF6F7F92);
+const SVCardGray = Color(0xFFF6F6F6);
 const SVBodyDark = Color(0xFFF5F5F5);
 const SVDividerColor = Color(0xFFE1E5EF);
-const defaultBgColor = Color(0xFFF5F7F6);
+const defaultBgColor = Color(0xFFFFFFFF);
 
 const appBackgroundColorDark = Color(0xFF121212);
 const cardBackgroundBlackDark = Color(0xFF1F1F1F);

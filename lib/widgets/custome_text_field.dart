@@ -104,6 +104,7 @@ class CustomTextField extends StatelessWidget {
               .of(context)
               .viewInsets
               .bottom),
+          onFieldSubmitted: (v)=>onSaved!(v) ,
           controller: controller,
           focusNode: focusNode ?? FocusNode(),
           autofocus: autofocus!,

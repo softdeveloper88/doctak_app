@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../home_screen/utils/SVCommon.dart';
 import 'chat_room_screen.dart';
@@ -25,7 +26,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
 
   @override
   void initState() {
-    setStatusBarColor(Colors.white);
+    setStatusBarColor(svGetScaffoldColor());
 
     chatBloc.add(LoadContactsEvent(page: 1, keyword: ''));
     super.initState();
@@ -51,15 +52,15 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.black),
+          icon:  Icon(Icons.arrow_back_ios_new_rounded,
+              color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        surfaceTintColor: Colors.white,
-        backgroundColor: Colors.white,
+        surfaceTintColor: context.cardColor,
+        backgroundColor: context.cardColor,
         centerTitle: true,
         title:  Text('Search Contacts',style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500),),
       ),
@@ -125,8 +126,8 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
 
             builder: (context, state) {
               if (state is PaginationLoadingState) {
-                return const Expanded(
-                    child: Center(child: CircularProgressIndicator()));
+                return  Expanded(
+                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -148,8 +149,8 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                       return bloc.contactNumberOfPage !=
                                   bloc.contactPageNumber - 1 &&
                               index >= bloc.searchContactsList.length - 1
-                          ? const Center(
-                              child: CircularProgressIndicator(),
+                          ?  Center(
+                              child: CircularProgressIndicator(color: svGetBodyColor(),),
                             )
                           :
                           // Padding(
@@ -305,17 +306,20 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                               ),
                                             ),
                                             10.width,
-                                            Text(
-                                                "${bloc.searchContactsList[index].firstName.validate()} ${bloc.searchContactsList[index].lastName.validate()}",
-                                                overflow: TextOverflow.clip,
-                                                style: GoogleFonts.poppins(
-                                                    color: Colors.black,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 16)),
+                                            SizedBox(
+                                              width: 70.w,
+                                              child: Text(
+                                                  "${bloc.searchContactsList[index].firstName.validate()} ${bloc.searchContactsList[index].lastName.validate()}",
+                                                  overflow: TextOverflow.clip,
+                                                  style: GoogleFonts.poppins(
+                                                      color: svGetBodyColor(),
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 16)),
+                                            ),
                                           ],
                                         ),
                                       ),
-                                      // isLoading ? const CircularProgressIndicator():  AppButton(
+                                      // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
                                       //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
                                       //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
                                       //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
@@ -349,7 +353,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                       //     });
                                       //   },
                                       //   child: isLoading
-                                      //       ? CircularProgressIndicator() // Show progress indicator if loading
+                                      //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
                                       //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
                                       //   style: ElevatedButton.styleFrom(
                                       //     // primary: Colors.blue, // Change button color as needed

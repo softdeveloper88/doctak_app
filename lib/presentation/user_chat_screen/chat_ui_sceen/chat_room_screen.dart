@@ -7,6 +7,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/main.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:flutter/material.dart';
@@ -90,7 +99,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void initState() {
 
     super.initState();
-    setStatusBarColor(Colors.white);
+    setStatusBarColor(svGetScaffoldColor());
 
     // Handle completion
     print("id${widget.id}roomid${widget.roomId}");
@@ -162,8 +171,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       setState(() => _recordDuration++);
     });
 
-    _ampTimer =
-        Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
+    _ampTimer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
       _amplitude = await _audioRecorder.getAmplitude();
       setState(() {});
     });
@@ -597,14 +605,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-        backgroundColor:SVAppLayoutBackground,
+        backgroundColor:svGetBgColor(),
         appBar: AppBar(
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
+          surfaceTintColor: context.cardColor,
+          backgroundColor: context.cardColor,
           toolbarHeight: 100,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black),
+            icon:  Icon(Icons.arrow_back_ios_new_rounded,
+                color: svGetBodyColor()),
             onPressed: () => Navigator.of(context).pop(),
           ),
           centerTitle: true,
@@ -675,8 +683,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               builder: (context, state) {
                 print("state $state");
                 if (state is PaginationLoadingState) {
-                  return const Expanded(
-                      child: Center(child: CircularProgressIndicator()));
+                  return  Expanded(
+                      child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
                 } else if (state is PaginationLoadedState) {
                   // print(state.drugsModel.length);
                   // return _buildPostList(context);
@@ -706,8 +714,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                         return bloc.messageNumberOfPage !=
                                     bloc.messagePageNumber - 1 &&
                                 index >= bloc.messagesList.length - 1
-                            ? const Center(
-                                child: CircularProgressIndicator(),
+                            ?  Center(
+                                child: CircularProgressIndicator(color: svGetBodyColor(),),
                               )
                             : ChatBubble(
                                 profile: bloc.messagesList[index].userId !=
@@ -813,7 +821,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             //                 child: Container(
             //                   margin: const EdgeInsets.all(8.0),
             //                   decoration: const BoxDecoration(
-            //                     color: Colors.black54,
+            //                     color: svGetBodyColor()54,
             //                     shape: BoxShape.circle,
             //                   ),
             //                   child: const Padding(
@@ -837,8 +845,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             if (_isDocumentFile(_selectedFile))
               _buildDocumentPreview(_selectedFile!),
             Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration:  BoxDecoration(
+                color: context.cardColor,
                 // borderRadius: BorderRadius.circular(0.0),
               ),
               padding:
@@ -847,7 +855,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: cardLightColor,
+                      color:appStore.isDarkMode ?svGetScaffoldColor() : cardLightColor,
                       // border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -858,7 +866,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                 width: 25,
                                 height: 25,
                                 margin: const EdgeInsets.all(8.0),
-                                child: const CircularProgressIndicator(),
+                                child:  CircularProgressIndicator(color: svGetBodyColor(),),
                               )
                             : IconButton(
                                 icon: const Icon(Icons.attach_file),
@@ -896,7 +904,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                 padding:
                                     const EdgeInsets.only(left: 8, right: 8),
                                 decoration: BoxDecoration(
-                                  color: cardLightColor,
+                                  color: appStore.isDarkMode ?svGetScaffoldColor() : cardLightColor,
                                   // border: Border.all(color: Colors.grey),
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),
@@ -966,7 +974,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           boxShadow: [
                             BoxShadow(
                                 color:
-                                    isRecording ? Colors.white : Colors.black12,
+                                    isRecording ? Colors.white : svGetBodyColor(),
                                 spreadRadius: 4)
                           ],
                           color: isRecording ? Colors.red : Colors.grey,
@@ -1359,15 +1367,15 @@ class TypingIndicator extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: svGetBodyColor().withOpacity(0.05),
                       blurRadius: 5,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Text(
+                child:  Text(
                   "typing...",
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: svGetBodyColor()),
                 ),
               ),
             ),
@@ -1417,9 +1425,9 @@ class _DisplayVideoState extends State<_DisplayVideo> {
               ],
             ),
           )
-        : const SizedBox(
+        :  SizedBox(
             height: 200,
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
           );
   }
 
@@ -1460,9 +1468,9 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: svGetBodyColor(),
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: svGetBodyColor(),
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
@@ -1499,7 +1507,7 @@ class _ControlsOverlay extends StatelessWidget {
           child: controller.value.isPlaying
               ? const SizedBox.shrink()
               : Container(
-                  color: Colors.black26,
+                  color: svGetBodyColor(),
                   child: const Center(
                     child: Icon(
                       Icons.play_arrow,

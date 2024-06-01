@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 // import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:intl/intl.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 import '../../data/models/chat_gpt_model/ChatGPTResponse.dart';
 import '../../data/models/chat_gpt_model/ChatGPTSessionModel.dart';
@@ -52,21 +53,21 @@ class ChatHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
         leading: IconButton(
           icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+               Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
-        surfaceTintColor: Colors.white,
-        backgroundColor: Colors.white,
+        surfaceTintColor: context.cardColor,
+        backgroundColor:  context.cardColor,
         title: Text(
           'History Doctak AI',
           style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w400),
         ),
       ),
-      backgroundColor: SVAppColorPrimary,
       body:  BlocConsumer<ChatGPTBloc, ChatGPTState>(
         listener: (context,state){},
              bloc: chatGPTBloc,
@@ -77,14 +78,15 @@ class ChatHistoryScreen extends StatelessWidget {
                   state1.response.sessions?.first.name ?? 'New Session';
             }
             if (state1 is DataInitial) {
-              return const Scaffold(
+              return  Scaffold(
+                backgroundColor: svGetBgColor(),
                 body: AnimatedBackground(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Center(child: CircularProgressIndicator()),
+                      Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
                     ],
                   ),
                 ),
@@ -94,126 +96,130 @@ class ChatHistoryScreen extends StatelessWidget {
                   child: Column(
                 children: [
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: state1.response.sessions?.length,
-                      itemBuilder: (context, index) {
-                        Sessions session = state1.response.sessions![index];
-                        // bool isSelected = session.id == selectedSessionId;
-                        return Slidable(
-                            key: ValueKey(session.id),
-                            // Use session's id as a unique key
-                            startActionPane: const ActionPane(
-                              motion: ScrollMotion(),
-                              children: [
-                                // SlidableAction(
-                                //   onPressed: (context) =>
-                                //       deleteRecord(context, session.id),
-                                //   // Reference to your delete method
-                                //   backgroundColor: Color(0xFFFE4A49),
-                                //   foregroundColor: Colors.white,
-                                //   icon: Icons.delete,
-                                //   label: 'Delete',
-                                // ),
-                                // SlidableAction(
-                                //   onPressed: (context) =>
-                                //       editRecord(context, session.id),
-                                //   // Reference to your edit method
-                                //   backgroundColor: Color(0xFF21B7CA),
-                                //   foregroundColor: Colors.white,
-                                //   icon: Icons.edit,
-                                //   label: 'Edit',
-                                // ),
-                              ],
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10)),
-                              padding: const EdgeInsets.all(16),
-                              margin: const EdgeInsets.only(
-                                top: 16,
-                                left: 16,
-                                right: 16,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                    child: Container(
+                      color: svGetBgColor(),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: state1.response.sessions?.length,
+                        itemBuilder: (context, index) {
+                          Sessions session = state1.response.sessions![index];
+                          // bool isSelected = session.id == selectedSessionId;
+                          return Slidable(
+                              key: ValueKey(session.id),
+                              // Use session's id as a unique key
+                              startActionPane: const ActionPane(
+                                motion: ScrollMotion(),
                                 children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => onTap(session),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            session.name ?? "",
-                                            overflow: TextOverflow.clip,
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.black),
-                                          ),
-                                          Row(
-                                            children: <Widget>[
-                                              const Icon(Icons.calendar_month,
-                                                  size: 15,
-                                                  color: Colors.black45),
-                                              const SizedBox(
-                                                width: 2,
-                                              ),
-                                              Text(
-                                                DateFormat(
-                                                        'MM dd, yyyy, h:mm a')
-                                                    .format(DateTime.parse(
-                                                        session.createdAt!)),
-                                                // timeAgo.format(DateTime.parse(
-                                                //     session.createdAt!)),
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Colors.black45),
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return ChatDeleteDialog(
-                                                title: ' ${session.name??''}',
-                                                callback: ()  {
-
-                                                  chatGPTBloc.add(DeleteChatSession(session.id??0));
-                                                  Navigator.of(context).pop();
-                                                });
-                                          });
-                                    },
-                                    child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.red.withOpacity(0.3),
-                                            borderRadius:
-                                                BorderRadius.circular(6)),
-                                        padding: const EdgeInsets.all(4),
-                                        child: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        )),
-                                  )
+                                  // SlidableAction(
+                                  //   onPressed: (context) =>
+                                  //       deleteRecord(context, session.id),
+                                  //   // Reference to your delete method
+                                  //   backgroundColor: Color(0xFFFE4A49),
+                                  //   foregroundColor: Colors.white,
+                                  //   icon: Icons.delete,
+                                  //   label: 'Delete',
+                                  // ),
+                                  // SlidableAction(
+                                  //   onPressed: (context) =>
+                                  //       editRecord(context, session.id),
+                                  //   // Reference to your edit method
+                                  //   backgroundColor: Color(0xFF21B7CA),
+                                  //   foregroundColor: Colors.white,
+                                  //   icon: Icons.edit,
+                                  //   label: 'Edit',
+                                  // ),
                                 ],
                               ),
-                              // title: Text(session.name!),
-                              // subtitle: Text(DateFormat('m d, y, h:mm a')
-                              //     .format(DateTime.parse(session.createdAt!))),
-                              // tileColor: isSelected ? Colors.grey[300] : null,
-                              // onTap:()=>widget.onTap(session)),
-                            ));
-                      },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: context.cardColor,
+                                    borderRadius: BorderRadius.circular(10)),
+                                padding: const EdgeInsets.all(16),
+                                margin: const EdgeInsets.only(
+                                  top: 16,
+                                  left: 16,
+                                  right: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => onTap(session),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              session.name ?? "",
+                                              overflow: TextOverflow.clip,
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: svGetBodyColor()),
+                                            ),
+                                            Row(
+                                              children: <Widget>[
+                                                 Icon(Icons.calendar_month,
+                                                    size: 15,
+                                                    color: svGetBodyColor()),
+                                                const SizedBox(
+                                                  width: 2,
+                                                ),
+                                                Text(
+                                                  DateFormat(
+                                                          'MM dd, yyyy, h:mm a')
+                                                      .format(DateTime.parse(
+                                                          session.createdAt!)),
+                                                  // timeAgo.format(DateTime.parse(
+                                                  //     session.createdAt!)),
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: svGetBodyColor()),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return ChatDeleteDialog(
+                                                  title: ' ${session.name??''}',
+                                                  callback: ()  {
+
+                                                    chatGPTBloc.add(DeleteChatSession(session.id??0));
+                                                    Navigator.of(context).pop();
+                                                  });
+                                            });
+                                      },
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.red.withOpacity(0.3),
+                                              borderRadius:
+                                                  BorderRadius.circular(6)),
+                                          padding: const EdgeInsets.all(4),
+                                          child: const Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
+                                          )),
+                                    )
+                                  ],
+                                ),
+                                // title: Text(session.name!),
+                                // subtitle: Text(DateFormat('m d, y, h:mm a')
+                                //     .format(DateTime.parse(session.createdAt!))),
+                                // tileColor: isSelected ? Colors.grey[300] : null,
+                                // onTap:()=>widget.onTap(session)),
+                              ));
+                        },
+                      ),
                     ),
                   ),
                   Container(

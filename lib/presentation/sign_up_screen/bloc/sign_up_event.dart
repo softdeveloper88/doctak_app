@@ -48,12 +48,15 @@ class SignUpButtonPressed extends DropdownEvent {
   final String password;
   final String firstName;
   final String lastName;
+  final String country;
+  final String state;
+  final String specialty;
   final String userType;
 
-  SignUpButtonPressed({required this.username, required this.password,required this.firstName,required this.lastName,required this.userType});
+  SignUpButtonPressed({required this.username, required this.password,required this.firstName,required this.lastName,required this.country,required this.state,required this.specialty,required this.userType});
 
   @override
-  List<Object> get props => [username, password,firstName,lastName,userType];
+  List<Object> get props => [username, password,firstName,lastName,country,state,specialty,userType];
 }
 class SocialButtonPressed extends DropdownEvent {
   final String token;
@@ -62,12 +65,14 @@ class SocialButtonPressed extends DropdownEvent {
   final String phone;
   final String country;
   final String state;
+  final String specialty;
+
   final String userType;
 
-  SocialButtonPressed({required this.token,required this.firstName,required this.lastName,required this.phone,required this.country,required this.state,required this.userType});
+  SocialButtonPressed({required this.token,required this.firstName,required this.lastName,required this.phone,required this.country,required this.state,required this.specialty,required this.userType});
 
   @override
-  List<Object> get props => [token,firstName,lastName,phone,country,state,userType];
+  List<Object> get props => [token,firstName,lastName,phone,country,state,specialty,userType];
 }
 // class GetCountries extends SignUpEvent {
 //   GetCountries();

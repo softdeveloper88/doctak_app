@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_state.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/components/SVSearchCardComponent.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -13,6 +14,9 @@ import '../../../../ads_setting/ads_widget/banner_ads_widget.dart';
 import '../../utils/SVCommon.dart';
 
 class SVSearchFragment extends StatefulWidget {
+  Function? backPress;
+  SVSearchFragment({this.backPress,super.key});
+
   @override
   State<SVSearchFragment> createState() => _SVSearchFragmentState();
 }
@@ -21,7 +25,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
   SearchPeopleBloc searchPeopleBloc = SearchPeopleBloc();
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-
+  bool isSearchShow=false;
   @override
   void initState() {
     searchPeopleBloc.add(SearchPeopleLoadPageEvent(
@@ -60,35 +64,43 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-          elevation: 0,
-          toolbarHeight: 10,
-          leading: Container(),
-          backgroundColor: svGetScaffoldColor(),
-          title: Container(
-            decoration: BoxDecoration(
-                color: context.cardColor, borderRadius: radius(8)),
-            // child: AppTextField(
-            //   controller: _searchController,
-            //   onChanged:_onSearchChanged,
-            //   textFieldType: TextFieldType.NAME,
-            //   decoration: InputDecoration(
-            //     border: InputBorder.none,
-            //     hintText: 'Search Here ',
-            //     hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-            //     prefixIcon: Image.asset(
-            //             'images/socialv/icons/ic_Search.png',
-            //             height: 16,
-            //             width: 16,
-            //             fit: BoxFit.cover,
-            //             color: svGetBodyColor())
-            //         .paddingAll(16),
-            //   ),
-            // ),
-          )),
+      appBar:AppBar(
+        backgroundColor:  svGetScaffoldColor(),
+        surfaceTintColor:  svGetScaffoldColor(),
+        iconTheme: IconThemeData(color: context.iconColor),
+        title: Text('Search Peoples',
+            style: boldTextStyle(size: 18)),
+
+        leading: IconButton(
+            icon:  Icon(Icons.arrow_back_ios_new_rounded,
+                color: svGetBodyColor()),
+            onPressed:(){widget.backPress!();}
+        ),
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          InkWell(
+            onTap: () {
+              setState(() {});
+              isSearchShow = !isSearchShow;
+            },
+            child: Icon(
+                isSearchShow
+                    ? Icons.cancel_outlined
+                    : CupertinoIcons.search,
+                size: 25,
+                // height: 16,
+                // width: 16,
+                // fit: BoxFit.cover,
+                color: svGetBodyColor())
+                .paddingLeft(4),
+          ).paddingRight(16)
+        ],
+      ),
       body: Column(
         children: [
-          Container(
+          const Divider(thickness: 0.3,color: Colors.grey,endIndent: 20,indent: 20,),
+          if(isSearchShow) Container(
             padding: const EdgeInsets.only(left: 8.0),
             margin: const EdgeInsets.only(
               left: 16,
@@ -139,8 +151,8 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
             builder: (context, state) {
               print("state $state");
               if (state is SearchPeoplePaginationLoadingState) {
-                return const Expanded(
-                    child: Center(child: CircularProgressIndicator()));
+                return  Expanded(
+                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
               } else if (state is SearchPeoplePaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -161,8 +173,8 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
                       }
                       return bloc.numberOfPage != bloc.pageNumber - 1 &&
                               index >= bloc.searchPeopleData.length - 1
-                          ? const Center(
-                              child: CircularProgressIndicator(),
+                          ?  Center(
+                              child: CircularProgressIndicator(color: svGetBodyColor(),),
                             )
                           : SVSearchCardComponent(
                              bloc: bloc,

@@ -94,7 +94,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
               );
             },
           );
-          // return const Center(child: CircularProgressIndicator());
+          // return const Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
         } else if (state is PostPaginationLoadedState) {
           return widget.homeBloc.postList.isEmpty
               ? const Center(child: Text("No result Found"))
@@ -116,8 +116,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     return widget.homeBloc.numberOfPage !=
                                 widget.homeBloc.pageNumber - 1 &&
                             index >= widget.homeBloc.postList.length - 1
-                        ? const Center(
-                            child: CircularProgressIndicator(),
+                        ?  Center(
+                            child: CircularProgressIndicator(color: svGetBodyColor(),),
                           )
                         : Column(
                             children: [
@@ -136,70 +136,71 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            InkWell(
-                                              onTap: (){
-                                                SVProfileFragment(userId:widget.homeBloc.postList[index].user?.id).launch(context);
-                                              },
-                                              child: CachedNetworkImage(
-                                                imageUrl:
-                                                    "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
-                                                height: 50,
-                                                width: 50,
-                                                fit: BoxFit.cover,
-                                              ).cornerRadiusWithClipRRect(20),
-                                            ),
-                                            12.width,
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                        widget
-                                                                .homeBloc
-                                                                .postList[index]
-                                                                .user
-                                                                ?.name ??
-                                                            '',
-                                                        style: boldTextStyle()),
-                                                    Image.asset(
-                                                        'images/socialv/icons/ic_TickSquare.png',
-                                                        height: 14,
-                                                        width: 14,
-                                                        fit: BoxFit.cover),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                        timeAgo.format(DateTime
-                                                            .parse(widget
-                                                                .homeBloc
-                                                                .postList[index]
-                                                                .createdAt!)),
-                                                        style: secondaryTextStyle(
-                                                            color:
-                                                                svGetBodyColor(),
-                                                            size: 12)),
-                                                    const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 8.0),
-                                                      child: Icon(
-                                                        Icons.access_time,
-                                                        size: 20,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            4.width,
-                                          ],
-                                        ).paddingSymmetric(horizontal: 16),
+                                        InkWell(
+                                          onTap: (){
+                                            SVProfileFragment(userId:widget.homeBloc.postList[index].user?.id).launch(context);
+                                          },
+                                          child: Row(
+                                            children: [
+                                               CachedNetworkImage(
+                                                  imageUrl:
+                                                      "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
+                                                  height: 50,
+                                                  width: 50,
+                                                  fit: BoxFit.cover,
+                                                ).cornerRadiusWithClipRRect(20),
+                                              12.width,
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                          widget
+                                                                  .homeBloc
+                                                                  .postList[index]
+                                                                  .user
+                                                                  ?.name ??
+                                                              '',
+                                                          style: boldTextStyle()),
+                                                      const SizedBox(width: 4,),
+                                                      Image.asset(
+                                                          'images/socialv/icons/ic_TickSquare.png',
+                                                          height: 14,
+                                                          width: 14,
+                                                          fit: BoxFit.cover),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                          timeAgo.format(DateTime
+                                                              .parse(widget
+                                                                  .homeBloc
+                                                                  .postList[index]
+                                                                  .createdAt!)),
+                                                          style: secondaryTextStyle(
+                                                              color:
+                                                                  svGetBodyColor(),
+                                                              size: 12)),
+                                                      const Padding(
+                                                        padding: EdgeInsets.only(
+                                                            left: 8.0),
+                                                        child: Icon(
+                                                          Icons.access_time,
+                                                          size: 20,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              4.width,
+                                            ],
+                                          ).paddingSymmetric(horizontal: 16),
+                                        ),
                                         Expanded(
                                           child: Row(
                                             mainAxisAlignment:
@@ -376,25 +377,25 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                             ],
                                           ),
                                         ),
-                                        InkWell(
-                                          splashColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: () {},
-                                          child: Column(
-                                            children: [
-                                              Image.asset(
-                                                'images/socialv/icons/ic_Send.png',
-                                                height: 22,
-                                                width: 22,
-                                                fit: BoxFit.cover,
-                                                color: context.iconColor,
-                                              ),
-                                              Text('Send',
-                                                  style: secondaryTextStyle(
-                                                      color: svGetBodyColor())),
-                                            ],
-                                          ),
-                                        ),
+                                        // InkWell(
+                                        //   splashColor: Colors.transparent,
+                                        //   highlightColor: Colors.transparent,
+                                        //   onTap: () {},
+                                        //   child: Column(
+                                        //     children: [
+                                        //       Image.asset(
+                                        //         'images/socialv/icons/ic_Send.png',
+                                        //         height: 22,
+                                        //         width: 22,
+                                        //         fit: BoxFit.cover,
+                                        //         color: context.iconColor,
+                                        //       ),
+                                        //       Text('Send',
+                                        //           style: secondaryTextStyle(
+                                        //               color: svGetBodyColor())),
+                                        //     ],
+                                        //   ),
+                                        // ),
                                       ],
                                     ).paddingSymmetric(horizontal: 16),
                                     // const Divider(indent: 16, endIndent: 16, height: 20),
@@ -1303,8 +1304,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         aspectRatio: 16 / 9, // Common aspect ratio for videos
         child: Container(
           color: Colors.black, // Video player typically has a black background
-          child: const Center(
-            child: CircularProgressIndicator(), // Loading indicator
+          child:  Center(
+            child: CircularProgressIndicator(color: svGetBodyColor(),), // Loading indicator
           ),
         ),
       );

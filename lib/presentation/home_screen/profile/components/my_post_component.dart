@@ -127,8 +127,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
 
               return widget.profileBloc.numberOfPage != widget.profileBloc.pageNumber - 1 &&
                   index >= widget.profileBloc.postList.length - 1
-                  ? const Center(
-                child: CircularProgressIndicator(),
+                  ?  Center(
+                child: CircularProgressIndicator(color: svGetBodyColor(),),
               )
                   : Container(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -303,25 +303,25 @@ class _MyPostComponentState extends State<MyPostComponent> {
                             ],
                           ),
                         ),
-                        InkWell(
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-
-                          onTap: (){
-                          },
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                'images/socialv/icons/ic_Send.png',
-                                height: 22,
-                                width: 22,
-                                fit: BoxFit.cover,
-                                color: context.iconColor,
-                              ), Text('Send', style: secondaryTextStyle(
-                                  color: svGetBodyColor())),
-                            ],
-                          ),
-                        ),
+                        // InkWell(
+                        //   splashColor: Colors.transparent,
+                        //   highlightColor: Colors.transparent,
+                        //
+                        //   onTap: (){
+                        //   },
+                        //   child: Column(
+                        //     children: [
+                        //       Image.asset(
+                        //         'images/socialv/icons/ic_Send.png',
+                        //         height: 22,
+                        //         width: 22,
+                        //         fit: BoxFit.cover,
+                        //         color: context.iconColor,
+                        //       ), Text('Send', style: secondaryTextStyle(
+                        //           color: svGetBodyColor())),
+                        //     ],
+                        //   ),
+                        // ),
                       ],
                     ).paddingSymmetric(horizontal: 16),
                     // const Divider(indent: 16, endIndent: 16, height: 20),
@@ -936,8 +936,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         aspectRatio: 16 / 9, // Common aspect ratio for videos
         child: Container(
           color: Colors.black, // Video player typically has a black background
-          child: const Center(
-            child: CircularProgressIndicator(), // Loading indicator
+          child:  Center(
+            child: CircularProgressIndicator(color: svGetBodyColor(),), // Loading indicator
           ),
         ),
       );

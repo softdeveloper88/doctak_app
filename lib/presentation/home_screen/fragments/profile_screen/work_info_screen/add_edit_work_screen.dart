@@ -24,7 +24,11 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       backgroundColor: svGetScaffoldColor(),
+
       appBar: AppBar(
+        surfaceTintColor: svGetScaffoldColor(),
+
         backgroundColor: svGetScaffoldColor(),
         title: Text('Add Work', style: boldTextStyle(size: 20)),
         elevation: 0,
@@ -82,7 +86,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
               children: [
 
                 const SizedBox(height: 10),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: true,
                   icon: Icons.work,
                   index: 2,
@@ -90,7 +94,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   // value: entry.name ?? '',
                   // onSave: (value) => entry.name = value,
                 ),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: true,
                   icon: Icons.type_specimen,
                   index: 2,
@@ -98,7 +102,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   // value: entry.position ?? "",
                   // onSave: (value) => entry.position = value,
                 ),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: true,
                   icon: Icons.location_on,
                   index: 2,
@@ -106,7 +110,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   // value: entry.address ?? "",
                   // onSave: (value) => entry.address = value,
                 ),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: true,
                   icon: Icons.description,
                   index: 2,
@@ -114,7 +118,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   // value: entry.degree ?? "",
                   // onSave: (value) => entry.degree = value,
                 ),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: true,
                   icon: Icons.book,
                   index: 2,
@@ -122,7 +126,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   // value: entry.courses ?? "",
                   // onSave: (value) => entry.courses = value,
                 ),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: true,
                   icon: Icons.book,
                   index: 2,
@@ -130,7 +134,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   // value: entry.workType ?? "",
                   // onSave: (value) => entry.workType = value,
                 ),
-                ProfileWidget(
+                TextFieldEditWidget(
                     isEditModeMap: true,
                     icon: Icons.description,
                     index: 2,

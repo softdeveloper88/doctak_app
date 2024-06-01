@@ -1,5 +1,7 @@
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 class ChatDeleteDialog extends StatelessWidget {
@@ -37,7 +39,7 @@ confirmationAlertDialog(BuildContext context, String title,
           child: StatefulBuilder(
             builder: (context, snapshot) {
               return Card(
-                color:Colors.white,
+                color: context.cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
@@ -60,7 +62,7 @@ confirmationAlertDialog(BuildContext context, String title,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.poppins(
                                         fontSize: 10.sp,
-                                        color: Colors.black,
+                                        color:  svGetBodyColor(),
                                         fontWeight: FontWeight.w500)),
                               ),
                             )
@@ -74,7 +76,7 @@ confirmationAlertDialog(BuildContext context, String title,
                           textAlign: TextAlign.center,
                           text: TextSpan(
                             style: GoogleFonts.poppins(
-                                fontSize: 8.sp, color: Colors.black),
+                                fontSize: 8.sp, color:  svGetBodyColor()),
                             children: <TextSpan>[
                               const TextSpan(text: 'Are you sure that you want to delete this chat'),
                               TextSpan(text:title,

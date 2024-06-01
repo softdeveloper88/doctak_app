@@ -1,17 +1,23 @@
 import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../../main.dart';
+import '../../../utils/SVColors.dart';
+import '../../../utils/SVColors.dart';
 import 'bloc/guideline_event.dart';
 
 class GuidelinesScreen extends StatefulWidget {
@@ -23,6 +29,7 @@ class GuidelinesScreen extends StatefulWidget {
 
 class _GuidelinesScreenState extends State<GuidelinesScreen> {
   Timer? _debounce;
+  bool isSearchShow = false;
 
   @override
   void dispose() {
@@ -44,22 +51,42 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
-          iconTheme: IconThemeData(color: context.iconColor),
-          elevation: 0,
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          backgroundColor: Colors.white,
-          title:  Text('Guidelines', style: boldTextStyle(size: 18))),
+        backgroundColor: svGetScaffoldColor(),
+       surfaceTintColor: svGetScaffoldColor(),
+        iconTheme: IconThemeData(color: context.iconColor),
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon:
+               Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text('Guidelines', style: boldTextStyle(size: 18)),
+        actions: [
+          InkWell(
+            onTap: () {
+              setState(() {});
+              isSearchShow = !isSearchShow;
+            },
+            child: Icon(
+                    isSearchShow
+                        ? Icons.cancel_outlined
+                        : CupertinoIcons.search,
+                    size: 25,
+                    // height: 16,
+                    // width: 16,
+                    // fit: BoxFit.cover,
+                    color: svGetBodyColor())
+                .paddingRight(10),
+          )
+        ],
+      ),
+
       body: Column(
         children: [
-          Container(
+         if(isSearchShow) Container(
             padding: const EdgeInsets.only(left: 8.0),
             margin: const EdgeInsets.only(
               left: 16,
@@ -70,12 +97,10 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
             decoration: BoxDecoration(
                 color: context.dividerColor.withOpacity(0.4),
                 borderRadius: radius(5),
-                border: Border.all(
-                    color: Colors.black, width: 0.3)),
+                border: Border.all(color: svGetBodyColor(), width: 0.3)),
             child: AppTextField(
               onChanged: (searchTxt) async {
                 if (_debounce?.isActive ?? false) _debounce?.cancel();
-
                 _debounce = Timer(const Duration(milliseconds: 500), () {
                   guidelineBloc.add(
                     LoadPageEvent(
@@ -119,8 +144,8 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
             builder: (context, state) {
               print("state $state");
               if (state is PaginationLoadingState) {
-                return const Expanded(
-                    child: Center(child: CircularProgressIndicator()));
+                return  Expanded(
+                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -139,8 +164,8 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       }
                       return bloc.numberOfPage != bloc.pageNumber - 1 &&
                               index >= bloc.guidelinesList.length - 1
-                          ? const Center(
-                              child: CircularProgressIndicator(),
+                          ?  Center(
+                              child: CircularProgressIndicator(color: svGetBodyColor(),),
                             )
                           : _buildDiseaseAndGuidelinesItem(
                               bloc.guidelinesList[index]);
@@ -162,7 +187,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
               }
             },
           ),
-          if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
+          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(
@@ -204,7 +229,15 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: svGetScaffoldColor(),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: svGetBodyColor().withOpacity(0.15),
+        //     spreadRadius: 0,
+        //     blurRadius: 10,
+        //     offset: const Offset(0, 3),
+        //   ),
+        // ],
+        color:appStore.isDarkMode?context.cardColor:Colors.grey[300],
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -213,9 +246,9 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
           ListTile(
             title: Text(
               item.diseaseName ?? '',
-              style: const TextStyle(
+              style:  TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: svGetBodyColor(),
               ),
             ),
             subtitle: GestureDetector(
@@ -227,7 +260,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 });
               },
               child: HtmlWidget(
-                 expandedMap[item.diseaseName]!
+                expandedMap[item.diseaseName]!
                     ? "<p>$description</p>"
                     : "<p>$trimmedDescription</p>",
               ),
@@ -260,7 +293,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 }
               },
               child: Text(
-                  expandedMap[item.diseaseName]! ? 'Download PDF' : 'See More'),
+                  expandedMap[item.diseaseName]! ? 'Download PDF' : 'See More',style: GoogleFonts.poppins(color: svGetBodyColor()),),
             ),
           ),
         ],

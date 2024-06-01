@@ -7,9 +7,11 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../../data/models/conference_model/search_conference_model.dart';
@@ -27,7 +29,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
   var selectedValue;
   ConferenceBloc conferenceBloc = ConferenceBloc();
   Timer? _debounce;
-
+   bool isSearchShow=false;
   @override
   void dispose() {
     _debounce?.cancel();
@@ -101,6 +103,22 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                               },
                             ),
                           ),
+                          InkWell(
+                            onTap: () {
+                              setState(() {});
+                              isSearchShow = !isSearchShow;
+                            },
+                            child: Icon(
+                                isSearchShow
+                                    ? Icons.cancel_outlined
+                                    : CupertinoIcons.search,
+                                size: 25,
+                                // height: 16,
+                                // width: 16,
+                                // fit: BoxFit.cover,
+                                color: svGetBodyColor())
+                                .paddingLeft(4),
+                          )
                         ],
                       ),
                       // Container(
@@ -166,7 +184,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                         state.countriesModelList.cast<String>();
                     return Row(
                       children: [
-                        Expanded(
+                       if(isSearchShow) Expanded(
                           child: Container(
                             padding: const EdgeInsets.only(left: 8.0),
                             margin: const EdgeInsets.only(
@@ -286,8 +304,8 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
           }
           return bloc.numberOfPage != bloc.pageNumber - 1 &&
                   index >= bloc.conferenceList.length - 1
-              ? const Center(
-                  child: CircularProgressIndicator(),
+              ?  Center(
+                  child: CircularProgressIndicator(color: svGetBodyColor(),),
                 )
               : ConferenceWidget(
                   conference: bloc.conferenceList[index],
@@ -347,6 +365,7 @@ class ConferenceWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Material(
         elevation: 2,
+        color: context.cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -382,12 +401,14 @@ class ConferenceWidget extends StatelessWidget {
 
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
+              child: svAppButton(
+                width: 30.w,
+                // color: svGetBodyColor(),
+                onTap: () {
                   Uri registrationUri = Uri.parse(conference.registrationLink!);
                   _launchInBrowser(registrationUri);
                 },
-                child: const Text('Register Now'),
+                text: 'Register Now', context: context,
               ),
             ),
 

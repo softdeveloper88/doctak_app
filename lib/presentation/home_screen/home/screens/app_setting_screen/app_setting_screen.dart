@@ -42,7 +42,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing:   Switch(
+              trailing:  Switch(
                 onChanged: (val) {
                   appStore.toggleDarkMode(value: val);
                 },

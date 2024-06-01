@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_state.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -190,66 +192,71 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        const Text(
+         Text(
           'Need More Help? ',
           style: TextStyle(
-            color: Colors.black,
+            color: svGetBodyColor(),
             fontSize: 16.0,
           ),
         ),
-        InkWell(
-          onTap: () async {
-            final Uri url = Uri.parse(
-                'https://wa.me/+971504957572'); // WhatsApp URL as a Uri object
-            // Ask the user for confirmation before launching the URL
-            bool? confirm = await showDialog<bool>(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Open WhatsApp'),
-                  content: const Text(
-                      'Would you like to open WhatsApp to send a message?'),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context)
-                            .pop(false); // User does not want to leave the app
-                      },
-                    ),
-                    TextButton(
-                      child: const Text('Yes'),
-                      onPressed: () {
-                        Navigator.of(context)
-                            .pop(true); // User confirms to leave the app
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
-
-            if (confirm == true) {
-              await launchUrl(url);
-            }
-          },
-          child: Row(
-            children: [
-              Image.asset(
-                'assets/logo/whatsapp.png',
-                // Make sure you have a WhatsApp icon in SVG format in your assets
-                height: 20,
-                width: 20,
-              ),
-              const Text(
-                ' Connect on WhatsApp',
-                style: TextStyle(
+        Expanded(
+          child: InkWell(
+            onTap: () async {
+              final Uri url = Uri.parse(
+                  'https://wa.me/+971504957572'); // WhatsApp URL as a Uri object
+              // Ask the user for confirmation before launching the URL
+              bool? confirm = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Open WhatsApp'),
+                    content: const Text(
+                        'Would you like to open WhatsApp to send a message?'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context)
+                              .pop(false); // User does not want to leave the app
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Yes'),
+                        onPressed: () {
+                          Navigator.of(context)
+                              .pop(true); // User confirms to leave the app
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+          
+              if (confirm == true) {
+                await launchUrl(url);
+              }
+            },
+            child: Row(
+              children: [
+                Image.asset(
                   color: Colors.green,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
+                  'assets/logo/whatsapp.png',
+                  // Make sure you have a WhatsApp icon in SVG format in your assets
+                  height: 20,
+                  width: 20,
                 ),
-              ),
-            ],
+                const Flexible(
+                  child: Text(
+                    ' Connect on WhatsApp',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

@@ -30,16 +30,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.cardColor,
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
-        backgroundColor: context.cardColor,
+        backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
         title: Text('Job Details', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black),
+            icon:  Icon(Icons.arrow_back_ios_new_rounded,
+                color:svGetBodyColor(),),
             onPressed:(){Navigator.pop(context);}
         ),
         actions: const [
@@ -62,7 +62,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return const Center(child: CircularProgressIndicator());
+            return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
           } else if (state is PaginationLoadedState) {
             // print(state.drugsModel.length);
             return SingleChildScrollView(
@@ -74,6 +74,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 ),
                 child: Material(
                   elevation: 4,
+                  color:context.cardColor,
                   borderRadius:
                   const BorderRadius.all(Radius.circular(10)),
                   child: Container(
@@ -98,7 +99,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         Text(
                           jobsBloc.jobDetailModel.job?.jobTitle ?? "",
                           style: GoogleFonts.poppins(
-                              color: Colors.black,
+                              color: svGetBodyColor(),
                               fontWeight: FontWeight.bold,
                               fontSize: 18),
                         ),
@@ -109,10 +110,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         const SizedBox(height: 10),
                         Row(
                           children: <Widget>[
-                            const Icon(
+                             Icon(
                               Icons.location_on,
                               size: 20,
-                              color: Colors.grey,
+                              color: svGetBodyColor(),
                             ),
                             const SizedBox(
                               width: 5,
@@ -129,7 +130,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         const SizedBox(height: 20),
                         Text('Apply Date',
                             style: GoogleFonts.poppins(
-                                color: Colors.black,
+                                color: svGetBodyColor(),
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14)),
                         Row(
@@ -142,13 +143,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               children: [
                                 Text('Date From',
                                     style: secondaryTextStyle(
-                                        color: Colors.black)),
+                                        color: svGetBodyColor())),
                                 Row(
                                   children: <Widget>[
-                                    const Icon(
+                                     Icon(
                                       Icons.date_range_outlined,
                                       size: 20,
-                                      color: Colors.black,
+                                      color: svGetBodyColor(),
                                     ),
                                     const SizedBox(
                                       width: 5,
@@ -174,14 +175,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               children: [
                                 Text('Date To',
                                     style: secondaryTextStyle(
-                                      color: Colors.black,
+                                      color: svGetBodyColor(),
                                     )),
                                 Row(
                                   children: <Widget>[
-                                    const Icon(
+                                     Icon(
                                       Icons.date_range_outlined,
                                       size: 20,
-                                      color: Colors.black,
+                                      color: svGetBodyColor(),
                                     ),
                                     const SizedBox(
                                       width: 5,
@@ -201,12 +202,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         Text(
                             'Experience: ${jobsBloc.jobDetailModel.job?.experience ?? 'N/A'}',
                             style: secondaryTextStyle(
-                              color: Colors.black,
+                              color: svGetBodyColor(),
                             )),
                         const SizedBox(height: 5),
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: HtmlWidget(
+                            textStyle: GoogleFonts.poppins(color: svGetBodyColor(),),
                             '<p>${jobsBloc.jobDetailModel.job?.description}</p>',
                           ),
                         ),

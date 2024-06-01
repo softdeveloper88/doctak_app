@@ -35,8 +35,11 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetScaffoldColor(),
+
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
+        surfaceTintColor: svGetScaffoldColor(),
         title: Text('Interest Information', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
@@ -54,11 +57,11 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 // widget.profileBloc.interestList!.add(InterestModel());
               });
             },
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Icon(
                 Icons.add_circle_outline_sharp,
-                color: Colors.black,
+                color: svGetBodyColor(),
                 size: 30,
                 // color: Colors.black,
                 // imagePath: 'assets/icon/ic_vector.svg',
@@ -112,7 +115,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.description,
                   index: 2,
@@ -120,7 +123,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                   value: entry.interestType ?? '',
                   onSave: (value) => entry.interestType = value,
                 ),
-                ProfileWidget(
+                TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.description,
                   index: 2,

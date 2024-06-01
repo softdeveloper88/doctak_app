@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
+import '../../utils/SVCommon.dart';
+
 class SVCommentComponent extends StatefulWidget {
   final PostComments comment;
 
@@ -62,7 +64,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
           const SizedBox(height: 8),
           Text(
             widget.comment.comment ?? '',
-            style: GoogleFonts.poppins(color:Colors.grey[800],fontSize:16)
+            style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize:16)
             // TextStyle(color: Colors.grey[800], fontSize: 16),
           ),
           Text(

@@ -95,8 +95,8 @@ class _CheckPlaceBottomSheetState
           builder: (context, state) {
             print("state $state");
             if (state is PaginationLoadingState) {
-              return const Expanded(
-                  child: Center(child: CircularProgressIndicator()));
+              return  Expanded(
+                  child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
               // return _buildPostList(context);

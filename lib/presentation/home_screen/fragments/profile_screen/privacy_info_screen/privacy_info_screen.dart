@@ -8,6 +8,7 @@ import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../../../core/app_export.dart';
 import '../../../utils/SVCommon.dart';
@@ -32,7 +33,9 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
+        surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
         title: Text('Privacy Information', style: boldTextStyle(size: 20)),
         elevation: 0,
@@ -50,11 +53,11 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                 isEditModeMap =!isEditModeMap;
               });
             },
-            color: Colors.black,
+            color: svGetBodyColor( ),
             imagePath: 'assets/icon/ic_vector.svg',
             height: 25,
             width: 25,
-            margin: const EdgeInsets.only(top: 4, right: 4),
+            margin: const EdgeInsets.only(top: 4, right: 16),
           ),
         ],
       ),
@@ -121,7 +124,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   capitalizeWords(label.replaceAll('_', ' ')??''),
-                  style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500,),
+                  style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500,color: svGetBodyColor()),
                 ),
               ),
               CustomDropdownButtonFormField(
@@ -156,20 +159,28 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
     //   },
     //   decoration: InputDecoration(labelText: label),
     // )
-        : Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          '${capitalizeWords(label)}:',
-          style:
-          const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        Text(
-          capitalizeWords(value),
-          style: const TextStyle(fontSize: 16),
-        ),
-      ],
-    );
+        : Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 16,bottom: 16),
+              child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+              Text(
+                capitalizeWords(label),
+                style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
+                  ),
+              Text(
+                capitalizeWords(value),
+                style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
+              ),
+                    ],
+                  ),
+            ),
+            Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+
+          ],
+        );
   }
 }
 

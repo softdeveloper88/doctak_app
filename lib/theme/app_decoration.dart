@@ -1,3 +1,5 @@
+import 'package:doctak_app/main.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/app_export.dart';
 
@@ -11,8 +13,8 @@ class AppDecoration {
   static BoxDecoration get fillBlue => BoxDecoration(
         color: appTheme.blue50,
       );
-  static BoxDecoration get fillGray => const BoxDecoration(
-        color: Color(0XFFF6F6F6),
+  static BoxDecoration get fillGray =>  BoxDecoration(
+        color: appStore.isDarkMode? svGetScaffoldColor() : const Color(0XFFF6F6F6),
       );
   static BoxDecoration get fillOnErrorContainer => BoxDecoration(
         color: theme.colorScheme.onErrorContainer,

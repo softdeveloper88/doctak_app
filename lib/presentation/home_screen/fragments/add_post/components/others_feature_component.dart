@@ -47,7 +47,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
       padding: const EdgeInsets.only(left: 16),
       // margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: radius(SVAppCommonRadius)),
+          color: svGetScaffoldColor(), borderRadius: const BorderRadius.only(topLeft: Radius.circular(SVAppCommonRadius),topRight: Radius.circular(SVAppCommonRadius))),
       child: Column(
         children: [
           // SizedBox(
