@@ -64,7 +64,7 @@ class ChatHistoryScreen extends StatelessWidget {
         surfaceTintColor: context.cardColor,
         backgroundColor:  context.cardColor,
         title: Text(
-          'History Doctak AI',
+          'History Artificial Intelligence',
           style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w400),
         ),
       ),

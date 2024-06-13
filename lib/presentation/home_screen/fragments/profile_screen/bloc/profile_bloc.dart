@@ -12,7 +12,6 @@ import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'profile_event.dart';
 import 'profile_state.dart';
 

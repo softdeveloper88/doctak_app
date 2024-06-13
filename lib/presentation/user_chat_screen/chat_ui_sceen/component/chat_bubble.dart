@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:voice_message_package/voice_message_package.dart';
 
+import '../../../home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
 import 'video_view.dart';
 import 'voice_message_view1.dart';
 

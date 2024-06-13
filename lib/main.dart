@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:doctak_app/core/utils/doctak_firebase_remoteConfig.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
@@ -60,7 +59,7 @@ Future<void> main() async {
   appStore.toggleDarkMode(value: false);
   WidgetsFlutterBinding.ensureInitialized();
   await Upgrader.clearSavedSettings(); //live update
-  await DoctakFirebaseRemoteConfig.initialize();
+  // await DoctakFirebaseRemoteConfig.initialize();
   // AdmobSetting appOpenAdManager = AdmobSetting()..loadAd();
   // WidgetsBinding.instance!.addObserver(AppLifecycle(appOpenAdManager: appOpenAdManager));
   AdmobSetting.initialization();
@@ -133,6 +132,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context, state) {
               return Observer(
                   builder: (_) => MaterialApp(
+                    scaffoldMessengerKey: globalMessengerKey,
                         // theme: theme,
                         title: 'doctak_app',
                         navigatorKey: NavigatorService.navigatorKey,

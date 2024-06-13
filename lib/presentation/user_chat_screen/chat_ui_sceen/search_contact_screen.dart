@@ -41,7 +41,6 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-
     _debounce = Timer(const Duration(milliseconds: 500), () {
       chatBloc.add(LoadContactsEvent(page: 1, keyword: query));
       print('Search query: $query');

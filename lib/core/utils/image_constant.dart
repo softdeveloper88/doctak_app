@@ -149,7 +149,7 @@ class ImageConstant {
 
   // Drugs Detail images
   static String imgHealthvitLLys163x163 =
-      '$imagePath/img_healthvit_l_lys_163x163.png';
+      '$imagePath/img_event.png';
 
   static String imgFavorite = '$imagePath/ic_favorite.svg';
 
@@ -225,7 +225,7 @@ class ImageConstant {
 
   static String imgLinkedin = '$imagePath/img_linkedin.svg';
 
-  static String imgEllipse89 = '$imagePath/img_ellipse_89.png';
+  static String imgEllipse89 = '$imagePath/img_avtar.png';
 
   static String imgHome = '$imagePath/img_home.svg';
 

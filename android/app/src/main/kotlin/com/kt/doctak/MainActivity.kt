@@ -17,6 +17,7 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         flutterEngine.plugins.add(GoogleMobileAdsPlugin())
         super.configureFlutterEngine(flutterEngine)
+
         GoogleMobileAdsPlugin.registerNativeAdFactory(
             flutterEngine,
             "NativeAdsShow",

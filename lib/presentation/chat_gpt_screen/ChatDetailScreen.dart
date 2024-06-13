@@ -193,9 +193,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 .add(GetNewChat());
                             Navigator.of(context).pop();
 
-                            selectedSessionId =
-                                BlocProvider.of<ChatGPTBloc>(context)
-                                    .newChatSessionId;
+                            selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
 
                             // Session newSession = await createNewChatSession();
                             // setState(() {
@@ -892,6 +890,7 @@ class ChatBubble extends StatelessWidget {
                   ),
                   CircleAvatar(
                     backgroundImage: CachedNetworkImageProvider(
+
                         AppData.imageUrl + AppData.profile_pic),
                     radius: 12,
                   ),

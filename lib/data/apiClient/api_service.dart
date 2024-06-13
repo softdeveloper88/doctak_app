@@ -12,6 +12,10 @@ import 'package:doctak_app/data/models/check_in_search_model/check_in_search_mod
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
+import 'package:doctak_app/data/models/group_model/group_about_model.dart';
+import 'package:doctak_app/data/models/group_model/group_details_model.dart';
+import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
+import 'package:doctak_app/data/models/group_model/group_post_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/data/models/jobs_model/job_detail_model.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
@@ -26,6 +30,7 @@ import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'api_service.g.dart';
@@ -187,11 +192,14 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @POST("/delete-chatgpt-session")
-  Future<HttpResponse> deleteChatgptSession(@Header('Authorization') String token, @Query('session_id')String sessionId);
+  Future<HttpResponse> deleteChatgptSession(
+      @Header('Authorization') String token,
+      @Query('session_id') String sessionId);
 
   @FormUrlEncoded()
   @GET("/conference-countries")
-  Future<HttpResponse> getConferenceCountries(@Header('Authorization') String token);
+  Future<HttpResponse> getConferenceCountries(
+      @Header('Authorization') String token);
 
   @FormUrlEncoded()
   @GET("/search-conferences")
@@ -430,4 +438,66 @@ abstract class ApiService {
   @POST("/delete_post")
   Future<HttpResponse> deletePost(
       @Header('Authorization') String token, @Query('post_id') String postId);
+
+  @MultiPart()
+  @POST("/group/store")
+  Future<HttpResponse> groupStore(
+    @Header('Authorization') String token,
+    @Field('name') String name,
+    @Field('specialty_focus') String specialty_focus,
+    @Field('tags') String tags,
+    @Field('location') String location,
+    @Field('interest') String interest,
+    @Field('language') String language,
+    @Field('description') String description,
+    @Field('member_limit') String member_limit,
+    @Field('admin') String admin,
+    @Field('status') String status,
+    @Field('post_permission') String post_permission,
+    @Field('allow_search') String allow_search,
+    @Field('visibility') String visibility,
+    @Field('join_request') String join_request,
+    @Field('rules') String rules,
+    @Part(name: 'logo') String logo,
+    @Part(name: 'banner') String banner,
+  );
+
+  @FormUrlEncoded()
+  @POST("/group/create")
+  Future<HttpResponse> createGroup(@Header('Authorization') String token);
+
+  @FormUrlEncoded()
+  @POST("/group/notification")
+  Future<HttpResponse> groupNotificationUpdate(
+      @Header('Authorization') String token, @Field('type') String type,@Field('group_updates_push') String group_updates_push,@Field('group_updates_email') String group_updates_email);
+
+  @FormUrlEncoded()
+  @POST("/group/show")
+  Future<GroupDetailsModel> groupDetails(
+      @Header('Authorization') String token, @Field('id') String id);
+
+  @FormUrlEncoded()
+  @POST("/group/about")
+  Future<GroupAboutModel> groupAbout(@Header('Authorization') String token, @Field('id') String id);
+
+  @FormUrlEncoded()
+  @POST("/group/member-requests")
+  Future<GroupMemberRequestModel> groupMemberRequest(@Header('Authorization') String token, @Field('id') String id);
+
+  @FormUrlEncoded()
+  @POST("/group/members")
+  Future<GroupMemberRequestModel> groupMembers(@Header('Authorization') String token, @Field('id') String id,@Field('keyword') String keyword);
+
+  @FormUrlEncoded()
+  @POST("/group/posts")
+  Future<GroupPostModel> groupPost(@Header('Authorization') String token, @Field('id') String id,@Field('offset') String offset);
+
+  @FormUrlEncoded()
+  @POST("/group/posts")
+  Future<HttpResponse> groupMemberRequestUpdate(@Header('Authorization') String token, @Field('id') String id,@Field('group_id') String group_id,@Field('status') String status);
+
+  @FormUrlEncoded()
+  @POST("/group/post-requests")
+  Future<GroupPostModel> groupPostRequest(@Header('Authorization') String token, @Field('id') String id,@Field('offset') String offset);
+
 }

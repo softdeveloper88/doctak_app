@@ -34,7 +34,7 @@ class CustomImageView extends StatelessWidget {
     this.radius,
     this.margin,
     this.border,
-    this.placeHolder = 'assets/images/ic_not_found_img.png',
+    this.placeHolder = 'assets/images/image_not_found.png',
   });
 
   @override
@@ -115,14 +115,29 @@ class CustomImageView extends StatelessWidget {
             fit: fit,
             imageUrl: imagePath!,
             color: color,
-            placeholder: (context, url) => SizedBox(
-              height: 30,
-              width: 30,
-              child: LinearProgressIndicator(
-                color: Colors.grey.shade200,
-                backgroundColor: Colors.grey.shade100,
-              ),
-            ),
+            placeholder: (context, url) =>  Center(
+              child: SizedBox(
+                height: 60,
+                width: 60,
+                child: CircularProgressIndicator(
+                  color: Colors.grey[300],
+                  strokeWidth: 8,
+                  strokeCap: StrokeCap.round,
+                  backgroundColor: Colors.white,
+                ),
+              )),
+            // errorWidget: (context, url,error) =>  Center(
+            //   child: SizedBox(
+            //     height: 60,
+            //     width: 60,
+            //     child: CircularProgressIndicator(
+            //       color: Colors.grey[300],
+            //       strokeWidth: 8,
+            //       strokeCap: StrokeCap.round,
+            //       backgroundColor: Colors.white,
+            //     ),
+            //   ),
+            // ),
             errorWidget: (context, url, error) => Image.asset(
               placeHolder,
               height: height,

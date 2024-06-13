@@ -84,16 +84,19 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
               setState(() {});
               isSearchShow = !isSearchShow;
             },
-            child: Icon(
-                isSearchShow
-                    ? Icons.cancel_outlined
-                    : CupertinoIcons.search,
+            child:  isSearchShow
+                ? Icon(Icons.cancel_outlined,
                 size: 25,
                 // height: 16,
                 // width: 16,
                 // fit: BoxFit.cover,
                 color: svGetBodyColor())
-                .paddingLeft(4),
+                .paddingLeft(4):Image.asset(
+                  'assets/images/search.png',
+                  height: 20,
+                  width: 20,
+                  color: svGetBodyColor(),
+                ),
           ).paddingRight(16)
         ],
       ),

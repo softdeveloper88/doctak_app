@@ -70,14 +70,14 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           actions: [
             AppButton(
               shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
-              text: 'DocTak Ai',
+              text: ' Artificial Intelligence ',
               textStyle: secondaryTextStyle(color: Colors.white, size: 10),
               onTap: () {
                 const ChatDetailScreen().launch(context);
               },
               elevation: 0,
               color: SVAppColorPrimary,
-              width: 70,
+              width: 80,
               height: 25,
               padding: const EdgeInsets.all(0),
             ),

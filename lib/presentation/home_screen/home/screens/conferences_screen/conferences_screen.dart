@@ -7,7 +7,6 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -29,7 +28,8 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
   var selectedValue;
   ConferenceBloc conferenceBloc = ConferenceBloc();
   Timer? _debounce;
-   bool isSearchShow=false;
+  bool isSearchShow = false;
+
   @override
   void dispose() {
     _debounce?.cancel();
@@ -108,16 +108,19 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                               setState(() {});
                               isSearchShow = !isSearchShow;
                             },
-                            child: Icon(
-                                isSearchShow
-                                    ? Icons.cancel_outlined
-                                    : CupertinoIcons.search,
-                                size: 25,
-                                // height: 16,
-                                // width: 16,
-                                // fit: BoxFit.cover,
-                                color: svGetBodyColor())
-                                .paddingLeft(4),
+                            child: isSearchShow
+                                ? Icon(Icons.cancel_outlined,
+                                        size: 25,
+                                        // height: 16,
+                                        // width: 16,
+                                        // fit: BoxFit.cover,
+                                        color: svGetBodyColor())
+                                    .paddingLeft(4)
+                                : Image.asset(
+                                    'assets/images/search.png',
+                                    height: 20,
+                                    width: 20,
+                                  ),
                           )
                         ],
                       ),
@@ -184,58 +187,58 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                         state.countriesModelList.cast<String>();
                     return Row(
                       children: [
-                       if(isSearchShow) Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            margin: const EdgeInsets.only(
-                              left: 16,
-                              top: 16.0,
-                              bottom: 16.0,
-                              right: 16,
-                            ),
-                            decoration: BoxDecoration(
-                                color: context.dividerColor.withOpacity(0.4),
-                                borderRadius: radius(5),
-                                border: Border.all(
-                                    color: Colors.black, width: 0.3)),
-
-                            child: AppTextField(
-                              textFieldType: TextFieldType.NAME,
-                              onChanged: (searchTxt) async {
-                                if (_debounce?.isActive ?? false)
-                                  _debounce?.cancel();
-                                _debounce = Timer(
-                                    const Duration(milliseconds: 500), () {
-                                  conferenceBloc.add(
-                                    LoadPageEvent(
-                                      page: 1,
-                                      countryName: state.countryName,
-                                      searchTerm: searchTxt,
-                                    ),
-                                  );
-                                  BlocProvider.of<SplashBloc>(context)
-                                      .add(LoadDropdownData1(
-                                    state.countryName ?? '',
-                                    searchTxt,
-                                  ));
-                                });
-                              },
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Search Here',
-                                hintStyle:
-                                    secondaryTextStyle(color: svGetBodyColor()),
-                                suffixIcon: Image.asset(
-                                        'images/socialv/icons/ic_Search.png',
-                                        height: 16,
-                                        width: 16,
-                                        fit: BoxFit.cover,
-                                        color: svGetBodyColor())
-                                    .paddingAll(16),
+                        if (isSearchShow)
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              margin: const EdgeInsets.only(
+                                left: 16,
+                                top: 16.0,
+                                bottom: 16.0,
+                                right: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                  color: context.dividerColor.withOpacity(0.4),
+                                  borderRadius: radius(5),
+                                  border: Border.all(
+                                      color: Colors.black, width: 0.3)),
+                              child: AppTextField(
+                                textFieldType: TextFieldType.NAME,
+                                onChanged: (searchTxt) async {
+                                  if (_debounce?.isActive ?? false)
+                                    _debounce?.cancel();
+                                  _debounce = Timer(
+                                      const Duration(milliseconds: 500), () {
+                                    conferenceBloc.add(
+                                      LoadPageEvent(
+                                        page: 1,
+                                        countryName: state.countryName,
+                                        searchTerm: searchTxt,
+                                      ),
+                                    );
+                                    BlocProvider.of<SplashBloc>(context)
+                                        .add(LoadDropdownData1(
+                                      state.countryName ?? '',
+                                      searchTxt,
+                                    ));
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Search Here',
+                                  hintStyle: secondaryTextStyle(
+                                      color: svGetBodyColor()),
+                                  suffixIcon: Image.asset(
+                                          'images/socialv/icons/ic_Search.png',
+                                          height: 16,
+                                          width: 16,
+                                          fit: BoxFit.cover,
+                                          color: svGetBodyColor())
+                                      .paddingAll(16),
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     );
                   } else if (state is DataError) {
@@ -286,7 +289,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 }
               },
             ),
-            if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
+            if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
           ],
         ));
   }
@@ -296,59 +299,66 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
     print("bloc$bloc");
     print("len${bloc.conferenceList.length}");
     return Expanded(
-      child:bloc.conferenceList.isEmpty?const Center(child: Text("No Conference Found"),) : ListView.builder(
-        itemCount: bloc.conferenceList.length,
-        itemBuilder: (context, index) {
-          if (index == bloc.conferenceList.length - bloc.nextPageTrigger) {
-            bloc.add(CheckIfNeedMoreDataEvent(index: index));
-          }
-          return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                  index >= bloc.conferenceList.length - 1
-              ?  Center(
-                  child: CircularProgressIndicator(color: svGetBodyColor(),),
-                )
-              : ConferenceWidget(
-                  conference: bloc.conferenceList[index],
-                );
-          //     : Container(
-          //   margin: const EdgeInsets.symmetric(vertical: 5),
-          //   padding: const EdgeInsets.all(8),
-          //   decoration: BoxDecoration(
-          //     color: context.cardColor,
-          //     borderRadius: BorderRadius.circular(5),
-          //   ),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text(
-          //         index.toString(),
-          //         style: secondaryTextStyle(
-          //             color: svGetBodyColor(), size: 18),
-          //       ),
-          //       Text(
-          //         bloc.conferenceList[index].country ?? "",
-          //         style: secondaryTextStyle(
-          //             color: svGetBodyColor(), size: 18),
-          //       ),
-          //       const SizedBox(height: 5),
-          //       Text(bloc.conferenceList[index].state ?? 'N/A',
-          //           style: secondaryTextStyle(color: svGetBodyColor())),
-          //       const SizedBox(height: 5),
-          //       Text(bloc.conferenceList[index].description ?? 'N/A',
-          //           style: secondaryTextStyle(color: svGetBodyColor())),
-          //       const SizedBox(height: 10),
-          //       Text(bloc.conferenceList[index].city ?? 'N/A',
-          //           style: secondaryTextStyle(color: svGetBodyColor())),
-          //       const SizedBox(height: 5),
-          //       Text(
-          //           "${bloc.conferenceList[index].title ?? '0'} ${AppData.currency}",
-          //           style: secondaryTextStyle(color: svGetBodyColor())),
-          //     ],
-          //   ),
-          // );
-          // return PostItem(bloc.conferenceList[index].title, bloc.posts[index].body);
-        },
-      ),
+      child: bloc.conferenceList.isEmpty
+          ? const Center(
+              child: Text("No Conference Found"),
+            )
+          : ListView.builder(
+              itemCount: bloc.conferenceList.length,
+              itemBuilder: (context, index) {
+                if (index ==
+                    bloc.conferenceList.length - bloc.nextPageTrigger) {
+                  bloc.add(CheckIfNeedMoreDataEvent(index: index));
+                }
+                return bloc.numberOfPage != bloc.pageNumber - 1 &&
+                        index >= bloc.conferenceList.length - 1
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: svGetBodyColor(),
+                        ),
+                      )
+                    : ConferenceWidget(
+                        conference: bloc.conferenceList[index],
+                      );
+                //     : Container(
+                //   margin: const EdgeInsets.symmetric(vertical: 5),
+                //   padding: const EdgeInsets.all(8),
+                //   decoration: BoxDecoration(
+                //     color: context.cardColor,
+                //     borderRadius: BorderRadius.circular(5),
+                //   ),
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       Text(
+                //         index.toString(),
+                //         style: secondaryTextStyle(
+                //             color: svGetBodyColor(), size: 18),
+                //       ),
+                //       Text(
+                //         bloc.conferenceList[index].country ?? "",
+                //         style: secondaryTextStyle(
+                //             color: svGetBodyColor(), size: 18),
+                //       ),
+                //       const SizedBox(height: 5),
+                //       Text(bloc.conferenceList[index].state ?? 'N/A',
+                //           style: secondaryTextStyle(color: svGetBodyColor())),
+                //       const SizedBox(height: 5),
+                //       Text(bloc.conferenceList[index].description ?? 'N/A',
+                //           style: secondaryTextStyle(color: svGetBodyColor())),
+                //       const SizedBox(height: 10),
+                //       Text(bloc.conferenceList[index].city ?? 'N/A',
+                //           style: secondaryTextStyle(color: svGetBodyColor())),
+                //       const SizedBox(height: 5),
+                //       Text(
+                //           "${bloc.conferenceList[index].title ?? '0'} ${AppData.currency}",
+                //           style: secondaryTextStyle(color: svGetBodyColor())),
+                //     ],
+                //   ),
+                // );
+                // return PostItem(bloc.conferenceList[index].title, bloc.posts[index].body);
+              },
+            ),
     );
   }
 }

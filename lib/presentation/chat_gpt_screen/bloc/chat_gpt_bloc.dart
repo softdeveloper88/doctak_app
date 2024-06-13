@@ -129,7 +129,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   }
 
   _onGetNewChat(GetNewChat event, Emitter<ChatGPTState> emit) async {
-    emit(DataInitial());
+    // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
       var response = await postService.newChat('Bearer ${AppData.userToken}');

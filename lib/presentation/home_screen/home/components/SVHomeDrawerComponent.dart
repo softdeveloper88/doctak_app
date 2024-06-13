@@ -4,6 +4,7 @@ import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
+import 'package:doctak_app/presentation/group_screen/my_groups_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/app_setting_screen/app_setting_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drugs_list_screen.dart';
@@ -221,28 +222,34 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       } else if (selectedIndex == 7) {
                         finish(context);
                         print(selectedIndex);
-                        NewsScreen().launch(context);
+                        MyGroupsScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
                       } else if (selectedIndex == 8) {
                         finish(context);
                         print(selectedIndex);
-                        const ComingSoonScreen().launch(context);
+                        NewsScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
                       } else if (selectedIndex == 9) {
                         finish(context);
                         print(selectedIndex);
-                        const SuggestionScreen().launch(context);
+                        const ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
                       } else if (selectedIndex == 10) {
                         finish(context);
                         print(selectedIndex);
-                        const AppSettingScreen().launch(context);
+                        const SuggestionScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
                       } else if (selectedIndex == 11) {
+                        finish(context);
+                        print(selectedIndex);
+                        const AppSettingScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 12) {
                         finish(context);
                         Navigator.push(
                             context,
@@ -252,14 +259,14 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                                     url: 'https://doctak.net/privacy-policy')));
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 12) {
+                      } else if (selectedIndex == 13) {
                         finish(context);
                         print(selectedIndex);
                         // ComingSoonScreen().launch(context);
                         logoutAccount(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 13) {
+                      } else if (selectedIndex == 14) {
                         print(selectedIndex);
                         deleteAccount(context);
                         // finish(context);

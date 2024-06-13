@@ -1,27 +1,23 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chewie/chewie.dart';
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
-import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
-import 'package:url_launcher/url_launcher.dart';
-import 'package:video_player/video_player.dart';
 
+import '../../fragments/home_main_screen/post_widget/post_media_widget.dart';
 import '../screens/comment_screen/SVCommentScreen.dart';
-import 'full_screen_image_page.dart';
 
 class SVPostComponent extends StatefulWidget {
   SVPostComponent(this.homeBloc, {super.key});
@@ -116,8 +112,10 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     return widget.homeBloc.numberOfPage !=
                                 widget.homeBloc.pageNumber - 1 &&
                             index >= widget.homeBloc.postList.length - 1
-                        ?  Center(
-                            child: CircularProgressIndicator(color: svGetBodyColor(),),
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: svGetBodyColor(),
+                            ),
                           )
                         : Column(
                             children: [
@@ -134,21 +132,28 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         InkWell(
-                                          onTap: (){
-                                            SVProfileFragment(userId:widget.homeBloc.postList[index].user?.id).launch(context);
+                                          onTap: () {
+                                            SVProfileFragment(
+                                                    userId: widget
+                                                        .homeBloc
+                                                        .postList[index]
+                                                        .user
+                                                        ?.id)
+                                                .launch(context);
                                           },
                                           child: Row(
                                             children: [
-                                               CachedNetworkImage(
-                                                  imageUrl:
-                                                      "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
-                                                  height: 50,
-                                                  width: 50,
-                                                  fit: BoxFit.cover,
-                                                ).cornerRadiusWithClipRRect(20),
+                                              CachedNetworkImage(
+                                                imageUrl:
+                                                    "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
+                                                height: 50,
+                                                width: 50,
+                                                fit: BoxFit.cover,
+                                              ).cornerRadiusWithClipRRect(20),
                                               12.width,
                                               Column(
                                                 crossAxisAlignment:
@@ -159,12 +164,16 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                       Text(
                                                           widget
                                                                   .homeBloc
-                                                                  .postList[index]
+                                                                  .postList[
+                                                                      index]
                                                                   .user
                                                                   ?.name ??
                                                               '',
-                                                          style: boldTextStyle()),
-                                                      const SizedBox(width: 4,),
+                                                          style:
+                                                              boldTextStyle()),
+                                                      const SizedBox(
+                                                        width: 4,
+                                                      ),
                                                       Image.asset(
                                                           'images/socialv/icons/ic_TickSquare.png',
                                                           height: 14,
@@ -178,15 +187,17 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                           timeAgo.format(DateTime
                                                               .parse(widget
                                                                   .homeBloc
-                                                                  .postList[index]
+                                                                  .postList[
+                                                                      index]
                                                                   .createdAt!)),
                                                           style: secondaryTextStyle(
                                                               color:
                                                                   svGetBodyColor(),
                                                               size: 12)),
                                                       const Padding(
-                                                        padding: EdgeInsets.only(
-                                                            left: 8.0),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 8.0),
                                                         child: Icon(
                                                           Icons.access_time,
                                                           size: 20,
@@ -741,56 +752,6 @@ class _SVPostComponentState extends State<SVPostComponent> {
     // show the dialog
   }
 
-  Future<void> _launchURL(context, String urlString) async {
-    Uri url = Uri.parse(urlString);
-
-    // Show a confirmation dialog before launching the URL
-    bool shouldLaunch = await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Open Link'),
-              content: Text('Would you like to open this link? \n$urlString'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context)
-                        .pop(false); // Return false to shouldLaunch
-                  },
-                ),
-                TextButton(
-                  child: const Text('Open'),
-                  onPressed: () {
-                    Navigator.of(context)
-                        .pop(true); // Return true to shouldLaunch
-                  },
-                ),
-              ],
-            );
-          },
-        ) ??
-        false; // shouldLaunch will be false if the dialog is dismissed
-
-    if (shouldLaunch) {
-      await launchUrl(url);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Leaving the app canceled.'),
-          backgroundColor: Colors.blue,
-        ),
-      );
-    }
-  }
-
-  Color contrastingTextColor(Color bgColor) {
-    // Calculate the luminance of the background color
-    double luminance = bgColor.computeLuminance();
-    // Return black or white text color based on luminance
-    return luminance > 0.5 ? Colors.black : Colors.white;
-  }
-
   Widget _buildPlaceholderWithoutFile(
       context, title, backgroundColor, image, media) {
     String fullText = title ?? '';
@@ -799,9 +760,9 @@ class _SVPostComponentState extends State<SVPostComponent> {
         ? fullText
         : '${words.take(20).join(' ')}...';
 
-    Color bgColor = HexColor(backgroundColor);
+    Color bgColor = PostUtils.HexColor(backgroundColor);
 
-    Color textColor = contrastingTextColor(bgColor);
+    Color textColor = PostUtils.contrastingTextColor(bgColor);
     // return LayoutBuilder(
     //   builder: (context, constraints) {
     //     return DecoratedBox(
@@ -817,7 +778,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
     //           children: [
     //             if ((image?.isNotEmpty == true) || media?.isNotEmpty == true)
     //               if (words.length > 25 ) Linkify(
-    //               onOpen: (link) => _launchURL(context,link.url),
+    //               onOpen: (link) => PostUtils.launchURL(context,link.url),
     //               text: textToShow,
     //               style: TextStyle(
     //                 fontSize: 14.0,
@@ -840,7 +801,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
     //               height: 200,
     //               child: Center(
     //                 child: Linkify(
-    //                   onOpen: (link) => _launchURL(context,link.url),
+    //                   onOpen: (link) => PostUtils.launchURL(context,link.url),
     //                   text: textToShow,
     //                   style: TextStyle(
     //                     fontSize: 14.0,
@@ -862,7 +823,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
     //                 ),
     //               ),
     //             )else Linkify(
-    //               onOpen: (link) => _launchURL(context,link.url),
+    //               onOpen: (link) => PostUtils.launchURL(context,link.url),
     //               text: textToShow,
     //               style: TextStyle(
     //                 fontSize: 14.0,
@@ -926,13 +887,16 @@ class _SVPostComponentState extends State<SVPostComponent> {
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
                   Linkify(
                     onOpen: (link) {
-                      if(link.url.contains('doctak/jobs-detail')){
-                        int jobID=Uri.parse(link.url).pathSegments.last.toInt();
-                        JobsDetailsScreen(jobId: jobID,).launch(context);
-                      }else {
-                        _launchURL(context, link.url);
+                      if (link.url.contains('doctak/jobs-detail')) {
+                        int jobID =
+                            Uri.parse(link.url).pathSegments.last.toInt();
+                        JobsDetailsScreen(
+                          jobId: jobID,
+                        ).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link.url);
                       }
-                     },
+                    },
                     text: textToShow,
                     style: TextStyle(
                       fontSize: 14.0,
@@ -953,14 +917,16 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     child: Center(
                       child: Linkify(
                         onOpen: (link) {
-                          if(link.url.contains('doctak/jobs-detail')){
-                          int jobID=Uri.parse(link.url).pathSegments.last.toInt();
-                          JobsDetailsScreen(jobId: jobID,).launch(context);
-                          }else {
-                            _launchURL(context, link.url);
+                          if (link.url.contains('doctak/jobs-detail')) {
+                            int jobID =
+                                Uri.parse(link.url).pathSegments.last.toInt();
+                            JobsDetailsScreen(
+                              jobId: jobID,
+                            ).launch(context);
+                          } else {
+                            PostUtils.launchURL(context, link.url);
                           }
-                          },
-
+                        },
                         text: textToShow,
                         style: TextStyle(
                           fontSize: 14.0,
@@ -1001,131 +967,34 @@ class _SVPostComponentState extends State<SVPostComponent> {
     );
   }
 
-  void _showFullScreenImage(int listCount, String? imageUrl, post,
-      List<Map<String, String>> mediaUrl) {
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (context) => FullScreenImagePage(imageUrl: imageUrl,post: post),
-    //   ),
-    // );
-    if (listCount == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FullScreenImagePage(
-            listCount: listCount,
-            imageUrl: imageUrl,
-            post: post,
-            mediaUrls: mediaUrl,
-          ),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FullScreenImagePage(
-            listCount: listCount,
-            imageUrl: imageUrl,
-            post: post,
-            mediaUrls: mediaUrl,
-          ),
-        ),
-      );
-    }
-  }
-
   Widget _buildMediaContent(context, index) {
-    List<Widget> mediaWidgets = [];
-    List<Map<String, String>> mediaUrls = [];
-    for (var media in widget.homeBloc.postList[index].media ?? []) {
-      if (media.mediaType == 'image') {
-        // mediaUrls.add("",AppData.imageUrl + media.mediaPath);
-        Map<String, String> newMedia = {
-          "url": AppData.imageUrl + media.mediaPath,
-          "type": "image"
-        };
-        mediaUrls.add(newMedia);
-        mediaWidgets.add(
-          GestureDetector(
-            onTap: () => _showFullScreenImage(
-                1,
-                AppData.imageUrl + media.mediaPath,
-                widget.homeBloc.postList[index], []),
-            child: FadeInImage.assetNetwork(
-              placeholder: 'assets/logo/loading.gif',
-              // Local asset for shimmer
-              image: AppData.imageUrl + media.mediaPath,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: 300,
-              fadeInDuration: const Duration(milliseconds: 300),
-              fadeOutDuration: const Duration(milliseconds: 300),
-            ),
-          ),
-        );
-      } else if (media.mediaType == 'video') {
-        // Map<String, String> newMedia1 = {"url": "https://doctak-file.s3.ap-south-1.amazonaws.com/posts/1702706840657d3e981707e0.58712680.png", "type": "image"};
-        // Map<String, String> newMedia2 = {"url": "https://doctak-file.s3.ap-south-1.amazonaws.com/posts/1702706840657d3e981707e0.58712680.png", "type": "image"};
-        Map<String, String> newMedia = {
-          "url": AppData.imageUrl + media.mediaPath,
-          "type": "video"
-        };
-        // mediaUrls.add(newMedia1);
-        mediaUrls.add(newMedia);
-        // mediaUrls.add(newMedia2);
-        // mediaUrls.add(AppData.imageUrl + media.mediaPath);
-        // Include video player widget
-        mediaWidgets.add(
-          VideoPlayerWidget(videoUrl: AppData.imageUrl + media.mediaPath),
-        );
-      }
-    }
-    if (mediaUrls.length > 1) {
-      return PhotoGrid(
-        imageUrls: mediaUrls,
-        onImageClicked: (i) => _showFullScreenImage(1, mediaUrls[i]["url"]!,
-            widget.homeBloc.postList[index], mediaUrls),
-        onExpandClicked: () => _showFullScreenImage(
-            2, '', widget.homeBloc.postList[index], mediaUrls),
-        maxImages: 2,
-      );
-    } else {
-      return Column(children: mediaWidgets);
-    }
+    return PostMediaWidget(
+        mediaList: widget.homeBloc.postList[index].media ?? [],
+        imageUrlBase: AppData.imageUrl,
+        onImageTap: (url) {
+          showFullScreenImage(
+            context,
+            1,
+            url,
+            widget.homeBloc.postList[index],
+            [],
+          );
+        },
+        onVideoTap: (url) {
+          // Handle video tap
+        },
+        onExpandImageUrls: (mediaUrls) {
+          showFullScreenImage(
+            context,
+            2,
+            '',
+            widget.homeBloc.postList[index],
+            mediaUrls,
+          );
+        });
   }
 
   bool _isExpanded = false;
-
-  Color HexColor(String hexColorString) {
-    hexColorString = hexColorString.replaceAll("#", "");
-    if (hexColorString.length == 6) {
-      hexColorString = "FF$hexColorString"; // Add FF for opacity
-      return Color(int.parse(hexColorString, radix: 16));
-    } else {
-      return Color(int.parse('ffffff', radix: 16));
-    }
-
-    return Color(int.parse(hexColorString, radix: 16));
-  }
-}
-
-class PhotoGrid extends StatefulWidget {
-  final int maxImages;
-  final List<Map<String, String>> imageUrls;
-  final Function(int) onImageClicked;
-  final Function onExpandClicked;
-
-  PhotoGrid({
-    required this.imageUrls,
-    required this.onImageClicked,
-    required this.onExpandClicked,
-    this.maxImages = 2,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  createState() => _PhotoGridState();
 }
 
 bool findIsLiked(post) {
@@ -1136,186 +1005,4 @@ bool findIsLiked(post) {
   }
 
   return false; // User has not liked the post
-}
-
-class _PhotoGridState extends State<PhotoGrid> {
-  @override
-  Widget build(BuildContext context) {
-    var images = buildImages();
-
-    return SizedBox(
-      height: 200,
-      child: GridView(
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 300,
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
-        ),
-        children: images,
-      ),
-    );
-  }
-
-  List<Widget> buildImages() {
-    int numImages = widget.imageUrls.length;
-    return List<Widget>.generate(min(numImages, widget.maxImages), (index) {
-      String imageUrl = widget.imageUrls[index]["url"] ?? '';
-      String urlType = widget.imageUrls[index]["type"] ?? '';
-
-      // If its the last image
-      if (index == widget.maxImages - 1) {
-        // Check how many more images are left
-        int remaining = numImages - widget.maxImages;
-
-        // If no more are remaining return a simple image widget
-        if (remaining == 0) {
-          if (urlType == "image") {
-            return GestureDetector(
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                height: 300,
-                width: context.width() - 32,
-              ),
-              onTap: () => widget.onImageClicked(index),
-            );
-          } else {
-            return GestureDetector(
-              child: VideoPlayerWidget(
-                videoUrl: imageUrl,
-              ),
-              onTap: () => widget.onImageClicked(index),
-            );
-          }
-        } else {
-          // Create the facebook like effect for the last image with number of remaining  images
-          return GestureDetector(
-            onTap: () => widget.onExpandClicked(),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Image.network(imageUrl, fit: BoxFit.cover),
-                if (urlType == "image")
-                  GestureDetector(
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      height: 300,
-                      width: context.width() - 32,
-                    ),
-                    onTap: () => widget.onImageClicked(index),
-                  )
-                else
-                  GestureDetector(
-                    child: VideoPlayerWidget(
-                      videoUrl: imageUrl,
-                    ),
-                    onTap: () => widget.onImageClicked(index),
-                  ),
-                Positioned.fill(
-                  child: Container(
-                    alignment: Alignment.center,
-                    color: Colors.black54,
-                    child: Text(
-                      '+$remaining',
-                      style: const TextStyle(fontSize: 32, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-      } else {
-        if (urlType == "image") {
-          return GestureDetector(
-            child: CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              height: 300,
-              width: context.width() - 32,
-            ),
-            onTap: () => widget.onImageClicked(index),
-          );
-        } else {
-          return GestureDetector(
-            child: VideoPlayerWidget(
-              videoUrl: imageUrl,
-            ),
-            onTap: () => widget.onImageClicked(index),
-          );
-        }
-      }
-      //   return GestureDetector(
-      //     child: Image.network(
-      //       imageUrl,
-      //       fit: BoxFit.cover,
-      //     ),
-      //     onTap: () => widget.onImageClicked(index),
-      //   );
-      // }
-    });
-  }
-}
-
-class VideoPlayerWidget extends StatefulWidget {
-  final String videoUrl;
-
-  VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
-
-  @override
-  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
-}
-
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  VideoPlayerController? _controller;
-  ChewieController? chewieController;
-
-  @override
-  void initState() {
-    super.initState();
-    initializeVideoPlayer();
-  }
-
-  Future<void> initializeVideoPlayer() async {
-    _controller ??= VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-      ..initialize().then((_) {
-        if (mounted) {
-          chewieController = ChewieController(
-            videoPlayerController: _controller!,
-            autoPlay: false,
-            looping: false,
-          );
-          setState(() {}); // Update UI once the controller has initialized
-        }
-      });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_controller != null && _controller!.value.isInitialized) {
-      return AspectRatio(
-        aspectRatio: _controller!.value.aspectRatio,
-        child: Chewie(controller: chewieController!),
-      );
-    } else {
-      return AspectRatio(
-        aspectRatio: 16 / 9, // Common aspect ratio for videos
-        child: Container(
-          color: Colors.black, // Video player typically has a black background
-          child:  Center(
-            child: CircularProgressIndicator(color: svGetBodyColor(),), // Loading indicator
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose(); // Dispose of the controller when done
-    chewieController?.dispose();
-    super.dispose();
-  }
 }

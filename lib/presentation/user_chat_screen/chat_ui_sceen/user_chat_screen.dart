@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/group_screen/group_create_screen.dart';
+import 'package:doctak_app/presentation/group_screen/group_view_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
@@ -47,7 +48,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
         title:  Text('Chats',style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500),),
         actions: [
           IconButton(
-            icon:  Icon(Icons.search,color: svGetBodyColor(),),
+            icon:  Image.asset('assets/images/search.png',color: svGetBodyColor(),height: 20,width: 20,),
             onPressed: () {
               SearchContactScreen().launch(context);
             },
@@ -423,7 +424,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
       ),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
-      //     GroupCreateScreen().launch(context);
+      //     GroupViewScreen().launch(context);
       //     // Add functionality to start a new chat
       //   },
       //   child: const Icon(Icons.group),

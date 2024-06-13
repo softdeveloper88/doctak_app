@@ -31,6 +31,7 @@ class CustomTextField extends StatelessWidget {
     this.isReadOnly = false,
     this.initialValue,
     this.onSaved,
+    this.onFieldSubmitted,
     this.validator,
   }) : super(
     key: key,
@@ -80,6 +81,7 @@ class CustomTextField extends StatelessWidget {
 
   final bool? isReadOnly;
   final Function(String)? onSaved;
+  final Function(String)? onFieldSubmitted;
   final String? initialValue;
 
   final FormFieldValidator<String>? validator;
@@ -104,7 +106,7 @@ class CustomTextField extends StatelessWidget {
               .of(context)
               .viewInsets
               .bottom),
-          onFieldSubmitted: (v)=>onSaved!(v) ,
+          onFieldSubmitted: (v)=>onFieldSubmitted!(v) ,
           controller: controller,
           focusNode: focusNode ?? FocusNode(),
           autofocus: autofocus!,

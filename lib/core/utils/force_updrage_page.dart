@@ -1,10 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:doctak_app/core/utils/doctak_firebase_remoteConfig.dart';
 import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,7 +19,8 @@ class ForceUpgradePage extends StatefulWidget {
 
 class _ForceUpgradeState extends State<ForceUpgradePage> {
   PackageInfo? packageInfo;
-  final featureFlagRepository = DoctakFirebaseRemoteConfig();
+
+  // final featureFlagRepository = DoctakFirebaseRemoteConfig();
 
   @override
   void initState() {
@@ -34,21 +37,65 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
     packageInfo = await PackageInfo.fromPlatform();
   }
 
-  void _checkAppVersion() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (packageInfo != null) {
-        final appVersion = _getExtendedVersionNumber(packageInfo!.version);
-        final requiredMinVersion =
-        _getExtendedVersionNumber(featureFlagRepository.getRequiredMinimumVersion());
-        final recommendedMinVersion =
-        _getExtendedVersionNumber(featureFlagRepository.getRecommendedMinimumVersion());
+  Future<Map<String, dynamic>> fetchLatestVersion() async {
+    var response;
+    if (Platform.isAndroid) {
+      response = await http
+          .get(Uri.parse('https://doctak.net/api/v1/version/Android'));
+    } else {
+      response =
+          await http.get(Uri.parse('https://doctak.net/api/v1/version/iOS'));
+    }
+    print(response.body);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load version info');
+    }
+  }
 
-        if (appVersion < requiredMinVersion) {
-          isSkippible=false;
-          isUpdateAvailable=true;
-        } else if (appVersion < recommendedMinVersion) {
-          isSkippible=true;
-          isUpdateAvailable=true;
+  void _checkAppVersion() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (packageInfo != null) {
+        // final appVersion = _getExtendedVersionNumber(packageInfo!.version);
+
+        // final requiredMinVersion = _getExtendedVersionNumber(featureFlagRepository.getRequiredMinimumVersion());
+
+        // final recommendedMinVersion = _getExtendedVersionNumber(featureFlagRepository.getRecommendedMinimumVersion());
+        //         {
+        //       "success": true,
+        //   "data": {
+        //   "platform": "iOS",
+        //   "version": "1.0.0",
+        //   "mandatory": 0,
+        //   "message": "New Update Available.",
+        //   "update_url": null
+        // }
+        // }
+        final latestVersionInfo = await fetchLatestVersion();
+        final latestVersion = latestVersionInfo['data']['version'];
+        final mandatory = latestVersionInfo['data']['mandatory'];
+
+        Version version1 = Version.parse(packageInfo!.version);
+        Version version2 = Version.parse(latestVersion);
+
+        // final url = latestVersionInfo['url'];
+        print(latestVersionInfo);
+        print(latestVersion);
+        print(version1);
+        print(version2);
+
+        if (version1 < version2) {
+        setState(() {
+          isSkippible = false;
+          isUpdateAvailable = true;
+        });
+        }else if (version1 > version2 && mandatory==0) {
+          setState(() {
+            isSkippible = true;
+            isUpdateAvailable = true;
+          });
+
         } else {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -65,7 +112,7 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
         // Handle the case where packageInfo is null
         // You can display a loading indicator or handle it in some other way
       }
-    });
+     });
   }
 
   int _getExtendedVersionNumber(String version) {
@@ -77,90 +124,96 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
   void _launchAppOrPlayStore() {
     final appId = Platform.isAndroid ? packageInfo!.packageName : '6448684340';
     final url = Uri.parse(
-      Platform.isAndroid ? "market://details?id=$appId" : "https://apps.apple.com/app/id$appId",
+      Platform.isAndroid
+          ? "market://details?id=$appId"
+          : "https://apps.apple.com/app/id$appId",
     );
     launchUrl(
       url,
       mode: LaunchMode.externalApplication,
     );
   }
-bool? isSkippible;
-bool? isUpdateAvailable;
+
+  bool? isSkippible;
+  bool? isUpdateAvailable;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isUpdateAvailable??false?Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'New version available',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Please update to the latest version of the app to continue using it.',
-              style: TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed:_launchAppOrPlayStore,
-              child: const Text('Update Now'),
-            ),
-           if(isSkippible??false) ElevatedButton(
-              onPressed:(){
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const SplashScreen(),
+      body: isUpdateAvailable ?? false
+          ? Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'New version available',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                );
-              },
-              child: const Text('Skip'),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Please update to the latest version of the app to continue using it.',
+                    style: TextStyle(fontSize: 18),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 40),
+                  ElevatedButton(
+                    onPressed: _launchAppOrPlayStore,
+                    child: const Text('Update Now'),
+                  ),
+                  if (isSkippible ?? false)
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const SplashScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text('Skip'),
+                    ),
+                ],
+              ),
+            )
+          : Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/splash.png',
+                  height: context.height(),
+                  width: context.width(),
+                  fit: BoxFit.fill,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                        child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Image.asset(
+                              'assets/logo/logo.png',
+                              // height: 80,
+                              width: 80.w,
+                              fit: BoxFit.contain,
+                            ))),
+                    8.width,
+                    // Padding(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: Text("Doctak.net",
+                    //       style: primaryTextStyle(
+                    //           color: Colors.white,
+                    //           size: 24,
+                    //           weight: FontWeight.w500)),
+                    // ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-      ):Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.asset(
-            'assets/images/splash.png',
-            height: context.height(),
-            width: context.width(),
-            fit: BoxFit.fill,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Image.asset(
-                        'assets/logo/logo.png',
-                        // height: 80,
-                        width: 80.w,
-                        fit: BoxFit.contain,
-                      ))),
-              8.width,
-              // Padding(
-              //   padding: const EdgeInsets.all(8.0),
-              //   child: Text("Doctak.net",
-              //       style: primaryTextStyle(
-              //           color: Colors.white,
-              //           size: 24,
-              //           weight: FontWeight.w500)),
-              // ),
-            ],
-          ),
-        ],
-      ),
     );
-
   }
 }

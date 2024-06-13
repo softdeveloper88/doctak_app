@@ -16,6 +16,7 @@ import '../home_main_screen/bloc/home_bloc.dart';
 import 'bloc/add_post_bloc.dart';
 import 'components/SVPostOptionsComponent.dart';
 import 'components/SVPostTextComponent.dart';
+import 'components/dynamic_text_font_widget.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
@@ -49,6 +50,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
     int intValue = int.parse(colorCode, radix: 16);
     return Color(intValue).withAlpha(0xFF);
   }
+  String _fontFamily = 'Roboto';
+  double _fontSize = 20.0;
+  Color _fontColor = Colors.black;
+  FontWeight _fontWeight = FontWeight.normal;
 
   void changeColor() {
     setState(() {
@@ -141,66 +146,77 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
         ],
       ),
       body: SingleChildScrollView(
-        child: SizedBox(
-          height: context.height(),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  CachedNetworkImage(
-                    imageUrl:
-                        "${AppData.imageUrl}${AppData.profile_pic.validate()}",
-                    height: 50,
-                    width: 50,
-                    fit: BoxFit.cover,
-                  ).cornerRadiusWithClipRRect(100),
-                  12.width,
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(AppData.name ?? '', style: boldTextStyle()),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Image.asset(
-                                'images/socialv/icons/ic_TickSquare.png',
-                                height: 14,
-                                width: 14,
-                                fit: BoxFit.cover),
-                          ),
-                        ],
-                      ),
-                      Text(AppData.userType,
-                          style: secondaryTextStyle(
-                              color: svGetBodyColor(), size: 12)),
-                    ],
-                  ),
-                  4.width,
-                ],
-              ).paddingSymmetric(horizontal: 16),
-              Divider(
-                color: Colors.grey[300],
-                endIndent: 16,
-                indent: 16,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CachedNetworkImage(
+                  imageUrl:
+                      "${AppData.imageUrl}${AppData.profile_pic.validate()}",
+                  height: 50,
+                  width: 50,
+                  fit: BoxFit.cover,
+                ).cornerRadiusWithClipRRect(100),
+                12.width,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(AppData.name ?? '', style: boldTextStyle()),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Image.asset(
+                              'images/socialv/icons/ic_TickSquare.png',
+                              height: 14,
+                              width: 14,
+                              fit: BoxFit.cover),
+                        ),
+                      ],
+                    ),
+                    Text(AppData.userType,
+                        style: secondaryTextStyle(
+                            color: svGetBodyColor(), size: 12)),
+                  ],
+                ),
+                4.width,
+              ],
+            ).paddingSymmetric(horizontal: 16),
+            Divider(
+              color: Colors.grey[300],
+              endIndent: 16,
+              indent: 16,
+            ),
+            SVPostTextComponent(
+              textStyle: TextStyle(
+                fontFamily: _fontFamily,
+                fontSize: _fontSize,
+                color: _fontColor,
+                fontWeight: _fontWeight,
               ),
-              SVPostTextComponent(
+              onColorChange: () => changeColor,
+              colorValue: currentColor,
+              searchPeopleBloc: searchPeopleBloc,
+            ),
+            DynamicTextFontWidget(onStyleChanged: (Map<String, dynamic> value) {
+              setState(() {
+                _fontFamily= value['fontFamily'];
+                _fontSize= value['fontSize'];
+                _fontColor= value['fontColor'];
+                _fontWeight= value['fontWeight'];
+              });
+            },),
+            OtherFeatureComponent(
                 onColorChange: () => changeColor,
                 colorValue: currentColor,
-                searchPeopleBloc: searchPeopleBloc,
-              ),
-              OtherFeatureComponent(
-                  onColorChange: () => changeColor,
-                  colorValue: currentColor,
-                  searchPeopleBloc: searchPeopleBloc),
-              Divider(
-                color: Colors.grey[300],
-                endIndent: 16,
-                indent: 16,
-              ),
-              SVPostOptionsComponent(searchPeopleBloc)
-            ],
-          ),
+                searchPeopleBloc: searchPeopleBloc),
+            Divider(
+              color: Colors.grey[300],
+              endIndent: 16,
+              indent: 16,
+            ),
+            SVPostOptionsComponent(searchPeopleBloc)
+          ],
         ),
       ),
       // bottomNavigationBar: Column(

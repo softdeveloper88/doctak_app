@@ -1,29 +1,37 @@
 // full_screen_image_page.dart
-import 'dart:typed_data';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../../data/models/post_model/post_data_model.dart';
+import '../../fragments/home_main_screen/post_widget/video_player_widget.dart';
 import 'SVPostComponent.dart';
 
-class FullScreenImagePage extends StatelessWidget {
+class FullScreenImagePage extends StatefulWidget {
   String? imageUrl;
   final Post post;
-  String percent = "0";
   int listCount;
   List<Map<String, String>>? mediaUrls = [];
-  ValueNotifier<String> downloadProgress = ValueNotifier('');
 
   FullScreenImagePage(
-      {super.key, required this.listCount,
+      {super.key,
+      required this.listCount,
       this.imageUrl,
       required this.post,
       this.mediaUrls});
+
+  @override
+  State<FullScreenImagePage> createState() => _FullScreenImagePageState();
+}
+
+class _FullScreenImagePageState extends State<FullScreenImagePage> {
+  String percent = "0";
+
+  ValueNotifier<String> downloadProgress = ValueNotifier('');
 
   Future<void> _downloadImage(String url, BuildContext context) async {
     final status = await Permission.storage.request();
@@ -83,6 +91,8 @@ class FullScreenImagePage extends StatelessWidget {
     }
   }
 
+  bool isShown = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,82 +106,87 @@ class FullScreenImagePage extends StatelessWidget {
             // boundaryMargin: const EdgeInsets.all(10),
             // minScale: 5.5,
             // maxScale: 10,
-            child: listCount == 2
+            child: widget.listCount == 2
                 ? CarouselSlider(
-                options: CarouselOptions(
-                  height: MediaQuery.of(context).size.height-100,
-                  // aspectRatio: 16/12,
-                  viewportFraction: 0.9,
-                  initialPage: 0,
-                  enableInfiniteScroll: true,
-                  reverse: false,
-                  autoPlay: false,
-                  // autoPlayInterval: Duration(seconds: 3),
-                  // autoPlayAnimationDuration: Duration(milliseconds: 800),
-                  autoPlayCurve: Curves.fastOutSlowIn,
-                  enlargeCenterPage: true,
-                  // enlargeFactor: 0.3,
-                  // onPageChanged: callbackFunction,
-                  scrollDirection: Axis.horizontal,
-                ),
+                    options: CarouselOptions(
+                      height: MediaQuery.of(context).size.height - 100,
+                      // aspectRatio: 16/12,
+                      viewportFraction: 0.9,
+                      initialPage: 0,
+                      enableInfiniteScroll: true,
+                      reverse: false,
+                      autoPlay: false,
+                      // autoPlayInterval: Duration(seconds: 3),
+                      // autoPlayAnimationDuration: Duration(milliseconds: 800),
+                      autoPlayCurve: Curves.fastOutSlowIn,
+                      enlargeCenterPage: true,
+                      // enlargeFactor: 0.3,
+                      // onPageChanged: callbackFunction,
+                      scrollDirection: Axis.horizontal,
+                    ),
                     // options: CarouselOptions(height: 400.0),
-                    items: mediaUrls?.map((i) {
+                    items: widget.mediaUrls?.map((i) {
                       return Builder(builder: (BuildContext context) {
                         if (i['type'] == "image") {
-                         return Stack(
-                           children:[
-                             Center(
-                               child: Image.network(
+                          return Stack(children: [
+                            Center(
+                              child: Image.network(
                                 i['url']!,
                                 fit: BoxFit.contain,
                                 width: double.infinity,
                                 height: double.infinity,
-                                loadingBuilder: (BuildContext context, Widget child,
+                                loadingBuilder: (BuildContext context,
+                                    Widget child,
                                     ImageChunkEvent? loadingProgress) {
                                   if (loadingProgress == null) return child;
                                   return Center(
                                     child: CircularProgressIndicator(
-                                      value: loadingProgress.expectedTotalBytes != null
-                                          ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                          : null,
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
                                     ),
                                   );
                                 },
+                              ),
                             ),
-                             ),
-                             Positioned(
-                               right:0,
-                               top: 30,
-                               child: GestureDetector(
-                                 onTap: () => _downloadImage(i['url']!, context),
-                                 child: const Icon(Icons.download, color: Colors.white),
-                               ),
-                             ),
-                         ]);
+                            Positioned(
+                              right: 0,
+                              top: 30,
+                              child: GestureDetector(
+                                onTap: () => _downloadImage(i['url']!, context),
+                                child: const Icon(Icons.download,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ]);
                         } else {
-                          return Stack(
-                            children:[
-                           Center(
-                             child: VideoPlayerWidget(
+                          return Stack(children: [
+                            Center(
+                              child: VideoPlayerWidget(
                                 videoUrl: i['url']!,
                               ),
-                           ),
-                              Positioned(
-                                right:0,
-                                top: 30,
-                                child: GestureDetector(
-                                  onTap: () => _downloadImage(i['url']!, context),
-                                  child: const Icon(Icons.download, color: Colors.white),
-                                ),
+                            ),
+                            Positioned(
+                              right: 0,
+                              top: 30,
+                              child: GestureDetector(
+                                onTap: () => _downloadImage(i['url']!, context),
+                                child: const Icon(Icons.download,
+                                    color: Colors.white),
                               ),
-                         ]);
+                            ),
+                          ]);
                         }
                       });
                     }).toList(),
                   )
                 : Image.network(
-                    imageUrl!,
+                    widget.imageUrl!,
                     fit: BoxFit.contain,
                     width: double.infinity,
                     height: double.infinity,
@@ -194,57 +209,167 @@ class FullScreenImagePage extends StatelessWidget {
             child: Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  // Back arrow icon
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                  // Close icon
-                 if(listCount ==1) GestureDetector(
-                    onTap: () => _downloadImage(imageUrl!, context),
-                    child: const Icon(Icons.download, color: Colors.white),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Back arrow icon
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: const Icon(Icons.arrow_back_ios,
+                            color: Colors.white),
+                      ),
+                      // Close icon
+                      if (widget.listCount == 1)
+                        GestureDetector(
+                          onTap: () =>
+                              _downloadImage(widget.imageUrl!, context),
+                          child:
+                              const Icon(Icons.download, color: Colors.white),
+                        ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-          // Post Title, Likes, and Comments
           Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                Text(
-                  post.title??'', // Use the title from the Datum object
-                  style: const TextStyle(color: Colors.white, fontSize: 20),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Likes
-                    Text(
-                      "${post.likes?.length} likes",
-                      // Use the likes count from the Datum object
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    // Comments
-                    Text(
-                      "${post.comments?.length} comments",
-                      // Use the comments count from the Datum object
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ],
+            bottom: 0,
+            child: Container(
+              width: 100.w,
+              height: 50,
+              color: Colors.white,
+              child: Align(
+                alignment: Alignment.center,
+                child: InkWell(
+                    onTap: () {
+                      bottomSheetDialog();
+                    },
+                    child: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Colors.black,
+                    )),
+              ),
             ),
-          ),
+          )
+          // Post Title, Likes, and Comments
+          // Positioned(
+          //   bottom: 20,
+          //   top: 100,
+          //   left: 0,
+          //   right: 0,
+          //   child: SingleChildScrollView(
+          //     child: Container(
+          //       color: Colors.white.withOpacity(0.2),
+          //       child: Column(
+          //         children: [
+          //           if (isShown)
+          //             InkWell(
+          //                 onTap: () {
+          //                   bottomSheetDialog();
+          //                 },
+          //                 child: Icon(
+          //                   Icons.keyboard_arrow_down_rounded,
+          //                   color: Colors.white,
+          //                 ))
+          //           else
+          //             InkWell(
+          //                 onTap: () {
+          //                   setState(() {
+          //                     isShown = true;
+          //                   });
+          //                 },
+          //                 child: const Icon(
+          //                   Icons.keyboard_arrow_up_rounded,
+          //                   color: Colors.white,
+          //                 )),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
+    );
+
+  }
+
+  Future<void> bottomSheetDialog() {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: false, // Prevent dismissal by tapping outside
+      backgroundColor: Colors.black.withOpacity(0.4),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.5,
+              minChildSize: 0.2,
+              maxChildSize: 0.75,
+              expand: false,
+              builder: (BuildContext context, ScrollController scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.4),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.minimize, color: Colors.white),
+                              onPressed: () {
+                                setState(() {
+                                  Navigator.of(context).pop();
+                                  // Future.microtask(() => bottomSheetDialogWithInitialSize(0.2));
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Text(
+                          widget.post.title ?? '',
+                          style: const TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              "${widget.post.likes?.length ?? 0} likes",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            Text(
+                              "${widget.post.comments?.length ?? 0} comments",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

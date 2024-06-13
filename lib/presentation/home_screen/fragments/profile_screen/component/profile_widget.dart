@@ -4,6 +4,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
@@ -14,9 +15,11 @@ class TextFieldEditWidget extends StatelessWidget {
       this.isEditModeMap,
       this.value,
       this.onSave,
+      this.onFieldSubmitted,
       this.maxLines,
       this.icon,
       this.textInputType,
+      this.textInputAction,
       super.key});
 
   int? index;
@@ -24,9 +27,11 @@ class TextFieldEditWidget extends StatelessWidget {
   bool? isEditModeMap;
   String? value;
   Function(String)? onSave;
+  Function(String)? onFieldSubmitted;
   int? maxLines;
   IconData? icon;
   TextInputType? textInputType;
+  TextInputAction? textInputAction;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +50,7 @@ class TextFieldEditWidget extends StatelessWidget {
               Container(
                 margin: const EdgeInsets.only(top: 4),
                 child: CustomTextField(
+                    textInputAction: textInputAction,
                     hintText: label,
                     filled: true,
                     fillColor: AppDecoration.fillGray.color,
@@ -55,6 +61,11 @@ class TextFieldEditWidget extends StatelessWidget {
                     maxLines: maxLines,
                     onSaved: (v) {
                       onSave?.call(v);
+                    },
+                    onFieldSubmitted: (v) {
+
+                      onFieldSubmitted?.call(v);
+
                     },
                     contentPadding:
                         const EdgeInsets.only(top: 18, right: 30, bottom: 18)),

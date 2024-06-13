@@ -6,7 +6,6 @@ export 'package:doctak_app/core/utils/image_constant.dart';
 export 'package:doctak_app/core/utils/logger.dart';
 export 'package:doctak_app/core/utils/navigator_service.dart';
 export 'package:doctak_app/core/utils/pref_utils.dart';
-export 'package:doctak_app/core/utils/size_utils.dart';
 export 'package:doctak_app/data/models/selectionPopupModel/selection_popup_model.dart';
 export 'package:doctak_app/localization/app_localization.dart';
 export 'package:doctak_app/routes/app_routes.dart';
