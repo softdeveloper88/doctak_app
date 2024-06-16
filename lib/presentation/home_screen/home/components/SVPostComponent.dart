@@ -157,46 +157,48 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                 fit: BoxFit.cover,
                                               ).cornerRadiusWithClipRRect(20),
                                               12.width,
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  TextIcon(
-                                                     text: widget.homeBloc.postList[index].user?.name ??
-                                                          '',
-                                                      suffix: Image.asset(
-                                                          'images/socialv/icons/ic_TickSquare.png',
-                                                          height: 14,
-                                                          width: 14,
-                                                          fit: BoxFit.cover),
-                                                      textStyle:
-                                                          boldTextStyle()),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                          timeAgo.format(DateTime
-                                                              .parse(widget
-                                                                  .homeBloc
-                                                                  .postList[
-                                                                      index]
-                                                                  .createdAt!)),
-                                                          style: secondaryTextStyle(
-                                                              color:
-                                                                  svGetBodyColor(),
-                                                              size: 12)),
-                                                      const Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 8.0),
-                                                        child: Icon(
-                                                          Icons.access_time,
-                                                          size: 20,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ],
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    TextIcon(
+                                                       text: widget.homeBloc.postList[index].user?.name ??
+                                                            '',
+                                                        suffix: Image.asset(
+                                                            'images/socialv/icons/ic_TickSquare.png',
+                                                            height: 14,
+                                                            width: 14,
+                                                            fit: BoxFit.cover),
+                                                        textStyle:
+                                                            boldTextStyle()),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                            timeAgo.format(DateTime
+                                                                .parse(widget
+                                                                    .homeBloc
+                                                                    .postList[
+                                                                        index]
+                                                                    .createdAt!)),
+                                                            style: secondaryTextStyle(
+                                                                color:
+                                                                    svGetBodyColor(),
+                                                                size: 12)),
+                                                        const Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 8.0),
+                                                          child: Icon(
+                                                            Icons.access_time,
+                                                            size: 20,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                               4.width,
                                             ],
