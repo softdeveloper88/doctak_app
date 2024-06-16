@@ -157,8 +157,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                 fit: BoxFit.cover,
                                               ).cornerRadiusWithClipRRect(20),
                                               12.width,
-                                              Expanded(
-                                                child: Column(
+                                              Column(
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
@@ -199,7 +198,6 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                     ),
                                                   ],
                                                 ),
-                                              ),
                                               4.width,
                                             ],
                                           ).paddingSymmetric(horizontal: 16),
@@ -1034,7 +1032,7 @@ class TextIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(width: 40.w,
+        SizedBox(width: text.length>12? 40.w:25.w,
           child: Text(
             text,
             style: textStyle,
