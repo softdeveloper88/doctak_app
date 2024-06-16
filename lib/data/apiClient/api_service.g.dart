@@ -2114,6 +2114,36 @@ class _ApiService implements ApiService {
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
+  } @override
+  Future<GroupListModel> listGroup(
+      String token,
+      String userId,
+      ) async {
+    final _extra = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = {
+      'user_id': userId
+    };
+    final _result =
+    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    ).compose(
+      _dio.options,
+      '/groups',
+      data: _data,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
+
+    final value = GroupListModel.fromJson(_result.data!);
+    return value;
   }
   @override
   Future<HttpResponse<dynamic>> groupMemberRequestUpdate(

@@ -31,7 +31,10 @@ import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
+
+import '../models/group_model/group_list_model.dart';
 
 part 'api_service.g.dart';
 
@@ -465,6 +468,10 @@ abstract class ApiService {
   @FormUrlEncoded()
   @POST("/group/create")
   Future<HttpResponse> createGroup(@Header('Authorization') String token);
+
+  @FormUrlEncoded()
+  @POST("/groups")
+  Future<GroupListModel> listGroup(@Header('Authorization') String token,@Field('user_id') String userId);
 
   @FormUrlEncoded()
   @POST("/group/notification")

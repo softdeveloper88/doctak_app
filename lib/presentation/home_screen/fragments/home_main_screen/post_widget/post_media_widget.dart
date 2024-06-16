@@ -37,9 +37,9 @@ class PostMediaWidget extends StatelessWidget {
               color: svGetBgColor(),
               child: CustomImageView(
                 imagePath: fullImageUrl,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 width: double.infinity,
-                height: 300,
+                // height: 300,
               ),
             ),
           ),

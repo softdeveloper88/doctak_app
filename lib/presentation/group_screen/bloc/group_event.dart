@@ -31,6 +31,13 @@ class GroupDetailsEvent extends GroupEvent {
   @override
   List<Object?> get props => [id];
 }
+class ListGroupsEvent extends GroupEvent {
+
+  ListGroupsEvent();
+
+  @override
+  List<Object?> get props => [];
+}
 
 class GroupMemberRequestEvent extends GroupEvent {
   final String id;

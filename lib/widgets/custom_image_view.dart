@@ -89,11 +89,11 @@ class CustomImageView extends StatelessWidget {
       switch (imagePath!.imageType) {
         case ImageType.svg:
           return SizedBox(
-            height: height,
+            // height: height,
             width: width,
             child: SvgPicture.asset(
               imagePath!,
-              height: height,
+              // height: height,
               width: width,
               fit: fit ?? BoxFit.contain,
               colorFilter: ColorFilter.mode(
@@ -103,27 +103,29 @@ class CustomImageView extends StatelessWidget {
         case ImageType.file:
           return Image.file(
             File(imagePath!),
-            height: height,
+            // height: height,
             width: width,
             fit: fit ?? BoxFit.cover,
             color: color,
           );
         case ImageType.network:
           return CachedNetworkImage(
-            height: height,
+            // height: height,
             width: width,
             fit: fit,
             imageUrl: imagePath!,
             color: color,
             placeholder: (context, url) =>  Center(
               child: SizedBox(
-                height: 60,
+                height:  300,
                 width: 60,
-                child: CircularProgressIndicator(
-                  color: Colors.grey[300],
-                  strokeWidth: 8,
-                  strokeCap: StrokeCap.round,
-                  backgroundColor: Colors.white,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.grey[300],
+                    strokeWidth: 8,
+                    strokeCap: StrokeCap.round,
+                    backgroundColor: Colors.white,
+                  ),
                 ),
               )),
             // errorWidget: (context, url,error) =>  Center(
@@ -140,7 +142,7 @@ class CustomImageView extends StatelessWidget {
             // ),
             errorWidget: (context, url, error) => Image.asset(
               placeHolder,
-              height: height,
+              // height: height,
               width: width,
               fit: fit ?? BoxFit.cover,
             ),
@@ -149,7 +151,7 @@ class CustomImageView extends StatelessWidget {
         default:
           return Image.asset(
             imagePath!,
-            height: height,
+            // height: height,
             width: width,
             fit: fit ?? BoxFit.cover,
             color: color,

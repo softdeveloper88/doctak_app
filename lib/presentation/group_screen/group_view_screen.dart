@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/group_screen/about_group_screen.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
@@ -14,14 +15,15 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../main.dart';
+import '../coming_soon_screen/coming_soon_screen.dart';
 import '../home_screen/utils/SVCommon.dart';
 import 'group_member_request_screen.dart';
 import 'group_member_screen.dart';
 import 'manage_notification_screen.dart';
 
 class GroupViewScreen extends StatefulWidget {
-  GroupViewScreen({super.key});
-
+  GroupViewScreen( this.id,{super.key});
+  String? id;
   @override
   State<GroupViewScreen> createState() => _GroupViewScreenState();
 }
@@ -33,10 +35,11 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
 
   @override
   void initState() {
-    groupBloc.add(GroupDetailsEvent("7eada24c-00d9-49e3-80bb-4e7d345c5a2d"));
-    groupBloc.add(GroupPostRequestEvent('7eada24c-00d9-49e3-80bb-4e7d345c5a2d', '1'));
-    groupBloc.add(GroupMemberRequestEvent("7eada24c-00d9-49e3-80bb-4e7d345c5a2d"));
-    groupBloc.add(GroupMembersEvent("7eada24c-00d9-49e3-80bb-4e7d345c5a2d",''));
+    print(widget.id??"");
+    groupBloc.add(GroupDetailsEvent(widget.id??''));
+    groupBloc.add(GroupPostRequestEvent(widget.id??'', '1'));
+    groupBloc.add(GroupMemberRequestEvent(widget.id??''));
+    groupBloc.add(GroupMembersEvent(widget.id??'',''));
     super.initState();
   }
 
@@ -110,7 +113,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
-                              height: 45.w,
+                              height: 22.h,
                               child: Stack(
                                 children: [
                                   Container(
@@ -205,6 +208,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                 ],
                               ),
                             ),
+                            const SizedBox(height: 10,),
                             Padding(
                               padding: const EdgeInsets.only(left: 16.0),
                               child: Text(
@@ -362,7 +366,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                         color: Colors.grey[300]),
                                     child: TextButton(
                                       onPressed: () {
-                                        EventsScreen().launch(context);
+                                        const ComingSoonScreen().launch(context);
 
                                       },
                                       child: Text(
@@ -400,7 +404,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                       ),
                       Container(
                         color: context.cardColor,
-                        padding: const EdgeInsets.all(10),
+                        padding:  EdgeInsets.all(10),
                         child: Column(
                           children: [
                             Row(
@@ -409,8 +413,8 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                 Container(
                                   decoration: BoxDecoration(
                                       image: DecorationImage(
-                                        image: AssetImage(ImageConstant
-                                            .imgRectangle46087x113),
+                                        image: CachedNetworkImageProvider(
+                                          AppData.imageUrl + AppData.profile_pic,),
                                         fit: BoxFit.cover,
                                       ),
                                       color: svGetBgColor(),
@@ -1004,8 +1008,9 @@ class CustomDrawer extends StatelessWidget {
               ),
               DrawerItem(
                 onTap: (){
+                if(groupBloc?.groupDetailsModel?.isAdmin??false) {
                   ManageNotificationScreen(groupBloc).launch(context);
-
+                }
                 },
                 icon: Icons.notifications,
                 text: 'Manage Notification',
@@ -1017,6 +1022,9 @@ class CustomDrawer extends StatelessWidget {
                 endIndent: 50,
               ),
               DrawerItem(
+                onTap: (){
+
+                },
                 icon: Icons.post_add,
                 text: 'View post request',
                 trailing: '${groupBloc?.groupPostModel?.posts?.length??'0'}',
@@ -1029,7 +1037,9 @@ class CustomDrawer extends StatelessWidget {
               ),
               DrawerItem(
                 onTap: (){
-                  GroupMemberRequestScreen(groupBloc).launch(context);
+                  if(groupBloc?.groupDetailsModel?.isAdmin??false) {
+                    GroupMemberRequestScreen(groupBloc).launch(context);
+                  }
                 },
                 icon: Icons.group,
                 text: 'View member request',

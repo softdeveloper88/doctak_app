@@ -6,6 +6,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../core/utils/app/AppData.dart';
@@ -66,6 +67,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   }
 
   AddPostBloc searchPeopleBloc = AddPostBloc();
+  final QuillController _controller = QuillController.basic();
 
   @override
   void initState() {
@@ -188,24 +190,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
               indent: 16,
             ),
             SVPostTextComponent(
-              textStyle: TextStyle(
-                fontFamily: _fontFamily,
-                fontSize: _fontSize,
-                color: _fontColor,
-                fontWeight: _fontWeight,
-              ),
               onColorChange: () => changeColor,
               colorValue: currentColor,
               searchPeopleBloc: searchPeopleBloc,
             ),
-            DynamicTextFontWidget(onStyleChanged: (Map<String, dynamic> value) {
-              setState(() {
-                _fontFamily= value['fontFamily'];
-                _fontSize= value['fontSize'];
-                _fontColor= value['fontColor'];
-                _fontWeight= value['fontWeight'];
-              });
-            },),
             OtherFeatureComponent(
                 onColorChange: () => changeColor,
                 colorValue: currentColor,

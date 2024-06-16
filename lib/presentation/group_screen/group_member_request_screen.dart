@@ -50,7 +50,6 @@ class _GroupMemberRequestScreenState extends State<GroupMemberRequestScreen> {
           return MemberRequestItem(widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index],(){
             widget.groupBloc?.add(GroupMemberRequestUpdateEvent('${widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index].id??''}', widget.groupBloc?.groupDetailsModel?.group?.id??'', 'rejected'));
             widget.groupBloc?.groupMemberRequestModel?.groupMembers?.removeAt(index);
-
             setState(() {});
             },(){
 

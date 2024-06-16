@@ -9,6 +9,8 @@ import '../../core/utils/app/AppData.dart';
 import '../home_screen/utils/SVColors.dart';
 
 class EventsScreen extends StatefulWidget {
+  EventsScreen( this.id, {super.key});
+   String id;
   @override
   _EventsScreenState createState() => _EventsScreenState();
 }
@@ -99,9 +101,9 @@ class _EventsScreenState extends State<EventsScreen>
             child: TabBarView(
               controller: _tabController,
                 physics: const NeverScrollableScrollPhysics(),
-                children: [
+                children: const [
                   UpcomingEventsTab(),
-                        const Center(child: Text('Past Events')),
+                        Center(child: Text('Past Events')),
                   //
                  ]),
           ),
@@ -138,11 +140,13 @@ class _EventsScreenState extends State<EventsScreen>
 }
 
 class UpcomingEventsTab extends StatelessWidget {
+  const UpcomingEventsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(8.0),
-      children: [
+      children: const [
         EventCard(),
         EventCard(),
       ],
@@ -151,6 +155,8 @@ class UpcomingEventsTab extends StatelessWidget {
 }
 
 class EventCard extends StatelessWidget {
+  const EventCard({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Card(

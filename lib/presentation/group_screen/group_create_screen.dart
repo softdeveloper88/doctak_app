@@ -941,15 +941,15 @@ class _Step2State extends State<Step2> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            TextFieldEditWidget(
-              isEditModeMap: true,
-              icon: Icons.description,
-              index: 2,
-              maxLines: 1,
-              label: 'Add Admin:',
-              value:  widget.groupBloc.addAdmin,
-              onSave: (value)=> widget.groupBloc.addAdmin = value,
-            ),
+            // TextFieldEditWidget(
+            //   isEditModeMap: true,
+            //   icon: Icons.description,
+            //   index: 2,
+            //   maxLines: 1,
+            //   label: 'Add Admin:',
+            //   value:  widget.groupBloc.addAdmin,
+            //   onSave: (value)=> widget.groupBloc.addAdmin = value,
+            // ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(

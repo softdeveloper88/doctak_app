@@ -1,12 +1,16 @@
 // full_screen_image_page.dart
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../../core/utils/post_utils.dart';
 import '../../../../data/models/post_model/post_data_model.dart';
 import '../../fragments/home_main_screen/post_widget/video_player_widget.dart';
 import 'SVPostComponent.dart';
@@ -128,6 +132,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
                     items: widget.mediaUrls?.map((i) {
                       return Builder(builder: (BuildContext context) {
                         if (i['type'] == "image") {
+                          print(i['url']!);
                           return Stack(children: [
                             Center(
                               child: Image.network(
@@ -294,8 +299,14 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
     );
 
   }
-
+bool _isExpanded=false;
   Future<void> bottomSheetDialog() {
+    String fullText = widget.post.title ?? '' ?? '';
+    List<String> words = fullText.split(' ');
+    String textToShow = _isExpanded || words.length <= 25
+        ? fullText
+        : '${words.take(20).join(' ')}...';
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -327,41 +338,99 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
                   ),
                   child: SingleChildScrollView(
                     controller: scrollController,
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.minimize, color: Colors.white),
-                              onPressed: () {
-                                setState(() {
-                                  Navigator.of(context).pop();
-                                  // Future.microtask(() => bottomSheetDialogWithInitialSize(0.2));
-                                });
-                              },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.minimize, color: Colors.white),
+                                onPressed: () {
+                                  setState(() {
+                                    Navigator.of(context).pop();
+                                    // Future.microtask(() => bottomSheetDialogWithInitialSize(0.2));
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                          if(_isHtml(textToShow))  HtmlWidget(fullText, onTapUrl: (link) async {
+                            print('link $link');
+                            if (link.contains('doctak/jobs-detail')) {
+                              int jobID = Uri.parse(link).pathSegments.last.toInt();
+                              JobsDetailsScreen(
+                                jobId: jobID,
+                              ).launch(context);
+                            } else {
+                              PostUtils.launchURL(context, link);
+                            }
+                            return true;
+                          })
+
+                          else  Linkify(
+                            onOpen: (link) {
+                              if (link.url.contains('doctak/jobs-detail')) {
+                                int jobID =
+                                Uri.parse(link.url).pathSegments.last.toInt();
+                                JobsDetailsScreen(
+                                  jobId: jobID,
+                                ).launch(context);
+                              } else {
+                                PostUtils.launchURL(context, link.url);
+                              }
+                            },
+                            text: fullText,
+                            style: const TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                        Text(
-                          widget.post.title ?? '',
-                          style: const TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              "${widget.post.likes?.length ?? 0} likes",
-                              style: const TextStyle(color: Colors.white),
+                            linkStyle: const TextStyle(
+                              color: Colors.blue,
                             ),
-                            Text(
-                              "${widget.post.comments?.length ?? 0} comments",
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ],
+                            textAlign: TextAlign.left,
+                          ),
+                          // if (words.length > 25)
+                          //   TextButton(
+                          //     onPressed: () => setState(() {
+                          //       _isExpanded = !_isExpanded;
+                          //     }),
+                          //     child: Text(
+                          //       _isExpanded ? 'Show Less' : 'Show More',
+                          //       style: const TextStyle(
+                          //         color: Colors.white,
+                          //         shadows: [
+                          //           Shadow(
+                          //             offset: Offset(1.0, 1.0),
+                          //             blurRadius: 3.0,
+                          //             color: Color.fromARGB(255, 0, 0, 0),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //   ),
+                          // Text(
+                          //   widget.post.title ?? '',
+                          //   style: const TextStyle(color: Colors.white, fontSize: 20),
+                          // ),
+                            SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                "${widget.post.likes?.length ?? 0} likes",
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                "${widget.post.comments?.length ?? 0} comments",
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -371,5 +440,10 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
         );
       },
     );
+  }
+  bool _isHtml(String text) {
+    // Simple regex to check if the string contains HTML tags
+    final htmlTagPattern = RegExp(r'<[^>]*>');
+    return htmlTagPattern.hasMatch(text);
   }
 }

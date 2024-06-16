@@ -34,10 +34,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       var pickedfiles = await imgpicker.pickMultipleMedia();
       //you can use ImageCourse.camera for Camera capture
       if (pickedfiles != null) {
-        pickedfiles.forEach((element) {
+        for (var element in pickedfiles) {
           imagefiles.add(element);
           widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: element,isRemove: false));
-        });
+        }
         setState(() {});
       } else {
         print("No image is selected.");
@@ -150,55 +150,61 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      openImages();
-                    },
-                    child:  SizedBox(
-                      height: 32,
-                      width: 32,
-                      // color: context.cardColor,
-                      child:Icon(Icons.image_outlined,size: 32,color:svGetBodyColor(),),
-                      // Image.asset('images/socialv/icons/ic_CameraPost.png',
-                      //     height: 22, width: 22, fit: BoxFit.cover),
+              GestureDetector(
+                onTap: () {
+                  openImages();
+                },
+                child: Row(
+                  children: [
+
+                   SizedBox(
+                        height: 32,
+                        width: 32,
+                        // color: context.cardColor,
+                        child:Icon(Icons.image_outlined,size: 32,color:svGetBodyColor(),
+                        // Image.asset('images/socialv/icons/ic_CameraPost.png',
+                        //     height: 22, width: 22, fit: BoxFit.cover),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10,),
-                  Text('From Gallery',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
+                    const SizedBox(width: 10,),
+                    Text('From Gallery',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
 
-                ],
+                  ],
+                ),
               ),
               Divider(color: Colors.grey[300],),
-              Row(
-                children: <Widget>[
-                  GestureDetector(
-                      onTap: () {
-                        openVideo();
-                      },
-                      child: Image.asset('images/socialv/icons/ic_Video.png',
-                          color:svGetBodyColor(),
-                          height: 32, width: 32, fit: BoxFit.cover)),
-                  const SizedBox(width: 10,),
-                   Text('Take Video',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
-                ],
+              GestureDetector(
+                onTap: () {
+                  openVideo();
+                },
+                child: Row(
+                  children: <Widget>[
+
+                       Image.asset('images/socialv/icons/ic_Video.png',
+                            color:svGetBodyColor(),
+                            height: 32, width: 32, fit: BoxFit.cover),
+                    const SizedBox(width: 10,),
+                     Text('Take Video',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
+                  ],
+                ),
               ),
               Divider(color: Colors.grey[300],),
 
-              Row(
-                children: [
-                  GestureDetector(
-                      onTap: () {
-                        openCamera();
-                      },
-                      child: Image.asset('images/socialv/icons/ic_CameraPost.png',
-                          color:svGetBodyColor(),
-                          height: 32, width: 32, fit: BoxFit.cover)),
-                  const SizedBox(width: 10,),
-                  Text('Take Picture',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
+              GestureDetector(
+                  onTap: () {
+                    openCamera();
+                  },
+                child: Row(
+                  children: [
 
-                ],
+                         Image.asset('images/socialv/icons/ic_CameraPost.png',
+                            color:svGetBodyColor(),
+                            height: 32, width: 32, fit: BoxFit.cover),
+                    const SizedBox(width: 10,),
+                    Text('Take Picture',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
+
+                  ],
+                ),
               ),
               Divider(color: Colors.grey[300],),
 

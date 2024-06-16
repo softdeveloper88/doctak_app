@@ -3,6 +3,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/group_model/group_about_model.dart';
 import 'package:doctak_app/data/models/group_model/group_details_model.dart';
+import 'package:doctak_app/data/models/group_model/group_list_model.dart';
 import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
 import 'package:doctak_app/data/models/group_model/group_post_model.dart';
 import 'package:doctak_app/main.dart';
@@ -41,11 +42,13 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   GroupPostModel? groupPostModelRequest;
   GroupMemberRequestModel? groupMemberModel;
   GroupPostModel? groupPostModel;
+  GroupListModel? groupListModel;
   GroupBloc() : super(DataInitial()) {
     on<UpdateSpecialtyDropdownValue>(_updateSpecialtyDropdownValues);
     on<UpdateSpecialtyDropdownValue1>(_createGroup);
     on<GroupDetailsEvent>(_groupDetails);
     on<GroupMemberRequestEvent>(_groupMemberRequest);
+    on<ListGroupsEvent>(_listGroups);
     on<GroupMembersEvent>(_groupMembers);
     on<GroupMemberRequestUpdateEvent>(_groupMemberRequestUpdate);
     on<GroupNotificationEvent>(_groupNotification);
@@ -71,6 +74,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     groupPostModel = await postService.groupPost( 'Bearer ${AppData.userToken}', event.id,'0');
     var response = await postService.groupNotificationUpdate( 'Bearer ${AppData.userToken}', 'get','','');
     print(response);
+    print(AppData.logInUserId);
     emit(PaginationLoadedState(
       [],
       '',
@@ -129,6 +133,17 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     print(    event.status);
     var response = await postService.groupMemberRequestUpdate( 'Bearer ${AppData.userToken}', event.id,event.groupId,event.status);
     print(response.data);
+    emit(PaginationLoadedState(
+      [],
+      '',
+    ));
+  }
+  void _listGroups(
+      ListGroupsEvent event, Emitter<GroupState> emit) async {
+
+    emit(PaginationLoadingState());
+
+     groupListModel = await postService.listGroup( 'Bearer ${AppData.userToken}', AppData.logInUserId);
     emit(PaginationLoadedState(
       [],
       '',

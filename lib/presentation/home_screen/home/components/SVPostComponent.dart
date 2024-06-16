@@ -12,8 +12,10 @@ import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../fragments/home_main_screen/post_widget/post_media_widget.dart';
@@ -159,28 +161,16 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                          widget
-                                                                  .homeBloc
-                                                                  .postList[
-                                                                      index]
-                                                                  .user
-                                                                  ?.name ??
-                                                              '',
-                                                          style:
-                                                              boldTextStyle()),
-                                                      const SizedBox(
-                                                        width: 4,
-                                                      ),
-                                                      Image.asset(
+                                                  TextIcon(
+                                                     text: widget.homeBloc.postList[index].user?.name ??
+                                                          '',
+                                                      suffix: Image.asset(
                                                           'images/socialv/icons/ic_TickSquare.png',
                                                           height: 14,
                                                           width: 14,
                                                           fit: BoxFit.cover),
-                                                    ],
-                                                  ),
+                                                      textStyle:
+                                                          boldTextStyle()),
                                                   Row(
                                                     children: [
                                                       Text(
@@ -885,61 +875,88 @@ class _SVPostComponentState extends State<SVPostComponent> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
-                  Linkify(
-                    onOpen: (link) {
-                      if (link.url.contains('doctak/jobs-detail')) {
-                        int jobID =
-                            Uri.parse(link.url).pathSegments.last.toInt();
-                        JobsDetailsScreen(
-                          jobId: jobID,
-                        ).launch(context);
-                      } else {
-                        PostUtils.launchURL(context, link.url);
-                      }
-                    },
-                    text: textToShow,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      color: (image?.isNotEmpty == true ||
-                              media?.isNotEmpty == true)
-                          ? Colors.black
-                          : Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    linkStyle: const TextStyle(
-                      color: Colors.blue,
-                    ),
-                    textAlign: TextAlign.left,
-                  )
+                if(_isHtml(textToShow))  HtmlWidget(textToShow, onTapUrl: (link) async {
+                    print('link $link');
+                    if (link.contains('doctak/jobs-detail')) {
+                      int jobID = Uri.parse(link).pathSegments.last.toInt();
+                      JobsDetailsScreen(
+                        jobId: jobID,
+                      ).launch(context);
+                    } else {
+                      PostUtils.launchURL(context, link);
+                    }
+                    return true;
+                  })
+
+              else  Linkify(
+                  onOpen: (link) {
+                    if (link.url.contains('doctak/jobs-detail')) {
+                      int jobID =
+                          Uri.parse(link.url).pathSegments.last.toInt();
+                      JobsDetailsScreen(
+                        jobId: jobID,
+                      ).launch(context);
+                    } else {
+                      PostUtils.launchURL(context, link.url);
+                    }
+                  },
+                  text: textToShow,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: (image?.isNotEmpty == true ||
+                            media?.isNotEmpty == true)
+                        ? Colors.black
+                        : Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  linkStyle: const TextStyle(
+                    color: Colors.blue,
+                  ),
+                  textAlign: TextAlign.left,
+                )
                 else
-                  SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: Linkify(
-                        onOpen: (link) {
-                          if (link.url.contains('doctak/jobs-detail')) {
+                if(_isHtml(textToShow))  SizedBox(
+                      height: 200,
+                      child: Center(
+                          child: HtmlWidget(
+                       textToShow,
+                        onTapUrl: (link) async {
+                          print(link);
+                          if (link.contains('doctak/jobs-detail')) {
                             int jobID =
-                                Uri.parse(link.url).pathSegments.last.toInt();
+                                Uri.parse(link).pathSegments.last.toInt();
                             JobsDetailsScreen(
                               jobId: jobID,
                             ).launch(context);
                           } else {
-                            PostUtils.launchURL(context, link.url);
+                            PostUtils.launchURL(context, link);
                           }
+                          return true;
                         },
-                        text: textToShow,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        linkStyle: const TextStyle(
-                          color: Colors.blue,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
+                      ))) else Linkify(
+                  onOpen: (link) {
+                    if (link.url.contains('doctak/jobs-detail')) {
+                      int jobID =
+                          Uri.parse(link.url).pathSegments.last.toInt();
+                      JobsDetailsScreen(
+                        jobId: jobID,
+                      ).launch(context);
+                    } else {
+                      PostUtils.launchURL(context, link.url);
+                    }
+                  },
+                  text: textToShow,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
                   ),
+                  linkStyle: const TextStyle(
+                    color: Colors.blue,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+
                 if (words.length > 25)
                   TextButton(
                     onPressed: () => setState(() {
@@ -966,7 +983,11 @@ class _SVPostComponentState extends State<SVPostComponent> {
       },
     );
   }
-
+  bool _isHtml(String text) {
+    // Simple regex to check if the string contains HTML tags
+    final htmlTagPattern = RegExp(r'<[^>]*>');
+    return htmlTagPattern.hasMatch(text);
+  }
   Widget _buildMediaContent(context, index) {
     return PostMediaWidget(
         mediaList: widget.homeBloc.postList[index].media ?? [],
@@ -996,7 +1017,33 @@ class _SVPostComponentState extends State<SVPostComponent> {
 
   bool _isExpanded = false;
 }
+class TextIcon extends StatelessWidget {
+  final String text;
+  final Widget suffix;
+  final TextStyle textStyle;
 
+  TextIcon({
+    required this.text,
+    required this.suffix,
+    required this.textStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(width: 40.w,
+          child: Text(
+            text,
+            style: textStyle,
+            overflow: TextOverflow.fade,
+          ),
+        ),
+        suffix,
+      ],
+    );
+  }
+}
 bool findIsLiked(post) {
   for (var like in post ?? []) {
     if (like.userId == AppData.logInUserId) {
