@@ -772,8 +772,11 @@ class _SearchScreenState extends State<SearchScreen>
                           Row(
                             children: [
                               Expanded(
-                                child: HtmlWidget(
-                                  '<p>${bloc.drugsData[index].description}</p>',
+                                child: Container(
+                                  color: Colors.white,
+                                  child: HtmlWidget(
+                                    '<p>${bloc.drugsData[index].description}</p>',
+                                  ),
                                 ),
                               ),
                             ],

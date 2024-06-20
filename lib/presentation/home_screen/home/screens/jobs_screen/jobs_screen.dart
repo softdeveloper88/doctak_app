@@ -743,9 +743,13 @@ class _JobsScreenState extends State<JobsScreen> {
                                       )),
                                   const SizedBox(height: 5),
                                   SingleChildScrollView(
+                                    clipBehavior: Clip.hardEdge,
                                     scrollDirection: Axis.horizontal,
-                                    child: HtmlWidget(
-                                      '<p>${bloc.drugsData[index].description}</p>',
+                                    child: Container(
+                                      color: Colors.white,
+                                      child: HtmlWidget(
+                                        '<p>${bloc.drugsData[index].description}</p>',
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 5),

@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> init() async {
     setStatusBarColor(Colors.transparent);
-    await 3.seconds.delay;
+    await 1.seconds.delay;
     finish(context);
     BlocProvider.of<SplashBloc>(context).add(
       LoadDropdownData('', '', '', ''),
@@ -36,7 +36,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
     initializeAsync();
   }
-
   void initializeAsync() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -70,22 +69,22 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.currency = currency;
     }
     if (userToken != null) {
-      Future.delayed(const Duration(seconds: 2), () {
+       //Future.delayed(const Duration(seconds: 1), () {
         // Navigator.pushReplacement(
         //   context,
         //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
         // );
         const SVDashboardScreen().launch(context,isNewTask: true);
-      });
+      // });
     } else {
-      Future.delayed(const Duration(seconds: 3), () {
+      // Future.delayed(const Duration(seconds: 1), () {
         LoginScreen().launch(context, isNewTask: true);
 
         // Navigator.pushReplacement(
         //   context,
         //   MaterialPageRoute(builder: (context) => const SignInScreen()), // Navigate to OnboardingScreen
         // );
-      });
+      // });
     }
   }
 

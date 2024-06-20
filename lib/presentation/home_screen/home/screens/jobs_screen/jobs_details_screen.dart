@@ -207,9 +207,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         const SizedBox(height: 5),
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
-                          child: HtmlWidget(
-                            textStyle: GoogleFonts.poppins(color: svGetBodyColor(),),
-                            '<p>${jobsBloc.jobDetailModel.job?.description}</p>',
+                          clipBehavior: Clip.hardEdge,
+                          child: Container(
+                            color: Colors.white,
+                            child: HtmlWidget(
+                              textStyle: GoogleFonts.poppins(color: svGetBodyColor(),),
+                              '<p>${jobsBloc.jobDetailModel.job?.description}</p>',
+                            ),
                           ),
                         ),
                         const SizedBox(height: 5),

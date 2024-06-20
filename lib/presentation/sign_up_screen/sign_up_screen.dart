@@ -698,6 +698,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   /// Displays a dialog with the [SignUpSuccessDialog] content.
   onTapSignUp(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+    }
     print(emailController.text.toString());
     if (widget.isSocialLogin == false) {
       if (passwordController.text != confirmPasswordController.text) {

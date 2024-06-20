@@ -23,6 +23,7 @@ import 'package:http/http.dart' as http;
 import 'package:sizer/sizer.dart';
 
 import '../../core/utils/app/AppData.dart';
+import '../../widgets/error_dialog.dart';
 import '../home_screen/utils/SVCommon.dart';
 import 'bloc/login_bloc.dart';
 
@@ -39,7 +40,7 @@ class LoginScreen extends StatelessWidget {
       barrierDismissible: false, // Disallow dismissing while loading
       builder: (BuildContext context) {
         return  SimpleDialog(
-          title: Text('Sending Verification Link'),
+          title: const Text('Sending Verification Link'),
           children: [
             Center(
               child: CircularProgressIndicator(color: svGetBodyColor(),),
@@ -139,6 +140,7 @@ class LoginScreen extends StatelessWidget {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -171,7 +173,7 @@ class LoginScreen extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (BuildContext context) => SVDashboardScreen(),
+                      builder: (BuildContext context) => const SVDashboardScreen(),
                     ),
                   );
                   // Navigate to the home screen or perform desired action
@@ -226,6 +228,7 @@ class LoginScreen extends StatelessWidget {
                       backgroundColor: Colors.red,
                     ),
                   );
+
                 }
               },
               child: SizedBox(
@@ -237,7 +240,7 @@ class LoginScreen extends StatelessWidget {
                           key: _formKey,
                           child: Container(
                               width: double.maxFinite,
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 24, vertical: 39),
                               child: Column(children: [
                                 CustomTextFormField(
@@ -247,7 +250,7 @@ class LoginScreen extends StatelessWidget {
                                         .msg_enter_your_email,
                                     textInputType: TextInputType.emailAddress,
                                     prefix: Container(
-                                        margin: EdgeInsets.fromLTRB(
+                                        margin: const EdgeInsets.fromLTRB(
                                             24, 16, 16, 16),
                                         child: CustomImageView(
                                             color: Colors.blueGrey,
@@ -256,21 +259,19 @@ class LoginScreen extends StatelessWidget {
                                             height: 24,
                                             width: 24)),
                                     prefixConstraints:
-                                        BoxConstraints(maxHeight: 56),
+                                        const BoxConstraints(maxHeight: 56),
                                     validator: (value) {
-                                      if (value == null ||
-                                          (!isValidEmail(value,
-                                              isRequired: true))) {
+                                      if (value == null || (!isValidEmail(value, isRequired: true))) {
                                         return translation(context)
                                             .err_msg_please_enter_valid_email;
                                       }
                                       return null;
                                     },
-                                    contentPadding: EdgeInsets.only(
+                                    contentPadding: const EdgeInsets.only(
                                         top: 18,
                                         right: 30,
                                         bottom: 18)),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 BlocBuilder<LoginBloc, LoginState>(
                                     bloc: loginBloc,
                                     builder: (context, state) {
@@ -286,7 +287,7 @@ class LoginScreen extends StatelessWidget {
                                           textInputType:
                                               TextInputType.visiblePassword,
                                           prefix: Container(
-                                              margin: EdgeInsets.fromLTRB(
+                                              margin: const EdgeInsets.fromLTRB(
                                                   24, 16, 16, 16),
                                               child: CustomImageView(
                                                   color: Colors.blueGrey,
@@ -294,17 +295,17 @@ class LoginScreen extends StatelessWidget {
                                                       .imgLocation,
                                                   height: 24,
                                                   width: 24)),
-                                          prefixConstraints: BoxConstraints(maxHeight: 56),
+                                          prefixConstraints: const BoxConstraints(maxHeight: 56),
                                           suffix: InkWell(
                                               onTap: () {
                                                 loginBloc.add(ChangePasswordVisibilityEvent(value: !state.isShowPassword));
 
                                               },
                                               child: Container(
-                                                  margin: EdgeInsets.fromLTRB(
+                                                  margin: const EdgeInsets.fromLTRB(
                                                       30, 16, 24, 16),
                                                   child:  state.isShowPassword
-                                                      ? Icon(
+                                                      ? const Icon(
                                                     Icons
                                                         .visibility_off,
                                                     color:
@@ -312,7 +313,7 @@ class LoginScreen extends StatelessWidget {
                                                     size:
                                                     24,
                                                   )
-                                                      : Icon(
+                                                      : const Icon(
                                                     Icons
                                                         .visibility,
                                                     color:
@@ -321,7 +322,7 @@ class LoginScreen extends StatelessWidget {
                                                     24,
                                                   ))),
                                           suffixConstraints:
-                                              BoxConstraints(maxHeight: 56),
+                                              const BoxConstraints(maxHeight: 56),
                                           validator: (value) {
                                             if (value == null ||
                                                 (!isValidPassword(value,
@@ -333,7 +334,7 @@ class LoginScreen extends StatelessWidget {
                                           },
                                           obscureText: state.isShowPassword);
                                     }),
-                                SizedBox(height: 10),
+                                const SizedBox(height: 10),
                                 Align(
                                     alignment: Alignment.centerRight,
                                     child: GestureDetector(
@@ -345,11 +346,14 @@ class LoginScreen extends StatelessWidget {
                                                 .msg_forgot_password,
                                             style: CustomTextStyles
                                                 .titleSmallPrimary))),
-                                SizedBox(height: 32),
+                                const SizedBox(height: 32),
                                 svAppButton(
                                   context: context,
                                   text: 'LOGIN',
                                   onTap: () {
+                                    if (_formKey.currentState!.validate()) {
+                                      _formKey.currentState!.save();
+                                    }
                                     loginBloc.add(
                                       LoginButtonPressed(
                                         username: emailController.text,
@@ -360,14 +364,14 @@ class LoginScreen extends StatelessWidget {
                                     );
                                   },
                                 ),
-                                SizedBox(height: 25),
+                                const SizedBox(height: 25),
                                 Align(
                                     alignment: Alignment.centerLeft,
                                     child: Padding(
-                                        padding: EdgeInsets.only(left: 48),
+                                        padding: const EdgeInsets.only(left: 48),
                                         child: Row(children: [
                                           Padding(
-                                              padding: EdgeInsets.only(
+                                              padding: const EdgeInsets.only(
                                                   bottom: 1),
                                               child: Text(
                                                   translation(context)
@@ -379,7 +383,7 @@ class LoginScreen extends StatelessWidget {
                                                 onTapTxtSignUp(context);
                                               },
                                               child: Padding(
-                                                  padding: EdgeInsets.only(
+                                                  padding: const EdgeInsets.only(
                                                       left: 4),
                                                   child: Text(
                                                       translation(context)
@@ -387,11 +391,11 @@ class LoginScreen extends StatelessWidget {
                                                       style: CustomTextStyles
                                                           .titleSmallPrimarySemiBold)))
                                         ]))),
-                                SizedBox(height: 34),
+                                const SizedBox(height: 34),
                                 _buildORDivider(context),
-                                SizedBox(height: 29),
+                                const SizedBox(height: 29),
                                 _buildSocial(context),
-                                SizedBox(height: 5)
+                                const SizedBox(height: 5)
                               ]))))))),
     );
   }
@@ -421,13 +425,13 @@ class LoginScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
+          const Padding(
               padding: EdgeInsets.only(top: 8, bottom: 9),
-              child: SizedBox(width: 137, child: const Divider())),
+              child: SizedBox(width: 137, child: Divider())),
           Text(translation(context).lbl_or, style: theme.textTheme.bodyLarge),
-          Padding(
+          const Padding(
               padding: EdgeInsets.only(top: 8, bottom: 9),
-              child: SizedBox(width: 137, child: const Divider()))
+              child: SizedBox(width: 137, child: Divider()))
         ]);
   }
 
@@ -437,7 +441,7 @@ class LoginScreen extends StatelessWidget {
       CustomOutlinedButton(
           text: translation(context).msg_sign_in_with_google,
           leftIcon: Container(
-              margin: EdgeInsets.only(right: 20),
+              margin: const EdgeInsets.only(right: 20),
               child: CustomImageView(
                   color: Colors.red,
                   imagePath: ImageConstant.imgGoogle,
@@ -447,7 +451,7 @@ class LoginScreen extends StatelessWidget {
             onPressedGoogleLogin();
             // onTapSignInWithGoogle(context);
           }),
-      SizedBox(height: 16),
+      const SizedBox(height: 16),
      if(Platform.isIOS) CustomOutlinedButton(
           onPressed: () {
             signInWithApple();
