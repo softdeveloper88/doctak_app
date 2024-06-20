@@ -124,6 +124,13 @@ class ForgotPassword extends StatelessWidget {
                                   context: context,
                                   text: 'SEND',
                                   onTap: () {
+                                    if(emailController.text.isEmpty){
+                                      return;
+                                    }
+                                    if (_formKey.currentState!.validate()) {
+                                      _formKey.currentState!.save();
+                                    }
+
                                     forgotBloc.add(
                                       ForgotPasswordEvent(
                                         username: emailController.text,

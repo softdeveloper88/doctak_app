@@ -8,11 +8,13 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:url_launcher/url_launcher.dart';
@@ -152,22 +154,19 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       children: [
                                         CachedNetworkImage(
                                           imageUrl:
-                                              "${AppData.imageUrl}${widget.profileBloc.postList[index].user?.profilePic!.validate()}",
+                                          "${AppData.imageUrl}${widget.profileBloc.postList[index].user?.profilePic!.validate()}",
                                           height: 50,
                                           width: 50,
                                           fit: BoxFit.cover,
                                         ).cornerRadiusWithClipRRect(20),
                                         12.width,
                                         Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
                                                 Text(
-                                                    widget
-                                                            .profileBloc
-                                                            .postList[index]
+                                                    widget.profileBloc.postList[index]
                                                             .user
                                                             ?.name ??
                                                         '',
@@ -215,8 +214,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                             MainAxisAlignment.end,
                                         children: [
                                           if (widget.profileBloc.postList[index]
-                                                  .userId ==
-                                              AppData.logInUserId)
+                                              .userId == AppData.logInUserId)
                                             PopupMenuButton(
                                               itemBuilder: (context) {
                                                 return [
@@ -268,8 +266,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                         .isNotEmpty
                                     ? _buildPlaceholderWithoutFile(
                                         context,
-                                        widget.profileBloc.postList[index]
-                                                .title ??
+                                        widget.profileBloc.postList[index].title ??
                                             '',
                                         widget.profileBloc.postList[index]
                                                 .backgroundColor ??
@@ -304,12 +301,10 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                          '${widget.profileBloc.postList[index].likes?.length ?? 0.validate()} Likes',
+                                      Text('${widget.profileBloc.postList[index].likes?.length ?? 0.validate()} Likes',
                                           style: secondaryTextStyle(
                                               color: svGetBodyColor())),
-                                      Text(
-                                          '${widget.profileBloc.postList[index].comments?.length ?? 0.validate()} comments',
+                                      Text('${widget.profileBloc.postList[index].comments?.length ?? 0.validate()} comments',
                                           style: secondaryTextStyle(
                                               color: svGetBodyColor())),
                                     ],
@@ -556,13 +551,121 @@ class _MyPostComponentState extends State<MyPostComponent> {
 
     Color bgColor = PostUtils.HexColor(backgroundColor);
 
-    Color textColor = contrastingTextColor(bgColor);
+    Color textColor = PostUtils.contrastingTextColor(bgColor);
+    // return LayoutBuilder(
+    //   builder: (context, constraints) {
+    //     return DecoratedBox(
+    //       decoration: BoxDecoration(
+    //         color: bgColor,
+    //         borderRadius: BorderRadius.circular(10.0),
+    //       ),
+    //       child: Padding(
+    //         padding: const EdgeInsets.all(8.0),
+    //         child: Column(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           crossAxisAlignment: CrossAxisAlignment.stretch,
+    //           children: [
+    //             if ((image?.isNotEmpty == true) || media?.isNotEmpty == true)
+    //               if (words.length > 25 ) Linkify(
+    //               onOpen: (link) => PostUtils.launchURL(context,link.url),
+    //               text: textToShow,
+    //               style: TextStyle(
+    //                 fontSize: 14.0,
+    //                 color: textColor, // Apply the contrasting text color
+    //                 fontWeight: FontWeight.bold,
+    //               ),
+    //               linkStyle: const TextStyle(
+    //                 color: Colors.blue,
+    //                 // You may want to adjust this color too
+    //                 // shadows: [
+    //                 //   Shadow(
+    //                 //     offset: Offset(1.0, 1.0),
+    //                 //     blurRadius: 3.0,
+    //                 //     color: Color.fromARGB(255, 0, 0, 0),
+    //                 //   ),
+    //                 // ],
+    //               ),
+    //               textAlign: TextAlign.left,
+    //             ) else SizedBox(
+    //               height: 200,
+    //               child: Center(
+    //                 child: Linkify(
+    //                   onOpen: (link) => PostUtils.launchURL(context,link.url),
+    //                   text: textToShow,
+    //                   style: TextStyle(
+    //                     fontSize: 14.0,
+    //                     color: textColor, // Apply the contrasting text color
+    //                     fontWeight: FontWeight.bold,
+    //                   ),
+    //                   linkStyle: const TextStyle(
+    //                     color: Colors.blue,
+    //                     // You may want to adjust this color too
+    //                     // shadows: [
+    //                     //   Shadow(
+    //                     //     offset: Offset(1.0, 1.0),
+    //                     //     blurRadius: 3.0,
+    //                     //     color: Color.fromARGB(255, 0, 0, 0),
+    //                     //   ),
+    //                     // ],
+    //                   ),
+    //                   textAlign: TextAlign.left,
+    //                 ),
+    //               ),
+    //             )else Linkify(
+    //               onOpen: (link) => PostUtils.launchURL(context,link.url),
+    //               text: textToShow,
+    //               style: TextStyle(
+    //                 fontSize: 14.0,
+    //                 color: textColor, // Apply the contrasting text color
+    //                 fontWeight: FontWeight.bold,
+    //               ),
+    //               linkStyle: const TextStyle(
+    //                 color: Colors.blue,
+    //                 // You may want to adjust this color too
+    //                 // shadows: [
+    //                 //   Shadow(
+    //                 //     offset: Offset(1.0, 1.0),
+    //                 //     blurRadius: 3.0,
+    //                 //     color: Color.fromARGB(255, 0, 0, 0),
+    //                 //   ),
+    //                 // ],
+    //               ),
+    //               textAlign: TextAlign.left,
+    //             ),
+    //             if (words.length > 25)
+    //               TextButton(
+    //                 onPressed: () => setState(() {
+    //                   _isExpanded = !_isExpanded;
+    //
+    //                 }),
+    //                 child: Text(
+    //                   _isExpanded ? 'Show Less' : 'Show More',
+    //                   style: TextStyle(
+    //                     color: textColor, // Apply the contrasting text color
+    //                     shadows: const [
+    //                       Shadow(
+    //                         offset: Offset(1.0, 1.0),
+    //                         blurRadius: 3.0,
+    //                         color: Color.fromARGB(255, 0, 0, 0),
+    //                       ),
+    //                     ],
+    //                   ),
+    //                 ),
+    //               ),
+    //           ],
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // );
     return LayoutBuilder(
       builder: (context, constraints) {
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(10.0),
+            color: (image?.isNotEmpty == true || media?.isNotEmpty == true)
+                ? Colors.white
+                : bgColor,
+            borderRadius: BorderRadius.circular(5.0),
           ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -571,8 +674,76 @@ class _MyPostComponentState extends State<MyPostComponent> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
-                  Linkify(
-                    onOpen: (link) => _launchURL(context, link.url),
+                  if(_isHtml(textToShow))  HtmlWidget(textToShow, onTapUrl: (link) async {
+                    print('link $link');
+                    if (link.contains('doctak/jobs-detail')) {
+                      int jobID = Uri.parse(link).pathSegments.last.toInt();
+                      JobsDetailsScreen(
+                        jobId: jobID,
+                      ).launch(context);
+                    } else {
+                      PostUtils.launchURL(context, link);
+                    }
+                    return true;
+                  })
+
+                  else  Linkify(
+                    onOpen: (link) {
+                      if (link.url.contains('doctak/jobs-detail')) {
+                        int jobID =
+                        Uri.parse(link.url).pathSegments.last.toInt();
+                        JobsDetailsScreen(
+                          jobId: jobID,
+                        ).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link.url);
+                      }
+                    },
+                    text: textToShow,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: (image?.isNotEmpty == true ||
+                          media?.isNotEmpty == true)
+                          ? Colors.black
+                          : Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    linkStyle: const TextStyle(
+                      color: Colors.blue,
+                    ),
+                    textAlign: TextAlign.left,
+                  )
+                else
+                  if(_isHtml(textToShow))  SizedBox(
+                      height: 200,
+                      child: Center(
+                          child: HtmlWidget(
+                            textToShow,
+                            onTapUrl: (link) async {
+                              print(link);
+                              if (link.contains('doctak/jobs-detail')) {
+                                int jobID =
+                                Uri.parse(link).pathSegments.last.toInt();
+                                JobsDetailsScreen(
+                                  jobId: jobID,
+                                ).launch(context);
+                              } else {
+                                PostUtils.launchURL(context, link);
+                              }
+                              return true;
+                            },
+                          ))) else Linkify(
+                    onOpen: (link) {
+                      if (link.url.contains('doctak/jobs-detail')) {
+                        int jobID =
+                        Uri.parse(link.url).pathSegments.last.toInt();
+                        JobsDetailsScreen(
+                          jobId: jobID,
+                        ).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link.url);
+                      }
+                    },
                     text: textToShow,
                     style: TextStyle(
                       fontSize: 14.0,
@@ -583,26 +754,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
                       color: Colors.blue,
                     ),
                     textAlign: TextAlign.left,
-                  )
-                else
-                  SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: Linkify(
-                        onOpen: (link) => _launchURL(context, link.url),
-                        text: textToShow,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        linkStyle: const TextStyle(
-                          color: Colors.blue,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
                   ),
+
                 if (words.length > 25)
                   TextButton(
                     onPressed: () => setState(() {
@@ -628,6 +781,12 @@ class _MyPostComponentState extends State<MyPostComponent> {
         );
       },
     );
+  }
+
+  bool _isHtml(String text) {
+    // Simple regex to check if the string contains HTML tags
+    final htmlTagPattern = RegExp(r'<[^>]*>');
+    return htmlTagPattern.hasMatch(text);
   }
 
   Widget _buildMediaContent(context, index) {
