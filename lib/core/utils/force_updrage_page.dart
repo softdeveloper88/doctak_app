@@ -54,24 +54,8 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
     }
   }
 
-  void _checkAppVersion() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+  Future<void> _checkAppVersion() async {
       if (packageInfo != null) {
-        // final appVersion = _getExtendedVersionNumber(packageInfo!.version);
-
-        // final requiredMinVersion = _getExtendedVersionNumber(featureFlagRepository.getRequiredMinimumVersion());
-
-        // final recommendedMinVersion = _getExtendedVersionNumber(featureFlagRepository.getRecommendedMinimumVersion());
-        //         {
-        //       "success": true,
-        //   "data": {
-        //   "platform": "iOS",
-        //   "version": "1.0.0",
-        //   "mandatory": 0,
-        //   "message": "New Update Available.",
-        //   "update_url": null
-        // }
-        // }
         final latestVersionInfo = await fetchLatestVersion();
         final latestVersion = latestVersionInfo['data']['version'];
         final mandatory = latestVersionInfo['data']['mandatory'];
@@ -85,12 +69,12 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
         print(version1);
         print(version2);
 
-        if (version1 < version2) {
+        if (version1 < version2 && mandatory==1) {
         setState(() {
           isSkippible = false;
           isUpdateAvailable = true;
         });
-        }else if (version1 > version2 && mandatory==0) {
+        }else if (version1 < version2 && mandatory==0) {
           setState(() {
             isSkippible = true;
             isUpdateAvailable = true;
@@ -112,14 +96,9 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
         // Handle the case where packageInfo is null
         // You can display a loading indicator or handle it in some other way
       }
-     });
+
   }
 
-  int _getExtendedVersionNumber(String version) {
-    List versionCells = version.split('.');
-    versionCells = versionCells.map((i) => int.parse(i)).toList();
-    return versionCells[0] - 100000 + versionCells[1] - 1000 + versionCells[2];
-  }
 
   void _launchAppOrPlayStore() {
     final appId = Platform.isAndroid ? packageInfo!.packageName : '6448684340';

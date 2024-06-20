@@ -156,7 +156,7 @@ class LoginScreen extends StatelessWidget {
                     showVerifyMessage(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('hello'),
+                        content: Text(''),
                         backgroundColor: Colors.green,
                       ),
                     );

@@ -5,7 +5,6 @@ import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-
 import '../../../../localization/app_localization.dart';
 import '../../../chat_gpt_screen/ChatDetailScreen.dart';
 import '../../utils/SVColors.dart';
