@@ -689,7 +689,7 @@ class _Step1State extends State<Step1> {
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
-              label: 'Name:',
+              label: 'Group Name:',
               value: widget.groupBloc.name,
               // onFieldSubmitted: (value) => widget.groupBloc.name = value,
               onSave: (value) => widget.groupBloc.name = value,

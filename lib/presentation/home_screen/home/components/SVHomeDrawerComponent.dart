@@ -211,6 +211,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       } else if (selectedIndex == 5) {
                         finish(context);
                         print(selectedIndex);
+                        const ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
                       } else if (selectedIndex == 6) {

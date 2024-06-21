@@ -48,7 +48,7 @@ class _JobsScreenState extends State<JobsScreen> {
   void initState() {
     jobsBloc.add(
       JobLoadPageEvent(
-          page: 1, countryId: '1', isExpired: 'New', searchTerm: ''),
+          page: 1, countryId: '', isExpired: 'New', searchTerm: ''),
     );
     profileBloc.add(UpdateSpecialtyDropdownValue1(''));
     super.initState();
@@ -67,7 +67,7 @@ class _JobsScreenState extends State<JobsScreen> {
 
   var selectedValue;
   bool isShownSuggestion = false;
-  bool isSearchShow = false;
+  bool isSearchShow = true;
   int selectedIndex = 0;
 
   Future<void> _launchInBrowser(Uri url) async {

@@ -31,7 +31,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
 
   late final ScrollController _scrollController;
   DrugsBloc drugsBloc = DrugsBloc();
-  bool isSearchShow = false;
+  bool isSearchShow = true;
 
   @override
   void initState() {

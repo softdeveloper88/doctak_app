@@ -29,7 +29,7 @@ class GuidelinesScreen extends StatefulWidget {
 
 class _GuidelinesScreenState extends State<GuidelinesScreen> {
   Timer? _debounce;
-  bool isSearchShow = false;
+  bool isSearchShow = true;
 
   @override
   void dispose() {

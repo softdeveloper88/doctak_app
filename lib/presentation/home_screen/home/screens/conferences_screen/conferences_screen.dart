@@ -28,7 +28,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
   var selectedValue;
   ConferenceBloc conferenceBloc = ConferenceBloc();
   Timer? _debounce;
-  bool isSearchShow = false;
+  bool isSearchShow = true;
 
   @override
   void dispose() {
@@ -41,7 +41,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
     // var bloc = BlocProvider.of<ConferenceBloc>(context);
     conferenceBloc.add(LoadPageEvent(
       page: 1,
-      countryName: 'Pakistan',
+      countryName: '',
       searchTerm: '',
     ));
     super.initState();
@@ -225,7 +225,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                 },
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: 'Search Here',
+                                  hintText: 'Search Conferences',
                                   hintStyle: secondaryTextStyle(
                                       color: svGetBodyColor()),
                                   suffixIcon: Image.asset(
@@ -285,7 +285,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                   );
                 } else {
                   return const Expanded(
-                      child: Center(child: Text('Something went wrong')));
+                      child: Center(child: Text('')));
                 }
               },
             ),
