@@ -7,12 +7,14 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/b
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
@@ -158,46 +160,50 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                               ).cornerRadiusWithClipRRect(20),
                                               12.width,
                                               Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    TextIcon(
-                                                       text: widget.homeBloc.postList[index].user?.name ??
-                                                            '',
-                                                        suffix: Image.asset(
-                                                            'images/socialv/icons/ic_TickSquare.png',
-                                                            height: 14,
-                                                            width: 14,
-                                                            fit: BoxFit.cover),
-                                                        textStyle:
-                                                            boldTextStyle()),
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                            timeAgo.format(DateTime
-                                                                .parse(widget
-                                                                    .homeBloc
-                                                                    .postList[
-                                                                        index]
-                                                                    .createdAt!)),
-                                                            style: secondaryTextStyle(
-                                                                color:
-                                                                    svGetBodyColor(),
-                                                                size: 12)),
-                                                        const Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 8.0),
-                                                          child: Icon(
-                                                            Icons.access_time,
-                                                            size: 20,
-                                                            color: Colors.grey,
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  TextIcon(
+                                                      text: widget
+                                                              .homeBloc
+                                                              .postList[index]
+                                                              .user
+                                                              ?.name ??
+                                                          '',
+                                                      suffix: Image.asset(
+                                                          'images/socialv/icons/ic_TickSquare.png',
+                                                          height: 14,
+                                                          width: 14,
+                                                          fit: BoxFit.cover),
+                                                      textStyle:
+                                                          boldTextStyle()),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                          timeAgo.format(DateTime
+                                                              .parse(widget
+                                                                  .homeBloc
+                                                                  .postList[
+                                                                      index]
+                                                                  .createdAt!)),
+                                                          style: secondaryTextStyle(
+                                                              color:
+                                                                  svGetBodyColor(),
+                                                              size: 12)),
+                                                      const Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 8.0),
+                                                        child: Icon(
+                                                          Icons.access_time,
+                                                          size: 20,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
                                               4.width,
                                             ],
                                           ).paddingSymmetric(horizontal: 16),
@@ -300,10 +306,21 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                              '${widget.homeBloc.postList[index].likes?.length ?? 0.validate()} Likes',
-                                              style: secondaryTextStyle(
-                                                  color: svGetBodyColor())),
+                                          GestureDetector(
+                                            onTap: () {
+                                              LikesListScreen(
+                                                      id: widget
+                                                              .homeBloc
+                                                              .postList[index]
+                                                              .id ??
+                                                          0)
+                                                  .launch(context);
+                                            },
+                                            child: Text(
+                                                '${widget.homeBloc.postList[index].likes?.length ?? 0.validate()} Likes',
+                                                style: secondaryTextStyle(
+                                                    color: svGetBodyColor())),
+                                          ),
                                           Text(
                                               '${widget.homeBloc.postList[index].comments?.length ?? 0.validate()} comments',
                                               style: secondaryTextStyle(
@@ -875,56 +892,62 @@ class _SVPostComponentState extends State<SVPostComponent> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
-                if(_isHtml(textToShow))  HtmlWidget(textToShow, onTapUrl: (link) async {
-                    print('link $link');
-                    if (link.contains('doctak/jobs-detail')) {
-                      int jobID = Uri.parse(link).pathSegments.last.toInt();
-                      JobsDetailsScreen(
-                        jobId: jobID,
-                      ).launch(context);
-                    } else {
-                      PostUtils.launchURL(context, link);
-                    }
-                    return true;
-                  })
-
-              else  Linkify(
-                  onOpen: (link) {
-                    if (link.url.contains('doctak/jobs-detail')) {
-                      int jobID =
-                          Uri.parse(link.url).pathSegments.last.toInt();
-                      JobsDetailsScreen(
-                        jobId: jobID,
-                      ).launch(context);
-                    } else {
-                      PostUtils.launchURL(context, link.url);
-                    }
-                  },
-                  text: textToShow,
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    color: (image?.isNotEmpty == true ||
-                            media?.isNotEmpty == true)
-                        ? Colors.black
-                        : Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  linkStyle: const TextStyle(
-                    color: Colors.blue,
-                  ),
-                  textAlign: TextAlign.left,
-                )
-                else
-                if(_isHtml(textToShow))  SizedBox(
-                      height: 200,
-                      child: Center(
-                          child: HtmlWidget(
-                       textToShow,
+                  if (_isHtml(textToShow))
+                    HtmlWidget(textToShow, onTapUrl: (link) async {
+                      print('link $link');
+                      if (link.contains('doctak/jobs-detail')) {
+                        int jobID = Uri.parse(link).pathSegments.last.toInt();
+                        JobsDetailsScreen(
+                          jobId: jobID,
+                        ).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link);
+                      }
+                      return true;
+                    })
+                  else
+                    Linkify(
+                      onOpen: (link) {
+                        if (link.url.contains('doctak/jobs-detail')) {
+                          int jobID =
+                              Uri.parse(link.url).pathSegments.last.toInt();
+                          JobsDetailsScreen(
+                            jobId: jobID,
+                          ).launch(context);
+                        } else {
+                          PostUtils.launchURL(context, link.url);
+                        }
+                      },
+                      text: textToShow,
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: (image?.isNotEmpty == true ||
+                                media?.isNotEmpty == true)
+                            ? Colors.black
+                            : Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      linkStyle: const TextStyle(
+                        color: Colors.blue,
+                      ),
+                      textAlign: TextAlign.left,
+                    )
+                else if (_isHtml(textToShow))
+                  Container(
+                    constraints: const BoxConstraints(
+                      minHeight: 200.0,
+                      minWidth: double.infinity, // Minimum height of the container
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: HtmlWidget(
+                        textStyle: GoogleFonts.poppins(),
+                        enableCaching: true,
+                        textToShow,
                         onTapUrl: (link) async {
                           print(link);
                           if (link.contains('doctak/jobs-detail')) {
-                            int jobID =
-                                Uri.parse(link).pathSegments.last.toInt();
+                            int jobID = Uri.parse(link).pathSegments.last.toInt();
                             JobsDetailsScreen(
                               jobId: jobID,
                             ).launch(context);
@@ -933,30 +956,33 @@ class _SVPostComponentState extends State<SVPostComponent> {
                           }
                           return true;
                         },
-                      ))) else Linkify(
-                  onOpen: (link) {
-                    if (link.url.contains('doctak/jobs-detail')) {
-                      int jobID =
-                          Uri.parse(link.url).pathSegments.last.toInt();
-                      JobsDetailsScreen(
-                        jobId: jobID,
-                      ).launch(context);
-                    } else {
-                      PostUtils.launchURL(context, link.url);
-                    }
-                  },
-                  text: textToShow,
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                else
+                  Linkify(
+                    onOpen: (link) {
+                      if (link.url.contains('doctak/jobs-detail')) {
+                        int jobID =
+                            Uri.parse(link.url).pathSegments.last.toInt();
+                        JobsDetailsScreen(
+                          jobId: jobID,
+                        ).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link.url);
+                      }
+                    },
+                    text: textToShow,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    linkStyle: const TextStyle(
+                      color: Colors.blue,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  linkStyle: const TextStyle(
-                    color: Colors.blue,
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-
                 if (words.length > 25)
                   TextButton(
                     onPressed: () => setState(() {
@@ -983,11 +1009,13 @@ class _SVPostComponentState extends State<SVPostComponent> {
       },
     );
   }
+
   bool _isHtml(String text) {
     // Simple regex to check if the string contains HTML tags
     final htmlTagPattern = RegExp(r'<[^>]*>');
     return htmlTagPattern.hasMatch(text);
   }
+
   Widget _buildMediaContent(context, index) {
     return PostMediaWidget(
         mediaList: widget.homeBloc.postList[index].media ?? [],
@@ -1017,6 +1045,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
 
   bool _isExpanded = false;
 }
+
 class TextIcon extends StatelessWidget {
   final String text;
   final Widget suffix;
@@ -1032,7 +1061,8 @@ class TextIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(width: text.length>12? 40.w:25.w,
+        SizedBox(
+          width: text.length > 12 ? 40.w : 25.w,
           child: Text(
             text,
             style: textStyle,
@@ -1044,6 +1074,7 @@ class TextIcon extends StatelessWidget {
     );
   }
 }
+
 bool findIsLiked(post) {
   for (var like in post ?? []) {
     if (like.userId == AppData.logInUserId) {

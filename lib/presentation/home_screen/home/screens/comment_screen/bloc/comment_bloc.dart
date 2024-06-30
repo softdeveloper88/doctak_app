@@ -19,6 +19,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
   CommentBloc() : super(DataInitial()) {
     on<LoadPageEvent>(_onGetPosts);
     on<PostCommentEvent>(_onPostComment);
+    on<DeleteCommentEvent>(_onDeleteComment);
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == postList.length - nextPageTrigger) {
         add(LoadPageEvent(postId: pageNumber));
@@ -83,6 +84,31 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       //   pageNumber = pageNumber + 1;
       //   postList.addAll(response.postComments ?? []);
       // }
+      emit(PaginationLoadedState());
+
+      // emit(DataLoaded(postList));
+    // } catch (e) {
+    //   print(e);
+    //
+    //   emit(PaginationLoadedState());
+    //
+    //   // emit(DataError('An error occurred $e'));
+    // }
+  }
+  _onDeleteComment(DeleteCommentEvent event, Emitter<CommentState> emit) async {
+    // if (event.pos == 1) {
+    //   postList.clear();
+    //   pageNumber = 1;
+
+    // }
+    print(event.commentId);
+    // try {
+      var response = await postService.deleteComments(
+        'Bearer ${AppData.userToken}',
+        event.commentId.toString());
+
+      postList.removeWhere((element)=>element.id.toString()==event.commentId);
+
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(postList));

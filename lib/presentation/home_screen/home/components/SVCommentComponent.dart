@@ -1,6 +1,8 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
+import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -10,8 +12,9 @@ import '../../utils/SVCommon.dart';
 
 class SVCommentComponent extends StatefulWidget {
   final PostComments comment;
+   CommentBloc commentBloc;
 
-  SVCommentComponent({required this.comment});
+  SVCommentComponent({required this.comment,required this.commentBloc});
 
   @override
   State<SVCommentComponent> createState() => _SVCommentComponentState();
@@ -57,6 +60,50 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                   ],
                 ),
                 const Spacer(),
+               if(widget.comment.userId==AppData.logInUserId)
+                 PopupMenuButton(
+                   itemBuilder: (context) {
+                     return [
+                       PopupMenuItem(
+                         child: Builder(
+                             builder: (context) {
+                               return Column(
+                                 children: ["Delete"]
+                                     .map((String item) {
+                                   return PopupMenuItem(
+                                     value: item,
+                                     child: Text(item),
+                                   );
+                                 }).toList(),
+                               );
+                             }),
+                       ),
+                     ];
+                   },
+                   onSelected: (value) {
+                     if (value == 'Delete') {
+                       showDialog(
+                           context: context,
+                           builder: (BuildContext context) {
+                             return CustomAlertDialog(
+                                 title: 'Are you sure want to delete comment ?',
+                                 callback: () {
+                                   widget.commentBloc.add(DeleteCommentEvent(
+                                       commentId: widget.comment.id
+                                           .toString()));
+                                   Navigator.of(context).pop();
+                                 });
+                           });
+                     }
+                         },
+                       )
+
+      //            IconButton(
+      // onPressed: (){
+      //
+      // },
+      //            icon:const Icon(Icons.delete,color: Colors.red,))
+      //
 
               ],
             ),

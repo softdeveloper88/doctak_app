@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
@@ -70,7 +71,6 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
-
                 widget.userProfile?.coverPicture == null ||
                         widget.userProfile?.coverPicture ==
                             'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
@@ -83,8 +83,8 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                     .cornerRadiusWithClipRRectOnly(
                         bottomLeft: SVAppCommonRadius.toInt(),
                         bottomRight: SVAppCommonRadius.toInt())
-                    : CachedNetworkImage(
-                        imageUrl: '${widget.userProfile?.coverPicture}',
+                    : CustomImageView(
+                        imagePath: '${widget.userProfile?.coverPicture}',
                         height: 130,
                         fit: BoxFit.cover,
                         width: double.maxFinite,

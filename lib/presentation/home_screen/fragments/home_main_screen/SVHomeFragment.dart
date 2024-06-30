@@ -72,7 +72,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               text: ' Artificial Intelligence ',
               textStyle: secondaryTextStyle(color: Colors.white, size: 10),
               onTap: () {
-                const ChatDetailScreen().launch(context);
+                 ChatDetailScreen(isFromMainScreen:true).launch(context);
               },
               elevation: 0,
               color: SVAppColorPrimary,

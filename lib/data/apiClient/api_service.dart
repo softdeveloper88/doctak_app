@@ -12,6 +12,7 @@ import 'package:doctak_app/data/models/check_in_search_model/check_in_search_mod
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
+import 'package:doctak_app/data/models/followers_model/follower_data_model.dart';
 import 'package:doctak_app/data/models/group_model/group_about_model.dart';
 import 'package:doctak_app/data/models/group_model/group_details_model.dart';
 import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
@@ -30,11 +31,10 @@ import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../models/group_model/group_list_model.dart';
+import '../models/post_model/post_likes_model.dart';
 
 part 'api_service.g.dart';
 
@@ -171,6 +171,10 @@ abstract class ApiService {
   Future<HttpResponse> setUserFollow(@Header('Authorization') String token,
       @Path("userId") String userId, @Path("follow") String follow);
 
+  @FormUrlEncoded()
+  @POST("/followers-and-following")
+  Future<FollowerDataModel> getUserFollower(@Header('Authorization') String token,@Field('user_id') String userId);
+
   //chat gpt api
 
   @FormUrlEncoded()
@@ -258,7 +262,7 @@ abstract class ApiService {
   @FormUrlEncoded()
   @GET("/profile")
   Future<UserProfile> getProfile(
-      @Header('Authorization') String token, @Query('user_id') String userId);
+  @Header('Authorization') String token, @Query('user_id') String userId);
 
   @FormUrlEncoded()
   @GET("/interests")
@@ -274,6 +278,38 @@ abstract class ApiService {
   @GET("/work-and-education")
   Future<List<WorkEducationModel>> getWorkEducation(
       @Header('Authorization') String token, @Query('user_id') String userId);
+
+  @FormUrlEncoded()
+  @POST("/update-work-and-education")
+  Future<HttpResponse> updateAddWorkEduction(
+    @Header('Authorization') String token,
+    @Field('id') String id,
+    @Field('name') String companyName,
+    @Field('position') String position,
+    @Field('city') String address,
+    @Field('degree') String degree,
+    @Field('course') String course,
+    @Field('type') String workType,
+    @Field('from') String startDate,
+    @Field('to') String endDate,
+    @Field('current_status') String currentStatus,
+    @Field('description') String description,
+    @Field('privacy') String privacy,
+  );
+
+  @FormUrlEncoded()
+  @POST("/delete-work-and-education")
+  Future<HttpResponse> deleteWorkEduction(
+    @Header('Authorization') String token,
+    @Field('id') String id,
+  );
+
+  @FormUrlEncoded()
+  @POST("/getPostLikes")
+  Future<List<PostLikesModel>> getPostUserLikes(
+    @Header('Authorization') String token,
+    @Field('postId') String id,
+  );
 
   @FormUrlEncoded()
   @POST("/work-and-education/update")
@@ -294,6 +330,19 @@ abstract class ApiService {
     @Query('description') String description,
     @Query('privacy') String privacy,
   );
+
+  @FormUrlEncoded()
+  @POST("/update-hobbies-interests")
+  Future<HttpResponse> updateAddHobbiesInterest(
+      @Header('Authorization') String token,
+      @Field('id') String id,
+      @Field('favt_tv_shows') String favt_tv_shows,
+      @Field('favt_movies') String favt_movies,
+      @Field('favt_books') String favt_books,
+      @Field('favt_writers') String favt_writers,
+      @Field('favt_music_bands') String favt_music_bands,
+      @Field('favt_games') String favt_games,);
+
 
   @FormUrlEncoded()
   @GET("/family-relationship")
@@ -356,6 +405,11 @@ abstract class ApiService {
   @POST("/post-comment")
   Future<HttpResponse> makeComment(@Header('Authorization') String token,
       @Query('post_id') String postId, @Query('comment') String comment);
+
+  @FormUrlEncoded()
+  @POST("/delete-comment")
+  Future<HttpResponse> deleteComments(@Header('Authorization') String token,
+      @Field('comment_id') String commentId);
 
   @FormUrlEncoded()
   @POST("/like")
@@ -471,12 +525,16 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @POST("/groups")
-  Future<GroupListModel> listGroup(@Header('Authorization') String token,@Field('user_id') String userId);
+  Future<GroupListModel> listGroup(
+      @Header('Authorization') String token, @Field('user_id') String userId);
 
   @FormUrlEncoded()
   @POST("/group/notification")
   Future<HttpResponse> groupNotificationUpdate(
-      @Header('Authorization') String token, @Field('type') String type,@Field('group_updates_push') String group_updates_push,@Field('group_updates_email') String group_updates_email);
+      @Header('Authorization') String token,
+      @Field('type') String type,
+      @Field('group_updates_push') String group_updates_push,
+      @Field('group_updates_email') String group_updates_email);
 
   @FormUrlEncoded()
   @POST("/group/show")
@@ -485,26 +543,36 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @POST("/group/about")
-  Future<GroupAboutModel> groupAbout(@Header('Authorization') String token, @Field('id') String id);
+  Future<GroupAboutModel> groupAbout(
+      @Header('Authorization') String token, @Field('id') String id);
 
   @FormUrlEncoded()
   @POST("/group/member-requests")
-  Future<GroupMemberRequestModel> groupMemberRequest(@Header('Authorization') String token, @Field('id') String id);
+  Future<GroupMemberRequestModel> groupMemberRequest(
+      @Header('Authorization') String token, @Field('id') String id);
 
   @FormUrlEncoded()
   @POST("/group/members")
-  Future<GroupMemberRequestModel> groupMembers(@Header('Authorization') String token, @Field('id') String id,@Field('keyword') String keyword);
+  Future<GroupMemberRequestModel> groupMembers(
+      @Header('Authorization') String token,
+      @Field('id') String id,
+      @Field('keyword') String keyword);
 
   @FormUrlEncoded()
   @POST("/group/posts")
-  Future<GroupPostModel> groupPost(@Header('Authorization') String token, @Field('id') String id,@Field('offset') String offset);
+  Future<GroupPostModel> groupPost(@Header('Authorization') String token,
+      @Field('id') String id, @Field('offset') String offset);
 
   @FormUrlEncoded()
   @POST("/group/posts")
-  Future<HttpResponse> groupMemberRequestUpdate(@Header('Authorization') String token, @Field('id') String id,@Field('group_id') String group_id,@Field('status') String status);
+  Future<HttpResponse> groupMemberRequestUpdate(
+      @Header('Authorization') String token,
+      @Field('id') String id,
+      @Field('group_id') String group_id,
+      @Field('status') String status);
 
   @FormUrlEncoded()
   @POST("/group/post-requests")
-  Future<GroupPostModel> groupPostRequest(@Header('Authorization') String token, @Field('id') String id,@Field('offset') String offset);
-
+  Future<GroupPostModel> groupPostRequest(@Header('Authorization') String token,
+      @Field('id') String id, @Field('offset') String offset);
 }

@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
-import 'package:doctak_app/data/models/post_model/post_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_media_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -10,6 +9,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,7 @@ import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../data/models/post_model/post_data_model.dart';
 import '../../fragments/home_main_screen/bloc/home_bloc.dart';
 
 class MyPostComponent extends StatefulWidget {
@@ -163,27 +164,36 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                         ).cornerRadiusWithClipRRect(20),
                                         12.width,
                                         Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
-                                                Text(
-                                                    widget
-                                                            .profileBloc
-                                                            .postList[index]
-                                                            .user
-                                                            ?.name ??
-                                                        '',
-                                                    style: boldTextStyle()),
-                                                const SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Image.asset(
-                                                    'images/socialv/icons/ic_TickSquare.png',
-                                                    height: 14,
-                                                    width: 14,
-                                                    fit: BoxFit.cover),
+
+                                                TextIcon(
+                                                    text: widget.profileBloc.postList[index].user?.name ??'',
+                                                    suffix: Image.asset(
+                                                        'images/socialv/icons/ic_TickSquare.png',
+                                                        height: 14,
+                                                        width: 14,
+                                                        fit: BoxFit.cover),
+                                                    textStyle:
+                                                    boldTextStyle()),
+                                                // Text(
+                                                //     widget
+                                                //             .profileBloc
+                                                //             .postList[index]
+                                                //             .user
+                                                //             ?.name ??
+                                                //         '',
+                                                //     style: boldTextStyle()),
+                                                // const SizedBox(
+                                                //   width: 10,
+                                                // ),
+                                                // Image.asset(
+                                                //     'images/socialv/icons/ic_TickSquare.png',
+                                                //     height: 14,
+                                                //     width: 14,
+                                                //     fit: BoxFit.cover),
                                               ],
                                             ),
                                             Row(
@@ -219,8 +229,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                             MainAxisAlignment.end,
                                         children: [
                                           if (widget.profileBloc.postList[index]
-                                                  .userId ==
-                                              AppData.logInUserId)
+                                              .userId == AppData.logInUserId)
                                             PopupMenuButton(
                                               itemBuilder: (context) {
                                                 return [
@@ -308,10 +317,19 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                          '${widget.profileBloc.postList[index].likes?.length ?? 0.validate()} Likes',
-                                          style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
+                                      GestureDetector(
+                                        onTap: (){
+                                          LikesListScreen(
+                                              id: widget.profileBloc
+                                                  .postList[index].id ??
+                                                  0)
+                                              .launch(context);
+                                        },
+                                        child: Text(
+                                            '${widget.profileBloc.postList[index].likes?.length ?? 0.validate()} Likes',
+                                            style: secondaryTextStyle(
+                                                color: svGetBodyColor())),
+                                      ),
                                       Text(
                                           '${widget.profileBloc.postList[index].comments?.length ?? 0.validate()} comments',
                                           style: secondaryTextStyle(
@@ -331,10 +349,23 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       splashColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
                                       onTap: () {
+                                        print('object');
+                                        setState(() {
+
+                                        });
+                                       if(findIsLiked(widget.profileBloc
+                                           .postList[index].likes)) {
+                                         print('object unlike');
+                                         widget.profileBloc.postList[index]
+                                             .likes!.removeWhere((e) => e.userId==AppData.logInUserId);
+                                       }else{
+                                         widget.profileBloc.postList[index]
+                                             .likes!.add(Likes(
+                                           id:index,userId: AppData.logInUserId,postId: widget.profileBloc.postList[index].id.toString(),createdAt: '',updatedAt: ''
+                                         ));
+                                       }
                                         homeBloc.add(PostLikeEvent(
-                                            postId: widget.profileBloc
-                                                    .postList[index].id ??
-                                                0));
+                                            postId: widget.profileBloc.postList[index].id ??0));
                                       },
                                       child: Column(
                                         children: [
@@ -550,6 +581,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
     return luminance > 0.5 ? Colors.black : Colors.white;
   }
 
+
   Widget _buildPlaceholderWithoutFile(
       context, title, backgroundColor, image, media) {
     String fullText = title ?? '';
@@ -560,13 +592,121 @@ class _MyPostComponentState extends State<MyPostComponent> {
 
     Color bgColor = PostUtils.HexColor(backgroundColor);
 
-    Color textColor = contrastingTextColor(bgColor);
+    Color textColor = PostUtils.contrastingTextColor(bgColor);
+    // return LayoutBuilder(
+    //   builder: (context, constraints) {
+    //     return DecoratedBox(
+    //       decoration: BoxDecoration(
+    //         color: bgColor,
+    //         borderRadius: BorderRadius.circular(10.0),
+    //       ),
+    //       child: Padding(
+    //         padding: const EdgeInsets.all(8.0),
+    //         child: Column(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           crossAxisAlignment: CrossAxisAlignment.stretch,
+    //           children: [
+    //             if ((image?.isNotEmpty == true) || media?.isNotEmpty == true)
+    //               if (words.length > 25 ) Linkify(
+    //               onOpen: (link) => PostUtils.launchURL(context,link.url),
+    //               text: textToShow,
+    //               style: TextStyle(
+    //                 fontSize: 14.0,
+    //                 color: textColor, // Apply the contrasting text color
+    //                 fontWeight: FontWeight.bold,
+    //               ),
+    //               linkStyle: const TextStyle(
+    //                 color: Colors.blue,
+    //                 // You may want to adjust this color too
+    //                 // shadows: [
+    //                 //   Shadow(
+    //                 //     offset: Offset(1.0, 1.0),
+    //                 //     blurRadius: 3.0,
+    //                 //     color: Color.fromARGB(255, 0, 0, 0),
+    //                 //   ),
+    //                 // ],
+    //               ),
+    //               textAlign: TextAlign.left,
+    //             ) else SizedBox(
+    //               height: 200,
+    //               child: Center(
+    //                 child: Linkify(
+    //                   onOpen: (link) => PostUtils.launchURL(context,link.url),
+    //                   text: textToShow,
+    //                   style: TextStyle(
+    //                     fontSize: 14.0,
+    //                     color: textColor, // Apply the contrasting text color
+    //                     fontWeight: FontWeight.bold,
+    //                   ),
+    //                   linkStyle: const TextStyle(
+    //                     color: Colors.blue,
+    //                     // You may want to adjust this color too
+    //                     // shadows: [
+    //                     //   Shadow(
+    //                     //     offset: Offset(1.0, 1.0),
+    //                     //     blurRadius: 3.0,
+    //                     //     color: Color.fromARGB(255, 0, 0, 0),
+    //                     //   ),
+    //                     // ],
+    //                   ),
+    //                   textAlign: TextAlign.left,
+    //                 ),
+    //               ),
+    //             )else Linkify(
+    //               onOpen: (link) => PostUtils.launchURL(context,link.url),
+    //               text: textToShow,
+    //               style: TextStyle(
+    //                 fontSize: 14.0,
+    //                 color: textColor, // Apply the contrasting text color
+    //                 fontWeight: FontWeight.bold,
+    //               ),
+    //               linkStyle: const TextStyle(
+    //                 color: Colors.blue,
+    //                 // You may want to adjust this color too
+    //                 // shadows: [
+    //                 //   Shadow(
+    //                 //     offset: Offset(1.0, 1.0),
+    //                 //     blurRadius: 3.0,
+    //                 //     color: Color.fromARGB(255, 0, 0, 0),
+    //                 //   ),
+    //                 // ],
+    //               ),
+    //               textAlign: TextAlign.left,
+    //             ),
+    //             if (words.length > 25)
+    //               TextButton(
+    //                 onPressed: () => setState(() {
+    //                   _isExpanded = !_isExpanded;
+    //
+    //                 }),
+    //                 child: Text(
+    //                   _isExpanded ? 'Show Less' : 'Show More',
+    //                   style: TextStyle(
+    //                     color: textColor, // Apply the contrasting text color
+    //                     shadows: const [
+    //                       Shadow(
+    //                         offset: Offset(1.0, 1.0),
+    //                         blurRadius: 3.0,
+    //                         color: Color.fromARGB(255, 0, 0, 0),
+    //                       ),
+    //                     ],
+    //                   ),
+    //                 ),
+    //               ),
+    //           ],
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // );
     return LayoutBuilder(
       builder: (context, constraints) {
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(10.0),
+            color: (image?.isNotEmpty == true || media?.isNotEmpty == true)
+                ? Colors.white
+                : bgColor,
+            borderRadius: BorderRadius.circular(5.0),
           ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -575,8 +715,75 @@ class _MyPostComponentState extends State<MyPostComponent> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
-                  Linkify(
-                    onOpen: (link) => _launchURL(context, link.url),
+                  if(_isHtml(textToShow))  HtmlWidget(textToShow, onTapUrl: (link) async {
+                    print('link $link');
+                    if (link.contains('doctak/jobs-detail')) {
+                      int jobID = Uri.parse(link).pathSegments.last.toInt();
+                      JobsDetailsScreen(
+                        jobId: jobID,
+                      ).launch(context);
+                    } else {
+                      PostUtils.launchURL(context, link);
+                    }
+                    return true;
+                  })
+                  else  Linkify(
+                    onOpen: (link) {
+                      if (link.url.contains('doctak/jobs-detail')) {
+                        int jobID =
+                        Uri.parse(link.url).pathSegments.last.toInt();
+                        JobsDetailsScreen(
+                          jobId: jobID,
+                        ).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link.url);
+                      }
+                    },
+                    text: textToShow,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: (image?.isNotEmpty == true ||
+                          media?.isNotEmpty == true)
+                          ? Colors.black
+                          : Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    linkStyle: const TextStyle(
+                      color: Colors.blue,
+                    ),
+                    textAlign: TextAlign.left,
+                  )
+                else
+                  if(_isHtml(textToShow))  SizedBox(
+                      // height: 200,
+                      child: Center(
+                          child: HtmlWidget(
+                            textToShow,
+                            onTapUrl: (link) async {
+                              print(link);
+                              if (link.contains('doctak/jobs-detail')) {
+                                int jobID =
+                                Uri.parse(link).pathSegments.last.toInt();
+                                JobsDetailsScreen(
+                                  jobId: jobID,
+                                ).launch(context);
+                              } else {
+                                PostUtils.launchURL(context, link);
+                              }
+                              return true;
+                            },
+                          ))) else Linkify(
+                    onOpen: (link) {
+                      if (link.url.contains('doctak/jobs-detail')) {
+                        int jobID =
+                        Uri.parse(link.url).pathSegments.last.toInt();
+                        JobsDetailsScreen(
+                          jobId: jobID,
+                        ).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link.url);
+                      }
+                    },
                     text: textToShow,
                     style: TextStyle(
                       fontSize: 14.0,
@@ -587,26 +794,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
                       color: Colors.blue,
                     ),
                     textAlign: TextAlign.left,
-                  )
-                else
-                  SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: Linkify(
-                        onOpen: (link) => _launchURL(context, link.url),
-                        text: textToShow,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        linkStyle: const TextStyle(
-                          color: Colors.blue,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
                   ),
+
                 if (words.length > 25)
                   TextButton(
                     onPressed: () => setState(() {
@@ -632,6 +821,12 @@ class _MyPostComponentState extends State<MyPostComponent> {
         );
       },
     );
+  }
+
+  bool _isHtml(String text) {
+    // Simple regex to check if the string contains HTML tags
+    final htmlTagPattern = RegExp(r'<[^>]*>');
+    return htmlTagPattern.hasMatch(text);
   }
 
   Widget _buildMediaContent(context, index) {
@@ -722,6 +917,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
 
 bool findIsLiked(post) {
   for (var like in post ?? []) {
+    print(like);
     if (like.userId == AppData.logInUserId) {
       return true; // User has liked the post
     }
@@ -729,3 +925,31 @@ bool findIsLiked(post) {
 
   return false; // User has not liked the post
 }
+class TextIcon extends StatelessWidget {
+  final String text;
+  final Widget suffix;
+  final TextStyle textStyle;
+
+  TextIcon({
+    required this.text,
+    required this.suffix,
+    required this.textStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(width: text.length>12? 40.w:25.w,
+          child: Text(
+            text,
+            style: textStyle,
+            overflow: TextOverflow.fade,
+          ),
+        ),
+        suffix,
+      ],
+    );
+  }
+}
+

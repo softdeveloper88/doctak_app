@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/data/models/post_model/post_likes_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

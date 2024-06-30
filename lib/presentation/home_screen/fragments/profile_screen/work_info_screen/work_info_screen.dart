@@ -1,6 +1,11 @@
+import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/text_view_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -20,6 +25,10 @@ class WorkInfoScreen extends StatefulWidget {
 bool isEditModeMap = false;
 
 class _WorkInfoScreenState extends State<WorkInfoScreen> {
+  List<WorkEducationModel> workList = [];
+  List<WorkEducationModel> universityList = [];
+  List<WorkEducationModel> highSchool = [];
+
   @override
   void initState() {
     isEditModeMap=false;
@@ -65,149 +74,153 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildWorkInfoFields(),
-              10.height,
-              if (isEditModeMap)
-                svAppButton(
-                  context: context,
-                  // style: svAppButton(text: text, onTap: onTap, context: context),
-                  onTap: () async {},
-                  text: 'Update',
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+      body: BlocConsumer<ProfileBloc,ProfileState>(
+        bloc: widget.profileBloc,
+        builder: (BuildContext context, ProfileState state) {
+          if (state is PaginationLoadedState){
+            workList =widget.profileBloc.workEducationList!
+                .where((work) => work.workType == 'work')
+                .toList();
+            universityList =widget.profileBloc.workEducationList!
+                .where((work) => work.workType == 'university')
+                .toList();
+            highSchool =widget.profileBloc.workEducationList!
+                .where((work) => work.workType == 'high_school')
+                .toList();
 
-  Widget _buildWorkInfoFields() {
-    return widget.profileBloc.workEducationList!.isEmpty?
-    const SizedBox(
-        height: 500,
-        child: Center(child:Text('No Work Add'))): Column(
-      children: widget.profileBloc.workEducationList!
-          .map(
-            (entry) => Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Work Experience ${1}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFieldEditWidget(
-                      isEditModeMap: isEditModeMap,
-                      icon: Icons.work,
-                      index: 2,
-                      label: 'Company Name',
-                      value: entry.name ?? '',
-                      onSave: (value) => entry.name = value,
-                    ),
-                    TextFieldEditWidget(
-                      isEditModeMap: isEditModeMap,
-                      icon: Icons.type_specimen,
-                      index: 2,
-                      label: 'Position',
-                      value: entry.position ?? "",
-                      onSave: (value) => entry.position = value,
-                    ),
-                    TextFieldEditWidget(
-                      isEditModeMap: isEditModeMap,
-                      icon: Icons.location_on,
-                      index: 2,
-                      label: 'Address',
-                      value: entry.address ?? "",
-                      onSave: (value) => entry.address = value,
-                    ),
-                    TextFieldEditWidget(
-                      isEditModeMap: isEditModeMap,
-                      icon: Icons.description,
-                      index: 2,
-                      label: 'Degree',
-                      value: entry.degree ?? "",
-                      onSave: (value) => entry.degree = value,
-                    ),
-                    TextFieldEditWidget(
-                      isEditModeMap: isEditModeMap,
-                      icon: Icons.book,
-                      index: 2,
-                      label: 'Courses',
-                      value: entry.courses ?? "",
-                      onSave: (value) => entry.courses = value,
-                    ),
-                    TextFieldEditWidget(
-                      isEditModeMap: isEditModeMap,
-                      icon: Icons.book,
-                      index: 2,
-                      label: 'Work Type',
-                      value: entry.workType ?? "",
-                      onSave: (value) => entry.workType = value,
-                    ),
-                    TextFieldEditWidget(
-                        isEditModeMap: isEditModeMap,
-                        icon: Icons.description,
-                        index: 2,
-                        label: 'Description',
-                        value: entry.description ?? "",
-                        onSave: (value) => entry.description = value,
-                        maxLines: 3),
-                    ProfileDateWidget(
-                      isEditModeMap: isEditModeMap,
-                      index: 2,
-                      label: 'Start Date',
-                      value: entry.startDate ?? '',
-                      onSave: (value) => entry.startDate = value,
-                    ),
-                    ProfileDateWidget(
-                      isEditModeMap: isEditModeMap,
-                      index: 2,
-                      label: 'End Date',
-                      value: entry.endDate ?? '',
-                      onSave: (value) => entry.endDate = value,
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: svAppButton(
-                            color: Colors.grey,
-                            context: context,
-                            // style: svAppButton(text: text, onTap: onTap, context: context),
-                            onTap: () async {},
-                            text: 'Remove',
-                          ),
-                        ),
-                        const SizedBox(width: 10,),
-                        Expanded(
-                          child: svAppButton(
-
-                            context: context,
-                            // style: svAppButton(text: text, onTap: onTap, context: context),
-                            onTap: () async {},
-                            text: 'Add',
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildWorkInfoFields(workList,'work'),
+                    _buildWorkInfoFields(universityList,'university'),
+                    _buildWorkInfoFields(highSchool,'high_school'),
+                    10.height,
+                    // if (isEditModeMap)
+                    //   svAppButton(
+                    //     context: context,
+                    //     // style: svAppButton(text: text, onTap: onTap, context: context),
+                    //     onTap: () async {},
+                    //     text: 'Update',
+                    //   ),
                   ],
                 ),
               ),
-            ),
-          )
-          .toList(),
+            );
+        }else{
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+    },
+        listener: (BuildContext context, ProfileState state) {
+
+      },
+      ),
+    );
+  }
+  Widget _buildWorkInfoFields(List<WorkEducationModel> list,String type) {
+    return list.isEmpty?
+     SizedBox(
+        height: 500,
+        child: Center(child:Text('No $type Add'))):
+    Column(
+      children: [
+        Text(
+          type,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Column(
+          children: list.map(
+                (entry) => Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                      if(type=='work')  TextViewWidget(
+                          icon: Icons.work,
+                          label: 'Company Name',
+                          value: entry.name ?? '',
+                        ),
+                        if(type=='work')  TextViewWidget(
+                          icon: Icons.type_specimen,
+
+                          label: 'Position',
+                          value: entry.position ?? "",
+                        ),
+                        TextViewWidget(
+                          icon: Icons.location_on,
+                          label: 'Address',
+                          value: entry.address ?? "",
+                        ),
+                        if(type!='work') TextViewWidget(
+                          icon: Icons.description,
+                          label: 'Degree',
+                          value: entry.degree ?? "",
+                        ),
+                        if(type!='work')  TextViewWidget(
+                          icon: Icons.book,
+                          label: 'Courses',
+                        ),
+                        TextViewWidget(
+                          icon: Icons.book,
+                          label: 'Work Type',
+                          value: entry.workType ?? "",
+                        ),
+                        TextViewWidget(
+                            icon: Icons.description,
+                            label: 'Description',
+                            value: entry.description ?? "",),
+                        TextViewWidget(
+                          label: 'Start Date',
+                          value: entry.startDate ?? '',
+                        ),
+                        TextViewWidget(
+                          label: 'End Date',
+                          value: entry.endDate ?? '',
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Expanded(
+                              child: svAppButton(
+                                color: Colors.grey,
+                                context: context,
+                                // style: svAppButton(text: text, onTap: onTap, context: context),
+                                onTap: () async {
+
+                                   widget.profileBloc.add(DeleteWorkEducationEvent(entry.id.toString()));
+                                },
+                                text: 'Remove',
+                              ),
+                            ),
+                            const SizedBox(width: 10,),
+                            Expanded(
+                              child: svAppButton(
+                                context: context,
+                                // style: svAppButton(text: text, onTap: onTap, context: context),
+                                onTap: () async {
+                                  AddEditWorkScreen(profileBloc: widget.profileBloc,updateWork:entry).launch(context);
+                                },
+                                text: 'Update',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ).toList(),
+        )
+      ]
     );
   }
 }

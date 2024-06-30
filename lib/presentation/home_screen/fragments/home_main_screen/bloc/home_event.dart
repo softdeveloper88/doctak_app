@@ -27,6 +27,12 @@ class PostLikeEvent extends HomeEvent{
   @override
   List<Object?> get props => [postId];
 }
+class PostUserLikeEvent extends HomeEvent{
+  int? postId;
+  PostUserLikeEvent({this.postId});
+  @override
+  List<Object?> get props => [postId];
+}
 class DeletePostEvent extends HomeEvent{
   int? postId;
   DeletePostEvent({this.postId});

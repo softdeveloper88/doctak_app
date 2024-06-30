@@ -98,6 +98,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                       //   child: CircularProgressIndicator(color: svGetBodyColor(),),
                       // ) :
                       return SVCommentComponent(
+                          commentBloc:commentBloc,
                           comment: commentBloc.postList[index]);
                     }),
               );

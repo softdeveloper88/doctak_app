@@ -122,6 +122,8 @@ dependencies:
   build_runner: ^2.4.8
   json_serializable: ^6.7.1
   audioplayers: ^5.2.1
+  flutter_markdown: ^0.7.3
+#  flutter_markdown_latex: ^0.3.3
 #  record: ^5.0.4
 #  record_mp3: ^3.0.0
 #  flutter_sound: ^9.2.13

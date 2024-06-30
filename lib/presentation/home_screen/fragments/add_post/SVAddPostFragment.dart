@@ -31,6 +31,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   String image = '';
 
   List<String> colorListHex = [
+    '#FFFFFF', // white
     '#FF0000', // Red
     '#0000FF', // Blue
     '#00FF00', // Green
@@ -51,16 +52,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
     int intValue = int.parse(colorCode, radix: 16);
     return Color(intValue).withAlpha(0xFF);
   }
-  String _fontFamily = 'Roboto';
-  double _fontSize = 20.0;
-  Color _fontColor = Colors.black;
-  FontWeight _fontWeight = FontWeight.normal;
-
   void changeColor() {
     setState(() {
-      print("object");
-      currentColor =
-          _hexToColor(colorListHex[random.nextInt(colorListHex.length)]);
+      currentColor = _hexToColor(colorListHex[random.nextInt(colorListHex.length)]);
       currentSetColor = colorListHex[random.nextInt(colorListHex.length)];
       searchPeopleBloc.backgroundColor = currentSetColor;
     });

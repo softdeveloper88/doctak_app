@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -20,7 +19,9 @@ import 'package:sizer/sizer.dart';
 import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
 
 class ChatDetailScreen extends StatefulWidget {
-  const ChatDetailScreen({super.key});
+  bool isFromMainScreen;
+  String? question;
+   ChatDetailScreen({super.key,this.isFromMainScreen=true,this.question});
 
   @override
   _ChatGPTScreenState createState() => _ChatGPTScreenState();
@@ -43,14 +44,56 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isWriting = false;
   String chatWithAi = "Preparing DocTak AI.";
   bool isDeleteButtonClicked = false;
-
+  bool isAlreadyAsk=true;
   @override
   void initState() {
-    super.initState();
-    // Call your API here
-    // futureSessions = fetchSessions();
-  }
+    if (!widget.isFromMainScreen) {
+      if (isAlreadyAsk) {
+        isAlreadyAsk = false;
+        textController.text=widget.question.toString();
+        // drugsAskQuestion(state1);
 
+      }
+    }
+    super.initState();
+
+  }
+  void drugsAskQuestion(state1){
+
+      String question = widget.question??"";
+      if (question.isEmpty) return;
+      // String sessionId = selectedSessionId.toString();
+      // var tempId =
+      //     -1; // Unique temporary ID for the response
+      setState(() {
+        var myMessage = Messages(
+            id: -1,
+            gptSessionId:
+            selectedSessionId.toString(),
+            question: question,
+            response: '...',
+            createdAt: DateTime.now().toString(),
+            updatedAt: DateTime.now().toString());
+        state1.response1.messages!.add(myMessage);
+        BlocProvider.of<ChatGPTBloc>(context).add(
+          GetPost(
+            sessionId: selectedSessionId.toString(),
+            question:
+            question, // replace with real input
+          ),
+        );
+        textController.clear();
+        scrollToBottom();
+      });
+      try {
+        isWriting = false;
+        // });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')));
+      }
+
+  }
   // Future<List<Session>> fetchSessions() async {
   //   final response = await http.get(
   //     Uri.parse("${AppData.remoteUrl}/gptChat-session"),
@@ -161,13 +204,17 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-        child: BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
+        child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+            builder: (context, state1) {
+
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
+
           }
           if (state1 is DataInitial) {
-            return  Scaffold(
+
+            return Scaffold(
               body: AnimatedBackground(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -180,6 +227,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
               ),
             );
           } else if (state1 is DataLoaded) {
+
             print('response ${state1.response.toString()}');
             return Scaffold(
                 backgroundColor:svGetBgColor(),
@@ -294,114 +342,24 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     },
                   ),
                 ),
-                // drawer: Drawer(
-                //   child: AnimatedBackground(
-                //       child: Column(
-                //     children: [
-                //       Expanded(
-                //         child: ListView.builder(
-                //           itemCount: state1.response.sessions?.length,
-                //           itemBuilder: (context, index) {
-                //             Sessions session = state1.response.sessions![index];
-                //             bool isSelected = session.id == selectedSessionId;
-                //             return Slidable(
-                //               key: ValueKey(session.id),
-                //               // Use session's id as a unique key
-                //               startActionPane: const ActionPane(
-                //                 motion: ScrollMotion(),
-                //                 children: [
-                //                   // SlidableAction(
-                //                   //   onPressed: (context) =>
-                //                   //       deleteRecord(context, session.id),
-                //                   //   // Reference to your delete method
-                //                   //   backgroundColor: Color(0xFFFE4A49),
-                //                   //   foregroundColor: Colors.white,
-                //                   //   icon: Icons.delete,
-                //                   //   label: 'Delete',
-                //                   // ),
-                //                   // SlidableAction(
-                //                   //   onPressed: (context) =>
-                //                   //       editRecord(context, session.id),
-                //                   //   // Reference to your edit method
-                //                   //   backgroundColor: Color(0xFF21B7CA),
-                //                   //   foregroundColor: Colors.white,
-                //                   //   icon: Icons.edit,
-                //                   //   label: 'Edit',
-                //                   // ),
-                //                 ],
-                //               ),
-                //               child: ListTile(
-                //                   title: Text(session.name!),
-                //                   subtitle: Text(DateFormat('m d, y, h:mm a')
-                //                       .format(
-                //                           DateTime.parse(session.createdAt!))),
-                //                   tileColor:
-                //                       isSelected ? Colors.grey[300] : null,
-                //                   onTap: () {
-                //                     // setState(() {
-                //                     chatWithAi = session.name!;
-                //                     isEmptyPage = false;
-                //                     selectedSessionId = session.id; // Update the selected session
-                //                     isLoadingMessages = true;
-                //                     // });
-                //                     BlocProvider.of<ChatGPTBloc>(context).add(
-                //                       GetMessages(
-                //                           sessionId:
-                //                               selectedSessionId.toString()),
-                //                     );
-                //                     // loadMessages(selectedSessionId.toString())
-                //                     //     .then((loadedMessages) {
-                //                     //   setState(() {
-                //                     //     messages = loadedMessages;
-                //                     //
-                //                     //     scrollToBottom();
-                //                     //     chatWithAi = session.name!;
-                //                     //
-                //                     //     isLoadingMessages = false;
-                //                     //   });
-                //                     // });
-                //                     Navigator.of(context)
-                //                         .pop(); // This line will close the drawer
-                //                   }),
-                //             );
-                //           },
-                //         ),
-                //       ),
-                //       Container(
-                //         width: double.infinity,
-                //         padding: const EdgeInsets.all(8.0),
-                //         child: svAppButton(
-                //           context: context,
-                //           // style: svAppButton(text: text, onTap: onTap, context: context),
-                //           onTap: () async {
-                //             try {
-                //               BlocProvider.of<ChatGPTBloc>(context)
-                //                   .add(GetNewChat());
-                //               Navigator.of(context).pop();
-                //
-                //               selectedSessionId =
-                //                   BlocProvider.of<ChatGPTBloc>(context)
-                //                       .newChatSessionId;
-                //
-                //               // Session newSession = await createNewChatSession();
-                //               // setState(() {
-                //               //   futureSessions = Future(() =>
-                //               //       [newSession, ...(snapshot.data ?? [])]);
-                //               // });
-                //             } catch (e) {
-                //               print(e);
-                //             }
-                //           },
-                //           text: 'New Chat',
-                //         ),
-                //       ),
-                //     ],
-                //   )),
-                // ),
                 body: Column(
                   children: <Widget>[
                     // const SizedBox(height: 10,),
-                    Expanded(
+                  if(state1.response1.messages!.isEmpty)
+                    const Expanded(child: Center(child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                          'Your personal & medical assistant powered by Artificial Intelligence'
+                          'Welcome, Doctor!'
+                          'Thank you for using our AI assistant. Here are some things you can do:'
+                          'Request diagnostic suggestions based on symptoms.'
+                          'Review medication interactions or dosages.'
+                          'Detect CPT or ICD code'
+                          'And much more! Feel free to explore.'
+                          "If you need assistance or have questions, don't hesitate to ask."),
+                    ),))
+                    else Expanded(
                       child: ListView.builder(
                         controller: _scrollController,
                         itemCount: state1.response1.messages!.length,
@@ -729,6 +687,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     ),
                   ],
                 ));
+
           } else if (state1 is DataError) {
             return Scaffold(body: Text(state1.errorMessage.toString()));
           } else {
@@ -806,7 +765,11 @@ class ChatBubble extends StatelessWidget {
                             constraints:
                                 BoxConstraints(maxWidth: bubbleMaxWidth),
                             child: Text(
-                              text,
+                              // fitContent: true,
+                              // selectable: true,
+                              // softLineBreak: true,
+                              // shrinkWrap: true,
+                               text.replaceAll("*", '').replaceAll('#', ''),
                             ),
                           ),
                         ),

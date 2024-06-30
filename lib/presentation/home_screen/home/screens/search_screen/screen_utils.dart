@@ -14,14 +14,9 @@ const String upComing = "UpComing";
 const String inProgress = "InProgress";
 const String end = "Ended";
 const String rentalData = "rentalData";
-
 ///  //////////////////////////
-
-
-
 ///  //////////////////////////
 /// Colors
-
 const Color gPrimaryColor = Color(0xff294D9C);
 const Color gSecondaryColor = Color(0xFF77246C);
 const Color gWhite = Color(0xffffffff);

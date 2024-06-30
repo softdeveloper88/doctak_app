@@ -25,6 +25,8 @@ class WorkEducationModel {
   String? createdAt;
   @JsonKey(name: 'updated_at')
   String? updatedAt;
+  @JsonKey(name: 'privacy')
+  String? privacy;
 
   WorkEducationModel({
      this.id,
@@ -41,6 +43,7 @@ class WorkEducationModel {
     this.description,
      this.createdAt,
      this.updatedAt,
+     this.privacy,
   });
 
   factory WorkEducationModel.fromJson(Map<String, dynamic> json) =>

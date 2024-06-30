@@ -1,20 +1,10 @@
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
-import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-import '../../../../../core/app_export.dart';
-import '../../../../../data/models/profile_model/interest_model.dart';
 import '../../../utils/SVCommon.dart';
-import '../bloc/profile_state.dart';
-import 'add_edit_interested_screen.dart';
 
 class InterestedInfoScreen extends StatefulWidget {
   ProfileBloc profileBloc;
@@ -24,19 +14,20 @@ class InterestedInfoScreen extends StatefulWidget {
   @override
   State<InterestedInfoScreen> createState() => _InterestedInfoScreenState();
 }
+
 bool isEditModeMap = false;
 
 class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
-   @override
+  @override
   void initState() {
-   isEditModeMap=false;
+    isEditModeMap = false;
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
@@ -49,28 +40,31 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
             },
             child: const Icon(Icons.arrow_back_ios)),
         iconTheme: IconThemeData(color: context.iconColor),
-        actions:  [
-          if (widget.profileBloc.isMe)   GestureDetector(
-            onTap: () {
-              setState(() {
-                AddEditInterestedScreen(profileBloc:widget.profileBloc).launch(context);
-                // widget.profileBloc.interestList!.add(InterestModel());
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.add_circle_outline_sharp,
-                color: svGetBodyColor(),
-                size: 30,
-                // color: Colors.black,
-                // imagePath: 'assets/icon/ic_vector.svg',
-                // height: 25.adaptSize,
-                // width: 25.adaptSize,
-                // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+        actions: [
+          if (widget.profileBloc.isMe)
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isEditModeMap = true;
+                  // AddEditInterestedScreen(profileBloc: widget.profileBloc)
+                  //     .launch(context);
+                  // widget.profileBloc.interestList!.add(InterestModel());
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.add_circle_outline_sharp,
+                  color: svGetBodyColor(),
+                  size: 30,
+                  // color: Colors.black,
+                  // imagePath: 'assets/icon/ic_vector.svg',
+                  // height: 25.adaptSize,
+                  // width: 25.adaptSize,
+                  // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: Padding(
@@ -80,73 +74,232 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
             children: [
               _buildInterestedInfoFields(),
               10.height,
-              if(isEditModeMap)svAppButton(
-                context: context,
-                // style: svAppButton(text: text, onTap: onTap, context: context),
-                onTap: () async {
+              if (isEditModeMap)
+                svAppButton(
+                  context: context,
+                  // style: svAppButton(text: text, onTap: onTap, context: context),
+                  onTap: () async {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+                    }
 
-                },
-                text: 'Update',
-              ),
+                    widget.profileBloc.add(UpdateAddHobbiesInterestEvent(
+                    '',
+                        widget.profileBloc.interestList!.isEmpty?'':widget.profileBloc.interestList?[0].interestDetails??"",
+                        widget.profileBloc.interestList!.length>=2?widget.profileBloc.interestList![1].interestDetails??"":'',
+                        widget.profileBloc.interestList!.length>=3?widget.profileBloc.interestList![2].interestDetails??"":'',
+                        widget.profileBloc.interestList!.length>=4?widget.profileBloc.interestList![3].interestDetails??"":'',
+                        widget.profileBloc.interestList!.length>=5?widget.profileBloc.interestList![4].interestDetails??"":'',
+                        widget.profileBloc.interestList!.length>=6?widget.profileBloc.interestList![5].interestDetails??"":'',
+                    ));
+
+                    Navigator.pop(context);
+                  },
+                  text: 'Update',
+                ),
             ],
           ),
         ),
       ),
     );
   }
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   Widget _buildInterestedInfoFields() {
-    return widget.profileBloc.workEducationList!.isEmpty?
-    const SizedBox(
-        height: 500,
-        child: Center(child:Text('No Interest Add'))): Column(
-      children: widget.profileBloc.interestList!
-          .map(
-            (entry) => Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Interest',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+    return widget.profileBloc.interestList!.isEmpty
+        ? const SizedBox(
+        height: 500, child: Center(child: Text('No Interest Add')))
+        : Form(
+        key: _formKey,
+        child: Column(children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.profileBloc.interestList?[0].interestType ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                TextFieldEditWidget(
-                  isEditModeMap: isEditModeMap,
-                  icon: Icons.description,
-                  index: 2,
-                  label: 'Interest Type',
-                  value: entry.interestType ?? '',
-                  onSave: (value) => entry.interestType = value,
-                ),
-                TextFieldEditWidget(
-                  isEditModeMap: isEditModeMap,
-                  icon: Icons.description,
-                  index: 2,
-                  label: 'Interest Details',
-                  value: entry.interestDetails ?? "",
-                  onSave: (value) => entry.interestDetails = value,
-                ),
-                const SizedBox(height: 10),
-                _buildElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      widget.profileBloc.interestList!.remove(entry);
-                    });
-                  },
-                  label: 'Remove Interest Info',
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  TextFieldEditWidget(
+                    isEditModeMap: isEditModeMap,
+                    icon: Icons.description,
+                    index: 2,
+                    label: 'Interest Details',
+                    value: widget.profileBloc.interestList?[0].interestDetails ??
+                        "",
+                    onSave: (value) =>
+                    widget.profileBloc.interestList?[0].interestDetails = value,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
-        ),
-      ).toList(),
-    );
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.profileBloc.interestList?[1].interestType ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFieldEditWidget(
+                    isEditModeMap: isEditModeMap,
+                    icon: Icons.description,
+                    index: 2,
+                    label: 'Interest Details',
+                    value: widget
+                        .profileBloc.interestList?[1].interestDetails ??
+                        "",
+                    onSave: (value) =>
+                    widget.profileBloc.interestList?[1]
+                        .interestDetails = value,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.profileBloc.interestList?[2].interestType ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFieldEditWidget(
+                    isEditModeMap: isEditModeMap,
+                    icon: Icons.description,
+                    index: 2,
+                    label: 'Interest Details',
+                    value: widget
+                        .profileBloc.interestList?[2].interestDetails ??
+                        "",
+                    onSave: (value) =>
+                    widget.profileBloc.interestList?[2]
+                        .interestDetails = value,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.profileBloc.interestList?[3].interestType ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFieldEditWidget(
+                    isEditModeMap: isEditModeMap,
+                    icon: Icons.description,
+                    index: 2,
+                    label: 'Interest Details',
+                    value: widget
+                        .profileBloc.interestList?[3].interestDetails ??
+                        "",
+                    onSave: (value) =>
+                    widget.profileBloc.interestList?[3]
+                        .interestDetails = value,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.profileBloc.interestList?[4].interestType ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFieldEditWidget(
+                    isEditModeMap: isEditModeMap,
+                    icon: Icons.description,
+                    index: 2,
+                    label: 'Interest Details',
+                    value: widget
+                        .profileBloc.interestList?[4].interestDetails ??
+                        "",
+                    onSave: (value) =>
+                    widget.profileBloc.interestList?[4]
+                        .interestDetails = value,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.profileBloc.interestList?[5].interestType ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFieldEditWidget(
+                    isEditModeMap: isEditModeMap,
+                    icon: Icons.description,
+                    index: 2,
+                    label: 'Interest Details',
+                    value: widget
+                        .profileBloc.interestList?[5].interestDetails ??
+                        "",
+                    onSave: (value) =>
+                    widget.profileBloc.interestList?[5]
+                        .interestDetails = value,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+        ]));
   }
+
   Widget _buildElevatedButton({
     required VoidCallback onPressed,
     required String label,
@@ -156,7 +309,4 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
       child: Text(label),
     );
   }
-
-
 }
-

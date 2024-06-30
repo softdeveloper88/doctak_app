@@ -8,9 +8,9 @@ part of 'api_service.dart';
 
 class _ApiService implements ApiService {
   _ApiService(
-      this._dio, {
-        this.baseUrl,
-      }) {
+    this._dio, {
+    this.baseUrl,
+  }) {
     baseUrl ??= 'https://doctak.net/api/v1';
   }
 
@@ -20,11 +20,11 @@ class _ApiService implements ApiService {
 
   @override
   Future<PostLoginDeviceAuthResp> login(
-      String username,
-      String password,
-      String deviceType,
-      String deviceId,
-      ) async {
+    String username,
+    String password,
+    String deviceType,
+    String deviceId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -36,19 +36,19 @@ class _ApiService implements ApiService {
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<PostLoginDeviceAuthResp>(Options(
-          method: 'POST',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/login',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/login',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -58,15 +58,15 @@ class _ApiService implements ApiService {
 
   @override
   Future<PostLoginDeviceAuthResp> loginWithSocial(
-      String username,
-      String firstName,
-      String lastName,
-      String deviceType,
-      String deviceId,
-      bool isSocialLogin,
-      String provider,
-      String token,
-      ) async {
+    String username,
+    String firstName,
+    String lastName,
+    String deviceType,
+    String deviceId,
+    bool isSocialLogin,
+    String provider,
+    String token,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -82,19 +82,19 @@ class _ApiService implements ApiService {
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<PostLoginDeviceAuthResp>(Options(
-          method: 'POST',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/login',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/login',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -104,15 +104,15 @@ class _ApiService implements ApiService {
 
   @override
   Future<PostLoginDeviceAuthResp> completeProfile(
-      String token,
-      String firstName,
-      String lastName,
-      String country,
-      String state,
-      String specialty,
-      String phone,
-      String userType,
-      ) async {
+    String token,
+    String firstName,
+    String lastName,
+    String country,
+    String state,
+    String specialty,
+    String phone,
+    String userType,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -128,19 +128,19 @@ class _ApiService implements ApiService {
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<PostLoginDeviceAuthResp>(Options(
-          method: 'POST',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/complete-profile',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/complete-profile',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -150,15 +150,15 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<Map<String, String>>> register(
-      String firstName,
-      String lastName,
-      String email,
-      String password,
-      String country,
-      String state,
-      String specialty,
-      String userType,
-      ) async {
+    String firstName,
+    String lastName,
+    String email,
+    String password,
+    String country,
+    String state,
+    String specialty,
+    String userType,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -174,19 +174,19 @@ class _ApiService implements ApiService {
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<HttpResponse<Map<String, String>>>(Options(
-          method: 'POST',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/register',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/register',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -204,23 +204,23 @@ class _ApiService implements ApiService {
       'email': email,
     };
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/forgot_password',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/forgot_password',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -235,23 +235,23 @@ class _ApiService implements ApiService {
       'post_id': postId,
     };
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/delete_post',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/delete_post',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -270,17 +270,17 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/country-list',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/country-list',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = CountriesModel.fromJson(_result.data!);
     return value;
   }
@@ -292,23 +292,23 @@ class _ApiService implements ApiService {
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/get-states',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/get-states',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -321,23 +321,23 @@ class _ApiService implements ApiService {
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/specialty',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/specialty',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -350,23 +350,23 @@ class _ApiService implements ApiService {
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/universities/state/${userId}',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/universities/state/${userId}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -374,9 +374,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<PostDataModel> getPosts(
-      String token,
-      String page,
-      ) async {
+    String token,
+    String page,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'page': page};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -389,27 +389,27 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/posts',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/posts',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = PostDataModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<PostDataModel> getMyPosts(
-      String token,
-      String page,
-      String userId,
-      ) async {
+    String token,
+    String page,
+    String userId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -425,29 +425,29 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/user-profile-post',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/user-profile-post',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = PostDataModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<JobsModel> getJobsList(
-      String token,
-      String page,
-      String countryId,
-      String searchTerm,
-      String expiredJob,
-      ) async {
+    String token,
+    String page,
+    String countryId,
+    String searchTerm,
+    String expiredJob,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -465,26 +465,26 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/jobs',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/jobs',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = JobsModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<JobDetailModel> getJobsDetails(
-      String token,
-      String jobId,
-      ) async {
+    String token,
+    String jobId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'job_id': jobId,
@@ -499,28 +499,28 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/job_detail',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/job_detail',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = JobDetailModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<JobsModel> getSearchJobsList(
-      String token,
-      String page,
-      String countryId,
-      String searchTerm,
-      ) async {
+    String token,
+    String page,
+    String countryId,
+    String searchTerm,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -537,27 +537,27 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/search-jobs',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/search-jobs',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = JobsModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<PostDataModel> getSearchPostList(
-      String token,
-      String page,
-      String searchTerm,
-      ) async {
+    String token,
+    String page,
+    String searchTerm,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -573,29 +573,29 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/search-post',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/search-post',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = PostDataModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<DrugsModel> getDrugsList(
-      String token,
-      String page,
-      String countryId,
-      String searchTerm,
-      String type,
-      ) async {
+    String token,
+    String page,
+    String countryId,
+    String searchTerm,
+    String type,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -613,27 +613,27 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/drug-search',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/drug-search',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = DrugsModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<SearchPeopleModel> getSearchPeople(
-      String token,
-      String page,
-      String searchTerm,
-      ) async {
+    String token,
+    String page,
+    String searchTerm,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -649,61 +649,96 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/searchPeople',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/searchPeople',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = SearchPeopleModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<HttpResponse<dynamic>> setUserFollow(
-      String token,
-      String userId,
-      String follow,
-      ) async {
+    String token,
+    String userId,
+    String follow,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/user/${userId}/${follow}',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/user/${userId}/${follow}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
   }
 
   @override
+  Future<FollowerDataModel> getUserFollower(
+    String token,
+      String userId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'user_id': userId,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/followers-and-following',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+
+    final value = FollowerDataModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<ChatGptAskQuestionResponse> askQuestionFromGpt(
-      String token,
-      String sessionId,
-      String question,
-      ) async {
+    String token,
+    String sessionId,
+    String question,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -711,19 +746,19 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<ChatGptAskQuestionResponse>(Options(
-          method: 'GET',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/ask-question/${sessionId}/${question}',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/ask-question/${sessionId}/${question}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -745,26 +780,26 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/gptChat-session',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/gptChat-session',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChatGptSession.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<ChatGptMessageHistory> gptChatMessages(
-      String token,
-      dynamic id,
-      ) async {
+    String token,
+    dynamic id,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -772,19 +807,19 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<ChatGptMessageHistory>(Options(
-          method: 'GET',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/gptChat-history/${id}',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/gptChat-history/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -800,23 +835,23 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/new-chat',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/new-chat',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -824,32 +859,32 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<dynamic>> deleteChatgptSession(
-      String token,
-      String sessionId,
-      ) async {
+    String token,
+    String sessionId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'session_id': sessionId};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/delete-chatgpt-session',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/delete-chatgpt-session',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -863,23 +898,23 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/conference-countries',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/conference-countries',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -887,11 +922,11 @@ class _ApiService implements ApiService {
 
   @override
   Future<SearchConferenceModel> searchConferences(
-      String token,
-      String page,
-      String country,
-      String searchTerm,
-      ) async {
+    String token,
+    String page,
+    String country,
+    String searchTerm,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -903,19 +938,19 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<SearchConferenceModel>(Options(
-          method: 'GET',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/search-conferences',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/search-conferences',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -925,32 +960,32 @@ class _ApiService implements ApiService {
 
   @override
   Future<List<NewsModel>> newsChannel(
-      String token,
-      String news,
-      ) async {
+    String token,
+    String news,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch<List<dynamic>>(_setStreamType<List<NewsModel>>(Options(
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<NewsModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/${news}',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/${news}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     var value = _result.data!
         .map((dynamic i) => NewsModel.fromJson(i as Map<String, dynamic>))
         .toList();
@@ -959,10 +994,10 @@ class _ApiService implements ApiService {
 
   @override
   Future<GuidelinesModel> guideline(
-      String token,
-      String page,
-      String searchTerm,
-      ) async {
+    String token,
+    String page,
+    String searchTerm,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -978,27 +1013,27 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/guideline',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/guideline',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = GuidelinesModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<SearchUserTagModel> searchTagFriend(
-      String token,
-      String page,
-      String name,
-      ) async {
+    String token,
+    String page,
+    String name,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -1014,29 +1049,29 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/search-users-for-tag',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/search-users-for-tag',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = SearchUserTagModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<CheckInSearchModel> checkInSearch(
-      String token,
-      String page,
-      String name,
-      String latitude,
-      String longitude,
-      ) async {
+    String token,
+    String page,
+    String name,
+    String latitude,
+    String longitude,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -1054,35 +1089,35 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/check_in_search',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/check_in_search',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = CheckInSearchModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<HttpResponse<dynamic>> newPost(
-      String token,
-      String title,
-      String name,
-      String locationName,
-      String lat,
-      String lng,
-      String backgroundColor,
-      List<MultipartFile> images,
-      List<MultipartFile> videos,
-      String tagging,
-      String feelings,
-      ) async {
+    String token,
+    String title,
+    String name,
+    String locationName,
+    String lat,
+    String lng,
+    String backgroundColor,
+    List<MultipartFile> images,
+    List<MultipartFile> videos,
+    String tagging,
+    String feelings,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'title': title,
@@ -1100,23 +1135,23 @@ class _ApiService implements ApiService {
     _data.files.addAll(images.map((i) => MapEntry('images', i)));
     _data.files.addAll(videos.map((i) => MapEntry('videos', i)));
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'multipart/form-data',
     )
-        .compose(
-      _dio.options,
-      '/new_post',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/new_post',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1124,9 +1159,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<UserProfile> getProfile(
-      String token,
-      String userId,
-      ) async {
+    String token,
+    String userId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'user_id': userId};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1139,26 +1174,59 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/profile',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/profile',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = UserProfile.fromJson(_result.data!);
+    return value;
+  }
+ @override
+  Future<List<PostLikesModel>> getPostUserLikes(
+    String token,
+    String postId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'postId': postId};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<List<dynamic>>(_setStreamType<List<PostLikesModel>>(Options(
+    method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/getPostLikes',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    var value = _result.data!
+        .map((dynamic i) => PostLikesModel.fromJson(i as Map<String, dynamic>))
+        .toList();
     return value;
   }
 
   @override
   Future<List<InterestModel>> getInterests(
-      String token,
-      String userId,
-      ) async {
+    String token,
+    String userId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'user_id': userId};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1171,17 +1239,17 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/interests',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/interests',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     var value = _result.data!
         .map((dynamic i) => InterestModel.fromJson(i as Map<String, dynamic>))
         .toList();
@@ -1190,32 +1258,171 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<dynamic>> getInterestsUpdate(
-      String token,
-      List<InterestModel> dataList,
-      ) async {
+    String token,
+    List<InterestModel> dataList,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     final _data = dataList.map((e) => e.toJson()).toList();
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/interests/update',
-      queryParameters: queryParameters,
-      data: _data,
+            .compose(
+              _dio.options,
+              '/interests/update',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<dynamic>> updateAddWorkEduction(
+    String token,
+    String id,
+    String companyName,
+    String position,
+    String address,
+    String degree,
+    String course,
+    String workType,
+    String startDate,
+    String endDate,
+    String currentStatus,
+    String description,
+    String privacy,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'id': id,
+      r'name': companyName,
+      r'position': position,
+      r'city': address,
+      r'degree': degree,
+      r'course': course,
+      r'type': workType,
+      r'from': startDate,
+      r'to': endDate,
+      r'current_status': currentStatus,
+      r'description': description,
+      r'pirvacy': privacy,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
     )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/update-work-and-education',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<dynamic>> deleteWorkEduction(
+    String token,
+    String id,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'id': id,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/delete-work-and-education',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<dynamic>> updateAddHobbiesInterest(
+    String token,
+    String id,
+    String favt_tv_shows,
+    String favt_movies,
+    String favt_books,
+    String favt_writers,
+    String favt_music_bands,
+    String favt_games,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'id': id,
+      r'favt_tv_shows': favt_tv_shows,
+      r'favt_movies': favt_movies,
+      r'favt_books': favt_books,
+      r'favt_writers': favt_writers,
+      r'favt_music_bands': favt_music_bands,
+      r'favt_games': favt_games,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/update-hobbies-interests',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1223,9 +1430,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<List<WorkEducationModel>> getWorkEducation(
-      String token,
-      String userId,
-      ) async {
+    String token,
+    String userId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'user_id': userId};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1238,52 +1445,52 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/work-and-education',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/work-and-education',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     var value = _result.data!
         .map((dynamic i) =>
-        WorkEducationModel.fromJson(i as Map<String, dynamic>))
+            WorkEducationModel.fromJson(i as Map<String, dynamic>))
         .toList();
     return value;
   }
 
   @override
   Future<HttpResponse<dynamic>> getWorkEducationUpdate(
-      String token,
-      List<WorkEducationModel> dataList,
-      ) async {
+    String token,
+    List<WorkEducationModel> dataList,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     final _data = dataList.map((e) => e.toJson()).toList();
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/work-and-education/update',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/work-and-education/update',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1291,9 +1498,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<PlaceLiveModel> getPlacesLived(
-      String token,
-      String userId,
-      ) async {
+    String token,
+    String userId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'user_id': userId};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1306,28 +1513,28 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/places-lived',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/places-lived',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = PlaceLiveModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<HttpResponse<dynamic>> getPlacesLivedUpdate(
-      String token,
-      String place,
-      String description,
-      String privacy,
-      ) async {
+    String token,
+    String place,
+    String description,
+    String privacy,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'place': place,
@@ -1338,23 +1545,23 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/places-lived/update',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/places-lived/update',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1362,9 +1569,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<FamilyRelationshipModel> getFamilyRelationship(
-      String token,
-      String userId,
-      ) async {
+    String token,
+    String userId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'user_id': userId};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1372,19 +1579,19 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<FamilyRelationshipModel>(Options(
-          method: 'GET',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/family-relationship',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/family-relationship',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -1401,23 +1608,23 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/family-relationship/update',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/family-relationship/update',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1425,17 +1632,17 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<dynamic>> updateAboutMe(
-      String token,
-      String aboutMe,
-      String address,
-      String brithPlace,
-      String liveIn,
-      String aboutMePrivacy,
-      String addressPrivacy,
-      String birthplacePrivacy,
-      String languagesPrivacy,
-      String livesInPrivacy,
-      ) async {
+    String token,
+    String aboutMe,
+    String address,
+    String brithPlace,
+    String liveIn,
+    String aboutMePrivacy,
+    String addressPrivacy,
+    String birthplacePrivacy,
+    String languagesPrivacy,
+    String livesInPrivacy,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'about_me': aboutMe,
@@ -1452,23 +1659,23 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/about-me/update',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/about-me/update',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1482,23 +1689,23 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/about-me',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/about-me',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1506,27 +1713,27 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<dynamic>> getProfileUpdate(
-      String token,
-      String firstName,
-      String lastName,
-      String phone,
-      String licenseNo,
-      String specialty,
-      String dob,
-      String gender,
-      String country,
-      String city,
-      String countryOrigin,
-      String dobPrivacy,
-      String emailPrivacy,
-      String genderPrivacy,
-      String phonePrivacy,
-      String licenseNoPrivacy,
-      String specialtyPrivacy,
-      String countryPrivacy,
-      String cityPrivacy,
-      String countryOriginPrivacy,
-      ) async {
+    String token,
+    String firstName,
+    String lastName,
+    String phone,
+    String licenseNo,
+    String specialty,
+    String dob,
+    String gender,
+    String country,
+    String city,
+    String countryOrigin,
+    String dobPrivacy,
+    String emailPrivacy,
+    String genderPrivacy,
+    String phonePrivacy,
+    String licenseNoPrivacy,
+    String specialtyPrivacy,
+    String countryPrivacy,
+    String cityPrivacy,
+    String countryOriginPrivacy,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'first_name': firstName,
@@ -1553,23 +1760,23 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/profile/update',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/profile/update',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1577,9 +1784,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<PostCommentModel> getPostComments(
-      String token,
-      String postId,
-      ) async {
+    String token,
+    String postId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'post_id': postId};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1592,27 +1799,27 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/get-post-comments',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/get-post-comments',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = PostCommentModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<HttpResponse<dynamic>> makeComment(
-      String token,
-      String postId,
-      String comment,
-      ) async {
+    String token,
+    String postId,
+    String comment,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'post_id': postId,
@@ -1622,23 +1829,58 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/post-comment',
-      queryParameters: queryParameters,
-      data: _data,
+            .compose(
+              _dio.options,
+              '/post-comment',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<dynamic>> deleteComments(
+    String token,
+    String commentId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'comment_id': commentId,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
     )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/delete-comment',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1646,32 +1888,32 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<dynamic>> like(
-      String token,
-      String postId,
-      ) async {
+    String token,
+    String postId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'post_id': postId};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/like',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/like',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1679,9 +1921,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<ContactsModel> getContacts(
-      String token,
-      String page,
-      ) async {
+    String token,
+    String page,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'page': page};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1694,27 +1936,27 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/get-contacts',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/get-contacts',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ContactsModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<SearchContactsModel> searchContacts(
-      String token,
-      String page,
-      String keyword,
-      ) async {
+    String token,
+    String page,
+    String keyword,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -1725,19 +1967,19 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<SearchContactsModel>(Options(
-          method: 'POST',
-          headers: _headers,
-          extra: _extra,
-          contentType: 'application/x-www-form-urlencoded',
-        )
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
             .compose(
-          _dio.options,
-          '/search-contacts',
-          queryParameters: queryParameters,
-          data: _data,
-        )
+              _dio.options,
+              '/search-contacts',
+              queryParameters: queryParameters,
+              data: _data,
+            )
             .copyWith(
-            baseUrl: _combineBaseUrls(
+                baseUrl: _combineBaseUrls(
               _dio.options.baseUrl,
               baseUrl,
             ))));
@@ -1747,11 +1989,11 @@ class _ApiService implements ApiService {
 
   @override
   Future<MessageModel> getRoomMessenger(
-      String token,
-      String page,
-      String userId,
-      String roomId,
-      ) async {
+    String token,
+    String page,
+    String userId,
+    String roomId,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'page': page,
@@ -1768,31 +2010,31 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/messenger',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/messenger',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = MessageModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<SendMessageModel> sendMessage(
-      String token,
-      String userId,
-      String roomId,
-      String receiverId,
-      String attachmentType,
-      String message,
-      String filePath,
-      ) async {
+    String token,
+    String userId,
+    String roomId,
+    String receiverId,
+    String attachmentType,
+    String message,
+    String filePath,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1819,30 +2061,30 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'multipart/form-data',
     )
-        .compose(
-      _dio.options,
-      '/send-message',
-      queryParameters: queryParameters,
-      data: formData,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/send-message',
+              queryParameters: queryParameters,
+              data: formData,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = SendMessageModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<SendMessageModel> sendMessageWithoutFile(
-      String token,
-      String userId,
-      String roomId,
-      String receiverId,
-      String attachmentType,
-      String message,
-      ) async {
+    String token,
+    String userId,
+    String roomId,
+    String receiverId,
+    String attachmentType,
+    String message,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1861,29 +2103,29 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/send-message',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/send-message',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = SendMessageModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<HttpResponse<dynamic>> saveSuggestion(
-      String token,
-      String name,
-      String phone,
-      String email,
-      String message,
-      ) async {
+    String token,
+    String name,
+    String phone,
+    String email,
+    String message,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1895,23 +2137,23 @@ class _ApiService implements ApiService {
       'message': message,
     };
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/save-suggestion',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/save-suggestion',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1919,9 +2161,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<dynamic>> uploadProfilePicture(
-      String token,
-      String filePath,
-      ) async {
+    String token,
+    String filePath,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1931,23 +2173,23 @@ class _ApiService implements ApiService {
       'profile_pic': await MultipartFile.fromFile(filePath),
     });
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'multipart/form-data',
     )
-        .compose(
-      _dio.options,
-      '/upload-profile-pic',
-      queryParameters: queryParameters,
-      data: formData,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/upload-profile-pic',
+              queryParameters: queryParameters,
+              data: formData,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -1955,9 +2197,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<dynamic>> uploadCoverPicture(
-      String token,
-      String filePath,
-      ) async {
+    String token,
+    String filePath,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -1967,23 +2209,23 @@ class _ApiService implements ApiService {
       'background': await MultipartFile.fromFile(filePath),
     });
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'multipart/form-data',
     )
-        .compose(
-      _dio.options,
-      '/upload-cover-pic',
-      queryParameters: queryParameters,
-      data: formData,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/upload-cover-pic',
+              queryParameters: queryParameters,
+              data: formData,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -2003,17 +2245,17 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/advertisement-types',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/advertisement-types',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     var value = _result.data!
         .map((dynamic i) => AdsTypeModel.fromJson(i as Map<String, dynamic>))
         .toList();
@@ -2035,57 +2277,58 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/advertisement-setting',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/advertisement-setting',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = AdsSettingModel.fromJson(_result.data!);
     return value;
   }
 
   @override
   Future<HttpResponse<dynamic>> createGroup(
-      String token,
-      ) async {
+    String token,
+  ) async {
     final _extra = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/group/create',
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/create',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
   }
+
   @override
   Future<HttpResponse<dynamic>> groupNotificationUpdate(
-      String token,
-      String type,
-      String group_updates_push,
-      String group_updates_email,
-      ) async {
+    String token,
+    String type,
+    String group_updates_push,
+    String group_updates_email,
+  ) async {
     final _extra = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
@@ -2093,65 +2336,67 @@ class _ApiService implements ApiService {
       'group_updates_push': group_updates_push,
       'group_updates_email': group_updates_email,
       'type': type,
-
     };
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
-    ).compose(
-      _dio.options,
-      '/group/notification',
-      data: _data,
     )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/notification',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
-  } @override
+  }
+
+  @override
   Future<GroupListModel> listGroup(
-      String token,
-      String userId,
-      ) async {
+    String token,
+    String userId,
+  ) async {
     final _extra = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
-    final _data = {
-      'user_id': userId
-    };
+    final _data = {'user_id': userId};
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
-    ).compose(
-      _dio.options,
-      '/groups',
-      data: _data,
     )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/groups',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
 
     final value = GroupListModel.fromJson(_result.data!);
     return value;
   }
+
   @override
   Future<HttpResponse<dynamic>> groupMemberRequestUpdate(
-      String token,
-      String id,
-      String group_id,
-      String status,
-      ) async {
+    String token,
+    String id,
+    String group_id,
+    String status,
+  ) async {
     final _extra = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
@@ -2159,24 +2404,24 @@ class _ApiService implements ApiService {
       'id': id,
       'group_id': group_id,
       'status': status,
-
     };
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
-    ).compose(
-      _dio.options,
-      '/group/member-request-update',
-      data: _data,
     )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/member-request-update',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
@@ -2184,9 +2429,9 @@ class _ApiService implements ApiService {
 
   @override
   Future<GroupMemberRequestModel> groupMemberRequest(
-      String token,
-      String id,
-      ) async {
+    String token,
+    String id,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -2196,32 +2441,33 @@ class _ApiService implements ApiService {
     };
 
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/group/member-requests',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/member-requests',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = GroupMemberRequestModel.fromJson(_result.data!);
     return value;
   }
+
   @override
   Future<GroupMemberRequestModel> groupMembers(
-      String token,
-      String id,
-      String keyword,
-      ) async {
+    String token,
+    String id,
+    String keyword,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -2232,32 +2478,33 @@ class _ApiService implements ApiService {
     };
 
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/group/members',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/members',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = GroupMemberRequestModel.fromJson(_result.data!);
     return value;
   }
+
   @override
   Future<GroupPostModel> groupPost(
-      String token,
-      String id,
-      String offset,
-      ) async {
+    String token,
+    String id,
+    String offset,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -2268,32 +2515,33 @@ class _ApiService implements ApiService {
     };
 
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/group/posts',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/posts',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = GroupPostModel.fromJson(_result.data!);
     return value;
   }
+
   @override
   Future<GroupPostModel> groupPostRequest(
-      String token,
-      String id,
-      String offset,
-      ) async {
+    String token,
+    String id,
+    String offset,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -2304,47 +2552,48 @@ class _ApiService implements ApiService {
     };
 
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/group/posts',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/posts',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = GroupPostModel.fromJson(_result.data!);
     return value;
   }
+
   @override
   Future<HttpResponse<dynamic>> groupStore(
-      String token,
-      String name,
-      String specialty_focus,
-      String tags,
-      String location,
-      String interest,
-      String language,
-      String description,
-      String member_limit,
-      String admin,
-      String status,
-      String post_permission,
-      String allow_search,
-      String visibility,
-      String join_request,
-      String rules,
-      String logo,
-      String banner,
-      ) async {
+    String token,
+    String name,
+    String specialty_focus,
+    String tags,
+    String location,
+    String interest,
+    String language,
+    String description,
+    String member_limit,
+    String admin,
+    String status,
+    String post_permission,
+    String allow_search,
+    String visibility,
+    String join_request,
+    String rules,
+    String logo,
+    String banner,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
@@ -2370,39 +2619,39 @@ class _ApiService implements ApiService {
     });
 
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'multipart/form-data',
     )
-        .compose(
-      _dio.options,
-      '/group/store',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/store',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
   }
+
   @override
   Future<GroupDetailsModel> groupDetails(
-      String token,
-      String id,
-      ) async {
+    String token,
+    String id,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     final _data = {
       'id': id,
-
     };
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<SendMessageModel>(Options(
@@ -2411,32 +2660,32 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/group/show',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/show',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = GroupDetailsModel.fromJson(_result.data!);
     return value;
   }
+
   @override
   Future<GroupAboutModel> groupAbout(
-      String token,
-      String id,
-      ) async {
+    String token,
+    String id,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
     final _data = {
       'id': id,
-
     };
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<SendMessageModel>(Options(
@@ -2445,17 +2694,17 @@ class _ApiService implements ApiService {
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/group/about',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/group/about',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = GroupAboutModel.fromJson(_result.data!);
     return value;
   }
@@ -2474,9 +2723,9 @@ class _ApiService implements ApiService {
   }
 
   String _combineBaseUrls(
-      String dioBaseUrl,
-      String? baseUrl,
-      ) {
+    String dioBaseUrl,
+    String? baseUrl,
+  ) {
     if (baseUrl == null || baseUrl.trim().isEmpty) {
       return dioBaseUrl;
     }

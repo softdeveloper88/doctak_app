@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:developer';
-import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
@@ -11,7 +9,10 @@ import 'package:doctak_app/data/models/profile_model/interest_model.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
+import 'package:doctak_app/main.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'profile_event.dart';
 import 'profile_state.dart';
 
@@ -31,6 +32,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   String? university;
   String? specialtyName;
   List<String>? specialtyList;
+
   ProfileBloc() : super(DataInitial()) {
     on<UpdateFirstDropdownValue>(_updateFirstDropdownValue);
     on<UpdateSecondDropdownValues>(_updateSecondDropdownValues);
@@ -40,7 +42,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<LoadPageEvent>(_onGetProfile);
     on<UpdateProfileEvent>(_onUpdateProfile);
     on<UpdateProfilePicEvent>(_updateProfilePicture);
+    on<UpdateAddWorkEductionEvent>(_updateAddWorkEduction);
+    on<UpdateAddHobbiesInterestEvent>(_updateAddHobbiesInterest);
     on<LoadPageEvent1>(_onGetPosts);
+    on<DeleteWorkEducationEvent>(_deleteAddWorkEduction);
+    on<SetUserFollow>(_setUserFollow);
 
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == postList.length - nextPageTrigger) {
@@ -91,7 +97,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     if (pageNumber == 1) {
       print("data ${event.userId}");
       PostDataModel postDataModelResponse = await postService.getMyPosts(
-          'Bearer ${AppData.userToken}', '1', event.userId??'');
+          'Bearer ${AppData.userToken}', '1', event.userId ?? '');
       print('repsones$postDataModelResponse');
       UserProfile response = await postService.getProfile(
           'Bearer ${AppData.userToken}', event.userId!);
@@ -120,14 +126,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       userProfile = response;
     }
     List<String>? countriesList = await _onGetCountries();
-    List<String>? stateList =
-        await _onGetStates(userProfile?.user?.country ?? countriesList?.first??'');
+    List<String>? stateList = await _onGetStates(
+        userProfile?.user?.country ?? countriesList?.first ?? '');
     List<String>? specialtyList = await _onGetSpecialty();
     emit(PaginationLoadedState(
-        countriesList??[],
-        userProfile?.user?.country ?? countriesList?.first??'',
-        stateList??[],
-        userProfile?.user?.city ?? stateList?.first??'',
+        countriesList ?? [],
+        userProfile?.user?.country ?? countriesList?.first ?? '',
+        stateList ?? [],
+        userProfile?.user?.city ?? stateList?.first ?? '',
         specialtyList!,
         userProfile?.user?.specialty ?? specialtyList.first,
         [],
@@ -161,17 +167,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       UpdateFirstDropdownValue event, Emitter<ProfileState> emit) async {
     List<String>? countriesList = await _onGetCountries();
 
-    emit(PaginationLoadedState(
-        countriesList??[],
-        countriesList?.first??'',
-        [],
-        'Select State',
-        [],
-        'select Specialty',
-        [],
-        ''));
+    emit(PaginationLoadedState(countriesList ?? [], countriesList?.first ?? '',
+        [], 'Select State', [], 'select Specialty', [], ''));
 
-    add(UpdateSecondDropdownValues(countriesList?.first??''));
+    add(UpdateSecondDropdownValues(countriesList?.first ?? ''));
   }
 
   Future<void> _updateProfilePicture(
@@ -213,69 +212,81 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // ProgressDialogUtils.showProgressDialog();
     // try {
     // print((specialtyName ?? event.userProfile?.user?.specialty ?? ''));
-   int privacyLength=event.userProfile?.privacySetting?.length??0;
-   if(event.updateProfileSection==1) {
-     final response = await postService.getProfileUpdate(
-       'Bearer ${AppData.userToken}',
-       event.userProfile?.user?.firstName ?? '',
-       event.userProfile?.user?.lastName ?? "",
-       event.userProfile?.user?.phone ?? '',
-       event.userProfile?.user?.licenseNo ?? " ",
-       specialtyName ?? event.userProfile?.user?.specialty ?? '',
-       event.userProfile?.user?.dob ?? "",
-       'male',
-       country ?? event.userProfile?.user?.country ?? 'United Arab Emirates',
-       stateName ?? event.userProfile?.user?.city ?? 'Dubai',
-       country ?? event.userProfile?.user?.country ?? "United Arab Emirates",
-       // event.userProfile?.privacySetting?[3].visibility ?? 'globe',
-       // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
-       // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
-       // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
-       privacyLength >= 3 ? event.userProfile?.privacySetting![3].visibility ??
-           'globe' : 'globe',
-       privacyLength >= 4 ? event.userProfile?.privacySetting![4].visibility ??
-           'globe' : 'globe',
-       privacyLength >= 5 ? event.userProfile?.privacySetting![5].visibility ??
-           'globe' : 'globe',
-       privacyLength >= 8 ? event.userProfile?.privacySetting![8].visibility ??
-           'globe' : 'globe',
-       'globe',
-       'globe',
-       privacyLength >= 10 ? event.userProfile?.privacySetting![10]
-           .visibility ?? 'globe' : 'globe',
-       privacyLength >= 11 ? event.userProfile?.privacySetting![11]
-           .visibility ?? 'globe' : 'globe',
-       privacyLength >= 12 ? event.userProfile?.privacySetting![12]
-           .visibility ?? 'globe' : 'globe',
-     );
-   }else if(event.updateProfileSection==2) {
-     // final response1 = await postService.getWorkEducationUpdate(
-     //     'Bearer ${AppData.userToken}', event.workEducationModel ?? []);
-     //
-     // print(response1.data);
-     // final response3 = await postService.getInterestsUpdate(
-     //     'Bearer ${AppData.userToken}', event.interestModel!);
-     //
-print(event.userProfile?.profile?.aboutMe??'');
-     final response2 = await postService.updateAboutMe(
-       'Bearer ${AppData.userToken}',
-       event.userProfile?.profile?.aboutMe ?? '...',
-       event.userProfile?.profile?.address ?? '...',
-       event.userProfile?.profile?.birthplace ?? '...',
-       event.userProfile?.profile?.livesIn ?? '...',
-       privacyLength >= 0 ? event.userProfile?.privacySetting![0].visibility ??
-           'lock' : 'lock',
-       privacyLength >= 1 ? event.userProfile?.privacySetting![1].visibility ??
-           'lock' : 'lock',
-       privacyLength >= 2 ? event.userProfile?.privacySetting![2].visibility ??
-           'lock' : 'lock',
-       privacyLength >= 6 ? event.userProfile?.privacySetting![6].visibility ??
-           'lock' : 'lock',
-       privacyLength >= 7 ? event.userProfile?.privacySetting![7].visibility ??
-           'lock' : 'lock',
-     );
-     print(response2.response);
-   }
+    int privacyLength = event.userProfile?.privacySetting?.length ?? 0;
+    if (event.updateProfileSection == 1) {
+      final response = await postService.getProfileUpdate(
+        'Bearer ${AppData.userToken}',
+        event.userProfile?.user?.firstName ?? '',
+        event.userProfile?.user?.lastName ?? "",
+        event.userProfile?.user?.phone ?? '',
+        event.userProfile?.user?.licenseNo ?? " ",
+        specialtyName ?? event.userProfile?.user?.specialty ?? '',
+        event.userProfile?.user?.dob ?? "",
+        'male',
+        country ?? event.userProfile?.user?.country ?? 'United Arab Emirates',
+        stateName ?? event.userProfile?.user?.city ?? 'Dubai',
+        country ?? event.userProfile?.user?.country ?? "United Arab Emirates",
+        // event.userProfile?.privacySetting?[3].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
+        privacyLength >= 3
+            ? event.userProfile?.privacySetting![3].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 4
+            ? event.userProfile?.privacySetting![4].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 5
+            ? event.userProfile?.privacySetting![5].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 8
+            ? event.userProfile?.privacySetting![8].visibility ?? 'globe'
+            : 'globe',
+        'globe',
+        'globe',
+        privacyLength >= 10
+            ? event.userProfile?.privacySetting![10].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 11
+            ? event.userProfile?.privacySetting![11].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 12
+            ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
+            : 'globe',
+      );
+    } else if (event.updateProfileSection == 2) {
+      // final response1 = await postService.getWorkEducationUpdate(
+      //     'Bearer ${AppData.userToken}', event.workEducationModel ?? []);
+      //
+      // print(response1.data);
+      // final response3 = await postService.getInterestsUpdate(
+      //     'Bearer ${AppData.userToken}', event.interestModel!);
+      //
+      print(event.userProfile?.profile?.aboutMe ?? '');
+      final response2 = await postService.updateAboutMe(
+        'Bearer ${AppData.userToken}',
+        event.userProfile?.profile?.aboutMe ?? '...',
+        event.userProfile?.profile?.address ?? '...',
+        event.userProfile?.profile?.birthplace ?? '...',
+        event.userProfile?.profile?.livesIn ?? '...',
+        privacyLength >= 0
+            ? event.userProfile?.privacySetting![0].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 1
+            ? event.userProfile?.privacySetting![1].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 2
+            ? event.userProfile?.privacySetting![2].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 6
+            ? event.userProfile?.privacySetting![6].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 7
+            ? event.userProfile?.privacySetting![7].visibility ?? 'lock'
+            : 'lock',
+      );
+      print(response2.response);
+    }
     // final response3 = await postService.getPlacesLivedUpdate(
     //   'Bearer ${AppData.userToken}',
     //   '','',
@@ -284,7 +295,6 @@ print(event.userProfile?.profile?.aboutMe??'');
     // );
     // emit(PaginationLoadedState());
     // ProgressDialogUtils.hideProgressDialog();
-
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
         (state as PaginationLoadedState).selectedFirstDropdownValue,
@@ -308,28 +318,30 @@ print(event.userProfile?.profile?.aboutMe??'');
 
   void _updateSecondDropdownValues(
       UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
-    List<String> secondDropdownValues=[];
-    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue)??[];
-     print(secondDropdownValues.toList());
+    List<String> secondDropdownValues = [];
+    secondDropdownValues =
+        await _onGetStates(event.selectedFirstDropdownValue) ?? [];
+    print(secondDropdownValues.toList());
     if (secondDropdownValues.isNotEmpty) {
-      List<String>? universityDropdownValues = await _onGetUniversities(secondDropdownValues.first ?? '');
+      List<String>? universityDropdownValues =
+          await _onGetUniversities(secondDropdownValues.first ?? '');
     }
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
         event.selectedFirstDropdownValue,
         secondDropdownValues ?? [],
-        secondDropdownValues.isNotEmpty?secondDropdownValues.first : '',
+        secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '',
         (state as PaginationLoadedState).specialtyDropdownValue,
         (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
         [],
         ''));
     // add(UpdateSpecialtyDropdownValue(secondDropdownValues!.first));
   }
+
   void _updateUniversityDropdownValues(
       UpdateUniversityDropdownValues event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
-    List<String>? secondDropdownValues =
-        await _onGetUniversities(event.selectedStateDropdownValue);
+    List<String>? secondDropdownValues = await _onGetUniversities(event.selectedStateDropdownValue);
     emit(PaginationLoadedState(
       (state as PaginationLoadedState).firstDropdownValues,
       (state as PaginationLoadedState).selectedFirstDropdownValue,
@@ -341,6 +353,112 @@ print(event.userProfile?.profile?.aboutMe??'');
       secondDropdownValues!.isEmpty ? '' : secondDropdownValues.first,
     ));
   }
+  void _updateAddWorkEduction(
+      UpdateAddWorkEductionEvent event, Emitter<ProfileState> emit) async {
+    // Simulate fetching second dropdown values based on the first dropdown selection
+    print(event.id);
+    print(event.companyName);
+    print(event.position);
+    print(event.address);
+    print(event.degree);
+    print(event.course);
+    print(event.workType ==''?"work":event.workType);
+    print(event.startDate);
+    print(event.endDate);
+    print(event.currentStatus);
+    print(event.description);
+    print(event.privacy);
+    var response = await postService.updateAddWorkEduction(
+        'Bearer ${AppData.userToken}',
+        event.id,
+        event.companyName,
+        event.position,
+        event.address,
+        event.degree,
+        event.course,
+        event.workType ==''?"work":event.workType,
+        event.startDate,
+        event.endDate,
+        event.currentStatus,
+        event.description,
+        event.privacy);
+
+    List<WorkEducationModel> response2 = await postService.getWorkEducation(
+        'Bearer ${AppData.userToken}', AppData.logInUserId);
+    workEducationList!.clear();
+    workEducationList!.addAll(response2);
+    print(response.data.toString());
+    globalMessengerKey.currentState?.showSnackBar(
+        const SnackBar(content: Text('Work info updated successfully')));
+
+    emit(PaginationLoadedState(
+        (state as PaginationLoadedState).firstDropdownValues,
+        (state as PaginationLoadedState).selectedFirstDropdownValue,
+        (state as PaginationLoadedState).secondDropdownValues,
+        (state as PaginationLoadedState).selectedSecondDropdownValue,
+        (state as PaginationLoadedState).specialtyDropdownValue,
+        (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
+        (state as PaginationLoadedState).universityDropdownValue,
+        (state as PaginationLoadedState).selectedUniversityDropdownValue));
+  }
+  void _updateAddHobbiesInterest(
+      UpdateAddHobbiesInterestEvent event, Emitter<ProfileState> emit) async {
+    // Simulate fetching second dropdown values based on the first dropdown selection
+    print(event.id);
+    print(event.favt_tv_shows);
+    print(event.favt_movies);
+    print(event.favt_games);
+    print(event.favt_writers);
+    print(event.favt_books);
+    print(event.favt_music_bands);
+
+    var response = await postService.updateAddHobbiesInterest(
+        'Bearer ${AppData.userToken}',
+        event.id,
+        event.favt_tv_shows,
+        event.favt_movies,
+        event.favt_books,
+        event.favt_writers,
+        event.favt_music_bands,
+        event.favt_games,);
+
+    List<InterestModel> response1 = await postService.getInterests(
+        'Bearer ${AppData.userToken}', AppData.logInUserId!);
+    interestList!.clear();
+    interestList!.addAll(response1);
+    print(response.data.toString());
+    emit(PaginationLoadedState(
+        (state as PaginationLoadedState).firstDropdownValues,
+        (state as PaginationLoadedState).selectedFirstDropdownValue,
+        (state as PaginationLoadedState).secondDropdownValues,
+        (state as PaginationLoadedState).selectedSecondDropdownValue,
+        (state as PaginationLoadedState).specialtyDropdownValue,
+        (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
+        (state as PaginationLoadedState).universityDropdownValue,
+        (state as PaginationLoadedState).selectedUniversityDropdownValue));
+  }
+  void _deleteAddWorkEduction(
+      DeleteWorkEducationEvent event, Emitter<ProfileState> emit) async {
+    // Simulate fetching second dropdown values based on the first dropdown selection
+    var response = await postService.deleteWorkEduction(
+        'Bearer ${AppData.userToken}',
+        event.id);
+    List<WorkEducationModel> response2 = await postService.getWorkEducation(
+        'Bearer ${AppData.userToken}', AppData.logInUserId);
+    workEducationList!.clear();
+    workEducationList!.addAll(response2);
+    globalMessengerKey.currentState?.showSnackBar(
+        const SnackBar(content: Text('Work Info deleted successfully')));
+    emit(PaginationLoadedState(
+        (state as PaginationLoadedState).firstDropdownValues,
+        (state as PaginationLoadedState).selectedFirstDropdownValue,
+        (state as PaginationLoadedState).secondDropdownValues,
+        (state as PaginationLoadedState).selectedSecondDropdownValue,
+        (state as PaginationLoadedState).specialtyDropdownValue,
+        (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
+        (state as PaginationLoadedState).universityDropdownValue,
+        (state as PaginationLoadedState).selectedUniversityDropdownValue));
+  }
 
   void _updateSpecialtyDropdownValues(
       UpdateSpecialtyDropdownValue event, Emitter<ProfileState> emit) async {
@@ -351,17 +469,16 @@ print(event.userProfile?.profile?.aboutMe??'');
         (state as PaginationLoadedState).selectedFirstDropdownValue,
         (state as PaginationLoadedState).secondDropdownValues,
         (state as PaginationLoadedState).selectedSecondDropdownValue,
-        secondDropdownValues??[],
-        secondDropdownValues?.first??'',
+        secondDropdownValues ?? [],
+        secondDropdownValues?.first ?? '',
         [],
         ''));
-
   }
-  void _specialityData(
-      UpdateSpecialtyDropdownValue1 event, Emitter<ProfileState> emit) async {
+
+  void _specialityData(UpdateSpecialtyDropdownValue1 event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
     List<String>? secondDropdownValues = await _onGetSpecialty();
-    specialtyList=secondDropdownValues??[];
+    specialtyList = secondDropdownValues ?? [];
   }
 
   Future<List<String>?> _onGetCountries() async {
@@ -386,7 +503,6 @@ print(event.userProfile?.profile?.aboutMe??'');
       // emit(DataFailure(error: 'An error occurred'));
     }
   }
-
   Future<List<String>?> _onGetSpecialty() async {
     // emit(DataLoading());
     try {
@@ -452,6 +568,32 @@ print(event.userProfile?.profile?.aboutMe??'');
       return [];
       print(e);
       // emit(DataFailure(error: 'An error occurred'));
+    }
+  }
+  _setUserFollow(SetUserFollow event, Emitter<ProfileState> emit) async {
+    // emit(DrugsDataInitial());
+    // ProgressDialogUtils.showProgressDialog();
+    print(event.userId,);
+    try {
+      var response = await postService.setUserFollow(
+          'Bearer ${AppData.userToken}',
+          event.userId,
+          event.follow ?? '');
+      // setLoading(false);
+      emit(PaginationLoadedState(
+          (state as PaginationLoadedState).firstDropdownValues,
+          (state as PaginationLoadedState).selectedFirstDropdownValue,
+          (state as PaginationLoadedState).secondDropdownValues,
+          (state as PaginationLoadedState).selectedSecondDropdownValue,
+          (state as PaginationLoadedState).specialtyDropdownValue,
+          (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
+          (state as PaginationLoadedState).universityDropdownValue,
+          (state as PaginationLoadedState).selectedUniversityDropdownValue));
+
+    } catch (e) {
+      print(e);
+
+      emit(DataError('No Data Found'));
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:flutter/material.dart';
@@ -94,17 +95,44 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                       style: secondaryTextStyle(color: svGetBodyColor())),
                   // 24.height,
                   if (widget.userId != null)
-                    AppButton(
-                      height: 60,
-                      shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
-                      text: 'Chat',
-                      textStyle: boldTextStyle(color: Colors.white),
-                      onTap: () {
-                        ChatRoomScreen(username: '${profileBloc.userProfile?.user?.firstName} ${profileBloc.userProfile?.user?.lastName}',profilePic: '${profileBloc.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',id: '${profileBloc.userProfile?.user?.id}',roomId: '',).launch(context);
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        MaterialButton(
+                          height: 30.0,
+                          minWidth: 100,
+                          onPressed: () {
+                            ChatRoomScreen(username: '${profileBloc.userProfile?.user?.firstName} ${profileBloc.userProfile?.user?.lastName}',profilePic: '${profileBloc.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',id: '${profileBloc.userProfile?.user?.id}',roomId: '',).launch(context);
+                          },
+                          elevation: 0,
+                          color: SVAppColorPrimary,
+                          child: Text('Chat',style: boldTextStyle(color: Colors.white)),
+                        ),
+                        SizedBox(width: 10,),
+                        MaterialButton(
+                          height: 30.0,
+                          minWidth: 100,
+                          onPressed: () {
+                            if (profileBloc.userProfile!.isFollowing?? false) {
+                              profileBloc.add(SetUserFollow(
+                                  profileBloc.userProfile?.user?.id ?? '',
+                                  'unfollow'));
 
-                      },
-                      elevation: 0,
-                      color: SVAppColorPrimary,
+                              profileBloc.userProfile!.isFollowing= false;
+                            } else {
+                              profileBloc.add(SetUserFollow(
+                                  profileBloc.userProfile?.user?.id?? '',
+                                  'follow'));
+
+                              profileBloc.userProfile!.isFollowing = true;
+                            }
+                            setState(() {});
+                          },
+                          elevation: 0,
+                          color: SVAppColorPrimary,
+                          child: Text(profileBloc.userProfile?.isFollowing??false?'Following':"Follow",style: boldTextStyle(color: Colors.white)),
+                        ),
+                      ],
                     ),
                   24.height,
                   if(AppData.isShowGoogleBannerAds??false)BannerAdWidget(),
@@ -112,41 +140,68 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Column(
-                        children: [
-                          Text('Posts',
-                              style: secondaryTextStyle(
-                                  color: svGetBodyColor(), size: 12)),
-                          4.height,
-                          Text('${profileBloc.userProfile?.totalPosts ?? ''}',
-                              style: boldTextStyle(size: 18)),
-                        ],
+                      GestureDetector(
+                        onTap: (){
+
+                        },
+                        child: Column(
+                          children: [
+                            Text('Posts',
+                                style: secondaryTextStyle(
+                                    color: svGetBodyColor(), size: 12)),
+                            4.height,
+                            Text('${profileBloc.userProfile?.totalPosts ?? ''}',
+                                style: boldTextStyle(size: 18)),
+                          ],
+                        ),
                       ),
-                      Column(
-                        children: [
-                          Text('Followers',
-                              style: secondaryTextStyle(
-                                  color: svGetBodyColor(), size: 12)),
-                          4.height,
-                          Text(
-                              profileBloc.userProfile?.totalFollows
-                                      ?.totalFollowers ??
-                                  '',
-                              style: boldTextStyle(size: 18)),
-                        ],
+                      GestureDetector(
+                        onTap: (){
+                          if(widget.userId != null) {
+                            FollowerScreen(isFollowersScreen: true,userId: widget.userId.toString(),).launch(
+                                context);
+                          }else{
+                            FollowerScreen(isFollowersScreen: true,userId: AppData.logInUserId,).launch(
+                                context);
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            Text('Followers',
+                                style: secondaryTextStyle(
+                                    color: svGetBodyColor(), size: 12)),
+                            4.height,
+                            Text(
+                                profileBloc.userProfile?.totalFollows
+                                        ?.totalFollowings ??
+                                    '',
+                                style: boldTextStyle(size: 18)),
+                          ],
+                        ),
                       ),
-                      Column(
-                        children: [
-                          Text('Following',
-                              style: secondaryTextStyle(
-                                  color: svGetBodyColor(), size: 12)),
-                          4.height,
-                          Text(
-                              profileBloc.userProfile?.totalFollows
-                                      ?.totalFollowings ??
-                                  '',
-                              style: boldTextStyle(size: 18)),
-                        ],
+                      GestureDetector(
+                        onTap: (){
+                          if(widget.userId != null) {
+                            FollowerScreen(isFollowersScreen: false,userId: widget.userId.toString(),).launch(
+                                context);
+                          }else{
+                            FollowerScreen(isFollowersScreen: false,userId: AppData.logInUserId,).launch(
+                                context);
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            Text('Followings',
+                                style: secondaryTextStyle(
+                                    color: svGetBodyColor(), size: 12)),
+                            4.height,
+                            Text(
+                                profileBloc.userProfile?.totalFollows
+                                        ?.totalFollowers ??
+                                    '',
+                                style: boldTextStyle(size: 18)),
+                          ],
+                        ),
                       )
                     ],
                   ),

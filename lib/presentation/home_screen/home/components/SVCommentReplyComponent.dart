@@ -16,7 +16,7 @@ TextEditingController commentController=TextEditingController();
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      color: svGetScaffoldColor(),
+      color: svGetBgColor(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

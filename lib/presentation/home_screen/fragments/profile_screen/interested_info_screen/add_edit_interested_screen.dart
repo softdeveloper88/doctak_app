@@ -70,6 +70,8 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
       ),
     );
   }
+  var focusNode1=FocusNode();
+  var focusNode2=FocusNode();
 
   Widget _buildInterestedInfoFields() {
     return Column(children: [
@@ -80,6 +82,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
           children: [
             const SizedBox(height: 10),
             TextFieldEditWidget(
+              focusNode: focusNode1,
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
@@ -88,6 +91,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
               // onSave: (value) => entry.interestType = value,
             ),
             TextFieldEditWidget(
+              focusNode: focusNode2,
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
@@ -126,7 +130,6 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
       ),
     ]);
   }
-
   Widget _buildElevatedButton({
     required VoidCallback onPressed,
     required String label,

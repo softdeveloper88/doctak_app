@@ -1,26 +1,48 @@
+import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/SVCommon.dart';
 import '../component/profile_date_widget.dart';
+import '../component/profile_widget.dart';
 
 class AddEditWorkScreen extends StatefulWidget {
   ProfileBloc profileBloc;
-
-  AddEditWorkScreen({required this.profileBloc, super.key});
+  WorkEducationModel? updateWork;
+  AddEditWorkScreen({required this.profileBloc, this.updateWork,super.key, });
 
   @override
   State<AddEditWorkScreen> createState() =>
       _AddEditWorkScreenState();
 }
+GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
 bool isEditModeMap = false;
+WorkEducationModel? updateWork=WorkEducationModel();
 
 class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
+
+  @override
+  void initState() {
+
+    if(widget.updateWork !=null){
+      updateWork= widget.updateWork;
+      updateWork?.workType=widget.updateWork?.workType??"work";
+
+    }
+    else{
+      updateWork=WorkEducationModel();
+      updateWork?.workType='work';
+    }
+    super.initState();
+  }
+  String privacy='global';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,27 +61,27 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
             },
             child: const Icon(Icons.arrow_back_ios)),
         iconTheme: IconThemeData(color: context.iconColor),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                // widget.profileBloc.interestList!.add(InterestModel());
-              });
-            },
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.add_circle_outline_sharp,
-                color: Colors.black,
-                size: 30,
-                // color: Colors.black,
-                // imagePath: 'assets/icon/ic_vector.svg',
-                // height: 25.adaptSize,
-                // width: 25.adaptSize,
-                // margin: EdgeInsets.only(top: 4.v, right: 4.v),
-              ),
-            ),
-          ),
+        actions: const [
+          // GestureDetector(
+          //   onTap: () {
+          //     setState(() {
+          //       // profileBloc.interestList!.add(InterestModel());
+          //     });
+          //   },
+            // child: const Padding(
+            //   padding: EdgeInsets.all(8.0),
+            //   child: Icon(
+            //     Icons.add_circle_outline_sharp,
+            //     color: Colors.black,
+            //     size: 30,
+            //     // color: Colors.black,
+            //     // imagePath: 'assets/icon/ic_vector.svg',
+            //     // height: 25.adaptSize,
+            //     // width: 25.adaptSize,
+            //     // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+            //   ),
+            // ),
+          // ),
         ],
       ),
       body: Padding(
@@ -75,113 +97,218 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
       ),
     );
   }
+  List<String> listWorkType = ['work', 'university','high_school'];
+  List<String> privacyList = ['global', 'private','only me'];
+  var focusNode1=FocusNode();
+  var focusNode2=FocusNode();
+  var focusNode3=FocusNode();
+  var focusNode4=FocusNode();
+  var focusNode5=FocusNode();
 
   Widget _buildWorkInfoFields() {
     return Column(
       children:[
         Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                const SizedBox(height: 10),
-                TextFieldEditWidget(
-                  isEditModeMap: true,
-                  icon: Icons.work,
-                  index: 2,
-                  label: 'Company Name',
-                  // value: entry.name ?? '',
-                  // onSave: (value) => entry.name = value,
-                ),
-                TextFieldEditWidget(
-                  isEditModeMap: true,
-                  icon: Icons.type_specimen,
-                  index: 2,
-                  label: 'Position',
-                  // value: entry.position ?? "",
-                  // onSave: (value) => entry.position = value,
-                ),
-                TextFieldEditWidget(
-                  isEditModeMap: true,
-                  icon: Icons.location_on,
-                  index: 2,
-                  label: 'Address',
-                  // value: entry.address ?? "",
-                  // onSave: (value) => entry.address = value,
-                ),
-                TextFieldEditWidget(
-                  isEditModeMap: true,
-                  icon: Icons.description,
-                  index: 2,
-                  label: 'Degree',
-                  // value: entry.degree ?? "",
-                  // onSave: (value) => entry.degree = value,
-                ),
-                TextFieldEditWidget(
-                  isEditModeMap: true,
-                  icon: Icons.book,
-                  index: 2,
-                  label: 'Courses',
-                  // value: entry.courses ?? "",
-                  // onSave: (value) => entry.courses = value,
-                ),
-                TextFieldEditWidget(
-                  isEditModeMap: true,
-                  icon: Icons.book,
-                  index: 2,
-                  label: 'Work Type',
-                  // value: entry.workType ?? "",
-                  // onSave: (value) => entry.workType = value,
-                ),
-                TextFieldEditWidget(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Work Type',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  CustomDropdownButtonFormField(
+                    items: listWorkType,
+                    value: listWorkType.first,
+                    width: double.infinity,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 0,
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        updateWork?.workType  = newValue;
+                      });
+                    },
+                  ),
+                  if(updateWork?.workType=='work') TextFieldEditWidget(
+                    isEditModeMap: true,
+                    icon: Icons.work,
+                    index: 2,
+                    focusNode: focusNode1,
+                    label: 'Company Name',
+                    value: updateWork?.name ?? '',
+                    onSave: (value) => updateWork?.name = value,
+                  ),
+                 if(updateWork?.workType=='work') TextFieldEditWidget(
+                    isEditModeMap: true,
+                    icon: Icons.type_specimen,
+                    index: 2,
+                    label: 'Position',
+                    value: updateWork?.position ?? "",
+                    onSave: (value) => updateWork?.position = value,
+                  ),
+                  TextFieldEditWidget(
+                    focusNode: focusNode2,
+                    isEditModeMap: true,
+                    icon: Icons.location_on,
+                    index: 2,
+                    label: 'Address',
+                    value: updateWork?.address ?? "",
+                    onSave: (value) => updateWork?.address = value,
+                  ),
+                  if(updateWork?.workType!='work') TextFieldEditWidget(
+                    focusNode: focusNode3,
                     isEditModeMap: true,
                     icon: Icons.description,
                     index: 2,
-                    label: 'Description',
-                    // value: entry.description ?? "",
-                    // onSave: (value) => entry.description = value,
-                    maxLines: 3),
-                ProfileDateWidget(
-                  isEditModeMap: true,
-                  index: 2,
-                  label: 'Start Date',
-                  // value: entry.startDate ?? '',
-                  // onSave: (value) => entry.startDate = value,
-                ),
-                ProfileDateWidget(
-                  isEditModeMap: true,
-                  index: 2,
-                  label: 'End Date',
-                  // value: entry.endDate ?? '',
-                  // onSave: (value) => entry.endDate = value,
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Expanded(
-                      child: svAppButton(
-                        color: Colors.grey,
-                        context: context,
-                        // style: svAppButton(text: text, onTap: onTap, context: context),
-                        onTap: () async {},
-                        text: 'Remove',
+                    label: 'Degree',
+                    value: updateWork?.degree ?? "",
+                    onSave: (value) => updateWork?.degree = value,
+                  ),
+                  if(updateWork?.workType!='work') TextFieldEditWidget(
+                    isEditModeMap: true,
+                    focusNode: focusNode4,
+                    icon: Icons.book,
+                    index: 2,
+                    label: 'Courses',
+                    value: updateWork?.courses ?? "",
+                    onSave: (value) => updateWork?.courses = value,
+                  ),
+                  TextFieldEditWidget(
+                      isEditModeMap: true,
+                      icon: Icons.description,
+                      focusNode: focusNode5,
+                      index: 2,
+                      label: 'Description',
+                      value: updateWork?.description ?? "",
+                      onSave: (value) => updateWork?.description = value,
+                      maxLines: 3),
+                  ProfileDateWidget(
+                    isEditModeMap: true,
+                    index: 2,
+                    label: 'Start Date',
+                    value: updateWork?.startDate ?? '',
+                    onSave: (value) => updateWork?.startDate = value,
+                  ),
+                  ProfileDateWidget(
+                    isEditModeMap: true,
+                    index: 2,
+                    label: 'End Date',
+                    value: updateWork?.endDate ?? '',
+                    onSave: (value) => updateWork?.endDate = value,
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Privacy',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(width: 10,),
-                    Expanded(
-                      child: svAppButton(
+                  ),
+                  CustomDropdownButtonFormField(
+                    items: privacyList,
+                    value: privacyList.first,
+                    width: double.infinity,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 0,
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                         privacy = newValue!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // Expanded(
+                      //   child: svAppButton(
+                      //     color: Colors.grey,
+                      //     context: context,
+                      //     // style: svAppButton(text: text, onTap: onTap, context: context),
+                      //     onTap: () async {
+                      //
+                      //     },
+                      //     text: 'Remove',
+                      //   ),
+                      // ),
+                      // const SizedBox(width: 10,),
+                      Expanded(
+                        child: svAppButton(
 
-                        context: context,
-                        // style: svAppButton(text: text, onTap: onTap, context: context),
-                        onTap: () async {},
-                        text: 'Add',
+                          context: context,
+                          // style: svAppButton(text: text, onTap: onTap, context: context),
+                          onTap: () async {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
+                            }
+                            var currentStatus=0;
+                            if(updateWork?.endDate=='' && updateWork?.endDate==null){
+                              currentStatus=1;
+                            }else{
+                              currentStatus=0;
+                            }
+                            if(widget.updateWork !=null) {
+                              print(updateWork?.id);
+                              widget.profileBloc.add(
+                                  UpdateAddWorkEductionEvent(
+                                      widget.updateWork?.id.toString()??'0',
+                                      updateWork?.name ?? "",
+                                      updateWork?.position ?? "",
+                                      updateWork?.address ?? "",
+                                      updateWork?.degree ?? "",
+                                      updateWork?.courses ?? "",
+                                      updateWork?.workType ?? "",
+                                      updateWork?.startDate ?? "",
+                                      updateWork?.endDate ?? "",
+                                      currentStatus.toString(),
+                                      updateWork?.description ?? "",
+                                      privacy
+                                      )
+
+                              );
+                            }else{
+                              widget.profileBloc.add(
+                                  UpdateAddWorkEductionEvent(
+                                      '',
+                                      updateWork?.name ?? "",
+                                      updateWork?.position ?? "",
+                                      updateWork?.address ?? "",
+                                      updateWork?.degree ?? "",
+                                      updateWork?.courses ?? "",
+                                      updateWork?.workType ?? "",
+                                      updateWork?.startDate ?? "",
+                                      updateWork?.endDate ?? "",
+                                      updateWork?.currentStatus ?? "",
+                                      updateWork?.description ?? "",
+                                      privacy)
+
+                              );
+                            }
+                           Navigator.pop(context);
+                          },
+                          text: 'Add',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 

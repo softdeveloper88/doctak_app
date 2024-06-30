@@ -6,7 +6,8 @@ class UserProfile {
       this.totalFollows, 
       this.profilePicture, 
       this.coverPicture, 
-      this.totalPosts, 
+      this.isFollowing,
+      this.totalPosts,
       this.user, 
       this.profile, 
       this.followers, 
@@ -16,6 +17,7 @@ class UserProfile {
     totalFollows = json['total_follows'] != null ? TotalFollows.fromJson(json['total_follows']) : null;
     profilePicture = json['profile_picture'];
     coverPicture = json['cover_picture'];
+    isFollowing = json['isFollowing'];
     totalPosts = json['total_posts'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     profile = json['profile'] != null ? Profile.fromJson(json['profile']) : null;
@@ -35,6 +37,7 @@ class UserProfile {
   TotalFollows? totalFollows;
   String? profilePicture;
   String? coverPicture;
+  bool? isFollowing;
   int? totalPosts;
   User? user;
   Profile? profile;
@@ -48,6 +51,7 @@ class UserProfile {
     }
     map['profile_picture'] = profilePicture;
     map['cover_picture'] = coverPicture;
+    map['isFollowing'] = isFollowing;
     map['total_posts'] = totalPosts;
     if (user != null) {
       map['user'] = user?.toJson();

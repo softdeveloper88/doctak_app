@@ -18,7 +18,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
 import '../../../../splash_screen/bloc/splash_state.dart';

@@ -140,7 +140,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messagesList.addAll(response.messages ?? []);
         // messagesList=messagesList.reversed.toList();
       }
-print(response.toJson());
+
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(contactsList));

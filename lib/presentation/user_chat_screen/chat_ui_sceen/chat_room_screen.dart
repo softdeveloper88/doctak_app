@@ -9,13 +9,6 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +23,6 @@ import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../home_screen/utils/SVColors.dart';
 import 'component/chat_bubble.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -79,6 +71,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   // List<SelectedByte> selectedFiles = [];
   bool isMessageLoaded = false; // Initialize it as per your logic
   File? _selectedFile;
+  bool _isFileUploading = false;
   bool _isRecording = false;
   bool _isPaused = false;
   int _recordDuration = 0;
@@ -97,7 +90,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   @override
   void initState() {
-
     super.initState();
     setStatusBarColor(svGetScaffoldColor());
 
@@ -171,7 +163,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       setState(() => _recordDuration++);
     });
 
-    _ampTimer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
+    _ampTimer =
+        Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
       _amplitude = await _audioRecorder.getAmplitude();
       setState(() {});
     });
@@ -427,7 +420,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
-
   // void _selectFiles(BuildContext context) async {
   //   ImagePickerPlus picker = ImagePickerPlus(context);
   //   SelectedImagesDetails? details = await picker.pickBoth(
@@ -599,20 +591,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
     });
   }
-
   @override
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
-
     return Scaffold(
-        backgroundColor:svGetBgColor(),
+        backgroundColor: svGetBgColor(),
         appBar: AppBar(
           surfaceTintColor: context.cardColor,
           backgroundColor: context.cardColor,
           toolbarHeight: 100,
           leading: IconButton(
-            icon:  Icon(Icons.arrow_back_ios_new_rounded,
-                color: svGetBodyColor()),
+            icon:
+                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
             onPressed: () => Navigator.of(context).pop(),
           ),
           centerTitle: true,
@@ -620,11 +610,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             children: [
               Text(
                 widget.username,
-                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
+                style: GoogleFonts.poppins(
+                    fontSize: 20, fontWeight: FontWeight.w600),
               ),
               Text(
                 '',
-                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w400),
+                style: GoogleFonts.poppins(
+                    fontSize: 12, fontWeight: FontWeight.w400),
               ),
             ],
           ),
@@ -663,33 +655,37 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             ),
           ],
         ),
-        body: Column(
-          children: [
-            BlocConsumer<ChatBloc, ChatState>(
-              bloc: chatBloc,
-              // listenWhen: (previous, current) => current is SearchPeopleState,
-              // buildWhen: (previous, current) => current is! SearchPeopleState,
-              listener: (BuildContext context, ChatState state) {
-                if (state is DataError) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      content: Text(state.errorMessage),
-                    ),
-                  );
-                }
-              },
-
-              builder: (context, state) {
-                print("state $state");
-                if (state is PaginationLoadingState) {
-                  return  Expanded(
-                      child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
-                } else if (state is PaginationLoadedState) {
-                  // print(state.drugsModel.length);
-                  // return _buildPostList(context);
-                  var bloc = chatBloc;
-                  return Expanded(
+        body: BlocConsumer<ChatBloc, ChatState>(
+          bloc: chatBloc,
+          // listenWhen: (previous, current) => current is SearchPeopleState,
+          // buildWhen: (previous, current) => current is! SearchPeopleState,
+          listener: (BuildContext context, ChatState state) {
+            if (state is DataError) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  content: Text(state.errorMessage),
+                ),
+              );
+            }else if (state is PaginationLoadedState) {
+             _isFileUploading=false;
+            }
+          },
+          builder: (context, state) {
+            print("state $state");
+            if (state is PaginationLoadingState) {
+              return Expanded(
+                  child: Center(
+                      child: CircularProgressIndicator(
+                color: svGetBodyColor(),
+              )));
+            } else if (state is PaginationLoadedState) {
+              print(state);
+              // return _buildPostList(context);
+              var bloc = chatBloc;
+              return Column(
+                children: [
+                  Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.all(8),
                       shrinkWrap: true,
@@ -714,8 +710,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                         return bloc.messageNumberOfPage !=
                                     bloc.messagePageNumber - 1 &&
                                 index >= bloc.messagesList.length - 1
-                            ?  Center(
-                                child: CircularProgressIndicator(color: svGetBodyColor(),),
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: svGetBodyColor(),
+                                ),
                               )
                             : ChatBubble(
                                 profile: bloc.messagesList[index].userId !=
@@ -727,148 +725,140 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                     bloc.messagesList[index].userId == widget.id
                                         ? false
                                         : true,
-                                attachmentJson: bloc.messagesList[index]
-                                    .attachment,
-                          createAt: bloc.messagesList[index].createdAt,
-                          // Pass the attachment JSON string
+                                attachmentJson:
+                                    bloc.messagesList[index].attachment,
+                                createAt: bloc.messagesList[index].createdAt,
+                                // Pass the attachment JSON string
                               );
                         // SVProfileFragment().launch(context);
                       },
                       itemCount: bloc.messagesList.length,
                     ),
-                  );
-                } else if (state is DataError) {
-                  return Expanded(
-                    child: Center(
-                      child: Text(state.errorMessage),
-                    ),
-                  );
-                } else {
-                  return const Expanded(
-                      child: Center(child: Text('Something went wrong')));
-                }
-              },
-            ),
-            isSomeoneTyping
-                ? TypingIndicator(profilePic: widget.profilePic)
-                : Container(),
-            // Show typing indicator conditionally
+                  ),
+                  isSomeoneTyping
+                      ? TypingIndicator(profilePic: widget.profilePic)
+                      : Container(),
+                  // Show typing indicator conditionally
 
-            // Container(
-            //   margin: const EdgeInsets.all(8.0),
-            //   child: AnimatedBackground(
-            //     child: GridView.builder(
-            //       shrinkWrap: true,
-            //       physics: const NeverScrollableScrollPhysics(),
-            //       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            //         crossAxisCount: 3, // Number of columns
-            //         crossAxisSpacing: 4.0, // Spacing between columns
-            //         mainAxisSpacing: 4.0, // Spacing between rows
-            //       ),
-            //       itemCount: 0,
-            //       itemBuilder: (context, index) {
-            //         // var file = selectedFiles[index];
-            //         return Stack(
-            //           children: [
-            //             Container(
-            //               margin: const EdgeInsets.all(8.0),
-            //               decoration: BoxDecoration(
-            //                 boxShadow: [
-            //                   BoxShadow(
-            //                     color: Colors.grey.withOpacity(0.5),
-            //                     spreadRadius: 2,
-            //                     blurRadius: 4,
-            //                     offset: const Offset(0, 3),
-            //                   ),
-            //                 ],
-            //                 borderRadius: BorderRadius.circular(8),
-            //                 border: Border.all(
-            //                     color: Colors.grey.withOpacity(0.2), width: 1),
-            //               ),
-            //               child: ClipRRect(
-            //                 borderRadius: BorderRadius.circular(8),
-            //                 child: GestureDetector(
-            //                   onTap: () {
-            //                     // Navigator.of(context)
-            //                     //     .push(MaterialPageRoute(
-            //                     //   builder: (_) => FullScreenImageGallery(
-            //                     //     imageFiles: selectedFiles
-            //                     //         .where((file) => file.isThatImage)
-            //                     //         .toList(),
-            //                     //     initialPage: selectedFiles
-            //                     //         .where((file) => file.isThatImage)
-            //                     //         .toList()
-            //                     //         .indexOf(file),
-            //                     //   ),
-            //                     // ));
-            //                   },
-            //                   child: Container()
-            //                   // Image.file(,
-            //                   //     fit: BoxFit.cover),
-            //                 )
-            //                      // _DisplayVideo(selectedByte: file),
-            //               ),
-            //             ),
-            //             Positioned(
-            //               right: 4,
-            //               top: 4,
-            //               child: GestureDetector(
-            //                 onTap: () {
-            //                   setState(() {
-            //                     // selectedFiles.removeAt(index);
-            //                   });
-            //                 },
-            //                 child: Container(
-            //                   margin: const EdgeInsets.all(8.0),
-            //                   decoration: const BoxDecoration(
-            //                     color: svGetBodyColor()54,
-            //                     shape: BoxShape.circle,
-            //                   ),
-            //                   child: const Padding(
-            //                     padding: EdgeInsets.all(2.0),
-            //                     child: Icon(Icons.close,
-            //                         size: 20, color: Colors.white),
-            //                   ),
-            //                 ),
-            //               ),
-            //             ),
-            //           ],
-            //         );
-            //       },
-            //     ),
-            //   ),
-            // ),
-            if (_selectedFile != null)
-              if (_isImageFile(_selectedFile!))
-                _buildImagePreview(_selectedFile!),
-            if (_isVideoFile(_selectedFile)) _buildVideoPreview(_selectedFile),
-            if (_isDocumentFile(_selectedFile))
-              _buildDocumentPreview(_selectedFile!),
-            Container(
-              decoration:  BoxDecoration(
-                color: context.cardColor,
-                // borderRadius: BorderRadius.circular(0.0),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-              child: Row(
-                children: [
+                  // Container(
+                  //   margin: const EdgeInsets.all(8.0),
+                  //   child: AnimatedBackground(
+                  //     child: GridView.builder(
+                  //       shrinkWrap: true,
+                  //       physics: const NeverScrollableScrollPhysics(),
+                  //       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  //         crossAxisCount: 3, // Number of columns
+                  //         crossAxisSpacing: 4.0, // Spacing between columns
+                  //         mainAxisSpacing: 4.0, // Spacing between rows
+                  //       ),
+                  //       itemCount: 0,
+                  //       itemBuilder: (context, index) {
+                  //         // var file = selectedFiles[index];
+                  //         return Stack(
+                  //           children: [
+                  //             Container(
+                  //               margin: const EdgeInsets.all(8.0),
+                  //               decoration: BoxDecoration(
+                  //                 boxShadow: [
+                  //                   BoxShadow(
+                  //                     color: Colors.grey.withOpacity(0.5),
+                  //                     spreadRadius: 2,
+                  //                     blurRadius: 4,
+                  //                     offset: const Offset(0, 3),
+                  //                   ),
+                  //                 ],
+                  //                 borderRadius: BorderRadius.circular(8),
+                  //                 border: Border.all(
+                  //                     color: Colors.grey.withOpacity(0.2), width: 1),
+                  //               ),
+                  //               child: ClipRRect(
+                  //                 borderRadius: BorderRadius.circular(8),
+                  //                 child: GestureDetector(
+                  //                   onTap: () {
+                  //                     // Navigator.of(context)
+                  //                     //     .push(MaterialPageRoute(
+                  //                     //   builder: (_) => FullScreenImageGallery(
+                  //                     //     imageFiles: selectedFiles
+                  //                     //         .where((file) => file.isThatImage)
+                  //                     //         .toList(),
+                  //                     //     initialPage: selectedFiles
+                  //                     //         .where((file) => file.isThatImage)
+                  //                     //         .toList()
+                  //                     //         .indexOf(file),
+                  //                     //   ),
+                  //                     // ));
+                  //                   },
+                  //                   child: Container()
+                  //                   // Image.file(,
+                  //                   //     fit: BoxFit.cover),
+                  //                 )
+                  //                      // _DisplayVideo(selectedByte: file),
+                  //               ),
+                  //             ),
+                  //             Positioned(
+                  //               right: 4,
+                  //               top: 4,
+                  //               child: GestureDetector(
+                  //                 onTap: () {
+                  //                   setState(() {
+                  //                     // selectedFiles.removeAt(index);
+                  //                   });
+                  //                 },
+                  //                 child: Container(
+                  //                   margin: const EdgeInsets.all(8.0),
+                  //                   decoration: const BoxDecoration(
+                  //                     color: svGetBodyColor()54,
+                  //                     shape: BoxShape.circle,
+                  //                   ),
+                  //                   child: const Padding(
+                  //                     padding: EdgeInsets.all(2.0),
+                  //                     child: Icon(Icons.close,
+                  //                         size: 20, color: Colors.white),
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         );
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
+                  if (_selectedFile != null)
+                    if (_isImageFile(_selectedFile!))
+                      _buildImagePreview(_selectedFile!),
+                  if (_isVideoFile(_selectedFile)) _buildVideoPreview(_selectedFile),
+                  if (_isDocumentFile(_selectedFile))
+                    _buildDocumentPreview(_selectedFile!),
                   Container(
                     decoration: BoxDecoration(
-                      color:appStore.isDarkMode ?svGetScaffoldColor() : cardLightColor,
-                      // border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(20.0),
+                      color: context.cardColor,
+                      // borderRadius: BorderRadius.circular(0.0),
                     ),
+                    padding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                     child: Row(
                       children: [
-                        isLoading
-                            ? Container(
+                        Container(
+                          decoration: BoxDecoration(
+                            color: appStore.isDarkMode
+                                ? svGetScaffoldColor()
+                                : cardLightColor,
+                            // border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Row(
+                            children: [
+                              isLoading
+                                  ? Container(
                                 width: 25,
                                 height: 25,
                                 margin: const EdgeInsets.all(8.0),
-                                child:  CircularProgressIndicator(color: svGetBodyColor(),),
+                                child: CircularProgressIndicator(
+                                  color: svGetBodyColor(),
+                                ),
                               )
-                            : IconButton(
+                                  : IconButton(
                                 icon: const Icon(Icons.attach_file),
                                 onPressed: () async {
                                   const permission = Permission.photos;
@@ -895,16 +885,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                   _showFileOptions();
                                 },
                               ),
-                        const SizedBox(width: 8.0), // Add spacing
-                        isRecording
-                            ? const Text('Recording Start..')
-                            : Container(
+                              const SizedBox(width: 8.0), // Add spacing
+                              isRecording
+                                  ? const Text('Recording Start..')
+                                  : Container(
                                 width: 50.w,
                                 height: 40,
                                 padding:
-                                    const EdgeInsets.only(left: 8, right: 8),
+                                const EdgeInsets.only(left: 8, right: 8),
                                 decoration: BoxDecoration(
-                                  color: appStore.isDarkMode ?svGetScaffoldColor() : cardLightColor,
+                                  color: appStore.isDarkMode
+                                      ? svGetScaffoldColor()
+                                      : cardLightColor,
                                   // border: Border.all(color: Colors.grey),
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),
@@ -926,73 +918,90 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                   ),
                                 ),
                               ),
-                        const SizedBox(width: 8.0), // Add spacing
-                        IconButton(
-                          onPressed: () async {
-                            // Handle send button press
-                            String message = textController.text;
-                            // onTriggerEventPressed(message);
-                            chatBloc.add(SendMessageEvent(
-                                userId: AppData.logInUserId,
-                                roomId: widget.roomId == ''
-                                    ? chatBloc.roomId
-                                    : widget.roomId,
-                                receiverId: widget.id,
-                                attachmentType: 'file',
-                                file: _selectedFile?.path ?? '',
-                                message: message));
-                            // sendMessage(message, 'text'); // Sending a text message
-                            textController.clear();
-                            setState(() {});
-                            _selectedFile = null;
-                            scrollToBottom();
+                              const SizedBox(width: 8.0), // Add spacing
+                              _isFileUploading?const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 3,)): IconButton(
+                                onPressed: () async {
+                                  // Handle send button press
+                                  String message = textController.text;
+                                  // onTriggerEventPressed(message);
+                                  _isFileUploading=true;
+                                  chatBloc.add(SendMessageEvent(
+                                      userId: AppData.logInUserId,
+                                      roomId: widget.roomId == ''
+                                          ? chatBloc.roomId
+                                          : widget.roomId,
+                                      receiverId: widget.id,
+                                      attachmentType: 'file',
+                                      file: _selectedFile?.path ?? '',
+                                      message: message));
+                                  // sendMessage(message, 'text'); // Sending a text message
+                                  textController.clear();
+                                  setState(() {});
+                                  _selectedFile = null;
+                                  scrollToBottom();
+
+                                },
+                                icon:const Icon(Icons.send),
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onLongPress: () {
+                            _start();
+                            // startRecord();
+                            setState(() {
+                              isRecording = true;
+                            });
                           },
-                          icon: const Icon(Icons.send),
+                          onLongPressEnd: (details) {
+                            _stop();
+                            // stopRecord();
+                            setState(() {
+                              isRecording = false;
+                            });
+                          },
+                          child: Container(
+                            height: 40,
+                            margin: const EdgeInsets.fromLTRB(16, 5, 5, 5),
+                            decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: isRecording
+                                          ? Colors.white
+                                          : svGetBodyColor(),
+                                      spreadRadius: 4)
+                                ],
+                                color: isRecording ? Colors.red : Colors.grey,
+                                shape: BoxShape.circle),
+                            child: Container(
+                                padding: const EdgeInsets.all(10),
+                                child: const Icon(
+                                  Icons.mic,
+                                  color: Colors.white,
+                                  size: 20,
+                                )),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  GestureDetector(
-                    onLongPress: () {
-                      _start();
-                      // startRecord();
-                      setState(() {
-                        isRecording = true;
-                      });
-                    },
-                    onLongPressEnd: (details) {
-                      _stop();
-                      // stopRecord();
-                      setState(() {
-                        isRecording = false;
-                      });
-                    },
-                    child: Container(
-                      height: 40,
-                      margin: const EdgeInsets.fromLTRB(16, 5, 5, 5),
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color:
-                                    isRecording ? Colors.white : svGetBodyColor(),
-                                spreadRadius: 4)
-                          ],
-                          color: isRecording ? Colors.red : Colors.grey,
-                          shape: BoxShape.circle),
-                      child: Container(
-                          padding: const EdgeInsets.all(10),
-                          child: const Icon(
-                            Icons.mic,
-                            color: Colors.white,
-                            size: 20,
-                          )),
-                    ),
-                  ),
+                  )
                 ],
-              ),
-            )
-          ],
-          // bottomSheet: FileUploadOption(chatBloc),
+              );
+            } else if (state is DataError) {
+              return Expanded(
+                child: Center(
+                  child: Text(state.errorMessage),
+                ),
+              );
+            } else {
+              return const Expanded(
+                  child: Center(child: Text('Something went wrong')));
+            }
+          },
         ));
   }
 
@@ -1373,7 +1382,7 @@ class TypingIndicator extends StatelessWidget {
                     ),
                   ],
                 ),
-                child:  Text(
+                child: Text(
                   "typing...",
                   style: TextStyle(color: svGetBodyColor()),
                 ),
@@ -1425,9 +1434,12 @@ class _DisplayVideoState extends State<_DisplayVideo> {
               ],
             ),
           )
-        :  SizedBox(
+        : SizedBox(
             height: 200,
-            child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
+            child: Center(
+                child: CircularProgressIndicator(
+              color: svGetBodyColor(),
+            )),
           );
   }
 

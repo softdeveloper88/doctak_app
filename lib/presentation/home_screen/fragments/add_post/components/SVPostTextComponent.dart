@@ -80,8 +80,8 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
                 color: Colors.transparent,
                 axis: Axis.horizontal,
                 multiRowsDisplay: false,
-                showBackgroundColorButton: false,
-                showDirection: false,
+                showBackgroundColorButton: true,
+                showDirection: true,
                 fontFamilyValues: const {
                   "Sem serifa": "sans-serif",
                   "Condensada": "sans-serif-condensed",
@@ -91,7 +91,8 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
               ),
             ),
           ),
-          SizedBox(
+          Container(
+            color: widget.colorValue,
             height: 20.h,
             child: quill.QuillEditor.basic(
               focusNode: editorFocusNode,

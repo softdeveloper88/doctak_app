@@ -24,6 +24,13 @@ class ChangePasswordVisibilityEvent extends ProfileEvent {
       ];
 }
 
+class SetUserFollow extends ProfileEvent {
+  String userId;
+  String follow;
+  SetUserFollow(this.userId,this.follow);
+  @override
+  List<Object?> get props => [userId,follow];
+}
 //
 // ///Event for changing checkbox
 class ChangeCheckBoxEvent extends ProfileEvent {
@@ -51,11 +58,10 @@ class UpdateProfilePicEvent extends ProfileEvent {
   String? filePath;
   bool? isProfilePicture;
 
-  UpdateProfilePicEvent({this.filePath,this.isProfilePicture});
+  UpdateProfilePicEvent({this.filePath, this.isProfilePicture});
 
   @override
-  List<Object?> get props => [filePath,isProfilePicture
-  ];
+  List<Object?> get props => [filePath, isProfilePicture];
 }
 
 class UpdateProfileEvent extends ProfileEvent {
@@ -75,8 +81,13 @@ class UpdateProfileEvent extends ProfileEvent {
       this.userProfilePrivacyModel});
 
   @override
-  List<Object?> get props =>
-      [updateProfileSection,userProfile, interestModel, workEducationModel, userProfilePrivacyModel];
+  List<Object?> get props => [
+        updateProfileSection,
+        userProfile,
+        interestModel,
+        workEducationModel,
+        userProfilePrivacyModel
+      ];
 }
 
 class LoadPageEvent1 extends ProfileEvent {
@@ -107,6 +118,84 @@ class UpdateFirstDropdownValue extends ProfileEvent {
   List<Object?> get props => [newValue];
 }
 
+class UpdateAddWorkEductionEvent extends ProfileEvent {
+  String id;
+  String companyName;
+  String position;
+  String address;
+  String degree;
+  String course;
+  String workType;
+  String startDate;
+  String endDate;
+  String currentStatus;
+  String description;
+  String privacy;
+
+  UpdateAddWorkEductionEvent(
+      this.id,
+      this.companyName,
+      this.position,
+      this.address,
+      this.degree,
+      this.course,
+      this.workType,
+      this.startDate,
+      this.endDate,
+      this.currentStatus,
+      this.description,
+      this.privacy);
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [
+        id,
+        companyName,
+        position,
+        address,
+        degree,
+        course,
+        workType,
+        startDate,
+        endDate,
+        currentStatus,
+        description,
+        privacy
+      ];
+}
+
+class UpdateAddHobbiesInterestEvent extends ProfileEvent {
+  String id;
+  String favt_tv_shows;
+  String favt_movies;
+  String favt_books;
+  String favt_writers;
+  String favt_music_bands;
+  String favt_games;
+
+  UpdateAddHobbiesInterestEvent(
+    this.id,
+    this.favt_tv_shows,
+    this.favt_movies,
+    this.favt_books,
+    this.favt_writers,
+    this.favt_music_bands,
+    this.favt_games,
+  );
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [
+        id,
+        favt_tv_shows,
+        favt_movies,
+        favt_books,
+        favt_writers,
+        favt_music_bands,
+        favt_games,
+      ];
+}
+
 class UpdateSecondDropdownValues extends ProfileEvent {
   final String selectedFirstDropdownValue;
 
@@ -126,6 +215,17 @@ class UpdateSpecialtyDropdownValue extends ProfileEvent {
   // TODO: implement props
   List<Object?> get props => [newValue];
 }
+
+class DeleteWorkEducationEvent extends ProfileEvent {
+  final String id;
+
+  DeleteWorkEducationEvent(this.id);
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [id];
+}
+
 class UpdateSpecialtyDropdownValue1 extends ProfileEvent {
   final String newValue;
 
