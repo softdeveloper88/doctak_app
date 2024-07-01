@@ -938,12 +938,11 @@ class _SVPostComponentState extends State<SVPostComponent> {
                       minHeight: 200.0,
                       minWidth: double.infinity, // Minimum height of the container
                     ),
-                    child: Align(
-                      alignment: Alignment.center,
+                    child: Center(
                       child: HtmlWidget(
                         textStyle: GoogleFonts.poppins(),
                         enableCaching: true,
-                        textToShow,
+                        '<div style="text-align: center;">$textToShow</div>',
                         onTapUrl: (link) async {
                           print(link);
                           if (link.contains('doctak/jobs-detail')) {

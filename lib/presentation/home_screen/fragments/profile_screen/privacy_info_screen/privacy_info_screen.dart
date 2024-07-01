@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
@@ -44,7 +45,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: const Icon(Icons.arrow_back_ios)),
+            child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           if (widget.profileBloc.isMe) CustomImageView(
@@ -72,7 +73,16 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                 context: context,
                 // style: svAppButton(text: text, onTap: onTap, context: context),
                 onTap: () async {
-
+                  setState(() {
+                    isEditModeMap=false;
+                  });
+                  widget.profileBloc.add(UpdateProfileEvent(
+                    updateProfileSection: 1,
+                    userProfile: widget.profileBloc.userProfile,
+                    interestModel: widget.profileBloc.interestList,
+                    workEducationModel: widget.profileBloc.workEducationList,
+                    userProfilePrivacyModel: UserProfilePrivacyModel(),
+                  ));
                 },
                 text: 'Update',
               ),

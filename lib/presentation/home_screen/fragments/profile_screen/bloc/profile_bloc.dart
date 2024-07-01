@@ -295,6 +295,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // );
     // emit(PaginationLoadedState());
     // ProgressDialogUtils.hideProgressDialog();
+    globalMessengerKey.currentState?.showSnackBar(
+        const SnackBar(content: Text('profile info updated successfully')));
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
         (state as PaginationLoadedState).selectedFirstDropdownValue,

@@ -32,7 +32,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: const Icon(Icons.arrow_back_ios)),
+            child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           GestureDetector(

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -21,7 +22,8 @@ import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_messa
 class ChatDetailScreen extends StatefulWidget {
   bool isFromMainScreen;
   String? question;
-   ChatDetailScreen({super.key,this.isFromMainScreen=true,this.question});
+
+  ChatDetailScreen({super.key, this.isFromMainScreen = true, this.question});
 
   @override
   _ChatGPTScreenState createState() => _ChatGPTScreenState();
@@ -44,56 +46,53 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isWriting = false;
   String chatWithAi = "Preparing DocTak AI.";
   bool isDeleteButtonClicked = false;
-  bool isAlreadyAsk=true;
+  bool isAlreadyAsk = true;
+
   @override
   void initState() {
     if (!widget.isFromMainScreen) {
       if (isAlreadyAsk) {
         isAlreadyAsk = false;
-        textController.text=widget.question.toString();
+        textController.text = widget.question.toString();
         // drugsAskQuestion(state1);
-
       }
     }
     super.initState();
-
   }
-  void drugsAskQuestion(state1){
 
-      String question = widget.question??"";
-      if (question.isEmpty) return;
-      // String sessionId = selectedSessionId.toString();
-      // var tempId =
-      //     -1; // Unique temporary ID for the response
-      setState(() {
-        var myMessage = Messages(
-            id: -1,
-            gptSessionId:
-            selectedSessionId.toString(),
-            question: question,
-            response: '...',
-            createdAt: DateTime.now().toString(),
-            updatedAt: DateTime.now().toString());
-        state1.response1.messages!.add(myMessage);
-        BlocProvider.of<ChatGPTBloc>(context).add(
-          GetPost(
-            sessionId: selectedSessionId.toString(),
-            question:
-            question, // replace with real input
-          ),
-        );
-        textController.clear();
-        scrollToBottom();
-      });
-      try {
-        isWriting = false;
-        // });
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')));
-      }
-
+  void drugsAskQuestion(state1) {
+    String question = widget.question ?? "";
+    if (question.isEmpty) return;
+    // String sessionId = selectedSessionId.toString();
+    // var tempId =
+    //     -1; // Unique temporary ID for the response
+    setState(() {
+      var myMessage = Messages(
+          id: -1,
+          gptSessionId: selectedSessionId.toString(),
+          question: question,
+          response: '...',
+          createdAt: DateTime.now().toString(),
+          updatedAt: DateTime.now().toString());
+      state1.response1.messages!.add(myMessage);
+      BlocProvider.of<ChatGPTBloc>(context).add(
+        GetPost(
+          sessionId: selectedSessionId.toString(),
+          question: question, // replace with real input
+        ),
+      );
+      textController.clear();
+      scrollToBottom();
+    });
+    try {
+      isWriting = false;
+      // });
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
+
   // Future<List<Session>> fetchSessions() async {
   //   final response = await http.get(
   //     Uri.parse("${AppData.remoteUrl}/gptChat-session"),
@@ -204,16 +203,13 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-        child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
-            builder: (context, state1) {
-
+        child:
+            BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
-
           }
           if (state1 is DataInitial) {
-
             return Scaffold(
               body: AnimatedBackground(
                 child: Column(
@@ -221,16 +217,18 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
+                    Center(
+                        child: CircularProgressIndicator(
+                      color: svGetBodyColor(),
+                    )),
                   ],
                 ),
               ),
             );
           } else if (state1 is DataLoaded) {
-
             print('response ${state1.response.toString()}');
             return Scaffold(
-                backgroundColor:svGetBgColor(),
+                backgroundColor: svGetBgColor(),
                 appBar: AppBar(
                   leading: GestureDetector(
                     onTap: () {
@@ -241,7 +239,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 .add(GetNewChat());
                             Navigator.of(context).pop();
 
-                            selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                            selectedSessionId =
+                                BlocProvider.of<ChatGPTBloc>(context)
+                                    .newChatSessionId;
 
                             // Session newSession = await createNewChatSession();
                             // setState(() {
@@ -289,7 +289,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   ),
                   centerTitle: true,
                   surfaceTintColor: context.cardColor,
-                  backgroundColor:  context.cardColor,
+                  backgroundColor: context.cardColor,
                   title: Builder(
                     builder: (context) {
                       return Row(
@@ -330,7 +330,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                  color: appStore.isDarkMode?svGetScaffoldColor():cardLightColor),
+                                  color: appStore.isDarkMode
+                                      ? svGetScaffoldColor()
+                                      : cardLightColor),
                               child: Icon(
                                 Icons.cancel_outlined,
                                 color: svGetBodyColor(),
@@ -345,163 +347,240 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 body: Column(
                   children: <Widget>[
                     // const SizedBox(height: 10,),
-                  if(state1.response1.messages!.isEmpty)
-                    const Expanded(child: Center(child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        textAlign: TextAlign.center,
-                          'Your personal & medical assistant powered by Artificial Intelligence'
-                          'Welcome, Doctor!'
-                          'Thank you for using our AI assistant. Here are some things you can do:'
-                          'Request diagnostic suggestions based on symptoms.'
-                          'Review medication interactions or dosages.'
-                          'Detect CPT or ICD code'
-                          'And much more! Feel free to explore.'
-                          "If you need assistance or have questions, don't hesitate to ask."),
-                    ),))
-                    else Expanded(
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        itemCount: state1.response1.messages!.length,
-                        itemBuilder: (context, index) {
-                          Messages message = state1.response1.messages![index];
-                          return Column(
-                            children: [
-                              ChatBubble(
-                                text: message.question ?? '',
-                                isUserMessage: true,
-                              ),
-                              ChatBubble(
-                                text: message.response ?? "",
-                                isUserMessage: false,
-                                onTapReginarate: (){
-                                  String question = message.question??"";
-                                  if (question.isEmpty) return;
-                                  // String sessionId = selectedSessionId.toString();
-                                  // var tempId =
-                                  //     -1; // Unique temporary ID for the response
-                                  setState(() {
-                                    var myMessage = Messages(
-                                        id: -1,
-                                        gptSessionId:
-                                        selectedSessionId.toString(),
-                                        question: question,
-                                        response: '...',
-                                        createdAt: DateTime.now().toString(),
-                                        updatedAt: DateTime.now().toString());
-                                    state1.response1.messages!.add(myMessage);
-                                    BlocProvider.of<ChatGPTBloc>(context).add(
-                                      GetPost(
-                                        sessionId: selectedSessionId.toString(),
-                                        question:
-                                        question, // replace with real input
-                                      ),
-                                    );
-                                    textController.clear();
-                                    scrollToBottom();
-                                  });
-                                  // // Add the temporary message (User's question)
-                                  // // setState(() {
-                                  // // message.add(myMessage);
-                                  // // scrollToBottom();
-                                  // // });
-                                  //
-                                  try {
-                                    //   for (int i = 0; i <= state1.response2.content!.length; i++) {
-                                    //     await Future.delayed(const Duration(
-                                    //         milliseconds:
-                                    //             100)); // Delay to simulate typing speed
+                    if (state1.response1.messages!.isEmpty)
+                      Expanded(
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  'Your personal & medical assistant powered by Artificial Intelligence',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16.0),
+                                 Text(
+                                  textAlign: TextAlign.center,
+                                  'Welcome, Doctor!',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16.0),
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  'Thank you for using our AI assistant. Here are some things you can do:',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 16.0),
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  'Request diagnostic suggestions based on symptoms.',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  'Review medication interactions or dosages.',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  'Detect CPT or ICD code.',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  'And much more! Feel free to explore.',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                                const SizedBox(height: 16.0),
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  "If you need assistance or have questions, don't hesitate to ask.",
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: state1.response1.messages!.length,
+                          itemBuilder: (context, index) {
+                            Messages message =
+                                state1.response1.messages![index];
+                            return Column(
+                              children: [
+                                ChatBubble(
+                                  text: message.question ?? '',
+                                  isUserMessage: true,
+                                ),
+                                ChatBubble(
+                                  text: message.response ?? "",
+                                  isUserMessage: false,
+                                  onTapReginarate: () {
+                                    String question = message.question ?? "";
+                                    if (question.isEmpty) return;
+                                    // String sessionId = selectedSessionId.toString();
+                                    // var tempId =
+                                    //     -1; // Unique temporary ID for the response
+                                    setState(() {
+                                      var myMessage = Messages(
+                                          id: -1,
+                                          gptSessionId:
+                                              selectedSessionId.toString(),
+                                          question: question,
+                                          response: '...',
+                                          createdAt: DateTime.now().toString(),
+                                          updatedAt: DateTime.now().toString());
+                                      state1.response1.messages!.add(myMessage);
+                                      BlocProvider.of<ChatGPTBloc>(context).add(
+                                        GetPost(
+                                          sessionId:
+                                              selectedSessionId.toString(),
+                                          question:
+                                              question, // replace with real input
+                                        ),
+                                      );
+                                      textController.clear();
+                                      scrollToBottom();
+                                    });
+                                    // // Add the temporary message (User's question)
+                                    // // setState(() {
+                                    // // message.add(myMessage);
+                                    // // scrollToBottom();
+                                    // // });
                                     //
-                                    //     int index = state1.response1.messages!
-                                    //         .indexWhere((msg) => msg.id == -1);
-                                    //     if (index != -1) {
-                                    //       // Update the temporary message with gradually more characters of the response
-                                    //       String typingText = state1
-                                    //           .response2.content!
-                                    //           .substring(0, i);
-                                    //       state1.response1.messages![index] =
-                                    //           Messages(
-                                    //               id: -1,
-                                    //               gptSessionId: state1.response.sessions!.first??'',
-                                    //               question: question,
-                                    //               response: typingText,
-                                    //               createdAt:
-                                    //                   DateTime.now().toString(),
-                                    //               updatedAt: DateTime.now()
-                                    //                   .toString());
-                                    //       print(typingText);
-                                    //       if (state1
-                                    //               .response2.content!.length ==
-                                    //           i) {
-                                    //         state1.response1.messages![index] =
-                                    //             Messages(
-                                    //                 id: -1,
-                                    //                 gptSessionId: state1.response.sessions!.first??'',
-                                    //                 question: question,
-                                    //                 response: typingText,
-                                    //                 createdAt: DateTime.now()
-                                    //                     .toString(),
-                                    //                 updatedAt: DateTime.now()
-                                    //                     .toString());
-                                    //       }
-                                    //     }
-                                    //   }
-                                    // ChatGPTResponse newMessage =
-                                    //     await askQuestion(
-                                    //         sessionId, question);
+                                    try {
+                                      //   for (int i = 0; i <= state1.response2.content!.length; i++) {
+                                      //     await Future.delayed(const Duration(
+                                      //         milliseconds:
+                                      //             100)); // Delay to simulate typing speed
+                                      //
+                                      //     int index = state1.response1.messages!
+                                      //         .indexWhere((msg) => msg.id == -1);
+                                      //     if (index != -1) {
+                                      //       // Update the temporary message with gradually more characters of the response
+                                      //       String typingText = state1
+                                      //           .response2.content!
+                                      //           .substring(0, i);
+                                      //       state1.response1.messages![index] =
+                                      //           Messages(
+                                      //               id: -1,
+                                      //               gptSessionId: state1.response.sessions!.first??'',
+                                      //               question: question,
+                                      //               response: typingText,
+                                      //               createdAt:
+                                      //                   DateTime.now().toString(),
+                                      //               updatedAt: DateTime.now()
+                                      //                   .toString());
+                                      //       print(typingText);
+                                      //       if (state1
+                                      //               .response2.content!.length ==
+                                      //           i) {
+                                      //         state1.response1.messages![index] =
+                                      //             Messages(
+                                      //                 id: -1,
+                                      //                 gptSessionId: state1.response.sessions!.first??'',
+                                      //                 question: question,
+                                      //                 response: typingText,
+                                      //                 createdAt: DateTime.now()
+                                      //                     .toString(),
+                                      //                 updatedAt: DateTime.now()
+                                      //                     .toString());
+                                      //       }
+                                      //     }
+                                      //   }
+                                      // ChatGPTResponse newMessage =
+                                      //     await askQuestion(
+                                      //         sessionId, question);
 
-                                    // for (int i = 0;
-                                    //     i <= state1.response2.content!.length;
-                                    //     i++) {
-                                    //   await Future.delayed(const Duration(
-                                    //       milliseconds:
-                                    //           1)); // Delay to simulate typing speed
-                                    //
-                                    //   // setState(() {
-                                    //     int index = state1.response1.messages!.indexWhere(
-                                    //         (msg) => msg.id == tempId);
-                                    //     if (index != -1) {
-                                    //       // Update the temporary message with gradually more characters of the response
-                                    //       String typingText = state1.response2.content!.substring(0, i);
-                                    //       state1.response1.messages![index] = Messages(
-                                    //           id: tempId,
-                                    //           gptSessionId: state1.response.sessions!.first??'',
-                                    //           question: question,
-                                    //           response: typingText,
-                                    //           createdAt:
-                                    //               DateTime.now().toString(),
-                                    //           updatedAt:
-                                    //               DateTime.now().toString());
-                                    //       if (state1.response2.content!.length ==
-                                    //           i) {
-                                    //         state1.response1.messages![index] = Messages(
-                                    //             id: -1,
-                                    //             gptSessionId: state1.response.sessions!.first??'',
-                                    //             question: question,
-                                    //             response: typingText,
-                                    //             createdAt:
-                                    //                 DateTime.now().toString(),
-                                    //             updatedAt: DateTime.now()
-                                    //                 .toString());
-                                    //       }
-                                    //     }
-                                    //   // });
-                                    //   scrollToBottom();
-                                    // }
-                                    // setState(() {
-                                    isWriting = false;
-                                    // });
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Error: $e')));
-                                  }
-                                },
-                              ),
-                            ],
-                          );
-                        },
+                                      // for (int i = 0;
+                                      //     i <= state1.response2.content!.length;
+                                      //     i++) {
+                                      //   await Future.delayed(const Duration(
+                                      //       milliseconds:
+                                      //           1)); // Delay to simulate typing speed
+                                      //
+                                      //   // setState(() {
+                                      //     int index = state1.response1.messages!.indexWhere(
+                                      //         (msg) => msg.id == tempId);
+                                      //     if (index != -1) {
+                                      //       // Update the temporary message with gradually more characters of the response
+                                      //       String typingText = state1.response2.content!.substring(0, i);
+                                      //       state1.response1.messages![index] = Messages(
+                                      //           id: tempId,
+                                      //           gptSessionId: state1.response.sessions!.first??'',
+                                      //           question: question,
+                                      //           response: typingText,
+                                      //           createdAt:
+                                      //               DateTime.now().toString(),
+                                      //           updatedAt:
+                                      //               DateTime.now().toString());
+                                      //       if (state1.response2.content!.length ==
+                                      //           i) {
+                                      //         state1.response1.messages![index] = Messages(
+                                      //             id: -1,
+                                      //             gptSessionId: state1.response.sessions!.first??'',
+                                      //             question: question,
+                                      //             response: typingText,
+                                      //             createdAt:
+                                      //                 DateTime.now().toString(),
+                                      //             updatedAt: DateTime.now()
+                                      //                 .toString());
+                                      //       }
+                                      //     }
+                                      //   // });
+                                      //   scrollToBottom();
+                                      // }
+                                      // setState(() {
+                                      isWriting = false;
+                                      // });
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text('Error: $e')));
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    ),
                     Container(
                       color: context.cardColor,
                       // margin: const EdgeInsets.all(10.0),
@@ -518,7 +597,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             child: Container(
                               padding: const EdgeInsets.only(left: 8, right: 8),
                               decoration: BoxDecoration(
-                                color: appStore.isDarkMode? svGetScaffoldColor():cardLightColor,
+                                color: appStore.isDarkMode
+                                    ? svGetScaffoldColor()
+                                    : cardLightColor,
                                 // border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(20.0),
                               ),
@@ -685,9 +766,19 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                         ],
                       ),
                     ),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      color: Colors.white,
+                      child: Marquee(
+                          pauseDuration: const Duration(milliseconds: 100),
+                          direction: Axis.horizontal,
+                          directionMarguee: DirectionMarguee.oneDirection,
+                          textDirection: TextDirection.ltr,
+                          child: const Text(
+                              'Artificial Intelligence can make mistakes. Consider checking important information.')),
+                    )
                   ],
                 ));
-
           } else if (state1 is DataError) {
             return Scaffold(body: Text(state1.errorMessage.toString()));
           } else {
@@ -718,7 +809,11 @@ class ChatBubble extends StatelessWidget {
   final bool isUserMessage;
   final Function? onTapReginarate;
 
-   ChatBubble({Key? key, required this.text, required this.isUserMessage,this.onTapReginarate})
+  ChatBubble(
+      {Key? key,
+      required this.text,
+      required this.isUserMessage,
+      this.onTapReginarate})
       : super(key: key);
 
   @override
@@ -769,7 +864,7 @@ class ChatBubble extends StatelessWidget {
                               // selectable: true,
                               // softLineBreak: true,
                               // shrinkWrap: true,
-                               text.replaceAll("*", '').replaceAll('#', ''),
+                              text.replaceAll("*", '').replaceAll('#', ''),
                             ),
                           ),
                         ),
@@ -780,7 +875,7 @@ class ChatBubble extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             InkWell(
-                              onTap: ()=>onTapReginarate!(),
+                              onTap: () => onTapReginarate!(),
                               child: const Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: Row(
@@ -853,7 +948,6 @@ class ChatBubble extends StatelessWidget {
                   ),
                   CircleAvatar(
                     backgroundImage: CachedNetworkImageProvider(
-
                         AppData.imageUrl + AppData.profile_pic),
                     radius: 12,
                   ),

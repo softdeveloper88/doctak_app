@@ -59,7 +59,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: const Icon(Icons.arrow_back_ios)),
+            child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: const [
           // GestureDetector(

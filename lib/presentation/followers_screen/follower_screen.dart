@@ -70,7 +70,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
         backgroundColor:  svGetScaffoldColor(),
         surfaceTintColor:  svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text(widget.isFollowersScreen?'My Followers':'My Following',
+        title: Text(widget.isFollowersScreen?'Followers':'Following',
             style: boldTextStyle(size: 18)),
 
         leading: IconButton(
