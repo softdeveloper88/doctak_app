@@ -45,7 +45,36 @@ class _SearchScreenState extends State<SearchScreen>
   SearchBloc drugsBloc = SearchBloc();
   SearchPeopleBloc searchPeopleBloc = SearchPeopleBloc();
   HomeBloc homeBloc = HomeBloc();
-
+  @override
+  void initState() {
+    searchPeopleBloc.add(
+      SearchPeopleLoadPageEvent(
+        page: 1,
+        searchTerm: '',
+      ),
+    );
+    homeBloc
+        .add(LoadSearchPageEvent(page: 1, search: 'a'));
+    // BlocProvider.of<SearchBloc>(context).add(
+    //   GetPost(
+    //       page: '1',
+    //       countryId: "1",
+    //       searchTerm: searchTxt,
+    //       type: state.typeValue),
+    // );
+    // BlocProvider.of<SplashBloc>(context).add(
+    //     LoadDropdownData(
+    //         state.countryFlag,
+    //         state.typeValue,
+    //         state.searchTerms ?? '',
+    //         ''));
+    drugsBloc.add(LoadPageEvent(
+      page: 1,
+      countryId: '',
+      searchTerm: '',
+    ));
+    super.initState();
+  }
   // @override
   // void dispose() {
   //   _bannerAd!.dispose();

@@ -42,8 +42,8 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
     try {
       SearchConferenceModel response = await postService.searchConferences(
           'Bearer ${AppData.userToken}',
-          '${pageNumber}',
-          event.countryName??"Pakistan",
+          '$pageNumber',
+          event.countryName??"all",
           event.searchTerm??'');
       numberOfPage = response.conferences?.lastPage ?? 0;
       if (pageNumber < numberOfPage+1) {

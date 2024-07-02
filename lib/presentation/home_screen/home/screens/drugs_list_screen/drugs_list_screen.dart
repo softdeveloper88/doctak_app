@@ -474,7 +474,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                   Text(
                                     bloc.drugsData[index].genericName ?? "",
                                     style: GoogleFonts.poppins(
-                                        color: svGetBodyColor(),
+                                        color: SVAppColorPrimary,
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w500),
                                   ),
@@ -575,7 +575,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       title:  Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(genericName),
+          Expanded(child: Text(genericName)),
           IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {

@@ -71,7 +71,7 @@ class _LikesListScreenState extends State<LikesListScreen> {
           },
           builder: (context, state) {
 
-            if (state is PaginationLoadingState) {
+            if (state is DataInitial) {
               return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
@@ -214,7 +214,7 @@ class _LikesListScreenState extends State<LikesListScreen> {
                     }),
               );
             } else {
-              return const Center(child: Text("No Comment Found"));
+              return const Center(child: Text(""));
             }
           }),
 

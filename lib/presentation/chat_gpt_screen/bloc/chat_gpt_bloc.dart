@@ -24,7 +24,6 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     on<GetMessages>(_onGetSessionMessagesList);
     on<GetNewChat>(_onGetNewChat);
   }
-
   _onGetPosts(LoadDataValues event, Emitter<ChatGPTState> emit) async {
     emit(DataInitial());
     // ProgressDialogUtils.showProgressDialog();
@@ -40,10 +39,8 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       // emit(MessagesDataLoaded(response1));
       // if (response.==true) {
       //   ProgressDialogUtils.hideProgressDialog();
-      log(json.encode(response));
-
+      print('object $response');
       emit(DataLoaded(response, response1, ChatGptAskQuestionResponse()));
-
       // } else {
       //   ProgressDialogUtils.hideProgressDialog();
       //   emit(LoginFailure(error: 'Invalid credentials'));
@@ -67,6 +64,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       //     createdAt: DateTime.now().toString(),
       //     updatedAt: DateTime.now().toString());
       // (state as DataLoaded).response1.messages!.add(myMessage);
+      // emit(DataLoaded(ChatGptSession(), ChatGptMessageHistory(), response));
       emit(DataLoaded((state as DataLoaded).response,
           (state as DataLoaded).response1, response));
       for (int i = 0;
@@ -98,7 +96,6 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
                 updatedAt: DateTime.now().toString());
           }
         }
-        print('$i');
         emit(DataLoaded((state as DataLoaded).response,
             (state as DataLoaded).response1, response));
 
@@ -132,6 +129,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
+
       var response = await postService.newChat('Bearer ${AppData.userToken}');
       ChatGptMessageHistory response1 = await postService.gptChatMessages(
           'Bearer ${AppData.userToken}', response.response.data['session_id']);
@@ -140,6 +138,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       );
       print(response.response.data['session_id']);
       ProgressDialogUtils.hideProgressDialog();
+      print('data');
       emit(DataLoaded(responseSession, response1, (state as DataLoaded).response2));
     } catch (e) {
       print(e);
@@ -149,13 +148,13 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   _onDeleteChatSession(DeleteChatSession event, Emitter<ChatGPTState> emit) async {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
-
     try {
       var response = await postService.deleteChatgptSession('Bearer ${AppData.userToken}',event.sessionId.toString());
       print(response.response.data);
       ChatGptSession response1 = await postService.gptChatSession(
         'Bearer ${AppData.userToken}',
       );
+      print('data');
       ProgressDialogUtils.hideProgressDialog();
       emit(DataLoaded(response1, (state as DataLoaded).response1, (state as DataLoaded).response2));
     } catch (e) {

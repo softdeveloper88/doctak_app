@@ -4,6 +4,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_media_widget.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/text_icon_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
@@ -18,12 +19,14 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../data/models/post_model/post_data_model.dart';
 import '../../fragments/home_main_screen/bloc/home_bloc.dart';
+import '../../fragments/home_main_screen/post_widget/find_likes.dart';
 
 class MyPostComponent extends StatefulWidget {
   MyPostComponent(this.profileBloc, {super.key});
@@ -154,99 +157,90 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        CachedNetworkImage(
-                                          imageUrl:
-                                              "${AppData.imageUrl}${widget.profileBloc.postList[index].user?.profilePic!.validate()}",
-                                          height: 50,
-                                          width: 50,
-                                          fit: BoxFit.cover,
-                                        ).cornerRadiusWithClipRRect(20),
-                                        12.width,
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-
-                                                TextIcon(
-                                                    text: widget.profileBloc.postList[index].user?.name ??'',
-                                                    suffix: Image.asset(
-                                                        'images/socialv/icons/ic_TickSquare.png',
-                                                        height: 14,
-                                                        width: 14,
-                                                        fit: BoxFit.cover),
-                                                    textStyle:
-                                                    boldTextStyle()),
-                                                // Text(
-                                                //     widget
-                                                //             .profileBloc
-                                                //             .postList[index]
-                                                //             .user
-                                                //             ?.name ??
-                                                //         '',
-                                                //     style: boldTextStyle()),
-                                                // const SizedBox(
-                                                //   width: 10,
-                                                // ),
-                                                // Image.asset(
-                                                //     'images/socialv/icons/ic_TickSquare.png',
-                                                //     height: 14,
-                                                //     width: 14,
-                                                //     fit: BoxFit.cover),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                    timeAgo.format(
-                                                        DateTime.parse(widget
-                                                            .profileBloc
-                                                            .postList[index]
-                                                            .createdAt!)),
-                                                    style: secondaryTextStyle(
-                                                        color: svGetBodyColor(),
-                                                        size: 12)),
-                                                const Padding(
-                                                  padding: EdgeInsets.only(
-                                                      left: 8.0),
-                                                  child: Icon(
-                                                    Icons.access_time,
-                                                    size: 20,
-                                                    color: Colors.grey,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        4.width,
-                                      ],
-                                    ).paddingSymmetric(horizontal: 16),
                                     Expanded(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          if (widget.profileBloc.postList[index]
-                                              .userId == AppData.logInUserId)
+                                          child: Row(
+                                            children: [
+                                              CachedNetworkImage(
+                                                imageUrl:
+                                                "${AppData.imageUrl}${widget.profileBloc.postList[index].user?.profilePic!.validate()}",
+                                                height: 50,
+                                                width: 50,
+                                                fit: BoxFit.cover,
+                                              ).cornerRadiusWithClipRRect(20),
+                                              12.width,
+                                              Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  TextIconWidget(
+                                                      text: widget
+                                                          .profileBloc
+                                                          .postList[index]
+                                                          .user?.name ?? '',
+                                                      suffix: Image.asset(
+                                                          'images/socialv/icons/ic_TickSquare.png',
+                                                          height: 14,
+                                                          width: 14,
+                                                          fit: BoxFit.cover),
+                                                      textStyle:
+                                                      boldTextStyle()),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                          timeAgo.format(DateTime
+                                                              .parse(widget
+                                                              .profileBloc
+                                                              .postList[
+                                                          index]
+                                                              .createdAt!)),
+                                                          style: secondaryTextStyle(
+                                                              color:
+                                                              svGetBodyColor(),
+                                                              size: 12)),
+                                                      const Padding(
+                                                        padding:
+                                                        EdgeInsets.only(
+                                                            left: 8.0),
+                                                        child: Icon(
+                                                          Icons.access_time,
+                                                          size: 20,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              // 4.width,
+                                            ],
+                                          ).paddingSymmetric(horizontal: 16),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.end,
+                                          children: [
+                                            if (widget.profileBloc
+                                                    .postList[index].userId ==
+                                                AppData.logInUserId)
                                             PopupMenuButton(
                                               itemBuilder: (context) {
                                                 return [
                                                   PopupMenuItem(
                                                     child: Builder(
                                                         builder: (context) {
-                                                      return Column(
-                                                        children: ["Delete"]
-                                                            .map((String item) {
-                                                          return PopupMenuItem(
-                                                            value: item,
-                                                            child: Text(item),
+                                                          return Column(
+                                                            children: [
+                                                              "Delete"
+                                                            ].map(
+                                                                    (String item) {
+                                                                  return PopupMenuItem(
+                                                                    value: item,
+                                                                    child:
+                                                                    Text(item),
+                                                                  );
+                                                                }).toList(),
                                                           );
-                                                        }).toList(),
-                                                      );
-                                                    }),
+                                                        }),
                                                   ),
                                                 ];
                                               },
@@ -254,26 +248,25 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                                 if (value == 'Delete') {
                                                   showDialog(
                                                     context: context,
-                                                    builder:
-                                                        (BuildContext context) {
+                                                    builder: (BuildContext
+                                                    context) {
                                                       return showAlertDialog(
                                                           context,
                                                           widget
-                                                                  .profileBloc
-                                                                  .postList[
-                                                                      index]
-                                                                  .id ??
+                                                              .profileBloc
+                                                              .postList[
+                                                          index]
+                                                              .id ??
                                                               0);
                                                     },
                                                   );
                                                 }
                                               },
                                             )
-                                          // IconButton(onPressed: () {},
-                                          //     icon: const Icon(Icons.more_horiz)),
-                                        ],
-                                      ).paddingSymmetric(horizontal: 8),
-                                    ),
+                                            // IconButton(onPressed: () {},
+                                            //     icon: const Icon(Icons.more_horiz)),
+                                          ],
+                                        ),
                                   ],
                                 ),
                                 16.height,
@@ -415,25 +408,35 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                         ],
                                       ),
                                     ),
-                                    // InkWell(
-                                    //   splashColor: Colors.transparent,
-                                    //   highlightColor: Colors.transparent,
-                                    //
-                                    //   onTap: (){
-                                    //   },
-                                    //   child: Column(
-                                    //     children: [
-                                    //       Image.asset(
-                                    //         'images/socialv/icons/ic_Send.png',
-                                    //         height: 22,
-                                    //         width: 22,
-                                    //         fit: BoxFit.cover,
-                                    //         color: context.iconColor,
-                                    //       ), Text('Send', style: secondaryTextStyle(
-                                    //           color: svGetBodyColor())),
-                                    //     ],
-                                    //   ),
-                                    // ),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+
+                                      onTap: (){
+                                        Share.share('${removeHtmlTags(widget
+                                            .profileBloc
+                                            .postList[index].title??'')}\n https://doctak.net/post/${widget
+                                            .profileBloc
+                                            .postList[index].id} \n'
+                                            '${AppData.imageUrl}${widget
+                                            .profileBloc
+                                            .postList[index].media?.first.mediaPath}');
+
+
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Image.asset(
+                                            'images/socialv/icons/ic_Send.png',
+                                            height: 22,
+                                            width: 22,
+                                            fit: BoxFit.cover,
+                                            color: context.iconColor,
+                                          ), Text('Send', style: secondaryTextStyle(
+                                              color: svGetBodyColor())),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ).paddingSymmetric(horizontal: 16),
                                 // const Divider(indent: 16, endIndent: 16, height: 20),
@@ -726,7 +729,10 @@ class _MyPostComponentState extends State<MyPostComponent> {
       },
     );
   }
-
+  String removeHtmlTags(String htmlString) {
+    final RegExp htmlTagRegExp = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+    return htmlString.replaceAll(htmlTagRegExp, '');
+  }
   bool _isHtml(String text) {
     // Simple regex to check if the string contains HTML tags
     final htmlTagPattern = RegExp(r'<[^>]*>');
@@ -817,43 +823,5 @@ class _MyPostComponentState extends State<MyPostComponent> {
   // }
 
   bool _isExpanded = false;
-}
-
-bool findIsLiked(post) {
-  for (var like in post ?? []) {
-    print(like);
-    if (like.userId == AppData.logInUserId) {
-      return true; // User has liked the post
-    }
-  }
-
-  return false; // User has not liked the post
-}
-class TextIcon extends StatelessWidget {
-  final String text;
-  final Widget suffix;
-  final TextStyle textStyle;
-
-  TextIcon({
-    required this.text,
-    required this.suffix,
-    required this.textStyle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(width: text.length>12? 40.w:25.w,
-          child: Text(
-            text,
-            style: textStyle,
-            overflow: TextOverflow.fade,
-          ),
-        ),
-        suffix,
-      ],
-    );
-  }
 }
 

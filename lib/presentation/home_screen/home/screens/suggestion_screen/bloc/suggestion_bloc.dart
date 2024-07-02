@@ -29,13 +29,12 @@ class SuggestionBloc extends Bloc<SuggestionEvent, SuggestionState> {
         event.email,
         event.message);
     ProgressDialogUtils.hideProgressDialog();
-    print(response.response);
     // List<NewsModel> newsList1 = response1.map((item) => NewsModel.fromJson(item)).toList();
     // List<NewsModel> newsList2 = response2.map((item) => NewsModel.fromJson(item)).toList();
     // print("dddd$newsList1");
     globalMessengerKey.currentState?.showSnackBar(
         const SnackBar(content: Text('Your message has been sent, thank you!')));
-    emit(PaginationLoadedState(response.response.data.toString()));
+    emit(PaginationLoadedState('Your message has been sent, thank you!'));
     // emit(DataLoaded(bbcNews));
     // } catch (e) {
     // ProgressDialogUtils.hideProgressDialog();

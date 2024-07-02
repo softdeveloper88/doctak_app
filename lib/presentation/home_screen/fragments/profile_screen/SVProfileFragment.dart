@@ -43,7 +43,28 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
     setStatusBarColor(Colors.transparent);
     super.initState();
   }
-
+  Widget _buildPointsCard() {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(
+              'Your Earned Points',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 4),
+            Text(
+              '300',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,9 +112,11 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                           height: 14, width: 14, fit: BoxFit.cover),
                     ],
                   ),
+
                   Text(profileBloc.userProfile?.user?.specialty ?? '',
                       style: secondaryTextStyle(color: svGetBodyColor())),
                   // 24.height,
+                  if(widget.userId == null)_buildPointsCard(),
                   if (widget.userId != null)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

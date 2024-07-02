@@ -48,25 +48,15 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isDeleteButtonClicked = false;
   bool isAlreadyAsk = true;
 
-  @override
-  void initState() {
-    if (!widget.isFromMainScreen) {
-      if (isAlreadyAsk) {
-        isAlreadyAsk = false;
-        textController.text = widget.question.toString();
-        // drugsAskQuestion(state1);
-      }
-    }
-    super.initState();
-  }
-
-  void drugsAskQuestion(state1) {
+  void drugsAskQuestion(state1,context) {
     String question = widget.question ?? "";
     if (question.isEmpty) return;
+
     // String sessionId = selectedSessionId.toString();
     // var tempId =
     //     -1; // Unique temporary ID for the response
-    setState(() {
+    print('object');
+    // setState(() {
       var myMessage = Messages(
           id: -1,
           gptSessionId: selectedSessionId.toString(),
@@ -74,7 +64,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           response: '...',
           createdAt: DateTime.now().toString(),
           updatedAt: DateTime.now().toString());
-      state1.response1.messages!.add(myMessage);
+
+     state1.response1.messages!.add(myMessage);
+
       BlocProvider.of<ChatGPTBloc>(context).add(
         GetPost(
           sessionId: selectedSessionId.toString(),
@@ -83,7 +75,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
       );
       textController.clear();
       scrollToBottom();
-    });
+    // });
     try {
       isWriting = false;
       // });
@@ -203,14 +195,17 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-        child:
-            BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
+        child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+            builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
+
           }
           if (state1 is DataInitial) {
+
             return Scaffold(
+
               body: AnimatedBackground(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -225,8 +220,19 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 ),
               ),
             );
+
           } else if (state1 is DataLoaded) {
             print('response ${state1.response.toString()}');
+
+            if (!widget.isFromMainScreen) {
+              if (isAlreadyAsk) {
+                isAlreadyAsk = false;
+                // Future.delayed(const Duration(seconds: 1),(){
+                  drugsAskQuestion(state1,context);
+                // });
+                // textController.text = widget.question.toString();
+              }
+            }
             return Scaffold(
                 backgroundColor: svGetBgColor(),
                 appBar: AppBar(
@@ -292,6 +298,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   backgroundColor: context.cardColor,
                   title: Builder(
                     builder: (context) {
+
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -352,84 +359,86 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                         child: Center(
                           child: Container(
                             padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  'Your personal & medical assistant powered by Artificial Intelligence',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey[700],
-                                    fontWeight: FontWeight.bold,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    'Your personal & medical assistant powered by Artificial Intelligence',
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: Colors.grey[700],
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 16.0),
-                                 Text(
-                                  textAlign: TextAlign.center,
-                                  'Welcome, Doctor!',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
+                                  const SizedBox(height: 16.0),
+                                   Text(
+                                    textAlign: TextAlign.center,
+                                    'Welcome, Doctor!',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 16.0),
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  'Thank you for using our AI assistant. Here are some things you can do:',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey[700],
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    'Thank you for using our AI assistant. Here are some things you can do:',
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: Colors.grey[700],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 16.0),
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  'Request diagnostic suggestions based on symptoms.',
-                                  style: TextStyle(
-                                    fontSize: 10.sp,
-                                    color: Colors.grey[500],
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    'Request diagnostic suggestions based on symptoms.',
+                                    style: TextStyle(
+                                      fontSize: 8.sp,
+                                      color: Colors.grey[500],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8.0),
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  'Review medication interactions or dosages.',
-                                  style: TextStyle(
-                                    fontSize: 10.sp,
-                                    color: Colors.grey[500],
+                                  const SizedBox(height: 8.0),
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    'Review medication interactions or dosages.',
+                                    style: TextStyle(
+                                      fontSize: 8.sp,
+                                      color: Colors.grey[500],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8.0),
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  'Detect CPT or ICD code.',
-                                  style: TextStyle(
-                                    fontSize: 10.sp,
-                                    color: Colors.grey[500],
+                                  const SizedBox(height: 8.0),
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    'Detect CPT or ICD code.',
+                                    style: TextStyle(
+                                      fontSize: 8.sp,
+                                      color: Colors.grey[500],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8.0),
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  'And much more! Feel free to explore.',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey[500],
+                                  const SizedBox(height: 8.0),
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    'And much more! Feel free to explore.',
+                                    style: TextStyle(
+                                      fontSize: 8.sp,
+                                      color: Colors.grey[500],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 16.0),
-                                Text(
-                                  textAlign: TextAlign.center,
-                                  "If you need assistance or have questions, don't hesitate to ask.",
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey[700],
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    textAlign: TextAlign.center,
+                                    "If you need assistance or have questions, don't hesitate to ask.",
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: Colors.grey[700],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -440,8 +449,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           controller: _scrollController,
                           itemCount: state1.response1.messages!.length,
                           itemBuilder: (context, index) {
-                            Messages message =
-                                state1.response1.messages![index];
+                            Messages message = state1.response1.messages![index];
+
                             return Column(
                               children: [
                                 ChatBubble(
@@ -842,7 +851,7 @@ class ChatBubble extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    width: 60.w,
+                    width: 75.w,
                     decoration: BoxDecoration(
                       borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(10),
@@ -855,7 +864,7 @@ class ChatBubble extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 15.0, vertical: 10.0),
+                              horizontal: 10.0, vertical: 10.0),
                           child: ConstrainedBox(
                             constraints:
                                 BoxConstraints(maxWidth: bubbleMaxWidth),

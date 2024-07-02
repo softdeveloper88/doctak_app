@@ -24,6 +24,15 @@ class GetPost extends ChatGPTEvent {
   @override
   List<Object> get props => [sessionId, question];
 }
+class GetDrugAskEvent extends ChatGPTEvent {
+  final String sessionId;
+  final String question;
+
+  GetDrugAskEvent({required this.sessionId, required this.question});
+
+  @override
+  List<Object> get props => [sessionId, question];
+}
   class GetMessages extends ChatGPTEvent {
     final String sessionId;
 

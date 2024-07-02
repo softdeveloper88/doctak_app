@@ -41,7 +41,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
     // var bloc = BlocProvider.of<ConferenceBloc>(context);
     conferenceBloc.add(LoadPageEvent(
       page: 1,
-      countryName: '',
+      countryName: 'all',
       searchTerm: '',
     ));
     super.initState();

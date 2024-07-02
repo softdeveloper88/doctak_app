@@ -43,9 +43,10 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+
+      // padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-          color: context.cardColor, borderRadius: radius(SVAppContainerRadius)),
+          color: context.cardColor, ),
       child: Column(
         children: [
           Row(
@@ -116,22 +117,6 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
           16.height,
           selectedIndex == 0
               ? MyPostComponent(widget.profileBloc)
-              // GridView.builder(
-              //         itemCount: allPostList.length,
-              //         shrinkWrap: true,
-              //         physics: const NeverScrollableScrollPhysics(),
-              //         itemBuilder: (BuildContext context, int index) {
-              //           return Image.asset(allPostList[index],
-              //                   height: 100, fit: BoxFit.cover)
-              //               .cornerRadiusWithClipRRect(8);
-              //         },
-              //         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              //           crossAxisCount: 3,
-              //           crossAxisSpacing: 16,
-              //           mainAxisSpacing: 16,
-              //           childAspectRatio: 1,
-              //         ),
-              //       )
               : AboutWidget(profileBloc: widget.profileBloc,)
          // : EditProfileScreen(widget.profileBloc),
         ],

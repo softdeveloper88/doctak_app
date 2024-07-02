@@ -96,15 +96,21 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
     return Column(
       children: widget.profileBloc.userProfile!.privacySetting!.map((item) {
         // if(item.visibility!='crickete update d') {
+        var selectValue=item.visibility=='lock'?'Only me': item.visibility=='group'?'Friend':'Public';
+
         return _buildDropdownField(
           index: 4,
           label: '${item.recordType} privacy',
           value:
           item.visibility == null || item.visibility == 'crickete update d'
-              ? 'lock'
-              : item.visibility ?? 'lock',
-          onSave: (value) => item.visibility = value,
-          options: ['lock', 'group', 'globe'],
+              ? 'Only me'
+              :selectValue ,
+          onSave: (value) {
+
+            value=='Only me'?'lock': value=='Friend'?'group':'Public';
+            item.visibility = value;
+          },
+          options: ['Only me', 'Friend', 'Public'],
         );
         // }else{
         //   return Container();

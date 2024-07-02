@@ -7,7 +7,6 @@ import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-import '../screens/SVStoryScreen.dart';
 
 class SVStoryComponent extends StatefulWidget {
   @override
@@ -27,7 +26,7 @@ class _SVStoryComponentState extends State<SVStoryComponent> {
           Column(
             children: [
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 16),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 height: 60,
                 width: 60,
                 decoration: BoxDecoration(
@@ -35,7 +34,7 @@ class _SVStoryComponentState extends State<SVStoryComponent> {
                   borderRadius: radius(SVAppCommonRadius),
                 ),
                 child: IconButton(
-                    icon: Icon(Icons.add, color: Colors.white),
+                    icon: const Icon(Icons.add, color: Colors.white),
                     onPressed: () async {
                       image = await svGetImageSource();
                     }),

@@ -156,8 +156,8 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                   bloc: suggestionBloc,
                   listener: (BuildContext context, SuggestionState state) {
                     if (state is PaginationLoadedState) {
-                      var data = jsonDecode(state.response);
-                      if (data['message'] == true) {}
+                      // var data = jsonDecode(state.response);
+                      // if (data['message'] == true) {}
                     }
                   },
                   child: ElevatedButton(
