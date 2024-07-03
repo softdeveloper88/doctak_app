@@ -1,3 +1,6 @@
+import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +12,9 @@ import '../screens/comment_screen/bloc/comment_bloc.dart';
 
 class SVCommentReplyComponent extends StatelessWidget {
   CommentBloc commentBloc;
+  Function(String) onPostComment;
   int id;
-   SVCommentReplyComponent(this.commentBloc,this.id, {Key? key}) : super(key: key);
+   SVCommentReplyComponent(this.commentBloc,this.id,this.onPostComment, {Key? key}) : super(key: key);
 TextEditingController commentController=TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -24,29 +28,41 @@ TextEditingController commentController=TextEditingController();
           Row(
             children: [
               16.width,
-              Image.network(AppData.imageUrl + AppData.profile_pic, height: 48, width: 48, fit: BoxFit.cover).cornerRadiusWithClipRRect(50),
+              CustomImageView(imagePath:AppData.imageUrl + AppData.profile_pic, height: 48, width: 48, fit: BoxFit.cover).cornerRadiusWithClipRRect(50),
               10.width,
-              SizedBox(
-                width: context.width() * 0.6,
-                child: AppTextField(
-                  controller: commentController,
-                  textFieldType: TextFieldType.OTHER,
-                  decoration: InputDecoration(
-                    hintText: 'Write a comment',
-                    hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                  ),
+              Container(
+                padding: const EdgeInsets.only(left: 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: svGetBodyColor())
                 ),
-              ),
-              TextButton(onPressed: () {
-                if(commentController.text.isNotEmpty) {
-                  commentBloc.add(PostCommentEvent(
-                      postId: id, comment: commentController.text));
-                  commentController.text='';
-                }
-              }, child: Text('Post', style: secondaryTextStyle(color: SVAppColorPrimary)))
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: context.width() * 0.6,
+                      child: AppTextField(
+                        controller: commentController,
+                        textFieldType: TextFieldType.OTHER,
+                        decoration: InputDecoration(
+                          hintText: 'Write a comment',
+                          hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    TextButton(onPressed:(){
+                      if(commentController.text.isNotEmpty) {
+                        onPostComment(commentController.text);
+                        commentController.text='';
+                      }
+                      },
+                       child: Text
+                    ('Post', style: secondaryTextStyle(color: SVAppColorPrimary))),
+                  ],
+                ),
+              )
             ],
           ),
         ],

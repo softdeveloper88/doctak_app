@@ -13,6 +13,7 @@ import 'package:doctak_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../widgets/toast_widget.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
@@ -295,8 +296,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // );
     // emit(PaginationLoadedState());
     // ProgressDialogUtils.hideProgressDialog();
-    globalMessengerKey.currentState?.showSnackBar(
-        const SnackBar(content: Text('profile info updated successfully')));
+    // globalMessengerKey.currentState?.showSnackBar(
+    //     const SnackBar(content: Text('profile info updated successfully')));
+    showToast('profile info updated successfully');
+    // showTopSnackBar(globalMessengerKey.currentState!.context, 'profile info updated successfully');
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
         (state as PaginationLoadedState).selectedFirstDropdownValue,
@@ -390,8 +393,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     workEducationList!.clear();
     workEducationList!.addAll(response2);
     print(response.data.toString());
-    globalMessengerKey.currentState?.showSnackBar(
-        const SnackBar(content: Text('Work info updated successfully')));
+    // globalMessengerKey.currentState?.showSnackBar(
+    //     const SnackBar(content: Text('Work info updated successfully')));
+    showToast('Work info updated successfully');
 
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
@@ -429,6 +433,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     interestList!.clear();
     interestList!.addAll(response1);
     print(response.data.toString());
+    showToast('Hobbies and Interest info updated successfully');
+
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
         (state as PaginationLoadedState).selectedFirstDropdownValue,
@@ -449,8 +455,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         'Bearer ${AppData.userToken}', AppData.logInUserId);
     workEducationList!.clear();
     workEducationList!.addAll(response2);
-    globalMessengerKey.currentState?.showSnackBar(
-        const SnackBar(content: Text('Work Info deleted successfully')));
+    showToast('Work Info deleted successfully');
+
+    // globalMessengerKey.currentState?.showSnackBar(
+    //     const SnackBar(content: Text('Work Info deleted successfully')));
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
         (state as PaginationLoadedState).selectedFirstDropdownValue,

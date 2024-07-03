@@ -25,7 +25,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
   SearchPeopleBloc searchPeopleBloc = SearchPeopleBloc();
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  bool isSearchShow=false;
+  bool isSearchShow=true;
   @override
   void initState() {
     searchPeopleBloc.add(SearchPeopleLoadPageEvent(

@@ -48,18 +48,25 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
             child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
-          if (widget.profileBloc.isMe) CustomImageView(
-            onTap: () {
-              setState(() {
-                isEditModeMap =!isEditModeMap;
-              });
-            },
-            color: svGetBodyColor( ),
-            imagePath: 'assets/icon/ic_vector.svg',
-            height: 25,
-            width: 25,
-            margin: const EdgeInsets.only(top: 4, right: 16),
-          ),
+          if (widget.profileBloc.isMe)  Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              CustomImageView(
+                onTap: () {
+                  setState(() {
+                    isEditModeMap =!isEditModeMap;
+                  });
+                },
+                color: Colors.blue,
+                imagePath: 'assets/icon/ic_vector.svg',
+                height: 20,
+                width: 20,
+                margin: const EdgeInsets.only(top: 4, right: 16),
+              ),
+              Text("Edit",style: GoogleFonts.poppins(fontSize: 8.sp,fontWeight: FontWeight.w400,color: Colors.blue),)
+            ],
+          ).paddingTop(10),
         ],
       ),
       body: Padding(

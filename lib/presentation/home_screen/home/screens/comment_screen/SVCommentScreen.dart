@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
@@ -10,8 +11,8 @@ import '../../../utils/SVCommon.dart';
 
 class SVCommentScreen extends StatefulWidget {
   int id;
-
-  SVCommentScreen({required this.id, Key? key}) : super(key: key);
+HomeBloc homeBloc;
+  SVCommentScreen({required this.id,required this.homeBloc, Key? key}) : super(key: key);
 
   @override
   State<SVCommentScreen> createState() => _SVCommentScreenState();
@@ -119,7 +120,15 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       //     // SVCommentReplyComponent(),
       //   ],
       // ),
-      bottomSheet:  SVCommentReplyComponent(commentBloc,widget.id),
+      bottomSheet:  SVCommentReplyComponent(commentBloc,widget.id,(value){
+        if(value.isNotEmpty) {
+          commentBloc.add(PostCommentEvent(
+              postId: widget.id, comment: value));
+          value='';
+          // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
+          //  homeBloc.postList[index].comments!.add(Comments());
+        }
+      }),
     );
   }
 }

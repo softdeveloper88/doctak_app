@@ -6,6 +6,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'bloc/jobs_bloc.dart';
 import 'bloc/jobs_state.dart';
@@ -93,7 +94,37 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   fontWeight: FontWeight.w500,
                                   fontSize: kDefaultFontSize),
                             ),
-                            const Icon(Icons.bookmark_border),
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () {
+                                // _showBottomSheet(context,widget
+                                //     .homeBloc
+                                //     .postList[index]);
+
+                                Share.share("Job Title: ${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n"
+                                    "Company : ${jobsBloc.jobDetailModel.job?.companyName}\n"
+                                    "Location: ${jobsBloc.jobDetailModel.job?.location ?? 'N/A'}\n"
+                                    "Date From: ${ jobsBloc.jobDetailModel.job?.createdAt ??
+                                    'N/A'}\n"
+                                    "Date To: ${ jobsBloc.jobDetailModel.job?.lastDate ??
+                                    'N/A'}\n"
+                                    "Experience: ${ jobsBloc.jobDetailModel.job?.experience ??
+                                    'N/A'}\n"
+                                    "Job Apply Link: ${jobsBloc.jobDetailModel.job?.link ??
+                                    'N/A'}\n" );
+
+
+                              },
+                              child: Icon(Icons.share_sharp,
+                                size: 22,
+                                // 'images/socialv/icons/ic_share.png',
+                                // height: 22,
+                                // width: 22,
+                                // fit: BoxFit.cover,
+                                color: context.iconColor,
+                              ),
+                            ),
                           ],
                         ),
                         Text(

@@ -130,7 +130,7 @@ class _SearchScreenState extends State<SearchScreen>
   //   }
   // }
   var selectedValue;
-  bool isSearchShow=false;
+  bool isSearchShow=true;
   // final BannerAdManager _bannerAdManager = BannerAdManager();
   Widget _individualTab(String tabName) {
     return Row(

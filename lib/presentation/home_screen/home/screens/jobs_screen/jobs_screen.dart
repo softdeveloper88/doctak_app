@@ -17,6 +17,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
@@ -621,7 +622,41 @@ class _JobsScreenState extends State<JobsScreen> {
                                             fontWeight: FontWeight.w500,
                                             fontSize: kDefaultFontSize),
                                       ),
-                                      const Icon(Icons.bookmark_border),
+                              InkWell(
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () {
+                                  // _showBottomSheet(context,widget
+                                  //     .homeBloc
+                                  //     .postList[index]);
+
+                                  Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
+                                      "Company : ${bloc.drugsData[index].companyName}\n"
+                                      "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
+                                      "Date From: ${ bloc.drugsData[index]
+                                      .createdAt ??
+                                      'N/A'}\n"
+                                      "Date To: ${ bloc.drugsData[index]
+                                      .lastDate ??
+                                      'N/A'}\n"
+                                      "Experience: ${ bloc.drugsData[index]
+                                      .experience ??
+                                      'N/A'}\n"
+                                      "Job Apply Link: ${ bloc.drugsData[index]
+                                      .link ??
+                                      'N/A'}\n" );
+
+
+                                },
+                                child: Icon(Icons.share_sharp,
+                                  size: 22,
+                                  // 'images/socialv/icons/ic_share.png',
+                                  // height: 22,
+                                  // width: 22,
+                                  // fit: BoxFit.cover,
+                                  color: context.iconColor,
+                                ),
+                              ),
                                     ],
                                   ),
                                   Text(

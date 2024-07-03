@@ -420,6 +420,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
+
   // void _selectFiles(BuildContext context) async {
   //   ImagePickerPlus picker = ImagePickerPlus(context);
   //   SelectedImagesDetails? details = await picker.pickBoth(
@@ -591,6 +592,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
@@ -657,8 +659,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         ),
         body: BlocConsumer<ChatBloc, ChatState>(
           bloc: chatBloc,
-          // listenWhen: (previous, current) => current is SearchPeopleState,
-          // buildWhen: (previous, current) => current is! SearchPeopleState,
           listener: (BuildContext context, ChatState state) {
             if (state is DataError) {
               showDialog(
@@ -667,31 +667,30 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   content: Text(state.errorMessage),
                 ),
               );
-            }else if (state is PaginationLoadedState) {
-             _isFileUploading=false;
+            } else if (state is PaginationLoadedState) {
+              _isFileUploading = false;
             }
           },
           builder: (context, state) {
             print("state $state");
+
             if (state is PaginationLoadingState) {
-              return Expanded(
-                  child: Center(
-                      child: CircularProgressIndicator(
-                color: svGetBodyColor(),
-              )));
+              return Center(
+                child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                ),
+              );
             } else if (state is PaginationLoadedState) {
-              print(state);
-              // return _buildPostList(context);
               var bloc = chatBloc;
               return Column(
                 children: [
                   Expanded(
+                    flex: 1,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(8),
                       shrinkWrap: true,
                       reverse: true,
                       controller: _scrollController,
-                      // physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         if (bloc.messagePageNumber <=
                             bloc.messageNumberOfPage) {
@@ -728,9 +727,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                 attachmentJson:
                                     bloc.messagesList[index].attachment,
                                 createAt: bloc.messagesList[index].createdAt,
-                                // Pass the attachment JSON string
                               );
-                        // SVProfileFragment().launch(context);
                       },
                       itemCount: bloc.messagesList.length,
                     ),
@@ -738,105 +735,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   isSomeoneTyping
                       ? TypingIndicator(profilePic: widget.profilePic)
                       : Container(),
-                  // Show typing indicator conditionally
-
-                  // Container(
-                  //   margin: const EdgeInsets.all(8.0),
-                  //   child: AnimatedBackground(
-                  //     child: GridView.builder(
-                  //       shrinkWrap: true,
-                  //       physics: const NeverScrollableScrollPhysics(),
-                  //       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  //         crossAxisCount: 3, // Number of columns
-                  //         crossAxisSpacing: 4.0, // Spacing between columns
-                  //         mainAxisSpacing: 4.0, // Spacing between rows
-                  //       ),
-                  //       itemCount: 0,
-                  //       itemBuilder: (context, index) {
-                  //         // var file = selectedFiles[index];
-                  //         return Stack(
-                  //           children: [
-                  //             Container(
-                  //               margin: const EdgeInsets.all(8.0),
-                  //               decoration: BoxDecoration(
-                  //                 boxShadow: [
-                  //                   BoxShadow(
-                  //                     color: Colors.grey.withOpacity(0.5),
-                  //                     spreadRadius: 2,
-                  //                     blurRadius: 4,
-                  //                     offset: const Offset(0, 3),
-                  //                   ),
-                  //                 ],
-                  //                 borderRadius: BorderRadius.circular(8),
-                  //                 border: Border.all(
-                  //                     color: Colors.grey.withOpacity(0.2), width: 1),
-                  //               ),
-                  //               child: ClipRRect(
-                  //                 borderRadius: BorderRadius.circular(8),
-                  //                 child: GestureDetector(
-                  //                   onTap: () {
-                  //                     // Navigator.of(context)
-                  //                     //     .push(MaterialPageRoute(
-                  //                     //   builder: (_) => FullScreenImageGallery(
-                  //                     //     imageFiles: selectedFiles
-                  //                     //         .where((file) => file.isThatImage)
-                  //                     //         .toList(),
-                  //                     //     initialPage: selectedFiles
-                  //                     //         .where((file) => file.isThatImage)
-                  //                     //         .toList()
-                  //                     //         .indexOf(file),
-                  //                     //   ),
-                  //                     // ));
-                  //                   },
-                  //                   child: Container()
-                  //                   // Image.file(,
-                  //                   //     fit: BoxFit.cover),
-                  //                 )
-                  //                      // _DisplayVideo(selectedByte: file),
-                  //               ),
-                  //             ),
-                  //             Positioned(
-                  //               right: 4,
-                  //               top: 4,
-                  //               child: GestureDetector(
-                  //                 onTap: () {
-                  //                   setState(() {
-                  //                     // selectedFiles.removeAt(index);
-                  //                   });
-                  //                 },
-                  //                 child: Container(
-                  //                   margin: const EdgeInsets.all(8.0),
-                  //                   decoration: const BoxDecoration(
-                  //                     color: svGetBodyColor()54,
-                  //                     shape: BoxShape.circle,
-                  //                   ),
-                  //                   child: const Padding(
-                  //                     padding: EdgeInsets.all(2.0),
-                  //                     child: Icon(Icons.close,
-                  //                         size: 20, color: Colors.white),
-                  //                   ),
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //           ],
-                  //         );
-                  //       },
-                  //     ),
-                  //   ),
-                  // ),
                   if (_selectedFile != null)
                     if (_isImageFile(_selectedFile!))
                       _buildImagePreview(_selectedFile!),
-                  if (_isVideoFile(_selectedFile)) _buildVideoPreview(_selectedFile),
+                  if (_isVideoFile(_selectedFile))
+                    _buildVideoPreview(_selectedFile),
                   if (_isDocumentFile(_selectedFile))
                     _buildDocumentPreview(_selectedFile!),
                   Container(
                     decoration: BoxDecoration(
                       color: context.cardColor,
-                      // borderRadius: BorderRadius.circular(0.0),
                     ),
-                    padding:
-                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 16.0),
                     child: Row(
                       children: [
                         Container(
@@ -844,122 +755,120 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             color: appStore.isDarkMode
                                 ? svGetScaffoldColor()
                                 : cardLightColor,
-                            // border: Border.all(color: Colors.grey),
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: Row(
                             children: [
                               isLoading
                                   ? Container(
-                                width: 25,
-                                height: 25,
-                                margin: const EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(
-                                  color: svGetBodyColor(),
-                                ),
-                              )
+                                      width: 25,
+                                      height: 25,
+                                      margin: const EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                        color: svGetBodyColor(),
+                                      ),
+                                    )
                                   : IconButton(
-                                icon: const Icon(Icons.attach_file),
-                                onPressed: () async {
-                                  const permission = Permission.photos;
-                                  if (await permission.isGranted) {
-                                    _showFileOptions();
-                                    // _selectFiles(context);
-                                  } else if (await permission.isDenied) {
-                                    final result = await permission.request();
-                                    if (result.isGranted) {
-                                      _showFileOptions();
-                                      // _selectFiles(context);
-                                      print("isGranted");
-                                    } else if (result.isDenied) {
-                                      print("isDenied");
-                                    } else if (result.isPermanentlyDenied) {
-                                      print("isPermanentlyDenied");
-                                      _permissionDialog(context);
-                                    }
-                                  } else if (await permission
-                                      .isPermanentlyDenied) {
-                                    print("isPermanentlyDenied");
-                                    _permissionDialog(context);
-                                  }
-                                  _showFileOptions();
-                                },
-                              ),
-                              const SizedBox(width: 8.0), // Add spacing
+                                      icon: const Icon(Icons.attach_file),
+                                      onPressed: () async {
+                                        const permission = Permission.photos;
+                                        if (await permission.isGranted) {
+                                          _showFileOptions();
+                                        } else if (await permission.isDenied) {
+                                          final result =
+                                              await permission.request();
+                                          if (result.isGranted) {
+                                            _showFileOptions();
+                                          } else if (result.isDenied) {
+                                            print("isDenied");
+                                          } else if (result
+                                              .isPermanentlyDenied) {
+                                            print("isPermanentlyDenied");
+                                            _permissionDialog(context);
+                                          }
+                                        } else if (await permission
+                                            .isPermanentlyDenied) {
+                                          print("isPermanentlyDenied");
+                                          _permissionDialog(context);
+                                        }
+                                        _showFileOptions();
+                                      },
+                                    ),
+                              const SizedBox(width: 8.0),
                               isRecording
                                   ? const Text('Recording Start..')
                                   : Container(
-                                width: 50.w,
-                                height: 40,
-                                padding:
-                                const EdgeInsets.only(left: 8, right: 8),
-                                decoration: BoxDecoration(
-                                  color: appStore.isDarkMode
-                                      ? svGetScaffoldColor()
-                                      : cardLightColor,
-                                  // border: Border.all(color: Colors.grey),
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                child: Center(
-                                  child: TextField(
-                                    controller: textController,
-                                    decoration: const InputDecoration.collapsed(
-                                      hintText: 'Type your message...',
+                                      width: 50.w,
+                                      height: 40,
+                                      padding: const EdgeInsets.only(
+                                          left: 8, right: 8),
+                                      decoration: BoxDecoration(
+                                        color: appStore.isDarkMode
+                                            ? svGetScaffoldColor()
+                                            : cardLightColor,
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                      ),
+                                      child: Center(
+                                        child: TextField(
+                                          controller: textController,
+                                          decoration:
+                                              const InputDecoration.collapsed(
+                                            hintText: 'Type your message...',
+                                          ),
+                                          maxLines: null,
+                                          keyboardType: TextInputType.multiline,
+                                          textInputAction:
+                                              TextInputAction.newline,
+                                          onChanged: (Text) {
+                                            ontextFieldFocused(true);
+                                          },
+                                          onTapOutside: (text) {
+                                            ontextFieldFocused(false);
+                                          },
+                                        ),
+                                      ),
                                     ),
-                                    maxLines: null,
-                                    keyboardType: TextInputType.multiline,
-                                    textInputAction: TextInputAction.newline,
-                                    onChanged: (Text) {
-                                      ontextFieldFocused(true);
-                                    },
-                                    onTapOutside: (text) {
-                                      ontextFieldFocused(false);
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8.0), // Add spacing
-                              _isFileUploading?const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 3,)): IconButton(
-                                onPressed: () async {
-                                  // Handle send button press
-                                  String message = textController.text;
-                                  // onTriggerEventPressed(message);
-                                  _isFileUploading=true;
-                                  chatBloc.add(SendMessageEvent(
-                                      userId: AppData.logInUserId,
-                                      roomId: widget.roomId == ''
-                                          ? chatBloc.roomId
-                                          : widget.roomId,
-                                      receiverId: widget.id,
-                                      attachmentType: 'file',
-                                      file: _selectedFile?.path ?? '',
-                                      message: message));
-                                  // sendMessage(message, 'text'); // Sending a text message
-                                  textController.clear();
-                                  setState(() {});
-                                  _selectedFile = null;
-                                  scrollToBottom();
-
-                                },
-                                icon:const Icon(Icons.send),
-                              ),
+                              const SizedBox(width: 8.0),
+                              _isFileUploading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 3),
+                                    )
+                                  : IconButton(
+                                      onPressed: () async {
+                                        String message = textController.text;
+                                        _isFileUploading = true;
+                                        chatBloc.add(SendMessageEvent(
+                                            userId: AppData.logInUserId,
+                                            roomId: widget.roomId == ''
+                                                ? chatBloc.roomId
+                                                : widget.roomId,
+                                            receiverId: widget.id,
+                                            attachmentType: 'file',
+                                            file: _selectedFile?.path ?? '',
+                                            message: message));
+                                        textController.clear();
+                                        setState(() {});
+                                        _selectedFile = null;
+                                        scrollToBottom();
+                                      },
+                                      icon: const Icon(Icons.send),
+                                    ),
                             ],
                           ),
                         ),
                         GestureDetector(
                           onLongPress: () {
                             _start();
-                            // startRecord();
                             setState(() {
                               isRecording = true;
                             });
                           },
                           onLongPressEnd: (details) {
                             _stop();
-                            // stopRecord();
                             setState(() {
                               isRecording = false;
                             });
@@ -988,18 +897,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               );
             } else if (state is DataError) {
-              return Expanded(
-                child: Center(
-                  child: Text(state.errorMessage),
-                ),
+              return Center(
+                child: Text(state.errorMessage),
               );
             } else {
-              return const Expanded(
-                  child: Center(child: Text('Something went wrong')));
+              return const Center(child: Text('Something went wrong'));
             }
           },
         ));

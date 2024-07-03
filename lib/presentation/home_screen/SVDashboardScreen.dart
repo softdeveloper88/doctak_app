@@ -1,11 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-
 import '../../core/utils/app/AppData.dart';
 import 'fragments/add_post/SVAddPostFragment.dart';
 import 'fragments/home_main_screen/SVHomeFragment.dart';
@@ -13,7 +11,6 @@ import 'fragments/home_main_screen/bloc/home_bloc.dart';
 import 'fragments/profile_screen/SVProfileFragment.dart';
 import 'fragments/search_people/SVSearchFragment.dart';
 import 'home/components/SVHomeDrawerComponent.dart';
-
 class SVDashboardScreen extends StatefulWidget {
   const SVDashboardScreen({Key? key}) : super(key: key);
 

@@ -8,6 +8,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/b
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/share_post_bottom_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -28,6 +29,7 @@ import '../../fragments/home_main_screen/post_widget/find_likes.dart';
 import '../../fragments/home_main_screen/post_widget/post_media_widget.dart';
 import '../../fragments/home_main_screen/post_widget/text_icon_widget.dart';
 import '../screens/comment_screen/SVCommentScreen.dart';
+import '../screens/comment_screen/bloc/comment_bloc.dart';
 
 class SVPostComponent extends StatefulWidget {
   SVPostComponent(this.homeBloc, {super.key});
@@ -37,7 +39,7 @@ class SVPostComponent extends StatefulWidget {
   @override
   State<SVPostComponent> createState() => _SVPostComponentState();
 }
-
+int? isShowComment=-1;
 class _SVPostComponentState extends State<SVPostComponent> {
   @override
   Widget build(BuildContext context) {
@@ -327,6 +329,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                           InkWell(
                                             onTap: (){
                                               SVCommentScreen(
+                                                  homeBloc: widget.homeBloc,
                                                   id: widget
                                                       .homeBloc
                                                       .postList[index]
@@ -386,13 +389,21 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                           splashColor: Colors.grey,
                                           highlightColor: Colors.grey,
                                           onTap: () {
-                                            SVCommentScreen(
-                                                    id: widget
-                                                            .homeBloc
-                                                            .postList[index]
-                                                            .id ??
-                                                        0)
-                                                .launch(context);
+                                            setState(() {
+                                              if(isShowComment==-1) {
+                                                isShowComment = index;
+                                              }else{
+                                                isShowComment=-1;
+                                              }
+
+                                            });
+                                            // SVCommentScreen(
+                                            //         id: widget
+                                            //                 .homeBloc
+                                            //                 .postList[index]
+                                            //                 .id ??
+                                            //             0)
+                                            //     .launch(context);
                                           },
                                           child: Column(
                                             children: [
@@ -416,7 +427,6 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                             // _showBottomSheet(context,widget
                                             //     .homeBloc
                                             //     .postList[index]);
-
                                               Share.share('${removeHtmlTags(widget
                                                 .homeBloc
                                                 .postList[index].title??'')}\n https://doctak.net/post/${widget
@@ -446,6 +456,26 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                         ),
                                       ],
                                     ).paddingSymmetric(horizontal: 16),
+                                    if(isShowComment==index)SVCommentReplyComponent(CommentBloc(),widget
+                                        .homeBloc
+                                        .postList[index]
+                                        .id ??
+                                        0,(value){
+                                      if(value.isNotEmpty) {
+
+                                      var comments=  CommentBloc();
+                                      comments.add(PostCommentEvent(
+                                            postId: widget.homeBloc
+                                            .postList[index]
+                                            .id ??
+                                        0, comment: value));
+
+                                         widget.homeBloc.postList[index].comments!.add(Comments());
+                                         setState(() {
+                                           isShowComment=-1;
+                                         });
+                                      }
+                                    })
                                     // const Divider(indent: 16, endIndent: 16, height: 20),
                                     // Row(
                                     //   mainAxisAlignment: MainAxisAlignment.center,

@@ -3,7 +3,9 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../../../core/app_export.dart';
 import '../../../utils/SVCommon.dart';
@@ -43,18 +45,25 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
             child: const Icon(Icons.arrow_back_ios)),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
-          if (widget.profileBloc.isMe)  CustomImageView(
-            onTap: () {
-              setState(() {
-                isEditModeMap = !isEditModeMap;
-              });
-            },
-            color: svGetBodyColor(),
-            imagePath: 'assets/icon/ic_vector.svg',
-            height: 25,
-            width: 25,
-            margin: const EdgeInsets.only(top: 4, right: 16),
-          ),
+          if (widget.profileBloc.isMe)  Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              CustomImageView(
+                onTap: () {
+                  setState(() {
+                    isEditModeMap =!isEditModeMap;
+                  });
+                },
+                color: Colors.blue,
+                imagePath: 'assets/icon/ic_vector.svg',
+                height: 20,
+                width: 20,
+                margin: const EdgeInsets.only(top: 4, right: 16),
+              ),
+              Text("Edit",style: GoogleFonts.poppins(fontSize: 8.sp,fontWeight: FontWeight.w400,color: Colors.blue),)
+            ],
+          ).paddingTop(10),
         ],
       ),
       body: Padding(

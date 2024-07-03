@@ -58,11 +58,11 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                 isEditModeMap = !isEditModeMap;
               });
             },
-            child:  Padding(
-              padding: const EdgeInsets.all(8.0),
+            child:  const Padding(
+              padding: EdgeInsets.all(8.0),
               child: Icon(
                 Icons.add_circle_outline_sharp,
-                color: svGetBodyColor(),
+                color: Colors.blue,
                 size: 30,
                 // color: Colors.black,
                 // imagePath: 'assets/icon/ic_vector.svg',

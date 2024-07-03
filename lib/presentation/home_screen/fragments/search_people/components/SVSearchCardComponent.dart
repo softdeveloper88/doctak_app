@@ -135,21 +135,27 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                       ),
                     ),
                     10.width,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(width: 150, child: Text("${widget.element.firstName.validate()} ${widget.element.lastName.validate()}",overflow: TextOverflow.clip, style: boldTextStyle())),
-                            6.width,
-                            widget.element.isCurrentUser.validate()
-                                ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-                                : const Offstage(),
-                          ],
-                        ),
-                        Text(widget.element.userType.validate(), style: secondaryTextStyle(color: svGetBodyColor())),
-                      ],
+                    GestureDetector(
+                      onTap: (){
+                        SVProfileFragment(userId:widget.element.id).launch(context);
+
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(width: 150, child: Text("${widget.element.firstName.validate()} ${widget.element.lastName.validate()}",overflow: TextOverflow.clip, style: boldTextStyle())),
+                              6.width,
+                              widget.element.isCurrentUser.validate()
+                                  ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
+                                  : const Offstage(),
+                            ],
+                          ),
+                          Text(widget.element.userType.validate(), style: secondaryTextStyle(color: svGetBodyColor())),
+                        ],
+                      ),
                     ),
                   ],
                 ),

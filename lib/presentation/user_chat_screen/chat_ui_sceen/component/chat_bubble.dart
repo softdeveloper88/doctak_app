@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:flutter/cupertino.dart';
@@ -127,20 +128,26 @@ class _AudioViewerState extends State<AudioViewer> {
     //   });
     // });
     player.onPlayerStateChanged.listen((PlayerState state) {
-        setState(() {
-          isPlaying = state == PlayerState.playing;
-        });
+        if(mounted) {
+          setState(() {
+            isPlaying = state == PlayerState.playing;
+          });
+        }
     });
 
     player.onDurationChanged.listen((Duration d) {
-      setState(() {
-        duration = d.inMilliseconds.toDouble();
-      });
+      if(mounted) {
+        setState(() {
+          duration = d.inMilliseconds.toDouble();
+        });
+      }
     });
     player.onPositionChanged.listen((Duration p) {
-      setState(() {
-        sliderValue = p.inMilliseconds.toDouble();
-      });
+      if(mounted) {
+        setState(() {
+          sliderValue = p.inMilliseconds.toDouble();
+        });
+      }
     });
     super.initState();
   }
@@ -321,8 +328,8 @@ class ChatBubble extends StatelessWidget {
                             VideoPlayerWidget(videoUrl: '${AppData.imageUrl}$attachmentJson')
                             else Padding(
                               padding: const EdgeInsets.only(top: 8.0),
-                              child: Image.network(
-                                "${AppData.imageUrl}$attachmentJson",
+                              child: CustomImageView(
+                                imagePath: "${AppData.imageUrl}$attachmentJson",
                                 fit: BoxFit.cover,
                                 width: MediaQuery.of(context).size.width * 0.6, // Adjust as needed
                                 // height: 200, // You can set a fixed height if needed

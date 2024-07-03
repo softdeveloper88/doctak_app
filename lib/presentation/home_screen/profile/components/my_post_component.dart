@@ -2,13 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_media_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/text_icon_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart' as comment_bloc;
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -25,7 +28,6 @@ import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../data/models/post_model/post_data_model.dart';
-import '../../fragments/home_main_screen/bloc/home_bloc.dart';
 import '../../fragments/home_main_screen/post_widget/find_likes.dart';
 
 class MyPostComponent extends StatefulWidget {
@@ -39,7 +41,7 @@ class MyPostComponent extends StatefulWidget {
 
 class _MyPostComponentState extends State<MyPostComponent> {
   HomeBloc homeBloc = HomeBloc();
-
+ int isShowComment=-1;
   showAlertDialog(BuildContext context, int id) {
     // set up the buttons
     Widget cancelButton = TextButton(
@@ -324,10 +326,19 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                             style: secondaryTextStyle(
                                                 color: svGetBodyColor())),
                                       ),
-                                      Text(
-                                          '${widget.profileBloc.postList[index].comments?.length ?? 0.validate()} comments',
-                                          style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
+                                      GestureDetector(
+                                        onTap: (){
+                                          SVCommentScreen(
+                                                  id: widget.profileBloc
+                                                          .postList[index].id ??
+                                                      0,homeBloc: homeBloc,)
+                                              .launch(context);
+                                        },
+                                        child: Text(
+                                            '${widget.profileBloc.postList[index].comments?.length ?? 0.validate()} comments',
+                                            style: secondaryTextStyle(
+                                                color: svGetBodyColor())),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -387,11 +398,20 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       splashColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
                                       onTap: () {
-                                        SVCommentScreen(
-                                                id: widget.profileBloc
-                                                        .postList[index].id ??
-                                                    0)
-                                            .launch(context);
+                                        setState(() {
+                                          if(isShowComment==-1) {
+                                            isShowComment = index;
+                                          }else{
+                                            isShowComment=-1;
+                                          }
+
+                                        });
+
+                                        // SVCommentScreen(
+                                        //         id: widget.profileBloc
+                                        //                 .postList[index].id ??
+                                        //             0,homeBloc: homeBloc,)
+                                        //     .launch(context);
                                       },
                                       child: Column(
                                         children: [
@@ -426,19 +446,40 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       },
                                       child: Column(
                                         children: [
-                                          Image.asset(
-                                            'images/socialv/icons/ic_Send.png',
-                                            height: 22,
-                                            width: 22,
-                                            fit: BoxFit.cover,
+                                          Icon(Icons.share_sharp,
+                                            size: 22,
+                                            // 'images/socialv/icons/ic_share.png',
+                                            // height: 22,
+                                            // width: 22,
+                                            // fit: BoxFit.cover,
                                             color: context.iconColor,
-                                          ), Text('Send', style: secondaryTextStyle(
+                                          ),Text('Share', style: secondaryTextStyle(
                                               color: svGetBodyColor())),
                                         ],
                                       ),
                                     ),
                                   ],
                                 ).paddingSymmetric(horizontal: 16),
+                                if(isShowComment==index)SVCommentReplyComponent(comment_bloc.CommentBloc(),widget
+                                    .profileBloc
+                                    .postList[index]
+                                    .id ??
+                                    0,(value){
+                                  if(value.isNotEmpty) {
+
+                                    var comments=  comment_bloc.CommentBloc();
+                                    comments.add(comment_bloc.PostCommentEvent(
+                                        postId: widget.profileBloc
+                                            .postList[index]
+                                            .id ??
+                                            0, comment: value));
+
+                                    widget.profileBloc.postList[index].comments!.add(Comments());
+                                    setState(() {
+                                      isShowComment=-1;
+                                    });
+                                  }
+                                })
                                 // const Divider(indent: 16, endIndent: 16, height: 20),
                                 // Row(
                                 //   mainAxisAlignment: MainAxisAlignment.center,
