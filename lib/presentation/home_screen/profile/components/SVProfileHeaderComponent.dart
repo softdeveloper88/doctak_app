@@ -5,6 +5,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/profile_image_screen/profile_image_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -63,6 +64,8 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                 print("isPermanentlyDenied");
                 // _permissionDialog(context);
               }
+            }else{
+              ProfileImageScreen(imageUrl:'${widget.userProfile?.coverPicture}' ,).launch(context);
             }
             // _showFileOptions(false);
           },
@@ -93,12 +96,22 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                         bottomRight: 20),
                         if(!widget.isMe!) Positioned(
                             left: 16,
-                            top: 24,
-                            child: IconButton(
-                              onPressed: (){
-                                Navigator.pop(context);
-                              },
-                                icon: const Icon(Icons.arrow_back_ios,))),
+                            top: 30,
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: white,
+                                borderRadius: BorderRadius.circular(40)
+                              ),
+                              child: Center(
+                                child: IconButton(
+                                  onPressed: (){
+                                    Navigator.pop(context);
+                                  },
+                                    icon: const Icon(Icons.arrow_back_ios,)),
+                              ),
+                            )),
                 Positioned(
                   bottom: 0,
                   child: GestureDetector(
@@ -132,6 +145,9 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                           print("isPermanentlyDenied");
                           // _permissionDialog(context);
                         }
+                      }else{
+                        ProfileImageScreen(imageUrl:'${widget.userProfile?.profilePicture}' ,).launch(context);
+
                       }
                       // _showFileOptions(true);
                     },

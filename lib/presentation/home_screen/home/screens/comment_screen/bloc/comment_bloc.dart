@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -61,23 +62,24 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
 
     // }
     // try {
+
       var response = await postService.makeComment(
         'Bearer ${AppData.userToken}',
         event.postId.toString(),
         event.comment ?? "",
       );
-      print(response);
-      postList.insert(
-          0,
-          PostComments(
-              id: 0,
-              userId: AppData.logInUserId,
-              postId: event.postId.toString(),
-              comment: event.comment ?? "",
-              createdAt: DateTime.now().toString(),
-              updatedAt: DateTime.now().toString(),
-              profilePic: AppData.profile_pic,
-              name: AppData.name));
+
+      print(response.data);
+      showToast('Comment post successfully');
+      PostCommentModel response1 = await postService.getPostComments(
+        'Bearer ${AppData.userToken}',
+        event.postId.toString(),
+      );
+      // numberOfPage = response.posts?.lastPage ?? 0;
+      // if (pageNumber < numberOfPage + 1) {
+      //   pageNumber = pageNumber + 1;
+      postList.clear();
+      postList.addAll(response1.postComments ?? []);
       // }
       // numberOfPage = response.posts?.lastPage ?? 0;
       // if (pageNumber < numberOfPage + 1) {

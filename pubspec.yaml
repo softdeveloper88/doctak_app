@@ -81,7 +81,7 @@ dependencies:
   quill_html_converter: ^9.4.0
 #  html_editor_enhanced: ^2.6.0
   flutter_sound_record: ^3.3.2
-
+  app_links: ^6.1.4
 #  flutter_html: ^3.0.0-beta.2
   fluttertoast: ^8.0.6
 #  flutter_background_service: ^5.0.1

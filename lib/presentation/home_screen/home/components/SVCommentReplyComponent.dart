@@ -41,8 +41,10 @@ TextEditingController commentController=TextEditingController();
                     SizedBox(
                       width: context.width() * 0.6,
                       child: AppTextField(
+                        minLines: 1,
+                        textInputAction: TextInputAction.newline,
                         controller: commentController,
-                        textFieldType: TextFieldType.OTHER,
+                        textFieldType: TextFieldType.MULTILINE,
                         decoration: InputDecoration(
                           hintText: 'Write a comment',
                           hintStyle: secondaryTextStyle(color: svGetBodyColor()),
@@ -52,17 +54,18 @@ TextEditingController commentController=TextEditingController();
                         ),
                       ),
                     ),
-                    TextButton(onPressed:(){
-                      if(commentController.text.isNotEmpty) {
-                        onPostComment(commentController.text);
-                        commentController.text='';
-                      }
-                      },
-                       child: Text
-                    ('Post', style: secondaryTextStyle(color: SVAppColorPrimary))),
                   ],
                 ),
-              )
+              ),
+              TextButton(onPressed:(){
+                if(commentController.text.isNotEmpty) {
+                  onPostComment(commentController.text);
+                  commentController.text='';
+                }
+              },
+                  child: Text
+                    ('Post', style: secondaryTextStyle(color: SVAppColorPrimary))),
+
             ],
           ),
         ],

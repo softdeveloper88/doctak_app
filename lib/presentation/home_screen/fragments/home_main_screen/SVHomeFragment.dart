@@ -4,6 +4,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../../localization/app_localization.dart';
 import '../../../chat_gpt_screen/ChatDetailScreen.dart';
@@ -67,18 +68,25 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
           actions: [
-            AppButton(
-              shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
-              text: ' Artificial Intelligence ',
-              textStyle: secondaryTextStyle(color: Colors.white, size: 10),
-              onTap: () {
+            MaterialButton(
+              textColor: Colors.black,
+              // shapeBorder: RoundedRectangleBorder(borderRadius: radius(4),side: BorderSide()),
+              // text: ' Artificial Intelligence ',
+              // textStyle: secondaryTextStyle(color: Colors.white, size: 10),
+              onPressed: () {
                  ChatDetailScreen(isFromMainScreen:true).launch(context);
               },
-              elevation: 0,
-              color: SVAppColorPrimary,
-              width: 80,
+              elevation: 6,
+              color: Colors.white,
+              minWidth: 80,
+              shape:  RoundedRectangleBorder(borderRadius: radius(4),side: const BorderSide(color: Colors.blue)),
+              animationDuration: const Duration(milliseconds: 300),
+              focusColor: SVAppColorPrimary,
+              hoverColor: SVAppColorPrimary,
+              splashColor: SVAppColorPrimary,
               height: 25,
               padding: const EdgeInsets.all(0),
+              child: Text(" Artificial Intelligence ",style: GoogleFonts.poppins(color: Colors.black,fontWeight: FontWeight.w500,),),
             ),
             IconButton(
               color: context.cardColor,

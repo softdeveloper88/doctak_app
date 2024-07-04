@@ -61,7 +61,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           id: -1,
           gptSessionId: selectedSessionId.toString(),
           question: question,
-          response: '...',
+          response: 'Generating response...',
           createdAt: DateTime.now().toString(),
           updatedAt: DateTime.now().toString());
 
@@ -472,7 +472,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                           gptSessionId:
                                               selectedSessionId.toString(),
                                           question: question,
-                                          response: '...',
+                                          response: 'Generating response...',
                                           createdAt: DateTime.now().toString(),
                                           updatedAt: DateTime.now().toString());
                                       state1.response1.messages!.add(myMessage);
@@ -659,7 +659,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         gptSessionId:
                                             selectedSessionId.toString(),
                                         question: question,
-                                        response: '...',
+                                        response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString());
                                     state1.response1.messages!.add(myMessage);
@@ -831,7 +831,7 @@ class ChatBubble extends StatelessWidget {
     double bubbleMaxWidth = screenWidth * 0.6;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
       child: IntrinsicHeight(
         child: Row(
           mainAxisAlignment:
@@ -864,11 +864,23 @@ class ChatBubble extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 10.0),
+                              horizontal: 0.0, vertical: 6.0),
                           child: ConstrainedBox(
                             constraints:
                                 BoxConstraints(maxWidth: bubbleMaxWidth),
-                            child: Text(
+                            child: text=='Generating response...'?Column(
+                              children: [
+                                Text(
+                                  // fitContent: true,
+                                  // selectable: true,
+                                  // softLineBreak: true,
+                                  // shrinkWrap: true,
+                                  text.replaceAll("*", '').replaceAll('#', ''),
+                                ),
+                                 const SizedBox(height: 10,),
+                                 CircularProgressIndicator(color: svGetBodyColor(),),
+                              ],
+                            ):Text(
                               // fitContent: true,
                               // selectable: true,
                               // softLineBreak: true,
@@ -881,20 +893,20 @@ class ChatBubble extends StatelessWidget {
                           color: Colors.grey[200],
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            InkWell(
-                              onTap: () => onTapReginarate!(),
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.change_circle_outlined),
-                                    Text(' Regenerate')
-                                  ],
-                                ),
-                              ),
-                            ),
+                            // InkWell(
+                            //   onTap: () => onTapReginarate!(),
+                            //   child: const Padding(
+                            //     padding: EdgeInsets.all(8.0),
+                            //     child: Row(
+                            //       children: [
+                            //         Icon(Icons.change_circle_outlined),
+                            //         Text(' Regenerate')
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
                             IconButton(
                               icon: const Icon(Icons.copy),
                               onPressed: () {

@@ -433,17 +433,20 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       highlightColor: Colors.transparent,
 
                                       onTap: (){
+                                        String mediaLink;
+                                        if (widget.profileBloc.postList[index].media!.isNotEmpty) {
+                                          mediaLink = widget
+                                              .profileBloc
+                                              .postList[index].media?.first.mediaPath??"";
+                                        } else {
+                                          mediaLink = '';
+                                        }
                                         Share.share('${removeHtmlTags(widget
                                             .profileBloc
                                             .postList[index].title??'')}\n https://doctak.net/post/${widget
                                             .profileBloc
                                             .postList[index].id} \n'
-                                            '${AppData.imageUrl}${widget
-                                            .profileBloc
-                                            .postList[index].media?.first.mediaPath}');
-
-
-                                      },
+                                            '${AppData.imageUrl}$mediaLink'); },
                                       child: Column(
                                         children: [
                                           Icon(Icons.share_sharp,

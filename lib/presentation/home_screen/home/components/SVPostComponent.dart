@@ -26,6 +26,7 @@ import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../fragments/home_main_screen/post_widget/find_likes.dart';
+import '../../fragments/home_main_screen/post_widget/image_download.dart';
 import '../../fragments/home_main_screen/post_widget/post_media_widget.dart';
 import '../../fragments/home_main_screen/post_widget/text_icon_widget.dart';
 import '../screens/comment_screen/SVCommentScreen.dart';
@@ -427,15 +428,23 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                             // _showBottomSheet(context,widget
                                             //     .homeBloc
                                             //     .postList[index]);
+                                            String mediaLink;
+                                            if (widget.homeBloc.postList[index].media!.isNotEmpty) {
+                                              mediaLink = widget
+                                                .homeBloc
+                                                .postList[index].media?.first.mediaPath??"";
+                                            } else {
+                                              mediaLink = '';
+                                            }
                                               Share.share('${removeHtmlTags(widget
                                                 .homeBloc
                                                 .postList[index].title??'')}\n https://doctak.net/post/${widget
                                                   .homeBloc
                                                   .postList[index].id} \n'
-                                                  '${AppData.imageUrl}${widget
-                                                  .homeBloc
-                                                  .postList[index].media?.first.mediaPath}');
-
+                                                  '${AppData.imageUrl}$mediaLink');
+                                            // shareImageWithText('${AppData.imageUrl}$mediaLink',removeHtmlTags(widget
+                                            //     .homeBloc
+                                            //     .postList[index].title??''));
 
                                           },
                                           child: Column(
@@ -835,6 +844,10 @@ class _SVPostComponentState extends State<SVPostComponent> {
     );
   }
 
+  void shareImageWithText(String imageUrl, String text) async {
+    final imagePath = await downloadImageToTemporaryDirectory(imageUrl);
+    Share.shareXFiles([XFile(imagePath)], text: text);
+  }
 }
 
 

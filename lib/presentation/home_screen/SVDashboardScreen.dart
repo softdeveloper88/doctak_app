@@ -118,7 +118,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
                   .paddingTop(12),
             ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.group,size: 24,color:context.iconColor,).paddingTop(12),
+                icon: Icon(Icons.group_outlined,size: 28,color:context.iconColor,).paddingTop(12),
                 // Image.asset('images/socialv/icons/ic_Search.png',
                 //         height: 24,
                 //         width: 24,
@@ -126,7 +126,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
                 //         color: context.iconColor)
                 //     .paddingTop(12),
                 label: '',
-                activeIcon:const Icon(Icons.group,size: 24,).paddingTop(12)
+                activeIcon:const Icon(Icons.group_outlined,size: 28,).paddingTop(12)
               // Image.asset(
               //         'images/socialv/icons/ic_SearchSelected.png',
               //         height: 24,

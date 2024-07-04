@@ -188,7 +188,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             onChanged: (searchTxt) async {
                               if (_debounce?.isActive ?? false)
                                 _debounce?.cancel();
-
                               _debounce =
                                   Timer(const Duration(milliseconds: 500), () {
                                 // BlocProvider.of<DrugsBloc>(context).add(
@@ -471,12 +470,14 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    bloc.drugsData[index].genericName ?? "",
-                                    style: GoogleFonts.poppins(
-                                        color: SVAppColorPrimary,
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w500),
+                                  Expanded(
+                                    child: Text(
+                                      bloc.drugsData[index].genericName ?? "",
+                                      style: GoogleFonts.poppins(
+                                          color: SVAppColorPrimary,
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500),
+                                    ),
                                   ),
                                   Image.asset('assets/images/docktak_ai_light.png',height: 35,width: 35,),
 
@@ -550,7 +551,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                                   color: Colors.grey,
                                                   fontSize: 12.sp)),
                                           Text(
-                                              "${bloc.drugsData[index].mrp ?? '0'} ${AppData.currency}",
+                                              bloc.drugsData[index].mrp ?? '0',
                                               style: GoogleFonts.poppins(
                                                   color: svGetBodyColor(),
                                                   fontSize: 12.sp,
