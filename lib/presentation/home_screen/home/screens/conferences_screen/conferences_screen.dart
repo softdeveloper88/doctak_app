@@ -71,7 +71,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Conference', style: boldTextStyle(size: 20)),
+                          Text('Conferences', style: boldTextStyle(size: 20)),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: CustomDropdownButtonFormField(

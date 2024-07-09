@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
@@ -13,20 +16,18 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../fragments/home_main_screen/post_widget/find_likes.dart';
-import '../../fragments/home_main_screen/post_widget/image_download.dart';
 import '../../fragments/home_main_screen/post_widget/post_media_widget.dart';
 import '../../fragments/home_main_screen/post_widget/text_icon_widget.dart';
 import '../screens/comment_screen/SVCommentScreen.dart';
@@ -40,8 +41,68 @@ class SVPostComponent extends StatefulWidget {
   @override
   State<SVPostComponent> createState() => _SVPostComponentState();
 }
-int? isShowComment=-1;
+
+int? isShowComment = -1;
+
 class _SVPostComponentState extends State<SVPostComponent> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+
+    super.dispose();
+  }
+
+  Future<void> initDeepLinks() async {
+    try {
+      print('before');
+      _appLinks = AppLinks();
+      // Handle links
+      _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+        debugPrint('onAppLink: $uri');
+        openAppLink(uri);
+      });
+    } catch (e) {
+      print('error $e');
+    }
+  }
+
+  void openAppLink(Uri uri) {
+    _navigatorKey.currentState?.pushNamed(uri.fragment);
+  }
+
+  createDynamicLink(postTitle, postUrl, imageUrl) async {
+    final dynamicLinkParams = DynamicLinkParameters(
+      link: Uri.parse(postUrl),
+      uriPrefix: "https://doctak.page.link",
+      androidParameters: const AndroidParameters(
+        packageName: "com.kt.doctak",
+        minimumVersion: 39,
+      ),
+      iosParameters: const IOSParameters(
+        bundleId: "com.kt.doctak",
+        appStoreId: "123456789",
+        minimumVersion: "2.0.9",
+      ),
+      googleAnalyticsParameters: const GoogleAnalyticsParameters(
+        source: "twitter",
+        medium: "social",
+        campaign: "example-promo",
+      ),
+      socialMetaTagParameters: SocialMetaTagParameters(
+        title: postTitle,
+        imageUrl: Uri.parse(imageUrl),
+      ),
+    );
+    final dynamicLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParams);
+    Share.share(dynamicLink.shortUrl.toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HomeBloc, HomeState>(
@@ -145,7 +206,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: InkWell(
@@ -169,14 +231,18 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                 ).cornerRadiusWithClipRRect(20),
                                                 12.width,
                                                 Column(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     TextIconWidget(
                                                         text: widget
                                                                 .homeBloc
                                                                 .postList[index]
-                                                                .user?.name ?? '',
+                                                                .user
+                                                                ?.name ??
+                                                            '',
                                                         suffix: Image.asset(
                                                             'images/socialv/icons/ic_TickSquare.png',
                                                             height: 14,
@@ -189,18 +255,18 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                         Text(
                                                             timeAgo.format(DateTime
                                                                 .parse(widget
-                                                                .homeBloc
-                                                                .postList[
-                                                            index]
-                                                                .createdAt!)),
+                                                                    .homeBloc
+                                                                    .postList[
+                                                                        index]
+                                                                    .createdAt!)),
                                                             style: secondaryTextStyle(
                                                                 color:
-                                                                svGetBodyColor(),
+                                                                    svGetBodyColor(),
                                                                 size: 12)),
                                                         const Padding(
                                                           padding:
-                                                          EdgeInsets.only(
-                                                              left: 8.0),
+                                                              EdgeInsets.only(
+                                                                  left: 8.0),
                                                           child: Icon(
                                                             Icons.access_time,
                                                             size: 20,
@@ -220,8 +286,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
                                           children: [
-                                            if (widget.homeBloc
-                                                    .postList[index].userId ==
+                                            if (widget.homeBloc.postList[index]
+                                                    .userId ==
                                                 AppData.logInUserId)
                                               PopupMenuButton(
                                                 itemBuilder: (context) {
@@ -232,12 +298,10 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                         return Column(
                                                           children: [
                                                             "Delete"
-                                                          ].map(
-                                                              (String item) {
+                                                          ].map((String item) {
                                                             return PopupMenuItem(
                                                               value: item,
-                                                              child:
-                                                                  Text(item),
+                                                              child: Text(item),
                                                             );
                                                           }).toList(),
                                                         );
@@ -328,14 +392,14 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                     color: svGetBodyColor())),
                                           ),
                                           InkWell(
-                                            onTap: (){
+                                            onTap: () {
                                               SVCommentScreen(
-                                                  homeBloc: widget.homeBloc,
-                                                  id: widget
-                                                      .homeBloc
-                                                      .postList[index]
-                                                      .id ??
-                                                      0)
+                                                      homeBloc: widget.homeBloc,
+                                                      id: widget
+                                                              .homeBloc
+                                                              .postList[index]
+                                                              .id ??
+                                                          0)
                                                   .launch(context);
                                             },
                                             child: Text(
@@ -391,12 +455,11 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                           highlightColor: Colors.grey,
                                           onTap: () {
                                             setState(() {
-                                              if(isShowComment==-1) {
+                                              if (isShowComment == -1) {
                                                 isShowComment = index;
-                                              }else{
-                                                isShowComment=-1;
+                                              } else {
+                                                isShowComment = -1;
                                               }
-
                                             });
                                             // SVCommentScreen(
                                             //         id: widget
@@ -429,27 +492,41 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                             //     .homeBloc
                                             //     .postList[index]);
                                             String mediaLink;
-                                            if (widget.homeBloc.postList[index].media!.isNotEmpty) {
+                                            if (widget.homeBloc.postList[index]
+                                                .media!.isNotEmpty) {
                                               mediaLink = widget
-                                                .homeBloc
-                                                .postList[index].media?.first.mediaPath??"";
+                                                      .homeBloc
+                                                      .postList[index]
+                                                      .media
+                                                      ?.first
+                                                      .mediaPath ??
+                                                  "";
                                             } else {
                                               mediaLink = '';
                                             }
-                                              Share.share('${removeHtmlTags(widget
-                                                .homeBloc
-                                                .postList[index].title??'')}\n https://doctak.net/post/${widget
-                                                  .homeBloc
-                                                  .postList[index].id} \n'
-                                                  '${AppData.imageUrl}$mediaLink');
-                                            // shareImageWithText('${AppData.imageUrl}$mediaLink',removeHtmlTags(widget
+                                            createDynamicLink(
+                                                removeHtmlTags(widget
+                                                        .homeBloc
+                                                        .postList[index]
+                                                        .title ??
+                                                    ''),
+                                                'https://doctak.net/post/${widget.homeBloc.postList[index].id}',
+                                                mediaLink);
+                                            // _handleIncomingLinks();
+                                            //   Share.share('${removeHtmlTags(widget
+                                            //     .homeBloc
+                                            //     .postList[index].title??'')}\n https://doctak.net/post/${widget
+                                            //       .homeBloc
+                                            //       .postList[index].id} \n'
+                                            //       '${AppData.imageUrl}$mediaLink');
+                                            // // shareImageWithText('${AppData.imageUrl}$mediaLink',removeHtmlTags(widget
                                             //     .homeBloc
                                             //     .postList[index].title??''));
-
                                           },
                                           child: Column(
                                             children: [
-                                             Icon(Icons.share_sharp,
+                                              Icon(
+                                                Icons.share_sharp,
                                                 size: 22,
                                                 // 'images/socialv/icons/ic_share.png',
                                                 // height: 22,
@@ -465,26 +542,27 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                         ),
                                       ],
                                     ).paddingSymmetric(horizontal: 16),
-                                    if(isShowComment==index)SVCommentReplyComponent(CommentBloc(),widget
-                                        .homeBloc
-                                        .postList[index]
-                                        .id ??
-                                        0,(value){
-                                      if(value.isNotEmpty) {
+                                    if (isShowComment == index)
+                                      SVCommentReplyComponent(
+                                          CommentBloc(),
+                                          widget.homeBloc.postList[index].id ??
+                                              0, (value) {
+                                        if (value.isNotEmpty) {
+                                          var comments = CommentBloc();
+                                          comments.add(PostCommentEvent(
+                                              postId: widget.homeBloc
+                                                      .postList[index].id ??
+                                                  0,
+                                              comment: value));
 
-                                      var comments=  CommentBloc();
-                                      comments.add(PostCommentEvent(
-                                            postId: widget.homeBloc
-                                            .postList[index]
-                                            .id ??
-                                        0, comment: value));
-
-                                         widget.homeBloc.postList[index].comments!.add(Comments());
-                                         setState(() {
-                                           isShowComment=-1;
-                                         });
-                                      }
-                                    })
+                                          widget.homeBloc.postList[index]
+                                              .comments!
+                                              .add(Comments());
+                                          setState(() {
+                                            isShowComment = -1;
+                                          });
+                                        }
+                                      })
                                     // const Divider(indent: 16, endIndent: 16, height: 20),
                                     // Row(
                                     //   mainAxisAlignment: MainAxisAlignment.center,
@@ -579,10 +657,13 @@ class _SVPostComponentState extends State<SVPostComponent> {
       },
     );
   }
+
   String removeHtmlTags(String htmlString) {
-    final RegExp htmlTagRegExp = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+    final RegExp htmlTagRegExp =
+        RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
     return htmlString.replaceAll(htmlTagRegExp, '');
   }
+
   showAlertDialog(BuildContext context, int id) {
     // set up the buttons
     Widget cancelButton = TextButton(
@@ -711,7 +792,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                   Container(
                     constraints: const BoxConstraints(
                       minHeight: 200.0,
-                      minWidth: double.infinity, // Minimum height of the container
+                      minWidth:
+                          double.infinity, // Minimum height of the container
                     ),
                     child: Center(
                       child: HtmlWidget(
@@ -721,7 +803,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                         onTapUrl: (link) async {
                           print(link);
                           if (link.contains('doctak/jobs-detail')) {
-                            int jobID = Uri.parse(link).pathSegments.last.toInt();
+                            int jobID =
+                                Uri.parse(link).pathSegments.last.toInt();
                             JobsDetailsScreen(
                               jobId: jobID,
                             ).launch(context);
@@ -829,25 +912,20 @@ class _SVPostComponentState extends State<SVPostComponent> {
       builder: (context) {
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return DraggableScrollableSheet(
-                  initialChildSize: 0.9,
-                  minChildSize: 0.9,
-                  maxChildSize: 1.0,
-                  expand: false,
-                  builder: (BuildContext context, ScrollController scrollController) {
-                    return  Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: SharePostBottomDialog(postList),
-                    );});});
-
+          return DraggableScrollableSheet(
+              initialChildSize: 0.9,
+              minChildSize: 0.9,
+              maxChildSize: 1.0,
+              expand: false,
+              builder:
+                  (BuildContext context, ScrollController scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: SharePostBottomDialog(postList),
+                );
+              });
+        });
       },
     );
   }
-
-  void shareImageWithText(String imageUrl, String text) async {
-    final imagePath = await downloadImageToTemporaryDirectory(imageUrl);
-    Share.shareXFiles([XFile(imagePath)], text: text);
-  }
 }
-
-

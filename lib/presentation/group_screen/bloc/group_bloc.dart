@@ -211,7 +211,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       if (response.data!.isNotEmpty) {
         // emit(DataSuccess(countriesModel: response));
         List<String> list = [];
-        list.add('select Specialty');
+        list.add('Select Specialty');
         response.data!.forEach((element) {
           list.add(element['name']!);
         });

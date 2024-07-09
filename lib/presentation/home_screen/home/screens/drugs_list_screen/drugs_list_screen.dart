@@ -85,7 +85,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       children: [
                         Expanded(
                             child: Center(
-                                child: Text('Drugs List',
+                                child: Text('Drug List',
                                     style: boldTextStyle(size: 20)))),
                         Expanded(
                           child: CustomDropdownField(

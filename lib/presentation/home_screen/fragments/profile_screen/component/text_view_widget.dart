@@ -20,7 +20,7 @@ class TextViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       return Padding(
-        padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 16,bottom: 16),
+        padding: const EdgeInsets.only(left: 8.0,right: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
