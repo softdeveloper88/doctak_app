@@ -123,19 +123,19 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
             child: ListView(
               children: <Widget>[
                 const SizedBox(height: 20),
-                _buildTextField(_nameController, 'Name', validator: (value) {
+                _buildTextField('Enter Name',_nameController, 'Name', validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your name';
                   }
                   return null;
                 }),
-                _buildTextField(_phoneController, 'Phone', validator: (value) {
+                _buildTextField('03xxxxxxxx',_phoneController, 'Phone', validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your phone number';
                   }
                   return null;
                 }),
-                _buildTextField(_emailController, 'Email', validator: (value) {
+                _buildTextField('info@doctak.net',_emailController, 'Email', validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
                   }
@@ -144,7 +144,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                   }
                   return null;
                 }),
-                _buildTextField(_messageController, 'Message', maxLines: 4,
+                _buildTextField('Type message here',_messageController, 'Message', maxLines: 4,
                     validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your message';
@@ -263,17 +263,19 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
+  Widget _buildTextField(String hint,TextEditingController controller, String label,
       {int maxLines = 1, String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
+
         controller: controller,
         focusNode: controller == _nameController ? _nameFocusNode : null,
         // Assign the FocusNode here
 
         decoration: InputDecoration(
           labelText: label,
+          hintText: hint,
           border: const OutlineInputBorder(),
         ),
         validator: validator,

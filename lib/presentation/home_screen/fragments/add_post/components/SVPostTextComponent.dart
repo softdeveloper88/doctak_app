@@ -95,9 +95,11 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
             color: widget.colorValue,
             height: 20.h,
             child: quill.QuillEditor.basic(
+
               focusNode: editorFocusNode,
               configurations: quill.QuillEditorConfigurations(
                 controller: _controller,
+                placeholder: ' Share what’s on your mind',
                 sharedConfigurations: const quill.QuillSharedConfigurations(
                   locale: Locale('en'),
                 ),

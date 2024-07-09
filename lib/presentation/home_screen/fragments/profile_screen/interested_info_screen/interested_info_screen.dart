@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
@@ -120,7 +121,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.profileBloc.interestList?[0].interestType ?? '',
+              capitalizeWords(widget.profileBloc.interestList?[0].interestType!.replaceAll('_', ' ') ?? ''),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -149,7 +150,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.profileBloc.interestList?[1].interestType ?? '',
+    capitalizeWords( widget.profileBloc.interestList?[1].interestType!.replaceAll('_', ' ') ?? ''),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -180,7 +181,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.profileBloc.interestList?[2].interestType ?? '',
+    capitalizeWords(widget.profileBloc.interestList?[2].interestType!.replaceAll('_', ' ') ?? ''),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -211,7 +212,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.profileBloc.interestList?[3].interestType ?? '',
+    capitalizeWords(widget.profileBloc.interestList?[3].interestType!.replaceAll('_', ' ') ?? ''),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -242,7 +243,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.profileBloc.interestList?[4].interestType ?? '',
+    capitalizeWords( widget.profileBloc.interestList?[4].interestType!.replaceAll('_', ' ') ?? ''),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -273,7 +274,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.profileBloc.interestList?[5].interestType ?? '',
+                    capitalizeWords(widget.profileBloc.interestList?[5].interestType!.replaceAll('_', ' ') ?? ''),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

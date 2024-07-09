@@ -170,10 +170,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                                 onChanged: (String? newValue) {
                                   widget.profileBloc.country = newValue!;
-
-                                  widget.profileBloc
-                                      .add(UpdateFirstDropdownValue(newValue));
-                                  // widget.profileBloc.add(UpdateSecondDropdownValues(newValue));
+                                  widget.profileBloc.userProfile?.user?.country=newValue;
+                                  // widget.profileBloc
+                                  //     .add(UpdateFirstDropdownValue(newValue));
+                                  widget.profileBloc.add(UpdateSecondDropdownValues(newValue));
                                 },
                               ),
                               const SizedBox(height: 10),
@@ -191,11 +191,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                                 onChanged: (String? newValue) {
                                   widget.profileBloc.stateName = newValue!;
-                                  widget.profileBloc.add(
-                                      UpdateSpecialtyDropdownValue(
-                                          state.selectedSecondDropdownValue));
-                                  widget.profileBloc.add(
-                                      UpdateUniversityDropdownValues(newValue));
+                                  widget.profileBloc.userProfile?.user?.city=newValue;
+                                  widget.profileBloc.add(UpdateSpecialtyDropdownValue(state.selectedSecondDropdownValue));
+                                  widget.profileBloc.add(UpdateUniversityDropdownValues(newValue));
                                 },
                               ),
                               if (AppData.userType == "doctor")
@@ -216,11 +214,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   onChanged: (String? newValue) {
                                     print(newValue);
                                     print("Specialty $newValue");
-                                    widget.profileBloc.specialtyName =
-                                    newValue!;
+                                    widget.profileBloc.specialtyName = newValue!;
                                     widget.profileBloc.add(
                                         UpdateSpecialtyDropdownValue(
-                                            newValue!));
+                                            newValue));
                                   },
                                 ),
                               if (AppData.userType != "doctor")
@@ -280,9 +277,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     widget.profileBloc.add(UpdateProfileEvent(
                       updateProfileSection: 1,
                       userProfile: widget.profileBloc.userProfile,
-                      interestModel: widget.profileBloc.interestList,
-                      workEducationModel: widget.profileBloc.workEducationList,
-                      userProfilePrivacyModel: UserProfilePrivacyModel(),
+                       userProfilePrivacyModel: UserProfilePrivacyModel(),
                     ));
                   },
                   text: 'Update',

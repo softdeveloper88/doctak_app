@@ -2,7 +2,6 @@
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter/cupertino.dart';
 // import '../core/app_export.dart';
-//
 // class AppLocalization {
 //   AppLocalization(this.locale);
 //

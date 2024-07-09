@@ -169,7 +169,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     List<String>? countriesList = await _onGetCountries();
 
     emit(PaginationLoadedState(countriesList ?? [], countriesList?.first ?? '',
-        [], 'Select State', [], 'select Specialty', [], ''));
+        [], 'Select State', [], 'Select Specialty', [], ''));
 
     add(UpdateSecondDropdownValues(countriesList?.first ?? ''));
   }
@@ -263,6 +263,46 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // final response3 = await postService.getInterestsUpdate(
       //     'Bearer ${AppData.userToken}', event.interestModel!);
       //
+      final response = await postService.getProfileUpdate(
+        'Bearer ${AppData.userToken}',
+        event.userProfile?.user?.firstName ?? '',
+        event.userProfile?.user?.lastName ?? "",
+        event.userProfile?.user?.phone ?? '',
+        event.userProfile?.user?.licenseNo ?? " ",
+        specialtyName ?? event.userProfile?.user?.specialty ?? '',
+        event.userProfile?.user?.dob ?? "",
+        'male',
+        country ?? event.userProfile?.user?.country ?? 'United Arab Emirates',
+        stateName ?? event.userProfile?.user?.city ?? 'Dubai',
+        country ?? event.userProfile?.user?.country ?? "United Arab Emirates",
+        // event.userProfile?.privacySetting?[3].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
+        privacyLength >= 3
+            ? event.userProfile?.privacySetting![3].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 4
+            ? event.userProfile?.privacySetting![4].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 5
+            ? event.userProfile?.privacySetting![5].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 8
+            ? event.userProfile?.privacySetting![8].visibility ?? 'globe'
+            : 'globe',
+        'globe',
+        'globe',
+        privacyLength >= 10
+            ? event.userProfile?.privacySetting![10].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 11
+            ? event.userProfile?.privacySetting![11].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 12
+            ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
+            : 'globe',
+      );
       print(event.userProfile?.profile?.aboutMe ?? '');
       final response2 = await postService.updateAboutMe(
         'Bearer ${AppData.userToken}',
@@ -324,13 +364,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   void _updateSecondDropdownValues(
       UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
     List<String> secondDropdownValues = [];
-    secondDropdownValues =
-        await _onGetStates(event.selectedFirstDropdownValue) ?? [];
+    print('${event.selectedFirstDropdownValue}');
+    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? [];
     print(secondDropdownValues.toList());
     if (secondDropdownValues.isNotEmpty) {
       List<String>? universityDropdownValues =
           await _onGetUniversities(secondDropdownValues.first ?? '');
     }
+    add(UpdateSpecialtyDropdownValue(secondDropdownValues.first ?? ''));
+
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
         event.selectedFirstDropdownValue,
@@ -520,7 +562,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       if (response.data!.isNotEmpty) {
         // emit(DataSuccess(countriesModel: response));
         List<String> list = [];
-        list.add('select Specialty');
+        list.add('Select Specialty');
         response.data!.forEach((element) {
           list.add(element['name']!);
         });
@@ -546,6 +588,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       response.data.forEach((element) {
         list.add(element['state_name']);
       });
+      print("states : ${list.toString()}");
       return list;
     } catch (e) {
       print(e);

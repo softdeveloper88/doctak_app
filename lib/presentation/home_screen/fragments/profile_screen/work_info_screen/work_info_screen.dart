@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
@@ -6,6 +7,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/text_view_widget.dart';
+import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -93,9 +95,9 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildWorkInfoFields(workList,'work'),
-                    _buildWorkInfoFields(universityList,'university'),
-                    _buildWorkInfoFields(highSchool,'high_school'),
+                   if(workList.isNotEmpty) _buildWorkInfoFields(workList,'work'),
+                    if(universityList.isNotEmpty) _buildWorkInfoFields(universityList,'university'),
+                    if(highSchool.isNotEmpty)_buildWorkInfoFields(highSchool,'high_school'),
                     10.height,
                     // if (isEditModeMap)
                     //   svAppButton(
@@ -126,9 +128,11 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
         height: 500,
         child: Center(child:Text('No $type Add'))):
     Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
       children: [
         Text(
-          type,
+          capitalizeWords(type),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -138,12 +142,13 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
         Column(
           children: list.map(
                 (entry) => Card(
+                  elevation: 2,
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                      if(type=='work')  TextViewWidget(
+                      if(type=='work') TextViewWidget(
                           icon: Icons.work,
                           label: 'Company Name',
                           value: entry.name ?? '',
@@ -186,33 +191,60 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                           value: entry.endDate ?? '',
                         ),
                         const SizedBox(height: 10),
+                        // Row(
+                        //   // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        //   children: [
+                        //     Expanded(
+                        //       child: svAppButton(
+                        //         color: Colors.grey,
+                        //         context: context,
+                        //         // style: svAppButton(text: text, onTap: onTap, context: context),
+                        //         onTap: () async {
+                        //
+                        //            widget.profileBloc.add(DeleteWorkEducationEvent(entry.id.toString()));
+                        //         },
+                        //         text: 'Remove',
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 10,),
+                        //     Expanded(
+                        //       child: svAppButton(
+                        //         context: context,
+                        //         // style: svAppButton(text: text, onTap: onTap, context: context),
+                        //         onTap: () async {
+                        //           AddEditWorkScreen(profileBloc: widget.profileBloc,updateWork:entry).launch(context);
+                        //         },
+                        //         text: 'Update',
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                         Row(
-                          // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Expanded(
-                              child: svAppButton(
-                                color: Colors.grey,
-                                context: context,
-                                // style: svAppButton(text: text, onTap: onTap, context: context),
-                                onTap: () async {
+                            IconButton(
+                                onPressed: (){
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return CustomAlertDialog(
+                                            title: 'Are you sure want to delete Info ?',
+                                            callback: () {
+                                              widget.profileBloc.add(DeleteWorkEducationEvent(entry.id.toString()));
 
-                                   widget.profileBloc.add(DeleteWorkEducationEvent(entry.id.toString()));
+                                              Navigator.of(context).pop();
+                                            });
+                                      });
+
                                 },
-                                text: 'Remove',
-                              ),
-                            ),
-                            const SizedBox(width: 10,),
-                            Expanded(
-                              child: svAppButton(
-                                context: context,
-                                // style: svAppButton(text: text, onTap: onTap, context: context),
-                                onTap: () async {
-                                  AddEditWorkScreen(profileBloc: widget.profileBloc,updateWork:entry).launch(context);
+                                icon:const Icon(CupertinoIcons.delete,color:Colors.red)),
+                            IconButton(
+                                onPressed: (){
+                                            AddEditWorkScreen(profileBloc: widget.profileBloc,updateWork:entry).launch(context);
+
                                 },
-                                text: 'Update',
-                              ),
-                            ),
-                          ],
+                                icon:const Icon(CupertinoIcons.pencil_circle,color:Colors.blue)),
+                             ],
                         ),
                       ],
                     ),

@@ -4,9 +4,11 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../core/utils/app/AppData.dart';
@@ -108,15 +110,17 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                   searchPeopleBloc.title = '';
                   searchPeopleBloc.feeling = '';
                   searchPeopleBloc.backgroundColor = '';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(data['message'])),
-                  );
+                  showToast(data['message']);
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text(data['message'])),
+                  // );
                   widget.refresh();
                   Navigator.of(context).pop();
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(data['message'][0])),
-                  );
+                  showToast(data['message']);
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text(data['message'][0])),
+                  // );
                 }
               } else {
                 // ScaffoldMessenger.of(context).showSnackBar(
@@ -128,16 +132,16 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
             child: AppButton(
               shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
               text: 'Post',
-              textStyle: secondaryTextStyle(color: Colors.white, size: 10),
+              textStyle: GoogleFonts.poppins(color: Colors.white, fontSize: 18,fontWeight: FontWeight.w500),
               onTap: () {
                 searchPeopleBloc.add(AddPostDataEvent());
 
               },
               elevation: 0,
               color: SVAppColorPrimary,
-              width: 50,
+              width: 70,
               padding: const EdgeInsets.all(0),
-            ).paddingAll(16),
+            ).paddingAll(12),
           ),
         ],
       ),

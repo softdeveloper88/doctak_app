@@ -189,7 +189,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                       icon: Icons.description,
                       focusNode: focusNode5,
                       index: 2,
-                      label: 'Description',
+                      label: 'Professional Summary',
                       value: updateWork?.description ?? "",
                       onSave: (value) => updateWork?.description = value,
                       maxLines: 3),

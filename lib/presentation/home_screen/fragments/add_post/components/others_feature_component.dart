@@ -106,7 +106,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                         color: cardBackgroundBlackDark,
                       ),
                       Text(
-                        'Tags Friends:',
+                        'Tage Friend:',
                         style: TextStyle(
                             color: cardBackgroundBlackDark, fontWeight: FontWeight.bold),
                       ),
