@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
@@ -6,14 +7,15 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../SVDashboardScreen.dart';
 import 'bloc/jobs_bloc.dart';
 import 'bloc/jobs_state.dart';
 
 class JobsDetailsScreen extends StatefulWidget {
-  JobsDetailsScreen({required this.jobId,super.key});
-  int jobId;
+  JobsDetailsScreen({required this.jobId,this.isFromSplash=false,super.key});
+  String jobId;
+  bool isFromSplash;
   @override
   State<JobsDetailsScreen> createState() => _JobsDetailsScreenState();
 }
@@ -41,7 +43,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         leading: IconButton(
             icon:  Icon(Icons.arrow_back_ios_new_rounded,
                 color:svGetBodyColor(),),
-            onPressed:(){Navigator.pop(context);}
+            onPressed:(){
+              if(widget.isFromSplash){
+                SVDashboardScreen().launch(context,isNewTask: true);
+
+              }else {
+                Navigator.pop(context);
+              }}
         ),
         actions: const [
           // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
@@ -101,18 +109,21 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 // _showBottomSheet(context,widget
                                 //     .homeBloc
                                 //     .postList[index]);
-
-                                Share.share("Job Title: ${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n"
-                                    "Company : ${jobsBloc.jobDetailModel.job?.companyName}\n"
-                                    "Location: ${jobsBloc.jobDetailModel.job?.location ?? 'N/A'}\n"
-                                    "Date From: ${ jobsBloc.jobDetailModel.job?.createdAt ??
-                                    'N/A'}\n"
-                                    "Date To: ${ jobsBloc.jobDetailModel.job?.lastDate ??
-                                    'N/A'}\n"
-                                    "Experience: ${ jobsBloc.jobDetailModel.job?.experience ??
-                                    'N/A'}\n"
-                                    "Job Apply Link: ${jobsBloc.jobDetailModel.job?.link ??
-                                    'N/A'}\n" );
+                                createDynamicLink(
+                                    '${jobsBloc.jobDetailModel.job?.jobTitle ?? "" }\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ??''}',
+                                    'https://doctak.net/job/${jobsBloc.jobDetailModel.job?.id}',
+                                    jobsBloc.jobDetailModel.job?.link ??'');
+                                // Share.share("Job Title: ${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n"
+                                //     "Company : ${jobsBloc.jobDetailModel.job?.companyName}\n"
+                                //     "Location: ${jobsBloc.jobDetailModel.job?.location ?? 'N/A'}\n"
+                                //     "Date From: ${ jobsBloc.jobDetailModel.job?.createdAt ??
+                                //     'N/A'}\n"
+                                //     "Date To: ${ jobsBloc.jobDetailModel.job?.lastDate ??
+                                //     'N/A'}\n"
+                                //     "Experience: ${ jobsBloc.jobDetailModel.job?.experience ??
+                                //     'N/A'}\n"
+                                //     "Job Apply Link: ${jobsBloc.jobDetailModel.job?.link ??
+                                //     'N/A'}\n" );
 
 
                               },

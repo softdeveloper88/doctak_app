@@ -72,13 +72,18 @@ class UpdateProfileEvent extends ProfileEvent {
   List<WorkEducationModel>? workEducationModel;
   List<PlaceLiveModel>? placeLiveModel;
   UserProfilePrivacyModel? userProfilePrivacyModel;
+  String? personalInfoPrivacy;
+  String? aboutMePrivacy;
 
   UpdateProfileEvent(
       {this.userProfile,
       this.updateProfileSection,
       this.interestModel,
       this.workEducationModel,
-      this.userProfilePrivacyModel});
+      this.userProfilePrivacyModel,
+      this.personalInfoPrivacy,
+      this.aboutMePrivacy,
+      });
 
   @override
   List<Object?> get props => [
@@ -86,7 +91,9 @@ class UpdateProfileEvent extends ProfileEvent {
         userProfile,
         interestModel,
         workEducationModel,
-        userProfilePrivacyModel
+        userProfilePrivacyModel,
+        personalInfoPrivacy,
+        aboutMePrivacy
       ];
 }
 

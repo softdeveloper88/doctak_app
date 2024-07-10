@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
@@ -8,6 +13,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../home_screen/SVDashboardScreen.dart';
+import '../home_screen/home/screens/jobs_screen/jobs_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -22,8 +28,49 @@ class _SplashScreenState extends State<SplashScreen> {
     init();
     super.initState();
   }
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
 
-  Future<void> init() async {
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+
+    super.dispose();
+  }
+
+  Future<void> initDeepLinks(context) async {
+    try {
+      print('before');
+      _appLinks = AppLinks();
+      // Handle links
+      final initialLink = await _appLinks.getLatestLink();
+      if (initialLink != null) {
+        print(initialLink);
+        if(initialLink.path.contains('job')) {
+          String id = initialLink.pathSegments.last;
+          JobsDetailsScreen(isFromSplash:true,jobId:id).launch(
+              context, isNewTask: false);
+        }else if(initialLink.path.contains('post')) {
+           SVDashboardScreen().launch(context,isNewTask: true);
+
+        }else{
+
+          ConferencesScreen(isFromSplash:true).launch(context,isNewTask: false);
+
+        }
+      }else{
+        const SVDashboardScreen().launch(context,isNewTask: true);
+
+      }
+      _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+        debugPrint('onAppLink: $uri');
+        // openAppLink(uri);
+      });
+    } catch (e) {
+      print('error $e');
+    }
+  }
+    Future<void> init() async {
     setStatusBarColor(Colors.transparent);
     await 1.seconds.delay;
     finish(context);
@@ -74,7 +121,8 @@ class _SplashScreenState extends State<SplashScreen> {
         //   context,
         //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
         // );
-        const SVDashboardScreen().launch(context,isNewTask: true);
+        initDeepLinks(context);
+        // const SVDashboardScreen().launch(context,isNewTask: true);
       // });
     } else {
       // Future.delayed(const Duration(seconds: 1), () {

@@ -661,7 +661,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     HtmlWidget(textToShow, onTapUrl: (link) async {
                       print('link $link');
                       if (link.contains('doctak/jobs-detail')) {
-                        int jobID = Uri.parse(link).pathSegments.last.toInt();
+                        String jobID = Uri.parse(link).pathSegments.last;
                         JobsDetailsScreen(
                           jobId: jobID,
                         ).launch(context);
@@ -674,8 +674,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     Linkify(
                       onOpen: (link) {
                         if (link.url.contains('doctak/jobs-detail')) {
-                          int jobID =
-                          Uri.parse(link.url).pathSegments.last.toInt();
+                          String jobID =
+                          Uri.parse(link.url).pathSegments.last;
                           JobsDetailsScreen(
                             jobId: jobID,
                           ).launch(context);
@@ -711,7 +711,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                         onTapUrl: (link) async {
                           print(link);
                           if (link.contains('doctak/jobs-detail')) {
-                            int jobID = Uri.parse(link).pathSegments.last.toInt();
+                            String jobID = Uri.parse(link).pathSegments.last;
                             JobsDetailsScreen(
                               jobId: jobID,
                             ).launch(context);
@@ -727,8 +727,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
                   Linkify(
                     onOpen: (link) {
                       if (link.url.contains('doctak/jobs-detail')) {
-                        int jobID =
-                        Uri.parse(link.url).pathSegments.last.toInt();
+                        String jobID =
+                        Uri.parse(link.url).pathSegments.last;
                         JobsDetailsScreen(
                           jobId: jobID,
                         ).launch(context);

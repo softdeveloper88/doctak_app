@@ -29,7 +29,7 @@ JobLoadPageEvent({this.page,this.countryId,this.isExpired,this.searchTerm});
 List<Object?> get props => [page,countryId,isExpired,searchTerm];
 }
 class JobDetailPageEvent extends JobsEvent {
-int? jobId;
+String? jobId;
 
 
 JobDetailPageEvent({this.jobId});

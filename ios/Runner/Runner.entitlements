@@ -10,7 +10,7 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applink:doctak.net</string>
+		<string>applinks:doctak.page.link</string>
 	</array>
 </dict>
 </plist>

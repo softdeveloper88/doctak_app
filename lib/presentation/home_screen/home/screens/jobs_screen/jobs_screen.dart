@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
@@ -592,7 +593,7 @@ class _JobsScreenState extends State<JobsScreen> {
                   return InkWell(
                         onTap: () {
                           JobsDetailsScreen(
-                                  jobId: bloc.drugsData[index].id ?? 0)
+                                  jobId: '${bloc.drugsData[index].id??''}')
                               .launch(context);
                         },
                         child: Container(
@@ -629,22 +630,26 @@ class _JobsScreenState extends State<JobsScreen> {
                                   // _showBottomSheet(context,widget
                                   //     .homeBloc
                                   //     .postList[index]);
-
-                                  Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
-                                      "Company : ${bloc.drugsData[index].companyName}\n"
-                                      "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
-                                      "Date From: ${ bloc.drugsData[index]
-                                      .createdAt ??
-                                      'N/A'}\n"
-                                      "Date To: ${ bloc.drugsData[index]
-                                      .lastDate ??
-                                      'N/A'}\n"
-                                      "Experience: ${ bloc.drugsData[index]
-                                      .experience ??
-                                      'N/A'}\n"
-                                      "Job Apply Link: ${ bloc.drugsData[index]
-                                      .link ??
-                                      'N/A'}\n" );
+                                  createDynamicLink(
+                                      '${bloc.drugsData[index].jobTitle ?? ""} \n  Apply Link: ${bloc.drugsData[index].link ??''}',
+                                      'https://doctak.net/job/${bloc.drugsData[index].id}',
+                                      bloc.drugsData[index]
+                                          .link ??'');
+                                  // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
+                                  //     "Company : ${bloc.drugsData[index].companyName}\n"
+                                  //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
+                                  //     "Date From: ${ bloc.drugsData[index]
+                                  //     .createdAt ??
+                                  //     'N/A'}\n"
+                                  //     "Date To: ${ bloc.drugsData[index]
+                                  //     .lastDate ??
+                                  //     'N/A'}\n"
+                                  //     "Experience: ${ bloc.drugsData[index]
+                                  //     .experience ??
+                                  //     'N/A'}\n"
+                                  //     "Job Apply Link: ${ bloc.drugsData[index]
+                                  //     .link ??
+                                  //     'N/A'}\n" );
 
 
                                 },

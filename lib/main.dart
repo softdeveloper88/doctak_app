@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
+import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -9,6 +12,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/conferences_scr
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/store/AppStore.dart';
 import 'package:doctak_app/presentation/home_screen/utils/AppTheme.dart';
@@ -17,6 +21,7 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/theme/bloc/theme_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -78,6 +83,9 @@ Future<void> main() async {
 }
 
 class MyApp extends StatefulWidget {
+  final GlobalKey<NavigatorState>? navigatorKey;
+  MyApp({ this.navigatorKey});
+
   @override
   State<MyApp> createState() => _MyAppState();
 
@@ -89,19 +97,19 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale? _locale;
-
   setLocale(Locale locale) {
     setState(() {
       _locale = locale;
     });
   }
+  // final _navigatorKey = GlobalKey<NavigatorState>();
+
 
   @override
   void didChangeDependencies() {
     getLocale().then((locale) => {setLocale(locale)});
     super.didChangeDependencies();
   }
-
   @override
   Widget build(BuildContext context) {
     return Sizer(
@@ -166,7 +174,7 @@ class _MyAppState extends State<MyApp> {
                         locale: _locale,
                         home: const ForceUpgradePage(),
                         // initialRoute: AppRoutes.splashScreen,
-                        // routes: AppRoutes.routes,
+
                       ));
             },
           ),

@@ -9,8 +9,6 @@ import 'package:doctak_app/data/models/profile_model/interest_model.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
-import 'package:doctak_app/main.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../widgets/toast_widget.dart';
@@ -32,6 +30,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   String? stateName;
   String? university;
   String? specialtyName;
+  String? aboutMePrivacy;
+  String? personalInfoPrivacy;
   List<String>? specialtyList;
 
   ProfileBloc() : super(DataInitial()) {
@@ -214,6 +214,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // try {
     // print((specialtyName ?? event.userProfile?.user?.specialty ?? ''));
     int privacyLength = event.userProfile?.privacySetting?.length ?? 0;
+
     if (event.updateProfileSection == 1) {
       final response = await postService.getProfileUpdate(
         'Bearer ${AppData.userToken}',
@@ -256,6 +257,29 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             : 'globe',
       );
     } else if (event.updateProfileSection == 2) {
+      final response2 = await postService.updateAboutMe(
+        'Bearer ${AppData.userToken}',
+        event.userProfile?.profile?.aboutMe ?? '...',
+        event.userProfile?.profile?.address ?? '...',
+        event.userProfile?.profile?.birthplace ?? '...',
+        event.userProfile?.profile?.livesIn ?? '...',
+        privacyLength >= 0
+            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 1
+            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 2
+            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 6
+            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 7
+            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            : 'lock',
+      );
+    } else if (event.updateProfileSection == 3) {
       // final response1 = await postService.getWorkEducationUpdate(
       //     'Bearer ${AppData.userToken}', event.workEducationModel ?? []);
       //
@@ -263,6 +287,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // final response3 = await postService.getInterestsUpdate(
       //     'Bearer ${AppData.userToken}', event.interestModel!);
       //
+      //   String dobPrivacy,
+      //  String emailPrivacy,
+      // String genderPrivacy,
+      // String phonePrivacy,
+      // String licenseNoPrivacy,
+      // String specialtyPrivacy,
+      // String countryPrivacy,
+      // String cityPrivacy,
+      // String countryOriginPrivacy
+      // privacyLength >= 3 ? event.userProfile?.privacySetting![3].visibility ?? 'globe' : 'globe';
+      // privacyLength >= 4 ? event.userProfile?.privacySetting![4].visibility ?? 'globe' : 'globe';
+      // privacyLength >= 5 ? event.userProfile?.privacySetting![5].visibility ?? 'globe' : 'globe';
+      // privacyLength >= 8 ? event.userProfile?.privacySetting![8].visibility ?? 'globe' : 'globe';
+      // privacyLength >= 10
+      // ? event.userProfile?.privacySetting![10].visibility ?? 'globe' : 'globe';
+      // privacyLength >= 11 ? event.userProfile?.privacySetting![11].visibility ?? 'globe' : 'globe';
+      // privacyLength >= 12 ? event.userProfile?.privacySetting![12].visibility ?? 'globe' : 'globe';
       final response = await postService.getProfileUpdate(
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
@@ -279,29 +320,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
         // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
         // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
-        privacyLength >= 3
-            ? event.userProfile?.privacySetting![3].visibility ?? 'globe'
-            : 'globe',
-        privacyLength >= 4
-            ? event.userProfile?.privacySetting![4].visibility ?? 'globe'
-            : 'globe',
-        privacyLength >= 5
-            ? event.userProfile?.privacySetting![5].visibility ?? 'globe'
-            : 'globe',
-        privacyLength >= 8
-            ? event.userProfile?.privacySetting![8].visibility ?? 'globe'
-            : 'globe',
-        'globe',
-        'globe',
-        privacyLength >= 10
-            ? event.userProfile?.privacySetting![10].visibility ?? 'globe'
-            : 'globe',
-        privacyLength >= 11
-            ? event.userProfile?.privacySetting![11].visibility ?? 'globe'
-            : 'globe',
-        privacyLength >= 12
-            ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
-            : 'globe',
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
       );
       print(event.userProfile?.profile?.aboutMe ?? '');
       final response2 = await postService.updateAboutMe(
@@ -310,21 +341,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.userProfile?.profile?.address ?? '...',
         event.userProfile?.profile?.birthplace ?? '...',
         event.userProfile?.profile?.livesIn ?? '...',
-        privacyLength >= 0
-            ? event.userProfile?.privacySetting![0].visibility ?? 'lock'
-            : 'lock',
-        privacyLength >= 1
-            ? event.userProfile?.privacySetting![1].visibility ?? 'lock'
-            : 'lock',
-        privacyLength >= 2
-            ? event.userProfile?.privacySetting![2].visibility ?? 'lock'
-            : 'lock',
-        privacyLength >= 6
-            ? event.userProfile?.privacySetting![6].visibility ?? 'lock'
-            : 'lock',
-        privacyLength >= 7
-            ? event.userProfile?.privacySetting![7].visibility ?? 'lock'
-            : 'lock',
+        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
+        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
+        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
+        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
+        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
       );
       print(response2.response);
     }
@@ -365,7 +386,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
     List<String> secondDropdownValues = [];
     print('${event.selectedFirstDropdownValue}');
-    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? [];
+    secondDropdownValues =
+        await _onGetStates(event.selectedFirstDropdownValue) ?? [];
     print(secondDropdownValues.toList());
     if (secondDropdownValues.isNotEmpty) {
       List<String>? universityDropdownValues =
@@ -388,7 +410,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   void _updateUniversityDropdownValues(
       UpdateUniversityDropdownValues event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
-    List<String>? secondDropdownValues = await _onGetUniversities(event.selectedStateDropdownValue);
+    List<String>? secondDropdownValues =
+        await _onGetUniversities(event.selectedStateDropdownValue);
     emit(PaginationLoadedState(
       (state as PaginationLoadedState).firstDropdownValues,
       (state as PaginationLoadedState).selectedFirstDropdownValue,
@@ -400,6 +423,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       secondDropdownValues!.isEmpty ? '' : secondDropdownValues.first,
     ));
   }
+
   void _updateAddWorkEduction(
       UpdateAddWorkEductionEvent event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
@@ -409,7 +433,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     print(event.address);
     print(event.degree);
     print(event.course);
-    print(event.workType ==''?"work":event.workType);
+    print(event.workType == '' ? "work" : event.workType);
     print(event.startDate);
     print(event.endDate);
     print(event.currentStatus);
@@ -423,7 +447,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.address,
         event.degree,
         event.course,
-        event.workType ==''?"work":event.workType,
+        event.workType == '' ? "work" : event.workType,
         event.startDate,
         event.endDate,
         event.currentStatus,
@@ -449,6 +473,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         (state as PaginationLoadedState).universityDropdownValue,
         (state as PaginationLoadedState).selectedUniversityDropdownValue));
   }
+
   void _updateAddHobbiesInterest(
       UpdateAddHobbiesInterestEvent event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
@@ -461,14 +486,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     print(event.favt_music_bands);
 
     var response = await postService.updateAddHobbiesInterest(
-        'Bearer ${AppData.userToken}',
-        event.id,
-        event.favt_tv_shows,
-        event.favt_movies,
-        event.favt_books,
-        event.favt_writers,
-        event.favt_music_bands,
-        event.favt_games,);
+      'Bearer ${AppData.userToken}',
+      event.id,
+      event.favt_tv_shows,
+      event.favt_movies,
+      event.favt_books,
+      event.favt_writers,
+      event.favt_music_bands,
+      event.favt_games,
+    );
 
     List<InterestModel> response1 = await postService.getInterests(
         'Bearer ${AppData.userToken}', AppData.logInUserId!);
@@ -487,12 +513,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         (state as PaginationLoadedState).universityDropdownValue,
         (state as PaginationLoadedState).selectedUniversityDropdownValue));
   }
+
   void _deleteAddWorkEduction(
       DeleteWorkEducationEvent event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
     var response = await postService.deleteWorkEduction(
-        'Bearer ${AppData.userToken}',
-        event.id);
+        'Bearer ${AppData.userToken}', event.id);
     List<WorkEducationModel> response2 = await postService.getWorkEducation(
         'Bearer ${AppData.userToken}', AppData.logInUserId);
     workEducationList!.clear();
@@ -527,7 +553,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         ''));
   }
 
-  void _specialityData(UpdateSpecialtyDropdownValue1 event, Emitter<ProfileState> emit) async {
+  void _specialityData(
+      UpdateSpecialtyDropdownValue1 event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
     List<String>? secondDropdownValues = await _onGetSpecialty();
     specialtyList = secondDropdownValues ?? [];
@@ -555,6 +582,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // emit(DataFailure(error: 'An error occurred'));
     }
   }
+
   Future<List<String>?> _onGetSpecialty() async {
     // emit(DataLoading());
     try {
@@ -623,15 +651,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // emit(DataFailure(error: 'An error occurred'));
     }
   }
+
   _setUserFollow(SetUserFollow event, Emitter<ProfileState> emit) async {
     // emit(DrugsDataInitial());
     // ProgressDialogUtils.showProgressDialog();
-    print(event.userId,);
+    print(
+      event.userId,
+    );
     try {
       var response = await postService.setUserFollow(
-          'Bearer ${AppData.userToken}',
-          event.userId,
-          event.follow ?? '');
+          'Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
       // setLoading(false);
       emit(PaginationLoadedState(
           (state as PaginationLoadedState).firstDropdownValues,
@@ -642,7 +671,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
           (state as PaginationLoadedState).universityDropdownValue,
           (state as PaginationLoadedState).selectedUniversityDropdownValue));
-
     } catch (e) {
       print(e);
 

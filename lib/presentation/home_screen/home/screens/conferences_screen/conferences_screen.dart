@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/dynamic_link.dart';
+import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
@@ -19,6 +21,9 @@ import 'bloc/conference_event.dart';
 import 'bloc/conference_state.dart';
 
 class ConferencesScreen extends StatefulWidget {
+   ConferencesScreen({this.isFromSplash=false,super.key});
+  bool isFromSplash;
+
   @override
   State<ConferencesScreen> createState() => _ConferencesScreenState();
 }
@@ -55,7 +60,11 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
           // toolbarHeight: 200,
           leading: GestureDetector(
               onTap: () {
-                Navigator.of(context).pop();
+                if(widget.isFromSplash){
+                  const SVDashboardScreen().launch(context,isNewTask: true);
+                }else {
+                  Navigator.of(context).pop();
+                }
               },
               child: const Icon(Icons.arrow_back_ios)),
 
@@ -71,7 +80,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Conferences', style: boldTextStyle(size: 20)),
+                          Text('Conferences', style: boldTextStyle(size: 18)),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: CustomDropdownButtonFormField(
@@ -387,13 +396,59 @@ class ConferenceWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Text(
-                conference.title ?? 'No Title Available',
-                style: const TextStyle(
-                  fontFamily: 'Robotic',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      conference.title ?? 'No Title Available',
+                      style: const TextStyle(
+                        fontFamily: 'Robotic',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () {
+                        // _showBottomSheet(context,widget
+                        //     .homeBloc
+                        //     .postList[index]);
+                        createDynamicLink(
+                            '${ conference.title ?? ""} \n  Register Link: ${ conference.conferenceAgendaLink ??''}',
+                            'https://doctak.net/conference/${conference.id}',
+                            conference.thumbnail??'');
+                        // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
+                        //     "Company : ${bloc.drugsData[index].companyName}\n"
+                        //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
+                        //     "Date From: ${ bloc.drugsData[index]
+                        //     .createdAt ??
+                        //     'N/A'}\n"
+                        //     "Date To: ${ bloc.drugsData[index]
+                        //     .lastDate ??
+                        //     'N/A'}\n"
+                        //     "Experience: ${ bloc.drugsData[index]
+                        //     .experience ??
+                        //     'N/A'}\n"
+                        //     "Job Apply Link: ${ bloc.drugsData[index]
+                        //     .link ??
+                        //     'N/A'}\n" );
+
+                      },
+                      child: Icon(Icons.share_sharp,
+                        size: 22,
+                        // 'images/socialv/icons/ic_share.png',
+                        // height: 22,
+                        // width: 22,
+                        // fit: BoxFit.cover,
+                        color: context.iconColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             // Conference Dates
@@ -444,6 +499,7 @@ class ConferenceWidget extends StatelessWidget {
                   // 'Specialties Targeted: ${conference.specialties_targeted ?? 'N/A'}',
                   ),
             ),
+
           ],
         ),
       ),

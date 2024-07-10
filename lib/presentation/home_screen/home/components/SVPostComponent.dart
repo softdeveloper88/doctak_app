@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
@@ -45,64 +46,33 @@ class SVPostComponent extends StatefulWidget {
 int? isShowComment = -1;
 
 class _SVPostComponentState extends State<SVPostComponent> {
-  final _navigatorKey = GlobalKey<NavigatorState>();
-
-  late AppLinks _appLinks;
-  StreamSubscription<Uri>? _linkSubscription;
-
-  @override
-  void dispose() {
-    _linkSubscription?.cancel();
-
-    super.dispose();
-  }
-
-  Future<void> initDeepLinks() async {
-    try {
-      print('before');
-      _appLinks = AppLinks();
-      // Handle links
-      _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-        debugPrint('onAppLink: $uri');
-        openAppLink(uri);
-      });
-    } catch (e) {
-      print('error $e');
-    }
-  }
-
-  void openAppLink(Uri uri) {
-    _navigatorKey.currentState?.pushNamed(uri.fragment);
-  }
-
-  createDynamicLink(postTitle, postUrl, imageUrl) async {
-    final dynamicLinkParams = DynamicLinkParameters(
-      link: Uri.parse(postUrl),
-      uriPrefix: "https://doctak.page.link",
-      androidParameters: const AndroidParameters(
-        packageName: "com.kt.doctak",
-        minimumVersion: 39,
-      ),
-      iosParameters: const IOSParameters(
-        bundleId: "com.kt.doctak",
-        appStoreId: "123456789",
-        minimumVersion: "2.0.9",
-      ),
-      googleAnalyticsParameters: const GoogleAnalyticsParameters(
-        source: "twitter",
-        medium: "social",
-        campaign: "example-promo",
-      ),
-      socialMetaTagParameters: SocialMetaTagParameters(
-        title: postTitle,
-        imageUrl: Uri.parse(imageUrl),
-      ),
-    );
-    final dynamicLink =
-        await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParams);
-    Share.share(dynamicLink.shortUrl.toString());
-  }
-
+  // createDynamicLink(postTitle, postUrl, imageUrl) async {
+  //   final dynamicLinkParams = DynamicLinkParameters(
+  //     link: Uri.parse(postUrl),
+  //     uriPrefix: "https://doctak.page.link",
+  //     androidParameters: const AndroidParameters(
+  //       packageName: "com.kt.doctak",
+  //       minimumVersion: 41,
+  //     ),
+  //     iosParameters: const IOSParameters(
+  //       bundleId: "com.kt.doctak",
+  //       appStoreId: "6448684340",
+  //       minimumVersion: "2.0.9",
+  //     ),
+  //     googleAnalyticsParameters: const GoogleAnalyticsParameters(
+  //       source: "twitter",
+  //       medium: "social",
+  //       campaign: "example-promo",
+  //     ),
+  //     socialMetaTagParameters: SocialMetaTagParameters(
+  //       title: postTitle,
+  //       imageUrl: Uri.parse(imageUrl),
+  //     ),
+  //   );
+  //   final dynamicLink =
+  //       await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParams);
+  //   Share.share(dynamicLink.shortUrl.toString());
+  // }
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HomeBloc, HomeState>(
@@ -752,7 +722,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     HtmlWidget(textToShow, onTapUrl: (link) async {
                       print('link $link');
                       if (link.contains('doctak/jobs-detail')) {
-                        int jobID = Uri.parse(link).pathSegments.last.toInt();
+                        String jobID = Uri.parse(link).pathSegments.last;
                         JobsDetailsScreen(
                           jobId: jobID,
                         ).launch(context);
@@ -765,8 +735,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     Linkify(
                       onOpen: (link) {
                         if (link.url.contains('doctak/jobs-detail')) {
-                          int jobID =
-                              Uri.parse(link.url).pathSegments.last.toInt();
+                          String jobID =
+                              Uri.parse(link.url).pathSegments.last;
                           JobsDetailsScreen(
                             jobId: jobID,
                           ).launch(context);
@@ -803,8 +773,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                         onTapUrl: (link) async {
                           print(link);
                           if (link.contains('doctak/jobs-detail')) {
-                            int jobID =
-                                Uri.parse(link).pathSegments.last.toInt();
+                            String jobID =
+                                Uri.parse(link).pathSegments.last;
                             JobsDetailsScreen(
                               jobId: jobID,
                             ).launch(context);
@@ -820,8 +790,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                   Linkify(
                     onOpen: (link) {
                       if (link.url.contains('doctak/jobs-detail')) {
-                        int jobID =
-                            Uri.parse(link.url).pathSegments.last.toInt();
+                        String jobID =
+                            Uri.parse(link.url).pathSegments.last;
                         JobsDetailsScreen(
                           jobId: jobID,
                         ).launch(context);

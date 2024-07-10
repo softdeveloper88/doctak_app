@@ -33,6 +33,12 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    var selectValue=widget.profileBloc.userProfile!.privacySetting?[1].visibility=='lock'?'Only me': widget.profileBloc.userProfile!.privacySetting?[1].visibility=='group'?'Friend':'Public';
+    var selectValue2=widget.profileBloc.userProfile!.privacySetting?[10].visibility=='lock'?'Only me': widget.profileBloc.userProfile!.privacySetting?[10].visibility=='group'?'Friend':'Public';
+  print(widget.profileBloc.userProfile!.privacySetting?[1].recordType);
+  print(widget.profileBloc.userProfile!.privacySetting?[1].visibility);
+  print(widget.profileBloc.userProfile!.privacySetting?[10].recordType);
+  print(widget.profileBloc.userProfile!.privacySetting?[10].visibility);
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
@@ -74,7 +80,32 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildPrivacyInfoFields(),
+              _buildDropdownField(
+                index: 2,
+                label: 'Personal Information privacy',
+                value:widget.profileBloc.userProfile!.privacySetting?[1].visibility == null || widget.profileBloc.userProfile!.privacySetting?[1].visibility == 'crickete update d'
+                    ? 'Only me'
+                    :selectValue ,
+                onSave: (value) {
+                  var updateValue=  value=='Only me'?'lock': value=='Friend'?'group':'Public';
+                  widget.profileBloc.userProfile!.privacySetting?[1].visibility = updateValue;
+
+                  },
+                options: ['Only me', 'Friend', 'Public'],
+              ),
+              _buildDropdownField(
+                index: 2,
+                label: 'About me privacy',
+                value:widget.profileBloc.userProfile!.privacySetting?[10].visibility == null || widget.profileBloc.userProfile!.privacySetting?[10].visibility == 'crickete update d'
+                    ? 'Only me'
+                    :selectValue2 ,
+                onSave: (value) {
+                  var updateValue =  value=='Only me'?'lock': value=='Friend'?'group':'Public';
+                  widget.profileBloc.userProfile!.privacySetting?[10].visibility = updateValue;
+                },
+                options: ['Only me', 'Friend', 'Public'],
+              ),
+              // _buildPrivacyInfoFields(),
               10.height,
               if(isEditModeMap)svAppButton(
                 context: context,
@@ -84,7 +115,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                     isEditModeMap=false;
                   });
                   widget.profileBloc.add(UpdateProfileEvent(
-                    updateProfileSection: 1,
+                    updateProfileSection: 3,
                     userProfile: widget.profileBloc.userProfile,
                     interestModel: widget.profileBloc.interestList,
                     workEducationModel: widget.profileBloc.workEducationList,
@@ -108,14 +139,13 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
         return _buildDropdownField(
           index: 4,
           label: '${item.recordType} privacy',
-          value:
-          item.visibility == null || item.visibility == 'crickete update d'
+          value: item.visibility == null || item.visibility == 'crickete update d'
               ? 'Only me'
               :selectValue ,
           onSave: (value) {
+          var updateValue=  value=='Only me'?'lock': value=='Friend'?'group':'Public';
+            item.visibility = updateValue;
 
-            value=='Only me'?'lock': value=='Friend'?'group':'Public';
-            item.visibility = value;
           },
           options: ['Only me', 'Friend', 'Public'],
         );
@@ -160,6 +190,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                     ),
                     onChanged: (String? selectedValue) {
               if (selectedValue != value) {
+
                 onSave?.call(selectedValue!);
               }
                     },
