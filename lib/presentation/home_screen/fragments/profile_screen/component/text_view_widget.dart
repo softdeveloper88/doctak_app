@@ -20,18 +20,26 @@ class TextViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       return Padding(
-        padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+        padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              capitalizeWords(label??''),
-              style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
+            Expanded(
+              flex: 4,
+              child: Text(
+                textAlign: TextAlign.start,
+                capitalizeWords(label??''),
+                style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 12.sp,fontWeight: FontWeight.w500),
+              ),
             ),
-            Text(
-              capitalizeWords(value??''),
-              style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
+            Expanded(
+              flex: 5,
+              child: Text(
+                textAlign: TextAlign.end,
+                capitalizeWords(value??''),
+                style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 12.sp,fontWeight: FontWeight.w500),
 
+              ),
             ),
           ],
         ),

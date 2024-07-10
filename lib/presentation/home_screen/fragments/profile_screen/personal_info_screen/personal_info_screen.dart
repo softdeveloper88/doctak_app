@@ -4,6 +4,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,25 +50,55 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor(),)),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
-          if (widget.profileBloc.isMe)  Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              CustomImageView(
-                onTap: () {
-                  setState(() {
-                    isEditModeMap =!isEditModeMap;
-                  });
-                },
-                color: Colors.blue,
-                imagePath: 'assets/icon/ic_vector.svg',
-                height: 20,
-                width: 20,
-                margin: const EdgeInsets.only(top: 4, right: 16),
+          if (widget.profileBloc.isMe) Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: MaterialButton(
+              textColor: Colors.black,
+              onPressed: () {
+                setState(() {
+                  isEditModeMap = !isEditModeMap;
+                });
+              },
+              elevation: 6,
+              color: Colors.white,
+              minWidth: 40,
+              shape: RoundedRectangleBorder(
+                borderRadius: radius(100),
+                side: const BorderSide(color: Colors.blue),
               ),
-              Text("Edit",style: GoogleFonts.poppins(fontSize: 8.sp,fontWeight: FontWeight.w400,color: Colors.blue),)
-            ],
-          ).paddingTop(10),
+              animationDuration: const Duration(milliseconds: 300),
+              focusColor: SVAppColorPrimary,
+              hoverColor: SVAppColorPrimary,
+              splashColor: SVAppColorPrimary,
+              padding: const EdgeInsets.all(4),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomImageView(
+                    onTap: () {
+                      setState(() {
+                        isEditModeMap = !isEditModeMap;
+                      });
+                    },
+                    color: Colors.blue,
+                    imagePath: 'assets/icon/ic_vector.svg',
+                    height: 15,
+                    width: 15,
+                    // margin: const EdgeInsets.only(bottom: 4),
+                  ),
+                  Text(
+                    "Edit",
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
         ],
       ),
       body: Padding(

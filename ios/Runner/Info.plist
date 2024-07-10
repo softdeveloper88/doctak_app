@@ -4,6 +4,14 @@
 <dict>
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>
+	<key>CFBundleTypeRole</key>
+	<string>Editor</string>
+	<key>CFBundleURLName</key>
+	<string>doctak.page.link</string>
+	<key>CFBundleURLSchemes</key>
+	<array>
+		<string>https</string>
+	</array>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.3</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
@@ -12,6 +20,7 @@
 	<array>
 		<string>https://doctak.net/post</string>
 		<string>https://doctak.net/job</string>
+		<string>https://doctak.net/conference</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

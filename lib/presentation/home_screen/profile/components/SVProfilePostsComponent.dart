@@ -153,7 +153,7 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
         },
         context,
         imageOne: 'assets/icon/ic_frame.svg',
-        interested: "Professional Information",
+        interested: "Professional Summary",
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
@@ -163,7 +163,7 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
         },
         context,
         imageOne: 'assets/icon/ic_calendar.svg',
-        interested: "Work Information",
+        interested: "Professional Experience",
       ),
       const SizedBox(height: 10),
       _buildRowinterested(

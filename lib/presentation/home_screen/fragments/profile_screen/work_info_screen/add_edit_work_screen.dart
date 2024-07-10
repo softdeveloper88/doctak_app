@@ -1,6 +1,9 @@
+import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +42,8 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
     else{
       updateWork=WorkEducationModel();
       updateWork?.workType='work';
+      widget.profileBloc.add(UpdateSpecialtyDropdownValue(''));
+
     }
     super.initState();
   }
@@ -99,6 +104,16 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
   }
   List<String> listWorkType = ['work', 'university','high_school'];
   List<String> privacyList = ['global', 'private','only me'];
+  List<String> positionList = ['Resident Physician',
+    'Attending Physician',
+    'Fellow',
+    'Consultant',
+    'Surgeon',
+    'General Practitioner',
+    'Medical Officer',
+    'Researcher',
+    'Educator/Teacher/Professor'];
+
   var focusNode1=FocusNode();
   var focusNode2=FocusNode();
   var focusNode3=FocusNode();
@@ -115,20 +130,103 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // const SizedBox(height: 10),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 8.0),
+                  //   child: Text(
+                  //     'Work Type',
+                  //     style: GoogleFonts.poppins(
+                  //       fontSize: 14,
+                  //       fontWeight: FontWeight.w500,
+                  //     ),
+                  //   ),
+                  // ),
+                  // CustomDropdownButtonFormField(
+                  //   items: listWorkType,
+                  //   value: listWorkType.first,
+                  //   width: double.infinity,
+                  //   contentPadding: const EdgeInsets.symmetric(
+                  //     horizontal: 10,
+                  //     vertical: 0,
+                  //   ),
+                  //   onChanged: (String? newValue) {
+                  //     setState(() {
+                  //       updateWork?.workType  = newValue;
+                  //     });
+                  //   },
+                  // ),
+
+                  if(updateWork?.workType=='work')
+                    BlocBuilder<ProfileBloc, ProfileState>(
+                        bloc: widget.profileBloc,
+                        builder: (context, state) {
+                          if (state is PaginationLoadedState) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (AppData.userType == "doctor")
+                                  const SizedBox(height: 10),
+                                if (AppData.userType == "doctor")
+                                  Text(
+                                    'Speciality/Area of practice',
+                                    style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500,),
+                                  ),
+                                if (AppData.userType == "doctor") CustomDropdownButtonFormField(
+                                  items: state.specialtyDropdownValue,
+                                  value: state.selectedSpecialtyDropdownValue,
+                                  width: double.infinity,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 0,
+                                  ),
+                                  onChanged: (String? newValue) {
+                                    print(newValue);
+                                    print("Specialty $newValue");
+                                    updateWork?.name = newValue;
+                                    // widget.profileBloc.specialtyName = newValue!;
+                                    // widget.profileBloc.userProfile?.user?.specialty=newValue;
+                                    widget.profileBloc.add(
+                                        UpdateSpecialtyDropdownValue(
+                                            newValue??''));
+                                  },
+                                ),
+                                if (AppData.userType != "doctor")
+                                  const SizedBox(height: 10),
+                                // if (AppData.userType!="doctor")
+                                //   const SizedBox(height: 10),
+                                // if (AppData.userType != "doctor" &&
+                                //     state.selectedUniversityDropdownValue ==
+                                //         'Add new University')
+                              ],
+                            );
+                          } else {
+                            return Text('No widget $state');
+                          }
+                        }),
+                  //   TextFieldEditWidget(
+                  //   isEditModeMap: true,
+                  //   icon: Icons.work,
+                  //   index: 2,
+                  //   focusNode: focusNode1,
+                  //   label: 'Speciality/Area of practice',
+                  //   value: updateWork?.name ?? '',
+                  //   onSave: (value) => updateWork?.name = value,
+                  // ),
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
-                      'Work Type',
+                      'Position/Role',
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                   CustomDropdownButtonFormField(
-                    items: listWorkType,
-                    value: listWorkType.first,
+                    items: positionList,
+                    value: positionList.first,
                     width: double.infinity,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -136,33 +234,25 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
-                        updateWork?.workType  = newValue;
+                        updateWork?.position  = newValue;
                       });
                     },
                   ),
-                  if(updateWork?.workType=='work') TextFieldEditWidget(
-                    isEditModeMap: true,
-                    icon: Icons.work,
-                    index: 2,
-                    focusNode: focusNode1,
-                    label: 'Company Name',
-                    value: updateWork?.name ?? '',
-                    onSave: (value) => updateWork?.name = value,
-                  ),
-                 if(updateWork?.workType=='work') TextFieldEditWidget(
-                    isEditModeMap: true,
-                    icon: Icons.type_specimen,
-                    index: 2,
-                    label: 'Position',
-                    value: updateWork?.position ?? "",
-                    onSave: (value) => updateWork?.position = value,
-                  ),
+                 // if(updateWork?.workType=='work') TextFieldEditWidget(
+                 //    isEditModeMap: true,
+                 //    icon: Icons.type_specimen,
+                 //    index: 2,
+                 //    label: 'Position/Role',
+                 //    value: updateWork?.position ?? "",
+                 //    onSave: (value) => updateWork?.position = value,
+                 //  ),
                   TextFieldEditWidget(
                     focusNode: focusNode2,
                     isEditModeMap: true,
                     icon: Icons.location_on,
                     index: 2,
-                    label: 'Address',
+                    hints: 'Enter Hospital/clinic name',
+                    label: 'Hospital/Clinic Name',
                     value: updateWork?.address ?? "",
                     onSave: (value) => updateWork?.address = value,
                   ),
@@ -189,7 +279,8 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                       icon: Icons.description,
                       focusNode: focusNode5,
                       index: 2,
-                      label: 'Professional Summary',
+                      hints: 'Enter location (e.g., KSA, UAE)',
+                      label: 'Location',
                       value: updateWork?.description ?? "",
                       onSave: (value) => updateWork?.description = value,
                       maxLines: 3),

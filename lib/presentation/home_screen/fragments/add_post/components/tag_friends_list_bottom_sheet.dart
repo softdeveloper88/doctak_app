@@ -12,8 +12,7 @@ import '../../add_post/bloc/add_post_event.dart';
 class TagFriendsListBottomSheet extends StatefulWidget {
   AddPostBloc searchPeopleBloc;
 
-  TagFriendsListBottomSheet(this.searchPeopleBloc, {Key? key})
-      : super(key: key);
+  TagFriendsListBottomSheet(this.searchPeopleBloc, {Key? key}) : super(key: key);
 
   @override
   State<TagFriendsListBottomSheet> createState() =>

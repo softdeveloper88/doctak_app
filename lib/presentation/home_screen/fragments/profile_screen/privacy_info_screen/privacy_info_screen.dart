@@ -12,6 +12,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../../../core/app_export.dart';
+import '../../../utils/SVColors.dart';
 import '../../../utils/SVCommon.dart';
 import '../bloc/profile_state.dart';
 
@@ -54,25 +55,54 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
             child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
-          if (widget.profileBloc.isMe)  Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              CustomImageView(
-                onTap: () {
-                  setState(() {
-                    isEditModeMap =!isEditModeMap;
-                  });
-                },
-                color: Colors.blue,
-                imagePath: 'assets/icon/ic_vector.svg',
-                height: 20,
-                width: 20,
-                margin: const EdgeInsets.only(top: 4, right: 16),
+          if (widget.profileBloc.isMe)   Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: MaterialButton(
+              textColor: Colors.black,
+              onPressed: () {
+                setState(() {
+                  isEditModeMap = !isEditModeMap;
+                });
+              },
+              elevation: 6,
+              color: Colors.white,
+              minWidth: 40,
+              shape: RoundedRectangleBorder(
+                borderRadius: radius(100),
+                side: const BorderSide(color: Colors.blue),
               ),
-              Text("Edit",style: GoogleFonts.poppins(fontSize: 8.sp,fontWeight: FontWeight.w400,color: Colors.blue),)
-            ],
-          ).paddingTop(10),
+              animationDuration: const Duration(milliseconds: 300),
+              focusColor: SVAppColorPrimary,
+              hoverColor: SVAppColorPrimary,
+              splashColor: SVAppColorPrimary,
+              padding: const EdgeInsets.all(4),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomImageView(
+                    onTap: () {
+                      setState(() {
+                        isEditModeMap = !isEditModeMap;
+                      });
+                    },
+                    color: Colors.blue,
+                    imagePath: 'assets/icon/ic_vector.svg',
+                    height: 15,
+                    width: 15,
+                    // margin: const EdgeInsets.only(bottom: 4),
+                  ),
+                  Text(
+                    "Edit",
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
       body: Padding(
@@ -80,32 +110,32 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildDropdownField(
-                index: 2,
-                label: 'Personal Information privacy',
-                value:widget.profileBloc.userProfile!.privacySetting?[1].visibility == null || widget.profileBloc.userProfile!.privacySetting?[1].visibility == 'crickete update d'
-                    ? 'Only me'
-                    :selectValue ,
-                onSave: (value) {
-                  var updateValue=  value=='Only me'?'lock': value=='Friend'?'group':'Public';
-                  widget.profileBloc.userProfile!.privacySetting?[1].visibility = updateValue;
-
-                  },
-                options: ['Only me', 'Friend', 'Public'],
-              ),
-              _buildDropdownField(
-                index: 2,
-                label: 'About me privacy',
-                value:widget.profileBloc.userProfile!.privacySetting?[10].visibility == null || widget.profileBloc.userProfile!.privacySetting?[10].visibility == 'crickete update d'
-                    ? 'Only me'
-                    :selectValue2 ,
-                onSave: (value) {
-                  var updateValue =  value=='Only me'?'lock': value=='Friend'?'group':'Public';
-                  widget.profileBloc.userProfile!.privacySetting?[10].visibility = updateValue;
-                },
-                options: ['Only me', 'Friend', 'Public'],
-              ),
-              // _buildPrivacyInfoFields(),
+              // _buildDropdownField(
+              //   index: 2,
+              //   label: 'Personal Information privacy',
+              //   value:widget.profileBloc.userProfile!.privacySetting?[1].visibility == null || widget.profileBloc.userProfile!.privacySetting?[1].visibility == 'crickete update d'
+              //       ? 'Only me'
+              //       :selectValue ,
+              //   onSave: (value) {
+              //     var updateValue=  value=='Only me'?'lock': value=='Friend'?'group':'Public';
+              //     widget.profileBloc.userProfile!.privacySetting?[1].visibility = updateValue;
+              //
+              //     },
+              //   options: ['Only me', 'Friend', 'Public'],
+              // ),
+              // _buildDropdownField(
+              //   index: 2,
+              //   label: 'About me privacy',
+              //   value:widget.profileBloc.userProfile!.privacySetting?[10].visibility == null || widget.profileBloc.userProfile!.privacySetting?[10].visibility == 'crickete update d'
+              //       ? 'Only me'
+              //       :selectValue2 ,
+              //   onSave: (value) {
+              //     var updateValue =  value=='Only me'?'lock': value=='Friend'?'group':'Public';
+              //     widget.profileBloc.userProfile!.privacySetting?[10].visibility = updateValue;
+              //   },
+              //   options: ['Only me', 'Friend', 'Public'],
+              // ),
+              _buildPrivacyInfoFields(),
               10.height,
               if(isEditModeMap)svAppButton(
                 context: context,
@@ -133,12 +163,14 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
   Widget _buildPrivacyInfoFields() {
     return Column(
       children: widget.profileBloc.userProfile!.privacySetting!.map((item) {
+        print(item.recordType);
         // if(item.visibility!='crickete update d') {
         var selectValue=item.visibility=='lock'?'Only me': item.visibility=='group'?'Friend':'Public';
 
         return _buildDropdownField(
           index: 4,
-          label: '${item.recordType} privacy',
+          label: item.recordType=='dob' ?"Data of birth":'${item.recordType?.replaceAll('_', ' ')} ',
+
           value: item.visibility == null || item.visibility == 'crickete update d'
               ? 'Only me'
               :selectValue ,

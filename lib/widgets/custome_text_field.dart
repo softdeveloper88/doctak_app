@@ -18,6 +18,7 @@ class CustomTextField extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.textInputType = TextInputType.text,
     this.maxLines,
+    this.minLines,
     this.hintText,
     this.hintStyle,
     this.prefix,
@@ -58,6 +59,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? textInputType;
 
   final int? maxLines;
+  final int? minLines;
 
   final String? hintText;
 
@@ -110,6 +112,7 @@ class CustomTextField extends StatelessWidget {
           controller: controller,
           focusNode: focusNode ?? FocusNode(),
           autofocus: autofocus!,
+          minLines: minLines??1,
           onSaved:(v) => onSaved!(v!),
           initialValue: initialValue,
           style: secondaryTextStyle(color: SVAppColorPrimary),
@@ -117,7 +120,7 @@ class CustomTextField extends StatelessWidget {
           obscureText: obscureText!,
           textInputAction: textInputAction,
           keyboardType: textInputType,
-          maxLines: maxLines ?? 1,
+          maxLines: maxLines ??  4,
           decoration: decoration,
           validator: validator,
         )

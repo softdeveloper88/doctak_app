@@ -2,9 +2,12 @@ import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
+import 'package:doctak_app/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../utils/SVColors.dart';
 import '../../../utils/SVCommon.dart';
 
 class InterestedInfoScreen extends StatefulWidget {
@@ -43,29 +46,78 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           if (widget.profileBloc.isMe)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  isEditModeMap = true;
-                  // AddEditInterestedScreen(profileBloc: widget.profileBloc)
-                  //     .launch(context);
-                  // widget.profileBloc.interestList!.add(InterestModel());
-                });
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.add_circle_outline_sharp,
-                  color: Colors.blue,
-                  size: 30,
-                  // color: Colors.black,
-                  // imagePath: 'assets/icon/ic_vector.svg',
-                  // height: 25.adaptSize,
-                  // width: 25.adaptSize,
-                  // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: MaterialButton(
+                textColor: Colors.black,
+                onPressed: () {
+                  setState(() {
+                    isEditModeMap = !isEditModeMap;
+                  });
+                },
+                elevation: 6,
+                color: Colors.white,
+                minWidth: 40,
+                shape: RoundedRectangleBorder(
+                  borderRadius: radius(100),
+                  side: const BorderSide(color: Colors.blue),
+                ),
+                animationDuration: const Duration(milliseconds: 300),
+                focusColor: SVAppColorPrimary,
+                hoverColor: SVAppColorPrimary,
+                splashColor: SVAppColorPrimary,
+                padding: const EdgeInsets.all(4),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomImageView(
+                      onTap: () {
+                        setState(() {
+                          isEditModeMap = !isEditModeMap;
+                        });
+                      },
+                      color: Colors.blue,
+                      imagePath: 'assets/icon/ic_vector.svg',
+                      height: 15,
+                      width: 15,
+                      // margin: const EdgeInsets.only(bottom: 4),
+                    ),
+                    Text(
+                      "Edit",
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+
+            // GestureDetector(
+            //   onTap: () {
+            //     setState(() {
+            //       isEditModeMap = true;
+            //       // AddEditInterestedScreen(profileBloc: widget.profileBloc)
+            //       //     .launch(context);
+            //       // widget.profileBloc.interestList!.add(InterestModel());
+            //     });
+            //   },
+            //   child: const Padding(
+            //     padding: EdgeInsets.all(8.0),
+            //     child: Icon(
+            //       Icons.add_circle_outline_sharp,
+            //       color: Colors.blue,
+            //       size: 30,
+            //       // color: Colors.black,
+            //       // imagePath: 'assets/icon/ic_vector.svg',
+            //       // height: 25.adaptSize,
+            //       // width: 25.adaptSize,
+            //       // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+            //     ),
+            //   ),
+            // ),
         ],
       ),
       body: Padding(
@@ -88,10 +140,12 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     '',
                         widget.profileBloc.interestList!.isEmpty?'':widget.profileBloc.interestList?[0].interestDetails??"",
                         widget.profileBloc.interestList!.length>=2?widget.profileBloc.interestList![1].interestDetails??"":'',
-                        widget.profileBloc.interestList!.length>=3?widget.profileBloc.interestList![2].interestDetails??"":'',
-                        widget.profileBloc.interestList!.length>=4?widget.profileBloc.interestList![3].interestDetails??"":'',
-                        widget.profileBloc.interestList!.length>=5?widget.profileBloc.interestList![4].interestDetails??"":'',
-                        widget.profileBloc.interestList!.length>=6?widget.profileBloc.interestList![5].interestDetails??"":'',
+                        widget.profileBloc.interestList!.length>=3?widget.profileBloc.interestList![3].interestDetails??"":'',
+                        '',
+                        '',''
+                        // widget.profileBloc.interestList!.length>=4?widget.profileBloc.interestList![3].interestDetails??"":'',
+                        // widget.profileBloc.interestList!.length>=5?widget.profileBloc.interestList![4].interestDetails??"":'',
+                        // widget.profileBloc.interestList!.length>=6?widget.profileBloc.interestList![5].interestDetails??"":'',
                     ));
 
                     Navigator.pop(context);
@@ -121,7 +175,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-              capitalizeWords(widget.profileBloc.interestList?[0].interestType!.replaceAll('_', ' ') ?? ''),
+              capitalizeWords('Areas of Interest (Specific fields of medicine, research interests)'),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -129,6 +183,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                   ),
                   const SizedBox(height: 10),
                   TextFieldEditWidget(
+                    hints: 'Areas of Interest (Specific fields of medicine, research interests)',
                     isEditModeMap: isEditModeMap,
                     icon: Icons.description,
                     index: 2,
@@ -150,7 +205,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-    capitalizeWords( widget.profileBloc.interestList?[1].interestType!.replaceAll('_', ' ') ?? ''),
+    capitalizeWords('Participation in Conferences and Workshops'),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -161,6 +216,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     isEditModeMap: isEditModeMap,
                     icon: Icons.description,
                     index: 2,
+                    hints: 'Publications (Research papers, articles)',
                     label: 'Interest Details',
                     value: widget
                         .profileBloc.interestList?[1].interestDetails ??
@@ -180,9 +236,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-    capitalizeWords(widget.profileBloc.interestList?[2].interestType!.replaceAll('_', ' ') ?? ''),
-                    style: const TextStyle(
+                  const Text('Research Projects',
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -192,37 +247,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     isEditModeMap: isEditModeMap,
                     icon: Icons.description,
                     index: 2,
-                    label: 'Interest Details',
-                    value: widget
-                        .profileBloc.interestList?[2].interestDetails ??
-                        "",
-                    onSave: (value) =>
-                    widget.profileBloc.interestList?[2]
-                        .interestDetails = value,
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-    capitalizeWords(widget.profileBloc.interestList?[3].interestType!.replaceAll('_', ' ') ?? ''),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFieldEditWidget(
-                    isEditModeMap: isEditModeMap,
-                    icon: Icons.description,
-                    index: 2,
+                    hints: 'Clinical Trials...',
                     label: 'Interest Details',
                     value: widget
                         .profileBloc.interestList?[3].interestDetails ??
@@ -236,68 +261,99 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
               ),
             ),
           ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-    capitalizeWords( widget.profileBloc.interestList?[4].interestType!.replaceAll('_', ' ') ?? ''),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFieldEditWidget(
-                    isEditModeMap: isEditModeMap,
-                    icon: Icons.description,
-                    index: 2,
-                    label: 'Interest Details',
-                    value: widget
-                        .profileBloc.interestList?[4].interestDetails ??
-                        "",
-                    onSave: (value) =>
-                    widget.profileBloc.interestList?[4]
-                        .interestDetails = value,
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    capitalizeWords(widget.profileBloc.interestList?[5].interestType!.replaceAll('_', ' ') ?? ''),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFieldEditWidget(
-                    isEditModeMap: isEditModeMap,
-                    icon: Icons.description,
-                    index: 2,
-                    label: 'Interest Details',
-                    value: widget
-                        .profileBloc.interestList?[5].interestDetails ??
-                        "",
-                    onSave: (value) =>
-                    widget.profileBloc.interestList?[5]
-                        .interestDetails = value,
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
-          ),
+    //       Card(
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(16.0),
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               Text(
+    // capitalizeWords(widget.profileBloc.interestList?[3].interestType!.replaceAll('_', ' ') ?? ''),
+    //                 style: const TextStyle(
+    //                   fontSize: 16,
+    //                   fontWeight: FontWeight.bold,
+    //                 ),
+    //               ),
+    //               const SizedBox(height: 10),
+    //               TextFieldEditWidget(
+    //                 isEditModeMap: isEditModeMap,
+    //                 icon: Icons.description,
+    //                 index: 2,
+    //                 label: 'Interest Details',
+    //                 value: widget
+    //                     .profileBloc.interestList?[3].interestDetails ??
+    //                     "",
+    //                 onSave: (value) =>
+    //                 widget.profileBloc.interestList?[3]
+    //                     .interestDetails = value,
+    //               ),
+    //               const SizedBox(height: 10),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //       Card(
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(16.0),
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               Text(
+    // capitalizeWords( widget.profileBloc.interestList?[4].interestType!.replaceAll('_', ' ') ?? ''),
+    //                 style: const TextStyle(
+    //                   fontSize: 16,
+    //                   fontWeight: FontWeight.bold,
+    //                 ),
+    //               ),
+    //               const SizedBox(height: 10),
+    //               TextFieldEditWidget(
+    //                 isEditModeMap: isEditModeMap,
+    //                 icon: Icons.description,
+    //                 index: 2,
+    //                 label: 'Interest Details',
+    //                 value: widget
+    //                     .profileBloc.interestList?[4].interestDetails ??
+    //                     "",
+    //                 onSave: (value) =>
+    //                 widget.profileBloc.interestList?[4]
+    //                     .interestDetails = value,
+    //               ),
+    //               const SizedBox(height: 10),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //       Card(
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(16.0),
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               Text(
+    //                 capitalizeWords(widget.profileBloc.interestList?[5].interestType!.replaceAll('_', ' ') ?? ''),
+    //                 style: const TextStyle(
+    //                   fontSize: 16,
+    //                   fontWeight: FontWeight.bold,
+    //                 ),
+    //               ),
+    //               const SizedBox(height: 10),
+    //               TextFieldEditWidget(
+    //                 isEditModeMap: isEditModeMap,
+    //                 icon: Icons.description,
+    //                 index: 2,
+    //                 label: 'Interest Details',
+    //                 value: widget
+    //                     .profileBloc.interestList?[5].interestDetails ??
+    //                     "",
+    //                 onSave: (value) =>
+    //                 widget.profileBloc.interestList?[5]
+    //                     .interestDetails = value,
+    //               ),
+    //               const SizedBox(height: 10),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
         ]));
   }
 

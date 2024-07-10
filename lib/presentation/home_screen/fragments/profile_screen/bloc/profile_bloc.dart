@@ -257,6 +257,46 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             : 'globe',
       );
     } else if (event.updateProfileSection == 2) {
+      final response = await postService.getProfileUpdate(
+        'Bearer ${AppData.userToken}',
+        event.userProfile?.user?.firstName ?? '',
+        event.userProfile?.user?.lastName ?? "",
+        event.userProfile?.user?.phone ?? '',
+        event.userProfile?.user?.licenseNo ?? " ",
+        specialtyName ?? event.userProfile?.user?.specialty ?? '',
+        event.userProfile?.user?.dob ?? "",
+        'male',
+        country ?? event.userProfile?.user?.country ?? 'United Arab Emirates',
+        stateName ?? event.userProfile?.user?.city ?? 'Dubai',
+        country ?? event.userProfile?.user?.country ?? "United Arab Emirates",
+        // event.userProfile?.privacySetting?[3].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
+        // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
+        privacyLength >= 3
+            ? event.userProfile?.privacySetting![3].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 4
+            ? event.userProfile?.privacySetting![4].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 5
+            ? event.userProfile?.privacySetting![5].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 8
+            ? event.userProfile?.privacySetting![8].visibility ?? 'globe'
+            : 'globe',
+        'globe',
+        'globe',
+        privacyLength >= 10
+            ? event.userProfile?.privacySetting![10].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 11
+            ? event.userProfile?.privacySetting![11].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 12
+            ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
+            : 'globe',
+      );
       final response2 = await postService.updateAboutMe(
         'Bearer ${AppData.userToken}',
         event.userProfile?.profile?.aboutMe ?? '...',
@@ -264,19 +304,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.userProfile?.profile?.birthplace ?? '...',
         event.userProfile?.profile?.livesIn ?? '...',
         privacyLength >= 0
-            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            ? event.userProfile?.privacySetting![0].visibility ?? 'lock'
             : 'lock',
         privacyLength >= 1
-            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            ? event.userProfile?.privacySetting![1].visibility ?? 'lock'
             : 'lock',
         privacyLength >= 2
-            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            ? event.userProfile?.privacySetting![2].visibility ?? 'lock'
             : 'lock',
         privacyLength >= 6
-            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            ? event.userProfile?.privacySetting![6].visibility ?? 'lock'
             : 'lock',
         privacyLength >= 7
-            ? event.userProfile?.privacySetting![10].visibility ?? 'lock'
+            ? event.userProfile?.privacySetting![7].visibility ?? 'lock'
             : 'lock',
       );
     } else if (event.updateProfileSection == 3) {
@@ -320,19 +360,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         // event.userProfile?.privacySetting?[4].visibility ?? 'globe',
         // event.userProfile?.privacySetting?[5].visibility ?? 'globe',
         // event.userProfile?.privacySetting?[8].visibility ?? 'globe',
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
-        event.userProfile?.privacySetting?[1].visibility ?? 'globe',
+        privacyLength >= 3
+            ? event.userProfile?.privacySetting![3].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 4
+            ? event.userProfile?.privacySetting![4].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 5
+            ? event.userProfile?.privacySetting![5].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 8
+            ? event.userProfile?.privacySetting![8].visibility ?? 'globe'
+            : 'globe',
+        'lock',
+        'globe',
+        'lock',
+        // privacyLength >= 10
+        //     ? event.userProfile?.privacySetting![10].visibility ?? 'globe'
+        //     : 'globe',
+        privacyLength >= 11
+            ? event.userProfile?.privacySetting![11].visibility ?? 'globe'
+            : 'globe',
+        privacyLength >= 12
+            ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
+            : 'globe',
       );
       print(event.userProfile?.profile?.aboutMe ?? '');
       final response2 = await postService.updateAboutMe(
@@ -341,11 +392,21 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.userProfile?.profile?.address ?? '...',
         event.userProfile?.profile?.birthplace ?? '...',
         event.userProfile?.profile?.livesIn ?? '...',
-        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
-        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
-        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
-        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
-        event.userProfile?.privacySetting?[10].visibility ?? 'lock',
+        privacyLength >= 0
+            ? event.userProfile?.privacySetting![0].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 1
+            ? event.userProfile?.privacySetting![1].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 2
+            ? event.userProfile?.privacySetting![2].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 6
+            ? event.userProfile?.privacySetting![6].visibility ?? 'lock'
+            : 'lock',
+        privacyLength >= 7
+            ? event.userProfile?.privacySetting![7].visibility ?? 'lock'
+            : 'lock',
       );
       print(response2.response);
     }

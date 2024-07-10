@@ -13,6 +13,7 @@ class TextFieldEditWidget extends StatelessWidget {
   TextFieldEditWidget(
       {this.index,
       this.label,
+      this.hints,
       this.isEditModeMap,
       this.value,
       this.onSave,
@@ -26,6 +27,7 @@ class TextFieldEditWidget extends StatelessWidget {
 
   int? index;
   String? label;
+  String? hints;
   bool? isEditModeMap;
   String? value;
   Function(String)? onSave;
@@ -54,8 +56,9 @@ class TextFieldEditWidget extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 4),
                 child: CustomTextField(
                     textInputAction: textInputAction,
-                    hintText: label,
+                    hintText: hints,
                     filled: true,
+                    minLines:1,
                     focusNode: focusNode,
                     fillColor: AppDecoration.fillGray.color,
                     textInputType: textInputType ?? TextInputType.text,
@@ -82,15 +85,22 @@ class TextFieldEditWidget extends StatelessWidget {
         child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  capitalizeWords(label??''),
-                  style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  capitalizeWords(value??''),
+                Expanded(
+                  flex: 4,
+                  child: Text(
+                    capitalizeWords(label??''),
                     style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
-
-    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    textAlign: TextAlign.end,
+                    capitalizeWords(value??''),
+                      style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
+                  
+                      ),
+                ),
               ],
             ),
       );

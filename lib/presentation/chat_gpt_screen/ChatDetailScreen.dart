@@ -14,6 +14,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import to use Clipboard
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -308,21 +309,25 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    chatWithAi.length > 50
-                                        ? '${chatWithAi.substring(0, 50)}...'
-                                        : chatWithAi,
-                                    style: boldTextStyle(),
-                                    overflow: TextOverflow.ellipsis,
+                                SizedBox(
+                                  width: 40.w,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      chatWithAi.length > 50
+                                          ? '${chatWithAi.substring(0, 50)}...'
+                                          : chatWithAi,
+                                      style: boldTextStyle(),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
                                 IconButton(
                                   icon: isLoadingMessages
-                                      ? TypingIndicators(
-                                          color: svGetBodyColor(),
-                                          size: 2.0) // Custom typing indicator
+                                ? Image.asset('assets/images/docktak_ai_dark.png',height: 25,width: 25,)
+                                      // ? TypingIndicators(
+                                      //     color: svGetBodyColor(),
+                                      //     size: 2.0) // Custom typing indicator
                                       : const Text(""),
                                   onPressed: () {},
                                 )
@@ -397,8 +402,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     textAlign: TextAlign.center,
                                     'Request diagnostic suggestions based on symptoms.',
                                     style: TextStyle(
-                                      fontSize: 8.sp,
-                                      color: Colors.grey[500],
+                                      fontSize: 10.sp,
+                                      color: Colors.grey[700],
                                     ),
                                   ),
                                   const SizedBox(height: 8.0),
@@ -406,8 +411,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     textAlign: TextAlign.center,
                                     'Review medication interactions or dosages.',
                                     style: TextStyle(
-                                      fontSize: 8.sp,
-                                      color: Colors.grey[500],
+                                      fontSize: 10.sp,
+                                      color: Colors.grey[700],
                                     ),
                                   ),
                                   const SizedBox(height: 8.0),
@@ -415,8 +420,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     textAlign: TextAlign.center,
                                     'Detect CPT or ICD code.',
                                     style: TextStyle(
-                                      fontSize: 8.sp,
-                                      color: Colors.grey[500],
+                                      fontSize: 10.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold
                                     ),
                                   ),
                                   const SizedBox(height: 8.0),
@@ -424,8 +430,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     textAlign: TextAlign.center,
                                     'And much more! Feel free to explore.',
                                     style: TextStyle(
-                                      fontSize: 8.sp,
-                                      color: Colors.grey[500],
+                                      fontSize: 10.sp,
+                                      color: Colors.grey[700],
                                     ),
                                   ),
                                   const SizedBox(height: 16.0),
@@ -450,7 +456,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           itemCount: state1.response1.messages!.length,
                           itemBuilder: (context, index) {
                             Messages message = state1.response1.messages![index];
-
                             return Column(
                               children: [
                                 ChatBubble(
@@ -885,6 +890,7 @@ class ChatBubble extends StatelessWidget {
                               // selectable: true,
                               // softLineBreak: true,
                               // shrinkWrap: true,
+                              style: GoogleFonts.poppins(fontSize: 14),
                               text.replaceAll("*", '').replaceAll('#', ''),
                             ),
                           ),

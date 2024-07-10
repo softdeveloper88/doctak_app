@@ -12,6 +12,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../utils/SVColors.dart';
 import '../../../utils/SVCommon.dart';
 import 'add_edit_work_screen.dart';
 
@@ -43,7 +44,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
-        title: Text('Work Information', style: boldTextStyle(size: 20)),
+        title: Text('Professional Experience', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -53,27 +54,48 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
             child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
-          if (widget.profileBloc.isMe)   GestureDetector(
-            onTap: () {
-              setState(() {
-                AddEditWorkScreen(profileBloc:widget.profileBloc).launch(context);
-                isEditModeMap = !isEditModeMap;
-              });
-            },
-            child:  const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.add_circle_outline_sharp,
-                color: Colors.blue,
-                size: 30,
-                // color: Colors.black,
-                // imagePath: 'assets/icon/ic_vector.svg',
-                // height: 25.adaptSize,
-                // width: 25.adaptSize,
-                // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+          if (widget.profileBloc.isMe)  Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: MaterialButton(
+              textColor: Colors.black,
+              onPressed: () {
+                setState(() {
+                  isEditModeMap = !isEditModeMap;
+                });
+              },
+              elevation: 6,
+              color: Colors.white,
+              minWidth: 20,
+              shape: RoundedRectangleBorder(
+                borderRadius: radius(200),
+                side: const BorderSide(color: Colors.blue),
+              ),
+              animationDuration: const Duration(milliseconds: 300),
+              focusColor: SVAppColorPrimary,
+              hoverColor: SVAppColorPrimary,
+              splashColor: SVAppColorPrimary,
+              // padding: const EdgeInsets.all(4),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    AddEditWorkScreen(profileBloc:widget.profileBloc).launch(context);
+                    isEditModeMap = !isEditModeMap;
+                  });
+                },
+                child:  const Icon(
+                  Icons.add_circle_outline_sharp,
+                  color: Colors.blue,
+                  size: 25,
+                  // color: Colors.black,
+                  // imagePath: 'assets/icon/ic_vector.svg',
+                  // height: 25.adaptSize,
+                  // width: 25.adaptSize,
+                  // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+                ),
               ),
             ),
           ),
+
         ],
       ),
       body: BlocConsumer<ProfileBloc,ProfileState>(
@@ -83,12 +105,12 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
             workList =widget.profileBloc.workEducationList!
                 .where((work) => work.workType == 'work')
                 .toList();
-            universityList =widget.profileBloc.workEducationList!
-                .where((work) => work.workType == 'university')
-                .toList();
-            highSchool =widget.profileBloc.workEducationList!
-                .where((work) => work.workType == 'high_school')
-                .toList();
+            // universityList =widget.profileBloc.workEducationList!
+            //     .where((work) => work.workType == 'university')
+            //     .toList();
+            // highSchool =widget.profileBloc.workEducationList!
+            //     .where((work) => work.workType == 'high_school')
+            //     .toList();
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -150,20 +172,22 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                       children: [
                       if(type=='work') TextViewWidget(
                           icon: Icons.work,
-                          label: 'Company Name',
+                          label: 'Speciality/Area of practice',
                           value: entry.name ?? '',
                         ),
+                        Divider(color: Colors.grey,),
                         if(type=='work')  TextViewWidget(
                           icon: Icons.type_specimen,
-
-                          label: 'Position',
+                          label: 'Position/Role',
                           value: entry.position ?? "",
                         ),
+                        Divider(color: Colors.grey,),
                         TextViewWidget(
-                          icon: Icons.location_on,
-                          label: 'Address',
+                          icon: Icons.local_hospital,
+                          label: 'Hospital/Clinic Name',
                           value: entry.address ?? "",
                         ),
+                        Divider(color: Colors.grey,),
                         if(type!='work') TextViewWidget(
                           icon: Icons.description,
                           label: 'Degree',
@@ -173,19 +197,24 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                           icon: Icons.book,
                           label: 'Courses',
                         ),
+
+                        // TextViewWidget(
+                        //   icon: Icons.book,
+                        //   label: 'Work Type',
+                        //   value: entry.workType ?? "",
+                        // ),
                         TextViewWidget(
-                          icon: Icons.book,
-                          label: 'Work Type',
-                          value: entry.workType ?? "",
-                        ),
-                        TextViewWidget(
-                            icon: Icons.description,
-                            label: 'Description',
+                            icon: Icons.location_city ,
+                            label: 'Location',
                             value: entry.description ?? "",),
+                        Divider(color: Colors.grey,),
+
                         TextViewWidget(
                           label: 'Start Date',
                           value: entry.startDate ?? '',
                         ),
+                        Divider(color: Colors.grey,),
+
                         TextViewWidget(
                           label: 'End Date',
                           value: entry.endDate ?? '',
