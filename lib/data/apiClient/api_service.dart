@@ -460,6 +460,10 @@ abstract class ApiService {
   );
 
   @FormUrlEncoded()
+  @POST("/delete-message")
+  Future<HttpResponse> deleteMessage(@Header('Authorization') String token,
+      @Field('ic') String commentId);
+  @FormUrlEncoded()
   @POST("/save-suggestion")
   Future<HttpResponse> saveSuggestion(
     @Header('Authorization') String token,

@@ -48,8 +48,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   String chatWithAi = "Preparing DocTak AI.";
   bool isDeleteButtonClicked = false;
   bool isAlreadyAsk = true;
+  bool isEmpty = false;
 
-  void drugsAskQuestion(state1,context) {
+  void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
     if (question.isEmpty) return;
 
@@ -58,24 +59,24 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
     //     -1; // Unique temporary ID for the response
     print('object');
     // setState(() {
-      var myMessage = Messages(
-          id: -1,
-          gptSessionId: selectedSessionId.toString(),
-          question: question,
-          response: 'Generating response...',
-          createdAt: DateTime.now().toString(),
-          updatedAt: DateTime.now().toString());
+    var myMessage = Messages(
+        id: -1,
+        gptSessionId: selectedSessionId.toString(),
+        question: question,
+        response: 'Generating response...',
+        createdAt: DateTime.now().toString(),
+        updatedAt: DateTime.now().toString());
 
-     state1.response1.messages!.add(myMessage);
+    state1.response1.messages!.add(myMessage);
 
-      BlocProvider.of<ChatGPTBloc>(context).add(
-        GetPost(
-          sessionId: selectedSessionId.toString(),
-          question: question, // replace with real input
-        ),
-      );
-      textController.clear();
-      scrollToBottom();
+    BlocProvider.of<ChatGPTBloc>(context).add(
+      GetPost(
+        sessionId: selectedSessionId.toString(),
+        question: question, // replace with real input
+      ),
+    );
+    textController.clear();
+    scrollToBottom();
     // });
     try {
       isWriting = false;
@@ -191,22 +192,35 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   //   }
   // }
 
-  // ... (rest of the existing methods)
+  cardIntro(title,subTitle,onTap){
+    return InkWell(
+    onTap:onTap,
+    child: Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(title,textAlign: TextAlign.center,style: GoogleFonts.poppins(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.w400),),
+                Text(subTitle,textAlign: TextAlign.center,style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.normal),),
+              ]),
+        )),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-        child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
-            builder: (context, state1) {
+        child:
+            BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
-
           }
           if (state1 is DataInitial) {
-
             return Scaffold(
-
               body: AnimatedBackground(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -221,15 +235,18 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 ),
               ),
             );
-
           } else if (state1 is DataLoaded) {
+            isEmpty=state1.response1.messages!.isEmpty;
             print('response ${state1.response.toString()}');
-
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
+                setState(() {
+                  isEmpty=false;
+
+                });
                 isAlreadyAsk = false;
                 // Future.delayed(const Duration(seconds: 1),(){
-                  drugsAskQuestion(state1,context);
+                drugsAskQuestion(state1, context);
                 // });
                 // textController.text = widget.question.toString();
               }
@@ -299,7 +316,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   backgroundColor: context.cardColor,
                   title: Builder(
                     builder: (context) {
-
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -324,7 +340,11 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 ),
                                 IconButton(
                                   icon: isLoadingMessages
-                                ? Image.asset('assets/images/docktak_ai_dark.png',height: 25,width: 25,)
+                                      ? Image.asset(
+                                          'assets/images/docktak_ai_dark.png',
+                                          height: 25,
+                                          width: 25,
+                                        )
                                       // ? TypingIndicators(
                                       //     color: svGetBodyColor(),
                                       //     size: 2.0) // Custom typing indicator
@@ -359,7 +379,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 body: Column(
                   children: <Widget>[
                     // const SizedBox(height: 10,),
-                    if (state1.response1.messages!.isEmpty)
+                    if (isEmpty)
                       Expanded(
                         child: Center(
                           child: Container(
@@ -369,80 +389,203 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    'Your personal & medical assistant powered by Artificial Intelligence',
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                   Text(
-                                    textAlign: TextAlign.center,
+                                  const SizedBox(height: 20),
+                                  const Text(
                                     'Welcome, Doctor!',
                                     style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: Colors.black,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    'Your personal & medical assistant powered by Artificial Intelligence',
                                     textAlign: TextAlign.center,
-                                    'Thank you for using our AI assistant. Here are some things you can do:',
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey[700],
-                                    ),
+                                    style: TextStyle(fontSize: 16),
                                   ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
+                                  const SizedBox(height: 30),
+                                  Wrap(
+
+                                    alignment: WrapAlignment.center,
+                                    // mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      cardIntro('Code Detection', 'Identify CPT or ICD codes', (){
+                                        // Code Detection: Identify CPT or ICD codes
+                                        isAlreadyAsk=true;
+                                        widget.question='Code Detection: Identify CPT or ICD codes';
+                                        if (isAlreadyAsk) {
+                                          setState(() {
+                                            isEmpty=false;
+
+                                          });
+                                          isAlreadyAsk = false;
+
+                                          // Future.delayed(const Duration(seconds: 1),(){
+                                          drugsAskQuestion(state1, context);
+                                          // });
+                                          // textController.text = widget.question.toString();
+                                        }
+                                      }),
+                                      const SizedBox(width: 10),
+
+                                      cardIntro('Diagnostic \nSuggestions', 'Request suggestions based on symptoms', (){
+                                        isAlreadyAsk=true;
+                                        widget.question='Diagnostic Suggestions: Request suggestions based on symptoms';
+                                        if (isAlreadyAsk) {
+
+                                          isAlreadyAsk = false;
+                                          // Future.delayed(const Duration(seconds: 1),(){
+                                          setState(() {
+                                            isEmpty=false;
+
+                                          });
+                                          drugsAskQuestion(state1, context);
+                                          // });
+                                          // textController.text = widget.question.toString();
+                                        }
+                                      }),
+                                      const SizedBox(width: 10),
+                                      cardIntro('Medication Review', 'Check interactions and dosage', (){
+                                      // Medication Review: check interactions and dosage
+
+                                        widget.question='Medication Review: check interactions and dosage';
+                                          // Future.delayed(const Duration(seconds: 1),(){
+                                        setState(() {
+                                          isEmpty=false;
+
+                                        });
+                                        drugsAskQuestion(state1, context);
+                                          // });
+                                          // textController.text = widget.question.toString();
+                                      }),
+
+
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  const Text(
+                                    'Ready to start? Type your question below or choose a suggested topic.',
                                     textAlign: TextAlign.center,
-                                    'Request diagnostic suggestions based on symptoms.',
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey[700],
-                                    ),
+                                    style: TextStyle(fontSize: 14),
                                   ),
-                                  const SizedBox(height: 8.0),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    'Review medication interactions or dosages.',
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey[700],
-                                    ),
+                                  const SizedBox(height: 10),
+                                   Wrap(
+                                    alignment: WrapAlignment.center,
+                                    spacing: 10,
+                                    children: [
+                                      InkWell(
+                                          onTap: (){
+                                            widget.question='Symptom Analysis';
+                                            // Future.delayed(const Duration(seconds: 1),(){
+                                            setState(() {
+                                              isEmpty=false;
+
+                                            });
+                                            drugsAskQuestion(state1, context);
+                                          },
+                                          child: const Chip(label: Text('Symptom Analysis'))),
+
+                                      InkWell(
+                                          onTap: (){
+                                            widget.question='Drug Interactions';
+                                            // Future.delayed(const Duration(seconds: 1),(){
+                                            setState(() {
+                                              isEmpty=false;
+
+                                            });
+                                            drugsAskQuestion(state1, context);
+                                          },
+                                          child: const Chip(label: Text('Drug Interactions'))),
+
+                                      InkWell(
+                                          onTap: (){
+                                              widget.question='Treatment Guidelines';
+                                              // Future.delayed(const Duration(seconds: 1),(){
+                                              setState(() {
+                                                isEmpty=false;
+
+                                              });
+                                              drugsAskQuestion(state1, context);
+
+                                          },
+                                          child: const Chip(label: Text('Treatment Guidelines'))),
+                                    ],
                                   ),
-                                  const SizedBox(height: 8.0),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    'Detect CPT or ICD code.',
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8.0),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    'And much more! Feel free to explore.',
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    "If you need assistance or have questions, don't hesitate to ask.",
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
+                                  // Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   'Your personal & medical assistant powered by Artificial Intelligence',
+                                  //   style: TextStyle(
+                                  //     fontSize: 10.sp,
+                                  //     color: Colors.grey[700],
+                                  //     fontWeight: FontWeight.bold,
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 16.0),
+                                  //  Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   'Welcome, Doctor!',
+                                  //   style: TextStyle(
+                                  //     fontSize: 12.sp,
+                                  //     color: Colors.black,
+                                  //     fontWeight: FontWeight.bold,
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 16.0),
+                                  //
+                                  // Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   'Thank you for using our AI assistant. Here are some things you can do:',
+                                  //   style: TextStyle(
+                                  //     fontSize: 10.sp,
+                                  //     color: Colors.grey[700],
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 16.0),
+                                  // Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   'Request diagnostic suggestions based on symptoms.',
+                                  //   style: TextStyle(
+                                  //     fontSize: 10.sp,
+                                  //     color: Colors.grey[700],
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 8.0),
+                                  // Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   'Review medication interactions or dosages.',
+                                  //   style: TextStyle(
+                                  //     fontSize: 10.sp,
+                                  //     color: Colors.grey[700],
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 8.0),
+                                  // Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   'Detect CPT or ICD code.',
+                                  //   style: TextStyle(
+                                  //     fontSize: 10.sp,
+                                  //     color: Colors.black,
+                                  //     fontWeight: FontWeight.bold
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 8.0),
+                                  // Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   'And much more! Feel free to explore.',
+                                  //   style: TextStyle(
+                                  //     fontSize: 10.sp,
+                                  //     color: Colors.grey[700],
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 16.0),
+                                  // Text(
+                                  //   textAlign: TextAlign.center,
+                                  //   "If you need assistance or have questions, don't hesitate to ask.",
+                                  //   style: TextStyle(
+                                  //     fontSize: 10.sp,
+                                  //     color: Colors.grey[700],
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),
@@ -455,7 +598,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           controller: _scrollController,
                           itemCount: state1.response1.messages!.length,
                           itemBuilder: (context, index) {
-                            Messages message = state1.response1.messages![index];
+                            Messages message =
+                                state1.response1.messages![index];
                             return Column(
                               children: [
                                 ChatBubble(
@@ -873,26 +1017,36 @@ class ChatBubble extends StatelessWidget {
                           child: ConstrainedBox(
                             constraints:
                                 BoxConstraints(maxWidth: bubbleMaxWidth),
-                            child: text=='Generating response...'?Column(
-                              children: [
-                                Text(
-                                  // fitContent: true,
-                                  // selectable: true,
-                                  // softLineBreak: true,
-                                  // shrinkWrap: true,
-                                  text.replaceAll("*", '').replaceAll('#', ''),
-                                ),
-                                 const SizedBox(height: 10,),
-                                 CircularProgressIndicator(color: svGetBodyColor(),),
-                              ],
-                            ):Text(
-                              // fitContent: true,
-                              // selectable: true,
-                              // softLineBreak: true,
-                              // shrinkWrap: true,
-                              style: GoogleFonts.poppins(fontSize: 14),
-                              text.replaceAll("*", '').replaceAll('#', ''),
-                            ),
+                            child: text == 'Generating response...'
+                                ? Column(
+                                    children: [
+                                      Text(
+                                        // fitContent: true,
+                                        // selectable: true,
+                                        // softLineBreak: true,
+                                        // shrinkWrap: true,
+                                        text
+                                            .replaceAll("*", '')
+                                            .replaceAll('#', ''),
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      CircularProgressIndicator(
+                                        color: svGetBodyColor(),
+                                      ),
+                                    ],
+                                  )
+                                : Text(
+                                    // fitContent: true,
+                                    // selectable: true,
+                                    // softLineBreak: true,
+                                    // shrinkWrap: true,
+                                    style: GoogleFonts.poppins(fontSize: 14),
+                                    text
+                                        .replaceAll("*", '')
+                                        .replaceAll('#', ''),
+                                  ),
                           ),
                         ),
                         Divider(

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
@@ -5,6 +7,7 @@ import 'package:doctak_app/data/models/chat_model/contacts_model.dart';
 import 'package:doctak_app/data/models/chat_model/message_model.dart';
 import 'package:doctak_app/data/models/chat_model/search_contacts_model.dart';
 import 'package:doctak_app/data/models/chat_model/send_message_model.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -42,6 +45,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<LoadContactsEvent>(_onGetSearchContacts);
     on<LoadRoomMessageEvent>(_onGetMessages);
     on<SendMessageEvent>(_onSendMessages);
+    on<DeleteMessageEvent>(_onDeleteMessages);
     on<SelectedFiles>(_selectedFile);
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == contactsList.length - nextPageTrigger) {
@@ -125,8 +129,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       messagesList.clear();
       messagePageNumber = 1;
       emit(PaginationLoadingState());
+    }else if(event.page==0){
+      messagesList.clear();
+      messagePageNumber = 1;
+      event.page=1;
     }
-    // try {
+    try {
+    print(event.page);
       MessageModel response = await postService.getRoomMessenger(
           'Bearer ${AppData.userToken}',
           '$messagePageNumber',
@@ -141,16 +150,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         // messagesList=messagesList.reversed.toList();
       }
 
+
+print(response.toJson());
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(contactsList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   emit(PaginationLoadedState());
-    //
-    //   // emit(DataError('An error occurred $e'));
-    // }
+    } catch (e) {
+      print(e);
+
+      emit(PaginationLoadedState());
+
+      // emit(DataError('An error occurred $e'));
+    }
   }
 
   _onSendMessages(SendMessageEvent event, Emitter<ChatState> emit) async {
@@ -194,6 +205,31 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             attachmentType: response.attachmentType,
             createdAt: response.createdAt,
           ));
+      // print("hello${response.toJson()}");
+      emit(PaginationLoadedState());
+
+      // emit(DataLoaded(contactsList));
+    // } catch (e) {
+    //   print(e);
+    //
+    //   emit(PaginationLoadedState());
+    //
+    //   // emit(DataError('An error occurred $e'));
+    // }
+  }
+  _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
+
+    // try {
+
+
+     var  response1 = await postService.deleteMessage(
+          'Bearer ${AppData.userToken}',
+          event.id??'',
+        );
+     print(event.id);
+     print(response1.data);
+    messagesList.removeWhere((message)=>message.id==event.id);
+      showToast('Message deleted');
       // print("hello${response.toJson()}");
       emit(PaginationLoadedState());
 

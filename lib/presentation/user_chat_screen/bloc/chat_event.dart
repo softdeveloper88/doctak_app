@@ -90,6 +90,13 @@ class SendMessageEvent extends ChatEvent {
   @override
   List<Object?> get props => [userId,roomId,receiverId,attachmentType,file,message];
 }
+class DeleteMessageEvent extends ChatEvent {
+  String? id;
+
+  DeleteMessageEvent({required this.id});
+  @override
+  List<Object?> get props => [id];
+}
 class SelectedFiles extends ChatEvent {
   XFile pickedfiles;
   bool isRemove;

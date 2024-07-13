@@ -12,7 +12,7 @@ createDynamicLink(postTitle, postUrl, imageUrl) async {
       minimumVersion: 41,
     ),
     iosParameters:  IOSParameters(
-      bundleId: "com.kt.doctak",
+      bundleId: "com.doctak.ios",
       appStoreId: "6448684340",
       minimumVersion: "2.0.9",
       fallbackUrl:Uri.parse(postUrl),

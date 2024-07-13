@@ -277,7 +277,6 @@ class ChatBubble extends StatelessWidget {
               alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
               child: Column(
                 crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0),
@@ -312,7 +311,29 @@ class ChatBubble extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8.0),
                               child: Container(
                                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
-                                child: AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
+                                child:VoiceMessageView(
+                                  controller: VoiceController(
+                                  audioSrc: "${AppData.imageUrl}$attachmentJson",
+                                  maxDuration: const Duration(seconds: 10),
+                                  isFile: false,
+                                  onComplete: () {
+                                    /// do something on complete
+                                  },
+                                  onPause: () {
+                                    /// do something on pause
+                                  },
+                                  onPlaying: () {
+                                    /// do something on playing
+                                  },
+                                  onError: (err) {
+                                    /// do somethin on error
+                                  },
+                                ),
+                                  innerPadding: 12,
+                                  cornerRadius: 20,
+
+                                ),
+                                // AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
                               ),
                             )
                           else if (attachmentJson!.endsWith('m4a'))
@@ -320,8 +341,28 @@ class ChatBubble extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8.0),
                               child: Container(
                                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width-1),
-                                child:
-                                AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
+                                child:VoiceMessageView(     controller: VoiceController(
+                                  audioSrc:
+                                  "${AppData.imageUrl}$attachmentJson",
+                                  maxDuration: const Duration(seconds: 10),
+                                  isFile: false,
+                                  onComplete: () {
+                                    /// do something on complete
+                                  },
+                                  onPause: () {
+                                    /// do something on pause
+                                  },
+                                  onPlaying: () {
+                                    /// do something on playing
+                                  },
+                                  onError: (err) {
+                                    /// do somethin on error
+                                  },
+                                ),
+                                  innerPadding: 12,
+                                  cornerRadius: 20,
+                                ),
+                                // AudioViewer(audio: "${AppData.imageUrl}$attachmentJson", controllable: true,)
                               ),
                             )
                           else if(attachmentJson!.endsWith('mp4'))

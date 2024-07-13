@@ -11,6 +11,7 @@ import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
+import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound_record/flutter_sound_record.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -85,6 +86,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     _timer?.cancel();
     _ampTimer?.cancel();
     _audioRecorder.dispose();
+
     super.dispose();
   }
 
@@ -92,11 +94,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void initState() {
     super.initState();
     setStatusBarColor(svGetScaffoldColor());
-
     // Handle completion
     print("id${widget.id}roomid${widget.roomId}");
     _isRecording = false;
-
     chatBloc.add(LoadRoomMessageEvent(
         page: 1, userId: widget.id, roomId: widget.roomId));
     ConnectPusher();
@@ -114,7 +114,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           _isRecording = isRecording;
           _recordDuration = 0;
         });
-
         _startTimer();
       }
     } catch (e) {
@@ -158,18 +157,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void _startTimer() {
     _timer?.cancel();
     _ampTimer?.cancel();
-
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       setState(() => _recordDuration++);
     });
-
     _ampTimer =
         Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
       _amplitude = await _audioRecorder.getAmplitude();
       setState(() {});
     });
   }
-
 //   void _createClient() async {
 //     _client =
 //         await AgoraRtmClient.createInstance('f2cf99f1193a40e69546157883b2159f');
@@ -287,21 +283,138 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // });
   }
 
+//   void ConnectPusher() async {
+//     // Create the Pusher client
+//     await pusher.init(
+//         apiKey: PusherConfig.key,
+//         cluster: PusherConfig.cluster,
+//         useTLS: false,
+//         onSubscriptionCount: onSubscriptionCount,
+//         onAuthorizer: onAuthorizer);
+//     pusher.connect();
+//
+//     if (pusher != null) {
+//       // Successfully created and connected to Pusher
+//
+//       clientListenChannel = await pusher.subscribe(
+//         channelName: "private-chatify." + AppData.logInUserId,
+//         onMemberAdded: (member) {
+//           // print("Member added: $member");
+//         },
+//         onMemberRemoved: (member) {
+//           // print("Member removed: $member");
+//         },
+//         onEvent: (event) {
+//           String eventName = event.eventName;
+//
+//           switch (eventName) {
+//             case 'client-typing':
+//               onTypingStarted();
+//
+//               // If the timer is already running, cancel it
+//               if (typingTimer != null && typingTimer!.isActive) {
+//                 typingTimer!.cancel();
+//               }
+//               // Set a timer to stop typing indicator after 2 seconds
+//               typingTimer = Timer(const Duration(seconds: 2), () {
+//                 onTypingStopped();
+//                 chatBloc.add(LoadRoomMessageEvent(
+//                     page: 1, userId: widget.id, roomId: widget.roomId));
+//               });
+//               break;
+//             case 'messaging':
+//               var textMessage = "";
+//               var messageData = event.data;
+//               messageData = json.decode(messageData);
+//               var status = messageData['status'];
+//
+//               if (status == "web") {
+//                 final htmlMessage = event.data;
+//                 var message = json.decode(htmlMessage);
+//
+//                 // Use the html package to parse the HTML and extract text content
+//                 final document = htmlParser.parse(message['message']);
+//
+//                 final messageDiv = document.querySelector('.message');
+//                 final textMessageWithTime = messageDiv?.text.trim() ?? "";
+//
+// // Split the textMessageWithTime by the "time ago" portion
+//                 final parts = textMessageWithTime.split('1 second ago');
+//                 textMessage =
+//                     parts.first.trim(); // Take the first part (the message)
+//               }
+//               if (status == "api") {
+//                 var message = messageData['message'];
+//
+//                 textMessage = message['message'];
+//               }
+//
+//               setState(() {
+//                 typingTimer = Timer(const Duration(seconds: 2), () {
+//                   onTypingStopped();
+//                   chatBloc.add(LoadRoomMessageEvent(
+//                       page: 1, userId: widget.id, roomId: widget.roomId));
+//                 });
+//                 // messagesList.insert(
+//                 //   0,
+//                 //   Message(
+//                 //     body: textMessage, // Use the extracted text content
+//                 //     toId: AppData.logInUserId,
+//                 //     fromId: widget.id,
+//                 //   ),
+//                 // );
+//                 // isLoading = false;
+//               });
+//
+//               break;
+//             // Add more cases for other event types as needed
+//             default:
+//               // Handle unknown event types or ignore them
+//               break;
+//           }
+//         },
+//       );
+//
+//       clientSendChannel = await pusher.subscribe(
+//         channelName: "private-chatify.${widget.id}",
+//         onMemberAdded: (member) {
+//           // print("Member added: $member");
+//         },
+//         onMemberRemoved: (member) {
+//           // print("Member removed: $member");
+//         },
+//         onEvent: (event) {
+//           // print("Received Event (Listen Channel): $event");
+//         },
+//       );
+//
+//       // Attach an event listener to the channel
+//     } else {
+//       // Handle the case where Pusher connection failed
+//       // print("Failed to connect to Pusher");
+//     }
+//   }
   void ConnectPusher() async {
     // Create the Pusher client
     await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        useTLS: false,
-        onSubscriptionCount: onSubscriptionCount,
-        onAuthorizer: onAuthorizer);
+      apiKey: PusherConfig.key,
+      cluster: PusherConfig.cluster,
+      useTLS: false,
+      onSubscriptionCount: onSubscriptionCount,
+      onAuthorizer: onAuthorizer,
+    );
+
     pusher.connect();
 
     if (pusher != null) {
       // Successfully created and connected to Pusher
 
       clientListenChannel = await pusher.subscribe(
-        channelName: "private-chatify." + AppData.logInUserId,
+        channelName: "private-chattily.${AppData.logInUserId}",
+        onSubscriptionSucceeded: (event) {
+          // Channel is ready, now you can trigger events
+          print("Subscription to listen channel succeeded.");
+        },
         onMemberAdded: (member) {
           // print("Member added: $member");
         },
@@ -310,23 +423,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         },
         onEvent: (event) {
           String eventName = event.eventName;
-
           switch (eventName) {
             case 'client-typing':
               onTypingStarted();
-
               // If the timer is already running, cancel it
               if (typingTimer != null && typingTimer!.isActive) {
                 typingTimer!.cancel();
               }
-
               // Set a timer to stop typing indicator after 2 seconds
               typingTimer = Timer(const Duration(seconds: 2), () {
                 onTypingStopped();
                 chatBloc.add(LoadRoomMessageEvent(
                     page: 0, userId: widget.id, roomId: widget.roomId));
               });
-
               break;
             case 'messaging':
               var textMessage = "";
@@ -344,33 +453,27 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 final messageDiv = document.querySelector('.message');
                 final textMessageWithTime = messageDiv?.text.trim() ?? "";
 
-// Split the textMessageWithTime by the "time ago" portion
+                // Split the textMessageWithTime by the "time ago" portion
                 final parts = textMessageWithTime.split('1 second ago');
-                textMessage =
-                    parts.first.trim(); // Take the first part (the message)
+                textMessage = parts.first.trim(); // Take the first part (the message)
               }
               if (status == "api") {
                 var message = messageData['message'];
-
                 textMessage = message['message'];
               }
 
-              setState(() {
-                // messagesList.insert(
-                //   0,
-                //   Message(
-                //     body: textMessage, // Use the extracted text content
-                //     toId: AppData.logInUserId,
-                //     fromId: widget.id,
-                //   ),
-                // );
-                // isLoading = false;
-              });
+              // setState(() {
+                typingTimer = Timer(const Duration(seconds: 2), () {
+                  onTypingStopped();
+                  chatBloc.add(LoadRoomMessageEvent(
+                      page: 0, userId: widget.id, roomId: widget.roomId));
+                });
+              // });
 
               break;
-            // Add more cases for other event types as needed
+          // Add more cases for other event types as needed
             default:
-              // Handle unknown event types or ignore them
+            // Handle unknown event types or ignore them
               break;
           }
         },
@@ -378,6 +481,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
       clientSendChannel = await pusher.subscribe(
         channelName: "private-chatify.${widget.id}",
+        onSubscriptionSucceeded: (event) {
+          // Channel is ready, now you can trigger events
+          print("Subscription to send channel succeeded.");
+        },
         onMemberAdded: (member) {
           // print("Member added: $member");
         },
@@ -388,7 +495,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           // print("Received Event (Listen Channel): $event");
         },
       );
-
       // Attach an event listener to the channel
     } else {
       // Handle the case where Pusher connection failed
@@ -396,7 +502,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     }
   }
 
-  void ontextFieldFocused(bool typingStatus) async {
+  void onTextFieldFocused(bool typingStatus) async {
     String eventName = "client-typing"; // Replace with your event name
 // String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
     Map<String, dynamic> eventData = {
@@ -420,7 +526,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
-
   // void _selectFiles(BuildContext context) async {
   //   ImagePickerPlus picker = ImagePickerPlus(context);
   //   SelectedImagesDetails? details = await picker.pickBoth(
@@ -592,7 +697,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
     });
   }
-
   @override
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
@@ -714,20 +818,37 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                   color: svGetBodyColor(),
                                 ),
                               )
-                            : ChatBubble(
-                                profile: bloc.messagesList[index].userId !=
-                                        widget.id
-                                    ? widget.profilePic
-                                    : "${AppData.imageUrl}${widget.profilePic}",
-                                message: bloc.messagesList[index].body ?? '',
-                                isMe:
-                                    bloc.messagesList[index].userId == widget.id
-                                        ? false
-                                        : true,
-                                attachmentJson:
-                                    bloc.messagesList[index].attachment,
-                                createAt: bloc.messagesList[index].createdAt,
-                              );
+                            : InkWell(
+                          onLongPress: (){
+                            if(bloc.messagesList[index].userId != widget.id){
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomAlertDialog(
+                                      title: 'Are you sure want to delete message ?',
+                                      callback: () {
+                                        bloc.add(DeleteMessageEvent(
+                                            id: bloc.messagesList[index].id.toString()));
+                                        Navigator.of(context).pop();
+                                      });
+                                });
+                            }
+                          },
+                              child: ChatBubble(
+                                  profile: bloc.messagesList[index].userId !=
+                                          widget.id
+                                      ? widget.profilePic
+                                      : "${AppData.imageUrl}${widget.profilePic}",
+                                  message: bloc.messagesList[index].body ?? '',
+                                  isMe:
+                                      bloc.messagesList[index].userId == widget.id
+                                          ? false
+                                          : true,
+                                  attachmentJson:
+                                      bloc.messagesList[index].attachment,
+                                  createAt: bloc.messagesList[index].createdAt,
+                                ),
+                            );
                       },
                       itemCount: bloc.messagesList.length,
                     ),
@@ -746,118 +867,111 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     decoration: BoxDecoration(
                       color: context.cardColor,
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                     child: Row(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: appStore.isDarkMode
-                                ? svGetScaffoldColor()
-                                : cardLightColor,
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          child: Row(
-                            children: [
-                              isLoading
-                                  ? Container(
-                                      width: 25,
-                                      height: 25,
-                                      margin: const EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: svGetBodyColor(),
-                                      ),
-                                    )
-                                  : IconButton(
-                                      icon: const Icon(Icons.attach_file),
-                                      onPressed: () async {
-                                        const permission = Permission.photos;
-                                        if (await permission.isGranted) {
-                                          _showFileOptions();
-                                        } else if (await permission.isDenied) {
-                                          final result =
-                                              await permission.request();
-                                          if (result.isGranted) {
-                                            _showFileOptions();
-                                          } else if (result.isDenied) {
-                                            print("isDenied");
-                                          } else if (result
-                                              .isPermanentlyDenied) {
-                                            print("isPermanentlyDenied");
-                                            _permissionDialog(context);
-                                          }
-                                        } else if (await permission
-                                            .isPermanentlyDenied) {
-                                          print("isPermanentlyDenied");
-                                          _permissionDialog(context);
-                                        }
+                        Flexible(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: appStore.isDarkMode ? svGetScaffoldColor() : cardLightColor,
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Row(
+                              children: [
+                                isLoading
+                                    ? Container(
+                                  width: 25,
+                                  height: 25,
+                                  margin: const EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(
+                                    color: svGetBodyColor(),
+                                  ),
+                                )
+                                    : IconButton(
+                                  icon: const Icon(Icons.attach_file),
+                                  onPressed: () async {
+                                    const permission = Permission.photos;
+                                    if (await permission.isGranted) {
+                                      _showFileOptions();
+                                    } else if (await permission.isDenied) {
+                                      final result = await permission.request();
+                                      if (result.isGranted) {
                                         _showFileOptions();
-                                      },
+                                      } else if (result.isDenied) {
+                                        print("isDenied");
+                                      } else if (result.isPermanentlyDenied) {
+                                        print("isPermanentlyDenied");
+                                        _permissionDialog(context);
+                                      }
+                                    } else if (await permission.isPermanentlyDenied) {
+                                      print("isPermanentlyDenied");
+                                      _permissionDialog(context);
+                                    }
+                                    _showFileOptions();
+                                  },
+                                ),
+                                const SizedBox(width: 8.0),
+                                isRecording
+                                    ? const Text('Recording Start..')
+                                    : Flexible(
+                                  child: Container(
+                                    height: 40,
+                                    padding: const EdgeInsets.only(left: 8, right: 8),
+                                    decoration: BoxDecoration(
+                                      color: appStore.isDarkMode
+                                          ? svGetScaffoldColor()
+                                          : cardLightColor,
+                                      borderRadius: BorderRadius.circular(20.0),
                                     ),
-                              const SizedBox(width: 8.0),
-                              isRecording
-                                  ? const Text('Recording Start..')
-                                  : Container(
-                                      width: 50.w,
-                                      height: 40,
-                                      padding: const EdgeInsets.only(
-                                          left: 8, right: 8),
-                                      decoration: BoxDecoration(
-                                        color: appStore.isDarkMode
-                                            ? svGetScaffoldColor()
-                                            : cardLightColor,
-                                        borderRadius:
-                                            BorderRadius.circular(20.0),
-                                      ),
-                                      child: Center(
-                                        child: TextField(
-                                          controller: textController,
-                                          decoration:
-                                              const InputDecoration.collapsed(
-                                            hintText: 'Type your message...',
-                                          ),
-                                          maxLines: null,
-                                          keyboardType: TextInputType.multiline,
-                                          textInputAction:
-                                              TextInputAction.newline,
-                                          onChanged: (Text) {
-                                            ontextFieldFocused(true);
-                                          },
-                                          onTapOutside: (text) {
-                                            ontextFieldFocused(false);
-                                          },
+                                    child: Center(
+                                      child: TextField(
+                                        controller: textController,
+                                        decoration: const InputDecoration.collapsed(
+                                          hintText: 'Type your message...',
                                         ),
+                                        maxLines: null,
+                                        keyboardType: TextInputType.multiline,
+                                        textInputAction: TextInputAction.newline,
+                                        onChanged: (Text) {
+                                          onTextFieldFocused(true);
+                                        },
+                                        onTapOutside: (text) {
+                                          onTextFieldFocused(false);
+                                        },
                                       ),
                                     ),
-                              const SizedBox(width: 8.0),
-                              _isFileUploading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 3),
-                                    )
-                                  : IconButton(
-                                      onPressed: () async {
-                                        String message = textController.text;
-                                        _isFileUploading = true;
-                                        chatBloc.add(SendMessageEvent(
-                                            userId: AppData.logInUserId,
-                                            roomId: widget.roomId == ''
-                                                ? chatBloc.roomId
-                                                : widget.roomId,
-                                            receiverId: widget.id,
-                                            attachmentType: 'file',
-                                            file: _selectedFile?.path ?? '',
-                                            message: message));
-                                        textController.clear();
-                                        setState(() {});
-                                        _selectedFile = null;
-                                        scrollToBottom();
-                                      },
-                                      icon: const Icon(Icons.send),
-                                    ),
-                            ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8.0),
+                                _isFileUploading
+                                    ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 3),
+                                )
+                                    : IconButton(
+                                  onPressed: () async {
+                                    if(textController.text.isNotEmpty) {
+                                      String message = textController.text;
+                                      _isFileUploading = true;
+                                      chatBloc.add(SendMessageEvent(
+                                          userId: AppData.logInUserId,
+                                          roomId: widget.roomId == '' ? chatBloc
+                                              .roomId : widget.roomId,
+                                          receiverId: widget.id,
+                                          attachmentType: 'file',
+                                          file: _selectedFile?.path ?? '',
+                                          message: message));
+                                      textController.clear();
+                                      setState(() {});
+                                      _selectedFile = null;
+                                      scrollToBottom();
+                                    }
+                                  },
+                                  icon: const Icon(Icons.send),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         GestureDetector(
@@ -870,6 +984,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           onLongPressEnd: (details) {
                             _stop();
                             setState(() {
+                              _isFileUploading = true;
                               isRecording = false;
                             });
                           },
@@ -879,25 +994,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             decoration: BoxDecoration(
                                 boxShadow: [
                                   BoxShadow(
-                                      color: isRecording
-                                          ? Colors.white
-                                          : svGetBodyColor(),
+                                      color: isRecording ? Colors.white : svGetBodyColor(),
                                       spreadRadius: 4)
                                 ],
                                 color: isRecording ? Colors.red : Colors.grey,
                                 shape: BoxShape.circle),
                             child: Container(
-                                padding: const EdgeInsets.all(10),
-                                child: const Icon(
-                                  Icons.mic,
-                                  color: Colors.white,
-                                  size: 20,
-                                )),
+                              padding: const EdgeInsets.all(10),
+                              child: const Icon(
+                                Icons.mic,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
+                  )
                 ],
               );
             } else if (state is DataError) {

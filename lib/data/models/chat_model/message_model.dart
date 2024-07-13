@@ -45,14 +45,16 @@ Messages messagesFromJson(String str) => Messages.fromJson(json.decode(str));
 String messagesToJson(Messages data) => json.encode(data.toJson());
 class Messages {
   Messages({
-      this.userId, 
-      this.profile, 
+      this.id,
+      this.userId,
+      this.profile,
       this.body, 
       this.attachment, 
       this.attachmentType, 
       this.createdAt,});
 
   Messages.fromJson(dynamic json) {
+    id = json['id'];
     userId = json['user_id'];
     profile = json['profile'];
     body = json['body'];
@@ -60,6 +62,7 @@ class Messages {
     attachmentType = json['attachment_type'];
     createdAt = json['created_at'];
   }
+  String? id;
   String? userId;
   String? profile;
   String? body;
@@ -69,6 +72,7 @@ class Messages {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
+    map['id'] = id;
     map['user_id'] = userId;
     map['profile'] = profile;
     map['body'] = body;
