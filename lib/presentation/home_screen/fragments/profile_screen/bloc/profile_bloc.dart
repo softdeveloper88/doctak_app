@@ -306,6 +306,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.userProfile?.profile?.address ?? '...',
         event.userProfile?.profile?.birthplace ?? '...',
         event.userProfile?.profile?.livesIn ?? '...',
+        event.userProfile?.profile?.languages ?? '...',
         privacyLength >= 0
             ? event.userProfile?.privacySetting![0].visibility ?? 'lock'
             : 'lock',
@@ -399,6 +400,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.userProfile?.profile?.address ?? '...',
         event.userProfile?.profile?.birthplace ?? '...',
         event.userProfile?.profile?.livesIn ?? '...',
+        event.userProfile?.profile?.languages ?? '...',
         privacyLength >= 0
             ? event.userProfile?.privacySetting![0].visibility ?? 'lock'
             : 'lock',
