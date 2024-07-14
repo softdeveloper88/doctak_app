@@ -213,8 +213,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // ProgressDialogUtils.showProgressDialog();
     // try {
     // print((specialtyName ?? event.userProfile?.user?.specialty ?? ''));
-    int privacyLength = event.userProfile?.privacySetting?.length ?? 0;
-
+    int privacyLength = (event.userProfile?.privacySetting?.length ?? 0);
+    event.userProfile?.privacySetting?.forEach((e){
+      print('privacy ${e.recordType}');
+    });
     if (event.updateProfileSection == 1) {
       final response = await postService.getProfileUpdate(
         'Bearer ${AppData.userToken}',
@@ -251,7 +253,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             : 'globe',
         privacyLength >= 11
             ? event.userProfile?.privacySetting![11].visibility ?? 'globe'
-            : 'globe',
+            :
+        'globe',
         privacyLength >= 12
             ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
             : 'globe',
@@ -318,6 +321,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         privacyLength >= 7
             ? event.userProfile?.privacySetting![7].visibility ?? 'lock'
             : 'lock',
+        privacyLength >= 7
+            ? event.userProfile?.privacySetting![7].visibility ?? 'lock'
+            : 'lock',
       );
     } else if (event.updateProfileSection == 3) {
       // final response1 = await postService.getWorkEducationUpdate(
@@ -344,6 +350,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // ? event.userProfile?.privacySetting![10].visibility ?? 'globe' : 'globe';
       // privacyLength >= 11 ? event.userProfile?.privacySetting![11].visibility ?? 'globe' : 'globe';
       // privacyLength >= 12 ? event.userProfile?.privacySetting![12].visibility ?? 'globe' : 'globe';
+      print(privacyLength);
       final response = await postService.getProfileUpdate(
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
@@ -407,6 +414,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         privacyLength >= 7
             ? event.userProfile?.privacySetting![7].visibility ?? 'lock'
             : 'lock',
+        privacyLength >= 8
+            ? event.userProfile?.privacySetting![8].visibility ?? 'globe'
+            : 'globe',
       );
       print(response2.response);
     }

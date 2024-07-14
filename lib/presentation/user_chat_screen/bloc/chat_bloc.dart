@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
@@ -14,7 +12,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 part 'chat_event.dart';
-
 part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -124,18 +121,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
+  void addUserIfNotExists(
+      List<Messages> oldMessages, List<Messages> newMessages) {
+    for (var message in newMessages) {
+      if (!oldMessages.contains(message)) {
+        oldMessages.add(message);
+      }
+    }
+    messagesList = oldMessages;
+  }
+
   _onGetMessages(LoadRoomMessageEvent event, Emitter<ChatState> emit) async {
+    print('page ${event.page}');
     if (event.page == 1) {
       messagesList.clear();
       messagePageNumber = 1;
       emit(PaginationLoadingState());
-    }else if(event.page==0){
-      messagesList.clear();
-      messagePageNumber = 1;
-      event.page=1;
+      print('page ${event.page}');
+    } else if (event.page == 0) {
+      // messagesList.clear();
+      messagePageNumber = 0;
     }
     try {
-    print(event.page);
+      print(event.page);
       MessageModel response = await postService.getRoomMessenger(
           'Bearer ${AppData.userToken}',
           '$messagePageNumber',
@@ -146,17 +154,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       messageNumberOfPage = response.lastPage ?? 0;
       if (messagePageNumber < messageNumberOfPage + 1) {
         messagePageNumber = messagePageNumber + 1;
-        messagesList.addAll(response.messages ?? []);
-        // messagesList=messagesList.reversed.toList();
+        if (event.page == 0) {
+          messagesList.addAll(response.messages ?? []);
+          // messagesList=response.messages ?? [];
+          addUserIfNotExists(messagesList, response.messages ?? []);
+          // messagesList.addAll(response.messages ?? []);
+          // messagesList=messagesList.reversed.toList();
+        }else{
+          messagesList.addAll(response.messages ?? []);
+        }
       }
-
-
-print(response.toJson());
       emit(PaginationLoadedState());
-
-      // emit(DataLoaded(contactsList));
     } catch (e) {
-      print(e);
+      print('eee$e');
 
       emit(PaginationLoadedState());
 
@@ -172,43 +182,43 @@ print(response.toJson());
     print(event.file);
     print(event.attachmentType);
     // try {
-      print("hii${event.file}");
-      SendMessageModel response;
-      if (event.file != '') {
-        response = await postService.sendMessage(
-          'Bearer ${AppData.userToken}',
-          event.userId??'',
-          event.roomId??'',
-          event.receiverId??'',
-          event.attachmentType??'',
-          event.message??'',
-          event.file??'',
-        );
-        print("hii_file${response.body}");
-      } else {
-        response = await postService.sendMessageWithoutFile(
-          'Bearer ${AppData.userToken}',
-          event.userId!,
-          event.roomId!,
-          event.receiverId!,
-          event.attachmentType!,
-          event.message!,
-        );
-      }
-      messagesList.insert(
-          0,
-          Messages(
-            userId: response.userId!,
-            profile: response.profile,
-            body: response.body,
-            attachment: response.attachment,
-            attachmentType: response.attachmentType,
-            createdAt: response.createdAt,
-          ));
-      // print("hello${response.toJson()}");
-      emit(PaginationLoadedState());
+    print("hii${event.file}");
+    SendMessageModel response;
+    if (event.file != '') {
+      response = await postService.sendMessage(
+        'Bearer ${AppData.userToken}',
+        event.userId ?? '',
+        event.roomId ?? '',
+        event.receiverId ?? '',
+        event.attachmentType ?? '',
+        event.message ?? '',
+        event.file ?? '',
+      );
+      print("hii_file${response.body}");
+    } else {
+      response = await postService.sendMessageWithoutFile(
+        'Bearer ${AppData.userToken}',
+        event.userId!,
+        event.roomId!,
+        event.receiverId!,
+        event.attachmentType!,
+        event.message!,
+      );
+    }
+    messagesList.insert(
+        0,
+        Messages(
+          userId: response.userId!,
+          profile: response.profile,
+          body: response.body,
+          attachment: response.attachment,
+          attachmentType: response.attachmentType,
+          createdAt: response.createdAt,
+        ));
+    // print("hello${response.toJson()}");
+    emit(PaginationLoadedState());
 
-      // emit(DataLoaded(contactsList));
+    // emit(DataLoaded(contactsList));
     // } catch (e) {
     //   print(e);
     //
@@ -217,23 +227,22 @@ print(response.toJson());
     //   // emit(DataError('An error occurred $e'));
     // }
   }
-  _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
 
+  _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
     // try {
 
+    var response1 = await postService.deleteMessage(
+      'Bearer ${AppData.userToken}',
+      event.id ?? '',
+    );
+    print(event.id);
+    print(response1.data);
+    messagesList.removeWhere((message) => message.id == event.id);
+    showToast('Message deleted');
+    // print("hello${response.toJson()}");
+    emit(PaginationLoadedState());
 
-     var  response1 = await postService.deleteMessage(
-          'Bearer ${AppData.userToken}',
-          event.id??'',
-        );
-     print(event.id);
-     print(response1.data);
-    messagesList.removeWhere((message)=>message.id==event.id);
-      showToast('Message deleted');
-      // print("hello${response.toJson()}");
-      emit(PaginationLoadedState());
-
-      // emit(DataLoaded(contactsList));
+    // emit(DataLoaded(contactsList));
     // } catch (e) {
     //   print(e);
     //

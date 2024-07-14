@@ -283,138 +283,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // });
   }
 
-//   void ConnectPusher() async {
-//     // Create the Pusher client
-//     await pusher.init(
-//         apiKey: PusherConfig.key,
-//         cluster: PusherConfig.cluster,
-//         useTLS: false,
-//         onSubscriptionCount: onSubscriptionCount,
-//         onAuthorizer: onAuthorizer);
-//     pusher.connect();
-//
-//     if (pusher != null) {
-//       // Successfully created and connected to Pusher
-//
-//       clientListenChannel = await pusher.subscribe(
-//         channelName: "private-chatify." + AppData.logInUserId,
-//         onMemberAdded: (member) {
-//           // print("Member added: $member");
-//         },
-//         onMemberRemoved: (member) {
-//           // print("Member removed: $member");
-//         },
-//         onEvent: (event) {
-//           String eventName = event.eventName;
-//
-//           switch (eventName) {
-//             case 'client-typing':
-//               onTypingStarted();
-//
-//               // If the timer is already running, cancel it
-//               if (typingTimer != null && typingTimer!.isActive) {
-//                 typingTimer!.cancel();
-//               }
-//               // Set a timer to stop typing indicator after 2 seconds
-//               typingTimer = Timer(const Duration(seconds: 2), () {
-//                 onTypingStopped();
-//                 chatBloc.add(LoadRoomMessageEvent(
-//                     page: 1, userId: widget.id, roomId: widget.roomId));
-//               });
-//               break;
-//             case 'messaging':
-//               var textMessage = "";
-//               var messageData = event.data;
-//               messageData = json.decode(messageData);
-//               var status = messageData['status'];
-//
-//               if (status == "web") {
-//                 final htmlMessage = event.data;
-//                 var message = json.decode(htmlMessage);
-//
-//                 // Use the html package to parse the HTML and extract text content
-//                 final document = htmlParser.parse(message['message']);
-//
-//                 final messageDiv = document.querySelector('.message');
-//                 final textMessageWithTime = messageDiv?.text.trim() ?? "";
-//
-// // Split the textMessageWithTime by the "time ago" portion
-//                 final parts = textMessageWithTime.split('1 second ago');
-//                 textMessage =
-//                     parts.first.trim(); // Take the first part (the message)
-//               }
-//               if (status == "api") {
-//                 var message = messageData['message'];
-//
-//                 textMessage = message['message'];
-//               }
-//
-//               setState(() {
-//                 typingTimer = Timer(const Duration(seconds: 2), () {
-//                   onTypingStopped();
-//                   chatBloc.add(LoadRoomMessageEvent(
-//                       page: 1, userId: widget.id, roomId: widget.roomId));
-//                 });
-//                 // messagesList.insert(
-//                 //   0,
-//                 //   Message(
-//                 //     body: textMessage, // Use the extracted text content
-//                 //     toId: AppData.logInUserId,
-//                 //     fromId: widget.id,
-//                 //   ),
-//                 // );
-//                 // isLoading = false;
-//               });
-//
-//               break;
-//             // Add more cases for other event types as needed
-//             default:
-//               // Handle unknown event types or ignore them
-//               break;
-//           }
-//         },
-//       );
-//
-//       clientSendChannel = await pusher.subscribe(
-//         channelName: "private-chatify.${widget.id}",
-//         onMemberAdded: (member) {
-//           // print("Member added: $member");
-//         },
-//         onMemberRemoved: (member) {
-//           // print("Member removed: $member");
-//         },
-//         onEvent: (event) {
-//           // print("Received Event (Listen Channel): $event");
-//         },
-//       );
-//
-//       // Attach an event listener to the channel
-//     } else {
-//       // Handle the case where Pusher connection failed
-//       // print("Failed to connect to Pusher");
-//     }
-//   }
   void ConnectPusher() async {
     // Create the Pusher client
     await pusher.init(
-      apiKey: PusherConfig.key,
-      cluster: PusherConfig.cluster,
-      useTLS: false,
-      onSubscriptionCount: onSubscriptionCount,
-      onAuthorizer: onAuthorizer,
-    );
-
+        apiKey: PusherConfig.key,
+        cluster: PusherConfig.cluster,
+        useTLS: false,
+        onSubscriptionCount: onSubscriptionCount,
+        onAuthorizer: onAuthorizer);
     pusher.connect();
 
     if (pusher != null) {
       // Successfully created and connected to Pusher
 
       clientListenChannel = await pusher.subscribe(
-        channelName: "private-chattily.${AppData.logInUserId}",
-        onSubscriptionSucceeded: (event) {
-          // Channel is ready, now you can trigger events
-          print("Subscription to listen channel succeeded.");
-        },
+        channelName: "private-chatify." + AppData.logInUserId,
         onMemberAdded: (member) {
           // print("Member added: $member");
         },
@@ -423,6 +306,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         },
         onEvent: (event) {
           String eventName = event.eventName;
+
           switch (eventName) {
             case 'client-typing':
               onTypingStarted();
@@ -433,8 +317,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               // Set a timer to stop typing indicator after 2 seconds
               typingTimer = Timer(const Duration(seconds: 2), () {
                 onTypingStopped();
-                chatBloc.add(LoadRoomMessageEvent(
-                    page: 0, userId: widget.id, roomId: widget.roomId));
+                // chatBloc.add(LoadRoomMessageEvent(
+                //     page: 0, userId: widget.id, roomId: widget.roomId));
               });
               break;
             case 'messaging':
@@ -453,27 +337,39 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 final messageDiv = document.querySelector('.message');
                 final textMessageWithTime = messageDiv?.text.trim() ?? "";
 
-                // Split the textMessageWithTime by the "time ago" portion
+// Split the textMessageWithTime by the "time ago" portion
                 final parts = textMessageWithTime.split('1 second ago');
-                textMessage = parts.first.trim(); // Take the first part (the message)
+                textMessage =
+                    parts.first.trim(); // Take the first part (the message)
               }
               if (status == "api") {
                 var message = messageData['message'];
-                textMessage = message['message'];
-              }
 
+                textMessage = message['message'];
+                print(textMessage);
+              }
+              print(textMessage);
               // setState(() {
                 typingTimer = Timer(const Duration(seconds: 2), () {
                   onTypingStopped();
-                  chatBloc.add(LoadRoomMessageEvent(
-                      page: 0, userId: widget.id, roomId: widget.roomId));
-                });
-              // });
+                  // chatBloc.add(LoadRoomMessageEvent(
+                  //     page: 0, userId: widget.id, roomId: widget.roomId));
+                // });
+                // messagesList.insert(
+                //   0,
+                //   Message(
+                //     body: textMessage, // Use the extracted text content
+                //     toId: AppData.logInUserId,
+                //     fromId: widget.id,
+                //   ),
+                // );
+                // isLoading = false;
+              });
 
               break;
-          // Add more cases for other event types as needed
+            // Add more cases for other event types as needed
             default:
-            // Handle unknown event types or ignore them
+              // Handle unknown event types or ignore them
               break;
           }
         },
@@ -481,10 +377,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
       clientSendChannel = await pusher.subscribe(
         channelName: "private-chatify.${widget.id}",
-        onSubscriptionSucceeded: (event) {
-          // Channel is ready, now you can trigger events
-          print("Subscription to send channel succeeded.");
-        },
         onMemberAdded: (member) {
           // print("Member added: $member");
         },
@@ -495,12 +387,120 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           // print("Received Event (Listen Channel): $event");
         },
       );
+
       // Attach an event listener to the channel
     } else {
       // Handle the case where Pusher connection failed
       // print("Failed to connect to Pusher");
     }
   }
+  // void ConnectPusher() async {
+  //   // Create the Pusher client
+  //   await pusher.init(
+  //     apiKey: PusherConfig.key,
+  //     cluster: PusherConfig.cluster,
+  //     useTLS: false,
+  //     onSubscriptionCount: onSubscriptionCount,
+  //     onAuthorizer: onAuthorizer,
+  //   );
+  //
+  //   pusher.connect();
+  //
+  //   if (pusher != null) {
+  //     // Successfully created and connected to Pusher
+  //
+  //     clientListenChannel = await pusher.subscribe(
+  //       channelName: "private-chattily.${AppData.logInUserId}",
+  //       onSubscriptionSucceeded: (event) {
+  //         // Channel is ready, now you can trigger events
+  //         print("Subscription to listen channel succeeded.");
+  //       },
+  //       onMemberAdded: (member) {
+  //         // print("Member added: $member");
+  //       },
+  //       onMemberRemoved: (member) {
+  //         // print("Member removed: $member");
+  //       },
+  //       onEvent: (event) {
+  //         String eventName = event.eventName;
+  //         switch (eventName) {
+  //           case 'client-typing':
+  //             onTypingStarted();
+  //             // If the timer is already running, cancel it
+  //             if (typingTimer != null && typingTimer!.isActive) {
+  //               typingTimer!.cancel();
+  //             }
+  //             // Set a timer to stop typing indicator after 2 seconds
+  //             typingTimer = Timer(const Duration(seconds: 2), () {
+  //               onTypingStopped();
+  //               chatBloc.add(LoadRoomMessageEvent(
+  //                   page: 0, userId: widget.id, roomId: widget.roomId));
+  //             });
+  //             break;
+  //           case 'messaging':
+  //             var textMessage = "";
+  //             var messageData = event.data;
+  //             messageData = json.decode(messageData);
+  //             var status = messageData['status'];
+  //
+  //             if (status == "web") {
+  //               final htmlMessage = event.data;
+  //               var message = json.decode(htmlMessage);
+  //
+  //               // Use the html package to parse the HTML and extract text content
+  //               final document = htmlParser.parse(message['message']);
+  //
+  //               final messageDiv = document.querySelector('.message');
+  //               final textMessageWithTime = messageDiv?.text.trim() ?? "";
+  //
+  //               // Split the textMessageWithTime by the "time ago" portion
+  //               final parts = textMessageWithTime.split('1 second ago');
+  //               textMessage = parts.first.trim(); // Take the first part (the message)
+  //             }
+  //             if (status == "api") {
+  //               var message = messageData['message'];
+  //               textMessage = message['message'];
+  //             }
+  //
+  //             // setState(() {
+  //               typingTimer = Timer(const Duration(seconds: 2), () {
+  //                 onTypingStopped();
+  //                 chatBloc.add(LoadRoomMessageEvent(
+  //                     page: 0, userId: widget.id, roomId: widget.roomId));
+  //               });
+  //             // });
+  //
+  //             break;
+  //         // Add more cases for other event types as needed
+  //           default:
+  //           // Handle unknown event types or ignore them
+  //             break;
+  //         }
+  //       },
+  //     );
+  //
+  //     clientSendChannel = await pusher.subscribe(
+  //       channelName: "private-chatify.${widget.id}",
+  //       onSubscriptionSucceeded: (event) {
+  //         // Channel is ready, now you can trigger events
+  //         print("Subscription to send channel succeeded.");
+  //       },
+  //       onMemberAdded: (member) {
+  //         // print("Member added: $member");
+  //       },
+  //       onMemberRemoved: (member) {
+  //         // print("Member removed: $member");
+  //       },
+  //       onEvent: (event) {
+  //         // print("Received Event (Listen Channel): $event");
+  //       },
+  //     );
+  //     // Attach an event listener to the channel
+  //   } else {
+  //     // Handle the case where Pusher connection failed
+  //     // print("Failed to connect to Pusher");
+  //   }
+  // }
 
   void onTextFieldFocused(bool typingStatus) async {
     String eventName = "client-typing"; // Replace with your event name
@@ -890,6 +890,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                     : IconButton(
                                   icon: const Icon(Icons.attach_file),
                                   onPressed: () async {
+
                                     const permission = Permission.photos;
                                     if (await permission.isGranted) {
                                       _showFileOptions();
@@ -907,7 +908,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                       print("isPermanentlyDenied");
                                       _permissionDialog(context);
                                     }
-                                    _showFileOptions();
+
                                   },
                                 ),
                                 const SizedBox(width: 8.0),
@@ -974,41 +975,41 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onLongPress: () {
-                            _start();
-                            setState(() {
-                              isRecording = true;
-                            });
-                          },
-                          onLongPressEnd: (details) {
-                            _stop();
-                            setState(() {
-                              _isFileUploading = true;
-                              isRecording = false;
-                            });
-                          },
-                          child: Container(
-                            height: 40,
-                            margin: const EdgeInsets.fromLTRB(16, 5, 5, 5),
-                            decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: isRecording ? Colors.white : svGetBodyColor(),
-                                      spreadRadius: 4)
-                                ],
-                                color: isRecording ? Colors.red : Colors.grey,
-                                shape: BoxShape.circle),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              child: const Icon(
-                                Icons.mic,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // GestureDetector(
+                        //   onLongPress: () {
+                        //     _start();
+                        //     setState(() {
+                        //       isRecording = true;
+                        //     });
+                        //   },
+                        //   onLongPressEnd: (details) {
+                        //     _stop();
+                        //     setState(() {
+                        //       _isFileUploading = true;
+                        //       isRecording = false;
+                        //     });
+                        //   },
+                        //   child: Container(
+                        //     height: 40,
+                        //     margin: const EdgeInsets.fromLTRB(16, 5, 5, 5),
+                        //     decoration: BoxDecoration(
+                        //         boxShadow: [
+                        //           BoxShadow(
+                        //               color: isRecording ? Colors.white : svGetBodyColor(),
+                        //               spreadRadius: 4)
+                        //         ],
+                        //         color: isRecording ? Colors.red : Colors.grey,
+                        //         shape: BoxShape.circle),
+                        //     child: Container(
+                        //       padding: const EdgeInsets.all(10),
+                        //       child: const Icon(
+                        //         Icons.mic,
+                        //         color: Colors.white,
+                        //         size: 20,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   )
@@ -1262,14 +1263,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           // <-- SEE HERE
-          title: const Text('Warning!'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Are you sure want to enable permission?'),
-              ],
-            ),
-          ),
+          title:  Text('You want to enable permission?',textAlign: TextAlign.center,style: GoogleFonts.poppins(fontSize: 14.sp),),
+          // content: const SingleChildScrollView(
+          //   child: ListBody(
+          // //     children: <Widget>[
+          // //       Text('Are you sure want to enable permission?'),
+          // //     ],
+          //   ),
+          // ),
           actions: <Widget>[
             TextButton(
               child: const Text('No'),
@@ -1340,6 +1341,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     setState(() {
       isSomeoneTyping = false;
     });
+    chatBloc.add(LoadRoomMessageEvent(
+        page: 0, userId: widget.id, roomId: widget.roomId));
+
   }
 
 // List<RtmAttribute> convertToRtmAttributes(Map<String, dynamic> attributes) {
@@ -1371,11 +1375,11 @@ class TypingIndicator extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(profilePic),
-            // Use a placeholder image
-            radius: 16.0,
-          ),
+          // CircleAvatar(
+          //   backgroundImage: CachedNetworkImageProvider(profilePic),
+          //   // Use a placeholder image
+          //   radius: 16.0,
+          // ),
           const SizedBox(width: 12.0),
           Expanded(
             child: Align(

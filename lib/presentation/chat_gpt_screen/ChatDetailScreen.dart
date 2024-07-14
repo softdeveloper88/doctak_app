@@ -469,48 +469,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     style: TextStyle(fontSize: 14),
                                   ),
                                   const SizedBox(height: 10),
-                                   Wrap(
-                                    alignment: WrapAlignment.center,
-                                    spacing: 10,
-                                    children: [
-                                      InkWell(
-                                          onTap: (){
-                                            widget.question='Symptom Analysis';
-                                            // Future.delayed(const Duration(seconds: 1),(){
-                                            setState(() {
-                                              isEmpty=false;
-
-                                            });
-                                            drugsAskQuestion(state1, context);
-                                          },
-                                          child: const Chip(label: Text('Symptom Analysis'))),
-
-                                      InkWell(
-                                          onTap: (){
-                                            widget.question='Drug Interactions';
-                                            // Future.delayed(const Duration(seconds: 1),(){
-                                            setState(() {
-                                              isEmpty=false;
-
-                                            });
-                                            drugsAskQuestion(state1, context);
-                                          },
-                                          child: const Chip(label: Text('Drug Interactions'))),
-
-                                      InkWell(
-                                          onTap: (){
-                                              widget.question='Treatment Guidelines';
-                                              // Future.delayed(const Duration(seconds: 1),(){
-                                              setState(() {
-                                                isEmpty=false;
-
-                                              });
-                                              drugsAskQuestion(state1, context);
-
-                                          },
-                                          child: const Chip(label: Text('Treatment Guidelines'))),
-                                    ],
-                                  ),
                                   // Text(
                                   //   textAlign: TextAlign.center,
                                   //   'Your personal & medical assistant powered by Artificial Intelligence',

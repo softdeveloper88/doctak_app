@@ -1642,18 +1642,21 @@ class _ApiService implements ApiService {
     String birthplacePrivacy,
     String languagesPrivacy,
     String livesInPrivacy,
+    String phonePrivacy,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'about_me': aboutMe,
       r'address': address,
       r'birthplace': brithPlace,
-      r'live_in': liveIn,
+      r'lives_in': liveIn,
+      r'languages': liveIn,
+      r'languages': liveIn,
       r'about_me_privacy': aboutMePrivacy,
       r'address_privacy': addressPrivacy,
       r'birthplace_privacy': birthplacePrivacy,
       r'language_privacy': languagesPrivacy,
-      r'lives_in_privacy': livesInPrivacy,
+      r'phone_privacy': phonePrivacy,
     };
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);

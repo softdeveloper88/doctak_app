@@ -366,7 +366,8 @@ abstract class ApiService {
       @Query('address_privacy') String addressPrivacy,
       @Query('birthplace_privacy') String birthplacePrivacy,
       @Query('language_privacy') String languagesPrivacy,
-      @Query('lives_in_privacy') String livesInPrivacy);
+      @Query('lives_in_privacy') String livesInPrivacy,
+      @Query('phone_privacy') String phonePrivacy,);
 
   @FormUrlEncoded()
   @GET("/about-me")

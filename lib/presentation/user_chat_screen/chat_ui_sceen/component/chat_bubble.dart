@@ -279,7 +279,10 @@ class ChatBubble extends StatelessWidget {
                 crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0),
+                    constraints: const BoxConstraints(
+                      minWidth: 150,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
                     decoration: BoxDecoration(
                       color: isMe ? Colors.blue : Colors.grey[200],
                       borderRadius: BorderRadius.only(
