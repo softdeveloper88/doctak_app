@@ -422,6 +422,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
       print(response2.response);
     }
+
     // final response3 = await postService.getPlacesLivedUpdate(
     //   'Bearer ${AppData.userToken}',
     //   '','',

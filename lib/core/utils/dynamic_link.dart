@@ -4,7 +4,9 @@ import 'package:share_plus/share_plus.dart';
 createDynamicLink(postTitle, postUrl, imageUrl) async {
   final dynamicLinkParams = DynamicLinkParameters(
     link: Uri.parse(postUrl),
-
+   navigationInfoParameters: const NavigationInfoParameters(
+     forcedRedirectEnabled: true
+   ),
     uriPrefix: "https://doctak.page.link",
     androidParameters:  AndroidParameters(
       packageName: "com.kt.doctak",
@@ -14,7 +16,7 @@ createDynamicLink(postTitle, postUrl, imageUrl) async {
     iosParameters:  IOSParameters(
       bundleId: "com.doctak.ios",
       appStoreId: "6448684340",
-      minimumVersion: "2.0.9",
+      minimumVersion: "2.0.8",
       fallbackUrl:Uri.parse(postUrl),
     ),
     // googleAnalyticsParameters: const GoogleAnalyticsParameters(

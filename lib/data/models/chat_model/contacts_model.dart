@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:equatable/equatable.dart';
 ContactsModel contactsModelFromJson(String str) => ContactsModel.fromJson(json.decode(str));
 String contactsModelToJson(ContactsModel data) => json.encode(data.toJson());
 class ContactsModel {
@@ -50,7 +52,7 @@ class ContactsModel {
 
 Contacts contactsFromJson(String str) => Contacts.fromJson(json.decode(str));
 String contactsToJson(Contacts data) => json.encode(data.toJson());
-class Contacts {
+class Contacts extends Equatable{
   Contacts({
       this.id,
       this.roomId,
@@ -92,6 +94,9 @@ class Contacts {
     map['latest_message_time'] = latestMessageTime;
     return map;
   }
+
+  @override
+  List<Object?> get props => [id,roomId,createdAt,firstName,lastName,profilePic,latestMessage,latestMessageTime];
 
 }
 

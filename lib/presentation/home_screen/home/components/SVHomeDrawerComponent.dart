@@ -3,6 +3,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/main.dart';
+import 'package:doctak_app/presentation/about_us/about_us_screen.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/group_screen/my_groups_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/app_setting_screen/app_setting_screen.dart';
@@ -89,7 +90,6 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
   @override
   Widget build(BuildContext context) {
     List<SVDrawerModel> options = getDrawerOptions(context);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +174,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                             : SVAppColorPrimary),
                     title: e.title.validate(),
                     titleTextStyle: boldTextStyle(size: 14,color: Colors.white),
-                    leading: Image.asset(e.image.validate(),
+                    leading:Image.asset(e.image??"",
                         height: 22,
                         width: 22,
                         fit: BoxFit.cover,
@@ -262,6 +262,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
 
                         // SVGroupProfileScreen().launch(context);
                       } else if (selectedIndex == 13) {
+                        finish(context);
+                        print(selectedIndex);
+                        AboutUsScreen().launch(context);
+
+
+                        // SVGroupProfileScreen().launch(context);
+                      }else if (selectedIndex == 14) {
                         finish(context);
                         print(selectedIndex);
                         // ComingSoonScreen().launch(context);

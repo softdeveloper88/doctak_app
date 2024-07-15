@@ -77,6 +77,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   bool _isPaused = false;
   int _recordDuration = 0;
   Timer? _timer;
+  Timer? _timerChat;
   Timer? _ampTimer;
   final FlutterSoundRecord _audioRecorder = FlutterSoundRecord();
   Amplitude? _amplitude;
@@ -85,6 +86,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void dispose() {
     _timer?.cancel();
     _ampTimer?.cancel();
+    _timerChat?.cancel();
     _audioRecorder.dispose();
 
     super.dispose();
@@ -95,11 +97,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     super.initState();
     setStatusBarColor(svGetScaffoldColor());
     // Handle completion
+    _startTimerForChat();
     print("id${widget.id}roomid${widget.roomId}");
     _isRecording = false;
     chatBloc.add(LoadRoomMessageEvent(
         page: 1, userId: widget.id, roomId: widget.roomId));
     ConnectPusher();
+
     // fetchMessages();
     // _createClient();
   }
@@ -1345,6 +1349,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         page: 0, userId: widget.id, roomId: widget.roomId));
 
   }
+  void _startTimerForChat() {
+    _timerChat = Timer.periodic(Duration(seconds: 10), (timer) {
+      print('call timer');
+      chatBloc.add(LoadRoomMessageEvent(
+          page: 0, userId: widget.id, roomId: widget.roomId));
+    });
+  }
+
 
 // List<RtmAttribute> convertToRtmAttributes(Map<String, dynamic> attributes) {
 //   List<RtmAttribute> rtmAttributes = [];

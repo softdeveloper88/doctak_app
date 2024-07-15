@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/group_screen/group_create_screen.dart';
 import 'package:doctak_app/presentation/group_screen/group_view_screen.dart';
@@ -286,23 +287,26 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                       ),
                                                     ],
                                                   ),
-                                                  child: bloc
-                                                              .contactsList[
-                                                                  index]
-                                                              .profilePic ==
-                                                          ''
-                                                      ? Image.asset(
-                                                              'images/socialv/faces/face_5.png',
-                                                              height: 56,
-                                                              width: 56,
-                                                              fit: BoxFit
-                                                                  .cover)
-                                                          .cornerRadiusWithClipRRect(
-                                                              8)
-                                                          .cornerRadiusWithClipRRect(
-                                                              8)
-                                                      : CachedNetworkImage(
-                                                              imageUrl:
+                                                  child:
+                                                  // bloc
+                                                  //             .contactsList[
+                                                  //                 index]
+                                                  //             .profilePic ==
+                                                  //         ''
+                                                  //     ? Image.asset(
+                                                  //             'images/socialv/faces/face_5.png',
+                                                  //             height: 56,
+                                                  //             width: 56,
+                                                  //             fit: BoxFit
+                                                  //                 .cover)
+                                                  //         .cornerRadiusWithClipRRect(
+                                                  //             8)
+                                                  //         .cornerRadiusWithClipRRect(
+                                                  //             8)
+                                                  //     :
+                                                    CustomImageView(
+                                                    placeHolder: 'images/socialv/faces/face_5.png',
+                                                              imagePath:
                                                                   '${AppData.imageUrl}${bloc.contactsList[index].profilePic.validate()}',
                                                               height: 56,
                                                               width: 56,

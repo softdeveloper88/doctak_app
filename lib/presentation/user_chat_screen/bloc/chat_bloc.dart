@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
@@ -78,7 +80,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       numberOfPage = response.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
-        contactsList.addAll(response.contacts ?? []);
+       contactsList.addAll(response.contacts ?? []);
+       contactsList.removeWhere((element)=>element.id==null);
         groupList.addAll(response.groups ?? []);
       }
       log(response.contacts!.length);
@@ -155,9 +158,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (messagePageNumber < messageNumberOfPage + 1) {
         messagePageNumber = messagePageNumber + 1;
         if (event.page == 0) {
-          messagesList.addAll(response.messages ?? []);
-          // messagesList=response.messages ?? [];
-          addUserIfNotExists(messagesList, response.messages ?? []);
+          // messagesList.addAll(response.messages ?? []);
+          messagesList=response.messages ?? [];
+          // addUserIfNotExists(messagesList, response.messages ?? []);
           // messagesList.addAll(response.messages ?? []);
           // messagesList=messagesList.reversed.toList();
         }else{

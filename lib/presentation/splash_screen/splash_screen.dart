@@ -8,6 +8,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
+import 'package:doctak_app/presentation/terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
@@ -59,6 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
         }
       }else{
+
         const SVDashboardScreen().launch(context,isNewTask: true);
 
       }
@@ -87,6 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     bool rememberMe = prefs.getBool('rememberMe') ?? false;
+    bool acceptTerms = prefs.getBool('acceptTerms') ?? false;
 
     String? userToken = prefs.getString('token');
     String? userId = prefs.getString('userId');
@@ -115,25 +118,30 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.countryName = countryName;
       AppData.currency = currency;
     }
-    if (userToken != null) {
+   if(acceptTerms) {
+     if (userToken != null) {
        //Future.delayed(const Duration(seconds: 1), () {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
-        // );
-        initDeepLinks(context);
-        // const SVDashboardScreen().launch(context,isNewTask: true);
-      // });
-    } else {
-      // Future.delayed(const Duration(seconds: 1), () {
-        LoginScreen().launch(context, isNewTask: true);
+       // Navigator.pushReplacement(
+       //   context,
+       //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
+       // );
+       initDeepLinks(context);
+       // const SVDashboardScreen().launch(context,isNewTask: true);
+       // });
+     } else {
+       // Future.delayed(const Duration(seconds: 1), () {
+       LoginScreen().launch(context, isNewTask: true);
 
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const SignInScreen()), // Navigate to OnboardingScreen
-        // );
-      // });
-    }
+       // Navigator.pushReplacement(
+       //   context,
+       //   MaterialPageRoute(builder: (context) => const SignInScreen()), // Navigate to OnboardingScreen
+       // );
+       // });
+     }
+   }else{
+     TermsAndConditionScreen().launch(context, isNewTask: true);
+
+   }
   }
 
   @override
