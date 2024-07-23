@@ -74,19 +74,27 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               // text: ' Artificial Intelligence ',
               // textStyle: secondaryTextStyle(color: Colors.white, size: 10),
               onPressed: () {
-                 ChatDetailScreen(isFromMainScreen:true).launch(context);
+                ChatDetailScreen(isFromMainScreen: true).launch(context);
               },
               elevation: 6,
               color: Colors.white,
               minWidth: 80,
-              shape:  RoundedRectangleBorder(borderRadius: radius(4),side: const BorderSide(color: Colors.blue)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: radius(4),
+                  side: const BorderSide(color: Colors.blue)),
               animationDuration: const Duration(milliseconds: 300),
               focusColor: SVAppColorPrimary,
               hoverColor: SVAppColorPrimary,
               splashColor: SVAppColorPrimary,
               height: 25,
               padding: const EdgeInsets.all(0),
-              child: Text(" Artificial Intelligence ",style: GoogleFonts.poppins(color: Colors.black,fontWeight: FontWeight.w500,),),
+              child: Text(
+                " Artificial Intelligence ",
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
             IconButton(
               color: context.cardColor,

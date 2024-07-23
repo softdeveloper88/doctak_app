@@ -25,7 +25,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-             Expanded(
+            Expanded(
               child: SingleChildScrollView(
                 child: Text(
                   ''''
@@ -99,7 +99,9 @@ These Terms shall be governed by and construed in accordance with the laws of [Y
 If you have any questions about these Terms, please contact us at info@DocTak.net.
 
 By using the App, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service''',
-                    style: GoogleFonts.poppins(fontSize: 16.0,),
+                  style: GoogleFonts.poppins(
+                    fontSize: 16.0,
+                  ),
                 ),
               ),
             ),
@@ -127,9 +129,10 @@ By using the App, you acknowledge that you have read, understood, and agree to b
               child: ElevatedButton(
                 onPressed: _isChecked
                     ? () async {
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('acceptTerms', true);
-                  LoginScreen().launch(context, isNewTask: true);
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        await prefs.setBool('acceptTerms', true);
+                        LoginScreen().launch(context, isNewTask: true);
                       }
                     : null,
                 child: const Text('Next'),

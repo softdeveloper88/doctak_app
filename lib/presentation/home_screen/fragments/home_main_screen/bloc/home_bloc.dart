@@ -57,6 +57,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // emit(DataError('An error occurred $e'));
     }
   }
+
   _onGetSearchPosts(LoadSearchPageEvent event, Emitter<HomeState> emit) async {
     if (event.page == 1) {
       postList.clear();
@@ -67,7 +68,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       PostDataModel response = await postService.getSearchPostList(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
-        event.search??'',
+        event.search ?? '',
       );
       numberOfPage = response.posts?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
@@ -85,6 +86,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // emit(DataError('An error occurred $e'));
     }
   }
+
   _onPostLike(PostLikeEvent event, Emitter<HomeState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
@@ -97,16 +99,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         event.postId.toString(),
       );
       print(response.data);
-      int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
-      if(index>=0) {
-        bool isLike = postList[index].likes!.where((element) =>
-        element.userId.toString() == AppData.logInUserId.toString()).isEmpty;
+      int index = postList.indexWhere(
+          (element) => element.id.toString() == event.postId.toString());
+      if (index >= 0) {
+        bool isLike = postList[index]
+            .likes!
+            .where((element) =>
+                element.userId.toString() == AppData.logInUserId.toString())
+            .isEmpty;
         if (isLike) {
           postList[index].likes!.add(Likes(
               id: 1,
               userId: AppData.logInUserId,
-              postId: event.postId.toString()
-          ));
+              postId: event.postId.toString()));
         } else {
           postList[index].likes!.removeLast();
         }
@@ -131,39 +136,40 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // emit(DataError('An error occurred $e'));
     }
   }
+
   _onDeletePost(DeletePostEvent event, Emitter<HomeState> emit) async {
-
     // try {
-      var response = await postService.deletePost(
-        'Bearer ${AppData.userToken}',
-        event.postId.toString(),
-      );
-      postList.removeAt(postList.indexWhere((element) => element.id==event.postId));
-      // int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
-      // bool isLike=postList[index].likes!.where((element) => element.postId.toString()==event.postId.toString()).isEmpty;
-      // if(isLike) {
-      //   postList[index].likes!.add(Likes(
-      //       id: 1,
-      //       userId: AppData.logInUserId,
-      //       postId: event.postId.toString()
-      //   ));
-      // }else{
-      //
-      //   postList[index].likes!.removeLast();
-      // }
-      // numberOfPage = response.posts?.lastPage ?? 0;
-      // if (pageNumber < numberOfPage + 1) {
-      //   pageNumber = pageNumber + 1;
-      // }
-      // numberOfPage = response.posts?.lastPage ?? 0;
-      // if (pageNumber < numberOfPage + 1) {
-      //   pageNumber = pageNumber + 1;
-      //   postList.addAll(response.postComments ?? []);
-      // }
-     print(response.data);
-      emit(PostPaginationLoadedState());
+    var response = await postService.deletePost(
+      'Bearer ${AppData.userToken}',
+      event.postId.toString(),
+    );
+    postList
+        .removeAt(postList.indexWhere((element) => element.id == event.postId));
+    // int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
+    // bool isLike=postList[index].likes!.where((element) => element.postId.toString()==event.postId.toString()).isEmpty;
+    // if(isLike) {
+    //   postList[index].likes!.add(Likes(
+    //       id: 1,
+    //       userId: AppData.logInUserId,
+    //       postId: event.postId.toString()
+    //   ));
+    // }else{
+    //
+    //   postList[index].likes!.removeLast();
+    // }
+    // numberOfPage = response.posts?.lastPage ?? 0;
+    // if (pageNumber < numberOfPage + 1) {
+    //   pageNumber = pageNumber + 1;
+    // }
+    // numberOfPage = response.posts?.lastPage ?? 0;
+    // if (pageNumber < numberOfPage + 1) {
+    //   pageNumber = pageNumber + 1;
+    //   postList.addAll(response.postComments ?? []);
+    // }
+    print(response.data);
+    emit(PostPaginationLoadedState());
 
-      // emit(DataLoaded(postList));
+    // emit(DataLoaded(postList));
     // } catch (e) {
     //   print(e);
     //
@@ -172,23 +178,71 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     //   // emit(DataError('An error occurred $e'));
     // }
   }
-  Future<void> _adsSettingApi(AdsSettingEvent event,
-      Emitter<HomeState> emit) async {
+
+  Future<void> _adsSettingApi(
+      AdsSettingEvent event, Emitter<HomeState> emit) async {
     // try {
-    AppData.adsSettingModel = await postService.advertisementSetting('Bearer ${AppData.userToken}');
+    AppData.adsSettingModel =
+        await postService.advertisementSetting('Bearer ${AppData.userToken}');
     print("ads data  ${AppData.adsSettingModel.toJson()}");
-    AppData.listAdsType = await postService.advertisementTypes('Bearer ${AppData.userToken}',);
+    AppData.listAdsType = await postService.advertisementTypes(
+      'Bearer ${AppData.userToken}',
+    );
 
     // banner ads
-    AppData.isShowGoogleBannerAds=(AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').isNotEmpty) &&((AppData.adsSettingModel.data?.where((element) => element.advertisementType=='banner' && element.provider=='Google' && element.isAdvertisementOn ==1).isNotEmpty??false));
-    AppData.androidBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.androidId;
-    AppData.iosBannerAdsId=AppData.listAdsType.where((element) => element.type=='banner' && element.provider=='Google').single.iosId;
-  // native ads
-    AppData.isShowGoogleNativeAds=(AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').isNotEmpty) &&((AppData.adsSettingModel.data?.where((element) => element.advertisementType=='native' && element.provider=='Google' && element.isAdvertisementOn==1).isNotEmpty??false));
-    AppData.androidNativeAdsId=AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').single.androidId;
-    AppData.iosNativeAdsId=AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').single.iosId;
-    print(AppData.listAdsType.where((element) => element.type=='native' && element.provider=='Google').isNotEmpty);
-    print(AppData.adsSettingModel.data?.where((element) => element.advertisementType=='native' && element.provider=='Google' && element.isAdvertisementOn=='1').isNotEmpty);
+    AppData.isShowGoogleBannerAds = (AppData.listAdsType
+            .where((element) =>
+                element.type == 'banner' && element.provider == 'Google')
+            .isNotEmpty) &&
+        ((AppData.adsSettingModel.data
+                ?.where((element) =>
+                    element.advertisementType == 'banner' &&
+                    element.provider == 'Google' &&
+                    element.isAdvertisementOn == 1)
+                .isNotEmpty ??
+            false));
+    AppData.androidBannerAdsId = AppData.listAdsType
+        .where((element) =>
+            element.type == 'banner' && element.provider == 'Google')
+        .single
+        .androidId;
+    AppData.iosBannerAdsId = AppData.listAdsType
+        .where((element) =>
+            element.type == 'banner' && element.provider == 'Google')
+        .single
+        .iosId;
+    // native ads
+    AppData.isShowGoogleNativeAds = (AppData.listAdsType
+            .where((element) =>
+                element.type == 'native' && element.provider == 'Google')
+            .isNotEmpty) &&
+        ((AppData.adsSettingModel.data
+                ?.where((element) =>
+                    element.advertisementType == 'native' &&
+                    element.provider == 'Google' &&
+                    element.isAdvertisementOn == 1)
+                .isNotEmpty ??
+            false));
+    AppData.androidNativeAdsId = AppData.listAdsType
+        .where((element) =>
+            element.type == 'native' && element.provider == 'Google')
+        .single
+        .androidId;
+    AppData.iosNativeAdsId = AppData.listAdsType
+        .where((element) =>
+            element.type == 'native' && element.provider == 'Google')
+        .single
+        .iosId;
+    print(AppData.listAdsType
+        .where((element) =>
+            element.type == 'native' && element.provider == 'Google')
+        .isNotEmpty);
+    print(AppData.adsSettingModel.data
+        ?.where((element) =>
+            element.advertisementType == 'native' &&
+            element.provider == 'Google' &&
+            element.isAdvertisementOn == '1')
+        .isNotEmpty);
     print("dot1 ${AppData.isShowGoogleBannerAds}");
     print("dot ${AppData.isShowGoogleNativeAds}");
     // } catch (e) {

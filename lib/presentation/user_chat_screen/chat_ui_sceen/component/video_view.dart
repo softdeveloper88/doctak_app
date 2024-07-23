@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -68,9 +67,9 @@ class _VideoViewPageState extends State<VideoViewPage> {
               height: MediaQuery.of(context).size.height - 150,
               child: _controller!.value.isInitialized
                   ? AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
-                child: VideoPlayer(_controller!),
-              )
+                      aspectRatio: _controller!.value.aspectRatio,
+                      child: VideoPlayer(_controller!),
+                    )
                   : Container(),
             ),
             Positioned(

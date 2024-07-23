@@ -1,13 +1,17 @@
 import 'dart:convert';
-MessageModel messageModelFromJson(String str) => MessageModel.fromJson(json.decode(str));
+
+MessageModel messageModelFromJson(String str) =>
+    MessageModel.fromJson(json.decode(str));
 String messageModelToJson(MessageModel data) => json.encode(data.toJson());
+
 class MessageModel {
   MessageModel({
-      this.success, 
-      this.roomId, 
-      this.messages, 
-      this.total, 
-      this.lastPage,});
+    this.success,
+    this.roomId,
+    this.messages,
+    this.total,
+    this.lastPage,
+  });
 
   MessageModel.fromJson(dynamic json) {
     success = json['success'];
@@ -38,20 +42,21 @@ class MessageModel {
     map['last_page'] = lastPage;
     return map;
   }
-
 }
 
 Messages messagesFromJson(String str) => Messages.fromJson(json.decode(str));
 String messagesToJson(Messages data) => json.encode(data.toJson());
+
 class Messages {
   Messages({
-      this.id,
-      this.userId,
-      this.profile,
-      this.body, 
-      this.attachment, 
-      this.attachmentType, 
-      this.createdAt,});
+    this.id,
+    this.userId,
+    this.profile,
+    this.body,
+    this.attachment,
+    this.attachmentType,
+    this.createdAt,
+  });
 
   Messages.fromJson(dynamic json) {
     id = json['id'];
@@ -81,5 +86,4 @@ class Messages {
     map['created_at'] = createdAt;
     return map;
   }
-
 }

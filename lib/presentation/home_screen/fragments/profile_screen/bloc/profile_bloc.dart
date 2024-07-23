@@ -214,7 +214,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // try {
     // print((specialtyName ?? event.userProfile?.user?.specialty ?? ''));
     int privacyLength = (event.userProfile?.privacySetting?.length ?? 0);
-    event.userProfile?.privacySetting?.forEach((e){
+    event.userProfile?.privacySetting?.forEach((e) {
       print('privacy ${e.recordType}');
     });
     if (event.updateProfileSection == 1) {
@@ -253,8 +253,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             : 'globe',
         privacyLength >= 11
             ? event.userProfile?.privacySetting![11].visibility ?? 'globe'
-            :
-        'globe',
+            : 'globe',
         privacyLength >= 12
             ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
             : 'globe',

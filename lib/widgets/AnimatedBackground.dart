@@ -47,7 +47,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> {
               gradient: LinearGradient(
                 begin: Alignment(_gradientOffset, 0),
                 end: Alignment(_gradientOffset - 4, 0),
-                colors: [svGetScaffoldColor(),svGetScaffoldColor()],
+                colors: [svGetScaffoldColor(), svGetScaffoldColor()],
               ),
             ),
           ),

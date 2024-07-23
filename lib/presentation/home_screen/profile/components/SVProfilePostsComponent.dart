@@ -43,10 +43,10 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-
       // padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-          color: context.cardColor, ),
+        color: context.cardColor,
+      ),
       child: Column(
         children: [
           Row(
@@ -117,8 +117,10 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
           16.height,
           selectedIndex == 0
               ? MyPostComponent(widget.profileBloc)
-              : AboutWidget(profileBloc: widget.profileBloc,)
-         // : EditProfileScreen(widget.profileBloc),
+              : AboutWidget(
+                  profileBloc: widget.profileBloc,
+                )
+          // : EditProfileScreen(widget.profileBloc),
         ],
       ),
     );
@@ -126,20 +128,20 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
 }
 
 class AboutWidget extends StatelessWidget {
-   AboutWidget({required this.profileBloc,super.key});
+  AboutWidget({required this.profileBloc, super.key});
   ProfileBloc profileBloc;
   @override
   Widget build(BuildContext context) {
-    return _buildScrollview(context,profileBloc);
+    return _buildScrollview(context, profileBloc);
   }
 }
 
-Widget _buildColumnlockone(BuildContext context,profileBloc) {
+Widget _buildColumnlockone(BuildContext context, profileBloc) {
   return Column(
     children: [
       _buildRowinterested(
-        onTap: (){
-          PersonalInfoScreen(profileBloc:profileBloc).launch(context);
+        onTap: () {
+          PersonalInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,
         imageOne: 'assets/icon/ic_lock.svg',
@@ -147,9 +149,8 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
-        onTap: (){
-          ProfessionalInfoScreen(profileBloc:profileBloc).launch(context);
-
+        onTap: () {
+          ProfessionalInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,
         imageOne: 'assets/icon/ic_frame.svg',
@@ -157,9 +158,8 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
-        onTap: (){
-          WorkInfoScreen(profileBloc:profileBloc).launch(context);
-
+        onTap: () {
+          WorkInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,
         imageOne: 'assets/icon/ic_calendar.svg',
@@ -167,9 +167,8 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
-        onTap: (){
-          InterestedInfoScreen(profileBloc:profileBloc).launch(context);
-
+        onTap: () {
+          InterestedInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,
         imageOne: 'assets/icon/ic_person.svg',
@@ -177,9 +176,8 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
-        onTap: (){
-          PrivacyInfoScreen(profileBloc:profileBloc).launch(context);
-
+        onTap: () {
+          PrivacyInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,
         imageOne: 'assets/icon/ic_privacy.svg',
@@ -190,12 +188,12 @@ Widget _buildColumnlockone(BuildContext context,profileBloc) {
 }
 
 /// Section Widget
-Widget _buildScrollview(BuildContext context,profileBloc) {
+Widget _buildScrollview(BuildContext context, profileBloc) {
   return SingleChildScrollView(
     child: Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Column(
-        children: [_buildColumnlockone(context,profileBloc)],
+        children: [_buildColumnlockone(context, profileBloc)],
       ),
     ),
   );
@@ -209,7 +207,7 @@ Widget _buildRowinterested(
   required String interested,
 }) {
   return GestureDetector(
-    onTap: ()=>onTap(),
+    onTap: () => onTap(),
     child: Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 15,
@@ -235,18 +233,21 @@ Widget _buildRowinterested(
             ),
             child: Text(
               interested,
-              style: GoogleFonts.poppins(fontSize: 12.sp,fontWeight: FontWeight.w500,color: svGetBodyColor(),),
+              style: GoogleFonts.poppins(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: svGetBodyColor(),
+              ),
             ),
           ),
           const Spacer(),
-           Icon(
+          Icon(
             Icons.arrow_forward_ios_rounded,
             size: 25,
-            color:svGetBodyColor(),
+            color: svGetBodyColor(),
           )
         ],
       ),
     ),
   );
 }
-

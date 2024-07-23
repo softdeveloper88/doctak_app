@@ -54,14 +54,16 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
         leading: IconButton(
-          icon:  Icon(Icons.arrow_back_ios_new_rounded,
-              color: svGetBodyColor()),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
         centerTitle: true,
-        title:  Text('Search Contacts',style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500),),
+        title: Text(
+          'Search Contacts',
+          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
       ),
       body: Column(
         children: [
@@ -125,8 +127,11 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
 
             builder: (context, state) {
               if (state is PaginationLoadingState) {
-                return  Expanded(
-                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+                return Expanded(
+                    child: Center(
+                        child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                )));
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -148,8 +153,10 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                       return bloc.contactNumberOfPage !=
                                   bloc.contactPageNumber - 1 &&
                               index >= bloc.searchContactsList.length - 1
-                          ?  Center(
-                              child: CircularProgressIndicator(color: svGetBodyColor(),),
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: svGetBodyColor(),
+                              ),
                             )
                           :
                           // Padding(
@@ -226,7 +233,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                 onTap: () {
                                   ChatRoomScreen(
                                     username:
-                                        '${bloc.searchContactsList[index].firstName??''} ${bloc.searchContactsList[index].lastName??""}',
+                                        '${bloc.searchContactsList[index].firstName ?? ''} ${bloc.searchContactsList[index].lastName ?? ""}',
                                     profilePic:
                                         '${bloc.searchContactsList[index].profilePic}',
                                     id: '${bloc.searchContactsList[index].id}',
@@ -312,7 +319,8 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                                   overflow: TextOverflow.clip,
                                                   style: GoogleFonts.poppins(
                                                       color: svGetBodyColor(),
-                                                      fontWeight: FontWeight.w600,
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                       fontSize: 16)),
                                             ),
                                           ],

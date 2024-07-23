@@ -297,9 +297,9 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
         ],
       ),
     );
-
   }
-bool _isExpanded=false;
+
+  bool _isExpanded = false;
   Future<void> bottomSheetDialog() {
     String fullText = widget.post.title ?? '' ?? '';
     List<String> words = fullText.split(' ');
@@ -327,7 +327,8 @@ bool _isExpanded=false;
               minChildSize: 0.2,
               maxChildSize: 0.75,
               expand: false,
-              builder: (BuildContext context, ScrollController scrollController) {
+              builder:
+                  (BuildContext context, ScrollController scrollController) {
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.4),
@@ -346,7 +347,8 @@ bool _isExpanded=false;
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.minimize, color: Colors.white),
+                                icon: const Icon(Icons.minimize,
+                                    color: Colors.white),
                                 onPressed: () {
                                   setState(() {
                                     Navigator.of(context).pop();
@@ -356,42 +358,44 @@ bool _isExpanded=false;
                               ),
                             ],
                           ),
-                          if(_isHtml(textToShow))  HtmlWidget(fullText, onTapUrl: (link) async {
-                            print('link $link');
-                            if (link.contains('doctak/jobs-detail')) {
-                              String jobID = Uri.parse(link).pathSegments.last;
-                              JobsDetailsScreen(
-                                jobId: jobID,
-                              ).launch(context);
-                            } else {
-                              PostUtils.launchURL(context, link);
-                            }
-                            return true;
-                          })
-
-                          else  Linkify(
-                            onOpen: (link) {
-                              if (link.url.contains('doctak/jobs-detail')) {
+                          if (_isHtml(textToShow))
+                            HtmlWidget(fullText, onTapUrl: (link) async {
+                              print('link $link');
+                              if (link.contains('doctak/jobs-detail')) {
                                 String jobID =
-                                Uri.parse(link.url).pathSegments.last;
+                                    Uri.parse(link).pathSegments.last;
                                 JobsDetailsScreen(
                                   jobId: jobID,
                                 ).launch(context);
                               } else {
-                                PostUtils.launchURL(context, link.url);
+                                PostUtils.launchURL(context, link);
                               }
-                            },
-                            text: fullText,
-                            style: const TextStyle(
-                              fontSize: 14.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              return true;
+                            })
+                          else
+                            Linkify(
+                              onOpen: (link) {
+                                if (link.url.contains('doctak/jobs-detail')) {
+                                  String jobID =
+                                      Uri.parse(link.url).pathSegments.last;
+                                  JobsDetailsScreen(
+                                    jobId: jobID,
+                                  ).launch(context);
+                                } else {
+                                  PostUtils.launchURL(context, link.url);
+                                }
+                              },
+                              text: fullText,
+                              style: const TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              linkStyle: const TextStyle(
+                                color: Colors.blue,
+                              ),
+                              textAlign: TextAlign.left,
                             ),
-                            linkStyle: const TextStyle(
-                              color: Colors.blue,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
                           // if (words.length > 25)
                           //   TextButton(
                           //     onPressed: () => setState(() {
@@ -415,7 +419,7 @@ bool _isExpanded=false;
                           //   widget.post.title ?? '',
                           //   style: const TextStyle(color: Colors.white, fontSize: 20),
                           // ),
-                            SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -441,6 +445,7 @@ bool _isExpanded=false;
       },
     );
   }
+
   bool _isHtml(String text) {
     // Simple regex to check if the string contains HTML tags
     final htmlTagPattern = RegExp(r'<[^>]*>');

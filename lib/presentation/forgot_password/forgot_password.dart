@@ -118,13 +118,16 @@ class ForgotPassword extends StatelessWidget {
                                     },
                                     contentPadding: const EdgeInsets.only(
                                         top: 18, right: 30, bottom: 18)),
-                                Text(message,style: GoogleFonts.poppins(color: Colors.red),),
+                                Text(
+                                  message,
+                                  style: GoogleFonts.poppins(color: Colors.red),
+                                ),
                                 const SizedBox(height: 32),
                                 svAppButton(
                                   context: context,
                                   text: 'SEND',
                                   onTap: () {
-                                    if(emailController.text.isEmpty){
+                                    if (emailController.text.isEmpty) {
                                       return;
                                     }
                                     if (_formKey.currentState!.validate()) {
@@ -156,7 +159,8 @@ class ForgotPassword extends StatelessWidget {
                                                       .bodyMediumGray600)),
                                           GestureDetector(
                                               onTap: () {
-                                                FocusScope.of(context).unfocus();
+                                                FocusScope.of(context)
+                                                    .unfocus();
                                                 Navigator.pushAndRemoveUntil(
                                                     context,
                                                     MaterialPageRoute(

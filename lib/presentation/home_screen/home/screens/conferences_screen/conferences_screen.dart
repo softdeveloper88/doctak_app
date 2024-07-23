@@ -21,7 +21,7 @@ import 'bloc/conference_event.dart';
 import 'bloc/conference_state.dart';
 
 class ConferencesScreen extends StatefulWidget {
-   ConferencesScreen({this.isFromSplash=false,super.key});
+  ConferencesScreen({this.isFromSplash = false, super.key});
   bool isFromSplash;
 
   @override
@@ -60,9 +60,9 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
           // toolbarHeight: 200,
           leading: GestureDetector(
               onTap: () {
-                if(widget.isFromSplash){
-                  const SVDashboardScreen().launch(context,isNewTask: true);
-                }else {
+                if (widget.isFromSplash) {
+                  const SVDashboardScreen().launch(context, isNewTask: true);
+                } else {
                   Navigator.of(context).pop();
                 }
               },
@@ -293,8 +293,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                     ),
                   );
                 } else {
-                  return const Expanded(
-                      child: Center(child: Text('')));
+                  return const Expanded(child: Center(child: Text('')));
                 }
               },
             ),
@@ -418,9 +417,9 @@ class ConferenceWidget extends StatelessWidget {
                         //     .homeBloc
                         //     .postList[index]);
                         createDynamicLink(
-                            '${ conference.title ?? ""} \n  Register Link: ${ conference.conferenceAgendaLink ??''}',
+                            '${conference.title ?? ""} \n  Register Link: ${conference.conferenceAgendaLink ?? ''}',
                             'https://doctak.net/conference/${conference.id}',
-                            conference.thumbnail??'');
+                            conference.thumbnail ?? '');
                         // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
                         //     "Company : ${bloc.drugsData[index].companyName}\n"
                         //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
@@ -436,9 +435,9 @@ class ConferenceWidget extends StatelessWidget {
                         //     "Job Apply Link: ${ bloc.drugsData[index]
                         //     .link ??
                         //     'N/A'}\n" );
-
                       },
-                      child: Icon(Icons.share_sharp,
+                      child: Icon(
+                        Icons.share_sharp,
                         size: 22,
                         // 'images/socialv/icons/ic_share.png',
                         // height: 22,
@@ -499,7 +498,6 @@ class ConferenceWidget extends StatelessWidget {
                   // 'Specialties Targeted: ${conference.specialties_targeted ?? 'N/A'}',
                   ),
             ),
-
           ],
         ),
       ),

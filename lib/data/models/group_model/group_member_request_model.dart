@@ -1,9 +1,14 @@
 import 'dart:convert';
-GroupMemberRequestModel groupMemberRequestModelFromJson(String str) => GroupMemberRequestModel.fromJson(json.decode(str));
-String groupMemberRequestModelToJson(GroupMemberRequestModel data) => json.encode(data.toJson());
+
+GroupMemberRequestModel groupMemberRequestModelFromJson(String str) =>
+    GroupMemberRequestModel.fromJson(json.decode(str));
+String groupMemberRequestModelToJson(GroupMemberRequestModel data) =>
+    json.encode(data.toJson());
+
 class GroupMemberRequestModel {
   GroupMemberRequestModel({
-      this.groupMembers,});
+    this.groupMembers,
+  });
 
   GroupMemberRequestModel.fromJson(dynamic json) {
     if (json['group_members'] != null) {
@@ -22,19 +27,21 @@ class GroupMemberRequestModel {
     }
     return map;
   }
-
 }
 
-GroupMembers groupMembersFromJson(String str) => GroupMembers.fromJson(json.decode(str));
+GroupMembers groupMembersFromJson(String str) =>
+    GroupMembers.fromJson(json.decode(str));
 String groupMembersToJson(GroupMembers data) => json.encode(data.toJson());
+
 class GroupMembers {
   GroupMembers({
-      this.id, 
-      this.userId, 
-      this.joinedAt, 
-      this.adminType, 
-      this.name, 
-      this.profilePic,});
+    this.id,
+    this.userId,
+    this.joinedAt,
+    this.adminType,
+    this.name,
+    this.profilePic,
+  });
 
   GroupMembers.fromJson(dynamic json) {
     id = json['id'];
@@ -61,5 +68,4 @@ class GroupMembers {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }

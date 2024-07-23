@@ -1,9 +1,13 @@
 import 'dart:convert';
-JobDetailModel jobDetailModelFromJson(String str) => JobDetailModel.fromJson(json.decode(str));
+
+JobDetailModel jobDetailModelFromJson(String str) =>
+    JobDetailModel.fromJson(json.decode(str));
 String jobDetailModelToJson(JobDetailModel data) => json.encode(data.toJson());
+
 class JobDetailModel {
   JobDetailModel({
-      this.job,});
+    this.job,
+  });
 
   JobDetailModel.fromJson(dynamic json) {
     job = json['job'] != null ? Job.fromJson(json['job']) : null;
@@ -17,7 +21,6 @@ class JobDetailModel {
     }
     return map;
   }
-
 }
 
 Job jobsFromJson(String str) => Job.fromJson(json.decode(str));
@@ -40,7 +43,8 @@ class Job {
     this.lastDate,
     this.applicants,
     this.user,
-    this.specialties,});
+    this.specialties,
+  });
 
   Job.fromJson(dynamic json) {
     id = json['id'];
@@ -113,14 +117,16 @@ class Job {
     }
     return map;
   }
-
 }
 
-Application applicationFromJson(String str) => Application.fromJson(json.decode(str));
+Application applicationFromJson(String str) =>
+    Application.fromJson(json.decode(str));
 String applicationToJson(Application data) => json.encode(data.toJson());
+
 class Application {
   Application({
-    this.id,});
+    this.id,
+  });
 
   Application.fromJson(dynamic json) {
     id = json['id'];
@@ -141,13 +147,16 @@ class Application {
     return map;
   }
 }
+
 User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
+
 class User {
   User({
     this.id,
     this.name,
-    this.profilePic,});
+    this.profilePic,
+  });
 
   User.fromJson(dynamic json) {
     id = json['id'];
@@ -165,5 +174,4 @@ class User {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }

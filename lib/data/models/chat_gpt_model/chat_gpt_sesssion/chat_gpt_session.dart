@@ -1,11 +1,15 @@
 import 'dart:convert';
-ChatGptSession chatGptSessionFromJson(String str) => ChatGptSession.fromJson(json.decode(str));
+
+ChatGptSession chatGptSessionFromJson(String str) =>
+    ChatGptSession.fromJson(json.decode(str));
 String chatGptSessionToJson(ChatGptSession data) => json.encode(data.toJson());
+
 class ChatGptSession {
   ChatGptSession({
-      this.success, 
-      this.newSessionId, 
-      this.sessions,});
+    this.success,
+    this.newSessionId,
+    this.sessions,
+  });
 
   ChatGptSession.fromJson(dynamic json) {
     success = json['success'];
@@ -30,18 +34,19 @@ class ChatGptSession {
     }
     return map;
   }
-
 }
 
 Sessions sessionsFromJson(String str) => Sessions.fromJson(json.decode(str));
 String sessionsToJson(Sessions data) => json.encode(data.toJson());
+
 class Sessions {
   Sessions({
-      this.id, 
-      this.userId, 
-      this.name, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.userId,
+    this.name,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Sessions.fromJson(dynamic json) {
     id = json['id'];
@@ -65,5 +70,4 @@ class Sessions {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }

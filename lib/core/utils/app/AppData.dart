@@ -1,4 +1,3 @@
-
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
 
@@ -27,18 +26,20 @@ class AppData {
   static var practicingCountry = "";
   static var gender = "";
   static var logInUserId;
-  static String background="";
-  static String userType='doctor';
-  static String university="";
-  static String currency="";
-  static String countryName="";
-  static List<AdsTypeModel> listAdsType=[];
-  static  AdsSettingModel adsSettingModel=AdsSettingModel();
+  static String background = "";
+  static String userType = 'doctor';
+  static String university = "";
+  static String currency = "";
+  static String countryName = "";
+  static List<AdsTypeModel> listAdsType = [];
+  static AdsSettingModel adsSettingModel = AdsSettingModel();
+
   /// Ads Setting
   static bool? isShowGoogleBannerAds;
   static String? androidBannerAdsId;
   static String? iosBannerAdsId;
- /// Native Ads Setting
+
+  /// Native Ads Setting
   static bool? isShowGoogleNativeAds;
   static String? androidNativeAdsId;
   static String? iosNativeAdsId;

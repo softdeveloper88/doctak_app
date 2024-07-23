@@ -8,11 +8,8 @@ class ChatDeleteDialog extends StatelessWidget {
   final VoidCallback callback;
   final String title;
 
-
   const ChatDeleteDialog(
-      {Key? key,
-        required this.title,
-        required this.callback})
+      {Key? key, required this.title, required this.callback})
       : super(key: key);
 
   @override
@@ -28,8 +25,8 @@ class ChatDeleteDialog extends StatelessWidget {
   }
 }
 
-confirmationAlertDialog(BuildContext context, String title,
-    VoidCallback callBack) {
+confirmationAlertDialog(
+    BuildContext context, String title, VoidCallback callBack) {
   return Center(
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -56,13 +53,12 @@ confirmationAlertDialog(BuildContext context, String title,
                           children: [
                             Expanded(
                               child: Padding(
-                                padding:
-                                const EdgeInsets.only(right: 8.0),
+                                padding: const EdgeInsets.only(right: 8.0),
                                 child: Text("Delete chat?",
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.poppins(
                                         fontSize: 10.sp,
-                                        color:  svGetBodyColor(),
+                                        color: svGetBodyColor(),
                                         fontWeight: FontWeight.w500)),
                               ),
                             )
@@ -71,15 +67,18 @@ confirmationAlertDialog(BuildContext context, String title,
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0,right: 16.0),
+                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                       child: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
                             style: GoogleFonts.poppins(
-                                fontSize: 8.sp, color:  svGetBodyColor()),
+                                fontSize: 8.sp, color: svGetBodyColor()),
                             children: <TextSpan>[
-                              const TextSpan(text: 'Are you sure that you want to delete this chat'),
-                              TextSpan(text:title,
+                              const TextSpan(
+                                  text:
+                                      'Are you sure that you want to delete this chat'),
+                              TextSpan(
+                                  text: title,
                                   style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.w900)),
                             ],
@@ -93,8 +92,8 @@ confirmationAlertDialog(BuildContext context, String title,
                           width: 25.w,
                           height: 8.w,
                           decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: MaterialButton(
                             shape: RoundedRectangleBorder(
@@ -126,8 +125,9 @@ confirmationAlertDialog(BuildContext context, String title,
                             width: 25.w,
                             height: 8.w,
                             decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(10),),
+                              color: Colors.red.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             child: MaterialButton(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),

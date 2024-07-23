@@ -1,10 +1,15 @@
 import 'dart:convert';
-AdsSettingModel adsSettingModelFromJson(String str) => AdsSettingModel.fromJson(json.decode(str));
-String adsSettingModelToJson(AdsSettingModel data) => json.encode(data.toJson());
+
+AdsSettingModel adsSettingModelFromJson(String str) =>
+    AdsSettingModel.fromJson(json.decode(str));
+String adsSettingModelToJson(AdsSettingModel data) =>
+    json.encode(data.toJson());
+
 class AdsSettingModel {
   AdsSettingModel({
-      this.success, 
-      this.data,});
+    this.success,
+    this.data,
+  });
 
   AdsSettingModel.fromJson(dynamic json) {
     success = json['success'];
@@ -26,20 +31,21 @@ class AdsSettingModel {
     }
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
   Data({
-      this.id, 
-      this.userId, 
-      this.advertisementType, 
-      this.deviceType,
-      this.isPaid, 
-      this.provider, 
-      this.isAdvertisementOn,});
+    this.id,
+    this.userId,
+    this.advertisementType,
+    this.deviceType,
+    this.isPaid,
+    this.provider,
+    this.isAdvertisementOn,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -69,5 +75,4 @@ class Data {
     map['is_advertisement_on'] = isAdvertisementOn;
     return map;
   }
-
 }

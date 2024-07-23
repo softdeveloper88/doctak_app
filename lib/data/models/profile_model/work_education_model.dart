@@ -29,21 +29,21 @@ class WorkEducationModel {
   String? privacy;
 
   WorkEducationModel({
-     this.id,
-     this.userId,
-     this.workType,
-     this.name,
+    this.id,
+    this.userId,
+    this.workType,
+    this.name,
     this.position,
     this.address,
-     this.startDate,
-     this.endDate,
+    this.startDate,
+    this.endDate,
     this.currentStatus,
     this.degree,
     this.courses,
     this.description,
-     this.createdAt,
-     this.updatedAt,
-     this.privacy,
+    this.createdAt,
+    this.updatedAt,
+    this.privacy,
   });
 
   factory WorkEducationModel.fromJson(Map<String, dynamic> json) =>

@@ -51,12 +51,12 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   Widget build(BuildContext context) {
     return _isLoaded
         ? Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        height: _bannerAd.size.height.toDouble(),
-        child: AdWidget(ad: _bannerAd),
-      ),
-    )
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height: _bannerAd.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd),
+            ),
+          )
         : const SizedBox(height: 8);
   }
 }

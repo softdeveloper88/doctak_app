@@ -3,7 +3,8 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/widgets/base_button.dart';
 
 class CustomOutlinedButton extends BaseButton {
-  const CustomOutlinedButton({super.key,
+  const CustomOutlinedButton({
+    super.key,
     this.decoration,
     this.leftIcon,
     this.rightIcon,

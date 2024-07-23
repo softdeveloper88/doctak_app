@@ -42,70 +42,77 @@ class TextFieldEditWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isEditModeMap ?? false) {
       return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  label ?? '',
-                  style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500,),
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              label ?? '',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            child: CustomTextField(
+                textInputAction: textInputAction,
+                hintText: hints,
+                filled: true,
+                minLines: 1,
+                focusNode: focusNode,
+                fillColor: AppDecoration.fillGray.color,
+                textInputType: textInputType ?? TextInputType.text,
+                prefix: const SizedBox(
+                  width: 10,
                 ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                child: CustomTextField(
-                    textInputAction: textInputAction,
-                    hintText: hints,
-                    filled: true,
-                    minLines:1,
-                    focusNode: focusNode,
-                    fillColor: AppDecoration.fillGray.color,
-                    textInputType: textInputType ?? TextInputType.text,
-                    prefix: const SizedBox(width: 10,),
-                    prefixConstraints: const BoxConstraints(maxHeight: 56),
-                    initialValue: value,
-                    maxLines: maxLines,
-                    onSaved: (v) {
-                      onSave?.call(v);
-                    },
-                    onFieldSubmitted: (v) {
-
-                      onFieldSubmitted?.call(v);
-
-                    },
-                    contentPadding:
-                        const EdgeInsets.only(top: 18, right: 30, bottom: 18)),
-              ),
-            ],
-          );
+                prefixConstraints: const BoxConstraints(maxHeight: 56),
+                initialValue: value,
+                maxLines: maxLines,
+                onSaved: (v) {
+                  onSave?.call(v);
+                },
+                onFieldSubmitted: (v) {
+                  onFieldSubmitted?.call(v);
+                },
+                contentPadding:
+                    const EdgeInsets.only(top: 18, right: 30, bottom: 18)),
+          ),
+        ],
+      );
     } else {
       return Padding(
-        padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 16,bottom: 16),
+        padding:
+            const EdgeInsets.only(left: 8.0, right: 8.0, top: 16, bottom: 16),
         child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: Text(
-                    capitalizeWords(label??''),
-                    style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
-                  ),
-                ),
-                Expanded(
-                  flex: 5,
-                  child: Text(
-                    textAlign: TextAlign.end,
-                    capitalizeWords(value??''),
-                      style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w500),
-                  
-                      ),
-                ),
-              ],
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              flex: 4,
+              child: Text(
+                capitalizeWords(label ?? ''),
+                style: GoogleFonts.poppins(
+                    color: svGetBodyColor(),
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w500),
+              ),
             ),
+            Expanded(
+              flex: 5,
+              child: Text(
+                textAlign: TextAlign.end,
+                capitalizeWords(value ?? ''),
+                style: GoogleFonts.poppins(
+                    color: svGetBodyColor(),
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
       );
     }
   }
 }
-
-

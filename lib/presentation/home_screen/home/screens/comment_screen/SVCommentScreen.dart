@@ -11,15 +11,16 @@ import '../../../utils/SVCommon.dart';
 
 class SVCommentScreen extends StatefulWidget {
   int id;
-HomeBloc homeBloc;
-  SVCommentScreen({required this.id,required this.homeBloc, Key? key}) : super(key: key);
+  HomeBloc homeBloc;
+  SVCommentScreen({required this.id, required this.homeBloc, Key? key})
+      : super(key: key);
 
   @override
   State<SVCommentScreen> createState() => _SVCommentScreenState();
 }
 
 class _SVCommentScreenState extends State<SVCommentScreen> {
-   CommentBloc commentBloc = CommentBloc();
+  CommentBloc commentBloc = CommentBloc();
 
   @override
   void initState() {
@@ -47,10 +48,11 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-            icon:  Icon(Icons.arrow_back_ios_new_rounded,
-                color:svGetBodyColor()),
-            onPressed:(){Navigator.pop(context);}
-        ),
+            icon:
+                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
         actions: const [
           // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
         ],
@@ -70,39 +72,45 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
             }
           },
           builder: (context, state) {
-
             if (state is PaginationLoadingState) {
-              return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
+              return Center(
+                  child: CircularProgressIndicator(
+                color: svGetBodyColor(),
+              ));
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
-              return commentBloc.postList.isEmpty? const Center(child: Text('No comments'),):Padding(
-                padding: const EdgeInsets.only(bottom: 60.0),
-                child: ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: commentBloc.postList.length,
-                    itemBuilder: (context, index) {
-                      // if (commentBloc.pageNumber <=
-                      //     commentBloc.numberOfPage) {
-                      //   if (index ==
-                      //       commentBloc.postList.length -
-                      //           commentBloc.nextPageTrigger) {
-                      //     commentBloc
-                      //         .add(CheckIfNeedMoreDataEvent(index: index));
-                      //   }
-                      // }
-                      // return commentBloc.numberOfPage !=
-                      //     commentBloc.pageNumber - 1 &&
-                      //     index >= commentBloc.postList.length - 1
-                      //     ? const Center(
-                      //   child: CircularProgressIndicator(color: svGetBodyColor(),),
-                      // ) :
-                      return SVCommentComponent(
-                          commentBloc:commentBloc,
-                          comment: commentBloc.postList[index]);
-                    }),
-              );
+              return commentBloc.postList.isEmpty
+                  ? const Center(
+                      child: Text('No comments'),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: 60.0),
+                      child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: commentBloc.postList.length,
+                          itemBuilder: (context, index) {
+                            // if (commentBloc.pageNumber <=
+                            //     commentBloc.numberOfPage) {
+                            //   if (index ==
+                            //       commentBloc.postList.length -
+                            //           commentBloc.nextPageTrigger) {
+                            //     commentBloc
+                            //         .add(CheckIfNeedMoreDataEvent(index: index));
+                            //   }
+                            // }
+                            // return commentBloc.numberOfPage !=
+                            //     commentBloc.pageNumber - 1 &&
+                            //     index >= commentBloc.postList.length - 1
+                            //     ? const Center(
+                            //   child: CircularProgressIndicator(color: svGetBodyColor(),),
+                            // ) :
+                            return SVCommentComponent(
+                                commentBloc: commentBloc,
+                                comment: commentBloc.postList[index]);
+                          }),
+                    );
             } else {
               return const Center(child: Text("No Comment Found"));
             }
@@ -120,11 +128,10 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       //     // SVCommentReplyComponent(),
       //   ],
       // ),
-      bottomSheet:  SVCommentReplyComponent(commentBloc,widget.id,(value){
-        if(value.isNotEmpty) {
-          commentBloc.add(PostCommentEvent(
-              postId: widget.id, comment: value));
-          value='';
+      bottomSheet: SVCommentReplyComponent(commentBloc, widget.id, (value) {
+        if (value.isNotEmpty) {
+          commentBloc.add(PostCommentEvent(postId: widget.id, comment: value));
+          value = '';
           // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
           //  homeBloc.postList[index].comments!.add(Comments());
         }

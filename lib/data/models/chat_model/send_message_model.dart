@@ -1,7 +1,9 @@
 import 'dart:convert';
 
-SendMessageModel messagesFromJson(String str) => SendMessageModel.fromJson(json.decode(str));
+SendMessageModel messagesFromJson(String str) =>
+    SendMessageModel.fromJson(json.decode(str));
 String messagesToJson(SendMessageModel data) => json.encode(data.toJson());
+
 class SendMessageModel {
   SendMessageModel({
     this.userId,
@@ -9,7 +11,8 @@ class SendMessageModel {
     this.body,
     this.attachment,
     this.attachmentType,
-    this.createdAt,});
+    this.createdAt,
+  });
 
   SendMessageModel.fromJson(dynamic json) {
     userId = json['user_id'];
@@ -36,5 +39,4 @@ class SendMessageModel {
     map['created_at'] = createdAt;
     return map;
   }
-
 }

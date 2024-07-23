@@ -1,15 +1,19 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-ContactsModel contactsModelFromJson(String str) => ContactsModel.fromJson(json.decode(str));
+
+ContactsModel contactsModelFromJson(String str) =>
+    ContactsModel.fromJson(json.decode(str));
 String contactsModelToJson(ContactsModel data) => json.encode(data.toJson());
+
 class ContactsModel {
   ContactsModel({
-      this.success, 
-      this.groups, 
-      this.contacts, 
-      this.total, 
-      this.lastPage,});
+    this.success,
+    this.groups,
+    this.contacts,
+    this.total,
+    this.lastPage,
+  });
 
   ContactsModel.fromJson(dynamic json) {
     success = json['success'];
@@ -47,21 +51,22 @@ class ContactsModel {
     map['last_page'] = lastPage;
     return map;
   }
-
 }
 
 Contacts contactsFromJson(String str) => Contacts.fromJson(json.decode(str));
 String contactsToJson(Contacts data) => json.encode(data.toJson());
-class Contacts extends Equatable{
+
+class Contacts extends Equatable {
   Contacts({
-      this.id,
-      this.roomId,
-      this.createdAt,
-      this.firstName, 
-      this.lastName, 
-      this.profilePic, 
-      this.latestMessage, 
-      this.latestMessageTime,});
+    this.id,
+    this.roomId,
+    this.createdAt,
+    this.firstName,
+    this.lastName,
+    this.profilePic,
+    this.latestMessage,
+    this.latestMessageTime,
+  });
 
   Contacts.fromJson(dynamic json) {
     id = json['id'];
@@ -96,19 +101,29 @@ class Contacts extends Equatable{
   }
 
   @override
-  List<Object?> get props => [id,roomId,createdAt,firstName,lastName,profilePic,latestMessage,latestMessageTime];
-
+  List<Object?> get props => [
+        id,
+        roomId,
+        createdAt,
+        firstName,
+        lastName,
+        profilePic,
+        latestMessage,
+        latestMessageTime
+      ];
 }
 
 Groups groupsFromJson(String str) => Groups.fromJson(json.decode(str));
 String groupsToJson(Groups data) => json.encode(data.toJson());
+
 class Groups {
   Groups({
-      this.roomId, 
-      this.createdAt, 
-      this.groupName, 
-      this.latestMessage, 
-      this.latestMessageTime,});
+    this.roomId,
+    this.createdAt,
+    this.groupName,
+    this.latestMessage,
+    this.latestMessageTime,
+  });
 
   Groups.fromJson(dynamic json) {
     roomId = json['room_id'];
@@ -132,5 +147,4 @@ class Groups {
     map['latest_message_time'] = latestMessageTime;
     return map;
   }
-
 }

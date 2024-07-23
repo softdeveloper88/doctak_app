@@ -1,14 +1,18 @@
 import 'dart:convert';
-PlaceLiveModel placeLiveModelFromJson(String str) => PlaceLiveModel.fromJson(json.decode(str));
+
+PlaceLiveModel placeLiveModelFromJson(String str) =>
+    PlaceLiveModel.fromJson(json.decode(str));
 String placeLiveModelToJson(PlaceLiveModel data) => json.encode(data.toJson());
+
 class PlaceLiveModel {
   PlaceLiveModel({
-      this.id, 
-      this.userId, 
-      this.place, 
-      this.description, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.userId,
+    this.place,
+    this.description,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   PlaceLiveModel.fromJson(dynamic json) {
     id = json['id'];
@@ -35,5 +39,4 @@ class PlaceLiveModel {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }

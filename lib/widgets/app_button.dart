@@ -67,8 +67,8 @@ class _AppButtonState extends State<AppButton>
         lowerBound: 0.0,
         upperBound: 0.1,
       )..addListener(() {
-        setState(() {});
-      });
+          setState(() {});
+        });
     }
     super.initState();
   }
@@ -112,8 +112,8 @@ class _AppButtonState extends State<AppButton>
         padding: widget.padding ?? dynamicAppButtonPadding(context),
         onPressed: widget.enabled
             ? widget.onTap != null
-            ? widget.onTap as void Function()?
-            : null
+                ? widget.onTap as void Function()?
+                : null
             : null,
         color: widget.color ?? appButtonBackgroundColorGlobal,
         child: widget.child ??

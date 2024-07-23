@@ -11,7 +11,8 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart' as comment_bloc;
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart'
+    as comment_bloc;
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -41,7 +42,7 @@ class MyPostComponent extends StatefulWidget {
 
 class _MyPostComponentState extends State<MyPostComponent> {
   HomeBloc homeBloc = HomeBloc();
- int isShowComment=-1;
+  int isShowComment = -1;
   showAlertDialog(BuildContext context, int id) {
     // set up the buttons
     Widget cancelButton = TextButton(
@@ -160,115 +161,111 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
-                                          child: Row(
-                                            children: [
-                                              CachedNetworkImage(
-                                                imageUrl:
+                                      child: Row(
+                                        children: [
+                                          CachedNetworkImage(
+                                            imageUrl:
                                                 "${AppData.imageUrl}${widget.profileBloc.postList[index].user?.profilePic!.validate()}",
-                                                height: 50,
-                                                width: 50,
-                                                fit: BoxFit.cover,
-                                              ).cornerRadiusWithClipRRect(20),
-                                              12.width,
-                                              Column(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  TextIconWidget(
-                                                      text: widget
+                                            height: 50,
+                                            width: 50,
+                                            fit: BoxFit.cover,
+                                          ).cornerRadiusWithClipRRect(20),
+                                          12.width,
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              TextIconWidget(
+                                                  text: widget
                                                           .profileBloc
                                                           .postList[index]
-                                                          .user?.name ?? '',
-                                                      suffix: Image.asset(
-                                                          'images/socialv/icons/ic_TickSquare.png',
-                                                          height: 14,
-                                                          width: 14,
-                                                          fit: BoxFit.cover),
-                                                      textStyle:
-                                                      boldTextStyle()),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                          timeAgo.format(DateTime
-                                                              .parse(widget
+                                                          .user
+                                                          ?.name ??
+                                                      '',
+                                                  suffix: Image.asset(
+                                                      'images/socialv/icons/ic_TickSquare.png',
+                                                      height: 14,
+                                                      width: 14,
+                                                      fit: BoxFit.cover),
+                                                  textStyle: boldTextStyle()),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                      timeAgo.format(
+                                                          DateTime.parse(widget
                                                               .profileBloc
-                                                              .postList[
-                                                          index]
+                                                              .postList[index]
                                                               .createdAt!)),
-                                                          style: secondaryTextStyle(
-                                                              color:
+                                                      style: secondaryTextStyle(
+                                                          color:
                                                               svGetBodyColor(),
-                                                              size: 12)),
-                                                      const Padding(
-                                                        padding:
-                                                        EdgeInsets.only(
-                                                            left: 8.0),
-                                                        child: Icon(
-                                                          Icons.access_time,
-                                                          size: 20,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
+                                                          size: 12)),
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 8.0),
+                                                    child: Icon(
+                                                      Icons.access_time,
+                                                      size: 20,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  )
                                                 ],
                                               ),
-                                              // 4.width,
                                             ],
-                                          ).paddingSymmetric(horizontal: 16),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.end,
-                                          children: [
-                                            if (widget.profileBloc
-                                                    .postList[index].userId ==
-                                                AppData.logInUserId)
-                                            PopupMenuButton(
-                                              itemBuilder: (context) {
-                                                return [
-                                                  PopupMenuItem(
-                                                    child: Builder(
-                                                        builder: (context) {
-                                                          return Column(
-                                                            children: [
-                                                              "Delete"
-                                                            ].map(
-                                                                    (String item) {
-                                                                  return PopupMenuItem(
-                                                                    value: item,
-                                                                    child:
-                                                                    Text(item),
-                                                                  );
-                                                                }).toList(),
-                                                          );
-                                                        }),
-                                                  ),
-                                                ];
-                                              },
-                                              onSelected: (value) {
-                                                if (value == 'Delete') {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext
-                                                    context) {
-                                                      return showAlertDialog(
-                                                          context,
-                                                          widget
-                                                              .profileBloc
-                                                              .postList[
-                                                          index]
-                                                              .id ??
-                                                              0);
-                                                    },
-                                                  );
-                                                }
-                                              },
-                                            )
-                                            // IconButton(onPressed: () {},
-                                            //     icon: const Icon(Icons.more_horiz)),
-                                          ],
-                                        ),
+                                          ),
+                                          // 4.width,
+                                        ],
+                                      ).paddingSymmetric(horizontal: 16),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        if (widget.profileBloc.postList[index]
+                                                .userId ==
+                                            AppData.logInUserId)
+                                          PopupMenuButton(
+                                            itemBuilder: (context) {
+                                              return [
+                                                PopupMenuItem(
+                                                  child: Builder(
+                                                      builder: (context) {
+                                                    return Column(
+                                                      children: ["Delete"]
+                                                          .map((String item) {
+                                                        return PopupMenuItem(
+                                                          value: item,
+                                                          child: Text(item),
+                                                        );
+                                                      }).toList(),
+                                                    );
+                                                  }),
+                                                ),
+                                              ];
+                                            },
+                                            onSelected: (value) {
+                                              if (value == 'Delete') {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return showAlertDialog(
+                                                        context,
+                                                        widget
+                                                                .profileBloc
+                                                                .postList[index]
+                                                                .id ??
+                                                            0);
+                                                  },
+                                                );
+                                              }
+                                            },
+                                          )
+                                        // IconButton(onPressed: () {},
+                                        //     icon: const Icon(Icons.more_horiz)),
+                                      ],
+                                    ),
                                   ],
                                 ),
                                 16.height,
@@ -314,11 +311,11 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       GestureDetector(
-                                        onTap: (){
+                                        onTap: () {
                                           LikesListScreen(
-                                              id: widget.profileBloc
-                                                  .postList[index].id ??
-                                                  0)
+                                                  id: widget.profileBloc
+                                                          .postList[index].id ??
+                                                      0)
                                               .launch(context);
                                         },
                                         child: Text(
@@ -327,12 +324,13 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                                 color: svGetBodyColor())),
                                       ),
                                       GestureDetector(
-                                        onTap: (){
+                                        onTap: () {
                                           SVCommentScreen(
-                                                  id: widget.profileBloc
-                                                          .postList[index].id ??
-                                                      0,homeBloc: homeBloc,)
-                                              .launch(context);
+                                            id: widget.profileBloc
+                                                    .postList[index].id ??
+                                                0,
+                                            homeBloc: homeBloc,
+                                          ).launch(context);
                                         },
                                         child: Text(
                                             '${widget.profileBloc.postList[index].comments?.length ?? 0.validate()} comments',
@@ -355,22 +353,31 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       highlightColor: Colors.transparent,
                                       onTap: () {
                                         print('object');
-                                        setState(() {
-
-                                        });
-                                       if(findIsLiked(widget.profileBloc
-                                           .postList[index].likes)) {
-                                         print('object unlike');
-                                         widget.profileBloc.postList[index]
-                                             .likes!.removeWhere((e) => e.userId==AppData.logInUserId);
-                                       }else{
-                                         widget.profileBloc.postList[index]
-                                             .likes!.add(Likes(
-                                           id:index,userId: AppData.logInUserId,postId: widget.profileBloc.postList[index].id.toString(),createdAt: '',updatedAt: ''
-                                         ));
-                                       }
+                                        setState(() {});
+                                        if (findIsLiked(widget.profileBloc
+                                            .postList[index].likes)) {
+                                          print('object unlike');
+                                          widget.profileBloc.postList[index]
+                                              .likes!
+                                              .removeWhere((e) =>
+                                                  e.userId ==
+                                                  AppData.logInUserId);
+                                        } else {
+                                          widget.profileBloc.postList[index]
+                                              .likes!
+                                              .add(Likes(
+                                                  id: index,
+                                                  userId: AppData.logInUserId,
+                                                  postId: widget.profileBloc
+                                                      .postList[index].id
+                                                      .toString(),
+                                                  createdAt: '',
+                                                  updatedAt: ''));
+                                        }
                                         homeBloc.add(PostLikeEvent(
-                                            postId: widget.profileBloc.postList[index].id ??0));
+                                            postId: widget.profileBloc
+                                                    .postList[index].id ??
+                                                0));
                                       },
                                       child: Column(
                                         children: [
@@ -399,12 +406,11 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                       highlightColor: Colors.transparent,
                                       onTap: () {
                                         setState(() {
-                                          if(isShowComment==-1) {
+                                          if (isShowComment == -1) {
                                             isShowComment = index;
-                                          }else{
-                                            isShowComment=-1;
+                                          } else {
+                                            isShowComment = -1;
                                           }
-
                                         });
 
                                         // SVCommentScreen(
@@ -431,58 +437,65 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                     InkWell(
                                       splashColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
-
-                                      onTap: (){
+                                      onTap: () {
                                         String mediaLink;
-                                        if (widget.profileBloc.postList[index].media!.isNotEmpty) {
+                                        if (widget.profileBloc.postList[index]
+                                            .media!.isNotEmpty) {
                                           mediaLink = widget
-                                              .profileBloc
-                                              .postList[index].media?.first.mediaPath??"";
+                                                  .profileBloc
+                                                  .postList[index]
+                                                  .media
+                                                  ?.first
+                                                  .mediaPath ??
+                                              "";
                                         } else {
                                           mediaLink = '';
                                         }
-                                        Share.share('${removeHtmlTags(widget
-                                            .profileBloc
-                                            .postList[index].title??'')}\n https://doctak.net/post/${widget
-                                            .profileBloc
-                                            .postList[index].id} \n'
-                                            '${AppData.imageUrl}$mediaLink'); },
+                                        Share.share(
+                                            '${removeHtmlTags(widget.profileBloc.postList[index].title ?? '')}\n https://doctak.net/post/${widget.profileBloc.postList[index].id} \n'
+                                            '${AppData.imageUrl}$mediaLink');
+                                      },
                                       child: Column(
                                         children: [
-                                          Icon(Icons.share_sharp,
+                                          Icon(
+                                            Icons.share_sharp,
                                             size: 22,
                                             // 'images/socialv/icons/ic_share.png',
                                             // height: 22,
                                             // width: 22,
                                             // fit: BoxFit.cover,
                                             color: context.iconColor,
-                                          ),Text('Share', style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
+                                          ),
+                                          Text('Share',
+                                              style: secondaryTextStyle(
+                                                  color: svGetBodyColor())),
                                         ],
                                       ),
                                     ),
                                   ],
                                 ).paddingSymmetric(horizontal: 16),
-                                if(isShowComment==index)SVCommentReplyComponent(comment_bloc.CommentBloc(),widget
-                                    .profileBloc
-                                    .postList[index]
-                                    .id ??
-                                    0,(value){
-                                  if(value.isNotEmpty) {
+                                if (isShowComment == index)
+                                  SVCommentReplyComponent(
+                                      comment_bloc.CommentBloc(),
+                                      widget.profileBloc.postList[index].id ??
+                                          0, (value) {
+                                    if (value.isNotEmpty) {
+                                      var comments = comment_bloc.CommentBloc();
+                                      comments.add(
+                                          comment_bloc.PostCommentEvent(
+                                              postId: widget.profileBloc
+                                                      .postList[index].id ??
+                                                  0,
+                                              comment: value));
 
-                                    var comments=  comment_bloc.CommentBloc();
-                                    comments.add(comment_bloc.PostCommentEvent(
-                                        postId: widget.profileBloc
-                                            .postList[index]
-                                            .id ??
-                                            0, comment: value));
-
-                                    widget.profileBloc.postList[index].comments!.add(Comments());
-                                    setState(() {
-                                      isShowComment=-1;
-                                    });
-                                  }
-                                })
+                                      widget
+                                          .profileBloc.postList[index].comments!
+                                          .add(Comments());
+                                      setState(() {
+                                        isShowComment = -1;
+                                      });
+                                    }
+                                  })
                                 // const Divider(indent: 16, endIndent: 16, height: 20),
                                 // Row(
                                 //   mainAxisAlignment: MainAxisAlignment.center,
@@ -629,7 +642,6 @@ class _MyPostComponentState extends State<MyPostComponent> {
     return luminance > 0.5 ? Colors.black : Colors.white;
   }
 
-
   Widget _buildPlaceholderWithoutFile(
       context, title, backgroundColor, image, media) {
     String fullText = title ?? '';
@@ -674,8 +686,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     Linkify(
                       onOpen: (link) {
                         if (link.url.contains('doctak/jobs-detail')) {
-                          String jobID =
-                          Uri.parse(link.url).pathSegments.last;
+                          String jobID = Uri.parse(link.url).pathSegments.last;
                           JobsDetailsScreen(
                             jobId: jobID,
                           ).launch(context);
@@ -687,7 +698,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                       style: TextStyle(
                         fontSize: 14.0,
                         color: (image?.isNotEmpty == true ||
-                            media?.isNotEmpty == true)
+                                media?.isNotEmpty == true)
                             ? Colors.black
                             : Colors.white,
                         fontWeight: FontWeight.bold,
@@ -701,7 +712,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
                   Container(
                     constraints: const BoxConstraints(
                       minHeight: 200.0,
-                      minWidth: double.infinity, // Minimum height of the container
+                      minWidth:
+                          double.infinity, // Minimum height of the container
                     ),
                     child: Center(
                       child: HtmlWidget(
@@ -727,8 +739,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                   Linkify(
                     onOpen: (link) {
                       if (link.url.contains('doctak/jobs-detail')) {
-                        String jobID =
-                        Uri.parse(link.url).pathSegments.last;
+                        String jobID = Uri.parse(link.url).pathSegments.last;
                         JobsDetailsScreen(
                           jobId: jobID,
                         ).launch(context);
@@ -773,10 +784,13 @@ class _MyPostComponentState extends State<MyPostComponent> {
       },
     );
   }
+
   String removeHtmlTags(String htmlString) {
-    final RegExp htmlTagRegExp = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+    final RegExp htmlTagRegExp =
+        RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
     return htmlString.replaceAll(htmlTagRegExp, '');
   }
+
   bool _isHtml(String text) {
     // Simple regex to check if the string contains HTML tags
     final htmlTagPattern = RegExp(r'<[^>]*>');
@@ -868,4 +882,3 @@ class _MyPostComponentState extends State<MyPostComponent> {
 
   bool _isExpanded = false;
 }
-

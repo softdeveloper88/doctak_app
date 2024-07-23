@@ -10,8 +10,12 @@ class ForgotInitialEvent extends ForgotEvent {
 class ForgotPasswordEvent extends ForgotEvent {
   final String username;
 
-  ForgotPasswordEvent({required this.username,});
+  ForgotPasswordEvent({
+    required this.username,
+  });
 
   @override
-  List<Object> get props => [username,];
+  List<Object> get props => [
+        username,
+      ];
 }

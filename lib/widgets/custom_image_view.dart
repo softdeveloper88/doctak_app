@@ -12,7 +12,7 @@ class CustomImageView extends StatelessWidget {
 
   double? height;
   double? width;
-  Color? color=Colors.blueGrey;
+  Color? color = Colors.blueGrey;
   BoxFit? fit;
   final String placeHolder;
   Alignment? alignment;
@@ -23,7 +23,8 @@ class CustomImageView extends StatelessWidget {
 
   ///a [CustomImageView] it can be used for showing any type of images
   /// it will shows the placeholder image if image is not found on network image
-  CustomImageView({super.key,
+  CustomImageView({
+    super.key,
     this.imagePath,
     this.height,
     this.width,
@@ -115,19 +116,19 @@ class CustomImageView extends StatelessWidget {
             fit: fit,
             imageUrl: imagePath!,
             color: color,
-            placeholder: (context, url) =>  Center(
-              child: SizedBox(
-                height:  300,
-                width: 60,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.grey[300],
-                    strokeWidth: 8,
-                    strokeCap: StrokeCap.round,
-                    backgroundColor: Colors.white,
-                  ),
+            placeholder: (context, url) => Center(
+                child: SizedBox(
+              height: 300,
+              width: 60,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Colors.grey[300],
+                  strokeWidth: 8,
+                  strokeCap: StrokeCap.round,
+                  backgroundColor: Colors.white,
                 ),
-              )),
+              ),
+            )),
             // errorWidget: (context, url,error) =>  Center(
             //   child: SizedBox(
             //     height: 60,

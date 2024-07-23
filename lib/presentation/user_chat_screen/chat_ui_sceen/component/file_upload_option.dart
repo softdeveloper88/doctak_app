@@ -32,7 +32,8 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       if (pickedfiles != null) {
         pickedfiles.forEach((element) {
           imagefiles.add(element);
-          widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: element,isRemove: false));
+          widget.searchPeopleBloc
+              .add(SelectedFiles(pickedfiles: element, isRemove: false));
         });
         setState(() {});
       } else {
@@ -42,6 +43,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       print("error while picking file.");
     }
   }
+
   openVideo() async {
     try {
       var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
@@ -49,7 +51,8 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles,isRemove: false));
+        widget.searchPeopleBloc
+            .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
         // });
@@ -60,6 +63,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       print("error while picking file.$e");
     }
   }
+
   openCamera() async {
     try {
       var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera);
@@ -67,7 +71,8 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles,isRemove: false));
+        widget.searchPeopleBloc
+            .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
         // });
@@ -78,6 +83,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       print("error while picking file. $e");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -105,48 +111,49 @@ class _FileUploadOptionState extends State<FileUploadOption> {
                     width: 52,
                     color: context.cardColor,
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                     child: Image.asset('images/socialv/icons/ic_CameraPost.png',
                         height: 22, width: 22, fit: BoxFit.cover),
                   ),
                 ),
-                BlocBuilder<ChatBloc, ChatState>(
-                    builder: (context, state) {
-                      if (state is PaginationLoadedState) {
-                        return imagefiles != null
-                            ? Wrap(
-                          children: widget.searchPeopleBloc.imagefiles
-                              .map((imageone) {
-                            return Stack(children: [
-                              Card(
-                                child: SizedBox(
-                                  height: 60, width: 60,
-                                  child: buildMediaItem(File(imageone.path)),
-                                  // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
+                BlocBuilder<ChatBloc, ChatState>(builder: (context, state) {
+                  if (state is PaginationLoadedState) {
+                    return imagefiles != null
+                        ? Wrap(
+                            children: widget.searchPeopleBloc.imagefiles
+                                .map((imageone) {
+                              return Stack(children: [
+                                Card(
+                                  child: SizedBox(
+                                    height: 60, width: 60,
+                                    child: buildMediaItem(File(imageone.path)),
+                                    // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
+                                  ),
                                 ),
-                              ),
-                              Positioned(
-                                right: 0,
-                                child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {});
-                                      imagefiles.remove(imageone);
-                                      widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: imageone,isRemove: true));
-
-                                    },
-                                    child: const Icon(
-                                      Icons.remove_circle_outlined,
-                                      color: Colors.red,
-                                    )),
-                              )
-                            ]);
-                          }).toList(),
-                        )
-                            : Container();
-                      } else {
-                        return Container();
-                      }
-                    }),
+                                Positioned(
+                                  right: 0,
+                                  child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {});
+                                        imagefiles.remove(imageone);
+                                        widget.searchPeopleBloc.add(
+                                            SelectedFiles(
+                                                pickedfiles: imageone,
+                                                isRemove: true));
+                                      },
+                                      child: const Icon(
+                                        Icons.remove_circle_outlined,
+                                        color: Colors.red,
+                                      )),
+                                )
+                              ]);
+                            }).toList(),
+                          )
+                        : Container();
+                  } else {
+                    return Container();
+                  }
+                }),
                 // HorizontalList(
                 //   itemCount: list.length,
                 //   itemBuilder: (context, index) {
@@ -209,5 +216,4 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       return const Text('Unsupported file type');
     }
   }
-
 }

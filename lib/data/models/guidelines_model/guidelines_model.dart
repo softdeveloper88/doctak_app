@@ -1,21 +1,26 @@
 import 'dart:convert';
-GuidelinesModel guidelinesModelFromJson(String str) => GuidelinesModel.fromJson(json.decode(str));
-String guidelinesModelToJson(GuidelinesModel data) => json.encode(data.toJson());
+
+GuidelinesModel guidelinesModelFromJson(String str) =>
+    GuidelinesModel.fromJson(json.decode(str));
+String guidelinesModelToJson(GuidelinesModel data) =>
+    json.encode(data.toJson());
+
 class GuidelinesModel {
   GuidelinesModel({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   GuidelinesModel.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -77,16 +82,17 @@ class GuidelinesModel {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
   Links({
-      this.url, 
-      this.label, 
-      this.active,});
+    this.url,
+    this.label,
+    this.active,
+  });
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -104,18 +110,19 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
   Data({
-      this.id, 
-      this.diseaseName, 
-      this.fileName, 
-      this.description, 
-      this.guidelineName,});
+    this.id,
+    this.diseaseName,
+    this.fileName,
+    this.description,
+    this.guidelineName,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -139,5 +146,4 @@ class Data {
     map['guideline_name'] = guidelineName;
     return map;
   }
-
 }

@@ -1,12 +1,19 @@
 import 'dart:convert';
-SearchConferenceModel searchConferenceModelFromJson(String str) => SearchConferenceModel.fromJson(json.decode(str));
-String searchConferenceModelToJson(SearchConferenceModel data) => json.encode(data.toJson());
+
+SearchConferenceModel searchConferenceModelFromJson(String str) =>
+    SearchConferenceModel.fromJson(json.decode(str));
+String searchConferenceModelToJson(SearchConferenceModel data) =>
+    json.encode(data.toJson());
+
 class SearchConferenceModel {
   SearchConferenceModel({
-      this.conferences,});
+    this.conferences,
+  });
 
   SearchConferenceModel.fromJson(dynamic json) {
-    conferences = json['conferences'] != null ? Conferences.fromJson(json['conferences']) : null;
+    conferences = json['conferences'] != null
+        ? Conferences.fromJson(json['conferences'])
+        : null;
   }
   Conferences? conferences;
 
@@ -17,26 +24,28 @@ class SearchConferenceModel {
     }
     return map;
   }
-
 }
 
-Conferences conferencesFromJson(String str) => Conferences.fromJson(json.decode(str));
+Conferences conferencesFromJson(String str) =>
+    Conferences.fromJson(json.decode(str));
 String conferencesToJson(Conferences data) => json.encode(data.toJson());
+
 class Conferences {
   Conferences({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   Conferences.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -98,16 +107,17 @@ class Conferences {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
   Links({
-      this.url, 
-      this.label, 
-      this.active,});
+    this.url,
+    this.label,
+    this.active,
+  });
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -125,42 +135,43 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
   Data({
-      this.id, 
-      this.title, 
-      this.description, 
-      this.startDate, 
-      this.endDate, 
-      this.city, 
-      this.state, 
-      this.country, 
-      this.venue, 
-      this.organizer, 
-      this.cmeCredits, 
-      this.mocCredits, 
-      this.specialtiesTargeted, 
-      this.registrationLink, 
-      this.conferenceAgendaLink, 
-      this.earlyBirdPrice, 
-      this.regularPrice, 
-      this.latePrice, 
-      this.accommodationDetails, 
-      this.speakers, 
-      this.sponsors, 
-      this.email, 
-      this.phoneNo, 
-      this.keywords, 
-      this.thumbnail, 
-      this.conferenceStatus, 
-      this.additianalNotes, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.title,
+    this.description,
+    this.startDate,
+    this.endDate,
+    this.city,
+    this.state,
+    this.country,
+    this.venue,
+    this.organizer,
+    this.cmeCredits,
+    this.mocCredits,
+    this.specialtiesTargeted,
+    this.registrationLink,
+    this.conferenceAgendaLink,
+    this.earlyBirdPrice,
+    this.regularPrice,
+    this.latePrice,
+    this.accommodationDetails,
+    this.speakers,
+    this.sponsors,
+    this.email,
+    this.phoneNo,
+    this.keywords,
+    this.thumbnail,
+    this.conferenceStatus,
+    this.additianalNotes,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -256,5 +267,4 @@ class Data {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }

@@ -8,11 +8,8 @@ class CustomAlertDialog extends StatelessWidget {
   final VoidCallback callback;
   final String title;
 
-
   const CustomAlertDialog(
-      {Key? key,
-        required this.title,
-        required this.callback})
+      {Key? key, required this.title, required this.callback})
       : super(key: key);
 
   @override
@@ -28,8 +25,8 @@ class CustomAlertDialog extends StatelessWidget {
   }
 }
 
-confirmationCustomAlertDialog(BuildContext context, String title,
-    VoidCallback callBack) {
+confirmationCustomAlertDialog(
+    BuildContext context, String title, VoidCallback callBack) {
   return Center(
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -56,13 +53,12 @@ confirmationCustomAlertDialog(BuildContext context, String title,
                           children: [
                             Expanded(
                               child: Padding(
-                                padding:
-                                const EdgeInsets.only(right: 8.0),
+                                padding: const EdgeInsets.only(right: 8.0),
                                 child: Text("Delete ?",
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.poppins(
                                         fontSize: 10.sp,
-                                        color:  svGetBodyColor(),
+                                        color: svGetBodyColor(),
                                         fontWeight: FontWeight.w500)),
                               ),
                             )
@@ -71,15 +67,16 @@ confirmationCustomAlertDialog(BuildContext context, String title,
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0,right: 16.0),
+                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                       child: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
                             style: GoogleFonts.poppins(
-                                fontSize: 8.sp, color:  svGetBodyColor()),
+                                fontSize: 8.sp, color: svGetBodyColor()),
                             children: <TextSpan>[
-                               // TextSpan(text: title),
-                              TextSpan(text:title,
+                              // TextSpan(text: title),
+                              TextSpan(
+                                  text: title,
                                   style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.w900)),
                             ],
@@ -127,7 +124,8 @@ confirmationCustomAlertDialog(BuildContext context, String title,
                             height: 8.w,
                             decoration: BoxDecoration(
                               color: Colors.red.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(10),),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             child: MaterialButton(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),

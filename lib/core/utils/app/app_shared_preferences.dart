@@ -1,7 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AppSharedPreferences{
-
+class AppSharedPreferences {
   Future<void> clearSharedPreferencesData(context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('rememberMe');
@@ -26,5 +25,4 @@ class AppSharedPreferences{
     await prefs.remove('country');
     await prefs.clear();
   }
-
 }

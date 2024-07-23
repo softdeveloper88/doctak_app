@@ -43,6 +43,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
     setStatusBarColor(Colors.transparent);
     super.initState();
   }
+
   Widget _buildPointsCard() {
     return Card(
       elevation: 4.0,
@@ -58,17 +59,21 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
             SizedBox(height: 4),
             Text(
               '300',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue),
             ),
           ],
         ),
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:svGetScaffoldColor(),
+      backgroundColor: svGetScaffoldColor(),
       // appBar: AppBar(
       //   backgroundColor: svGetScaffoldColor(),
       //   // title: Text('Profile', style: boldTextStyle(size: 20)),
@@ -91,7 +96,10 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
         bloc: profileBloc,
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
+            return Center(
+                child: CircularProgressIndicator(
+              color: svGetBodyColor(),
+            ));
           } else if (state is PaginationLoadedState) {
             return SingleChildScrollView(
               child: Column(
@@ -106,7 +114,8 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                     children: [
                       Text(
                           '${profileBloc.userProfile?.user?.firstName ?? ''} ${profileBloc.userProfile?.user?.lastName ?? ''}',
-                          style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 12.sp)),
+                          style: GoogleFonts.poppins(
+                              color: svGetBodyColor(), fontSize: 12.sp)),
                       4.width,
                       Image.asset('images/socialv/icons/ic_TickSquare.png',
                           height: 14, width: 14, fit: BoxFit.cover),
@@ -116,7 +125,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                   Text(profileBloc.userProfile?.user?.specialty ?? '',
                       style: secondaryTextStyle(color: svGetBodyColor())),
                   // 24.height,
-                  if(widget.userId == null)_buildPointsCard(),
+                  if (widget.userId == null) _buildPointsCard(),
                   if (widget.userId != null)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -125,26 +134,36 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                           height: 30.0,
                           minWidth: 100,
                           onPressed: () {
-                            ChatRoomScreen(username: '${profileBloc.userProfile?.user?.firstName} ${profileBloc.userProfile?.user?.lastName}',profilePic: '${profileBloc.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',id: '${profileBloc.userProfile?.user?.id}',roomId: '',).launch(context);
+                            ChatRoomScreen(
+                              username:
+                                  '${profileBloc.userProfile?.user?.firstName} ${profileBloc.userProfile?.user?.lastName}',
+                              profilePic:
+                                  '${profileBloc.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                              id: '${profileBloc.userProfile?.user?.id}',
+                              roomId: '',
+                            ).launch(context);
                           },
                           elevation: 0,
                           color: SVAppColorPrimary,
-                          child: Text('Chat',style: boldTextStyle(color: Colors.white)),
+                          child: Text('Chat',
+                              style: boldTextStyle(color: Colors.white)),
                         ),
-                        SizedBox(width: 10,),
+                        SizedBox(
+                          width: 10,
+                        ),
                         MaterialButton(
                           height: 30.0,
                           minWidth: 100,
                           onPressed: () {
-                            if (profileBloc.userProfile!.isFollowing?? false) {
+                            if (profileBloc.userProfile!.isFollowing ?? false) {
                               profileBloc.add(SetUserFollow(
                                   profileBloc.userProfile?.user?.id ?? '',
                                   'unfollow'));
 
-                              profileBloc.userProfile!.isFollowing= false;
+                              profileBloc.userProfile!.isFollowing = false;
                             } else {
                               profileBloc.add(SetUserFollow(
-                                  profileBloc.userProfile?.user?.id?? '',
+                                  profileBloc.userProfile?.user?.id ?? '',
                                   'follow'));
 
                               profileBloc.userProfile!.isFollowing = true;
@@ -153,20 +172,22 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                           },
                           elevation: 0,
                           color: SVAppColorPrimary,
-                          child: Text(profileBloc.userProfile?.isFollowing??false?'Following':"Follow",style: boldTextStyle(color: Colors.white)),
+                          child: Text(
+                              profileBloc.userProfile?.isFollowing ?? false
+                                  ? 'Following'
+                                  : "Follow",
+                              style: boldTextStyle(color: Colors.white)),
                         ),
                       ],
                     ),
                   24.height,
-                  if(AppData.isShowGoogleBannerAds??false)BannerAdWidget(),
+                  if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
                   8.height,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       GestureDetector(
-                        onTap: (){
-
-                        },
+                        onTap: () {},
                         child: Column(
                           children: [
                             Text('Posts',
@@ -179,13 +200,17 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: (){
-                          if(widget.userId != null) {
-                            FollowerScreen(isFollowersScreen: true,userId: widget.userId.toString(),).launch(
-                                context);
-                          }else{
-                            FollowerScreen(isFollowersScreen: true,userId: AppData.logInUserId,).launch(
-                                context);
+                        onTap: () {
+                          if (widget.userId != null) {
+                            FollowerScreen(
+                              isFollowersScreen: true,
+                              userId: widget.userId.toString(),
+                            ).launch(context);
+                          } else {
+                            FollowerScreen(
+                              isFollowersScreen: true,
+                              userId: AppData.logInUserId,
+                            ).launch(context);
                           }
                         },
                         child: Column(
@@ -203,13 +228,17 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: (){
-                          if(widget.userId != null) {
-                            FollowerScreen(isFollowersScreen: false,userId: widget.userId.toString(),).launch(
-                                context);
-                          }else{
-                            FollowerScreen(isFollowersScreen: false,userId: AppData.logInUserId,).launch(
-                                context);
+                        onTap: () {
+                          if (widget.userId != null) {
+                            FollowerScreen(
+                              isFollowersScreen: false,
+                              userId: widget.userId.toString(),
+                            ).launch(context);
+                          } else {
+                            FollowerScreen(
+                              isFollowersScreen: false,
+                              userId: AppData.logInUserId,
+                            ).launch(context);
                           }
                         },
                         child: Column(
@@ -229,8 +258,14 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                     ],
                   ),
                   4.height,
-                   Divider(color: Colors.grey[200],endIndent: 16,indent: 16,),
-                  SVProfilePostsComponent(profileBloc,),
+                  Divider(
+                    color: Colors.grey[200],
+                    endIndent: 16,
+                    indent: 16,
+                  ),
+                  SVProfilePostsComponent(
+                    profileBloc,
+                  ),
                   16.height,
                 ],
               ),

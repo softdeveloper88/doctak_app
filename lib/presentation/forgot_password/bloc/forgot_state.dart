@@ -1,6 +1,5 @@
 // ignore_for_file: must_be_immutable
 
-
 /// Represents the state of Forgot in the application.
 // part 'login_bloc.dart';
 

@@ -85,7 +85,8 @@ class SVSearchCardComponent extends StatefulWidget {
   final Function onTap;
   final SearchPeopleBloc bloc;
 
-  SVSearchCardComponent({required this.element, required this.onTap, required this.bloc});
+  SVSearchCardComponent(
+      {required this.element, required this.onTap, required this.bloc});
 
   @override
   _SVSearchCardComponentState createState() => _SVSearchCardComponentState();
@@ -97,13 +98,13 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top:8.0),
+      padding: const EdgeInsets.only(top: 8.0),
       child: Material(
         elevation: 2,
         color: context.cardColor,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0,horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -111,9 +112,9 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: (){
-                        SVProfileFragment(userId:widget.element.id).launch(context);
-
+                      onTap: () {
+                        SVProfileFragment(userId: widget.element.id)
+                            .launch(context);
                       },
                       child: Container(
                         width: 50,
@@ -130,15 +131,24 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                           ],
                         ),
                         child: widget.element.profilePic == ''
-                            ? Image.asset('images/socialv/faces/face_5.png', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(8).cornerRadiusWithClipRRect(8)
-                            : CachedNetworkImage(imageUrl: '${AppData.imageUrl}${widget.element.profilePic.validate()}', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(30),
+                            ? Image.asset('images/socialv/faces/face_5.png',
+                                    height: 56, width: 56, fit: BoxFit.cover)
+                                .cornerRadiusWithClipRRect(8)
+                                .cornerRadiusWithClipRRect(8)
+                            : CachedNetworkImage(
+                                    imageUrl:
+                                        '${AppData.imageUrl}${widget.element.profilePic.validate()}',
+                                    height: 56,
+                                    width: 56,
+                                    fit: BoxFit.cover)
+                                .cornerRadiusWithClipRRect(30),
                       ),
                     ),
                     10.width,
                     GestureDetector(
-                      onTap: (){
-                        SVProfileFragment(userId:widget.element.id).launch(context);
-
+                      onTap: () {
+                        SVProfileFragment(userId: widget.element.id)
+                            .launch(context);
                       },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,39 +156,65 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SizedBox(width: 150, child: Text("${widget.element.firstName.validate()} ${widget.element.lastName.validate()}",overflow: TextOverflow.clip, style: boldTextStyle())),
+                              SizedBox(
+                                  width: 150,
+                                  child: Text(
+                                      "${widget.element.firstName.validate()} ${widget.element.lastName.validate()}",
+                                      overflow: TextOverflow.clip,
+                                      style: boldTextStyle())),
                               6.width,
                               widget.element.isCurrentUser.validate()
-                                  ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
+                                  ? Image.asset(
+                                      'images/socialv/icons/ic_TickSquare.png',
+                                      height: 14,
+                                      width: 14,
+                                      fit: BoxFit.cover)
                                   : const Offstage(),
                             ],
                           ),
-                          Text(widget.element.userType.validate(), style: secondaryTextStyle(color: svGetBodyColor())),
+                          Text(widget.element.userType.validate(),
+                              style:
+                                  secondaryTextStyle(color: svGetBodyColor())),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-              isLoading ?  CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
-                shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
-                text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
-                textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
-                onTap:  () async {
-                  setState(() {
-                    isLoading = true; // Set loading state to true when button is clicked
-                  });
+              isLoading
+                  ? CircularProgressIndicator(
+                      color: svGetBodyColor(),
+                    )
+                  : AppButton(
+                      shapeBorder:
+                          RoundedRectangleBorder(borderRadius: radius(10)),
+                      text: widget.element.isFollowedByCurrentUser == true
+                          ? 'Unfollow'
+                          : 'Follow',
+                      textStyle: boldTextStyle(
+                          color: widget.element.isFollowedByCurrentUser != true
+                              ? SVAppColorPrimary
+                              : buttonUnSelectColor,
+                          size: 10),
+                      onTap: () async {
+                        setState(() {
+                          isLoading =
+                              true; // Set loading state to true when button is clicked
+                        });
 
-                  // Perform API call
-                   widget.onTap();
+                        // Perform API call
+                        widget.onTap();
 
-                  setState(() {
-                    isLoading = false; // Set loading state to false after API response
-                  });
-                },
-                elevation: 0,
-                color: widget.element.isFollowedByCurrentUser == true ?SVAppColorPrimary:buttonUnSelectColor,
-              ),
+                        setState(() {
+                          isLoading =
+                              false; // Set loading state to false after API response
+                        });
+                      },
+                      elevation: 0,
+                      color: widget.element.isFollowedByCurrentUser == true
+                          ? SVAppColorPrimary
+                          : buttonUnSelectColor,
+                    ),
               // ElevatedButton(
               //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               //   onPressed: () async {

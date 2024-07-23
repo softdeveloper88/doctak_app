@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:doctak_app/main.dart';
 
-
 class ServerException implements Exception {}
 
 class CacheException implements Exception {}

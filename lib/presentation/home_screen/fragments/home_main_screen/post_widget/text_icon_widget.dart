@@ -15,9 +15,7 @@ class TextIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(
-          maxWidth: 50.w
-      ),
+      constraints: BoxConstraints(maxWidth: 50.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

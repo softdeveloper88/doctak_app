@@ -4,7 +4,6 @@ const double SVAppContainerRadius = 32;
 const double SVAppCommonRadius = 12;
 const svAppName = "SocialV";
 
-
 class SVNotificationType {
   static String like = 'like';
   static String request = 'request';
@@ -19,6 +18,5 @@ class SVPostType {
   static String location = 'location';
   static String text = 'text';
 }
-
 
 var svFontRoboto = GoogleFonts.roboto().fontFamily;

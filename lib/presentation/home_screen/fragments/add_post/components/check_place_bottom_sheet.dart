@@ -9,26 +9,19 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../../../../core/app_export.dart';
 import '../../add_post/bloc/add_post_event.dart';
 
-
 class CheckPlaceBottomSheet extends StatefulWidget {
   AddPostBloc searchPeopleBloc;
-   CheckPlaceBottomSheet(this.searchPeopleBloc, {Key? key}) : super(key: key);
+  CheckPlaceBottomSheet(this.searchPeopleBloc, {Key? key}) : super(key: key);
 
   @override
-  State<CheckPlaceBottomSheet> createState() =>
-      _CheckPlaceBottomSheetState();
+  State<CheckPlaceBottomSheet> createState() => _CheckPlaceBottomSheetState();
 }
 
-class _CheckPlaceBottomSheetState
-    extends State<CheckPlaceBottomSheet> {
+class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
   @override
   void initState() {
-    widget.searchPeopleBloc.add(PlaceAddEvent(
-      page: 1,
-      name: '',
-      latitude: '',
-      longitude: ''
-    ));
+    widget.searchPeopleBloc
+        .add(PlaceAddEvent(page: 1, name: '', latitude: '', longitude: ''));
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(svGetScaffoldColor());
@@ -43,11 +36,20 @@ class _CheckPlaceBottomSheetState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         30.height,
-        Align(alignment: Alignment.centerRight,child: InkWell(
-            onTap: (){
-              Navigator.of(context).pop();
-            },
-            child: const SizedBox(height: 40,width: 40,child: Icon(Icons.cancel,size: 30,),))),
+        Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: const SizedBox(
+                  height: 40,
+                  width: 40,
+                  child: Icon(
+                    Icons.cancel,
+                    size: 30,
+                  ),
+                ))),
 
         Container(
           padding: const EdgeInsets.only(left: 8.0),
@@ -95,8 +97,11 @@ class _CheckPlaceBottomSheetState
           builder: (context, state) {
             print("state $state");
             if (state is PaginationLoadingState) {
-              return  Expanded(
-                  child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+              return Expanded(
+                  child: Center(
+                      child: CircularProgressIndicator(
+                color: svGetBodyColor(),
+              )));
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
               // return _buildPostList(context);
@@ -109,43 +114,39 @@ class _CheckPlaceBottomSheetState
                     shrinkWrap: true,
                     // physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-
                       return InkWell(
-                              onTap: () {
-                                Navigator.of(context).pop();
+                        onTap: () {
+                          Navigator.of(context).pop();
 
-                                bloc.add(SelectedLocation(
-                                    name: bloc.placeList[index].name,
-                                    latitude: bloc.placeList[index].latitude,
-                                  longitude: bloc.placeList[index].longitude
-                                ));
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                              '${bloc.placeList[index].name}',
-                                              style: boldTextStyle()),
-                                          Text(
-                                              '${bloc.placeList[index].description}',
-                                              style: boldTextStyle()),
-                                          6.width,
-                                          // e.isOfficialAccount.validate()
-                                          //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-                                          //     : Offstage(),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ).paddingSymmetric(vertical: 8),
-                            );
+                          bloc.add(SelectedLocation(
+                              name: bloc.placeList[index].name,
+                              latitude: bloc.placeList[index].latitude,
+                              longitude: bloc.placeList[index].longitude));
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('${bloc.placeList[index].name}',
+                                        style: boldTextStyle()),
+                                    Text('${bloc.placeList[index].description}',
+                                        style: boldTextStyle()),
+                                    6.width,
+                                    // e.isOfficialAccount.validate()
+                                    //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
+                                    //     : Offstage(),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ).paddingSymmetric(vertical: 8),
+                      );
                       // SVProfileFragment().launch(context);
                     },
                     separatorBuilder: (BuildContext context, int index) {

@@ -23,7 +23,7 @@ import 'components/dynamic_text_font_widget.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
-   SVAddPostFragment({required this.refresh,Key? key}) : super(key: key);
+  SVAddPostFragment({required this.refresh, Key? key}) : super(key: key);
   Function refresh;
   @override
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
@@ -54,9 +54,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
     int intValue = int.parse(colorCode, radix: 16);
     return Color(intValue).withAlpha(0xFF);
   }
+
   void changeColor() {
     setState(() {
-      currentColor = _hexToColor(colorListHex[random.nextInt(colorListHex.length)]);
+      currentColor =
+          _hexToColor(colorListHex[random.nextInt(colorListHex.length)]);
       currentSetColor = colorListHex[random.nextInt(colorListHex.length)];
       searchPeopleBloc.backgroundColor = currentSetColor;
     });
@@ -132,10 +134,12 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
             child: AppButton(
               shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
               text: 'Post',
-              textStyle: GoogleFonts.poppins(color: Colors.white, fontSize: 18,fontWeight: FontWeight.w500),
+              textStyle: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500),
               onTap: () {
                 searchPeopleBloc.add(AddPostDataEvent());
-
               },
               elevation: 0,
               color: SVAppColorPrimary,

@@ -80,8 +80,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       numberOfPage = response.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
-       contactsList.addAll(response.contacts ?? []);
-       contactsList.removeWhere((element)=>element.id==null);
+        contactsList.addAll(response.contacts ?? []);
+        contactsList.removeWhere((element) => element.id == null);
         groupList.addAll(response.groups ?? []);
       }
       log(response.contacts!.length);
@@ -159,11 +159,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messagePageNumber = messagePageNumber + 1;
         if (event.page == 0) {
           // messagesList.addAll(response.messages ?? []);
-          messagesList=response.messages ?? [];
+          messagesList = response.messages ?? [];
           // addUserIfNotExists(messagesList, response.messages ?? []);
           // messagesList.addAll(response.messages ?? []);
           // messagesList=messagesList.reversed.toList();
-        }else{
+        } else {
           messagesList.addAll(response.messages ?? []);
         }
       }

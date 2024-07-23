@@ -81,27 +81,31 @@ class _GroupMemberScreenState extends State<GroupMemberScreen> {
                 child: Column(
                   children: [
                     SectionTitle(
-                        title: 'Admins and Moderators', count: admins.length ?? 0),
+                        title: 'Admins and Moderators',
+                        count: admins.length ?? 0),
                     ListView.builder(
                         padding: const EdgeInsets.all(8),
                         shrinkWrap: true,
-
                         itemCount: admins.length ?? 0,
                         physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           return MemberItem(
                             name: admins[index].name ?? "",
                             role: admins[index].adminType ?? "user",
-                            joined: timeAgo
-                                .format(DateTime.parse(admins[index].joinedAt ?? "")),
+                            joined: timeAgo.format(
+                                DateTime.parse(admins[index].joinedAt ?? "")),
                             avatarUrl: admins[index].profilePic ?? "",
-                            isAdmin: admins[index].adminType == 'admin' ? true : false,
+                            isAdmin: admins[index].adminType == 'admin'
+                                ? true
+                                : false,
                           );
                         }),
                   ],
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(
+                height: 10,
+              ),
               Container(
                 color: context.cardColor,
                 child: Column(
@@ -110,16 +114,17 @@ class _GroupMemberScreenState extends State<GroupMemberScreen> {
                     ListView.builder(
                         padding: const EdgeInsets.all(8),
                         shrinkWrap: true,
-                        itemCount:  user.length,
+                        itemCount: user.length,
                         physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           return MemberItem(
                             name: user[index].name ?? "",
                             role: 'member',
-                            joined: "Joined ${timeAgo
-                                .format(DateTime.parse(user[index].joinedAt ?? ""))}",
+                            joined:
+                                "Joined ${timeAgo.format(DateTime.parse(user[index].joinedAt ?? ""))}",
                             avatarUrl: user[index].profilePic ?? "",
-                            isAdmin: user[index].adminType == 'admin' ? true : false,
+                            isAdmin:
+                                user[index].adminType == 'admin' ? true : false,
                           );
                         }),
                   ],
@@ -196,7 +201,13 @@ class MemberItem extends StatelessWidget {
                 )
               : const Icon(Icons.person, size: 16),
           const SizedBox(width: 4),
-          Expanded(child: Text('$role  •  $joined',style: GoogleFonts.poppins(fontSize: 12), overflow: TextOverflow.ellipsis,),),
+          Expanded(
+            child: Text(
+              '$role  •  $joined',
+              style: GoogleFonts.poppins(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
       trailing: const Icon(Icons.more_vert),

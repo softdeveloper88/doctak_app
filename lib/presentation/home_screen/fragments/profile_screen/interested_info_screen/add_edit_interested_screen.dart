@@ -21,7 +21,6 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-
       appBar: AppBar(
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
@@ -32,7 +31,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
+            child: Icon(Icons.arrow_back_ios, color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           GestureDetector(
@@ -70,8 +69,9 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
       ),
     );
   }
-  var focusNode1=FocusNode();
-  var focusNode2=FocusNode();
+
+  var focusNode1 = FocusNode();
+  var focusNode2 = FocusNode();
 
   Widget _buildInterestedInfoFields() {
     return Column(children: [
@@ -130,6 +130,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
       ),
     ]);
   }
+
   Widget _buildElevatedButton({
     required VoidCallback onPressed,
     required String label,

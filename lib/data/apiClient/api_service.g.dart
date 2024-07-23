@@ -701,7 +701,7 @@ class _ApiService implements ApiService {
   @override
   Future<FollowerDataModel> getUserFollower(
     String token,
-      String userId,
+    String userId,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
@@ -1188,7 +1188,8 @@ class _ApiService implements ApiService {
     final value = UserProfile.fromJson(_result.data!);
     return value;
   }
- @override
+
+  @override
   Future<List<PostLikesModel>> getPostUserLikes(
     String token,
     String postId,
@@ -1200,7 +1201,7 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<List<dynamic>>(_setStreamType<List<PostLikesModel>>(Options(
-    method: 'GET',
+      method: 'GET',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
@@ -2027,11 +2028,12 @@ class _ApiService implements ApiService {
     final value = MessageModel.fromJson(_result.data!);
     return value;
   }
+
   @override
   Future<HttpResponse<dynamic>> deleteMessage(
-      String token,
-      String id,
-      ) async {
+    String token,
+    String id,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'id': id,
@@ -2040,27 +2042,28 @@ class _ApiService implements ApiService {
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
     final _result =
-    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
     )
-        .compose(
-      _dio.options,
-      '/delete-message',
-      queryParameters: queryParameters,
-      data: _data,
-    )
-        .copyWith(
-        baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        ))));
+            .compose(
+              _dio.options,
+              '/delete-message',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = _result.data;
     final httpResponse = HttpResponse(value, _result);
     return httpResponse;
   }
+
   @override
   Future<SendMessageModel> sendMessage(
     String token,

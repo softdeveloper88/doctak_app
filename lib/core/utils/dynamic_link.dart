@@ -4,20 +4,19 @@ import 'package:share_plus/share_plus.dart';
 createDynamicLink(postTitle, postUrl, imageUrl) async {
   final dynamicLinkParams = DynamicLinkParameters(
     link: Uri.parse(postUrl),
-   navigationInfoParameters: const NavigationInfoParameters(
-     forcedRedirectEnabled: true
-   ),
+    navigationInfoParameters:
+        const NavigationInfoParameters(forcedRedirectEnabled: true),
     uriPrefix: "https://doctak.page.link",
-    androidParameters:  AndroidParameters(
+    androidParameters: AndroidParameters(
       packageName: "com.kt.doctak",
-      fallbackUrl:Uri.parse(postUrl),
+      fallbackUrl: Uri.parse(postUrl),
       minimumVersion: 41,
     ),
-    iosParameters:  IOSParameters(
+    iosParameters: IOSParameters(
       bundleId: "com.doctak.ios",
       appStoreId: "6448684340",
       minimumVersion: "2.0.8",
-      fallbackUrl:Uri.parse(postUrl),
+      fallbackUrl: Uri.parse(postUrl),
     ),
     // googleAnalyticsParameters: const GoogleAnalyticsParameters(
     //   source: "twitter",
@@ -30,6 +29,6 @@ createDynamicLink(postTitle, postUrl, imageUrl) async {
     ),
   );
   final dynamicLink =
-  await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParams);
+      await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParams);
   Share.share(dynamicLink.shortUrl.toString());
 }

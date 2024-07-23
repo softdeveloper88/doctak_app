@@ -1,21 +1,26 @@
 import 'dart:convert';
-SearchPeopleModel searchPeopleModelFromJson(String str) => SearchPeopleModel.fromJson(json.decode(str));
-String searchPeopleModelToJson(SearchPeopleModel data) => json.encode(data.toJson());
+
+SearchPeopleModel searchPeopleModelFromJson(String str) =>
+    SearchPeopleModel.fromJson(json.decode(str));
+String searchPeopleModelToJson(SearchPeopleModel data) =>
+    json.encode(data.toJson());
+
 class SearchPeopleModel {
   SearchPeopleModel({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   SearchPeopleModel.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -77,16 +82,17 @@ class SearchPeopleModel {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
   Links({
-      this.url, 
-      this.label, 
-      this.active,});
+    this.url,
+    this.label,
+    this.active,
+  });
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -104,22 +110,23 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
   Data({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.profilePic, 
-      this.userType, 
-      this.specialty, 
-      this.followersCount, 
-      this.isFollowedByCurrentUser, 
-      this.isCurrentUser,});
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.profilePic,
+    this.userType,
+    this.specialty,
+    this.followersCount,
+    this.isFollowedByCurrentUser,
+    this.isCurrentUser,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -155,5 +162,4 @@ class Data {
     map['is_current_user'] = isCurrentUser;
     return map;
   }
-
 }

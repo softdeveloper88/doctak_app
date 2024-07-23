@@ -16,6 +16,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
     flutterNativeAdsShow();
     super.initState();
   }
+
   flutterNativeAdsShow() {
     // TODO: Create a NativeAd instance
     // _ad = NativeAd(
@@ -73,13 +74,15 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   @override
   Widget build(BuildContext context) {
     return _isAdLoaded
-        ?  Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        height: 350,
-        child: AdWidget(ad: _ad),
-      ),
-    )
-        : const SizedBox(height: 0,);
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height: 350,
+              child: AdWidget(ad: _ad),
+            ),
+          )
+        : const SizedBox(
+            height: 0,
+          );
   }
 }

@@ -114,9 +114,11 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
   //     throw Exception(e);
   //   }
   // }
-  Future<void> performLogin(String provider,String name,String email,String token ) async {
+  Future<void> performLogin(
+      String provider, String name, String email, String token) async {
     EasyLoading.show();
-    final apiUrl = Uri.parse('https://doctak.net/api/login'); // Replace with your API endpoint
+    final apiUrl = Uri.parse(
+        'https://doctak.net/api/login'); // Replace with your API endpoint
     print(token);
     try {
       final response = await http.post(apiUrl, body: {
@@ -124,7 +126,7 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
         'isSocialLogin': 'true',
         'name': name,
         'provider': provider,
-        'token':'4a080919-3829-4b4a-abdc-95b1267c4371'
+        'token': '4a080919-3829-4b4a-abdc-95b1267c4371'
       });
       print(response.body);
       // Hide loading overlay once the response is received
@@ -138,9 +140,9 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
 
           final token = responseData['token'];
           // ... store user details and token in SharedPreferences
-            // Store the rememberMe flag in SharedPreferences
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-           if(user['country'] != null) {
+          // Store the rememberMe flag in SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          if (user['country'] != null) {
             AppData.logInUserId = user['id'];
             await prefs.setBool('rememberMe', true);
             await prefs.setString('token', token ?? '');
@@ -152,7 +154,8 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
             await prefs.setString('background', user['background'] ?? '');
             await prefs.setString('licenseNo', user['license_no'] ?? '');
             await prefs.setString('title', user['title'] ?? '');
-            await prefs.setString('countryOrigin', user['country_origin'] ?? '');
+            await prefs.setString(
+                'countryOrigin', user['country_origin'] ?? '');
             await prefs.setString('college', user['college'] ?? '');
             await prefs.setString('clinicName', user['clinic_name'] ?? '');
             await prefs.setString('dob', user['dob'] ?? '');
@@ -172,14 +175,14 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
                 'practicingCountry', user['practicing_country'] ?? '');
             await prefs.setString('gender', user['gender'] ?? '');
             await prefs.setString('country', user['country'].toString());
-            String? userToken = prefs.getString('token')??'';
-            String? userId = prefs.getString('userId')??'';
-            String? name = prefs.getString('name')??'';
-            String? profile_pic = prefs.getString('profile_pic')??'';
-            String? background = prefs.getString('background')??'';
-            String? email = prefs.getString('email')??'';
-            String? specialty = prefs.getString('specialty')??'';
-            String? userType = prefs.getString('user_type')??'';
+            String? userToken = prefs.getString('token') ?? '';
+            String? userId = prefs.getString('userId') ?? '';
+            String? name = prefs.getString('name') ?? '';
+            String? profile_pic = prefs.getString('profile_pic') ?? '';
+            String? background = prefs.getString('background') ?? '';
+            String? email = prefs.getString('email') ?? '';
+            String? specialty = prefs.getString('specialty') ?? '';
+            String? userType = prefs.getString('user_type') ?? '';
             String? university = prefs.getString('university') ?? '';
             String? countryName = prefs.getString('country') ?? '';
             String? currency = prefs.getString('currency') ?? '';
@@ -189,8 +192,8 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
               AppData.logInUserId = userId;
               AppData.name = name;
               AppData.profile_pic = profile_pic;
-              AppData.university= university;
-              AppData.userType= userType;
+              AppData.university = university;
+              AppData.userType = userType;
               AppData.background = background;
               AppData.email = email;
               AppData.specialty = specialty;
@@ -199,7 +202,7 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
             }
             EasyLoading.dismiss();
             _navigateToHomeScreen();
-          }else{
+          } else {
             EasyLoading.dismiss();
             // Navigator.push(context, MaterialPageRoute(builder: (context) => SocialAccountUpdate(responseData['token']
             // ,name)));
@@ -225,8 +228,9 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
       }
     } on SocketException {
       // _hideLoadingOverlay();
-     EasyLoading.dismiss();
-      showErrorMessage(context, "No internet connection. Please check your network settings.");
+      EasyLoading.dismiss();
+      showErrorMessage(context,
+          "No internet connection. Please check your network settings.");
     } catch (error) {
       EasyLoading.dismiss();
       // EasyLoading.dismiss();
@@ -236,6 +240,7 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
           context, 'An unexpected error occurred. Please try again later.');
     }
   }
+
   void showErrorMessage(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -269,41 +274,43 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
       print(googleUser.toString());
 
       GoogleSignInAuthentication googleSignInAuthentication =
-      await googleUser!.authentication;
+          await googleUser!.authentication;
       String accessToken = googleSignInAuthentication.accessToken!;
       // await FirebaseMessaging.instance.getToken().then((token) async {
       //   print('token$googleUser');
-        performLogin('google', googleUser.displayName!, googleUser.email, accessToken);
-        // var loginResponse = await RemoteService().getSocialLoginResponse(
-        //     'google', googleUser.displayName!, googleUser.email, googleUser.id, token!);
-        // if (loginResponse.result == false) {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(
-        //       content: Text(
-        //         loginResponse.message ?? '',
-        //         style: const TextStyle(fontFamily: "Robotic"),
-        //       ),
-        //       backgroundColor: Colors.green,
-        //     ),
-        //   );
-        // } else {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(
-        //       content: Text(
-        //         loginResponse.message ?? '',
-        //         style: const TextStyle(fontFamily: "Robotic"),
-        //       ),
-        //       backgroundColor: Colors.green,
-        //     ),
-        //   );
-        // }
-        GoogleSignIn().disconnect();
+      performLogin(
+          'google', googleUser.displayName!, googleUser.email, accessToken);
+      // var loginResponse = await RemoteService().getSocialLoginResponse(
+      //     'google', googleUser.displayName!, googleUser.email, googleUser.id, token!);
+      // if (loginResponse.result == false) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text(
+      //         loginResponse.message ?? '',
+      //         style: const TextStyle(fontFamily: "Robotic"),
+      //       ),
+      //       backgroundColor: Colors.green,
+      //     ),
+      //   );
+      // } else {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text(
+      //         loginResponse.message ?? '',
+      //         style: const TextStyle(fontFamily: "Robotic"),
+      //       ),
+      //       backgroundColor: Colors.green,
+      //     ),
+      //   );
+      // }
+      GoogleSignIn().disconnect();
       // });
     } on Exception catch (e) {
       print('error is ....... $e');
       // TODO
     }
   }
+
   String generateNonce([int length = 32]) {
     const charset =
         '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
@@ -326,71 +333,73 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
     // match the sha256 hash of `rawNonce`.
     // await FirebaseMessaging.instance.getToken().then((token) async {
     //   print('token$token');
-      final rawNonce = generateNonce();
-      final nonce = sha256ofString(rawNonce);
+    final rawNonce = generateNonce();
+    final nonce = sha256ofString(rawNonce);
 
-      // Request credential for the currently signed in Apple account.
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: nonce,
-      );
+    // Request credential for the currently signed in Apple account.
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: nonce,
+    );
 
-      // Create an `OAuthCredential` from the credential returned by Apple.
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        rawNonce: rawNonce,
-      );
+    // Create an `OAuthCredential` from the credential returned by Apple.
+    final oauthCredential = OAuthProvider('apple.com').credential(
+      idToken: appleCredential.identityToken,
+      rawNonce: rawNonce,
+    );
 
-     // print(oauthCredential.signInMethod.);
-      // Sign in the user with Firebase. If the nonce we generated earlier does
-      // not match the nonce in `appleCredential.identityToken`, sign in will fail.
-      var response = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-      performLogin('apple', response.user?.displayName ?? '', response.user?.email ?? '', response.user!.uid??'');
-      print("${appleCredential.givenName} ${appleCredential.familyName}");
-      // var loginResponse = await AuthRepository().getSocialLoginResponse(
-      //     'google',
-      //     response.user?.displayName ?? '',
-      //     response.user?.email ?? '',
-      //     response.user?.uid ?? '',
-      //     access_token: appleCredential.identityToken,
-      //     deviceToken: token);
-      // print(appleCredential);
-      // print(response);
-      // print(loginResponse);
-      // if (loginResponse.result == false) {
-      //   // ToastComponent.showDialog(loginResponse.message ?? '',
-      //   //     gravity: Toast.center, duration: Toast.lengthLong);
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text(
-      //         loginResponse.message ?? '',
-      //         style: const TextStyle(fontFamily: "Robotic"),
-      //       ),
-      //       backgroundColor: Colors.green,
-      //     ),
-      //   );
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text(
-      //         loginResponse.message ?? '',
-      //         style: const TextStyle(fontFamily: "Robotic"),
-      //       ),
-      //       backgroundColor: Colors.green,
-      //     ),
-      //   );
-      // ToastComponent.showDialog(loginResponse.message ?? '',
-      //     gravity: Toast.center, duration: Toast.lengthLong);
-      // AuthHelper().setUserData(loginResponse);
-      // Navigator.of(context).pushNamedAndRemoveUntil(
-      //   MainScreen.routeName,
-      //       (route) => false,
-      // );
-      // }
-      GoogleSignIn().disconnect();
+    // print(oauthCredential.signInMethod.);
+    // Sign in the user with Firebase. If the nonce we generated earlier does
+    // not match the nonce in `appleCredential.identityToken`, sign in will fail.
+    var response =
+        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+    performLogin('apple', response.user?.displayName ?? '',
+        response.user?.email ?? '', response.user!.uid ?? '');
+    print("${appleCredential.givenName} ${appleCredential.familyName}");
+    // var loginResponse = await AuthRepository().getSocialLoginResponse(
+    //     'google',
+    //     response.user?.displayName ?? '',
+    //     response.user?.email ?? '',
+    //     response.user?.uid ?? '',
+    //     access_token: appleCredential.identityToken,
+    //     deviceToken: token);
+    // print(appleCredential);
+    // print(response);
+    // print(loginResponse);
+    // if (loginResponse.result == false) {
+    //   // ToastComponent.showDialog(loginResponse.message ?? '',
+    //   //     gravity: Toast.center, duration: Toast.lengthLong);
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         loginResponse.message ?? '',
+    //         style: const TextStyle(fontFamily: "Robotic"),
+    //       ),
+    //       backgroundColor: Colors.green,
+    //     ),
+    //   );
+    // } else {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         loginResponse.message ?? '',
+    //         style: const TextStyle(fontFamily: "Robotic"),
+    //       ),
+    //       backgroundColor: Colors.green,
+    //     ),
+    //   );
+    // ToastComponent.showDialog(loginResponse.message ?? '',
+    //     gravity: Toast.center, duration: Toast.lengthLong);
+    // AuthHelper().setUserData(loginResponse);
+    // Navigator.of(context).pushNamedAndRemoveUntil(
+    //   MainScreen.routeName,
+    //       (route) => false,
+    // );
+    // }
+    GoogleSignIn().disconnect();
     // });
   }
 
@@ -402,31 +411,28 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
           width: 70.w,
           // name: continueWithGoogle,
           // color: Colors.redAccent,
-            buttonStyle: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                    20), // button's shape
-              )),
-              leftIcon: const Icon(Icons.email),
-              onPressed: onPressedGoogleLogin, text: '  Login with Google',
-            ),
-            const SizedBox(height: 20),
-            if (Platform.isIOS)
-        CustomElevatedButton(text: "   Login with Apple",
-          // name: continueWithApple,
-          // color: Colors.black,
-          width: 70.w,
           buttonStyle: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                    20), // button's shape
-              )),
-          leftIcon: const Icon(Icons.apple),
-          onPressed: signInWithApple,
+            borderRadius: BorderRadius.circular(20), // button's shape
+          )),
+          leftIcon: const Icon(Icons.email),
+          onPressed: onPressedGoogleLogin, text: '  Login with Google',
         ),
+        const SizedBox(height: 20),
+        if (Platform.isIOS)
+          CustomElevatedButton(
+            text: "   Login with Apple",
+            // name: continueWithApple,
+            // color: Colors.black,
+            width: 70.w,
+            buttonStyle: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20), // button's shape
+            )),
+            leftIcon: const Icon(Icons.apple),
+            onPressed: signInWithApple,
+          ),
       ],
     );
   }
 }
-
-

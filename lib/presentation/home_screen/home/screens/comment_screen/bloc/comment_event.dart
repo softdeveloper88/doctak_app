@@ -2,7 +2,7 @@
 
 part of 'comment_bloc.dart';
 
-abstract class CommentEvent extends Equatable{}
+abstract class CommentEvent extends Equatable {}
 
 class LoadDataValues extends CommentEvent {
   @override
@@ -16,9 +16,10 @@ class ChangePasswordVisibilityEvent extends CommentEvent {
 
   @override
   List<Object?> get props => [
-    value,
-  ];
+        value,
+      ];
 }
+
 class ChangeCheckBoxEvent extends CommentEvent {
   ChangeCheckBoxEvent({required this.value});
 
@@ -26,29 +27,33 @@ class ChangeCheckBoxEvent extends CommentEvent {
 
   @override
   List<Object?> get props => [
-    value,
-  ];
+        value,
+      ];
 }
-class LoadPageEvent extends CommentEvent{
+
+class LoadPageEvent extends CommentEvent {
   int? postId;
   LoadPageEvent({this.postId});
   @override
   List<Object?> get props => [postId];
 }
-class PostCommentEvent extends CommentEvent{
+
+class PostCommentEvent extends CommentEvent {
   int? postId;
   String? comment;
-  PostCommentEvent({this.postId,this.comment});
+  PostCommentEvent({this.postId, this.comment});
   @override
-  List<Object?> get props => [postId,comment];
+  List<Object?> get props => [postId, comment];
 }
-class DeleteCommentEvent extends CommentEvent{
+
+class DeleteCommentEvent extends CommentEvent {
   String? commentId;
-  DeleteCommentEvent({this.commentId,});
+  DeleteCommentEvent({
+    this.commentId,
+  });
   @override
   List<Object?> get props => [commentId];
 }
-
 
 class CheckIfNeedMoreDataEvent extends CommentEvent {
   final int index;
@@ -56,4 +61,3 @@ class CheckIfNeedMoreDataEvent extends CommentEvent {
   @override
   List<Object?> get props => [index];
 }
-

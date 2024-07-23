@@ -11,62 +11,67 @@ import 'fragments/home_main_screen/bloc/home_bloc.dart';
 import 'fragments/profile_screen/SVProfileFragment.dart';
 import 'fragments/search_people/SVSearchFragment.dart';
 import 'home/components/SVHomeDrawerComponent.dart';
+
 class SVDashboardScreen extends StatefulWidget {
   const SVDashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<SVDashboardScreen> createState() => _SVDashboardScreenState();
 }
+
 var scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _SVDashboardScreenState extends State<SVDashboardScreen> {
   int selectedIndex = 0;
-  HomeBloc homeBloc =HomeBloc();
+  HomeBloc homeBloc = HomeBloc();
 
   Widget getFragment() {
     if (selectedIndex == 0) {
-      return SVHomeFragment(homeBloc:homeBloc,openDrawer: (){
-
-        scaffoldKey.currentState?.openDrawer();
-
-      },);
+      return SVHomeFragment(
+        homeBloc: homeBloc,
+        openDrawer: () {
+          scaffoldKey.currentState?.openDrawer();
+        },
+      );
     } else if (selectedIndex == 1) {
-      return  SearchScreen(backPress: (){
+      return SearchScreen(backPress: () {
         setState(() {
-          selectedIndex=0;
+          selectedIndex = 0;
         });
       });
-    }else if (selectedIndex == 3) {
-      return SVSearchFragment(backPress: (){
+    } else if (selectedIndex == 3) {
+      return SVSearchFragment(backPress: () {
         setState(() {
-          selectedIndex=0;
+          selectedIndex = 0;
         });
       });
     } else if (selectedIndex == 4) {
       return SVProfileFragment();
     }
-    return SVHomeFragment(homeBloc:homeBloc,openDrawer: (){
-      scaffoldKey.currentState?.openDrawer();
-    });
+    return SVHomeFragment(
+        homeBloc: homeBloc,
+        openDrawer: () {
+          scaffoldKey.currentState?.openDrawer();
+        });
   }
+
   @override
   void initState() {
     setStatusBarColor(Colors.transparent);
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: (){
-        if(selectedIndex !=0) {
+      onWillPop: () {
+        if (selectedIndex != 0) {
           setState(() {
-
-          selectedIndex = 0;
+            selectedIndex = 0;
           });
           return Future(() => false);
-        }else{
+        } else {
           return Future(() => true);
-
         }
       },
       child: Scaffold(
@@ -86,23 +91,26 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
                       color: context.iconColor)
                   .paddingTop(12),
               label: '',
-              activeIcon: Image.asset('images/socialv/icons/ic_HomeSelected.png',
-                      height: 24, width: 24, fit: BoxFit.cover)
+              activeIcon: Image.asset(
+                      'images/socialv/icons/ic_HomeSelected.png',
+                      height: 24,
+                      width: 24,
+                      fit: BoxFit.cover)
                   .paddingTop(12),
             ),
             BottomNavigationBarItem(
               icon: Image.asset('images/socialv/icons/ic_Search.png',
-                  height: 24,
-                  width: 24,
-                  fit: BoxFit.cover,
-                  color: context.iconColor)
+                      height: 24,
+                      width: 24,
+                      fit: BoxFit.cover,
+                      color: context.iconColor)
                   .paddingTop(12),
               label: '',
               activeIcon: Image.asset(
-                  'images/socialv/icons/ic_SearchSelected.png',
-                  height: 24,
-                  width: 24,
-                  fit: BoxFit.cover)
+                      'images/socialv/icons/ic_SearchSelected.png',
+                      height: 24,
+                      width: 24,
+                      fit: BoxFit.cover)
                   .paddingTop(12),
             ),
             BottomNavigationBarItem(
@@ -113,12 +121,19 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
                       color: context.iconColor)
                   .paddingTop(12),
               label: '',
-              activeIcon: Image.asset('images/socialv/icons/ic_PlusSelected.png',
-                      height: 24, width: 24, fit: BoxFit.cover)
+              activeIcon: Image.asset(
+                      'images/socialv/icons/ic_PlusSelected.png',
+                      height: 24,
+                      width: 24,
+                      fit: BoxFit.cover)
                   .paddingTop(12),
             ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.group_outlined,size: 28,color:context.iconColor,).paddingTop(12),
+                icon: Icon(
+                  Icons.group_outlined,
+                  size: 28,
+                  color: context.iconColor,
+                ).paddingTop(12),
                 // Image.asset('images/socialv/icons/ic_Search.png',
                 //         height: 24,
                 //         width: 24,
@@ -126,15 +141,17 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
                 //         color: context.iconColor)
                 //     .paddingTop(12),
                 label: '',
-                activeIcon:const Icon(Icons.group_outlined,size: 28,).paddingTop(12)
-              // Image.asset(
-              //         'images/socialv/icons/ic_SearchSelected.png',
-              //         height: 24,
-              //         width: 24,
-              //         fit: BoxFit.cover)
-              //     .paddingTop(12),
-            ),
-
+                activeIcon: const Icon(
+                  Icons.group_outlined,
+                  size: 28,
+                ).paddingTop(12)
+                // Image.asset(
+                //         'images/socialv/icons/ic_SearchSelected.png',
+                //         height: 24,
+                //         width: 24,
+                //         fit: BoxFit.cover)
+                //     .paddingTop(12),
+                ),
             BottomNavigationBarItem(
               icon: SizedBox(
                 height: 40.0,
@@ -162,14 +179,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
             setState(() {});
             if (val == 2) {
               setState(() {});
-               SVAddPostFragment(refresh:(){
-                 selectedIndex = 0;
+              SVAddPostFragment(refresh: () {
+                selectedIndex = 0;
 
-
-                 homeBloc.add(PostLoadPageEvent(page: 1));
-
-               }).launch(context);
-
+                homeBloc.add(PostLoadPageEvent(page: 1));
+              }).launch(context);
             }
           },
           currentIndex: selectedIndex,

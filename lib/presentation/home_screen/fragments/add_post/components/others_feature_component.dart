@@ -47,7 +47,10 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
       padding: const EdgeInsets.only(left: 16),
       // margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: svGetScaffoldColor(), borderRadius: const BorderRadius.only(topLeft: Radius.circular(SVAppCommonRadius),topRight: Radius.circular(SVAppCommonRadius))),
+          color: svGetScaffoldColor(),
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(SVAppCommonRadius),
+              topRight: Radius.circular(SVAppCommonRadius))),
       child: Column(
         children: [
           // SizedBox(
@@ -94,10 +97,8 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                   svShowShareBottomSheet(context, widget.searchPeopleBloc);
                 },
                 child: Container(
-
                   decoration: BoxDecoration(
-                      color:scaffoldLightColor,
-                      borderRadius: radius(10)),
+                      color: scaffoldLightColor, borderRadius: radius(10)),
                   padding: const EdgeInsets.all(8),
                   child: const Row(
                     children: [
@@ -108,7 +109,8 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                       Text(
                         'Tag Friends:',
                         style: TextStyle(
-                            color: cardBackgroundBlackDark, fontWeight: FontWeight.bold),
+                            color: cardBackgroundBlackDark,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -126,37 +128,44 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              ...widget.searchPeopleBloc.selectedSearchPeopleData.map((element) {
-                              return Container(
-                                padding: const EdgeInsets.all(4),
-                                margin: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                    color: Colors.lightBlueAccent.withOpacity(0.4),
-                                    borderRadius: radius(10)),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text('${element.firstName} ${element.lastName}',
-                                        style: boldTextStyle()),
-                                    // IconButton(
-                                    //   icon: const Icon(
-                                    //     Icons.highlight_remove_outlined,
-                                    //     color: Colors.black,
-                                    //   ),
-                                    //   onPressed: () {
-                                    //     // widget.searchPeopleBloc.selectedSearchPeopleData.add(SelectFriendEvent(
-                                    //     //     userData: element,
-                                    //     //     isAdd: false));
-                                    //     // e.doSend = !e.doSend.validate();
-                                    //     // setState(() {});
-                                    //   },
-                                    //   padding: EdgeInsets.all(0),
-                                    // ),
-                                  ],
-                                ),
-                              );
-                            })],
+                              ...widget
+                                  .searchPeopleBloc.selectedSearchPeopleData
+                                  .map((element) {
+                                return Container(
+                                  padding: const EdgeInsets.all(4),
+                                  margin: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                      color: Colors.lightBlueAccent
+                                          .withOpacity(0.4),
+                                      borderRadius: radius(10)),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                          '${element.firstName} ${element.lastName}',
+                                          style: boldTextStyle()),
+                                      // IconButton(
+                                      //   icon: const Icon(
+                                      //     Icons.highlight_remove_outlined,
+                                      //     color: Colors.black,
+                                      //   ),
+                                      //   onPressed: () {
+                                      //     // widget.searchPeopleBloc.selectedSearchPeopleData.add(SelectFriendEvent(
+                                      //     //     userData: element,
+                                      //     //     isAdd: false));
+                                      //     // e.doSend = !e.doSend.validate();
+                                      //     // setState(() {});
+                                      //   },
+                                      //   padding: EdgeInsets.all(0),
+                                      // ),
+                                    ],
+                                  ),
+                                );
+                              })
+                            ],
                           ),
                         ),
                       );

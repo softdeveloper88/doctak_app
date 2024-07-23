@@ -32,8 +32,8 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
   }
 
   bool _isLoading = false;
-  final StreamController<bool> _loadingController = StreamController<
-      bool>.broadcast();
+  final StreamController<bool> _loadingController =
+      StreamController<bool>.broadcast();
 
   // Getter for loading state stream
   Stream<bool> get loadingStream => _loadingController.stream;
@@ -49,8 +49,8 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
     _loadingController.close();
   }
 
-  _onGetUserInfo(FollowersLoadPageEvent event,
-      Emitter<FollowersState> emit) async {
+  _onGetUserInfo(
+      FollowersLoadPageEvent event, Emitter<FollowersState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     // if (event.page == 1) {
@@ -62,18 +62,16 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
     // ProgressDialogUtils.showProgressDialog();
     // try {
     followerDataModel = await postService.getUserFollower(
-        'Bearer ${AppData.userToken}',
-        event.userId.toString()
-      );
+        'Bearer ${AppData.userToken}', event.userId.toString());
 
-      // numberOfPage = response.lastPage ?? 0;
-      // if (pageNumber < numberOfPage+1) {
-      //   pageNumber = pageNumber + 1;
-      //   searchPeopleData.addAll(response.data??[]);
-      // }
-      emit(FollowersPaginationLoadedState());
+    // numberOfPage = response.lastPage ?? 0;
+    // if (pageNumber < numberOfPage+1) {
+    //   pageNumber = pageNumber + 1;
+    //   searchPeopleData.addAll(response.data??[]);
+    // }
+    emit(FollowersPaginationLoadedState());
 
-      // emit(DataLoaded(searchPeopleData));
+    // emit(DataLoaded(searchPeopleData));
     // } catch (e) {
     //   print(e);
     //
@@ -86,12 +84,12 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
   _setUserFollow(SetUserFollow event, Emitter<FollowersState> emit) async {
     // emit(DrugsDataInitial());
     // ProgressDialogUtils.showProgressDialog();
-  print(event.userId,);
+    print(
+      event.userId,
+    );
     try {
       var response = await postService.setUserFollow(
-          'Bearer ${AppData.userToken}',
-          event.userId,
-          event.follow ?? '');
+          'Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
       // setLoading(false);
       emit(FollowersPaginationLoadedState());
     } catch (e) {

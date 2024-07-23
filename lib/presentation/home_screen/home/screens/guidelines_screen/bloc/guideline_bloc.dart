@@ -31,7 +31,7 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
     print('33 ${event.page}');
     if (event.page == 1) {
       guidelinesList.clear();
-      pageNumber=1;
+      pageNumber = 1;
       emit(PaginationLoadingState());
       print(event.searchTerm);
     }
@@ -40,9 +40,9 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
       GuidelinesModel response = await postService.guideline(
           'Bearer ${AppData.userToken}',
           '${pageNumber}',
-          event.searchTerm??'');
+          event.searchTerm ?? '');
       numberOfPage = response.lastPage ?? 0;
-      if (pageNumber < numberOfPage+1) {
+      if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
         guidelinesList.addAll(response.data ?? []);
       }
@@ -65,9 +65,9 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
     // emit(PaginationLoadingState());
     try {
       GuidelinesModel response = await postService.guideline(
-          'Bearer ${AppData.userToken}',
-          "1",
-          event.searchTerm,
+        'Bearer ${AppData.userToken}',
+        "1",
+        event.searchTerm,
       );
       print("ddd${response.data!.length}");
       guidelinesList.clear();

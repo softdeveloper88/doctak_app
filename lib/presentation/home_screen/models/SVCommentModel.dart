@@ -7,7 +7,14 @@ class SVCommentModel {
   bool? isCommentReply;
   bool? like;
 
-  SVCommentModel({this.name, this.profileImage, this.time, this.comment, this.likeCount, this.isCommentReply, this.like});
+  SVCommentModel(
+      {this.name,
+      this.profileImage,
+      this.time,
+      this.comment,
+      this.likeCount,
+      this.isCommentReply,
+      this.like});
 }
 
 List<SVCommentModel> getComments() {
@@ -18,7 +25,8 @@ List<SVCommentModel> getComments() {
     profileImage: 'images/socialv/faces/face_1.png',
     time: '4m',
     likeCount: 4,
-    comment: 'Loving😍 your work and profile👨. Top Marks. Once you are confident enough to develop @ira_membrit',
+    comment:
+        'Loving😍 your work and profile👨. Top Marks. Once you are confident enough to develop @ira_membrit',
     isCommentReply: false,
     like: false,
   ));
@@ -54,7 +62,8 @@ List<SVCommentModel> getComments() {
     profileImage: 'images/socialv/faces/face_5.png',
     time: '4m',
     likeCount: 4,
-    comment: 'Hey Guys✋, I recommend you to try this smart pluginfor design System @Jane_Cooper',
+    comment:
+        'Hey Guys✋, I recommend you to try this smart pluginfor design System @Jane_Cooper',
     isCommentReply: false,
     like: false,
   ));

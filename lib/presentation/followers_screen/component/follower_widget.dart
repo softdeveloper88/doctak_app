@@ -77,13 +77,18 @@ import 'package:nb_utils/nb_utils.dart';
 // }
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+
 class FollowerWidget extends StatefulWidget {
-   var element;
-   String userId;
+  var element;
+  String userId;
   final Function onTap;
   final FollowersBloc bloc;
 
-  FollowerWidget({required this.element, required this.onTap, required this.bloc,required this.userId});
+  FollowerWidget(
+      {required this.element,
+      required this.onTap,
+      required this.bloc,
+      required this.userId});
 
   @override
   _FollowerWidgetState createState() => _FollowerWidgetState();
@@ -95,13 +100,13 @@ class _FollowerWidgetState extends State<FollowerWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top:8.0),
+      padding: const EdgeInsets.only(top: 8.0),
       child: Material(
         elevation: 2,
         color: context.cardColor,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0,horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -110,9 +115,8 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         // SVProfileFragment(userId:widget.element.id).launch(context);
-
                       },
                       child: Container(
                         width: 50,
@@ -129,8 +133,16 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                           ],
                         ),
                         child: widget.element.profilePic == ''
-                            ? Image.asset('images/socialv/faces/face_5.png', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(8).cornerRadiusWithClipRRect(8)
-                            : CachedNetworkImage(imageUrl: widget.element.profilePic??'', height: 56, width: 56, fit: BoxFit.cover).cornerRadiusWithClipRRect(30),
+                            ? Image.asset('images/socialv/faces/face_5.png',
+                                    height: 56, width: 56, fit: BoxFit.cover)
+                                .cornerRadiusWithClipRRect(8)
+                                .cornerRadiusWithClipRRect(8)
+                            : CachedNetworkImage(
+                                    imageUrl: widget.element.profilePic ?? '',
+                                    height: 56,
+                                    width: 56,
+                                    fit: BoxFit.cover)
+                                .cornerRadiusWithClipRRect(30),
                       ),
                     ),
                     10.width,
@@ -140,38 +152,61 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(width: 150, child: Text(widget.element?.name??"No Name",overflow: TextOverflow.clip, style: boldTextStyle())),
+                            SizedBox(
+                                width: 150,
+                                child: Text(widget.element?.name ?? "No Name",
+                                    overflow: TextOverflow.clip,
+                                    style: boldTextStyle())),
                             6.width,
-                             Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-
+                            Image.asset(
+                                'images/socialv/icons/ic_TickSquare.png',
+                                height: 14,
+                                width: 14,
+                                fit: BoxFit.cover)
                           ],
                         ),
-                        Text(widget.element?.specialty??"", style: secondaryTextStyle(color: svGetBodyColor())),
+                        Text(widget.element?.specialty ?? "",
+                            style: secondaryTextStyle(color: svGetBodyColor())),
                       ],
                     ),
                   ],
                 ),
               ),
-              if(widget.userId==AppData.logInUserId)
-                isLoading ? CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
-                shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
-                text: widget.element.isCurrentlyFollow ? 'Unfollow':'Follow',
-                textStyle: boldTextStyle(color:  widget.element.isCurrentlyFollow != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
-                onTap:  () async {
-                  setState(() {
-                    isLoading = true; // Set loading state to true when button is clicked
-                  });
+              if (widget.userId == AppData.logInUserId)
+                isLoading
+                    ? CircularProgressIndicator(
+                        color: svGetBodyColor(),
+                      )
+                    : AppButton(
+                        shapeBorder:
+                            RoundedRectangleBorder(borderRadius: radius(10)),
+                        text: widget.element.isCurrentlyFollow
+                            ? 'Unfollow'
+                            : 'Follow',
+                        textStyle: boldTextStyle(
+                            color: widget.element.isCurrentlyFollow != true
+                                ? SVAppColorPrimary
+                                : buttonUnSelectColor,
+                            size: 10),
+                        onTap: () async {
+                          setState(() {
+                            isLoading =
+                                true; // Set loading state to true when button is clicked
+                          });
 
-                  // Perform API call
-                  widget.onTap();
+                          // Perform API call
+                          widget.onTap();
 
-                  setState(() {
-                    isLoading = false; // Set loading state to false after API response
-                  });
-                },
-                elevation: 0,
-                color: widget.element.isCurrentlyFollow == true ?SVAppColorPrimary:buttonUnSelectColor,
-              ),
+                          setState(() {
+                            isLoading =
+                                false; // Set loading state to false after API response
+                          });
+                        },
+                        elevation: 0,
+                        color: widget.element.isCurrentlyFollow == true
+                            ? SVAppColorPrimary
+                            : buttonUnSelectColor,
+                      ),
               // ElevatedButton(
               //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               //   onPressed: () async {

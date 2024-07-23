@@ -120,7 +120,7 @@ class _JobsScreenState extends State<JobsScreen> {
                 return Column(
                   children: [
                     AppBar(
-                      surfaceTintColor:svGetScaffoldColor() ,
+                      surfaceTintColor: svGetScaffoldColor(),
                       backgroundColor: svGetScaffoldColor(),
                       iconTheme: IconThemeData(color: context.iconColor),
                       title: Row(
@@ -167,184 +167,188 @@ class _JobsScreenState extends State<JobsScreen> {
                           ),
                           InkWell(
                             onTap: () {
-                              setState(() {
-
-                              });
+                              setState(() {});
                               isSearchShow = !isSearchShow;
                             },
-                            child:  isSearchShow
-              ? Icon(Icons.cancel_outlined,
-              size: 25,
-              // height: 16,
-              // width: 16,
-              // fit: BoxFit.cover,
-              color: svGetBodyColor())
-                  .paddingLeft(4):Image.asset(
-              'assets/images/search.png',
-              height: 20,
-              width: 20,
-              color: svGetBodyColor(),
-              ),
-              ).paddingRight(16)
-
+                            child: isSearchShow
+                                ? Icon(Icons.cancel_outlined,
+                                        size: 25,
+                                        // height: 16,
+                                        // width: 16,
+                                        // fit: BoxFit.cover,
+                                        color: svGetBodyColor())
+                                    .paddingLeft(4)
+                                : Image.asset(
+                                    'assets/images/search.png',
+                                    height: 20,
+                                    width: 20,
+                                    color: svGetBodyColor(),
+                                  ),
+                          ).paddingRight(16)
                         ],
                       ),
                       leading: IconButton(
-                        icon:  Icon(Icons.arrow_back_ios_new_rounded,
-                            color:svGetBodyColor()),
+                        icon: Icon(Icons.arrow_back_ios_new_rounded,
+                            color: svGetBodyColor()),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       elevation: 0,
                       centerTitle: true,
                     ),
-                    Divider(color: Colors.grey[300],endIndent: 16,indent: 16,),
+                    Divider(
+                      color: Colors.grey[300],
+                      endIndent: 16,
+                      indent: 16,
+                    ),
                     Column(
                       children: [
                         Column(
                           children: [
-                            if(isSearchShow)  Container(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              margin: const EdgeInsets.only(
-                                left: 16,
-                                top: 16.0,
-                                bottom: 16.0,
-                                right: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                  color: context.dividerColor.withOpacity(0.4),
-                                  borderRadius: radius(5),
-                                  border: Border.all(
-                                      color: svGetBodyColor(), width: 0.3)),
-                              child:
-                                  // CustomDropdownSearch(
-                                  //   onChanged: (searchTxt) {
-                                  //     if (_debounce?.isActive ?? false)
-                                  //       _debounce?.cancel();
-                                  //
-                                  //     _debounce = Timer(
-                                  //         const Duration(milliseconds: 500), () {
-                                  //       // jobsBloc.add(
-                                  //       //   GetPost(
-                                  //       //     page: '1',
-                                  //       //     countryId: AppData.countryName,
-                                  //       //     searchTerm: searchTxt,
-                                  //       //   ),
-                                  //       // );
-                                  //       BlocProvider.of<SplashBloc>(context).add(
-                                  //           LoadDropdownData(
-                                  //               state.countryFlag,
-                                  //               state.typeValue,
-                                  //               searchTxt ?? '',
-                                  //               state.isExpired));
-                                  //       jobsBloc.add(JobLoadPageEvent(
-                                  //         page: 1,
-                                  //         countryId: state.countryFlag != ''
-                                  //             ? state.countryFlag
-                                  //             : '${state.countriesModel.countries?.first.id ?? 1}',
-                                  //         searchTerm: searchTxt,
-                                  //       ));
-                                  //     });
-                                  //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                  //   },
-                                  //   hintText: 'Search speciality',
-                                  //   textController: _controller,
-                                  //   items: profileBloc.specialtyList ?? [],
-                                  //   dropdownHeight: 300,
-                                  //   onSelect: (searchTxt) {
-                                  //     if (_debounce?.isActive ?? false)
-                                  //       _debounce?.cancel();
-                                  //
-                                  //     _debounce = Timer(
-                                  //         const Duration(milliseconds: 500), () {
-                                  //       // jobsBloc.add(
-                                  //       //   GetPost(
-                                  //       //     page: '1',
-                                  //       //     countryId: AppData.countryName,
-                                  //       //     searchTerm: searchTxt,
-                                  //       //   ),
-                                  //       // );
-                                  //       BlocProvider.of<SplashBloc>(context).add(
-                                  //           LoadDropdownData(
-                                  //               state.countryFlag,
-                                  //               state.typeValue,
-                                  //               searchTxt ?? '',
-                                  //               state.isExpired));
-                                  //       jobsBloc.add(JobLoadPageEvent(
-                                  //         page: 1,
-                                  //         countryId: state.countryFlag != ''
-                                  //             ? state.countryFlag
-                                  //             : '${state.countriesModel.countries?.first.id ?? 1}',
-                                  //         searchTerm: searchTxt,
-                                  //       ));
-                                  //     });
-                                  //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                  //   },
-                                  // )
-                                  AppTextField(
-                                controller: _controller,
-                                textFieldType: TextFieldType.NAME,
-                                onChanged: (searchTxt) async {
-                                  // if (_debounce?.isActive ?? false)
-                                  //   _debounce?.cancel();
-                                  // _debounce = Timer(const Duration(milliseconds: 500), () {
-                                  _filterSuggestions(searchTxt);
-                                  isShownSuggestion = true;
-                                  // jobsBloc.add(
-                                  //   GetPost(
-                                  //     page: '1',
-                                  //     countryId: AppData.countryName,
-                                  //     searchTerm: searchTxt,
-                                  //   ),
-                                  // );
-                                  // BlocProvider.of<SplashBloc>(context).add(
-                                  //     LoadDropdownData(
-                                  //         state.countryFlag,
-                                  //         state.typeValue,
-                                  //         searchTxt ?? '',
-                                  //         state.isExpired));
-                                  // jobsBloc.add(JobLoadPageEvent(
-                                  //   page: 1,
-                                  //   countryId: state.countryFlag != ''
-                                  //       ? state.countryFlag
-                                  //       : '${state.countriesModel.countries?.first.id ?? 1}',
-                                  //   searchTerm: searchTxt,
-                                  // ));
-                                  // });
-                                  // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                },
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Search by Specialty',
-                                  hintStyle: secondaryTextStyle(
-                                      color: svGetBodyColor()),
-                                  suffixIcon: GestureDetector(
-                                    onTap: () {
-                                      isShownSuggestion = true;
-                                      BlocProvider.of<SplashBloc>(context).add(
-                                          LoadDropdownData(
-                                              state.countryFlag,
-                                              state.typeValue,
-                                              _controller.text ?? '',
-                                              state.isExpired));
-                                      jobsBloc.add(JobLoadPageEvent(
-                                        page: 1,
-                                        countryId: state.countryFlag != ''
-                                            ? state.countryFlag
-                                            : '${state.countriesModel.countries?.first.id ?? 1}',
-                                        searchTerm: _controller.text,
-                                      ));
-                                    },
-                                    child: Image.asset(
-                                            'images/socialv/icons/ic_Search.png',
-                                            height: 16,
-                                            width: 16,
-                                            fit: BoxFit.cover,
-                                            color: svGetBodyColor())
-                                        .paddingAll(16),
+                            if (isSearchShow)
+                              Container(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                margin: const EdgeInsets.only(
+                                  left: 16,
+                                  top: 16.0,
+                                  bottom: 16.0,
+                                  right: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                    color:
+                                        context.dividerColor.withOpacity(0.4),
+                                    borderRadius: radius(5),
+                                    border: Border.all(
+                                        color: svGetBodyColor(), width: 0.3)),
+                                child:
+                                    // CustomDropdownSearch(
+                                    //   onChanged: (searchTxt) {
+                                    //     if (_debounce?.isActive ?? false)
+                                    //       _debounce?.cancel();
+                                    //
+                                    //     _debounce = Timer(
+                                    //         const Duration(milliseconds: 500), () {
+                                    //       // jobsBloc.add(
+                                    //       //   GetPost(
+                                    //       //     page: '1',
+                                    //       //     countryId: AppData.countryName,
+                                    //       //     searchTerm: searchTxt,
+                                    //       //   ),
+                                    //       // );
+                                    //       BlocProvider.of<SplashBloc>(context).add(
+                                    //           LoadDropdownData(
+                                    //               state.countryFlag,
+                                    //               state.typeValue,
+                                    //               searchTxt ?? '',
+                                    //               state.isExpired));
+                                    //       jobsBloc.add(JobLoadPageEvent(
+                                    //         page: 1,
+                                    //         countryId: state.countryFlag != ''
+                                    //             ? state.countryFlag
+                                    //             : '${state.countriesModel.countries?.first.id ?? 1}',
+                                    //         searchTerm: searchTxt,
+                                    //       ));
+                                    //     });
+                                    //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                                    //   },
+                                    //   hintText: 'Search speciality',
+                                    //   textController: _controller,
+                                    //   items: profileBloc.specialtyList ?? [],
+                                    //   dropdownHeight: 300,
+                                    //   onSelect: (searchTxt) {
+                                    //     if (_debounce?.isActive ?? false)
+                                    //       _debounce?.cancel();
+                                    //
+                                    //     _debounce = Timer(
+                                    //         const Duration(milliseconds: 500), () {
+                                    //       // jobsBloc.add(
+                                    //       //   GetPost(
+                                    //       //     page: '1',
+                                    //       //     countryId: AppData.countryName,
+                                    //       //     searchTerm: searchTxt,
+                                    //       //   ),
+                                    //       // );
+                                    //       BlocProvider.of<SplashBloc>(context).add(
+                                    //           LoadDropdownData(
+                                    //               state.countryFlag,
+                                    //               state.typeValue,
+                                    //               searchTxt ?? '',
+                                    //               state.isExpired));
+                                    //       jobsBloc.add(JobLoadPageEvent(
+                                    //         page: 1,
+                                    //         countryId: state.countryFlag != ''
+                                    //             ? state.countryFlag
+                                    //             : '${state.countriesModel.countries?.first.id ?? 1}',
+                                    //         searchTerm: searchTxt,
+                                    //       ));
+                                    //     });
+                                    //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                                    //   },
+                                    // )
+                                    AppTextField(
+                                  controller: _controller,
+                                  textFieldType: TextFieldType.NAME,
+                                  onChanged: (searchTxt) async {
+                                    // if (_debounce?.isActive ?? false)
+                                    //   _debounce?.cancel();
+                                    // _debounce = Timer(const Duration(milliseconds: 500), () {
+                                    _filterSuggestions(searchTxt);
+                                    isShownSuggestion = true;
+                                    // jobsBloc.add(
+                                    //   GetPost(
+                                    //     page: '1',
+                                    //     countryId: AppData.countryName,
+                                    //     searchTerm: searchTxt,
+                                    //   ),
+                                    // );
+                                    // BlocProvider.of<SplashBloc>(context).add(
+                                    //     LoadDropdownData(
+                                    //         state.countryFlag,
+                                    //         state.typeValue,
+                                    //         searchTxt ?? '',
+                                    //         state.isExpired));
+                                    // jobsBloc.add(JobLoadPageEvent(
+                                    //   page: 1,
+                                    //   countryId: state.countryFlag != ''
+                                    //       ? state.countryFlag
+                                    //       : '${state.countriesModel.countries?.first.id ?? 1}',
+                                    //   searchTerm: searchTxt,
+                                    // ));
+                                    // });
+                                    // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: 'Search by Specialty',
+                                    hintStyle: secondaryTextStyle(
+                                        color: svGetBodyColor()),
+                                    suffixIcon: GestureDetector(
+                                      onTap: () {
+                                        isShownSuggestion = true;
+                                        BlocProvider.of<SplashBloc>(context)
+                                            .add(LoadDropdownData(
+                                                state.countryFlag,
+                                                state.typeValue,
+                                                _controller.text ?? '',
+                                                state.isExpired));
+                                        jobsBloc.add(JobLoadPageEvent(
+                                          page: 1,
+                                          countryId: state.countryFlag != ''
+                                              ? state.countryFlag
+                                              : '${state.countriesModel.countries?.first.id ?? 1}',
+                                          searchTerm: _controller.text,
+                                        ));
+                                      },
+                                      child: Image.asset(
+                                              'images/socialv/icons/ic_Search.png',
+                                              height: 16,
+                                              width: 16,
+                                              fit: BoxFit.cover,
+                                              color: svGetBodyColor())
+                                          .paddingAll(16),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
                             if (isShownSuggestion)
                               ListView.builder(
                                 shrinkWrap: true,
@@ -545,8 +549,11 @@ class _JobsScreenState extends State<JobsScreen> {
               builder: (context, state) {
                 isShownSuggestion = false;
                 if (state is PaginationLoadingState) {
-                  return  Expanded(
-                      child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+                  return Expanded(
+                      child: Center(
+                          child: CircularProgressIndicator(
+                    color: svGetBodyColor(),
+                  )));
                 } else if (state is PaginationLoadedState) {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
@@ -585,290 +592,280 @@ class _JobsScreenState extends State<JobsScreen> {
                   }
                 }
                 if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-                        index >= bloc.drugsData.length - 1) {
-                  return  Center(
-                        child: CircularProgressIndicator(color: svGetBodyColor(),),
-                      );
+                    index >= bloc.drugsData.length - 1) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: svGetBodyColor(),
+                    ),
+                  );
                 } else {
                   return InkWell(
-                        onTap: () {
-                          JobsDetailsScreen(
-                                  jobId: '${bloc.drugsData[index].id??''}')
-                              .launch(context);
-                        },
+                    onTap: () {
+                      JobsDetailsScreen(
+                              jobId: '${bloc.drugsData[index].id ?? ''}')
+                          .launch(context);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: context.cardColor,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Material(
+                        color: context.cardColor,
+                        elevation: 4,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         child: Container(
-                          margin: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: context.cardColor,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Material(
-                            color:context.cardColor,
-                            elevation: 4,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10)),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        selectedIndex == 0 ? "New" : "Expired",
-                                        style: GoogleFonts.poppins(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: kDefaultFontSize),
-                                      ),
-                              InkWell(
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                onTap: () {
-                                  // _showBottomSheet(context,widget
-                                  //     .homeBloc
-                                  //     .postList[index]);
-                                  createDynamicLink(
-                                      '${bloc.drugsData[index].jobTitle ?? ""} \n  Apply Link: ${bloc.drugsData[index].link ??''}',
-                                      'https://doctak.net/job/${bloc.drugsData[index].id}',
-                                      bloc.drugsData[index]
-                                          .link ??'');
-                                  // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
-                                  //     "Company : ${bloc.drugsData[index].companyName}\n"
-                                  //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
-                                  //     "Date From: ${ bloc.drugsData[index]
-                                  //     .createdAt ??
-                                  //     'N/A'}\n"
-                                  //     "Date To: ${ bloc.drugsData[index]
-                                  //     .lastDate ??
-                                  //     'N/A'}\n"
-                                  //     "Experience: ${ bloc.drugsData[index]
-                                  //     .experience ??
-                                  //     'N/A'}\n"
-                                  //     "Job Apply Link: ${ bloc.drugsData[index]
-                                  //     .link ??
-                                  //     'N/A'}\n" );
-
-
-                                },
-                                child: Icon(Icons.share_sharp,
-                                  size: 22,
-                                  // 'images/socialv/icons/ic_share.png',
-                                  // height: 22,
-                                  // width: 22,
-                                  // fit: BoxFit.cover,
-                                  color: context.iconColor,
-                                ),
-                              ),
-                                    ],
-                                  ),
                                   Text(
-                                    bloc.drugsData[index].jobTitle ?? "",
+                                    selectedIndex == 0 ? "New" : "Expired",
                                     style: GoogleFonts.poppins(
-                                        color: svGetBodyColor(),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18),
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: kDefaultFontSize),
                                   ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                      bloc.drugsData[index].companyName ??
-                                          'N/A',
-                                      style: secondaryTextStyle(
-                                          color: svGetBodyColor())),
-                                  const SizedBox(height: 10),
-                                  Row(
-                                    children: <Widget>[
-                                      const Icon(
-                                        Icons.location_on,
-                                        size: 20,
-                                        color: Colors.grey,
-                                      ),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                            bloc.drugsData[index].location ??
-                                                'N/A',
-                                            style: secondaryTextStyle(
-                                                color: svGetBodyColor())),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Text('Apply Date',
-                                      style: GoogleFonts.poppins(
-                                          color: svGetBodyColor(),
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 14)),
-                                  Row(
-                                    children: [
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Date From',
-                                              style: secondaryTextStyle(
-                                                  color: svGetBodyColor())),
-                                          Row(
-                                            children: <Widget>[
-                                               Icon(
-                                                Icons.date_range_outlined,
-                                                size: 20,
-                                                color: svGetBodyColor(),
-                                              ),
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                  DateFormat('MMM dd, yyyy')
-                                                      .format(DateTime.parse(
-                                                          bloc.drugsData[index]
-                                                                  .createdAt ??
-                                                              'N/A'
-                                                                  .toString())),
-                                                  style: secondaryTextStyle(
-                                                      color: svGetBodyColor())),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(
-                                        width: 20,
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text('Date To',
-                                              style: secondaryTextStyle(
-                                                color: svGetBodyColor(),
-                                              )),
-                                          Row(
-                                            children: <Widget>[
-                                               Icon(
-                                                Icons.date_range_outlined,
-                                                size: 20,
-                                                color: svGetBodyColor(),
-                                              ),
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                  DateFormat('MMM dd, yyyy')
-                                                      .format(DateTime.parse(
-                                                          bloc.drugsData[index]
-                                                                  .lastDate ??
-                                                              'N/A'
-                                                                  .toString())),
-                                                  style: secondaryTextStyle(
-                                                      color: svGetBodyColor())),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                      'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
-                                      style: secondaryTextStyle(
-                                        color: svGetBodyColor(),
-                                      )),
-                                  const SizedBox(height: 5),
-                                  SingleChildScrollView(
-                                    clipBehavior: Clip.hardEdge,
-                                    scrollDirection: Axis.horizontal,
-                                    child: Container(
-                                      color: Colors.white,
-                                      child: HtmlWidget(
-                                        '<p>${bloc.drugsData[index].description}</p>',
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        TextButton(
-                                          onPressed: () async {
-                                            // final Uri url = Uri.parse(bloc
-                                            //     .drugsData[index]
-                                            //     .link!); // Assuming job.link is a non-null String
-                                            // Show dialog asking the user to confirm navigation
-                                            final shouldLeave =
-                                                await showDialog<bool>(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const Text('Leave App'),
-                                                content: const Text(
-                                                    'Would you like to leave the app to view this content?'),
-                                                actions: <Widget>[
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.of(context)
-                                                            .pop(false),
-                                                    child: const Text('No'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop(true);
-                                                      final Uri url = Uri.parse(
-                                                          bloc.drugsData[index]
-                                                              .link!);
-                                                      _launchInBrowser(url);
-                                                    },
-                                                    child: const Text('Yes'),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                            // If the user confirmed, launch the URL
-                                            if (shouldLeave == true) {
-                                              // await launchUrl(url);
-                                            } else if (shouldLeave == false) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Leaving the app canceled.')),
-                                              );
-                                            } else {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Leaving the app canceled.')),
-                                              );
-                                            }
-                                          },
-                                          child: const Text(
-                                            'Apply ',
-                                            style: TextStyle(
-                                              color: Colors.blue,
-                                              decoration:
-                                                  TextDecoration.underline,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                  InkWell(
+                                    splashColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () {
+                                      // _showBottomSheet(context,widget
+                                      //     .homeBloc
+                                      //     .postList[index]);
+                                      createDynamicLink(
+                                          '${bloc.drugsData[index].jobTitle ?? ""} \n  Apply Link: ${bloc.drugsData[index].link ?? ''}',
+                                          'https://doctak.net/job/${bloc.drugsData[index].id}',
+                                          bloc.drugsData[index].link ?? '');
+                                      // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
+                                      //     "Company : ${bloc.drugsData[index].companyName}\n"
+                                      //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
+                                      //     "Date From: ${ bloc.drugsData[index]
+                                      //     .createdAt ??
+                                      //     'N/A'}\n"
+                                      //     "Date To: ${ bloc.drugsData[index]
+                                      //     .lastDate ??
+                                      //     'N/A'}\n"
+                                      //     "Experience: ${ bloc.drugsData[index]
+                                      //     .experience ??
+                                      //     'N/A'}\n"
+                                      //     "Job Apply Link: ${ bloc.drugsData[index]
+                                      //     .link ??
+                                      //     'N/A'}\n" );
+                                    },
+                                    child: Icon(
+                                      Icons.share_sharp,
+                                      size: 22,
+                                      // 'images/socialv/icons/ic_share.png',
+                                      // height: 22,
+                                      // width: 22,
+                                      // fit: BoxFit.cover,
+                                      color: context.iconColor,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                              Text(
+                                bloc.drugsData[index].jobTitle ?? "",
+                                style: GoogleFonts.poppins(
+                                    color: svGetBodyColor(),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(bloc.drugsData[index].companyName ?? 'N/A',
+                                  style: secondaryTextStyle(
+                                      color: svGetBodyColor())),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: <Widget>[
+                                  const Icon(
+                                    Icons.location_on,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                        bloc.drugsData[index].location ?? 'N/A',
+                                        style: secondaryTextStyle(
+                                            color: svGetBodyColor())),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              Text('Apply Date',
+                                  style: GoogleFonts.poppins(
+                                      color: svGetBodyColor(),
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14)),
+                              Row(
+                                children: [
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Date From',
+                                          style: secondaryTextStyle(
+                                              color: svGetBodyColor())),
+                                      Row(
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.date_range_outlined,
+                                            size: 20,
+                                            color: svGetBodyColor(),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                              DateFormat('MMM dd, yyyy').format(
+                                                  DateTime.parse(bloc
+                                                          .drugsData[index]
+                                                          .createdAt ??
+                                                      'N/A'.toString())),
+                                              style: secondaryTextStyle(
+                                                  color: svGetBodyColor())),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    width: 20,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text('Date To',
+                                          style: secondaryTextStyle(
+                                            color: svGetBodyColor(),
+                                          )),
+                                      Row(
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.date_range_outlined,
+                                            size: 20,
+                                            color: svGetBodyColor(),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                              DateFormat('MMM dd, yyyy').format(
+                                                  DateTime.parse(bloc
+                                                          .drugsData[index]
+                                                          .lastDate ??
+                                                      'N/A'.toString())),
+                                              style: secondaryTextStyle(
+                                                  color: svGetBodyColor())),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                  'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
+                                  style: secondaryTextStyle(
+                                    color: svGetBodyColor(),
+                                  )),
+                              const SizedBox(height: 5),
+                              SingleChildScrollView(
+                                clipBehavior: Clip.hardEdge,
+                                scrollDirection: Axis.horizontal,
+                                child: Container(
+                                  color: Colors.white,
+                                  child: HtmlWidget(
+                                    '<p>${bloc.drugsData[index].description}</p>',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        // final Uri url = Uri.parse(bloc
+                                        //     .drugsData[index]
+                                        //     .link!); // Assuming job.link is a non-null String
+                                        // Show dialog asking the user to confirm navigation
+                                        final shouldLeave =
+                                            await showDialog<bool>(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text('Leave App'),
+                                            content: const Text(
+                                                'Would you like to leave the app to view this content?'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context)
+                                                        .pop(false),
+                                                child: const Text('No'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(true);
+                                                  final Uri url = Uri.parse(bloc
+                                                      .drugsData[index].link!);
+                                                  _launchInBrowser(url);
+                                                },
+                                                child: const Text('Yes'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        // If the user confirmed, launch the URL
+                                        if (shouldLeave == true) {
+                                          // await launchUrl(url);
+                                        } else if (shouldLeave == false) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Leaving the app canceled.')),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Leaving the app canceled.')),
+                                          );
+                                        }
+                                      },
+                                      child: const Text(
+                                        'Apply ',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      );
+                      ),
+                    ),
+                  );
                 }
                 // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
               },

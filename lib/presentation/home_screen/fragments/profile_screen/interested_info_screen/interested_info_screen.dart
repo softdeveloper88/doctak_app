@@ -42,7 +42,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child:  Icon(Icons.arrow_back_ios,color: svGetBodyColor())),
+            child: Icon(Icons.arrow_back_ios, color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           if (widget.profileBloc.isMe)
@@ -95,29 +95,29 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
               ),
             ),
 
-            // GestureDetector(
-            //   onTap: () {
-            //     setState(() {
-            //       isEditModeMap = true;
-            //       // AddEditInterestedScreen(profileBloc: widget.profileBloc)
-            //       //     .launch(context);
-            //       // widget.profileBloc.interestList!.add(InterestModel());
-            //     });
-            //   },
-            //   child: const Padding(
-            //     padding: EdgeInsets.all(8.0),
-            //     child: Icon(
-            //       Icons.add_circle_outline_sharp,
-            //       color: Colors.blue,
-            //       size: 30,
-            //       // color: Colors.black,
-            //       // imagePath: 'assets/icon/ic_vector.svg',
-            //       // height: 25.adaptSize,
-            //       // width: 25.adaptSize,
-            //       // margin: EdgeInsets.only(top: 4.v, right: 4.v),
-            //     ),
-            //   ),
-            // ),
+          // GestureDetector(
+          //   onTap: () {
+          //     setState(() {
+          //       isEditModeMap = true;
+          //       // AddEditInterestedScreen(profileBloc: widget.profileBloc)
+          //       //     .launch(context);
+          //       // widget.profileBloc.interestList!.add(InterestModel());
+          //     });
+          //   },
+          //   child: const Padding(
+          //     padding: EdgeInsets.all(8.0),
+          //     child: Icon(
+          //       Icons.add_circle_outline_sharp,
+          //       color: Colors.blue,
+          //       size: 30,
+          //       // color: Colors.black,
+          //       // imagePath: 'assets/icon/ic_vector.svg',
+          //       // height: 25.adaptSize,
+          //       // width: 25.adaptSize,
+          //       // margin: EdgeInsets.only(top: 4.v, right: 4.v),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
       body: Padding(
@@ -137,16 +137,29 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     }
 
                     widget.profileBloc.add(UpdateAddHobbiesInterestEvent(
-                    '',
-                        widget.profileBloc.interestList!.isEmpty?'':widget.profileBloc.interestList?[0].interestDetails??"",
-                        widget.profileBloc.interestList!.length>=2?widget.profileBloc.interestList![1].interestDetails??"":'',
-                        widget.profileBloc.interestList!.length>=3?widget.profileBloc.interestList![3].interestDetails??"":'',
                         '',
-                        '',''
+                        widget.profileBloc.interestList!.isEmpty
+                            ? ''
+                            : widget.profileBloc.interestList?[0]
+                                    .interestDetails ??
+                                "",
+                        widget.profileBloc.interestList!.length >= 2
+                            ? widget.profileBloc.interestList![1]
+                                    .interestDetails ??
+                                ""
+                            : '',
+                        widget.profileBloc.interestList!.length >= 3
+                            ? widget.profileBloc.interestList![3]
+                                    .interestDetails ??
+                                ""
+                            : '',
+                        '',
+                        '',
+                        ''
                         // widget.profileBloc.interestList!.length>=4?widget.profileBloc.interestList![3].interestDetails??"":'',
                         // widget.profileBloc.interestList!.length>=5?widget.profileBloc.interestList![4].interestDetails??"":'',
                         // widget.profileBloc.interestList!.length>=6?widget.profileBloc.interestList![5].interestDetails??"":'',
-                    ));
+                        ));
 
                     Navigator.pop(context);
                   },
@@ -164,197 +177,200 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
   Widget _buildInterestedInfoFields() {
     return widget.profileBloc.interestList!.isEmpty
         ? const SizedBox(
-        height: 500, child: Center(child: Text('No Interest Add')))
+            height: 500, child: Center(child: Text('No Interest Add')))
         : Form(
-        key: _formKey,
-        child: Column(children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-              capitalizeWords('Areas of Interest (Specific fields of medicine, research interests)'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+            key: _formKey,
+            child: Column(children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        capitalizeWords(
+                            'Areas of Interest (Specific fields of medicine, research interests)'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFieldEditWidget(
+                        hints:
+                            'Areas of Interest (Specific fields of medicine, research interests)',
+                        isEditModeMap: isEditModeMap,
+                        icon: Icons.description,
+                        index: 2,
+                        label: 'Interest Details',
+                        value: widget
+                                .profileBloc.interestList?[0].interestDetails ??
+                            "",
+                        onSave: (value) => widget.profileBloc.interestList?[0]
+                            .interestDetails = value,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  TextFieldEditWidget(
-                    hints: 'Areas of Interest (Specific fields of medicine, research interests)',
-                    isEditModeMap: isEditModeMap,
-                    icon: Icons.description,
-                    index: 2,
-                    label: 'Interest Details',
-                    value: widget.profileBloc.interestList?[0].interestDetails ??
-                        "",
-                    onSave: (value) =>
-                    widget.profileBloc.interestList?[0].interestDetails = value,
-                  ),
-                  const SizedBox(height: 10),
-                ],
+                ),
               ),
-            ),
-          ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-    capitalizeWords('Participation in Conferences and Workshops'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        capitalizeWords(
+                            'Participation in Conferences and Workshops'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFieldEditWidget(
+                        isEditModeMap: isEditModeMap,
+                        icon: Icons.description,
+                        index: 2,
+                        hints: 'Publications (Research papers, articles)',
+                        label: 'Interest Details',
+                        value: widget
+                                .profileBloc.interestList?[1].interestDetails ??
+                            "",
+                        onSave: (value) => widget.profileBloc.interestList?[1]
+                            .interestDetails = value,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  TextFieldEditWidget(
-                    isEditModeMap: isEditModeMap,
-                    icon: Icons.description,
-                    index: 2,
-                    hints: 'Publications (Research papers, articles)',
-                    label: 'Interest Details',
-                    value: widget
-                        .profileBloc.interestList?[1].interestDetails ??
-                        "",
-                    onSave: (value) =>
-                    widget.profileBloc.interestList?[1]
-                        .interestDetails = value,
-                  ),
-                  const SizedBox(height: 10),
-                ],
+                ),
               ),
-            ),
-          ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Research Projects',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Research Projects',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFieldEditWidget(
+                        isEditModeMap: isEditModeMap,
+                        icon: Icons.description,
+                        index: 2,
+                        hints: 'Clinical Trials...',
+                        label: 'Interest Details',
+                        value: widget
+                                .profileBloc.interestList?[3].interestDetails ??
+                            "",
+                        onSave: (value) => widget.profileBloc.interestList?[3]
+                            .interestDetails = value,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  TextFieldEditWidget(
-                    isEditModeMap: isEditModeMap,
-                    icon: Icons.description,
-                    index: 2,
-                    hints: 'Clinical Trials...',
-                    label: 'Interest Details',
-                    value: widget
-                        .profileBloc.interestList?[3].interestDetails ??
-                        "",
-                    onSave: (value) =>
-                    widget.profileBloc.interestList?[3]
-                        .interestDetails = value,
-                  ),
-                  const SizedBox(height: 10),
-                ],
+                ),
               ),
-            ),
-          ),
-    //       Card(
-    //         child: Padding(
-    //           padding: const EdgeInsets.all(16.0),
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               Text(
-    // capitalizeWords(widget.profileBloc.interestList?[3].interestType!.replaceAll('_', ' ') ?? ''),
-    //                 style: const TextStyle(
-    //                   fontSize: 16,
-    //                   fontWeight: FontWeight.bold,
-    //                 ),
-    //               ),
-    //               const SizedBox(height: 10),
-    //               TextFieldEditWidget(
-    //                 isEditModeMap: isEditModeMap,
-    //                 icon: Icons.description,
-    //                 index: 2,
-    //                 label: 'Interest Details',
-    //                 value: widget
-    //                     .profileBloc.interestList?[3].interestDetails ??
-    //                     "",
-    //                 onSave: (value) =>
-    //                 widget.profileBloc.interestList?[3]
-    //                     .interestDetails = value,
-    //               ),
-    //               const SizedBox(height: 10),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //       Card(
-    //         child: Padding(
-    //           padding: const EdgeInsets.all(16.0),
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               Text(
-    // capitalizeWords( widget.profileBloc.interestList?[4].interestType!.replaceAll('_', ' ') ?? ''),
-    //                 style: const TextStyle(
-    //                   fontSize: 16,
-    //                   fontWeight: FontWeight.bold,
-    //                 ),
-    //               ),
-    //               const SizedBox(height: 10),
-    //               TextFieldEditWidget(
-    //                 isEditModeMap: isEditModeMap,
-    //                 icon: Icons.description,
-    //                 index: 2,
-    //                 label: 'Interest Details',
-    //                 value: widget
-    //                     .profileBloc.interestList?[4].interestDetails ??
-    //                     "",
-    //                 onSave: (value) =>
-    //                 widget.profileBloc.interestList?[4]
-    //                     .interestDetails = value,
-    //               ),
-    //               const SizedBox(height: 10),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //       Card(
-    //         child: Padding(
-    //           padding: const EdgeInsets.all(16.0),
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               Text(
-    //                 capitalizeWords(widget.profileBloc.interestList?[5].interestType!.replaceAll('_', ' ') ?? ''),
-    //                 style: const TextStyle(
-    //                   fontSize: 16,
-    //                   fontWeight: FontWeight.bold,
-    //                 ),
-    //               ),
-    //               const SizedBox(height: 10),
-    //               TextFieldEditWidget(
-    //                 isEditModeMap: isEditModeMap,
-    //                 icon: Icons.description,
-    //                 index: 2,
-    //                 label: 'Interest Details',
-    //                 value: widget
-    //                     .profileBloc.interestList?[5].interestDetails ??
-    //                     "",
-    //                 onSave: (value) =>
-    //                 widget.profileBloc.interestList?[5]
-    //                     .interestDetails = value,
-    //               ),
-    //               const SizedBox(height: 10),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-        ]));
+              //       Card(
+              //         child: Padding(
+              //           padding: const EdgeInsets.all(16.0),
+              //           child: Column(
+              //             crossAxisAlignment: CrossAxisAlignment.start,
+              //             children: [
+              //               Text(
+              // capitalizeWords(widget.profileBloc.interestList?[3].interestType!.replaceAll('_', ' ') ?? ''),
+              //                 style: const TextStyle(
+              //                   fontSize: 16,
+              //                   fontWeight: FontWeight.bold,
+              //                 ),
+              //               ),
+              //               const SizedBox(height: 10),
+              //               TextFieldEditWidget(
+              //                 isEditModeMap: isEditModeMap,
+              //                 icon: Icons.description,
+              //                 index: 2,
+              //                 label: 'Interest Details',
+              //                 value: widget
+              //                     .profileBloc.interestList?[3].interestDetails ??
+              //                     "",
+              //                 onSave: (value) =>
+              //                 widget.profileBloc.interestList?[3]
+              //                     .interestDetails = value,
+              //               ),
+              //               const SizedBox(height: 10),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //       Card(
+              //         child: Padding(
+              //           padding: const EdgeInsets.all(16.0),
+              //           child: Column(
+              //             crossAxisAlignment: CrossAxisAlignment.start,
+              //             children: [
+              //               Text(
+              // capitalizeWords( widget.profileBloc.interestList?[4].interestType!.replaceAll('_', ' ') ?? ''),
+              //                 style: const TextStyle(
+              //                   fontSize: 16,
+              //                   fontWeight: FontWeight.bold,
+              //                 ),
+              //               ),
+              //               const SizedBox(height: 10),
+              //               TextFieldEditWidget(
+              //                 isEditModeMap: isEditModeMap,
+              //                 icon: Icons.description,
+              //                 index: 2,
+              //                 label: 'Interest Details',
+              //                 value: widget
+              //                     .profileBloc.interestList?[4].interestDetails ??
+              //                     "",
+              //                 onSave: (value) =>
+              //                 widget.profileBloc.interestList?[4]
+              //                     .interestDetails = value,
+              //               ),
+              //               const SizedBox(height: 10),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //       Card(
+              //         child: Padding(
+              //           padding: const EdgeInsets.all(16.0),
+              //           child: Column(
+              //             crossAxisAlignment: CrossAxisAlignment.start,
+              //             children: [
+              //               Text(
+              //                 capitalizeWords(widget.profileBloc.interestList?[5].interestType!.replaceAll('_', ' ') ?? ''),
+              //                 style: const TextStyle(
+              //                   fontSize: 16,
+              //                   fontWeight: FontWeight.bold,
+              //                 ),
+              //               ),
+              //               const SizedBox(height: 10),
+              //               TextFieldEditWidget(
+              //                 isEditModeMap: isEditModeMap,
+              //                 icon: Icons.description,
+              //                 index: 2,
+              //                 label: 'Interest Details',
+              //                 value: widget
+              //                     .profileBloc.interestList?[5].interestDetails ??
+              //                     "",
+              //                 onSave: (value) =>
+              //                 widget.profileBloc.interestList?[5]
+              //                     .interestDetails = value,
+              //               ),
+              //               const SizedBox(height: 10),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+            ]));
   }
 
   Widget _buildElevatedButton({

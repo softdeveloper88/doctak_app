@@ -28,7 +28,8 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     });
   }
   bool _isLoading = false;
-  StreamController<bool> _loadingController = StreamController<bool>.broadcast();
+  StreamController<bool> _loadingController =
+      StreamController<bool>.broadcast();
 
   // Getter for loading state stream
   Stream<bool> get loadingStream => _loadingController.stream;
@@ -43,25 +44,25 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
   void dispose() {
     _loadingController.close();
   }
-  _onGetUserInfo(SearchPeopleLoadPageEvent event, Emitter<SearchPeopleState> emit) async {
+
+  _onGetUserInfo(
+      SearchPeopleLoadPageEvent event, Emitter<SearchPeopleState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     if (event.page == 1) {
       searchPeopleData.clear();
-      pageNumber=1;
+      pageNumber = 1;
       emit(SearchPeoplePaginationLoadingState());
       print(event.searchTerm);
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
       SearchPeopleModel response = await postService.getSearchPeople(
-          'Bearer ${AppData.userToken}',
-          '$pageNumber',
-          event.searchTerm??'');
+          'Bearer ${AppData.userToken}', '$pageNumber', event.searchTerm ?? '');
       numberOfPage = response.lastPage ?? 0;
-      if (pageNumber < numberOfPage+1) {
+      if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
-        searchPeopleData.addAll(response.data??[]);
+        searchPeopleData.addAll(response.data ?? []);
       }
       emit(SearchPeoplePaginationLoadedState());
 
@@ -74,24 +75,23 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
       emit(SearchPeopleDataError('No Data Found'));
     }
   }
+
   _setUserFollow(SetUserFollow event, Emitter<SearchPeopleState> emit) async {
     // emit(DrugsDataInitial());
     // ProgressDialogUtils.showProgressDialog();
 
     try {
       var response = await postService.setUserFollow(
-          'Bearer ${AppData.userToken}',
-          event.userId,
-          event.follow??'');
+          'Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
       setLoading(false);
       emit(SearchPeoplePaginationLoadedState());
     } catch (e) {
-
       print(e);
 
       emit(SearchPeopleDataError('No Data Found'));
     }
   }
+
   _onGetUserInfo1(GetPost event, Emitter<SearchPeopleState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
@@ -99,9 +99,9 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     // emit(PaginationLoadingState());
     try {
       SearchPeopleModel response = await postService.getSearchPeople(
-          'Bearer ${AppData.userToken}',
-          "1",
-          '',
+        'Bearer ${AppData.userToken}',
+        "1",
+        '',
       );
       print("ddd${response.data!.length}");
       searchPeopleData.clear();

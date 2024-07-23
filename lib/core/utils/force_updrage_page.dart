@@ -55,50 +55,47 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
   }
 
   Future<void> _checkAppVersion() async {
-      if (packageInfo != null) {
-        final latestVersionInfo = await fetchLatestVersion();
-        final latestVersion = latestVersionInfo['data']['version'];
-        final mandatory = latestVersionInfo['data']['mandatory'];
+    if (packageInfo != null) {
+      final latestVersionInfo = await fetchLatestVersion();
+      final latestVersion = latestVersionInfo['data']['version'];
+      final mandatory = latestVersionInfo['data']['mandatory'];
 
-        Version version1 = Version.parse(packageInfo!.version);
-        Version version2 = Version.parse(latestVersion);
+      Version version1 = Version.parse(packageInfo!.version);
+      Version version2 = Version.parse(latestVersion);
 
-        // final url = latestVersionInfo['url'];
-        print(latestVersionInfo);
-        print(latestVersion);
-        print(version1);
-        print(version2);
+      // final url = latestVersionInfo['url'];
+      print(latestVersionInfo);
+      print(latestVersion);
+      print(version1);
+      print(version2);
 
-        if (version1 < version2 && mandatory==1) {
+      if (version1 < version2 && mandatory == 1) {
         setState(() {
           isSkippible = false;
           isUpdateAvailable = true;
         });
-        }else if (version1 < version2 && mandatory==0) {
-          setState(() {
-            isSkippible = true;
-            isUpdateAvailable = true;
-          });
-
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const SplashScreen(),
-            ),
-          );
-        }
+      } else if (version1 < version2 && mandatory == 0) {
+        setState(() {
+          isSkippible = true;
+          isUpdateAvailable = true;
+        });
       } else {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const SplashScreen(),
           ),
         );
-        // Handle the case where packageInfo is null
-        // You can display a loading indicator or handle it in some other way
       }
-
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const SplashScreen(),
+        ),
+      );
+      // Handle the case where packageInfo is null
+      // You can display a loading indicator or handle it in some other way
+    }
   }
-
 
   void _launchAppOrPlayStore() {
     final appId = Platform.isAndroid ? packageInfo!.packageName : '6448684340';

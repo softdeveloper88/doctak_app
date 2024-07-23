@@ -36,20 +36,27 @@ class _UserChatScreenState extends State<UserChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:svGetScaffoldColor(),
+      backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
         leading: IconButton(
-          icon:  Icon(Icons.arrow_back_ios_new_rounded,
-              color: svGetBodyColor()),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
-        title:  Text('Chats',style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500),),
+        title: Text(
+          'Chats',
+          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
         actions: [
           IconButton(
-            icon:  Image.asset('assets/images/search.png',color: svGetBodyColor(),height: 20,width: 20,),
+            icon: Image.asset(
+              'assets/images/search.png',
+              color: svGetBodyColor(),
+              height: 20,
+              width: 20,
+            ),
             onPressed: () {
               SearchContactScreen().launch(context);
             },
@@ -76,7 +83,10 @@ class _UserChatScreenState extends State<UserChatScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
+            return Center(
+                child: CircularProgressIndicator(
+              color: svGetBodyColor(),
+            ));
           } else if (state is PaginationLoadedState) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,14 +117,16 @@ class _UserChatScreenState extends State<UserChatScreen> {
                         }
                         return bloc.numberOfPage != bloc.pageNumber - 1 &&
                                 index >= bloc.groupList.length - 1
-                            ?  Center(
-                                child: CircularProgressIndicator(color: svGetBodyColor(),),
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: svGetBodyColor(),
+                                ),
                               )
                             : GestureDetector(
                                 onTap: () {
                                   ChatRoomScreen(
                                     username:
-                                        bloc.groupList[index].groupName??'',
+                                        bloc.groupList[index].groupName ?? '',
                                     profilePic: '',
                                     id: '',
                                     roomId: '${bloc.groupList[index].roomId}',
@@ -135,7 +147,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                       title: Text(
                                         bloc.groupList[index].groupName ??
                                             'Unknown',
-                                        style:  TextStyle(
+                                        style: TextStyle(
                                           color: svGetBodyColor(),
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -144,7 +156,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                       subtitle: Text(
                                         bloc.groupList[index].latestMessage ??
                                             '',
-                                        style:  TextStyle(
+                                        style: TextStyle(
                                           color: svGetBodyColor(),
                                           fontSize: 14,
                                         ),
@@ -179,8 +191,10 @@ class _UserChatScreenState extends State<UserChatScreen> {
                         }
                         return bloc.numberOfPage != bloc.pageNumber - 1 &&
                                 index >= bloc.contactsList.length - 1
-                            ?  Center(
-                                child: CircularProgressIndicator(color: svGetBodyColor() ,),
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: svGetBodyColor(),
+                                ),
                               )
                             :
                             // Card(
@@ -249,11 +263,12 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                   onTap: () {
                                     ChatRoomScreen(
                                       username:
-                                          '${bloc.contactsList[index].firstName??''} ${bloc.contactsList[index].lastName??''}',
+                                          '${bloc.contactsList[index].firstName ?? ''} ${bloc.contactsList[index].lastName ?? ''}',
                                       profilePic:
                                           '${bloc.contactsList[index].profilePic}',
                                       id: '${bloc.contactsList[index].id}',
-                                      roomId: '${bloc.contactsList[index].roomId}',
+                                      roomId:
+                                          '${bloc.contactsList[index].roomId}',
                                     ).launch(context);
                                     // Add navigation logic or any other action on contact tap
                                   },
@@ -282,36 +297,36 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                             .withOpacity(0.5),
                                                         spreadRadius: 2,
                                                         blurRadius: 5,
-                                                        offset: const Offset(
-                                                            0, 3),
+                                                        offset:
+                                                            const Offset(0, 3),
                                                       ),
                                                     ],
                                                   ),
                                                   child:
-                                                  // bloc
-                                                  //             .contactsList[
-                                                  //                 index]
-                                                  //             .profilePic ==
-                                                  //         ''
-                                                  //     ? Image.asset(
-                                                  //             'images/socialv/faces/face_5.png',
-                                                  //             height: 56,
-                                                  //             width: 56,
-                                                  //             fit: BoxFit
-                                                  //                 .cover)
-                                                  //         .cornerRadiusWithClipRRect(
-                                                  //             8)
-                                                  //         .cornerRadiusWithClipRRect(
-                                                  //             8)
-                                                  //     :
-                                                    CustomImageView(
-                                                    placeHolder: 'images/socialv/faces/face_5.png',
+                                                      // bloc
+                                                      //             .contactsList[
+                                                      //                 index]
+                                                      //             .profilePic ==
+                                                      //         ''
+                                                      //     ? Image.asset(
+                                                      //             'images/socialv/faces/face_5.png',
+                                                      //             height: 56,
+                                                      //             width: 56,
+                                                      //             fit: BoxFit
+                                                      //                 .cover)
+                                                      //         .cornerRadiusWithClipRRect(
+                                                      //             8)
+                                                      //         .cornerRadiusWithClipRRect(
+                                                      //             8)
+                                                      //     :
+                                                      CustomImageView(
+                                                              placeHolder:
+                                                                  'images/socialv/faces/face_5.png',
                                                               imagePath:
                                                                   '${AppData.imageUrl}${bloc.contactsList[index].profilePic.validate()}',
                                                               height: 56,
                                                               width: 56,
-                                                              fit: BoxFit
-                                                                  .cover)
+                                                              fit: BoxFit.cover)
                                                           .cornerRadiusWithClipRRect(
                                                               30),
                                                 ),
@@ -332,7 +347,14 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                               overflow:
                                                                   TextOverflow
                                                                       .clip,
-                                                              style:GoogleFonts.poppins(color:svGetBodyColor(),fontWeight:FontWeight.w600,fontSize:16))),
+                                                              style: GoogleFonts.poppins(
+                                                                  color:
+                                                                      svGetBodyColor(),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize:
+                                                                      16))),
                                                       6.width,
                                                       // bloc.contactsList[index].isCurrentUser.validate()
                                                       //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
@@ -340,10 +362,20 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                     ],
                                                   ),
                                                   Text(
-                                                      (bloc.contactsList[index]
-                                                          .latestMessage?.length??0) >20?'${bloc.contactsList[index]
-                                                          .latestMessage?.substring(0,20)}.....'??'':bloc.contactsList[index]
-                                                          .latestMessage??"",
+                                                      (bloc
+                                                                      .contactsList[
+                                                                          index]
+                                                                      .latestMessage
+                                                                      ?.length ??
+                                                                  0) >
+                                                              20
+                                                          ? '${bloc.contactsList[index].latestMessage?.substring(0, 20)}.....' ??
+                                                              ''
+                                                          : bloc
+                                                                  .contactsList[
+                                                                      index]
+                                                                  .latestMessage ??
+                                                              "",
                                                       style: secondaryTextStyle(
                                                           color:
                                                               svGetBodyColor())),
@@ -352,11 +384,14 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                             ],
                                           ),
                                         ),
-                                        Text(timeAgo.format(DateTime.parse(bloc
-                                            .contactsList[
-                                        index].createdAt??'')),
+                                        Text(
+                                            timeAgo.format(DateTime.parse(bloc
+                                                    .contactsList[index]
+                                                    .createdAt ??
+                                                '')),
                                             style: secondaryTextStyle(
-                                                color: svGetBodyColor(), size: 12)),
+                                                color: svGetBodyColor(),
+                                                size: 12)),
                                         // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
                                         //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
                                         //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',

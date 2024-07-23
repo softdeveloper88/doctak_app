@@ -22,7 +22,6 @@ abstract class AppStoreBase with Store {
 
       defaultLoaderBgColorGlobal = Colors.white;
       shadowColorGlobal = Colors.white12;
-
     } else {
       textPrimaryColorGlobal = textPrimaryColor;
       textSecondaryColorGlobal = textSecondaryColor;
@@ -30,7 +29,6 @@ abstract class AppStoreBase with Store {
       defaultLoaderBgColorGlobal = Colors.white;
       appButtonBackgroundColorGlobal = SVAppColorPrimary;
       shadowColorGlobal = Colors.black12;
-
     }
   }
 }

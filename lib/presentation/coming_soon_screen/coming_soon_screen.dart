@@ -16,6 +16,7 @@ class ComingSoonScreen extends StatelessWidget {
     );
   }
 }
+
 class ComingSoonWidget extends StatelessWidget {
   final String imagePath;
   final double aspectRatio;
@@ -29,15 +30,14 @@ class ComingSoonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:AppBar(
+      appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
         title: Text('Coming Soon', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
-
       ),
-       body: Container(
+      body: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),

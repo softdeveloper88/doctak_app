@@ -3,7 +3,8 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/widgets/base_button.dart';
 
 class CustomElevatedButton extends BaseButton {
-  const CustomElevatedButton({super.key,
+  const CustomElevatedButton({
+    super.key,
     this.decoration,
     this.leftIcon,
     this.rightIcon,

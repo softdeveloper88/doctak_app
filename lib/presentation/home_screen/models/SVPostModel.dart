@@ -7,7 +7,14 @@ class SVPostModel {
   int? commentCount;
   bool? like;
 
-  SVPostModel({this.name, this.profileImage, this.postImage, this.time, this.description, this.commentCount, this.like});
+  SVPostModel(
+      {this.name,
+      this.profileImage,
+      this.postImage,
+      this.time,
+      this.description,
+      this.commentCount,
+      this.like});
 }
 
 List<SVPostModel> getPosts() {
@@ -19,7 +26,8 @@ List<SVPostModel> getPosts() {
       profileImage: 'images/socialv/faces/face_3.png',
       time: '4m',
       postImage: 'images/socialv/postImage.png',
-      description: 'The great thing about reaching the top of the mountain is realising that there’s space for more than one person.',
+      description:
+          'The great thing about reaching the top of the mountain is realising that there’s space for more than one person.',
       commentCount: 0,
       like: false,
     ),

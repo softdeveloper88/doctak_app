@@ -5,7 +5,12 @@ class Session {
   final String? createdAt;
   final String? updatedAt;
 
-  Session({required this.id,   this.userId,   this.name,   this.createdAt,   this.updatedAt});
+  Session(
+      {required this.id,
+      this.userId,
+      this.name,
+      this.createdAt,
+      this.updatedAt});
 
   factory Session.fromJson(Map<String, dynamic> json) {
     return Session(

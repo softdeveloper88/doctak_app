@@ -9,13 +9,10 @@ class AboutUsScreen extends StatefulWidget {
   const AboutUsScreen({super.key});
 
   @override
-  State<AboutUsScreen> createState() =>
-      _AboutUsScreenState();
+  State<AboutUsScreen> createState() => _AboutUsScreenState();
 }
 
 class _AboutUsScreenState extends State<AboutUsScreen> {
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,10 +26,9 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
           // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
         ],
         leading: IconButton(
-          icon:  Icon(Icons.arrow_back_ios_new_rounded,
-              color:svGetBodyColor()),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
-      ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -84,7 +80,9 @@ Join Us
 Be a part of the Doctak.net community and experience a new era of medical networking and resources. Together, we can advance the field of medicine and improve healthcare outcomes worldwide.
 Thank you for choosing Doctak.net!
               ''',
-                  style: GoogleFonts.poppins(fontSize: 16.0,),
+                  style: GoogleFonts.poppins(
+                    fontSize: 16.0,
+                  ),
                 ),
               ),
             ),

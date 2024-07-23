@@ -49,8 +49,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         aspectRatio: 16 / 9, // Common aspect ratio for videos
         child: Container(
           color: Colors.black, // Video player typically has a black background
-          child:  Center(
-            child: CircularProgressIndicator(color: svGetBodyColor(),), // Loading indicator
+          child: Center(
+            child: CircularProgressIndicator(
+              color: svGetBodyColor(),
+            ), // Loading indicator
           ),
         ),
       );

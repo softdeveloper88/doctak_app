@@ -36,7 +36,8 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       if (pickedfiles != null) {
         for (var element in pickedfiles) {
           imagefiles.add(element);
-          widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: element,isRemove: false));
+          widget.searchPeopleBloc
+              .add(SelectedFiles(pickedfiles: element, isRemove: false));
         }
         setState(() {});
       } else {
@@ -46,6 +47,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       print("error while picking file.");
     }
   }
+
   openVideo() async {
     try {
       var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
@@ -53,7 +55,8 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles,isRemove: false));
+        widget.searchPeopleBloc
+            .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
         // });
@@ -64,6 +67,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       print("error while picking file.$e");
     }
   }
+
   openCamera() async {
     try {
       var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera);
@@ -71,7 +75,8 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles,isRemove: false));
+        widget.searchPeopleBloc
+            .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
         // });
@@ -82,6 +87,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       print("error while picking file. $e");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -120,8 +126,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                                       onTap: () {
                                         setState(() {});
                                         imagefiles.remove(imageone);
-                                        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: imageone,isRemove: true));
-
+                                        widget.searchPeopleBloc.add(
+                                            SelectedFiles(
+                                                pickedfiles: imageone,
+                                                isRemove: true));
                                       },
                                       child: const Icon(
                                         Icons.remove_circle_outlined,
@@ -145,7 +153,9 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
               ],
             ),
           ),
-          const SizedBox(height: 16,),
+          const SizedBox(
+            height: 16,
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,57 +166,87 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                 },
                 child: Row(
                   children: [
-
-                   SizedBox(
-                        height: 32,
-                        width: 32,
-                        // color: context.cardColor,
-                        child:Icon(Icons.image_outlined,size: 32,color:svGetBodyColor(),
+                    SizedBox(
+                      height: 32,
+                      width: 32,
+                      // color: context.cardColor,
+                      child: Icon(
+                        Icons.image_outlined, size: 32, color: svGetBodyColor(),
                         // Image.asset('images/socialv/icons/ic_CameraPost.png',
                         //     height: 22, width: 22, fit: BoxFit.cover),
                       ),
                     ),
-                    const SizedBox(width: 10,),
-                    Text('From Gallery',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
-
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      'From Gallery',
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w500,
+                          color: svGetBodyColor(),
+                          fontSize: kDefaultFontSize),
+                    )
                   ],
                 ),
               ),
-              Divider(color: Colors.grey[300],),
+              Divider(
+                color: Colors.grey[300],
+              ),
               GestureDetector(
                 onTap: () {
                   openVideo();
                 },
                 child: Row(
                   children: <Widget>[
-
-                       Image.asset('images/socialv/icons/ic_Video.png',
-                            color:svGetBodyColor(),
-                            height: 32, width: 32, fit: BoxFit.cover),
-                    const SizedBox(width: 10,),
-                     Text('Take Video',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
+                    Image.asset('images/socialv/icons/ic_Video.png',
+                        color: svGetBodyColor(),
+                        height: 32,
+                        width: 32,
+                        fit: BoxFit.cover),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      'Take Video',
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w500,
+                          color: svGetBodyColor(),
+                          fontSize: kDefaultFontSize),
+                    )
                   ],
                 ),
               ),
-              Divider(color: Colors.grey[300],),
+              Divider(
+                color: Colors.grey[300],
+              ),
 
               GestureDetector(
-                  onTap: () {
-                    openCamera();
-                  },
+                onTap: () {
+                  openCamera();
+                },
                 child: Row(
                   children: [
-
-                         Image.asset('images/socialv/icons/ic_CameraPost.png',
-                            color:svGetBodyColor(),
-                            height: 32, width: 32, fit: BoxFit.cover),
-                    const SizedBox(width: 10,),
-                    Text('Take Picture',style: GoogleFonts.poppins(fontWeight:FontWeight.w500,color:svGetBodyColor(),fontSize:kDefaultFontSize),)
-
+                    Image.asset('images/socialv/icons/ic_CameraPost.png',
+                        color: svGetBodyColor(),
+                        height: 32,
+                        width: 32,
+                        fit: BoxFit.cover),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      'Take Picture',
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w500,
+                          color: svGetBodyColor(),
+                          fontSize: kDefaultFontSize),
+                    )
                   ],
                 ),
               ),
-              Divider(color: Colors.grey[300],),
+              Divider(
+                color: Colors.grey[300],
+              ),
 
               // Image.asset('images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
               // GestureDetector(
@@ -246,5 +286,4 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       return const Text('Unsupported file type');
     }
   }
-
 }

@@ -192,23 +192,38 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   //   }
   // }
 
-  cardIntro(title,subTitle,onTap){
+  cardIntro(title, subTitle, onTap) {
     return InkWell(
-    onTap:onTap,
-    child: Card(
-        elevation: 2,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(title,textAlign: TextAlign.center,style: GoogleFonts.poppins(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.w400),),
-                Text(subTitle,textAlign: TextAlign.center,style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.normal),),
-              ]),
-        )),
+      onTap: onTap,
+      child: Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        color: Colors.black,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  Text(
+                    subTitle,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        color: svGetBodyColor(),
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.normal),
+                  ),
+                ]),
+          )),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -236,13 +251,12 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
               ),
             );
           } else if (state1 is DataLoaded) {
-            isEmpty=state1.response1.messages!.isEmpty;
+            isEmpty = state1.response1.messages!.isEmpty;
             print('response ${state1.response.toString()}');
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
                 setState(() {
-                  isEmpty=false;
-
+                  isEmpty = false;
                 });
                 isAlreadyAsk = false;
                 // Future.delayed(const Duration(seconds: 1),(){
@@ -405,18 +419,18 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   ),
                                   const SizedBox(height: 30),
                                   Wrap(
-
                                     alignment: WrapAlignment.center,
                                     // mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      cardIntro('Code Detection', 'Identify CPT or ICD codes', (){
+                                      cardIntro('Code Detection',
+                                          'Identify CPT or ICD codes', () {
                                         // Code Detection: Identify CPT or ICD codes
-                                        isAlreadyAsk=true;
-                                        widget.question='Code Detection: Identify CPT or ICD codes';
+                                        isAlreadyAsk = true;
+                                        widget.question =
+                                            'Code Detection: Identify CPT or ICD codes';
                                         if (isAlreadyAsk) {
                                           setState(() {
-                                            isEmpty=false;
-
+                                            isEmpty = false;
                                           });
                                           isAlreadyAsk = false;
 
@@ -427,17 +441,17 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         }
                                       }),
                                       const SizedBox(width: 10),
-
-                                      cardIntro('Diagnostic \nSuggestions', 'Request suggestions based on symptoms', (){
-                                        isAlreadyAsk=true;
-                                        widget.question='Diagnostic Suggestions: Request suggestions based on symptoms';
+                                      cardIntro('Diagnostic \nSuggestions',
+                                          'Request suggestions based on symptoms',
+                                          () {
+                                        isAlreadyAsk = true;
+                                        widget.question =
+                                            'Diagnostic Suggestions: Request suggestions based on symptoms';
                                         if (isAlreadyAsk) {
-
                                           isAlreadyAsk = false;
                                           // Future.delayed(const Duration(seconds: 1),(){
                                           setState(() {
-                                            isEmpty=false;
-
+                                            isEmpty = false;
                                           });
                                           drugsAskQuestion(state1, context);
                                           // });
@@ -445,21 +459,20 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         }
                                       }),
                                       const SizedBox(width: 10),
-                                      cardIntro('Medication Review', 'Check interactions and dosage', (){
-                                      // Medication Review: check interactions and dosage
+                                      cardIntro('Medication Review',
+                                          'Check interactions and dosage', () {
+                                        // Medication Review: check interactions and dosage
 
-                                        widget.question='Medication Review: check interactions and dosage';
-                                          // Future.delayed(const Duration(seconds: 1),(){
+                                        widget.question =
+                                            'Medication Review: check interactions and dosage';
+                                        // Future.delayed(const Duration(seconds: 1),(){
                                         setState(() {
-                                          isEmpty=false;
-
+                                          isEmpty = false;
                                         });
                                         drugsAskQuestion(state1, context);
-                                          // });
-                                          // textController.text = widget.question.toString();
+                                        // });
+                                        // textController.text = widget.question.toString();
                                       }),
-
-
                                     ],
                                   ),
                                   const SizedBox(height: 20),

@@ -22,7 +22,6 @@ class NewsScreen extends StatefulWidget {
 }
 
 class _NewsScreenState extends State<NewsScreen> {
-
   bool isLoading = true;
 
   @override
@@ -68,7 +67,8 @@ class _NewsScreenState extends State<NewsScreen> {
     return BlocProvider(
         create: (context) => NewsBloc()
           ..add(GetPost(
-            newsChannel: 'bbc-news',)),
+            newsChannel: 'bbc-news',
+          )),
         child: Scaffold(
             backgroundColor: svGetScaffoldColor(),
             appBar: AppBar(
@@ -77,7 +77,6 @@ class _NewsScreenState extends State<NewsScreen> {
                     Navigator.of(context).pop();
                   },
                   child: const Icon(Icons.arrow_back_ios)),
-
               backgroundColor: svGetScaffoldColor(),
               iconTheme: IconThemeData(color: context.iconColor),
               title: Text('World News', style: boldTextStyle(size: 18)),
@@ -93,7 +92,7 @@ class _NewsScreenState extends State<NewsScreen> {
                 body: AnimatedBackground(
                   child: Column(
                     children: <Widget>[
-                       Material(
+                      Material(
                         color: context.cardColor, // Set the color of the TabBar
                         child: TabBar(
                           labelColor: svGetBodyColor(),
@@ -113,8 +112,7 @@ class _NewsScreenState extends State<NewsScreen> {
                         builder: (context, state) {
                           print("state $state");
                           if (state is PaginationLoadingState) {
-                            return  Expanded(
-                                child: ShimmerLoading());
+                            return Expanded(child: ShimmerLoading());
                           } else if (state is PaginationLoadedState) {
                             // print(state.drugsModel.length);
                             print(state.bbcNews.toList());
@@ -135,11 +133,13 @@ class _NewsScreenState extends State<NewsScreen> {
                             );
                           } else {
                             return const Expanded(
-                                child: Center(child: Text('Something went wrong')));
+                                child: Center(
+                                    child: Text('Something went wrong')));
                           }
                         },
                       ),
-                      if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
+                      if (AppData.isShowGoogleBannerAds ?? false)
+                        BannerAdWidget()
                     ],
                   ),
                 ),
@@ -148,7 +148,11 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Widget buildNewsTab(List<NewsModel> news) {
-    return news.isEmpty? const Center(child: Text('No News found'),):ListView.builder(
+    return news.isEmpty
+        ? const Center(
+            child: Text('No News found'),
+          )
+        : ListView.builder(
             itemCount: news.length,
             itemBuilder: (context, index) {
               final article = news[index];
@@ -166,23 +170,23 @@ class _NewsScreenState extends State<NewsScreen> {
                         contentPadding: EdgeInsets.all(10.0),
                         leading: article.link != null
                             ? Image.network(
-                                article.link??'',
+                                article.link ?? '',
                                 width: 100.0,
                                 fit: BoxFit.cover,
                               )
                             : null,
                         title: Text(
-                          article.title??'',
+                          article.title ?? '',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text(article.description??''),
+                        subtitle: Text(article.description ?? ''),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
                             child: Text('Read More'),
-                            onPressed: () => _launchURL(article.link??''),
+                            onPressed: () => _launchURL(article.link ?? ''),
                           ),
                           SizedBox(width: 8),
                         ],

@@ -10,11 +10,12 @@ import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 class GroupMemberRequestScreen extends StatefulWidget {
-  GroupMemberRequestScreen( this.groupBloc, {super.key});
+  GroupMemberRequestScreen(this.groupBloc, {super.key});
   GroupBloc? groupBloc;
 
   @override
-  State<GroupMemberRequestScreen> createState() => _GroupMemberRequestScreenState();
+  State<GroupMemberRequestScreen> createState() =>
+      _GroupMemberRequestScreenState();
 }
 
 class _GroupMemberRequestScreenState extends State<GroupMemberRequestScreen> {
@@ -36,25 +37,39 @@ class _GroupMemberRequestScreenState extends State<GroupMemberRequestScreen> {
           },
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: Image.asset(
-      'assets/images/search.png',
-      height: 20,
-      width: 20,
-    ),)
+          IconButton(
+            onPressed: () {},
+            icon: Image.asset(
+              'assets/images/search.png',
+              height: 20,
+              width: 20,
+            ),
+          )
         ],
       ),
       body: ListView.builder(
         shrinkWrap: true,
-        itemCount: widget.groupBloc?.groupMemberRequestModel?.groupMembers?.length??0, // Replace with the actual number of items
+        itemCount:
+            widget.groupBloc?.groupMemberRequestModel?.groupMembers?.length ??
+                0, // Replace with the actual number of items
         itemBuilder: (context, index) {
-          return MemberRequestItem(widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index],(){
-            widget.groupBloc?.add(GroupMemberRequestUpdateEvent('${widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index].id??''}', widget.groupBloc?.groupDetailsModel?.group?.id??'', 'rejected'));
-            widget.groupBloc?.groupMemberRequestModel?.groupMembers?.removeAt(index);
+          return MemberRequestItem(
+              widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index],
+              () {
+            widget.groupBloc?.add(GroupMemberRequestUpdateEvent(
+                '${widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index].id ?? ''}',
+                widget.groupBloc?.groupDetailsModel?.group?.id ?? '',
+                'rejected'));
+            widget.groupBloc?.groupMemberRequestModel?.groupMembers
+                ?.removeAt(index);
             setState(() {});
-            },(){
-
-            widget.groupBloc?.add(GroupMemberRequestUpdateEvent('${widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index].id??''}', widget.groupBloc?.groupDetailsModel?.group?.id??'', 'joined'));
-            widget.groupBloc?.groupMemberRequestModel?.groupMembers?.removeAt(index);
+          }, () {
+            widget.groupBloc?.add(GroupMemberRequestUpdateEvent(
+                '${widget.groupBloc?.groupMemberRequestModel?.groupMembers?[index].id ?? ''}',
+                widget.groupBloc?.groupDetailsModel?.group?.id ?? '',
+                'joined'));
+            widget.groupBloc?.groupMemberRequestModel?.groupMembers
+                ?.removeAt(index);
             setState(() {});
           });
         },
@@ -64,7 +79,8 @@ class _GroupMemberRequestScreenState extends State<GroupMemberRequestScreen> {
 }
 
 class MemberRequestItem extends StatelessWidget {
-  MemberRequestItem(this.groupMember,this.onPressReject,this.onPressAccept, {super.key});
+  MemberRequestItem(this.groupMember, this.onPressReject, this.onPressAccept,
+      {super.key});
   GroupMembers? groupMember;
   Function? onPressReject;
   Function? onPressAccept;
@@ -74,38 +90,38 @@ class MemberRequestItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Column(
         children: [
-           Row(
-            children: [
-              // Profile picture
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: CachedNetworkImageProvider(
-                    groupMember?.profilePic??''), // Replace with actual image URL
-              ),
-              const SizedBox(width: 16),
-              // Request details
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      groupMember?.name??'',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+          Row(children: [
+            // Profile picture
+            CircleAvatar(
+              radius: 30,
+              backgroundImage: CachedNetworkImageProvider(
+                  groupMember?.profilePic ??
+                      ''), // Replace with actual image URL
+            ),
+            const SizedBox(width: 16),
+            // Request details
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    groupMember?.name ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    Text(
-                      timeAgo.format( DateTime.parse(groupMember?.joinedAt??"")),
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
+                  ),
+                  Text(
+                    timeAgo.format(DateTime.parse(groupMember?.joinedAt ?? "")),
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              ]),
+            ),
+          ]),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -115,7 +131,7 @@ class MemberRequestItem extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                onPressed: ()=>onPressReject!(),
+                onPressed: () => onPressReject!(),
                 child: const Text(
                   'REJECT',
                   style: TextStyle(
@@ -130,7 +146,7 @@ class MemberRequestItem extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                onPressed:()=>onPressAccept!(),
+                onPressed: () => onPressAccept!(),
                 child: const Text(
                   'ACCEPT',
                   style: TextStyle(

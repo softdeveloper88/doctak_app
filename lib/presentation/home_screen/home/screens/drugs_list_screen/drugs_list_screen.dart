@@ -61,12 +61,15 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         children: [
           BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
             if (state is CountriesDataInitial) {
-              return  Column(
+              return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
+                  Center(
+                      child: CircularProgressIndicator(
+                    color: svGetBodyColor(),
+                  )),
                 ],
               );
             } else if (state is CountriesDataLoaded) {
@@ -89,7 +92,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                     style: boldTextStyle(size: 20)))),
                         Expanded(
                           child: CustomDropdownField(
-
                             items: state.countriesModel.countries ?? [],
                             value: state
                                 .countriesModel.countries!.first.countryName,
@@ -135,28 +137,28 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             setState(() {});
                             isSearchShow = !isSearchShow;
                           },
-                          child:  isSearchShow
-            ? Icon(Icons.cancel_outlined,
-            size: 25,
-            // height: 16,
-            // width: 16,
-            // fit: BoxFit.cover,
-            color: svGetBodyColor())
-                .paddingLeft(4):Image.asset(
-            'assets/images/search.png',
-            height: 20,
-            width: 20,
-            color: svGetBodyColor(),
-            ),
-            ).paddingRight(16)
-
+                          child: isSearchShow
+                              ? Icon(Icons.cancel_outlined,
+                                      size: 25,
+                                      // height: 16,
+                                      // width: 16,
+                                      // fit: BoxFit.cover,
+                                      color: svGetBodyColor())
+                                  .paddingLeft(4)
+                              : Image.asset(
+                                  'assets/images/search.png',
+                                  height: 20,
+                                  width: 20,
+                                  color: svGetBodyColor(),
+                                ),
+                        ).paddingRight(16)
                       ],
                     ),
                     elevation: 0,
                     surfaceTintColor: svGetScaffoldColor(),
                     centerTitle: true,
                     leading: IconButton(
-                        icon:  Icon(Icons.arrow_back_ios_new_rounded,
+                        icon: Icon(Icons.arrow_back_ios_new_rounded,
                             color: svGetBodyColor()),
                         onPressed: () {
                           Navigator.pop(context);
@@ -165,8 +167,11 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
                     ],
                   ),
-                  Divider(color: Colors.grey[300],endIndent: 16,indent: 16,),
-
+                  Divider(
+                    color: Colors.grey[300],
+                    endIndent: 16,
+                    indent: 16,
+                  ),
                   Column(
                     children: [
                       if (isSearchShow)
@@ -181,8 +186,8 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                           decoration: BoxDecoration(
                               color: context.dividerColor.withOpacity(0.4),
                               borderRadius: radius(5),
-                              border:
-                                  Border.all(color: svGetBodyColor(), width: 0.3)),
+                              border: Border.all(
+                                  color: svGetBodyColor(), width: 0.3)),
                           child: AppTextField(
                             textFieldType: TextFieldType.NAME,
                             onChanged: (searchTxt) async {
@@ -378,7 +383,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               return const Center(child: Text('Unknown state'));
             }
           }),
-
           BlocConsumer<DrugsBloc, DrugsState>(
             bloc: drugsBloc,
             // listenWhen: (previous, current) => current is DrugsState,
@@ -395,8 +399,11 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
             },
             builder: (context, state) {
               if (state is PaginationLoadingState) {
-                return  Expanded(
-                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+                return Expanded(
+                    child: Center(
+                        child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                )));
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 return _buildPostList(context);
@@ -436,19 +443,22 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 }
                 return bloc.numberOfPage != bloc.pageNumber - 1 &&
                         index >= bloc.drugsData.length - 1
-                    ?  Center(
-                        child: CircularProgressIndicator(color: svGetBodyColor(),),
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: svGetBodyColor(),
+                        ),
                       )
                     : GestureDetector(
-                  onTap: (){
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return _buildDialog(context,bloc.drugsData[index].genericName??'');
-                      },
-                    );
-                  },
-                      child: Container(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return _buildDialog(context,
+                                  bloc.drugsData[index].genericName ?? '');
+                            },
+                          );
+                        },
+                        child: Container(
                           margin: const EdgeInsets.symmetric(
                               vertical: 5, horizontal: 10),
                           padding: const EdgeInsets.all(8),
@@ -468,7 +478,8 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
@@ -479,8 +490,11 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                           fontWeight: FontWeight.w500),
                                     ),
                                   ),
-                                  Image.asset('assets/images/docktak_ai_light.png',height: 35,width: 35,),
-
+                                  Image.asset(
+                                    'assets/images/docktak_ai_light.png',
+                                    height: 35,
+                                    width: 35,
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 5),
@@ -506,14 +520,16 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                               const SizedBox(height: 5),
                               Text(bloc.drugsData[index].tradeName ?? 'N/A',
                                   style: GoogleFonts.poppins(
-                                      color: svGetBodyColor(), fontSize: 10.sp)),
+                                      color: svGetBodyColor(),
+                                      fontSize: 10.sp)),
                               const SizedBox(height: 5),
                               const SizedBox(height: 10),
                               Divider(
                                 color: Colors.grey[300],
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     flex: 6,
@@ -550,8 +566,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                               style: GoogleFonts.poppins(
                                                   color: Colors.grey,
                                                   fontSize: 12.sp)),
-                                          Text(
-                                              bloc.drugsData[index].mrp ?? '0',
+                                          Text(bloc.drugsData[index].mrp ?? '0',
                                               style: GoogleFonts.poppins(
                                                   color: svGetBodyColor(),
                                                   fontSize: 12.sp,
@@ -565,15 +580,16 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             ],
                           ),
                         ),
-                    );
+                      );
                 // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
               },
             ),
     );
   }
-  Widget _buildDialog(BuildContext context,String genericName) {
+
+  Widget _buildDialog(BuildContext context, String genericName) {
     return AlertDialog(
-      title:  Row(
+      title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(child: Text(genericName)),
@@ -588,32 +604,43 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-            _buildQuestion(context, ' All information',genericName,clickable: true),
-            _buildQuestion(context, ' Mechanism of action',genericName,clickable: true),
-            _buildQuestion(context, ' Indications',genericName,clickable: true),
-            _buildQuestion(context, ' Dosage and administration',genericName,clickable: true),
-            _buildQuestion(context, ' Drug interactions',genericName,clickable: true),
-            _buildQuestion(context, ' Special populations',genericName, clickable: true),
-            _buildQuestion(context, ' Side effects',genericName,clickable: true),
+            _buildQuestion(context, ' All information', genericName,
+                clickable: true),
+            _buildQuestion(context, ' Mechanism of action', genericName,
+                clickable: true),
+            _buildQuestion(context, ' Indications', genericName,
+                clickable: true),
+            _buildQuestion(context, ' Dosage and administration', genericName,
+                clickable: true),
+            _buildQuestion(context, ' Drug interactions', genericName,
+                clickable: true),
+            _buildQuestion(context, ' Special populations', genericName,
+                clickable: true),
+            _buildQuestion(context, ' Side effects', genericName,
+                clickable: true),
           ],
         ),
       ),
-
     );
   }
-  Widget _buildQuestion(BuildContext context, String question, String genericName, {bool clickable = false}) {
+
+  Widget _buildQuestion(
+      BuildContext context, String question, String genericName,
+      {bool clickable = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: InkWell(
-        onTap: clickable ? () {
-          // ChatDetailScreen(isFromMainScreen:false,question: '$genericName of $question',).launch(context);
-          _showBottomSheet(context,genericName??'',question);
+        onTap: clickable
+            ? () {
+                // ChatDetailScreen(isFromMainScreen:false,question: '$genericName of $question',).launch(context);
+                _showBottomSheet(context, genericName ?? '', question);
 
-          // Handle onTap action here
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text('You clicked: $question')),
-          // );
-        } : null,
+                // Handle onTap action here
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(content: Text('You clicked: $question')),
+                // );
+              }
+            : null,
         child: Container(
           padding: EdgeInsets.all(12.0),
           decoration: BoxDecoration(
@@ -632,7 +659,11 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Image.asset('assets/images/docktak_ai_dark.png',height: 25,width: 25,),
+              Image.asset(
+                'assets/images/docktak_ai_dark.png',
+                height: 25,
+                width: 25,
+              ),
               Expanded(
                 child: Text(
                   question,
@@ -654,26 +685,34 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       ),
     );
   }
-  void _showBottomSheet(BuildContext context, String genericName,String question) {
+
+  void _showBottomSheet(
+      BuildContext context, String genericName, String question) {
     showModalBottomSheet(
       showDragHandle: true,
       enableDrag: true,
       isScrollControlled: true,
       isDismissible: false,
       context: context,
-        builder: (context) {
-      return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.9,
-          minChildSize: 0.9,
-          maxChildSize: 1.0,
-          expand: false,
-          builder: (BuildContext context, ScrollController scrollController) {
-            return  Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: ChatDetailScreen(isFromMainScreen:false,question: '$question  $genericName',),
-        );});});
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+          return DraggableScrollableSheet(
+              initialChildSize: 0.9,
+              minChildSize: 0.9,
+              maxChildSize: 1.0,
+              expand: false,
+              builder:
+                  (BuildContext context, ScrollController scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ChatDetailScreen(
+                    isFromMainScreen: false,
+                    question: '$question  $genericName',
+                  ),
+                );
+              });
+        });
         //   Container(
         //   padding: const EdgeInsets.all(16.0),
         //   child: SingleChildScrollView(

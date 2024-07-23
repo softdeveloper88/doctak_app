@@ -1,7 +1,7 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
 class DocktakPackageInfo {
-   String version='';
+  String version = '';
 
   Future<void> initialize() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();

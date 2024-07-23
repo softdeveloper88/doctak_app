@@ -173,7 +173,8 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @POST("/followers-and-following")
-  Future<FollowerDataModel> getUserFollower(@Header('Authorization') String token,@Field('user_id') String userId);
+  Future<FollowerDataModel> getUserFollower(
+      @Header('Authorization') String token, @Field('user_id') String userId);
 
   //chat gpt api
 
@@ -262,7 +263,7 @@ abstract class ApiService {
   @FormUrlEncoded()
   @GET("/profile")
   Future<UserProfile> getProfile(
-  @Header('Authorization') String token, @Query('user_id') String userId);
+      @Header('Authorization') String token, @Query('user_id') String userId);
 
   @FormUrlEncoded()
   @GET("/interests")
@@ -334,15 +335,15 @@ abstract class ApiService {
   @FormUrlEncoded()
   @POST("/update-hobbies-interests")
   Future<HttpResponse> updateAddHobbiesInterest(
-      @Header('Authorization') String token,
-      @Field('id') String id,
-      @Field('favt_tv_shows') String favt_tv_shows,
-      @Field('favt_movies') String favt_movies,
-      @Field('favt_books') String favt_books,
-      @Field('favt_writers') String favt_writers,
-      @Field('favt_music_bands') String favt_music_bands,
-      @Field('favt_games') String favt_games,);
-
+    @Header('Authorization') String token,
+    @Field('id') String id,
+    @Field('favt_tv_shows') String favt_tv_shows,
+    @Field('favt_movies') String favt_movies,
+    @Field('favt_books') String favt_books,
+    @Field('favt_writers') String favt_writers,
+    @Field('favt_music_bands') String favt_music_bands,
+    @Field('favt_games') String favt_games,
+  );
 
   @FormUrlEncoded()
   @GET("/family-relationship")
@@ -357,18 +358,19 @@ abstract class ApiService {
   @FormUrlEncoded()
   @POST("/about-me/update")
   Future<HttpResponse> updateAboutMe(
-      @Header('Authorization') String token,
-      @Query('about_me') String aboutMe,
-      @Query('address') String address,
-      @Query('birthplace') String brithPlace,
-      @Query('lives_in') String liveIn,
-      @Query('languages') String languages,
-      @Query('about_me_privacy') String aboutMePrivacy,
-      @Query('address_privacy') String addressPrivacy,
-      @Query('birthplace_privacy') String birthplacePrivacy,
-      @Query('language_privacy') String languagesPrivacy,
-      @Query('lives_in_privacy') String livesInPrivacy,
-      @Query('phone_privacy') String phonePrivacy,);
+    @Header('Authorization') String token,
+    @Query('about_me') String aboutMe,
+    @Query('address') String address,
+    @Query('birthplace') String brithPlace,
+    @Query('lives_in') String liveIn,
+    @Query('languages') String languages,
+    @Query('about_me_privacy') String aboutMePrivacy,
+    @Query('address_privacy') String addressPrivacy,
+    @Query('birthplace_privacy') String birthplacePrivacy,
+    @Query('language_privacy') String languagesPrivacy,
+    @Query('lives_in_privacy') String livesInPrivacy,
+    @Query('phone_privacy') String phonePrivacy,
+  );
 
   @FormUrlEncoded()
   @GET("/about-me")
@@ -463,8 +465,8 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @POST("/delete-message")
-  Future<HttpResponse> deleteMessage(@Header('Authorization') String token,
-      @Field('ic') String commentId);
+  Future<HttpResponse> deleteMessage(
+      @Header('Authorization') String token, @Field('ic') String commentId);
   @FormUrlEncoded()
   @POST("/save-suggestion")
   Future<HttpResponse> saveSuggestion(

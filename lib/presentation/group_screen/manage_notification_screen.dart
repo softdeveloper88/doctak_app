@@ -1,4 +1,3 @@
-
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +10,8 @@ class ManageNotificationScreen extends StatefulWidget {
   ManageNotificationScreen(this.groupBloc, {super.key});
   GroupBloc? groupBloc;
   @override
-  _ManageNotificationScreenState createState() => _ManageNotificationScreenState();
+  _ManageNotificationScreenState createState() =>
+      _ManageNotificationScreenState();
 }
 
 class _ManageNotificationScreenState extends State<ManageNotificationScreen> {
@@ -21,6 +21,7 @@ class _ManageNotificationScreenState extends State<ManageNotificationScreen> {
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,18 +41,22 @@ class _ManageNotificationScreenState extends State<ManageNotificationScreen> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 8.0,right: 8.0,bottom: 16),
+        padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16),
         child: Column(
           children: [
-            Divider(color: Colors.grey[200],),
+            Divider(
+              color: Colors.grey[200],
+            ),
             SwitchListTile(
               title: const Text('Push'),
               value: pushNotification,
               onChanged: (bool value) {
                 setState(() {
                   pushNotification = value;
-                  widget.groupBloc!.add(GroupNotificationEvent('post', pushNotification?'1':'0', emailNotification?"1":'0'));
-
+                  widget.groupBloc!.add(GroupNotificationEvent(
+                      'post',
+                      pushNotification ? '1' : '0',
+                      emailNotification ? "1" : '0'));
                 });
               },
             ),
@@ -61,7 +66,10 @@ class _ManageNotificationScreenState extends State<ManageNotificationScreen> {
               onChanged: (bool value) {
                 setState(() {
                   emailNotification = value;
-                  widget.groupBloc!.add(GroupNotificationEvent('post', pushNotification?'1':'0', emailNotification?"1":'0'));
+                  widget.groupBloc!.add(GroupNotificationEvent(
+                      'post',
+                      pushNotification ? '1' : '0',
+                      emailNotification ? "1" : '0'));
                 });
               },
             ),

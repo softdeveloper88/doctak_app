@@ -1,10 +1,15 @@
 import 'dart:convert';
-ChatGptMessageHistory chatGptMessageHistoryFromJson(String str) => ChatGptMessageHistory.fromJson(json.decode(str));
-String chatGptMessageHistoryToJson(ChatGptMessageHistory data) => json.encode(data.toJson());
+
+ChatGptMessageHistory chatGptMessageHistoryFromJson(String str) =>
+    ChatGptMessageHistory.fromJson(json.decode(str));
+String chatGptMessageHistoryToJson(ChatGptMessageHistory data) =>
+    json.encode(data.toJson());
+
 class ChatGptMessageHistory {
   ChatGptMessageHistory({
-      this.success, 
-      this.messages,});
+    this.success,
+    this.messages,
+  });
 
   ChatGptMessageHistory.fromJson(dynamic json) {
     success = json['success'];
@@ -26,19 +31,20 @@ class ChatGptMessageHistory {
     }
     return map;
   }
-
 }
 
 Messages messagesFromJson(String str) => Messages.fromJson(json.decode(str));
 String messagesToJson(Messages data) => json.encode(data.toJson());
+
 class Messages {
   Messages({
-      this.id, 
-      this.gptSessionId, 
-      this.question, 
-      this.response, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.gptSessionId,
+    this.question,
+    this.response,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Messages.fromJson(dynamic json) {
     id = json['id'];
@@ -65,5 +71,4 @@ class Messages {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }

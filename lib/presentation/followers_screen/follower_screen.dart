@@ -14,7 +14,11 @@ class FollowerScreen extends StatefulWidget {
   Function? backPress;
   bool isFollowersScreen;
   String userId;
-  FollowerScreen({this.backPress,super.key, required  this.isFollowersScreen,required this.userId});
+  FollowerScreen(
+      {this.backPress,
+      super.key,
+      required this.isFollowersScreen,
+      required this.userId});
 
   @override
   State<FollowerScreen> createState() => _FollowerScreenState();
@@ -24,14 +28,11 @@ class _FollowerScreenState extends State<FollowerScreen> {
   FollowersBloc followersBloc = FollowersBloc();
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  bool isSearchShow=false;
+  bool isSearchShow = false;
   @override
   void initState() {
-    followersBloc.add(FollowersLoadPageEvent(
-      page: 1,
-      searchTerm: '',
-      userId: widget.userId
-    ));
+    followersBloc.add(
+        FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId));
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(svGetScaffoldColor());
@@ -51,11 +52,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
     _debounce = Timer(const Duration(milliseconds: 500), () {
       followersBloc.add(
         FollowersLoadPageEvent(
-          page: 1,
-          searchTerm: query,
-            userId: widget.userId
-
-        ),
+            page: 1, searchTerm: query, userId: widget.userId),
       );
       print('Search query: $query');
       // Replace this with your actual search logic and API calls
@@ -66,20 +63,18 @@ class _FollowerScreenState extends State<FollowerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-      appBar:AppBar(
-        backgroundColor:  svGetScaffoldColor(),
-        surfaceTintColor:  svGetScaffoldColor(),
+      appBar: AppBar(
+        backgroundColor: svGetScaffoldColor(),
+        surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text(widget.isFollowersScreen?'Followers':'Following',
+        title: Text(widget.isFollowersScreen ? 'Followers' : 'Following',
             style: boldTextStyle(size: 18)),
-
         leading: IconButton(
-            icon:  Icon(Icons.arrow_back_ios_new_rounded,
-                color: svGetBodyColor()),
-            onPressed:(){
+            icon:
+                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            onPressed: () {
               Navigator.pop(context);
-            }
-        ),
+            }),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -88,58 +83,65 @@ class _FollowerScreenState extends State<FollowerScreen> {
               setState(() {});
               isSearchShow = !isSearchShow;
             },
-            child:  isSearchShow
+            child: isSearchShow
                 ? Icon(Icons.cancel_outlined,
-                size: 25,
-                // height: 16,
-                // width: 16,
-                // fit: BoxFit.cover,
-                color: svGetBodyColor())
-                .paddingLeft(4):Image.asset(
-              'assets/images/search.png',
-              height: 20,
-              width: 20,
-              color: svGetBodyColor(),
-            ),
+                        size: 25,
+                        // height: 16,
+                        // width: 16,
+                        // fit: BoxFit.cover,
+                        color: svGetBodyColor())
+                    .paddingLeft(4)
+                : Image.asset(
+                    'assets/images/search.png',
+                    height: 20,
+                    width: 20,
+                    color: svGetBodyColor(),
+                  ),
           ).paddingRight(16)
         ],
       ),
       body: Column(
         children: [
-          const Divider(thickness: 0.3,color: Colors.grey,endIndent: 20,indent: 20,),
-          if(isSearchShow) Container(
-            padding: const EdgeInsets.only(left: 8.0),
-            margin: const EdgeInsets.only(
-              left: 16,
-              top: 16.0,
-              bottom: 16.0,
-              right: 16,
-            ),
-            decoration: BoxDecoration(
-                color: context.dividerColor.withOpacity(0.4),
-                borderRadius: radius(5),
-                border: Border.all(
-                    color: Colors.black, width: 0.3)),
-            child: Padding(
+          const Divider(
+            thickness: 0.3,
+            color: Colors.grey,
+            endIndent: 20,
+            indent: 20,
+          ),
+          if (isSearchShow)
+            Container(
               padding: const EdgeInsets.only(left: 8.0),
-              child: AppTextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                textFieldType: TextFieldType.NAME,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Search People ',
-                  hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                  suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                      height: 16,
-                      width: 16,
-                      fit: BoxFit.cover,
-                      color: svGetBodyColor())
-                      .paddingAll(16),
+              margin: const EdgeInsets.only(
+                left: 16,
+                top: 16.0,
+                bottom: 16.0,
+                right: 16,
+              ),
+              decoration: BoxDecoration(
+                  color: context.dividerColor.withOpacity(0.4),
+                  borderRadius: radius(5),
+                  border: Border.all(color: Colors.black, width: 0.3)),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: AppTextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  textFieldType: TextFieldType.NAME,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Search People ',
+                    hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                    suffixIcon: Image.asset(
+                            'images/socialv/icons/ic_Search.png',
+                            height: 16,
+                            width: 16,
+                            fit: BoxFit.cover,
+                            color: svGetBodyColor())
+                        .paddingAll(16),
+                  ),
                 ),
               ),
             ),
-          ),
           BlocConsumer<FollowersBloc, FollowersState>(
             bloc: followersBloc,
             // listenWhen: (previous, current) => current is FollowersState,
@@ -158,8 +160,11 @@ class _FollowerScreenState extends State<FollowerScreen> {
             builder: (context, state) {
               print("state $state");
               if (state is FollowersPaginationLoadingState) {
-                return  Expanded(
-                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+                return Expanded(
+                    child: Center(
+                        child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                )));
               } else if (state is FollowersPaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -179,62 +184,73 @@ class _FollowerScreenState extends State<FollowerScreen> {
                       //   }
                       // }
                       return
-                      //   bloc.numberOfPage != bloc.pageNumber - 1 &&
-                      //     index >= bloc.searchPeopleData.length - 1
-                      //     ?  Center(
-                      //   child: CircularProgressIndicator(color: svGetBodyColor(),),
-                      // )
-                      //     :
-                        FollowerWidget(
-                          userId: widget.userId,
-                          bloc: bloc,
-                          element:widget.isFollowersScreen? bloc.followerDataModel!.followers![index]:bloc.followerDataModel!.following![index],
-                          onTap: () {
-                            if(widget.isFollowersScreen) {
-                              if (bloc.followerDataModel?.followers![index]
-                                  .isCurrentlyFollow ??
-                                  false) {
-                                bloc.add(SetUserFollow(
-                                    followersBloc.followerDataModel?.followers?[index].id ?? '',
-                                    'unfollow'));
+                          //   bloc.numberOfPage != bloc.pageNumber - 1 &&
+                          //     index >= bloc.searchPeopleData.length - 1
+                          //     ?  Center(
+                          //   child: CircularProgressIndicator(color: svGetBodyColor(),),
+                          // )
+                          //     :
+                          FollowerWidget(
+                              userId: widget.userId,
+                              bloc: bloc,
+                              element: widget.isFollowersScreen
+                                  ? bloc.followerDataModel!.followers![index]
+                                  : bloc.followerDataModel!.following![index],
+                              onTap: () {
+                                if (widget.isFollowersScreen) {
+                                  if (bloc.followerDataModel?.followers![index]
+                                          .isCurrentlyFollow ??
+                                      false) {
+                                    bloc.add(SetUserFollow(
+                                        followersBloc.followerDataModel
+                                                ?.followers?[index].id ??
+                                            '',
+                                        'unfollow'));
 
-                                bloc.followerDataModel?.followers![index]
-                                    .isCurrentlyFollow = false;
-                              } else {
-                                bloc.add(SetUserFollow(
-                                    bloc.followerDataModel?.followers![index].id ?? '',
-                                    'follow'));
+                                    bloc.followerDataModel?.followers![index]
+                                        .isCurrentlyFollow = false;
+                                  } else {
+                                    bloc.add(SetUserFollow(
+                                        bloc.followerDataModel
+                                                ?.followers![index].id ??
+                                            '',
+                                        'follow'));
 
-                                bloc.followerDataModel!.followers![index]
-                                    .isCurrentlyFollow = true;
-                              }
-                            }else{
+                                    bloc.followerDataModel!.followers![index]
+                                        .isCurrentlyFollow = true;
+                                  }
+                                } else {
+                                  if (bloc.followerDataModel?.following![index]
+                                          .isCurrentlyFollow ??
+                                      false) {
+                                    bloc.add(SetUserFollow(
+                                        followersBloc.followerDataModel
+                                                ?.following?[index].id ??
+                                            '',
+                                        'unfollow'));
 
-                              if (bloc.followerDataModel?.following![index]
-                                  .isCurrentlyFollow ??
-                                  false) {
-                                bloc.add(SetUserFollow(
-                                    followersBloc.followerDataModel?.following?[index].id ?? '',
-                                    'unfollow'));
+                                    bloc.followerDataModel?.following![index]
+                                        .isCurrentlyFollow = false;
+                                  } else {
+                                    bloc.add(SetUserFollow(
+                                        bloc.followerDataModel
+                                                ?.following![index].id ??
+                                            '',
+                                        'follow'));
 
-                                bloc.followerDataModel?.following![index]
-                                    .isCurrentlyFollow = false;
-                              } else {
-                                bloc.add(SetUserFollow(
-                                    bloc.followerDataModel?.following![index].id ?? '',
-                                    'follow'));
-
-                                bloc.followerDataModel!.following![index]
-                                    .isCurrentlyFollow = true;
-                              }
-                            }
-                          });
+                                    bloc.followerDataModel!.following![index]
+                                        .isCurrentlyFollow = true;
+                                  }
+                                }
+                              });
                       // SVProfileFragment().launch(context);
                     },
                     // separatorBuilder: (BuildContext context, int index) {
                     //   return const Divider(height: 20);
                     // },
-                    itemCount:widget.isFollowersScreen? bloc.followerDataModel?.followers?.length:bloc.followerDataModel?.following?.length,
+                    itemCount: widget.isFollowersScreen
+                        ? bloc.followerDataModel?.followers?.length
+                        : bloc.followerDataModel?.following?.length,
                   ),
                 );
               } else if (state is FollowersDataError) {
@@ -245,11 +261,14 @@ class _FollowerScreenState extends State<FollowerScreen> {
                 );
               } else {
                 return Expanded(
-                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+                    child: Center(
+                        child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                )));
               }
             },
           ),
-          if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
+          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(

@@ -12,7 +12,8 @@ import '../../add_post/bloc/add_post_event.dart';
 class TagFriendsListBottomSheet extends StatefulWidget {
   AddPostBloc searchPeopleBloc;
 
-  TagFriendsListBottomSheet(this.searchPeopleBloc, {Key? key}) : super(key: key);
+  TagFriendsListBottomSheet(this.searchPeopleBloc, {Key? key})
+      : super(key: key);
 
   @override
   State<TagFriendsListBottomSheet> createState() =>
@@ -26,10 +27,7 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
 
   @override
   void initState() {
-    widget.searchPeopleBloc.add(LoadPageEvent(
-      page: 1,
-      name: ''
-    ));
+    widget.searchPeopleBloc.add(LoadPageEvent(page: 1, name: ''));
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(svGetScaffoldColor());
@@ -193,8 +191,11 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
             builder: (context, state) {
               print("state $state");
               if (state is PaginationLoadingState) {
-                return  Expanded(
-                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+                return Expanded(
+                    child: Center(
+                        child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                )));
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -213,8 +214,10 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
                       }
                       return bloc.numberOfPage != bloc.pageNumber - 1 &&
                               index >= bloc.searchPeopleData.length - 1
-                          ?  Center(
-                              child: CircularProgressIndicator(color: svGetBodyColor(),),
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: svGetBodyColor(),
+                              ),
                             )
                           :
                           // InkWell(

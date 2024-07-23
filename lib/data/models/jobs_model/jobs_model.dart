@@ -1,9 +1,12 @@
 import 'dart:convert';
+
 JobsModel jobsModelFromJson(String str) => JobsModel.fromJson(json.decode(str));
 String jobsModelToJson(JobsModel data) => json.encode(data.toJson());
+
 class JobsModel {
   JobsModel({
-      this.jobs,});
+    this.jobs,
+  });
 
   JobsModel.fromJson(dynamic json) {
     jobs = json['jobs'] != null ? Jobs.fromJson(json['jobs']) : null;
@@ -17,26 +20,27 @@ class JobsModel {
     }
     return map;
   }
-
 }
 
 Jobs jobsFromJson(String str) => Jobs.fromJson(json.decode(str));
 String jobsToJson(Jobs data) => json.encode(data.toJson());
+
 class Jobs {
   Jobs({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   Jobs.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -98,16 +102,17 @@ class Jobs {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
   Links({
-      this.url, 
-      this.label, 
-      this.active,});
+    this.url,
+    this.label,
+    this.active,
+  });
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -125,29 +130,30 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
   Data({
-      this.id, 
-      this.jobTitle, 
-      this.companyName, 
-      this.experience, 
-      this.location, 
-      this.description, 
-      this.link, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.userId, 
-      this.jobImage, 
-      this.countryId, 
-      this.lastDate, 
-      this.applicants, 
-      this.user, 
-      this.specialties,});
+    this.id,
+    this.jobTitle,
+    this.companyName,
+    this.experience,
+    this.location,
+    this.description,
+    this.link,
+    this.createdAt,
+    this.updatedAt,
+    this.userId,
+    this.jobImage,
+    this.countryId,
+    this.lastDate,
+    this.applicants,
+    this.user,
+    this.specialties,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -220,14 +226,16 @@ class Data {
     }
     return map;
   }
-
 }
 
-Application applicationFromJson(String str) => Application.fromJson(json.decode(str));
+Application applicationFromJson(String str) =>
+    Application.fromJson(json.decode(str));
 String applicationToJson(Application data) => json.encode(data.toJson());
+
 class Application {
   Application({
-    this.id,});
+    this.id,
+  });
 
   Application.fromJson(dynamic json) {
     id = json['id'];
@@ -248,13 +256,16 @@ class Application {
     return map;
   }
 }
+
 User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
+
 class User {
   User({
-      this.id, 
-      this.name, 
-      this.profilePic,});
+    this.id,
+    this.name,
+    this.profilePic,
+  });
 
   User.fromJson(dynamic json) {
     id = json['id'];
@@ -272,5 +283,4 @@ class User {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }

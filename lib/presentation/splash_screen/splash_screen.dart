@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../core/utils/pusher_service.dart';
 import '../home_screen/SVDashboardScreen.dart';
 import '../home_screen/home/screens/jobs_screen/jobs_screen.dart';
 
@@ -29,6 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
     init();
     super.initState();
   }
+
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
 
@@ -47,22 +49,18 @@ class _SplashScreenState extends State<SplashScreen> {
       final initialLink = await _appLinks.getLatestLink();
       if (initialLink != null) {
         print(initialLink);
-        if(initialLink.path.contains('job')) {
+        if (initialLink.path.contains('job')) {
           String id = initialLink.pathSegments.last;
-          JobsDetailsScreen(isFromSplash:true,jobId:id).launch(
-              context, isNewTask: false);
-        }else if(initialLink.path.contains('post')) {
-           SVDashboardScreen().launch(context,isNewTask: true);
-
-        }else{
-
-          ConferencesScreen(isFromSplash:true).launch(context,isNewTask: false);
-
+          JobsDetailsScreen(isFromSplash: true, jobId: id)
+              .launch(context, isNewTask: false);
+        } else if (initialLink.path.contains('post')) {
+          SVDashboardScreen().launch(context, isNewTask: true);
+        } else {
+          ConferencesScreen(isFromSplash: true)
+              .launch(context, isNewTask: false);
         }
-      }else{
-
-        const SVDashboardScreen().launch(context,isNewTask: true);
-
+      } else {
+        const SVDashboardScreen().launch(context, isNewTask: true);
       }
       _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
         debugPrint('onAppLink: $uri');
@@ -72,7 +70,8 @@ class _SplashScreenState extends State<SplashScreen> {
       print('error $e');
     }
   }
-    Future<void> init() async {
+
+  Future<void> init() async {
     setStatusBarColor(Colors.transparent);
     await 1.seconds.delay;
     finish(context);
@@ -85,6 +84,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     initializeAsync();
   }
+
   void initializeAsync() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -118,30 +118,30 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.countryName = countryName;
       AppData.currency = currency;
     }
-   if(acceptTerms) {
-     if (userToken != null) {
-       //Future.delayed(const Duration(seconds: 1), () {
-       // Navigator.pushReplacement(
-       //   context,
-       //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
-       // );
-       initDeepLinks(context);
-       // const SVDashboardScreen().launch(context,isNewTask: true);
-       // });
-     } else {
-       // Future.delayed(const Duration(seconds: 1), () {
-       LoginScreen().launch(context, isNewTask: true);
+    if (acceptTerms) {
+      if (userToken != null) {
+        //Future.delayed(const Duration(seconds: 1), () {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
+        // );
+        PusherService(AppData.logInUserId);
+        initDeepLinks(context);
+        // const SVDashboardScreen().launch(context,isNewTask: true);
+        // });
+      } else {
+        // Future.delayed(const Duration(seconds: 1), () {
+        LoginScreen().launch(context, isNewTask: true);
 
-       // Navigator.pushReplacement(
-       //   context,
-       //   MaterialPageRoute(builder: (context) => const SignInScreen()), // Navigate to OnboardingScreen
-       // );
-       // });
-     }
-   }else{
-     TermsAndConditionScreen().launch(context, isNewTask: true);
-
-   }
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => const SignInScreen()), // Navigate to OnboardingScreen
+        // );
+        // });
+      }
+    } else {
+      TermsAndConditionScreen().launch(context, isNewTask: true);
+    }
   }
 
   @override

@@ -1,11 +1,15 @@
 import 'dart:convert';
-PostLikesModel postLikesModelFromJson(String str) => PostLikesModel.fromJson(json.decode(str));
+
+PostLikesModel postLikesModelFromJson(String str) =>
+    PostLikesModel.fromJson(json.decode(str));
 String postLikesModelToJson(PostLikesModel data) => json.encode(data.toJson());
+
 class PostLikesModel {
   PostLikesModel({
-      this.id, 
-      this.profilePic, 
-      this.name,});
+    this.id,
+    this.profilePic,
+    this.name,
+  });
 
   PostLikesModel.fromJson(dynamic json) {
     id = json['id'];
@@ -24,5 +28,4 @@ class PostLikesModel {
     map['name'] = name;
     return map;
   }
-
 }

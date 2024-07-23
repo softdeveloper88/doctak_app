@@ -7,7 +7,14 @@ class SVForumRepliesModel {
   String? profileImage;
   bool? isOfficial;
 
-  SVForumRepliesModel({this.date, this.hashTagNo, this.subTitle, this.name, this.description, this.profileImage, this.isOfficial});
+  SVForumRepliesModel(
+      {this.date,
+      this.hashTagNo,
+      this.subTitle,
+      this.name,
+      this.description,
+      this.profileImage,
+      this.isOfficial});
 }
 
 List<SVForumRepliesModel> getRepliesList() {
@@ -18,7 +25,8 @@ List<SVForumRepliesModel> getRepliesList() {
     date: '25 Feb, 2022 at 05:30 AM',
     hashTagNo: '123',
     subTitle: 'Public Group',
-    description: 'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit...',
+    description:
+        'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit...',
     profileImage: 'images/socialv/faces/face_1.png',
   ));
   list.add(SVForumRepliesModel(
@@ -26,7 +34,8 @@ List<SVForumRepliesModel> getRepliesList() {
     date: '25 Feb, 2022 at 05:30 AM',
     hashTagNo: '123',
     subTitle: 'Public Group',
-    description: 'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit...',
+    description:
+        'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit...',
     profileImage: 'images/socialv/faces/face_2.png',
   ));
 
@@ -35,7 +44,8 @@ List<SVForumRepliesModel> getRepliesList() {
     date: '25 Feb, 2022 at 05:30 AM',
     hashTagNo: '123',
     subTitle: 'Public Group',
-    description: 'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit...',
+    description:
+        'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit...',
     profileImage: 'images/socialv/faces/face_3.png',
   ));
 

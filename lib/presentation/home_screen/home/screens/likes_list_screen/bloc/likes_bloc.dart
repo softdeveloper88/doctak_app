@@ -5,11 +5,8 @@ import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dar
 import 'package:doctak_app/data/models/post_model/post_likes_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-part  'likes_event.dart';
-part  'likes_state.dart';
-
-
-
+part 'likes_event.dart';
+part 'likes_state.dart';
 
 class LikesBloc extends Bloc<LikesEvent, LikesState> {
   final ApiService postService = ApiService(Dio());
@@ -55,5 +52,4 @@ class LikesBloc extends Bloc<LikesEvent, LikesState> {
       // emit(DataError('An error occurred $e'));
     }
   }
-
 }

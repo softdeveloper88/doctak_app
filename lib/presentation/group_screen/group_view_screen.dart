@@ -22,7 +22,7 @@ import 'group_member_screen.dart';
 import 'manage_notification_screen.dart';
 
 class GroupViewScreen extends StatefulWidget {
-  GroupViewScreen( this.id,{super.key});
+  GroupViewScreen(this.id, {super.key});
   String? id;
   @override
   State<GroupViewScreen> createState() => _GroupViewScreenState();
@@ -35,11 +35,11 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
 
   @override
   void initState() {
-    print(widget.id??"");
-    groupBloc.add(GroupDetailsEvent(widget.id??''));
-    groupBloc.add(GroupPostRequestEvent(widget.id??'', '1'));
-    groupBloc.add(GroupMemberRequestEvent(widget.id??''));
-    groupBloc.add(GroupMembersEvent(widget.id??'',''));
+    print(widget.id ?? "");
+    groupBloc.add(GroupDetailsEvent(widget.id ?? ''));
+    groupBloc.add(GroupPostRequestEvent(widget.id ?? '', '1'));
+    groupBloc.add(GroupMemberRequestEvent(widget.id ?? ''));
+    groupBloc.add(GroupMembersEvent(widget.id ?? '', ''));
     super.initState();
   }
 
@@ -208,7 +208,9 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 10,),
+                            const SizedBox(
+                              height: 10,
+                            ),
                             Padding(
                               padding: const EdgeInsets.only(left: 16.0),
                               child: Text(
@@ -228,7 +230,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                     size: 24,
                                   ),
                                   Text(
-                                    " ${groupBloc.groupDetailsModel?.group?.privacySetting??''} Group . ${groupBloc.groupDetailsModel?.totalMembers??'0'} members",
+                                    " ${groupBloc.groupDetailsModel?.group?.privacySetting ?? ''} Group . ${groupBloc.groupDetailsModel?.totalMembers ?? '0'} members",
                                     style: GoogleFonts.poppins(
                                         color: Colors.black45,
                                         fontSize: 10.sp,
@@ -348,7 +350,8 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                         color: Colors.grey[300]),
                                     child: TextButton(
                                       onPressed: () {
-                                        GroupMemberScreen(groupBloc).launch(context);
+                                        GroupMemberScreen(groupBloc)
+                                            .launch(context);
                                       },
                                       child: Text(
                                         'Members',
@@ -366,8 +369,8 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                         color: Colors.grey[300]),
                                     child: TextButton(
                                       onPressed: () {
-                                        const ComingSoonScreen().launch(context);
-
+                                        const ComingSoonScreen()
+                                            .launch(context);
                                       },
                                       child: Text(
                                         'Events',
@@ -404,7 +407,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                       ),
                       Container(
                         color: context.cardColor,
-                        padding:  EdgeInsets.all(10),
+                        padding: EdgeInsets.all(10),
                         child: Column(
                           children: [
                             Row(
@@ -414,7 +417,9 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                   decoration: BoxDecoration(
                                       image: DecorationImage(
                                         image: CachedNetworkImageProvider(
-                                          AppData.imageUrl + AppData.profile_pic,),
+                                          AppData.imageUrl +
+                                              AppData.profile_pic,
+                                        ),
                                         fit: BoxFit.cover,
                                       ),
                                       color: svGetBgColor(),
@@ -942,22 +947,23 @@ class CustomDrawer extends StatelessWidget {
                 height: 230,
                 child: Stack(
                   children: [
-                   CachedNetworkImage(
-                     placeholder: (context, url) => SizedBox(
-                       height: 30,
-                       width: 30,
-                       child: LinearProgressIndicator(
-                         color: Colors.grey.shade200,
-                         backgroundColor: Colors.grey.shade100,
-                       ),
-                     ),
-                      imageUrl:groupBloc?.groupDetailsModel?.group?.banner??"",
+                    CachedNetworkImage(
+                      placeholder: (context, url) => SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: LinearProgressIndicator(
+                          color: Colors.grey.shade200,
+                          backgroundColor: Colors.grey.shade100,
+                        ),
+                      ),
+                      imageUrl:
+                          groupBloc?.groupDetailsModel?.group?.banner ?? "",
                       // Replace with the actual image URL
                       width: double.infinity,
                       height: 200,
                       fit: BoxFit.cover,
                     ),
-                     Positioned(
+                    Positioned(
                       // bottom: 10,
                       left: 10,
                       right: 10,
@@ -965,7 +971,9 @@ class CustomDrawer extends StatelessWidget {
                       child: Center(
                         child: CircleAvatar(
                           radius: 40,
-                          backgroundImage: CachedNetworkImageProvider(groupBloc?.groupDetailsModel?.group?.logo??""), // Replace with the actual image URL
+                          backgroundImage: CachedNetworkImageProvider(
+                              groupBloc?.groupDetailsModel?.group?.logo ??
+                                  ""), // Replace with the actual image URL
                         ),
                       ),
                     ),
@@ -973,15 +981,15 @@ class CustomDrawer extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-               Text(
-                groupBloc?.groupDetailsModel?.group?.name??"",
+              Text(
+                groupBloc?.groupDetailsModel?.group?.name ?? "",
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                 ),
               ),
-               Text(
-                '${groupBloc?.groupDetailsModel?.group?.privacySetting??''} Group . ${groupBloc?.groupDetailsModel?.totalMembers??""} members',
+              Text(
+                '${groupBloc?.groupDetailsModel?.group?.privacySetting ?? ''} Group . ${groupBloc?.groupDetailsModel?.totalMembers ?? ""} members',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -994,7 +1002,7 @@ class CustomDrawer extends StatelessWidget {
                 endIndent: 50,
               ),
               DrawerItem(
-                onTap: (){
+                onTap: () {
                   AboutGroupScreen(groupBloc).launch(context);
                 },
                 icon: Icons.info,
@@ -1007,10 +1015,10 @@ class CustomDrawer extends StatelessWidget {
                 endIndent: 50,
               ),
               DrawerItem(
-                onTap: (){
-                if(groupBloc?.groupDetailsModel?.isAdmin??false) {
-                  ManageNotificationScreen(groupBloc).launch(context);
-                }
+                onTap: () {
+                  if (groupBloc?.groupDetailsModel?.isAdmin ?? false) {
+                    ManageNotificationScreen(groupBloc).launch(context);
+                  }
                 },
                 icon: Icons.notifications,
                 text: 'Manage Notification',
@@ -1022,12 +1030,10 @@ class CustomDrawer extends StatelessWidget {
                 endIndent: 50,
               ),
               DrawerItem(
-                onTap: (){
-
-                },
+                onTap: () {},
                 icon: Icons.post_add,
                 text: 'View post request',
-                trailing: '${groupBloc?.groupPostModel?.posts?.length??'0'}',
+                trailing: '${groupBloc?.groupPostModel?.posts?.length ?? '0'}',
               ),
               const Divider(
                 color: Colors.white,
@@ -1036,14 +1042,15 @@ class CustomDrawer extends StatelessWidget {
                 endIndent: 50,
               ),
               DrawerItem(
-                onTap: (){
-                  if(groupBloc?.groupDetailsModel?.isAdmin??false) {
+                onTap: () {
+                  if (groupBloc?.groupDetailsModel?.isAdmin ?? false) {
                     GroupMemberRequestScreen(groupBloc).launch(context);
                   }
                 },
                 icon: Icons.group,
                 text: 'View member request',
-                trailing: '${groupBloc?.groupMemberRequestModel?.groupMembers?.length??'0'}',
+                trailing:
+                    '${groupBloc?.groupMemberRequestModel?.groupMembers?.length ?? '0'}',
               ),
               const Divider(
                 color: Colors.white,
@@ -1110,7 +1117,7 @@ class DrawerItem extends StatelessWidget {
               ),
             )
           : null,
-      onTap:()=>onTap!(),
+      onTap: () => onTap!(),
     );
   }
 }

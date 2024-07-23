@@ -2,14 +2,12 @@
 
 part of 'chat_bloc.dart';
 
-
-abstract class ChatEvent extends Equatable{}
+abstract class ChatEvent extends Equatable {}
 
 class LoadDataValues extends ChatEvent {
   @override
   List<Object?> get props => [];
 }
-
 
 class ChangePasswordVisibilityEvent extends ChatEvent {
   ChangePasswordVisibilityEvent({required this.value});
@@ -21,12 +19,14 @@ class ChangePasswordVisibilityEvent extends ChatEvent {
         value,
       ];
 }
-class PostLikeEvent extends ChatEvent{
+
+class PostLikeEvent extends ChatEvent {
   int? postId;
   PostLikeEvent({this.postId});
   @override
   List<Object?> get props => [postId];
 }
+
 class ChangeCheckBoxEvent extends ChatEvent {
   ChangeCheckBoxEvent({required this.value});
 
@@ -37,26 +37,29 @@ class ChangeCheckBoxEvent extends ChatEvent {
         value,
       ];
 }
-class LoadPageEvent extends ChatEvent{
+
+class LoadPageEvent extends ChatEvent {
   int? page;
-LoadPageEvent({this.page});
-@override
-List<Object?> get props => [page];
+  LoadPageEvent({this.page});
+  @override
+  List<Object?> get props => [page];
 }
-class LoadContactsEvent extends ChatEvent{
+
+class LoadContactsEvent extends ChatEvent {
   int? page;
   String? keyword;
-  LoadContactsEvent({this.page,this.keyword});
-@override
-List<Object?> get props => [page,keyword];
+  LoadContactsEvent({this.page, this.keyword});
+  @override
+  List<Object?> get props => [page, keyword];
 }
-class LoadRoomMessageEvent extends ChatEvent{
+
+class LoadRoomMessageEvent extends ChatEvent {
   int? page;
   String? userId;
   String? roomId;
-  LoadRoomMessageEvent({this.page,this.userId,this.roomId});
-@override
-List<Object?> get props => [page,userId,roomId];
+  LoadRoomMessageEvent({this.page, this.userId, this.roomId});
+  @override
+  List<Object?> get props => [page, userId, roomId];
 }
 
 class CheckIfNeedMoreDataEvent extends ChatEvent {
@@ -65,20 +68,24 @@ class CheckIfNeedMoreDataEvent extends ChatEvent {
   @override
   List<Object?> get props => [index];
 }
+
 class CheckIfNeedMoreContactDataEvent extends ChatEvent {
   final int index;
   CheckIfNeedMoreContactDataEvent({required this.index});
   @override
   List<Object?> get props => [index];
 }
+
 class CheckIfNeedMoreMessageDataEvent extends ChatEvent {
   final int index;
   String userId;
   String roomId;
-  CheckIfNeedMoreMessageDataEvent({required this.index,required this.userId,required this.roomId});
+  CheckIfNeedMoreMessageDataEvent(
+      {required this.index, required this.userId, required this.roomId});
   @override
-  List<Object?> get props => [index,userId,roomId];
+  List<Object?> get props => [index, userId, roomId];
 }
+
 class SendMessageEvent extends ChatEvent {
   String? userId;
   String? roomId;
@@ -86,10 +93,18 @@ class SendMessageEvent extends ChatEvent {
   String? attachmentType;
   String? file;
   String? message;
-  SendMessageEvent({required this.userId,required this.roomId,required this.receiverId,required this.attachmentType,required this.file,required this.message});
+  SendMessageEvent(
+      {required this.userId,
+      required this.roomId,
+      required this.receiverId,
+      required this.attachmentType,
+      required this.file,
+      required this.message});
   @override
-  List<Object?> get props => [userId,roomId,receiverId,attachmentType,file,message];
+  List<Object?> get props =>
+      [userId, roomId, receiverId, attachmentType, file, message];
 }
+
 class DeleteMessageEvent extends ChatEvent {
   String? id;
 
@@ -97,12 +112,11 @@ class DeleteMessageEvent extends ChatEvent {
   @override
   List<Object?> get props => [id];
 }
+
 class SelectedFiles extends ChatEvent {
   XFile pickedfiles;
   bool isRemove;
-  SelectedFiles({required this.pickedfiles,required this.isRemove});
+  SelectedFiles({required this.pickedfiles, required this.isRemove});
   @override
-  List<Object?> get props => [pickedfiles,isRemove];
-
+  List<Object?> get props => [pickedfiles, isRemove];
 }
-

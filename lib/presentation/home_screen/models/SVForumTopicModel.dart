@@ -7,7 +7,14 @@ class SVForumTopicModel {
   String? freshness;
   bool? isFav;
 
-  SVForumTopicModel({this.title, this.domain, this.freshness, this.name, this.postNo, this.voicesNo,this.isFav});
+  SVForumTopicModel(
+      {this.title,
+      this.domain,
+      this.freshness,
+      this.name,
+      this.postNo,
+      this.voicesNo,
+      this.isFav});
 }
 
 List<SVForumTopicModel> getTopicsList() {
@@ -30,7 +37,6 @@ List<SVForumTopicModel> getTopicsList() {
     voicesNo: '50',
     freshness: 'Perry Scope',
     isFav: false,
-
   ));
   list.add(SVForumTopicModel(
     name: 'Frank N. Stein',
@@ -40,7 +46,6 @@ List<SVForumTopicModel> getTopicsList() {
     voicesNo: '200',
     freshness: 'Perry Scope',
     isFav: false,
-
   ));
 
   list.add(SVForumTopicModel(
@@ -60,7 +65,6 @@ List<SVForumTopicModel> getTopicsList() {
     voicesNo: '50',
     freshness: 'Perry Scope',
     isFav: true,
-
   ));
   list.add(SVForumTopicModel(
     name: 'Frank N. Stein',
@@ -70,9 +74,7 @@ List<SVForumTopicModel> getTopicsList() {
     voicesNo: '200',
     freshness: 'Perry Scope',
     isFav: true,
-
   ));
-
 
   return list;
 }

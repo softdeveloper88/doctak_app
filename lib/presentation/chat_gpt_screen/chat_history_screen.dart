@@ -29,11 +29,11 @@ class ChatHistoryScreen extends StatelessWidget {
   // final ScrollController _scrollController = ScrollController();
 
   List<ChatGPTResponse> messages = [];
- // Add this line
+  // Add this line
   late Future<List<Session>> futureSessions;
 
   int? selectedSessionId = 0;
- // State variable for tracking selected session
+  // State variable for tracking selected session
   Future<List<ChatGPTResponse>> futureMessages = Future.value([]);
 
   final TextEditingController textController = TextEditingController();
@@ -49,36 +49,35 @@ class ChatHistoryScreen extends StatelessWidget {
   String chatWithAi = "Preparing DocTak AI.";
 
   bool isDeleteButtonClicked = false;
-  ChatGPTBloc chatGPTBloc= ChatGPTBloc()..add(LoadDataValues());
+  ChatGPTBloc chatGPTBloc = ChatGPTBloc()..add(LoadDataValues());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
       appBar: AppBar(
         leading: IconButton(
-          icon:
-               Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
         surfaceTintColor: context.cardColor,
-        backgroundColor:  context.cardColor,
+        backgroundColor: context.cardColor,
         title: Text(
           'History Artificial Intelligence',
           style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w400),
         ),
       ),
-      body:  BlocConsumer<ChatGPTBloc, ChatGPTState>(
-        listener: (context,state){},
-             bloc: chatGPTBloc,
-              builder: (context, state1) {
+      body: BlocConsumer<ChatGPTBloc, ChatGPTState>(
+          listener: (context, state) {},
+          bloc: chatGPTBloc,
+          builder: (context, state1) {
             if (selectedSessionId == 0 && state1 is DataLoaded) {
               selectedSessionId = state1.response.newSessionId;
               chatWithAi =
                   state1.response.sessions?.first.name ?? 'New Session';
             }
             if (state1 is DataInitial) {
-              return  Scaffold(
+              return Scaffold(
                 backgroundColor: svGetBgColor(),
                 body: AnimatedBackground(
                   child: Column(
@@ -86,7 +85,10 @@ class ChatHistoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
+                      Center(
+                          child: CircularProgressIndicator(
+                        color: svGetBodyColor(),
+                      )),
                     ],
                   ),
                 ),
@@ -161,7 +163,7 @@ class ChatHistoryScreen extends StatelessWidget {
                                             ),
                                             Row(
                                               children: <Widget>[
-                                                 Icon(Icons.calendar_month,
+                                                Icon(Icons.calendar_month,
                                                     size: 15,
                                                     color: svGetBodyColor()),
                                                 const SizedBox(
@@ -176,7 +178,8 @@ class ChatHistoryScreen extends StatelessWidget {
                                                   //     session.createdAt!)),
                                                   style: GoogleFonts.poppins(
                                                       fontSize: 14,
-                                                      fontWeight: FontWeight.w400,
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       color: svGetBodyColor()),
                                                 ),
                                               ],
@@ -191,17 +194,20 @@ class ChatHistoryScreen extends StatelessWidget {
                                             context: context,
                                             builder: (BuildContext context) {
                                               return ChatDeleteDialog(
-                                                  title: ' ${session.name??''}',
-                                                  callback: ()  {
-
-                                                    chatGPTBloc.add(DeleteChatSession(session.id??0));
+                                                  title:
+                                                      ' ${session.name ?? ''}',
+                                                  callback: () {
+                                                    chatGPTBloc.add(
+                                                        DeleteChatSession(
+                                                            session.id ?? 0));
                                                     Navigator.of(context).pop();
                                                   });
                                             });
                                       },
                                       child: Container(
                                           decoration: BoxDecoration(
-                                              color: Colors.red.withOpacity(0.3),
+                                              color:
+                                                  Colors.red.withOpacity(0.3),
                                               borderRadius:
                                                   BorderRadius.circular(6)),
                                           padding: const EdgeInsets.all(4),

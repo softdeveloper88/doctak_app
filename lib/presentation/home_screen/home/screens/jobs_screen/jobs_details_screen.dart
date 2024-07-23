@@ -13,7 +13,8 @@ import 'bloc/jobs_bloc.dart';
 import 'bloc/jobs_state.dart';
 
 class JobsDetailsScreen extends StatefulWidget {
-  JobsDetailsScreen({required this.jobId,this.isFromSplash=false,super.key});
+  JobsDetailsScreen(
+      {required this.jobId, this.isFromSplash = false, super.key});
   String jobId;
   bool isFromSplash;
   @override
@@ -25,11 +26,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   @override
   void initState() {
     jobsBloc.add(
-      JobDetailPageEvent(
-          jobId: widget.jobId),
+      JobDetailPageEvent(jobId: widget.jobId),
     );
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,21 +42,22 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-            icon:  Icon(Icons.arrow_back_ios_new_rounded,
-                color:svGetBodyColor(),),
-            onPressed:(){
-              if(widget.isFromSplash){
-                SVDashboardScreen().launch(context,isNewTask: true);
-
-              }else {
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: svGetBodyColor(),
+            ),
+            onPressed: () {
+              if (widget.isFromSplash) {
+                SVDashboardScreen().launch(context, isNewTask: true);
+              } else {
                 Navigator.pop(context);
-              }}
-        ),
+              }
+            }),
         actions: const [
           // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
         ],
       ),
-      body:  BlocConsumer<JobsBloc, JobsState>(
+      body: BlocConsumer<JobsBloc, JobsState>(
         bloc: jobsBloc,
         // listenWhen: (previous, current) => current is PaginationLoadedState,
         // buildWhen: (previous, current) => current is! PaginationLoadedState,
@@ -71,7 +73,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return  Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
+            return Center(
+                child: CircularProgressIndicator(
+              color: svGetBodyColor(),
+            ));
           } else if (state is PaginationLoadedState) {
             // print(state.drugsModel.length);
             return SingleChildScrollView(
@@ -83,20 +88,18 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 ),
                 child: Material(
                   elevation: 4,
-                  color:context.cardColor,
-                  borderRadius:
-                  const BorderRadius.all(Radius.circular(10)),
+                  color: context.cardColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "New" ,
+                              "New",
                               style: GoogleFonts.poppins(
                                   color: Colors.red,
                                   fontWeight: FontWeight.w500,
@@ -110,9 +113,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 //     .homeBloc
                                 //     .postList[index]);
                                 createDynamicLink(
-                                    '${jobsBloc.jobDetailModel.job?.jobTitle ?? "" }\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ??''}',
+                                    '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
                                     'https://doctak.net/job/${jobsBloc.jobDetailModel.job?.id}',
-                                    jobsBloc.jobDetailModel.job?.link ??'');
+                                    jobsBloc.jobDetailModel.job?.link ?? '');
                                 // Share.share("Job Title: ${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n"
                                 //     "Company : ${jobsBloc.jobDetailModel.job?.companyName}\n"
                                 //     "Location: ${jobsBloc.jobDetailModel.job?.location ?? 'N/A'}\n"
@@ -124,10 +127,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 //     'N/A'}\n"
                                 //     "Job Apply Link: ${jobsBloc.jobDetailModel.job?.link ??
                                 //     'N/A'}\n" );
-
-
                               },
-                              child: Icon(Icons.share_sharp,
+                              child: Icon(
+                                Icons.share_sharp,
                                 size: 22,
                                 // 'images/socialv/icons/ic_share.png',
                                 // height: 22,
@@ -147,12 +149,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         ),
                         const SizedBox(height: 5),
                         Text(jobsBloc.jobDetailModel.job?.companyName ?? 'N/A',
-                            style: secondaryTextStyle(
-                                color: svGetBodyColor())),
+                            style: secondaryTextStyle(color: svGetBodyColor())),
                         const SizedBox(height: 10),
                         Row(
                           children: <Widget>[
-                             Icon(
+                            Icon(
                               Icons.location_on,
                               size: 20,
                               color: svGetBodyColor(),
@@ -178,17 +179,15 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         Row(
                           children: [
                             Column(
-                              mainAxisAlignment:
-                              MainAxisAlignment.start,
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Date From',
                                     style: secondaryTextStyle(
                                         color: svGetBodyColor())),
                                 Row(
                                   children: <Widget>[
-                                     Icon(
+                                    Icon(
                                       Icons.date_range_outlined,
                                       size: 20,
                                       color: svGetBodyColor(),
@@ -197,9 +196,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                       width: 5,
                                     ),
                                     Text(
-                                        DateFormat('MMM dd, yyyy')
-                                            .format(DateTime.parse(jobsBloc.jobDetailModel.job?.createdAt ??
-                                            'N/A'.toString())),
+                                        DateFormat('MMM dd, yyyy').format(
+                                            DateTime.parse(jobsBloc
+                                                    .jobDetailModel
+                                                    .job
+                                                    ?.createdAt ??
+                                                'N/A'.toString())),
                                         style: secondaryTextStyle(
                                             color: svGetBodyColor())),
                                   ],
@@ -210,10 +212,8 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               width: 20,
                             ),
                             Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              mainAxisAlignment:
-                              MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text('Date To',
                                     style: secondaryTextStyle(
@@ -221,7 +221,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                     )),
                                 Row(
                                   children: <Widget>[
-                                     Icon(
+                                    Icon(
                                       Icons.date_range_outlined,
                                       size: 20,
                                       color: svGetBodyColor(),
@@ -230,9 +230,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                       width: 5,
                                     ),
                                     Text(
-                                        DateFormat('MMM dd, yyyy')
-                                            .format(DateTime.parse(jobsBloc.jobDetailModel.job?.lastDate ??
-                                            'N/A'.toString())),
+                                        DateFormat('MMM dd, yyyy').format(
+                                            DateTime.parse(jobsBloc
+                                                    .jobDetailModel
+                                                    .job
+                                                    ?.lastDate ??
+                                                'N/A'.toString())),
                                         style: secondaryTextStyle(
                                             color: svGetBodyColor())),
                                   ],
@@ -253,7 +256,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           child: Container(
                             color: Colors.white,
                             child: HtmlWidget(
-                              textStyle: GoogleFonts.poppins(color: svGetBodyColor(),),
+                              textStyle: GoogleFonts.poppins(
+                                color: svGetBodyColor(),
+                              ),
                               '<p>${jobsBloc.jobDetailModel.job?.description}</p>',
                             ),
                           ),
@@ -262,8 +267,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               TextButton(
                                 onPressed: () async {
@@ -271,8 +275,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   //     .drugsData[index]
                                   //     .link!); // Assuming job.link is a non-null String
                                   // Show dialog asking the user to confirm navigation
-                                  final shouldLeave =
-                                  await showDialog<bool>(
+                                  final shouldLeave = await showDialog<bool>(
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: const Text('Leave App'),
@@ -281,16 +284,15 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                       actions: <Widget>[
                                         TextButton(
                                           onPressed: () =>
-                                              Navigator.of(context)
-                                                  .pop(false),
+                                              Navigator.of(context).pop(false),
                                           child: const Text('No'),
                                         ),
                                         TextButton(
                                           onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(true);
-                                            final Uri url = Uri.parse(
-                                                jobsBloc.jobDetailModel.job?.link??'');
+                                            Navigator.of(context).pop(true);
+                                            final Uri url = Uri.parse(jobsBloc
+                                                    .jobDetailModel.job?.link ??
+                                                '');
                                             _launchInBrowser(url);
                                           },
                                           child: const Text('Yes'),
@@ -302,15 +304,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   if (shouldLeave == true) {
                                     // await launchUrl(url);
                                   } else if (shouldLeave == false) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                           content: Text(
                                               'Leaving the app canceled.')),
                                     );
                                   } else {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                           content: Text(
                                               'Leaving the app canceled.')),
@@ -321,8 +321,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   'Apply ',
                                   style: TextStyle(
                                     color: Colors.blue,
-                                    decoration:
-                                    TextDecoration.underline,
+                                    decoration: TextDecoration.underline,
                                   ),
                                 ),
                               ),
@@ -344,9 +343,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           }
         },
       ),
-
     );
   }
+
   Future<void> _launchInBrowser(Uri url) async {
     if (!await launchUrl(
       url,

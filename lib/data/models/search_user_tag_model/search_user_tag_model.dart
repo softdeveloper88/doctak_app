@@ -1,10 +1,15 @@
 import 'dart:convert';
-SearchUserTagModel searchUserTagModelFromJson(String str) => SearchUserTagModel.fromJson(json.decode(str));
-String searchUserTagModelToJson(SearchUserTagModel data) => json.encode(data.toJson());
+
+SearchUserTagModel searchUserTagModelFromJson(String str) =>
+    SearchUserTagModel.fromJson(json.decode(str));
+String searchUserTagModelToJson(SearchUserTagModel data) =>
+    json.encode(data.toJson());
+
 class SearchUserTagModel {
   SearchUserTagModel({
-      this.success, 
-      this.data,});
+    this.success,
+    this.data,
+  });
 
   SearchUserTagModel.fromJson(dynamic json) {
     success = json['success'];
@@ -21,26 +26,27 @@ class SearchUserTagModel {
     }
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
   Data({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   Data.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -102,16 +108,17 @@ class Data {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
   Links({
-      this.url, 
-      this.label, 
-      this.active,});
+    this.url,
+    this.label,
+    this.active,
+  });
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -129,15 +136,15 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 class UserData {
   UserData({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.profilePic,});
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.profilePic,
+  });
 
   UserData.fromJson(dynamic json) {
     id = json['id'];
@@ -158,5 +165,4 @@ class UserData {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }

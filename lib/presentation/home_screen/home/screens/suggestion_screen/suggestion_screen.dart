@@ -107,13 +107,11 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
               Navigator.of(context).pop();
             },
             child: const Icon(Icons.arrow_back_ios)),
-
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
         title: Text('Suggestion', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
-
       ),
       body: AnimatedBackground(
         child: Padding(
@@ -123,19 +121,22 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
             child: ListView(
               children: <Widget>[
                 const SizedBox(height: 20),
-                _buildTextField('Enter Name',_nameController, 'Name', validator: (value) {
+                _buildTextField('Enter Name', _nameController, 'Name',
+                    validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your name';
                   }
                   return null;
                 }),
-                _buildTextField('03xxxxxxxx',_phoneController, 'Phone', validator: (value) {
+                _buildTextField('03xxxxxxxx', _phoneController, 'Phone',
+                    validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your phone number';
                   }
                   return null;
                 }),
-                _buildTextField('info@doctak.net',_emailController, 'Email', validator: (value) {
+                _buildTextField('info@doctak.net', _emailController, 'Email',
+                    validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
                   }
@@ -144,8 +145,9 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                   }
                   return null;
                 }),
-                _buildTextField('Type message here',_messageController, 'Message', maxLines: 4,
-                    validator: (value) {
+                _buildTextField(
+                    'Type message here', _messageController, 'Message',
+                    maxLines: 4, validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your message';
                   }
@@ -192,7 +194,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-         Text(
+        Text(
           'Need More Help? ',
           style: TextStyle(
             color: svGetBodyColor(),
@@ -216,8 +218,8 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                       TextButton(
                         child: const Text('Cancel'),
                         onPressed: () {
-                          Navigator.of(context)
-                              .pop(false); // User does not want to leave the app
+                          Navigator.of(context).pop(
+                              false); // User does not want to leave the app
                         },
                       ),
                       TextButton(
@@ -231,7 +233,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                   );
                 },
               );
-          
+
               if (confirm == true) {
                 await launchUrl(url);
               }
@@ -263,12 +265,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
     );
   }
 
-  Widget _buildTextField(String hint,TextEditingController controller, String label,
+  Widget _buildTextField(
+      String hint, TextEditingController controller, String label,
       {int maxLines = 1, String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
-
         controller: controller,
         focusNode: controller == _nameController ? _nameFocusNode : null,
         // Assign the FocusNode here

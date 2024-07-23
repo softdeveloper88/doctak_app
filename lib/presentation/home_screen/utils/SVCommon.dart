@@ -72,7 +72,7 @@ Color svGetBgColor() {
   if (appStore.isDarkMode) {
     return appBackgroundColorDark;
   } else {
-    return  SVCardGray;
+    return SVCardGray;
   }
 }
 
@@ -121,7 +121,7 @@ Widget svAppButton(
     textStyle: boldTextStyle(color: Colors.white),
     onTap: onTap,
     elevation: 0,
-    color: color??SVAppColorPrimary,
+    color: color ?? SVAppColorPrimary,
     width: width ?? context.width() - 32,
     height: 50,
   );

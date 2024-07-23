@@ -15,7 +15,7 @@ import '../../utils/SVCommon.dart';
 
 class SVSearchFragment extends StatefulWidget {
   Function? backPress;
-  SVSearchFragment({this.backPress,super.key});
+  SVSearchFragment({this.backPress, super.key});
 
   @override
   State<SVSearchFragment> createState() => _SVSearchFragmentState();
@@ -25,7 +25,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
   SearchPeopleBloc searchPeopleBloc = SearchPeopleBloc();
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  bool isSearchShow=true;
+  bool isSearchShow = true;
   @override
   void initState() {
     searchPeopleBloc.add(SearchPeopleLoadPageEvent(
@@ -64,18 +64,17 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-      appBar:AppBar(
-        backgroundColor:  svGetScaffoldColor(),
-        surfaceTintColor:  svGetScaffoldColor(),
+      appBar: AppBar(
+        backgroundColor: svGetScaffoldColor(),
+        surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Search Peoples',
-            style: boldTextStyle(size: 18)),
-
+        title: Text('Search Peoples', style: boldTextStyle(size: 18)),
         leading: IconButton(
-            icon:  Icon(Icons.arrow_back_ios_new_rounded,
-                color: svGetBodyColor()),
-            onPressed:(){widget.backPress!();}
-        ),
+            icon:
+                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            onPressed: () {
+              widget.backPress!();
+            }),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -84,58 +83,65 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
               setState(() {});
               isSearchShow = !isSearchShow;
             },
-            child:  isSearchShow
+            child: isSearchShow
                 ? Icon(Icons.cancel_outlined,
-                size: 25,
-                // height: 16,
-                // width: 16,
-                // fit: BoxFit.cover,
-                color: svGetBodyColor())
-                .paddingLeft(4):Image.asset(
-                  'assets/images/search.png',
-                  height: 20,
-                  width: 20,
-                  color: svGetBodyColor(),
-                ),
+                        size: 25,
+                        // height: 16,
+                        // width: 16,
+                        // fit: BoxFit.cover,
+                        color: svGetBodyColor())
+                    .paddingLeft(4)
+                : Image.asset(
+                    'assets/images/search.png',
+                    height: 20,
+                    width: 20,
+                    color: svGetBodyColor(),
+                  ),
           ).paddingRight(16)
         ],
       ),
       body: Column(
         children: [
-          const Divider(thickness: 0.3,color: Colors.grey,endIndent: 20,indent: 20,),
-          if(isSearchShow) Container(
-            padding: const EdgeInsets.only(left: 8.0),
-            margin: const EdgeInsets.only(
-              left: 16,
-              top: 16.0,
-              bottom: 16.0,
-              right: 16,
-            ),
-            decoration: BoxDecoration(
-                color: context.dividerColor.withOpacity(0.4),
-                borderRadius: radius(5),
-                border: Border.all(
-                    color: Colors.black, width: 0.3)),
-            child: Padding(
+          const Divider(
+            thickness: 0.3,
+            color: Colors.grey,
+            endIndent: 20,
+            indent: 20,
+          ),
+          if (isSearchShow)
+            Container(
               padding: const EdgeInsets.only(left: 8.0),
-              child: AppTextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                textFieldType: TextFieldType.NAME,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Search People ',
-                  hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                  suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                          height: 16,
-                          width: 16,
-                          fit: BoxFit.cover,
-                          color: svGetBodyColor())
-                      .paddingAll(16),
+              margin: const EdgeInsets.only(
+                left: 16,
+                top: 16.0,
+                bottom: 16.0,
+                right: 16,
+              ),
+              decoration: BoxDecoration(
+                  color: context.dividerColor.withOpacity(0.4),
+                  borderRadius: radius(5),
+                  border: Border.all(color: Colors.black, width: 0.3)),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: AppTextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  textFieldType: TextFieldType.NAME,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Search People ',
+                    hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                    suffixIcon: Image.asset(
+                            'images/socialv/icons/ic_Search.png',
+                            height: 16,
+                            width: 16,
+                            fit: BoxFit.cover,
+                            color: svGetBodyColor())
+                        .paddingAll(16),
+                  ),
                 ),
               ),
             ),
-          ),
           BlocConsumer<SearchPeopleBloc, SearchPeopleState>(
             bloc: searchPeopleBloc,
             // listenWhen: (previous, current) => current is SearchPeopleState,
@@ -154,8 +160,11 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
             builder: (context, state) {
               print("state $state");
               if (state is SearchPeoplePaginationLoadingState) {
-                return  Expanded(
-                    child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)));
+                return Expanded(
+                    child: Center(
+                        child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                )));
               } else if (state is SearchPeoplePaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -176,11 +185,13 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
                       }
                       return bloc.numberOfPage != bloc.pageNumber - 1 &&
                               index >= bloc.searchPeopleData.length - 1
-                          ?  Center(
-                              child: CircularProgressIndicator(color: svGetBodyColor(),),
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: svGetBodyColor(),
+                              ),
                             )
                           : SVSearchCardComponent(
-                             bloc: bloc,
+                              bloc: bloc,
                               element: bloc.searchPeopleData[index],
                               onTap: () {
                                 if (bloc.searchPeopleData[index]
@@ -221,7 +232,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
               }
             },
           ),
-          if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
+          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(

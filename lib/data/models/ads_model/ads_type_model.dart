@@ -1,17 +1,20 @@
 import 'dart:convert';
-AdsTypeModel adsTypeModelFromJson(String str) => AdsTypeModel.fromJson(json.decode(str));
+
+AdsTypeModel adsTypeModelFromJson(String str) =>
+    AdsTypeModel.fromJson(json.decode(str));
 String adsTypeModelToJson(AdsTypeModel data) => json.encode(data.toJson());
+
 class AdsTypeModel {
   AdsTypeModel({
-      this.id, 
-      this.type, 
-      this.applicationId, 
-      this.provider, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.advertisementId,
-      this.androidId,
-      this.iosId,
+    this.id,
+    this.type,
+    this.applicationId,
+    this.provider,
+    this.createdAt,
+    this.updatedAt,
+    this.advertisementId,
+    this.androidId,
+    this.iosId,
   });
 
   AdsTypeModel.fromJson(dynamic json) {
@@ -48,5 +51,4 @@ class AdsTypeModel {
     map['ios_id'] = iosId;
     return map;
   }
-
 }

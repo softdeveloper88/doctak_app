@@ -88,7 +88,7 @@ class _WebPageScreenState extends State<WebPageScreen> {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(title:  Text(widget.page_name), actions: []),
+        appBar: AppBar(title: Text(widget.page_name), actions: []),
         body: buildBody(),
       ),
     );

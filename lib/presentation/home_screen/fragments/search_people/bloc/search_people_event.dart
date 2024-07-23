@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 //   @override
 //   List<Object> get props => [page];
 // }
-abstract class SearchPeopleEvent extends Equatable{}
+abstract class SearchPeopleEvent extends Equatable {}
 
 class LoadDataValues extends SearchPeopleEvent {
   @override
@@ -27,18 +27,18 @@ class GetPost extends SearchPeopleEvent {
   final String page;
   final String searchTerm;
 
-  GetPost({required this.page,required this.searchTerm});
+  GetPost({required this.page, required this.searchTerm});
   @override
-  List<Object> get props => [page,searchTerm];
+  List<Object> get props => [page, searchTerm];
 }
 
 class SearchPeopleLoadPageEvent extends SearchPeopleEvent {
-int? page;
-final String? searchTerm;
+  int? page;
+  final String? searchTerm;
 
-SearchPeopleLoadPageEvent({this.page,this.searchTerm});
-@override
-List<Object?> get props => [page,searchTerm];
+  SearchPeopleLoadPageEvent({this.page, this.searchTerm});
+  @override
+  List<Object?> get props => [page, searchTerm];
 }
 
 class SearchFieldData extends SearchPeopleEvent {
@@ -47,12 +47,13 @@ class SearchFieldData extends SearchPeopleEvent {
   @override
   List<Object?> get props => [searchValue];
 }
+
 class SetUserFollow extends SearchPeopleEvent {
   String userId;
   String follow;
-  SetUserFollow(this.userId,this.follow);
+  SetUserFollow(this.userId, this.follow);
   @override
-  List<Object?> get props => [userId,follow];
+  List<Object?> get props => [userId, follow];
 }
 
 class SearchPeopleCheckIfNeedMoreDataEvent extends SearchPeopleEvent {

@@ -101,8 +101,9 @@ class ProfileDateWidget extends StatelessWidget {
             ),
           )
         : Padding(
-          padding: const EdgeInsets.only(right: 8.0,left: 8.0,top: 16,bottom: 16),
-          child: Row(
+            padding: const EdgeInsets.only(
+                right: 8.0, left: 8.0, top: 16, bottom: 16),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
@@ -122,6 +123,6 @@ class ProfileDateWidget extends StatelessWidget {
                 ),
               ],
             ),
-        );
+          );
   }
 }

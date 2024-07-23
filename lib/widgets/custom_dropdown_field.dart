@@ -37,65 +37,65 @@ class CustomDropdownField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width??100.w,
-      height: height??60,
-      // width: getProportionateScreenWidth(0.5),
-      child: DropdownButtonFormField<String>(
-        onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
-        value: value,
-        decoration: _buildDecoration(),
-        iconSize: isTextBold ? 20.0 : 0.0,
-        style: TextStyle(
-          color: isTextBold ? Colors.black : Colors.grey,
-          fontSize: 12,
-          fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
-          overflow: TextOverflow.clip,
-        ),
-        icon: isTimeDropDown!
-            ? Icon(
-          Icons.arrow_drop_down,
-          size: 12.sp,
-        )
-            : null,
-        isExpanded: true,
-        items: [
-          ...List.generate(
-            items.length,
-                (index) => DropdownMenuItem<String>(
-              value: items[index].countryName,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    items[index].countryName ?? '',
-                    overflow: TextOverflow.visible,
-                    style:  TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: svGetBodyColor(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        width: width ?? 100.w,
+        height: height ?? 60,
+        // width: getProportionateScreenWidth(0.5),
+        child: DropdownButtonFormField<String>(
+          onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
+          value: value,
+          decoration: _buildDecoration(),
+          iconSize: isTextBold ? 20.0 : 0.0,
+          style: TextStyle(
+            color: isTextBold ? Colors.black : Colors.grey,
+            fontSize: 12,
+            fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
+            overflow: TextOverflow.clip,
           ),
-        ],
-        selectedItemBuilder: (BuildContext context) {
-          return items.map((item) {
-            return Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                item.countryName ?? '',
-                style: TextStyle(
-                  color: isTextBold ? svGetBodyColor() : Colors.grey,
-                  fontSize: 12,
-                  fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
+          icon: isTimeDropDown!
+              ? Icon(
+                  Icons.arrow_drop_down,
+                  size: 12.sp,
+                )
+              : null,
+          isExpanded: true,
+          items: [
+            ...List.generate(
+              items.length,
+              (index) => DropdownMenuItem<String>(
+                value: items[index].countryName,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      items[index].countryName ?? '',
+                      overflow: TextOverflow.visible,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: svGetBodyColor(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }).toList();
-        },
-      )
-    );
+            ),
+          ],
+          selectedItemBuilder: (BuildContext context) {
+            return items.map((item) {
+              return Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  item.countryName ?? '',
+                  style: TextStyle(
+                    color: isTextBold ? svGetBodyColor() : Colors.grey,
+                    fontSize: 12,
+                    fontWeight:
+                        isTextBold ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              );
+            }).toList();
+          },
+        ));
   }
 
   OutlineInputBorder _outLinedInputBorder() {
@@ -109,7 +109,6 @@ class CustomDropdownField extends StatelessWidget {
 
   _buildDecoration() {
     return InputDecoration(
-
       hintText: hint ?? '',
       hintStyle: _setFontStyle(),
       border: _outLinedInputBorder(),
@@ -131,12 +130,10 @@ class CustomDropdownField extends StatelessWidget {
   _setFontStyle() {
     return const TextStyle(
       color: Colors.grey,
-      fontSize:
-      14,
+      fontSize: 14,
       fontFamily: 'Roboto',
       fontWeight: FontWeight.w700,
       height: 1.21,
-
     );
   }
 }

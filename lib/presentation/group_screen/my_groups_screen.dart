@@ -20,12 +20,13 @@ class MyGroupsScreen extends StatefulWidget {
 }
 
 class _MyGroupsScreenState extends State<MyGroupsScreen> {
-  GroupBloc groupBloc=GroupBloc();
+  GroupBloc groupBloc = GroupBloc();
   @override
   void initState() {
     groupBloc.add(ListGroupsEvent());
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,40 +64,41 @@ class _MyGroupsScreenState extends State<MyGroupsScreen> {
           child: const Icon(Icons.group),
         ),
         body: BlocConsumer<GroupBloc, GroupState>(
-        listener: (BuildContext context, GroupState state) {},
-    bloc: groupBloc,
-    builder: (context, state) {
-    if (state is PaginationLoadingState) {
-    return Center(
-    child: CircularProgressIndicator(
-    color: svGetBodyColor(),
-    ));
-    } else if (state is PaginationLoadedState) {
-      return ListView.builder(
-    shrinkWrap: true,
-    itemCount: groupBloc.groupListModel?.groups?.length??0, // Replace with the actual number of items
-          itemBuilder: (context, index) {
-            return GroupListItem(group:groupBloc.groupListModel!.groups![index]);
-          },
-        );
-    }else{
-      return Container();
-    }
-    }
-        )
-    );
+            listener: (BuildContext context, GroupState state) {},
+            bloc: groupBloc,
+            builder: (context, state) {
+              if (state is PaginationLoadingState) {
+                return Center(
+                    child: CircularProgressIndicator(
+                  color: svGetBodyColor(),
+                ));
+              } else if (state is PaginationLoadedState) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: groupBloc.groupListModel?.groups?.length ??
+                      0, // Replace with the actual number of items
+                  itemBuilder: (context, index) {
+                    return GroupListItem(
+                        group: groupBloc.groupListModel!.groups![index]);
+                  },
+                );
+              } else {
+                return Container();
+              }
+            }));
   }
 }
+
 class GroupListItem extends StatelessWidget {
   final Groups group;
 
-  GroupListItem( {required this.group});
+  GroupListItem({required this.group});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
-         GroupViewScreen(group.id).launch(context);
+      onTap: () {
+        GroupViewScreen(group.id).launch(context);
       },
       child: Card(
         margin: const EdgeInsets.all(8.0),
@@ -117,13 +119,14 @@ class GroupListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      group.name??'',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      group.name ?? '',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      group?.description??'',
+                      group?.description ?? '',
                       style: const TextStyle(fontSize: 14),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

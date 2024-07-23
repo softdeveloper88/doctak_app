@@ -1,9 +1,13 @@
 import 'dart:convert';
-GroupListModel groupListModelFromJson(String str) => GroupListModel.fromJson(json.decode(str));
+
+GroupListModel groupListModelFromJson(String str) =>
+    GroupListModel.fromJson(json.decode(str));
 String groupListModelToJson(GroupListModel data) => json.encode(data.toJson());
+
 class GroupListModel {
   GroupListModel({
-      this.groups,});
+    this.groups,
+  });
 
   GroupListModel.fromJson(dynamic json) {
     if (json['groups'] != null) {
@@ -22,20 +26,21 @@ class GroupListModel {
     }
     return map;
   }
-
 }
 
 Groups groupsFromJson(String str) => Groups.fromJson(json.decode(str));
 String groupsToJson(Groups data) => json.encode(data.toJson());
+
 class Groups {
   Groups({
-      this.id, 
-      this.name, 
-      this.description, 
-      this.specialtyFocus, 
-      this.privacySetting, 
-      this.logo, 
-      this.memberLimit,});
+    this.id,
+    this.name,
+    this.description,
+    this.specialtyFocus,
+    this.privacySetting,
+    this.logo,
+    this.memberLimit,
+  });
 
   Groups.fromJson(dynamic json) {
     id = json['id'];
@@ -65,5 +70,4 @@ class Groups {
     map['member_limit'] = memberLimit;
     return map;
   }
-
 }

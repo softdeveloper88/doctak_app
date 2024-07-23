@@ -5,13 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
 class TextViewWidget extends StatelessWidget {
-  TextViewWidget(
-      {
-        this.label,
-        this.value,
-        this.icon,
-
-        super.key});
+  TextViewWidget({this.label, this.value, this.icon, super.key});
 
   String? label;
   String? value;
@@ -19,31 +13,35 @@ class TextViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.only(left: 8.0,right: 8.0,top: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              flex: 4,
-              child: Text(
-                textAlign: TextAlign.start,
-                capitalizeWords(label??''),
-                style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 12.sp,fontWeight: FontWeight.w500),
-              ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 4,
+            child: Text(
+              textAlign: TextAlign.start,
+              capitalizeWords(label ?? ''),
+              style: GoogleFonts.poppins(
+                  color: svGetBodyColor(),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500),
             ),
-            Expanded(
-              flex: 5,
-              child: Text(
-                textAlign: TextAlign.end,
-                capitalizeWords(value??''),
-                style:GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 12.sp,fontWeight: FontWeight.w500),
-
-              ),
+          ),
+          Expanded(
+            flex: 5,
+            child: Text(
+              textAlign: TextAlign.end,
+              capitalizeWords(value ?? ''),
+              style: GoogleFonts.poppins(
+                  color: svGetBodyColor(),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500),
             ),
-          ],
-        ),
-      );
-    }
-
+          ),
+        ],
+      ),
+    );
+  }
 }

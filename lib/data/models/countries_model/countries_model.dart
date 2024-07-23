@@ -1,9 +1,13 @@
 import 'dart:convert';
-CountriesModel countriesModelFromJson(String str) => CountriesModel.fromJson(json.decode(str));
+
+CountriesModel countriesModelFromJson(String str) =>
+    CountriesModel.fromJson(json.decode(str));
 String countriesModelToJson(CountriesModel data) => json.encode(data.toJson());
+
 class CountriesModel {
   CountriesModel({
-      this.countries,});
+    this.countries,
+  });
 
   CountriesModel.fromJson(dynamic json) {
     if (json['countries'] != null) {
@@ -22,22 +26,22 @@ class CountriesModel {
     }
     return map;
   }
-
 }
 
 Countries countriesFromJson(String str) => Countries.fromJson(json.decode(str));
 String countriesToJson(Countries data) => json.encode(data.toJson());
+
 class Countries {
   Countries({
-      this.id, 
-      this.countryName, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.isRegistered, 
-      this.countryCode, 
-      this.countryMask, 
-      this.currency,
-      this.flag,
+    this.id,
+    this.countryName,
+    this.createdAt,
+    this.updatedAt,
+    this.isRegistered,
+    this.countryCode,
+    this.countryMask,
+    this.currency,
+    this.flag,
   });
 
   Countries.fromJson(dynamic json) {

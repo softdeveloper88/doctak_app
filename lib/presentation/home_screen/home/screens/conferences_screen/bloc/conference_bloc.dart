@@ -9,7 +9,6 @@ import 'package:nb_utils/nb_utils.dart';
 import 'conference_event.dart';
 import 'conference_state.dart';
 
-
 class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
   final ApiService postService = ApiService(Dio());
   int pageNumber = 1;
@@ -33,7 +32,7 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
     print('33 ${event.page}');
     if (event.page == 1) {
       conferenceList.clear();
-      pageNumber=1;
+      pageNumber = 1;
       emit(PaginationLoadingState());
       print(event.countryName);
       print(event.searchTerm);
@@ -43,10 +42,10 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
       SearchConferenceModel response = await postService.searchConferences(
           'Bearer ${AppData.userToken}',
           '$pageNumber',
-          event.countryName??"all",
-          event.searchTerm??'');
+          event.countryName ?? "all",
+          event.searchTerm ?? '');
       numberOfPage = response.conferences?.lastPage ?? 0;
-      if (pageNumber < numberOfPage+1) {
+      if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
         conferenceList.addAll(response.conferences?.data ?? []);
       }
@@ -84,18 +83,20 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
   //     emit(DataError('No Data Found'));
   //   }
   // }
-  Future<void> _listCountryList(LoadDropdownData event, Emitter<ConferenceState> emit) async {
+  Future<void> _listCountryList(
+      LoadDropdownData event, Emitter<ConferenceState> emit) async {
     try {
       final response = await postService.getConferenceCountries(
         'Bearer ${AppData.userToken}',
       );
-     print('333s${response.data['countries']}');
+      print('333s${response.data['countries']}');
 
-      emit(CountriesDataLoaded(countriesModel:response.data['countries'],
+      emit(CountriesDataLoaded(
+          countriesModel: response.data['countries'],
           countryName: event.countryName,
           searchTerms: event.searchTerms));
       // add(LoadDropdownData(event.newValue,event.typeValue));
-    }catch(e){
+    } catch (e) {
       emit(DataError('$e'));
     }
   }
@@ -114,5 +115,4 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
   //     emit(DataError( 'An error occurred'));
   //   }
   // }
-
 }

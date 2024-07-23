@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
@@ -14,7 +13,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> drugsData = [];
-  JobDetailModel jobDetailModel=JobDetailModel();
+  JobDetailModel jobDetailModel = JobDetailModel();
   final int nextPageTrigger = 1;
 
   JobsBloc() : super(PaginationInitialState()) {
@@ -38,27 +37,27 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     if (event.page == 1) {
       print('object clear');
       drugsData.clear();
-      pageNumber=1;
+      pageNumber = 1;
       emit(PaginationLoadingState());
       print(event.countryId);
       print(event.searchTerm);
     }
     // ProgressDialogUtils.showProgressDialog();
     // try {
-      JobsModel response = await postService.getJobsList(
-          'Bearer ${AppData.userToken}',
-          '${pageNumber}',
-          event.countryId??"1",
-          event.searchTerm??'',
-         event.isExpired=='New'? "false":'true');
-      numberOfPage = response.jobs?.lastPage ?? 0;
-      if (pageNumber < numberOfPage+1) {
-        pageNumber = pageNumber + 1;
-        drugsData.addAll(response.jobs?.data ?? []);
-      }
-      emit(PaginationLoadedState());
+    JobsModel response = await postService.getJobsList(
+        'Bearer ${AppData.userToken}',
+        '${pageNumber}',
+        event.countryId ?? "1",
+        event.searchTerm ?? '',
+        event.isExpired == 'New' ? "false" : 'true');
+    numberOfPage = response.jobs?.lastPage ?? 0;
+    if (pageNumber < numberOfPage + 1) {
+      pageNumber = pageNumber + 1;
+      drugsData.addAll(response.jobs?.data ?? []);
+    }
+    emit(PaginationLoadedState());
 
-      // emit(DataLoaded(drugsData));
+    // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   print(e);
     //
@@ -67,15 +66,15 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     //   emit(DataError('No Data Found'));
     // }
   }
+
   _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
     emit(PaginationLoadingState());
     // try {
-      JobDetailModel response = await postService.getJobsDetails(
-          'Bearer ${AppData.userToken}',
-          event.jobId.toString());
-      jobDetailModel=response;
-      emit(PaginationLoadedState());
-      // emit(DataLoaded(drugsData));
+    JobDetailModel response = await postService.getJobsDetails(
+        'Bearer ${AppData.userToken}', event.jobId.toString());
+    jobDetailModel = response;
+    emit(PaginationLoadedState());
+    // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   print(e);
     //
@@ -96,8 +95,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
           "1",
           event.countryId,
           event.searchTerm,
-         'false'
-      );
+          'false');
       print("ddd${response.jobs?.data!.length}");
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);

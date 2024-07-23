@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -32,21 +31,24 @@ class DisplayVideoState extends State<DisplayVideo> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          VideoPlayer(_controller),
-          ClosedCaption(text: _controller.value.caption.text),
-          // _ControlsOverlay(controller: _controller),
-          VideoProgressIndicator(_controller, allowScrubbing: true),
-        ],
-      ),
-    )
-        :  SizedBox(
-      height: 200,
-      child: Center(child: CircularProgressIndicator(color: svGetBodyColor(),)),
-    );
+            aspectRatio: _controller.value.aspectRatio,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: <Widget>[
+                VideoPlayer(_controller),
+                ClosedCaption(text: _controller.value.caption.text),
+                // _ControlsOverlay(controller: _controller),
+                VideoProgressIndicator(_controller, allowScrubbing: true),
+              ],
+            ),
+          )
+        : SizedBox(
+            height: 200,
+            child: Center(
+                child: CircularProgressIndicator(
+              color: svGetBodyColor(),
+            )),
+          );
   }
 
   @override

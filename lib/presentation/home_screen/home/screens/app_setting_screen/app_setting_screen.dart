@@ -19,16 +19,16 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
-    iconTheme: IconThemeData(color: context.iconColor),
-    title: Text('App Setting', style: boldTextStyle(size: 20)),
-    elevation: 0,
-    centerTitle: true,
-    actions: const [
-    // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-    ],
-    ),
+        iconTheme: IconThemeData(color: context.iconColor),
+        title: Text('App Setting', style: boldTextStyle(size: 20)),
+        elevation: 0,
+        centerTitle: true,
+        actions: const [
+          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -42,7 +42,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing:  Switch(
+              trailing: Switch(
                 onChanged: (val) {
                   appStore.toggleDarkMode(value: val);
                 },
@@ -50,9 +50,10 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                 activeColor: SVAppColorPrimary,
               ),
             ),
-            const Divider(color: Colors.grey,),
+            const Divider(
+              color: Colors.grey,
+            ),
             ListTile(
-
               title: const Text(
                 'App Language',
                 style: TextStyle(
@@ -60,7 +61,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing:  PopupMenuButton(
+              trailing: PopupMenuButton(
                 icon: Icon(
                   Icons.translate,
                   color: context.iconColor,
@@ -109,8 +110,10 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
             //   ),
             //
             // ),
-            const Divider(color: Colors.grey,),
-            if(AppData.isShowGoogleBannerAds??false)BannerAdWidget()
+            const Divider(
+              color: Colors.grey,
+            ),
+            if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
           ],
         ),
       ),

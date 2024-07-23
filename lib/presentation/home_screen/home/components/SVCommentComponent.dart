@@ -12,9 +12,9 @@ import '../../utils/SVCommon.dart';
 
 class SVCommentComponent extends StatefulWidget {
   final PostComments comment;
-   CommentBloc commentBloc;
+  CommentBloc commentBloc;
 
-  SVCommentComponent({required this.comment,required this.commentBloc});
+  SVCommentComponent({required this.comment, required this.commentBloc});
 
   @override
   State<SVCommentComponent> createState() => _SVCommentComponentState();
@@ -34,9 +34,8 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: (){
-              SVProfileFragment(userId:widget.comment.userId).launch(context);
-
+            onTap: () {
+              SVProfileFragment(userId: widget.comment.userId).launch(context);
             },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -44,7 +43,8 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundImage: NetworkImage('${AppData.imageUrl}${widget.comment.profilePic}'),
+                  backgroundImage: NetworkImage(
+                      '${AppData.imageUrl}${widget.comment.profilePic}'),
                 ),
                 const SizedBox(width: 12),
                 Row(
@@ -52,73 +52,75 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                   children: [
                     Text(
                       widget.comment.name ?? 'No Name',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(width: 6), // Added margin between name and verified icon
+                    const SizedBox(
+                        width:
+                            6), // Added margin between name and verified icon
                     Image.asset('images/socialv/icons/ic_TickSquare.png',
                         height: 14, width: 14, fit: BoxFit.cover),
                   ],
                 ),
                 const Spacer(),
-               if(widget.comment.userId==AppData.logInUserId)
-                 PopupMenuButton(
-                   itemBuilder: (context) {
-                     return [
-                       PopupMenuItem(
-                         child: Builder(
-                             builder: (context) {
-                               return Column(
-                                 children: ["Delete"]
-                                     .map((String item) {
-                                   return PopupMenuItem(
-                                     value: item,
-                                     child: Text(item),
-                                   );
-                                 }).toList(),
-                               );
-                             }),
-                       ),
-                     ];
-                   },
-                   onSelected: (value) {
-                     if (value == 'Delete') {
-                       showDialog(
-                           context: context,
-                           builder: (BuildContext context) {
-                             return CustomAlertDialog(
-                                 title: 'Are you sure want to delete comment ?',
-                                 callback: () {
-                                   widget.commentBloc.add(DeleteCommentEvent(
-                                       commentId: widget.comment.id
-                                           .toString()));
-                                   Navigator.of(context).pop();
-                                 });
-                           });
-                     }
-                         },
-                       )
+                if (widget.comment.userId == AppData.logInUserId)
+                  PopupMenuButton(
+                    itemBuilder: (context) {
+                      return [
+                        PopupMenuItem(
+                          child: Builder(builder: (context) {
+                            return Column(
+                              children: ["Delete"].map((String item) {
+                                return PopupMenuItem(
+                                  value: item,
+                                  child: Text(item),
+                                );
+                              }).toList(),
+                            );
+                          }),
+                        ),
+                      ];
+                    },
+                    onSelected: (value) {
+                      if (value == 'Delete') {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CustomAlertDialog(
+                                  title:
+                                      'Are you sure want to delete comment ?',
+                                  callback: () {
+                                    widget.commentBloc.add(DeleteCommentEvent(
+                                        commentId:
+                                            widget.comment.id.toString()));
+                                    Navigator.of(context).pop();
+                                  });
+                            });
+                      }
+                    },
+                  )
 
-      //            IconButton(
-      // onPressed: (){
-      //
-      // },
-      //            icon:const Icon(Icons.delete,color: Colors.red,))
-      //
-
+                //            IconButton(
+                // onPressed: (){
+                //
+                // },
+                //            icon:const Icon(Icons.delete,color: Colors.red,))
+                //
               ],
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            widget.comment.comment ?? '',
-            style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize:16)
-            // TextStyle(color: Colors.grey[800], fontSize: 16),
-          ),
+          Text(widget.comment.comment ?? '',
+              style: GoogleFonts.poppins(color: svGetBodyColor(), fontSize: 16)
+              // TextStyle(color: Colors.grey[800], fontSize: 16),
+              ),
           Text(
             timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
             style: const TextStyle(color: Colors.grey, fontSize: 12),
           ),
-          Divider(color: Colors.grey[300],)
+          Divider(
+            color: Colors.grey[300],
+          )
         ],
       ),
     );

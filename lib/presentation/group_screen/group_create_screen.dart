@@ -44,10 +44,11 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
           },
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: Image.asset(
-      'assets/images/search.png',
-      height: 20,
-      width: 20),)
+          IconButton(
+            onPressed: () {},
+            icon:
+                Image.asset('assets/images/search.png', height: 20, width: 20),
+          )
         ],
       ),
       body: SingleChildScrollView(
@@ -66,8 +67,9 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
 
   void onNextStep() {
     setState(() {
-      if (step < 4) {step += 1;}
-      else {
+      if (step < 4) {
+        step += 1;
+      } else {
         Navigator.pop(context);
       }
     });
@@ -685,7 +687,7 @@ class _Step1State extends State<Step1> {
         child: Column(
           children: [
             TextFieldEditWidget(
-              textInputAction:TextInputAction.next,
+              textInputAction: TextInputAction.next,
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
@@ -778,17 +780,18 @@ class _Step1State extends State<Step1> {
               ),
             ),
             TextFieldEditWidget(
-              textInputAction:TextInputAction.done,
+              textInputAction: TextInputAction.done,
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
               label: 'Tags:',
-              value:"",
+              value: "",
               onFieldSubmitted: (value) => setState(() {
-
-                widget.groupBloc.tags.add({'value': value});}
-              ),
-              onSave: (value) => setState(() { widget.groupBloc.tags.add({'value': value});}),
+                widget.groupBloc.tags.add({'value': value});
+              }),
+              onSave: (value) => setState(() {
+                widget.groupBloc.tags.add({'value': value});
+              }),
             ),
             TextFieldEditWidget(
               isEditModeMap: true,
@@ -826,8 +829,12 @@ class _Step1State extends State<Step1> {
               index: 2,
               label: 'Interest:',
               value: "",
-              onFieldSubmitted:(value)=> setState(() { widget.groupBloc.interest.add({'value': value});}),
-              onSave:(value)=> setState(() { widget.groupBloc.interest.add({'value': value});}),
+              onFieldSubmitted: (value) => setState(() {
+                widget.groupBloc.interest.add({'value': value});
+              }),
+              onSave: (value) => setState(() {
+                widget.groupBloc.interest.add({'value': value});
+              }),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
@@ -856,9 +863,12 @@ class _Step1State extends State<Step1> {
               index: 2,
               label: 'Language:',
               value: '',
-              onFieldSubmitted:(value)=> setState(() { widget.groupBloc.language.add({'value': value});}),
-              onSave:(value)=> setState(() { widget.groupBloc.language.add({'value': value});}),
-
+              onFieldSubmitted: (value) => setState(() {
+                widget.groupBloc.language.add({'value': value});
+              }),
+              onSave: (value) => setState(() {
+                widget.groupBloc.language.add({'value': value});
+              }),
             ),
             TextFieldEditWidget(
               isEditModeMap: true,
@@ -894,7 +904,6 @@ class _Step1State extends State<Step1> {
           ],
         ),
       ),
-
     );
   }
 }
@@ -936,8 +945,8 @@ class _Step2State extends State<Step2> {
       padding: const EdgeInsets.all(8),
       color: context.cardColor,
       child: Form(
-    key: _formKey,
-      child: Column(
+        key: _formKey,
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -970,8 +979,7 @@ class _Step2State extends State<Step2> {
               ),
               onChanged: (String? newValue) {
                 setState(() {
-
-                  widget.groupBloc.status = newValue=='Active'?'1':'0';
+                  widget.groupBloc.status = newValue == 'Active' ? '1' : '0';
                 });
               },
             ),
@@ -1021,16 +1029,13 @@ class _Step2State extends State<Step2> {
               onChanged: (String? newValue) {
                 setState(() {
                   // a. Open (Open, Every one can post), b. Members (Members, Only members) c. Admin (Admin)
-                 if(newValue=='Open, Every one can post'){
-                   widget.groupBloc.postPermission = 'Open';
-
-                 }else if(newValue=='Members, Only members'){
-                   widget.groupBloc.postPermission = 'Members';
-
-                 }else{
-                   widget.groupBloc.postPermission = 'Admin';
-                 }
-
+                  if (newValue == 'Open, Every one can post') {
+                    widget.groupBloc.postPermission = 'Open';
+                  } else if (newValue == 'Members, Only members') {
+                    widget.groupBloc.postPermission = 'Members';
+                  } else {
+                    widget.groupBloc.postPermission = 'Admin';
+                  }
                 });
               },
             ),
@@ -1054,7 +1059,8 @@ class _Step2State extends State<Step2> {
               ),
               onChanged: (String? newValue) {
                 setState(() {
-                  widget.groupBloc.allowInSearch = newValue=='Yes'?'1':'0';
+                  widget.groupBloc.allowInSearch =
+                      newValue == 'Yes' ? '1' : '0';
                 });
               },
             ),
@@ -1078,7 +1084,11 @@ class _Step2State extends State<Step2> {
               ),
               onChanged: (String? newValue) {
                 setState(() {
-                  widget.groupBloc.visibility = newValue=='Only me'?'only_me':newValue=='Public'?'public':'followers';
+                  widget.groupBloc.visibility = newValue == 'Only me'
+                      ? 'only_me'
+                      : newValue == 'Public'
+                          ? 'public'
+                          : 'followers';
                 });
               },
             ),
@@ -1102,7 +1112,8 @@ class _Step2State extends State<Step2> {
               ),
               onChanged: (String? newValue) {
                 setState(() {
-                  widget.groupBloc.joinRequest = newValue=='Yes,User can Join directly'?'1':'0';
+                  widget.groupBloc.joinRequest =
+                      newValue == 'Yes,User can Join directly' ? '1' : '0';
                 });
               },
             ),
@@ -1112,8 +1123,8 @@ class _Step2State extends State<Step2> {
               index: 2,
               maxLines: 1,
               label: 'Custom Rules:',
-              value: widget.groupBloc.customRules ,
-              onSave: (value)=> widget.groupBloc.customRules = value,
+              value: widget.groupBloc.customRules,
+              onSave: (value) => widget.groupBloc.customRules = value,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1437,25 +1448,43 @@ class Step4 extends StatelessWidget {
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.all(8),
       color: context.cardColor,
-      child:  BlocBuilder(
+      child: BlocBuilder(
           bloc: groupBloc,
-          builder: (context,state){
-            if(state is PaginationLoadedState){
+          builder: (context, state) {
+            if (state is PaginationLoadedState) {
               return Column(
                 children: [
-                   Text('Successfully',style: GoogleFonts.poppins(color: Colors.blue,fontSize: 14.sp,fontWeight: FontWeight.w500),),
-                   const SizedBox(height: 10,),
+                  Text(
+                    'Successfully',
+                    style: GoogleFonts.poppins(
+                        color: Colors.blue,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Image.asset(
                     'assets/images/success.png',
                     height: 30.w,
                     width: 30.w,
                   ),
-                  const SizedBox(height: 20,),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('Group Created Successfully',style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w400),),
+                    child: Text(
+                      'Group Created Successfully',
+                      style: GoogleFonts.poppins(
+                          color: svGetBodyColor(),
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400),
+                    ),
                   ),
-                  const SizedBox(height: 30,),
+                  const SizedBox(
+                    height: 30,
+                  ),
                   Container(
                     width: 90.w,
                     padding: const EdgeInsets.all(8.0),
@@ -1468,24 +1497,44 @@ class Step4 extends StatelessWidget {
                   ),
                 ],
               );
-            }else if(state is DataError){
+            } else if (state is DataError) {
               return Column(
                 children: [
-                  const SizedBox(height: 20,),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   Image.asset(
                     'assets/images/error.png',
                     height: 30.w,
                     color: Colors.grey,
                     width: 30.w,
                   ),
-                  const SizedBox(height: 20,),
-                  Text('Error !',style: GoogleFonts.poppins(color: Colors.red,fontSize: 14.sp,fontWeight: FontWeight.w500),),
-                  const SizedBox(height: 10,),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Error !',
+                    style: GoogleFonts.poppins(
+                        color: Colors.red,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('An Error Occurred While Creating The Group. Please Go To The Basic Info And Provide The Correct Details',style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 10.sp,fontWeight: FontWeight.w400),),
+                    child: Text(
+                      'An Error Occurred While Creating The Group. Please Go To The Basic Info And Provide The Correct Details',
+                      style: GoogleFonts.poppins(
+                          color: svGetBodyColor(),
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400),
+                    ),
                   ),
-                  const SizedBox(height: 30,),
+                  const SizedBox(
+                    height: 30,
+                  ),
                   Container(
                     width: 90.w,
                     padding: const EdgeInsets.all(8.0),
@@ -1498,13 +1547,13 @@ class Step4 extends StatelessWidget {
                   ),
                 ],
               );
-            }else{
+            } else {
               return Image.asset(
                 'assets/images/success.png',
                 color: grey,
               );
             }
-      }),
+          }),
     );
   }
 }

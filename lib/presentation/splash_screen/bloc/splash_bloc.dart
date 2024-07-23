@@ -19,11 +19,12 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // on<UpdateFirstDropdownValue>(_listCountryList);
   }
 
-  Future<void> _listCountryList(LoadDropdownData event,
-      Emitter<SplashState> emit) async {
+  Future<void> _listCountryList(
+      LoadDropdownData event, Emitter<SplashState> emit) async {
     var firstDropdownValues = await _onGetCountries();
     // print("DD ${firstDropdownValues!.countries!}");
-    emit(CountriesDataLoaded(countriesModel: firstDropdownValues!,
+    emit(CountriesDataLoaded(
+        countriesModel: firstDropdownValues!,
         countryFlag: event.countryFlag,
         typeValue: event.typeValue,
         searchTerms: event.searchTerms));
@@ -53,15 +54,16 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     }
   }
 
-  Future<void> _listCountryList1(LoadDropdownData1 event,
-      Emitter<SplashState> emit) async {
+  Future<void> _listCountryList1(
+      LoadDropdownData1 event, Emitter<SplashState> emit) async {
     try {
       final response = await postService.getConferenceCountries(
         'Bearer ${AppData.userToken}',
       );
       print('333s${response.data['countries']}');
 
-      emit(CountriesDataLoaded1(countriesModelList: response.data['countries'],
+      emit(CountriesDataLoaded1(
+          countriesModelList: response.data['countries'],
           countryName: event.countryName,
           searchTerms: event.searchTerms));
       // add(LoadDropdownData(event.newValue,event.typeValue));
@@ -69,5 +71,4 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       // emit(CountriesDataError('$e'));
     }
   }
-
 }

@@ -1,4 +1,3 @@
-
 String capitalizeWords(String text) {
   if (text == null || text.isEmpty) {
     return text;

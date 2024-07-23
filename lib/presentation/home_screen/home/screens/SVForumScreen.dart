@@ -52,17 +52,21 @@ class _SVForumScreenState extends State<SVForumScreen> {
           children: [
             Container(
               padding: const EdgeInsets.only(left: 8.0),
-
               margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(8)),
+              decoration: BoxDecoration(
+                  color: context.cardColor, borderRadius: radius(8)),
               child: AppTextField(
                 textFieldType: TextFieldType.NAME,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Search Here',
                   hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                  prefixIcon:
-                      Image.asset('images/socialv/icons/ic_Search.png', height: 16, width: 16, fit: BoxFit.cover, color: svGetBodyColor()).paddingAll(16),
+                  prefixIcon: Image.asset('images/socialv/icons/ic_Search.png',
+                          height: 16,
+                          width: 16,
+                          fit: BoxFit.cover,
+                          color: svGetBodyColor())
+                      .paddingAll(16),
                 ),
               ),
             ),
@@ -74,13 +78,19 @@ class _SVForumScreenState extends State<SVForumScreen> {
                 return AppButton(
                   shapeBorder: RoundedRectangleBorder(borderRadius: radius(8)),
                   text: tabList[index],
-                  textStyle: boldTextStyle(color: selectedTab == index ? Colors.white : svGetBodyColor(), size: 14),
+                  textStyle: boldTextStyle(
+                      color: selectedTab == index
+                          ? Colors.white
+                          : svGetBodyColor(),
+                      size: 14),
                   onTap: () {
                     selectedTab = index;
                     setState(() {});
                   },
                   elevation: 0,
-                  color: selectedTab == index ? SVAppColorPrimary : svGetScaffoldColor(),
+                  color: selectedTab == index
+                      ? SVAppColorPrimary
+                      : svGetScaffoldColor(),
                 );
               },
             ),

@@ -19,7 +19,6 @@ class UserChatComponent extends StatefulWidget {
 }
 
 class _UserChatComponentState extends State<UserChatComponent> {
-
   ChatBloc chatBloc = ChatBloc();
 
   @override
@@ -85,14 +84,18 @@ class _UserChatComponentState extends State<UserChatComponent> {
                                   color: SVAppColorPrimary, width: 2),
                               borderRadius: radius(14),
                             ),
-                            child: chatBloc.contactsList[index].profilePic?.isEmpty??true
-                                ? Image.asset('images/socialv/faces/face_2.png',
+                            child: chatBloc.contactsList[index].profilePic
+                                        ?.isEmpty ??
+                                    true
+                                ? Image.asset(
+                                    'images/socialv/faces/face_2.png',
                                     height: 58,
                                     width: 58,
                                     fit: BoxFit.cover,
                                   ).cornerRadiusWithClipRRect(SVAppCommonRadius)
                                 : CachedNetworkImage(
-                                    imageUrl: '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
+                                    imageUrl:
+                                        '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
                                     height: 58,
                                     width: 58,
                                     fit: BoxFit.cover,
@@ -101,7 +104,9 @@ class _UserChatComponentState extends State<UserChatComponent> {
                           ).onTap(() {
                             print(chatBloc.contactsList[index].id);
                             // ChatRoomScreen(username: '${chatBloc.contactsList[index].firstName} ${chatBloc.contactsList[index].lastName}',profilePic: '${chatBloc.contactsList[index].profilePic}',id: '',roomId: '${chatBloc.contactsList[index].roomId}',).launch(context);
-                            SVProfileFragment(userId:chatBloc.contactsList[index].id).launch(context);
+                            SVProfileFragment(
+                                    userId: chatBloc.contactsList[index].id)
+                                .launch(context);
 
                             // SVStoryScreen(story: storyList[index])
                             //     .launch(context);

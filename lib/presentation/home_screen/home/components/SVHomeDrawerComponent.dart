@@ -135,14 +135,16 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                           AppData.userType == 'doctor'
                               ? "Dr. ${capitalizeWords(AppData.name)}"
                               : capitalizeWords(AppData.name), // User's name
-                          style: boldTextStyle(size: 18,color: Colors.white),
+                          style: boldTextStyle(size: 18, color: Colors.white),
                         ),
                         2.height,
                         Text(
                             textAlign: TextAlign.center,
                             AppData.userType == 'doctor'
-                                ? AppData.specialty:  AppData.userType == 'student'?
-                                 "${AppData.university}\n Student":AppData.specialty,
+                                ? AppData.specialty
+                                : AppData.userType == 'student'
+                                    ? "${AppData.university}\n Student"
+                                    : AppData.specialty,
                             // User's specialty
                             style: secondaryTextStyle(color: Colors.white)),
                       ],
@@ -167,14 +169,19 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 children: options.map((e) {
                   int index = options.indexOf(e);
                   return SettingItemWidget(
-                    trailing:const Icon(Icons.arrow_forward_ios_rounded,color: Colors.white,size: 25,),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.white,
+                      size: 25,
+                    ),
                     decoration: BoxDecoration(
                         color: selectedIndex == index
                             ? SVAppColorPrimary.withAlpha(30)
                             : SVAppColorPrimary),
                     title: e.title.validate(),
-                    titleTextStyle: boldTextStyle(size: 14,color: Colors.white),
-                    leading:Image.asset(e.image??"",
+                    titleTextStyle:
+                        boldTextStyle(size: 14, color: Colors.white),
+                    leading: Image.asset(e.image ?? "",
                         height: 22,
                         width: 22,
                         fit: BoxFit.cover,
@@ -266,9 +273,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                         print(selectedIndex);
                         AboutUsScreen().launch(context);
 
-
                         // SVGroupProfileScreen().launch(context);
-                      }else if (selectedIndex == 14) {
+                      } else if (selectedIndex == 14) {
                         finish(context);
                         print(selectedIndex);
                         // ComingSoonScreen().launch(context);
@@ -297,7 +303,11 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                   );
                 }).toList(),
               ),
-              const Divider(indent: 16, endIndent: 16,color: Colors.white,),
+              const Divider(
+                indent: 16,
+                endIndent: 16,
+                color: Colors.white,
+              ),
               Center(
                 child: SnapHelperWidget<PackageInfo>(
                   future: PackageInfo.fromPlatform(),
@@ -309,31 +319,35 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
             ],
           ),
         ),
-        Stack(
-          children:[
-            Container(
-              color: SVAppColorPrimary,
-              // decoration: const BoxDecoration(
-              //     color: Colors.white,
-              //     borderRadius: BorderRadius.only(topRight: Radius.circular(300),bottomRight: Radius.circular(300))
-              // ),
-              width: 20,
-            ),
-            InkWell(
-              onTap: (){
-                finish(context);
-              },
-              child: Container(
+        Stack(children: [
+          Container(
+            color: SVAppColorPrimary,
+            // decoration: const BoxDecoration(
+            //     color: Colors.white,
+            //     borderRadius: BorderRadius.only(topRight: Radius.circular(300),bottomRight: Radius.circular(300))
+            // ),
+            width: 20,
+          ),
+          InkWell(
+            onTap: () {
+              finish(context);
+            },
+            child: Container(
               decoration: const BoxDecoration(
-                color: SVAppColorPrimary,
-                borderRadius: BorderRadius.only(topRight: Radius.circular(300),bottomRight: Radius.circular(300))
-              ),
+                  color: SVAppColorPrimary,
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(300),
+                      bottomRight: Radius.circular(300))),
               margin: const EdgeInsets.only(top: 50),
               width: 50,
               height: 100,
-              child:  const Icon(Icons.arrow_back_ios_new_rounded,color: Colors.white,size: 40,),
-                        ),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
             ),
+          ),
         ])
       ],
     );
@@ -379,6 +393,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
       },
     );
   }
+
   deleteAccount(BuildContext context) async {
     return showDialog(
       context: context,
@@ -422,6 +437,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
       },
     );
   }
+
   Future<bool> deleteUserAccount() async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/delete-account');
     try {
@@ -445,6 +461,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
     }
     return false;
   }
+
   Future<bool> logoutUserAccount() async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/logout');
     try {

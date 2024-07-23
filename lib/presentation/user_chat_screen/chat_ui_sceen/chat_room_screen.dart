@@ -354,10 +354,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               }
               print(textMessage);
               // setState(() {
-                typingTimer = Timer(const Duration(seconds: 2), () {
-                  onTypingStopped();
-                  // chatBloc.add(LoadRoomMessageEvent(
-                  //     page: 0, userId: widget.id, roomId: widget.roomId));
+              typingTimer = Timer(const Duration(seconds: 2), () {
+                onTypingStopped();
+                // chatBloc.add(LoadRoomMessageEvent(
+                //     page: 0, userId: widget.id, roomId: widget.roomId));
                 // });
                 // messagesList.insert(
                 //   0,
@@ -701,6 +701,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
@@ -823,36 +824,40 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                 ),
                               )
                             : InkWell(
-                          onLongPress: (){
-                            if(bloc.messagesList[index].userId != widget.id){
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CustomAlertDialog(
-                                      title: 'Are you sure want to delete message ?',
-                                      callback: () {
-                                        bloc.add(DeleteMessageEvent(
-                                            id: bloc.messagesList[index].id.toString()));
-                                        Navigator.of(context).pop();
-                                      });
-                                });
-                            }
-                          },
-                              child: ChatBubble(
+                                onLongPress: () {
+                                  if (bloc.messagesList[index].userId !=
+                                      widget.id) {
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return CustomAlertDialog(
+                                              title:
+                                                  'Are you sure want to delete message ?',
+                                              callback: () {
+                                                bloc.add(DeleteMessageEvent(
+                                                    id: bloc
+                                                        .messagesList[index].id
+                                                        .toString()));
+                                                Navigator.of(context).pop();
+                                              });
+                                        });
+                                  }
+                                },
+                                child: ChatBubble(
                                   profile: bloc.messagesList[index].userId !=
                                           widget.id
                                       ? widget.profilePic
                                       : "${AppData.imageUrl}${widget.profilePic}",
                                   message: bloc.messagesList[index].body ?? '',
-                                  isMe:
-                                      bloc.messagesList[index].userId == widget.id
-                                          ? false
-                                          : true,
+                                  isMe: bloc.messagesList[index].userId ==
+                                          widget.id
+                                      ? false
+                                      : true,
                                   attachmentJson:
                                       bloc.messagesList[index].attachment,
                                   createAt: bloc.messagesList[index].createdAt,
                                 ),
-                            );
+                              );
                       },
                       itemCount: bloc.messagesList.length,
                     ),
@@ -871,110 +876,124 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     decoration: BoxDecoration(
                       color: context.cardColor,
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 16.0),
                     child: Row(
                       children: [
                         Flexible(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: appStore.isDarkMode ? svGetScaffoldColor() : cardLightColor,
+                              color: appStore.isDarkMode
+                                  ? svGetScaffoldColor()
+                                  : cardLightColor,
                               borderRadius: BorderRadius.circular(20.0),
                             ),
                             child: Row(
                               children: [
                                 isLoading
                                     ? Container(
-                                  width: 25,
-                                  height: 25,
-                                  margin: const EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(
-                                    color: svGetBodyColor(),
-                                  ),
-                                )
+                                        width: 25,
+                                        height: 25,
+                                        margin: const EdgeInsets.all(8.0),
+                                        child: CircularProgressIndicator(
+                                          color: svGetBodyColor(),
+                                        ),
+                                      )
                                     : IconButton(
-                                  icon: const Icon(Icons.attach_file),
-                                  onPressed: () async {
-
-                                    const permission = Permission.photos;
-                                    if (await permission.isGranted) {
-                                      _showFileOptions();
-                                    } else if (await permission.isDenied) {
-                                      final result = await permission.request();
-                                      if (result.isGranted) {
-                                        _showFileOptions();
-                                      } else if (result.isDenied) {
-                                        print("isDenied");
-                                      } else if (result.isPermanentlyDenied) {
-                                        print("isPermanentlyDenied");
-                                        _permissionDialog(context);
-                                      }
-                                    } else if (await permission.isPermanentlyDenied) {
-                                      print("isPermanentlyDenied");
-                                      _permissionDialog(context);
-                                    }
-
-                                  },
-                                ),
+                                        icon: const Icon(Icons.attach_file),
+                                        onPressed: () async {
+                                          const permission = Permission.photos;
+                                          if (await permission.isGranted) {
+                                            _showFileOptions();
+                                          } else if (await permission
+                                              .isDenied) {
+                                            final result =
+                                                await permission.request();
+                                            if (result.isGranted) {
+                                              _showFileOptions();
+                                            } else if (result.isDenied) {
+                                              print("isDenied");
+                                            } else if (result
+                                                .isPermanentlyDenied) {
+                                              print("isPermanentlyDenied");
+                                              _permissionDialog(context);
+                                            }
+                                          } else if (await permission
+                                              .isPermanentlyDenied) {
+                                            print("isPermanentlyDenied");
+                                            _permissionDialog(context);
+                                          }
+                                        },
+                                      ),
                                 const SizedBox(width: 8.0),
                                 isRecording
                                     ? const Text('Recording Start..')
                                     : Flexible(
-                                  child: Container(
-                                    height: 40,
-                                    padding: const EdgeInsets.only(left: 8, right: 8),
-                                    decoration: BoxDecoration(
-                                      color: appStore.isDarkMode
-                                          ? svGetScaffoldColor()
-                                          : cardLightColor,
-                                      borderRadius: BorderRadius.circular(20.0),
-                                    ),
-                                    child: Center(
-                                      child: TextField(
-                                        controller: textController,
-                                        decoration: const InputDecoration.collapsed(
-                                          hintText: 'Type your message...',
+                                        child: Container(
+                                          height: 40,
+                                          padding: const EdgeInsets.only(
+                                              left: 8, right: 8),
+                                          decoration: BoxDecoration(
+                                            color: appStore.isDarkMode
+                                                ? svGetScaffoldColor()
+                                                : cardLightColor,
+                                            borderRadius:
+                                                BorderRadius.circular(20.0),
+                                          ),
+                                          child: Center(
+                                            child: TextField(
+                                              controller: textController,
+                                              decoration: const InputDecoration
+                                                  .collapsed(
+                                                hintText:
+                                                    'Type your message...',
+                                              ),
+                                              maxLines: null,
+                                              keyboardType:
+                                                  TextInputType.multiline,
+                                              textInputAction:
+                                                  TextInputAction.newline,
+                                              onChanged: (Text) {
+                                                onTextFieldFocused(true);
+                                              },
+                                              onTapOutside: (text) {
+                                                onTextFieldFocused(false);
+                                              },
+                                            ),
+                                          ),
                                         ),
-                                        maxLines: null,
-                                        keyboardType: TextInputType.multiline,
-                                        textInputAction: TextInputAction.newline,
-                                        onChanged: (Text) {
-                                          onTextFieldFocused(true);
-                                        },
-                                        onTapOutside: (text) {
-                                          onTextFieldFocused(false);
-                                        },
                                       ),
-                                    ),
-                                  ),
-                                ),
                                 const SizedBox(width: 8.0),
                                 _isFileUploading
                                     ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 3),
-                                )
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 3),
+                                      )
                                     : IconButton(
-                                  onPressed: () async {
-                                    if(textController.text.isNotEmpty) {
-                                      String message = textController.text;
-                                      _isFileUploading = true;
-                                      chatBloc.add(SendMessageEvent(
-                                          userId: AppData.logInUserId,
-                                          roomId: widget.roomId == '' ? chatBloc
-                                              .roomId : widget.roomId,
-                                          receiverId: widget.id,
-                                          attachmentType: 'file',
-                                          file: _selectedFile?.path ?? '',
-                                          message: message));
-                                      textController.clear();
-                                      setState(() {});
-                                      _selectedFile = null;
-                                      scrollToBottom();
-                                    }
-                                  },
-                                  icon: const Icon(Icons.send),
-                                ),
+                                        onPressed: () async {
+                                          if (textController.text.isNotEmpty) {
+                                            String message =
+                                                textController.text;
+                                            _isFileUploading = true;
+                                            chatBloc.add(SendMessageEvent(
+                                                userId: AppData.logInUserId,
+                                                roomId: widget.roomId == ''
+                                                    ? chatBloc.roomId
+                                                    : widget.roomId,
+                                                receiverId: widget.id,
+                                                attachmentType: 'file',
+                                                file: _selectedFile?.path ?? '',
+                                                message: message));
+                                            textController.clear();
+                                            setState(() {});
+                                            _selectedFile = null;
+                                            scrollToBottom();
+                                          }
+                                        },
+                                        icon: const Icon(Icons.send),
+                                      ),
                               ],
                             ),
                           ),
@@ -1267,7 +1286,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           // <-- SEE HERE
-          title:  Text('You want to enable permission?',textAlign: TextAlign.center,style: GoogleFonts.poppins(fontSize: 14.sp),),
+          title: Text(
+            'You want to enable permission?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 14.sp),
+          ),
           // content: const SingleChildScrollView(
           //   child: ListBody(
           // //     children: <Widget>[
@@ -1347,8 +1370,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     });
     chatBloc.add(LoadRoomMessageEvent(
         page: 0, userId: widget.id, roomId: widget.roomId));
-
   }
+
   void _startTimerForChat() {
     _timerChat = Timer.periodic(Duration(seconds: 10), (timer) {
       print('call timer');
@@ -1356,7 +1379,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           page: 0, userId: widget.id, roomId: widget.roomId));
     });
   }
-
 
 // List<RtmAttribute> convertToRtmAttributes(Map<String, dynamic> attributes) {
 //   List<RtmAttribute> rtmAttributes = [];

@@ -54,7 +54,7 @@ class PhotoGrid extends StatelessWidget {
           if (urlType == "image") {
             return GestureDetector(
               child: CustomImageView(
-               imagePath:  imageUrl,
+                imagePath: imageUrl,
                 fit: BoxFit.cover,
                 height: 300,
                 width: context.width() - 32,

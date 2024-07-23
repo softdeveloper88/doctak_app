@@ -15,7 +15,12 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
   Color _fontColor = Colors.black;
   FontWeight _fontWeight = FontWeight.normal;
 
-  final List<String> _fontFamilies = ['Roboto', 'Arial', 'Courier New', 'Times New Roman'];
+  final List<String> _fontFamilies = [
+    'Roboto',
+    'Arial',
+    'Courier New',
+    'Times New Roman'
+  ];
 
   void _updateStyle() {
     widget.onStyleChanged({
@@ -123,7 +128,8 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
               children: <Widget>[
                 Expanded(
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     onPressed: () {
                       setState(() {
                         _fontColor = Colors.red;
@@ -136,7 +142,8 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor:  Colors.green),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
                     onPressed: () {
                       setState(() {
                         _fontColor = Colors.green;
@@ -149,7 +156,8 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                     onPressed: () {
                       setState(() {
                         _fontColor = Colors.blue;

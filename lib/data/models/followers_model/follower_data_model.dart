@@ -1,18 +1,25 @@
 import 'dart:convert';
-FollowerDataModel followerDataModelFromJson(String str) => FollowerDataModel.fromJson(json.decode(str));
-String followerDataModelToJson(FollowerDataModel data) => json.encode(data.toJson());
+
+FollowerDataModel followerDataModelFromJson(String str) =>
+    FollowerDataModel.fromJson(json.decode(str));
+String followerDataModelToJson(FollowerDataModel data) =>
+    json.encode(data.toJson());
+
 class FollowerDataModel {
   FollowerDataModel({
-      this.totalFollows, 
-      this.profilePicture, 
-      this.coverPicture, 
-      this.totalPosts, 
-      this.user, 
-      this.followers, 
-      this.following,});
+    this.totalFollows,
+    this.profilePicture,
+    this.coverPicture,
+    this.totalPosts,
+    this.user,
+    this.followers,
+    this.following,
+  });
 
   FollowerDataModel.fromJson(dynamic json) {
-    totalFollows = json['total_follows'] != null ? TotalFollows.fromJson(json['total_follows']) : null;
+    totalFollows = json['total_follows'] != null
+        ? TotalFollows.fromJson(json['total_follows'])
+        : null;
     profilePicture = json['profile_picture'];
     coverPicture = json['cover_picture'];
     totalPosts = json['total_posts'];
@@ -57,19 +64,20 @@ class FollowerDataModel {
     }
     return map;
   }
-
 }
 
 Following followingFromJson(String str) => Following.fromJson(json.decode(str));
 String followingToJson(Following data) => json.encode(data.toJson());
+
 class Following {
   Following({
-      this.id,
-      this.profileUrl,
-      this.isCurrentlyFollow,
-      this.name,
-      this.profilePic, 
-      this.specialty,});
+    this.id,
+    this.profileUrl,
+    this.isCurrentlyFollow,
+    this.name,
+    this.profilePic,
+    this.specialty,
+  });
 
   Following.fromJson(dynamic json) {
     id = json['user_id'];
@@ -96,11 +104,11 @@ class Following {
     map['specialty'] = specialty;
     return map;
   }
-
 }
 
 Followers followersFromJson(String str) => Followers.fromJson(json.decode(str));
 String followersToJson(Followers data) => json.encode(data.toJson());
+
 class Followers {
   Followers({
     this.id,
@@ -108,7 +116,8 @@ class Followers {
     this.isCurrentlyFollow,
     this.name,
     this.profilePic,
-    this.specialty,});
+    this.specialty,
+  });
 
   Followers.fromJson(dynamic json) {
     id = json['user_id'];
@@ -135,47 +144,48 @@ class Followers {
     map['specialty'] = specialty;
     return map;
   }
-
 }
 
 User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
+
 class User {
   User({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.emailVerifiedAt, 
-      this.userType, 
-      this.name, 
-      this.email, 
-      this.token, 
-      this.phone, 
-      this.licenseNo, 
-      this.specialty, 
-      this.status, 
-      this.role, 
-      this.gender, 
-      this.dob, 
-      this.clinicName, 
-      this.college, 
-      this.countryOrigin, 
-      this.profilePic, 
-      this.practicingCountry, 
-      this.otpCode, 
-      this.balance, 
-      this.title, 
-      this.city, 
-      this.country, 
-      this.isAdmin, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.activeStatus, 
-      this.avatar, 
-      this.darkMode, 
-      this.messengerColor, 
-      this.isPremium, 
-      this.background,});
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.emailVerifiedAt,
+    this.userType,
+    this.name,
+    this.email,
+    this.token,
+    this.phone,
+    this.licenseNo,
+    this.specialty,
+    this.status,
+    this.role,
+    this.gender,
+    this.dob,
+    this.clinicName,
+    this.college,
+    this.countryOrigin,
+    this.profilePic,
+    this.practicingCountry,
+    this.otpCode,
+    this.balance,
+    this.title,
+    this.city,
+    this.country,
+    this.isAdmin,
+    this.createdAt,
+    this.updatedAt,
+    this.activeStatus,
+    this.avatar,
+    this.darkMode,
+    this.messengerColor,
+    this.isPremium,
+    this.background,
+  });
 
   User.fromJson(dynamic json) {
     id = json['id'];
@@ -286,15 +296,17 @@ class User {
     map['background'] = background;
     return map;
   }
-
 }
 
-TotalFollows totalFollowsFromJson(String str) => TotalFollows.fromJson(json.decode(str));
+TotalFollows totalFollowsFromJson(String str) =>
+    TotalFollows.fromJson(json.decode(str));
 String totalFollowsToJson(TotalFollows data) => json.encode(data.toJson());
+
 class TotalFollows {
   TotalFollows({
-      this.totalFollowers, 
-      this.totalFollowings,});
+    this.totalFollowers,
+    this.totalFollowings,
+  });
 
   TotalFollows.fromJson(dynamic json) {
     totalFollowers = json['total_followers'];
@@ -309,5 +321,4 @@ class TotalFollows {
     map['total_followings'] = totalFollowings;
     return map;
   }
-
 }

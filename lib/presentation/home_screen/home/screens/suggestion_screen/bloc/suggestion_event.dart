@@ -1,7 +1,6 @@
-
 import 'package:equatable/equatable.dart';
 
-abstract class SuggestionEvent extends Equatable{}
+abstract class SuggestionEvent extends Equatable {}
 
 class LoadDataValues extends SuggestionEvent {
   @override
@@ -14,7 +13,11 @@ class SaveSuggestion extends SuggestionEvent {
   final String email;
   final String message;
 
-  SaveSuggestion({required this.name,required this.phone,required this.email,required this.message});
+  SaveSuggestion(
+      {required this.name,
+      required this.phone,
+      required this.email,
+      required this.message});
   @override
-  List<Object> get props => [name,phone,email,message];
+  List<Object> get props => [name, phone, email, message];
 }

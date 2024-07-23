@@ -3,7 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class PostUtils {
   // Function to show alert dialog for deleting a post
- static Color HexColor(String hexColorString) {
+  static Color HexColor(String hexColorString) {
     hexColorString = hexColorString.replaceAll("#", "");
     if (hexColorString.length == 6) {
       hexColorString = "FF$hexColorString"; // Add FF for opacity
@@ -21,28 +21,31 @@ class PostUtils {
 
     // Show a confirmation dialog before launching the URL
     bool shouldLaunch = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Open Link'),
-          content: Text('Would you like to open this link? \n$urlString'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop(false); // Return false to shouldLaunch
-              },
-            ),
-            TextButton(
-              child: const Text('Open'),
-              onPressed: () {
-                Navigator.of(context).pop(true); // Return true to shouldLaunch
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false; // shouldLaunch will be false if the dialog is dismissed
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Open Link'),
+              content: Text('Would you like to open this link? \n$urlString'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pop(false); // Return false to shouldLaunch
+                  },
+                ),
+                TextButton(
+                  child: const Text('Open'),
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pop(true); // Return true to shouldLaunch
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false; // shouldLaunch will be false if the dialog is dismissed
 
     if (shouldLaunch) {
       await launchUrl(url);

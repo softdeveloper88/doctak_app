@@ -60,8 +60,8 @@ class _CustomDropdownSearchState extends State<CustomDropdownSearch> {
             setState(() {
               _filteredList = _subFilteredList
                   .where((element) => element
-                  .toLowerCase()
-                  .contains(widget.textController!.text.toLowerCase()))
+                      .toLowerCase()
+                      .contains(widget.textController!.text.toLowerCase()))
                   .toList();
             });
           },
@@ -71,56 +71,55 @@ class _CustomDropdownSearchState extends State<CustomDropdownSearch> {
           onTap: () => setState(() => _isTapped = !_isTapped),
           decoration: InputDecoration(
 
-            // labelStyle: const TextStyle(decoration: TextDecoration.none,),
+              // labelStyle: const TextStyle(decoration: TextDecoration.none,),
               border: widget.textFieldBorder ?? InputBorder.none,
               hintText: widget.hintText ?? "Write here...",
               hintStyle: widget.hintStyle ??
                   const TextStyle(fontSize: 16.0, color: Colors.black),
-              suffixIcon:
-              Icon(widget.suffixIcon ?? Icons.search, size: 25),
+              suffixIcon: Icon(widget.suffixIcon ?? Icons.search, size: 25),
               contentPadding: widget.contentPadding ??
                   const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
               isDense: true,
               suffixIconConstraints:
-              BoxConstraints.loose(MediaQuery.of(context).size),
+                  BoxConstraints.loose(MediaQuery.of(context).size),
               suffix: widget.textController!.text.isEmpty
                   ? const SizedBox()
                   : InkWell(
-                  onTap: () {
-                    widget.textController!.clear();
-                    setState(() => _filteredList = widget.items!);
-                  },
-                  child: const Icon(Icons.clear, color: Colors.blue))),
+                      onTap: () {
+                        widget.textController!.clear();
+                        setState(() => _filteredList = widget.items!);
+                      },
+                      child: const Icon(Icons.clear, color: Colors.blue))),
         ),
 
         ///Dropdown Items
         _isTapped && _filteredList.isNotEmpty
             ? Container(
-          height: widget.dropdownHeight ?? 150.0,
-          color: widget.dropdownBgColor ?? Colors.grey.shade200,
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: ListView.builder(
-            itemCount: _filteredList.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () {
-                  setState(() => _isTapped = !_isTapped);
-                  widget.textController!.text = _filteredList[index];
-                  widget.onSelect?.call(
-                      _filteredList[index]); // Call the callback function
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(_filteredList[index],
-                      style: widget.dropdownTextStyle ??
-                          TextStyle(
-                              color: Colors.grey.shade800,
-                              fontSize: 16.0)),
+                height: widget.dropdownHeight ?? 150.0,
+                color: widget.dropdownBgColor ?? Colors.grey.shade200,
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: ListView.builder(
+                  itemCount: _filteredList.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() => _isTapped = !_isTapped);
+                        widget.textController!.text = _filteredList[index];
+                        widget.onSelect?.call(
+                            _filteredList[index]); // Call the callback function
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(_filteredList[index],
+                            style: widget.dropdownTextStyle ??
+                                TextStyle(
+                                    color: Colors.grey.shade800,
+                                    fontSize: 16.0)),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        )
+              )
             : const SizedBox.shrink(),
       ],
     );

@@ -1,9 +1,14 @@
 import 'dart:convert';
-GroupAboutModel groupAboutModelFromJson(String str) => GroupAboutModel.fromJson(json.decode(str));
-String groupAboutModelToJson(GroupAboutModel data) => json.encode(data.toJson());
+
+GroupAboutModel groupAboutModelFromJson(String str) =>
+    GroupAboutModel.fromJson(json.decode(str));
+String groupAboutModelToJson(GroupAboutModel data) =>
+    json.encode(data.toJson());
+
 class GroupAboutModel {
   GroupAboutModel({
-      this.group,});
+    this.group,
+  });
 
   GroupAboutModel.fromJson(dynamic json) {
     group = json['group'] != null ? Group.fromJson(json['group']) : null;
@@ -17,26 +22,27 @@ class GroupAboutModel {
     }
     return map;
   }
-
 }
 
 Group groupFromJson(String str) => Group.fromJson(json.decode(str));
 String groupToJson(Group data) => json.encode(data.toJson());
+
 class Group {
   Group({
-      this.id, 
-      this.name, 
-      this.description, 
-      this.specialtyFocus, 
-      this.privacySetting, 
-      this.tags, 
-      this.location, 
-      this.interest, 
-      this.rules, 
-      this.joinRequest, 
-      this.status, 
-      this.language, 
-      this.visibility,});
+    this.id,
+    this.name,
+    this.description,
+    this.specialtyFocus,
+    this.privacySetting,
+    this.tags,
+    this.location,
+    this.interest,
+    this.rules,
+    this.joinRequest,
+    this.status,
+    this.language,
+    this.visibility,
+  });
 
   Group.fromJson(dynamic json) {
     id = json['id'];
@@ -84,5 +90,4 @@ class Group {
     map['visibility'] = visibility;
     return map;
   }
-
 }

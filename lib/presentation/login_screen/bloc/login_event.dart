@@ -1,24 +1,25 @@
-
 import 'package:equatable/equatable.dart';
 
 abstract class LoginEvent extends Equatable {}
-  // const LoginEvent();
+// const LoginEvent();
 
-  // @override
-  // List<Object> get props => [];
+// @override
+// List<Object> get props => [];
 // }
 class LoginInitialEvent extends LoginEvent {
   @override
   List<Object?> get props => [];
 }
+
 class ChangePasswordVisibilityEvent extends LoginEvent {
   ChangePasswordVisibilityEvent({required this.value});
   bool value;
   @override
   List<Object?> get props => [
-    value,
-  ];
+        value,
+      ];
 }
+
 class LoginButtonPressed extends LoginEvent {
   final String username;
   final String password;
@@ -28,6 +29,7 @@ class LoginButtonPressed extends LoginEvent {
   @override
   List<Object> get props => [username, password];
 }
+
 class SocialLoginButtonPressed extends LoginEvent {
   final String email;
   final String firstName;
@@ -36,8 +38,15 @@ class SocialLoginButtonPressed extends LoginEvent {
   final String provider;
   final String token;
 
-  SocialLoginButtonPressed({required this.email, required this.firstName,required this.lastName,required this.isSocialLogin,required this.provider,required this.token});
+  SocialLoginButtonPressed(
+      {required this.email,
+      required this.firstName,
+      required this.lastName,
+      required this.isSocialLogin,
+      required this.provider,
+      required this.token});
 
   @override
-  List<Object> get props => [email, firstName,lastName,isSocialLogin,provider,token];
+  List<Object> get props =>
+      [email, firstName, lastName, isSocialLogin, provider, token];
 }

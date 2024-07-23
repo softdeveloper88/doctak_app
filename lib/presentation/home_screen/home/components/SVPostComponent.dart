@@ -735,8 +735,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     Linkify(
                       onOpen: (link) {
                         if (link.url.contains('doctak/jobs-detail')) {
-                          String jobID =
-                              Uri.parse(link.url).pathSegments.last;
+                          String jobID = Uri.parse(link.url).pathSegments.last;
                           JobsDetailsScreen(
                             jobId: jobID,
                           ).launch(context);
@@ -773,8 +772,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                         onTapUrl: (link) async {
                           print(link);
                           if (link.contains('doctak/jobs-detail')) {
-                            String jobID =
-                                Uri.parse(link).pathSegments.last;
+                            String jobID = Uri.parse(link).pathSegments.last;
                             JobsDetailsScreen(
                               jobId: jobID,
                             ).launch(context);
@@ -790,8 +788,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                   Linkify(
                     onOpen: (link) {
                       if (link.url.contains('doctak/jobs-detail')) {
-                        String jobID =
-                            Uri.parse(link.url).pathSegments.last;
+                        String jobID = Uri.parse(link.url).pathSegments.last;
                         JobsDetailsScreen(
                           jobId: jobID,
                         ).launch(context);

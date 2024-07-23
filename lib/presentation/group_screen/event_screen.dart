@@ -9,15 +9,15 @@ import '../../core/utils/app/AppData.dart';
 import '../home_screen/utils/SVColors.dart';
 
 class EventsScreen extends StatefulWidget {
-  EventsScreen( this.id, {super.key});
-   String id;
+  EventsScreen(this.id, {super.key});
+  String id;
   @override
   _EventsScreenState createState() => _EventsScreenState();
 }
 
 class _EventsScreenState extends State<EventsScreen>
     with SingleTickerProviderStateMixin {
-   TabController? _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -30,6 +30,7 @@ class _EventsScreenState extends State<EventsScreen>
     _tabController!.dispose();
     super.dispose();
   }
+
   int selectIndex = 0;
   Widget _individualTab(String tabName) {
     return Row(
@@ -37,14 +38,17 @@ class _EventsScreenState extends State<EventsScreen>
       children: [
         Expanded(
           child: Tab(
-            child: Text(tabName,style: GoogleFonts.poppins(color: svGetBodyColor()),),
+            child: Text(
+              tabName,
+              style: GoogleFonts.poppins(color: svGetBodyColor()),
+            ),
           ),
         ),
         if (tabName == 'Upcoming Event')
           Container(
             height: 20,
             width: 1,
-            decoration:  BoxDecoration(
+            decoration: BoxDecoration(
                 border: Border(
                     right: BorderSide(
                         color: svGetBodyColor(),
@@ -75,8 +79,7 @@ class _EventsScreenState extends State<EventsScreen>
         children: [
           Container(
             color: svGetScaffoldColor(),
-            padding: const EdgeInsets.symmetric(
-                horizontal: 2, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
             child: TabBar(
               controller: _tabController,
               dividerHeight: 1,
@@ -99,13 +102,13 @@ class _EventsScreenState extends State<EventsScreen>
           ),
           Expanded(
             child: TabBarView(
-              controller: _tabController,
+                controller: _tabController,
                 physics: const NeverScrollableScrollPhysics(),
                 children: const [
                   UpcomingEventsTab(),
-                        Center(child: Text('Past Events')),
+                  Center(child: Text('Past Events')),
                   //
-                 ]),
+                ]),
           ),
           if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
           // Container(

@@ -152,9 +152,8 @@ class CustomTextStyles {
         color: appTheme.redA200,
       );
   static get titleMediumWhiteA700 => theme.textTheme.titleMedium!.copyWith(
-    color: SVAppColorPrimary,
-    fontStyle: FontStyle.italic,
-
+        color: SVAppColorPrimary,
+        fontStyle: FontStyle.italic,
       );
   static get titleMediumWhiteA70018 => theme.textTheme.titleMedium!.copyWith(
         color: appTheme.whiteA700,

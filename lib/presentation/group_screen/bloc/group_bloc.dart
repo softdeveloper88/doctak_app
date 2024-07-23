@@ -21,7 +21,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   List<Map<String, dynamic>> tags = [];
   List<Map<String, dynamic>> interest = [];
   List<Map<String, dynamic>> language = [];
-  List<Map<String, dynamic>> selectSpecialtyList=[];
+  List<Map<String, dynamic>> selectSpecialtyList = [];
   String? location;
   String? description;
   String? memberLimit;
@@ -65,14 +65,16 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     ));
   }
 
-  void _groupDetails(
-      GroupDetailsEvent event, Emitter<GroupState> emit) async {
-
+  void _groupDetails(GroupDetailsEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupDetailsModel = await postService.groupDetails( 'Bearer ${AppData.userToken}', event.id);
-    groupAboutModel = await postService.groupAbout( 'Bearer ${AppData.userToken}', event.id);
-    groupPostModel = await postService.groupPost( 'Bearer ${AppData.userToken}', event.id,'0');
-    var response = await postService.groupNotificationUpdate( 'Bearer ${AppData.userToken}', 'get','','');
+    groupDetailsModel =
+        await postService.groupDetails('Bearer ${AppData.userToken}', event.id);
+    groupAboutModel =
+        await postService.groupAbout('Bearer ${AppData.userToken}', event.id);
+    groupPostModel = await postService.groupPost(
+        'Bearer ${AppData.userToken}', event.id, '0');
+    var response = await postService.groupNotificationUpdate(
+        'Bearer ${AppData.userToken}', 'get', '', '');
     print(response);
     print(AppData.logInUserId);
     emit(PaginationLoadedState(
@@ -80,70 +82,76 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       '',
     ));
   }
+
   void _groupNotification(
       GroupNotificationEvent event, Emitter<GroupState> emit) async {
-
     emit(PaginationLoadingState());
-    var response = await postService.groupNotificationUpdate( 'Bearer ${AppData.userToken}', event.type,event.groupNotificationPush,event.groupNotificationEmail);
+    var response = await postService.groupNotificationUpdate(
+        'Bearer ${AppData.userToken}',
+        event.type,
+        event.groupNotificationPush,
+        event.groupNotificationEmail);
     emit(PaginationLoadedState(
       [],
       '',
     ));
   }
 
- void _groupMemberRequest(
+  void _groupMemberRequest(
       GroupMemberRequestEvent event, Emitter<GroupState> emit) async {
-
     emit(PaginationLoadingState());
-    groupMemberRequestModel = await postService.groupMemberRequest( 'Bearer ${AppData.userToken}', event.id);
-     print(groupMemberRequestModel?.toJson());
+    groupMemberRequestModel = await postService.groupMemberRequest(
+        'Bearer ${AppData.userToken}', event.id);
+    print(groupMemberRequestModel?.toJson());
     emit(PaginationLoadedState(
       [],
       '',
     ));
   }
+
   void _groupPostRequest(
       GroupPostRequestEvent event, Emitter<GroupState> emit) async {
-
     emit(PaginationLoadingState());
-    groupPostModelRequest = await postService.groupPostRequest( 'Bearer ${AppData.userToken}', event.id,event.offset);
-     print(groupPostModelRequest?.toJson());
+    groupPostModelRequest = await postService.groupPostRequest(
+        'Bearer ${AppData.userToken}', event.id, event.offset);
+    print(groupPostModelRequest?.toJson());
     emit(PaginationLoadedState(
       [],
       '',
     ));
   }
-  void _groupMembers(
-      GroupMembersEvent event, Emitter<GroupState> emit) async {
 
+  void _groupMembers(GroupMembersEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupMemberModel = await postService.groupMembers( 'Bearer ${AppData.userToken}', event.id,event.keyword);
-     print(groupMemberRequestModel?.toJson());
+    groupMemberModel = await postService.groupMembers(
+        'Bearer ${AppData.userToken}', event.id, event.keyword);
+    print(groupMemberRequestModel?.toJson());
     emit(PaginationLoadedState(
       [],
       '',
     ));
   }
+
   void _groupMemberRequestUpdate(
       GroupMemberRequestUpdateEvent event, Emitter<GroupState> emit) async {
-
     emit(PaginationLoadingState());
-    print(    event.groupId);
-    print(    event.id);
-    print(    event.status);
-    var response = await postService.groupMemberRequestUpdate( 'Bearer ${AppData.userToken}', event.id,event.groupId,event.status);
+    print(event.groupId);
+    print(event.id);
+    print(event.status);
+    var response = await postService.groupMemberRequestUpdate(
+        'Bearer ${AppData.userToken}', event.id, event.groupId, event.status);
     print(response.data);
     emit(PaginationLoadedState(
       [],
       '',
     ));
   }
-  void _listGroups(
-      ListGroupsEvent event, Emitter<GroupState> emit) async {
 
+  void _listGroups(ListGroupsEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
 
-     groupListModel = await postService.listGroup( 'Bearer ${AppData.userToken}', AppData.logInUserId);
+    groupListModel = await postService.listGroup(
+        'Bearer ${AppData.userToken}', AppData.logInUserId);
     emit(PaginationLoadedState(
       [],
       '',
@@ -153,23 +161,57 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   void _createGroup(
       UpdateSpecialtyDropdownValue1 event, Emitter<GroupState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
-    print(name.toString(),);
-    print(selectSpecialtyList.toString(),);
-    print(tags.toString(),);
-    print(location.toString(),);
-    print(interest.toString(),);
-    print(language.toString(),);
-    print(description.toString(),);
-    print(memberLimit.toString(),);
-    print(addAdmin.toString(),);
-    print(status.toString(),);
-    print(postPermission.toString(),);
-    print(allowInSearch.toString(),);
-    print(visibility.toString(),);
-    print(joinRequest.toString(),);
-    print(customRules.toString(),);
-    print(coverPicture.toString(),);
-    print(profilePicture.toString(),);
+    print(
+      name.toString(),
+    );
+    print(
+      selectSpecialtyList.toString(),
+    );
+    print(
+      tags.toString(),
+    );
+    print(
+      location.toString(),
+    );
+    print(
+      interest.toString(),
+    );
+    print(
+      language.toString(),
+    );
+    print(
+      description.toString(),
+    );
+    print(
+      memberLimit.toString(),
+    );
+    print(
+      addAdmin.toString(),
+    );
+    print(
+      status.toString(),
+    );
+    print(
+      postPermission.toString(),
+    );
+    print(
+      allowInSearch.toString(),
+    );
+    print(
+      visibility.toString(),
+    );
+    print(
+      joinRequest.toString(),
+    );
+    print(
+      customRules.toString(),
+    );
+    print(
+      coverPicture.toString(),
+    );
+    print(
+      profilePicture.toString(),
+    );
     try {
       final response = await postService.groupStore(
           'Bearer ${AppData.userToken}',
@@ -190,18 +232,17 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
           customRules ?? 'No Rules Set',
           profilePicture ?? '',
           coverPicture ?? "");
-      globalMessengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text(response.toString())));
+      globalMessengerKey.currentState
+          ?.showSnackBar(SnackBar(content: Text(response.toString())));
       emit(PaginationLoadedState(
         [],
         '',
       ));
-    }catch(e){
+    } catch (e) {
       emit(DataError('$e'));
-      globalMessengerKey.currentState?.showSnackBar(SnackBar(content: Text("$e")));
-
+      globalMessengerKey.currentState
+          ?.showSnackBar(SnackBar(content: Text("$e")));
     }
-
   }
 
   Future<List<String>?> _onGetSpecialty() async {

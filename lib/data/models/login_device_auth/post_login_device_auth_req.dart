@@ -4,7 +4,8 @@ class PostLoginDeviceAuthReq {
   String? deviceType;
   String? deviceId;
 
-  PostLoginDeviceAuthReq({this.email, this.password,this.deviceType,this.deviceId});
+  PostLoginDeviceAuthReq(
+      {this.email, this.password, this.deviceType, this.deviceId});
 
   PostLoginDeviceAuthReq.fromJson(Map<String, dynamic> json) {
     email = json['email'];

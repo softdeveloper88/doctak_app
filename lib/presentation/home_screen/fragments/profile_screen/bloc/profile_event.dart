@@ -27,10 +27,11 @@ class ChangePasswordVisibilityEvent extends ProfileEvent {
 class SetUserFollow extends ProfileEvent {
   String userId;
   String follow;
-  SetUserFollow(this.userId,this.follow);
+  SetUserFollow(this.userId, this.follow);
   @override
-  List<Object?> get props => [userId,follow];
+  List<Object?> get props => [userId, follow];
 }
+
 //
 // ///Event for changing checkbox
 class ChangeCheckBoxEvent extends ProfileEvent {
@@ -75,15 +76,15 @@ class UpdateProfileEvent extends ProfileEvent {
   String? personalInfoPrivacy;
   String? aboutMePrivacy;
 
-  UpdateProfileEvent(
-      {this.userProfile,
-      this.updateProfileSection,
-      this.interestModel,
-      this.workEducationModel,
-      this.userProfilePrivacyModel,
-      this.personalInfoPrivacy,
-      this.aboutMePrivacy,
-      });
+  UpdateProfileEvent({
+    this.userProfile,
+    this.updateProfileSection,
+    this.interestModel,
+    this.workEducationModel,
+    this.userProfilePrivacyModel,
+    this.personalInfoPrivacy,
+    this.aboutMePrivacy,
+  });
 
   @override
   List<Object?> get props => [

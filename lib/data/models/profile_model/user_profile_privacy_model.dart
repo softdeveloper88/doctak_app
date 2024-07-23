@@ -1,35 +1,34 @@
 class UserProfilePrivacyModel {
-  String? aboutMePrivacy='lock';
-  String? addressPrivacy='lock';
-  String? birthPlacePrivacy='lock';
-  String? languagePrivacy='lock';
-  String? liveInPrivacy='lock';
-  String? dobPrivacy='lock';
-  String? emailPrivacy='lock';
-  String? genderPrivacy='lock';
-  String? phonePrivacy='lock';
-  String? licenseNumberPrivacy='lock';
-  String? specialtyPrivacy='lock';
-  String? countryPrivacy='lock';
-  String? cityPrivacy='lock';
-  String? countryOrigin='lock';
+  String? aboutMePrivacy = 'lock';
+  String? addressPrivacy = 'lock';
+  String? birthPlacePrivacy = 'lock';
+  String? languagePrivacy = 'lock';
+  String? liveInPrivacy = 'lock';
+  String? dobPrivacy = 'lock';
+  String? emailPrivacy = 'lock';
+  String? genderPrivacy = 'lock';
+  String? phonePrivacy = 'lock';
+  String? licenseNumberPrivacy = 'lock';
+  String? specialtyPrivacy = 'lock';
+  String? countryPrivacy = 'lock';
+  String? cityPrivacy = 'lock';
+  String? countryOrigin = 'lock';
 
-  UserProfilePrivacyModel({
-    this.aboutMePrivacy,
-    this.addressPrivacy,
-    this.birthPlacePrivacy,
-    this.languagePrivacy,
-    this.liveInPrivacy,
-    this.dobPrivacy,
-    this.emailPrivacy,
-    this.genderPrivacy,
-    this.phonePrivacy,
-    this.licenseNumberPrivacy,
-    this.specialtyPrivacy,
-    this.countryPrivacy,
-    this.cityPrivacy,
-    this.countryOrigin
-  });
+  UserProfilePrivacyModel(
+      {this.aboutMePrivacy,
+      this.addressPrivacy,
+      this.birthPlacePrivacy,
+      this.languagePrivacy,
+      this.liveInPrivacy,
+      this.dobPrivacy,
+      this.emailPrivacy,
+      this.genderPrivacy,
+      this.phonePrivacy,
+      this.licenseNumberPrivacy,
+      this.specialtyPrivacy,
+      this.countryPrivacy,
+      this.cityPrivacy,
+      this.countryOrigin});
   Map<String, dynamic> toJson() {
     return {
       'aboutMePrivacy': aboutMePrivacy,
@@ -48,5 +47,4 @@ class UserProfilePrivacyModel {
       'countryOrigin': countryOrigin,
     };
   }
-
 }

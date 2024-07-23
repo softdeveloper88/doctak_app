@@ -1,10 +1,15 @@
 import 'dart:convert';
-ChatGptAskQuestionResponse chatGptAskQuestionResponseFromJson(String str) => ChatGptAskQuestionResponse.fromJson(json.decode(str));
-String chatGptAskQuestionResponseToJson(ChatGptAskQuestionResponse data) => json.encode(data.toJson());
+
+ChatGptAskQuestionResponse chatGptAskQuestionResponseFromJson(String str) =>
+    ChatGptAskQuestionResponse.fromJson(json.decode(str));
+String chatGptAskQuestionResponseToJson(ChatGptAskQuestionResponse data) =>
+    json.encode(data.toJson());
+
 class ChatGptAskQuestionResponse {
   ChatGptAskQuestionResponse({
-      this.content, 
-      this.responseMessageId,});
+    this.content,
+    this.responseMessageId,
+  });
 
   ChatGptAskQuestionResponse.fromJson(dynamic json) {
     content = json['content'];
@@ -19,5 +24,4 @@ class ChatGptAskQuestionResponse {
     map['responseMessageId'] = responseMessageId;
     return map;
   }
-
 }

@@ -1,9 +1,13 @@
 import 'dart:convert';
-DrugsModel drugsModelFromJson(String str) => DrugsModel.fromJson(json.decode(str));
+
+DrugsModel drugsModelFromJson(String str) =>
+    DrugsModel.fromJson(json.decode(str));
 String drugsModelToJson(DrugsModel data) => json.encode(data.toJson());
+
 class DrugsModel {
   DrugsModel({
-      this.data,});
+    this.data,
+  });
 
   DrugsModel.fromJson(dynamic json) {
     data = json['data'] != null ? DrugsData.fromJson(json['data']) : null;
@@ -17,25 +21,24 @@ class DrugsModel {
     }
     return map;
   }
-
 }
-
 
 class DrugsData {
   DrugsData({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   DrugsData.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -97,16 +100,17 @@ class DrugsData {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
   Links({
-      this.url, 
-      this.label, 
-      this.active,});
+    this.url,
+    this.label,
+    this.active,
+  });
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -124,21 +128,21 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 class Data {
   Data({
-      this.id, 
-      this.druglistId, 
-      this.tradeName, 
-      this.genericName, 
-      this.strength, 
-      this.packageSize, 
-      this.mrp, 
-      this.manufacturerName, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.druglistId,
+    this.tradeName,
+    this.genericName,
+    this.strength,
+    this.packageSize,
+    this.mrp,
+    this.manufacturerName,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -177,5 +181,4 @@ class Data {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }

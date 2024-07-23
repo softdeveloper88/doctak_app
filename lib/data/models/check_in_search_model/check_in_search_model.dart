@@ -1,10 +1,15 @@
 import 'dart:convert';
-CheckInSearchModel checkInSearchModelFromJson(String str) => CheckInSearchModel.fromJson(json.decode(str));
-String checkInSearchModelToJson(CheckInSearchModel data) => json.encode(data.toJson());
+
+CheckInSearchModel checkInSearchModelFromJson(String str) =>
+    CheckInSearchModel.fromJson(json.decode(str));
+String checkInSearchModelToJson(CheckInSearchModel data) =>
+    json.encode(data.toJson());
+
 class CheckInSearchModel {
   CheckInSearchModel({
-      this.success, 
-      this.data,});
+    this.success,
+    this.data,
+  });
 
   CheckInSearchModel.fromJson(dynamic json) {
     success = json['success'];
@@ -26,32 +31,33 @@ class CheckInSearchModel {
     }
     return map;
   }
-
 }
 
 PlaceData dataFromJson(String str) => PlaceData.fromJson(json.decode(str));
 String dataToJson(PlaceData data) => json.encode(data.toJson());
+
 class PlaceData {
   PlaceData({
-      this.id, 
-      this.name, 
-      this.address, 
-      this.latitude, 
-      this.longitude, 
-      this.phone, 
-      this.email, 
-      this.website, 
-      this.contactPerson, 
-      this.category, 
-      this.specialty, 
-      this.openTime, 
-      this.closeTime, 
-      this.daysOfOperation, 
-      this.accessibiltyInformation, 
-      this.facilitiesAvailable, 
-      this.description, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.name,
+    this.address,
+    this.latitude,
+    this.longitude,
+    this.phone,
+    this.email,
+    this.website,
+    this.contactPerson,
+    this.category,
+    this.specialty,
+    this.openTime,
+    this.closeTime,
+    this.daysOfOperation,
+    this.accessibiltyInformation,
+    this.facilitiesAvailable,
+    this.description,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   PlaceData.fromJson(dynamic json) {
     id = json['id'];
@@ -117,5 +123,4 @@ class PlaceData {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }

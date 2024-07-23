@@ -31,7 +31,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     print('33 ${event.page}');
     if (event.page == 1) {
       drugsData.clear();
-      pageNumber=1;
+      pageNumber = 1;
       emit(PaginationLoadingState());
       print(event.countryId);
       print(event.searchTerm);
@@ -42,12 +42,12 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       JobsModel response = await postService.getSearchJobsList(
           'Bearer ${AppData.userToken}',
           '${pageNumber}',
-          event.countryId??"1",
-          event.searchTerm??'');
+          event.countryId ?? "1",
+          event.searchTerm ?? '');
       numberOfPage = response.jobs?.lastPage ?? 0;
-      if (pageNumber < numberOfPage+1) {
+      if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
-        drugsData.addAll(response.jobs?.data?? []);
+        drugsData.addAll(response.jobs?.data ?? []);
       }
       emit(PaginationLoadedState());
 
@@ -64,7 +64,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   _onGetJobs1(GetPost event, Emitter<SearchState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
-    print('33'+event.type);
+    print('33' + event.type);
     // emit(PaginationLoadingState());
     try {
       final response = await postService.getJobsList(

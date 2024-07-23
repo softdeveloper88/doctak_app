@@ -23,6 +23,7 @@ class SVPostTextComponent extends StatefulWidget {
   @override
   State<SVPostTextComponent> createState() => _SVPostTextComponentState();
 }
+
 class _SVPostTextComponentState extends State<SVPostTextComponent> {
   final quill.QuillController _controller = quill.QuillController.basic();
 
@@ -51,6 +52,7 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
 // Load Delta document using HTML
 //     _controller.document = quill.Document.fromDelta(quill.Document.fromHtml(html));
   }
+
   final FocusNode editorFocusNode = FocusNode();
 
   // final HtmlEditorController _controller = HtmlEditorController();
@@ -93,7 +95,6 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
             color: widget.colorValue,
             height: 20.h,
             child: quill.QuillEditor.basic(
-
               focusNode: editorFocusNode,
               configurations: quill.QuillEditorConfigurations(
                 controller: _controller,

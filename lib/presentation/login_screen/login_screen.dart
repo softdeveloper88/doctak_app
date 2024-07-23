@@ -39,11 +39,13 @@ class LoginScreen extends StatelessWidget {
       context: context,
       barrierDismissible: false, // Disallow dismissing while loading
       builder: (BuildContext context) {
-        return  SimpleDialog(
+        return SimpleDialog(
           title: const Text('Sending Verification Link'),
           children: [
             Center(
-              child: CircularProgressIndicator(color: svGetBodyColor(),),
+              child: CircularProgressIndicator(
+                color: svGetBodyColor(),
+              ),
             ),
           ],
         );
@@ -110,8 +112,8 @@ class LoginScreen extends StatelessWidget {
     }
   }
 
-  FocusNode focusNode1=FocusNode();
-  FocusNode focusNode2=FocusNode();
+  FocusNode focusNode1 = FocusNode();
+  FocusNode focusNode2 = FocusNode();
   void showVerifyMessage(BuildContext context) {
     showDialog(
       context: context,
@@ -125,7 +127,7 @@ class LoginScreen extends StatelessWidget {
                 // Add your logic for resending the verification link here
 
                 String email = emailController.text;
-                sendVerificationLink(email,context);
+                sendVerificationLink(email, context);
               },
               child: const Text('Resend Link'),
             ),
@@ -144,7 +146,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
@@ -173,7 +175,8 @@ class LoginScreen extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (BuildContext context) => const SVDashboardScreen(),
+                      builder: (BuildContext context) =>
+                          const SVDashboardScreen(),
                     ),
                   );
                   // Navigate to the home screen or perform desired action
@@ -214,8 +217,7 @@ class LoginScreen extends StatelessWidget {
                             isSocialLogin: true,
                             firstName: state.response.user?.firstName ?? '',
                             lastName: state.response.user?.lastName ?? '',
-                            token: state.response.token ?? ''
-                        ),
+                            token: state.response.token ?? ''),
                       ),
                     );
                   }
@@ -228,7 +230,6 @@ class LoginScreen extends StatelessWidget {
                       backgroundColor: Colors.red,
                     ),
                   );
-
                 }
               },
               child: SizedBox(
@@ -244,7 +245,7 @@ class LoginScreen extends StatelessWidget {
                                   horizontal: 24, vertical: 39),
                               child: Column(children: [
                                 CustomTextFormField(
-                                  focusNode: focusNode1,
+                                    focusNode: focusNode1,
                                     controller: emailController,
                                     hintText: translation(context)
                                         .msg_enter_your_email,
@@ -261,29 +262,27 @@ class LoginScreen extends StatelessWidget {
                                     prefixConstraints:
                                         const BoxConstraints(maxHeight: 56),
                                     validator: (value) {
-                                      if (value == null || (!isValidEmail(value, isRequired: true))) {
+                                      if (value == null ||
+                                          (!isValidEmail(value,
+                                              isRequired: true))) {
                                         return translation(context)
                                             .err_msg_please_enter_valid_email;
                                       }
                                       return null;
                                     },
                                     contentPadding: const EdgeInsets.only(
-                                        top: 18,
-                                        right: 30,
-                                        bottom: 18)),
+                                        top: 18, right: 30, bottom: 18)),
                                 const SizedBox(height: 16),
                                 BlocBuilder<LoginBloc, LoginState>(
                                     bloc: loginBloc,
                                     builder: (context, state) {
                                       print(state.isShowPassword);
                                       return CustomTextFormField(
-
-                                        focusNode: focusNode2,
+                                          focusNode: focusNode2,
                                           controller: passwordController,
                                           hintText: translation(context)
                                               .msg_enter_new_password,
-                                          textInputAction:
-                                              TextInputAction.done,
+                                          textInputAction: TextInputAction.done,
                                           textInputType:
                                               TextInputType.visiblePassword,
                                           prefix: Container(
@@ -291,38 +290,38 @@ class LoginScreen extends StatelessWidget {
                                                   24, 16, 16, 16),
                                               child: CustomImageView(
                                                   color: Colors.blueGrey,
-                                                  imagePath: ImageConstant
-                                                      .imgLocation,
+                                                  imagePath:
+                                                      ImageConstant.imgLocation,
                                                   height: 24,
                                                   width: 24)),
-                                          prefixConstraints: const BoxConstraints(maxHeight: 56),
+                                          prefixConstraints:
+                                              const BoxConstraints(
+                                                  maxHeight: 56),
                                           suffix: InkWell(
                                               onTap: () {
-                                                loginBloc.add(ChangePasswordVisibilityEvent(value: !state.isShowPassword));
-
+                                                loginBloc.add(
+                                                    ChangePasswordVisibilityEvent(
+                                                        value: !state
+                                                            .isShowPassword));
                                               },
                                               child: Container(
-                                                  margin: const EdgeInsets.fromLTRB(
-                                                      30, 16, 24, 16),
-                                                  child:  state.isShowPassword
+                                                  margin:
+                                                      const EdgeInsets.fromLTRB(
+                                                          30, 16, 24, 16),
+                                                  child: state.isShowPassword
                                                       ? const Icon(
-                                                    Icons
-                                                        .visibility_off,
-                                                    color:
-                                                    Colors.black54,
-                                                    size:
-                                                    24,
-                                                  )
+                                                          Icons.visibility_off,
+                                                          color: Colors.black54,
+                                                          size: 24,
+                                                        )
                                                       : const Icon(
-                                                    Icons
-                                                        .visibility,
-                                                    color:
-                                                    Colors.black54,
-                                                    size:
-                                                    24,
-                                                  ))),
+                                                          Icons.visibility,
+                                                          color: Colors.black54,
+                                                          size: 24,
+                                                        ))),
                                           suffixConstraints:
-                                              const BoxConstraints(maxHeight: 56),
+                                              const BoxConstraints(
+                                                  maxHeight: 56),
                                           validator: (value) {
                                             if (value == null ||
                                                 (!isValidPassword(value,
@@ -368,7 +367,8 @@ class LoginScreen extends StatelessWidget {
                                 Align(
                                     alignment: Alignment.centerLeft,
                                     child: Padding(
-                                        padding: const EdgeInsets.only(left: 48),
+                                        padding:
+                                            const EdgeInsets.only(left: 48),
                                         child: Row(children: [
                                           Padding(
                                               padding: const EdgeInsets.only(
@@ -383,8 +383,9 @@ class LoginScreen extends StatelessWidget {
                                                 onTapTxtSignUp(context);
                                               },
                                               child: Padding(
-                                                  padding: const EdgeInsets.only(
-                                                      left: 4),
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 4),
                                                   child: Text(
                                                       translation(context)
                                                           .lbl_sign_up,
@@ -452,18 +453,19 @@ class LoginScreen extends StatelessWidget {
             // onTapSignInWithGoogle(context);
           }),
       const SizedBox(height: 16),
-     if(Platform.isIOS) CustomOutlinedButton(
-          onPressed: () {
-            signInWithApple();
-          },
-          text: translation(context).msg_sign_in_with_apple,
-          leftIcon: Container(
-              margin: const EdgeInsets.only(right: 30),
-              child: CustomImageView(
-                  color: Colors.blueGrey,
-                  imagePath: ImageConstant.imgApple,
-                  height: 20,
-                  width: 16))),
+      if (Platform.isIOS)
+        CustomOutlinedButton(
+            onPressed: () {
+              signInWithApple();
+            },
+            text: translation(context).msg_sign_in_with_apple,
+            leftIcon: Container(
+                margin: const EdgeInsets.only(right: 30),
+                child: CustomImageView(
+                    color: Colors.blueGrey,
+                    imagePath: ImageConstant.imgApple,
+                    height: 20,
+                    width: 16))),
       const SizedBox(height: 16),
     ]);
   }
@@ -497,7 +499,7 @@ class LoginScreen extends StatelessWidget {
           isSocialLogin: true,
           provider: 'google',
           token: 'accessToken'));
-         GoogleSignIn().disconnect();
+      GoogleSignIn().disconnect();
       // });
     } on Exception catch (e) {
       print('error is ....... $e');
@@ -521,7 +523,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   signInWithApple() async {
-      //   print('token$token');
+    //   print('token$token');
     final rawNonce = generateNonce();
     final nonce = sha256ofString(rawNonce);
 
@@ -540,9 +542,9 @@ class LoginScreen extends StatelessWidget {
       rawNonce: rawNonce,
     );
 
-     var response =
+    var response =
         await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-     loginBloc.add(SocialLoginButtonPressed(
+    loginBloc.add(SocialLoginButtonPressed(
         email: response.user?.email ?? ' ',
         firstName: response.user?.displayName!.split(' ').first ?? ' ',
         lastName: response.user?.displayName!.split(' ').last ?? ' ',

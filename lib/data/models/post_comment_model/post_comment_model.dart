@@ -1,9 +1,14 @@
 import 'dart:convert';
-PostCommentModel postCommentModelFromJson(String str) => PostCommentModel.fromJson(json.decode(str));
-String postCommentModelToJson(PostCommentModel data) => json.encode(data.toJson());
+
+PostCommentModel postCommentModelFromJson(String str) =>
+    PostCommentModel.fromJson(json.decode(str));
+String postCommentModelToJson(PostCommentModel data) =>
+    json.encode(data.toJson());
+
 class PostCommentModel {
   PostCommentModel({
-      this.postComments,});
+    this.postComments,
+  });
 
   PostCommentModel.fromJson(dynamic json) {
     if (json['postComments'] != null) {
@@ -22,21 +27,23 @@ class PostCommentModel {
     }
     return map;
   }
-
 }
 
-PostComments postCommentsFromJson(String str) => PostComments.fromJson(json.decode(str));
+PostComments postCommentsFromJson(String str) =>
+    PostComments.fromJson(json.decode(str));
 String postCommentsToJson(PostComments data) => json.encode(data.toJson());
+
 class PostComments {
   PostComments({
-      this.id, 
-      this.userId, 
-      this.postId, 
-      this.comment, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.profilePic, 
-      this.name,});
+    this.id,
+    this.userId,
+    this.postId,
+    this.comment,
+    this.createdAt,
+    this.updatedAt,
+    this.profilePic,
+    this.name,
+  });
 
   PostComments.fromJson(dynamic json) {
     id = json['id'];
@@ -69,5 +76,4 @@ class PostComments {
     map['name'] = name;
     return map;
   }
-
 }

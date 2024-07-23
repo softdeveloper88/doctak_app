@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-abstract class ConferenceEvent extends Equatable{}
+abstract class ConferenceEvent extends Equatable {}
 
 class LoadDataValues extends ConferenceEvent {
   @override
@@ -18,25 +18,26 @@ class LoadDataValues extends ConferenceEvent {
 // }
 
 class LoadPageEvent extends ConferenceEvent {
- int? page;
- final String? countryName;
- final String? searchTerm;
+  int? page;
+  final String? countryName;
+  final String? searchTerm;
 
- LoadPageEvent({this.page,this.countryName,this.searchTerm});
+  LoadPageEvent({this.page, this.countryName, this.searchTerm});
   @override
-  List<Object?> get props => [page,countryName,searchTerm];
+  List<Object?> get props => [page, countryName, searchTerm];
 }
+
 class LoadDropdownData extends ConferenceEvent {
-final String countryName;
-final String searchTerms;
-LoadDropdownData(this.countryName,this.searchTerms);
-@override
-List<Object?> get props => [countryName,searchTerms];
+  final String countryName;
+  final String searchTerms;
+  LoadDropdownData(this.countryName, this.searchTerms);
+  @override
+  List<Object?> get props => [countryName, searchTerms];
 }
 
 class CheckIfNeedMoreDataEvent extends ConferenceEvent {
   final int index;
-   CheckIfNeedMoreDataEvent({required this.index});
+  CheckIfNeedMoreDataEvent({required this.index});
   @override
   List<Object?> get props => [index];
 }

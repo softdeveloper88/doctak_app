@@ -38,11 +38,10 @@ class CustomDropdownButtonFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width??90.w,
-      height: height??50,
+      width: width ?? 90.w,
+      height: height ?? 50,
       // width: getProportionateScreenWidth(0.5),
-      child:
-      DropdownButtonFormField<String>(
+      child: DropdownButtonFormField<String>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
         value: value,
         dropdownColor: svGetScaffoldColor(),
@@ -57,10 +56,10 @@ class CustomDropdownButtonFormField extends StatelessWidget {
         ),
         icon: isTimeDropDown!
             ? Icon(
-          Icons.arrow_drop_down,
-          size: 12.sp,
-          color: svGetBodyColor(),
-        )
+                Icons.arrow_drop_down,
+                size: 12.sp,
+                color: svGetBodyColor(),
+              )
             : null,
         // decoration: InputDecoration(
         //   filled: true,
@@ -78,19 +77,17 @@ class CustomDropdownButtonFormField extends StatelessWidget {
         items: [
           ...List.generate(
             items.length,
-                (index) =>
-                DropdownMenuItem<String>(
-                  value: items[index],
-                  child: Text(
-                    items[index],
-                    overflow: TextOverflow.visible,
-                    style:
-                     TextStyle(
-                      fontWeight:  FontWeight.bold ,
-                      color:  svGetBodyColor() ,
-                    ),
-                  ),
+            (index) => DropdownMenuItem<String>(
+              value: items[index],
+              child: Text(
+                items[index],
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: svGetBodyColor(),
                 ),
+              ),
+            ),
           ),
         ],
       ),
@@ -100,7 +97,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
   OutlineInputBorder _outLinedInputBorder() {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius ?? 8),
-      borderSide:  BorderSide(
+      borderSide: BorderSide(
         color: svGetBodyColor(),
       ),
     );
@@ -129,12 +126,10 @@ class CustomDropdownButtonFormField extends StatelessWidget {
   _setFontStyle() {
     return const TextStyle(
       color: Colors.grey,
-      fontSize:
-      14,
+      fontSize: 14,
       fontFamily: 'Roboto',
       fontWeight: FontWeight.w700,
       height: 1.21,
-
     );
   }
 }

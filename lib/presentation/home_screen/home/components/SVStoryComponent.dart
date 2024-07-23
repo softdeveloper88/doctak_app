@@ -7,7 +7,6 @@ import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-
 class SVStoryComponent extends StatefulWidget {
   @override
   State<SVStoryComponent> createState() => _SVStoryComponentState();
@@ -40,7 +39,11 @@ class _SVStoryComponentState extends State<SVStoryComponent> {
                     }),
               ),
               10.height,
-              Text('Your Story', style: secondaryTextStyle(size: 12, color: context.iconColor, weight: FontWeight.w500)),
+              Text('Your Story',
+                  style: secondaryTextStyle(
+                      size: 12,
+                      color: context.iconColor,
+                      weight: FontWeight.w500)),
             ],
           ),
           HorizontalList(
@@ -64,7 +67,11 @@ class _SVStoryComponentState extends State<SVStoryComponent> {
                     // SVStoryScreen(story: storyList[index]).launch(context);
                   }),
                   10.height,
-                  Text(storyList[index].name.validate(), style: secondaryTextStyle(size: 12, color: context.iconColor, weight: FontWeight.w500)),
+                  Text(storyList[index].name.validate(),
+                      style: secondaryTextStyle(
+                          size: 12,
+                          color: context.iconColor,
+                          weight: FontWeight.w500)),
                 ],
               );
             },

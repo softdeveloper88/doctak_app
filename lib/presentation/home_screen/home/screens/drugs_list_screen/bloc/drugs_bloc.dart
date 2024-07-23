@@ -33,7 +33,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
     print('33 ${event.page}');
     if (event.page == 1) {
       drugsData.clear();
-      pageNumber=1;
+      pageNumber = 1;
       emit(PaginationLoadingState());
       print(event.countryId);
       print(event.searchTerm);
@@ -42,21 +42,21 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
 
     // ProgressDialogUtils.showProgressDialog();
     // try {
-      DrugsModel response = await postService.getDrugsList(
-          'Bearer ${AppData.userToken}',
-          '${pageNumber}',
-          event.countryId??"1",
-          event.searchTerm??'',
-          event.type=='Generic'?'Active':"Brand");
-      numberOfPage = response.data?.lastPage ?? 0;
-      if (pageNumber < numberOfPage+1) {
-        pageNumber = pageNumber + 1;
-        drugsData.addAll(response.data?.data ?? []);
-      }
-      print(drugsData.toList());
-      emit(PaginationLoadedState());
+    DrugsModel response = await postService.getDrugsList(
+        'Bearer ${AppData.userToken}',
+        '${pageNumber}',
+        event.countryId ?? "1",
+        event.searchTerm ?? '',
+        event.type == 'Generic' ? 'Active' : "Brand");
+    numberOfPage = response.data?.lastPage ?? 0;
+    if (pageNumber < numberOfPage + 1) {
+      pageNumber = pageNumber + 1;
+      drugsData.addAll(response.data?.data ?? []);
+    }
+    print(drugsData.toList());
+    emit(PaginationLoadedState());
 
-      // emit(DataLoaded(drugsData));
+    // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   print(e);
     //
@@ -69,20 +69,20 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
   _onGetJobs1(GetPost event, Emitter<DrugsState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
-    print('33'+event.type);
+    print('33' + event.type);
     // emit(PaginationLoadingState());
     // try {
-      final response = await postService.getDrugsList(
-          'Bearer ${AppData.userToken}',
-          "1",
-          event.countryId,
-          event.searchTerm,
-          event.type);
-      print("ddd${response.data?.data!.length}");
-      drugsData.clear();
-      drugsData.addAll(response.data?.data ?? []);
-      emit(PaginationLoadedState());
-      // emit(DataLoaded(drugsData));
+    final response = await postService.getDrugsList(
+        'Bearer ${AppData.userToken}',
+        "1",
+        event.countryId,
+        event.searchTerm,
+        event.type);
+    print("ddd${response.data?.data!.length}");
+    drugsData.clear();
+    drugsData.addAll(response.data?.data ?? []);
+    emit(PaginationLoadedState());
+    // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   // ProgressDialogUtils.hideProgressDialog();
     //   print(e);

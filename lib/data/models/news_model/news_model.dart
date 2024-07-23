@@ -1,12 +1,15 @@
 import 'dart:convert';
+
 NewsModel newsModelFromJson(String str) => NewsModel.fromJson(json.decode(str));
 String newsModelToJson(NewsModel data) => json.encode(data.toJson());
+
 class NewsModel {
   NewsModel({
-      this.title, 
-      this.link, 
-      this.description, 
-      this.pubDate,});
+    this.title,
+    this.link,
+    this.description,
+    this.pubDate,
+  });
 
   NewsModel.fromJson(dynamic json) {
     title = json['title'];
@@ -27,5 +30,4 @@ class NewsModel {
     map['pubDate'] = pubDate;
     return map;
   }
-
 }

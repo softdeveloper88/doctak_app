@@ -35,8 +35,8 @@ class CustomTextField extends StatelessWidget {
     this.onFieldSubmitted,
     this.validator,
   }) : super(
-    key: key,
-  );
+          key: key,
+        );
 
   final Alignment? alignment;
 
@@ -92,45 +92,37 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return alignment != null
         ? Align(
-      alignment: alignment ?? Alignment.center,
-      child: textFormFieldWidget(context),
-    )
+            alignment: alignment ?? Alignment.center,
+            child: textFormFieldWidget(context),
+          )
         : textFormFieldWidget(context);
   }
 
-  Widget textFormFieldWidget(BuildContext context) =>
-      SizedBox(
+  Widget textFormFieldWidget(BuildContext context) => SizedBox(
         width: width ?? double.maxFinite,
         child: TextFormField(
           readOnly: isReadOnly ?? false,
           scrollPadding:
-          EdgeInsets.only(bottom: MediaQuery
-              .of(context)
-              .viewInsets
-              .bottom),
-          onFieldSubmitted: (v)=>onFieldSubmitted!(v) ,
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          onFieldSubmitted: (v) => onFieldSubmitted!(v),
           controller: controller,
           focusNode: focusNode ?? FocusNode(),
           autofocus: autofocus!,
-          minLines: minLines??1,
-          onSaved:(v) => onSaved!(v!),
+          minLines: minLines ?? 1,
+          onSaved: (v) => onSaved!(v!),
           initialValue: initialValue,
           style: secondaryTextStyle(color: SVAppColorPrimary),
           // style: textStyle ?? CustomTextStyles.titleMediumMedium,
           obscureText: obscureText!,
           textInputAction: textInputAction,
           keyboardType: textInputType,
-          maxLines: maxLines ??  4,
+          maxLines: maxLines ?? 4,
           decoration: decoration,
           validator: validator,
-        )
-
-        ,
-
+        ),
       );
 
-  InputDecoration get decoration =>
-      InputDecoration(
+  InputDecoration get decoration => InputDecoration(
         hintText: hintText ?? "",
         hintStyle: hintStyle ?? theme.textTheme.bodyLarge,
         prefixIcon: prefix,
@@ -138,7 +130,8 @@ class CustomTextField extends StatelessWidget {
         suffixIcon: suffix,
         suffixIconConstraints: suffixConstraints,
         isDense: true,
-        contentPadding: contentPadding ?? const EdgeInsets.symmetric(vertical: 18),
+        contentPadding:
+            contentPadding ?? const EdgeInsets.symmetric(vertical: 18),
         fillColor: fillColor,
         filled: filled,
         border: borderDecoration ??
@@ -170,8 +163,7 @@ class CustomTextField extends StatelessWidget {
 
 /// Extension on [CustomTextField] to facilitate inclusion of all types of border style etc
 extension TextFormFieldStyleHelper on CustomTextField {
-  static OutlineInputBorder get outlineGrayTL8 =>
-      OutlineInputBorder(
+  static OutlineInputBorder get outlineGrayTL8 => OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
           color: appTheme.gray300,

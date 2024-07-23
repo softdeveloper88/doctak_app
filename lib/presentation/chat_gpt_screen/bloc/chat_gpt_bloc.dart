@@ -118,7 +118,8 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       ChatGptMessageHistory response = await postService.gptChatMessages(
           'Bearer ${AppData.userToken}', event.sessionId);
       ProgressDialogUtils.hideProgressDialog();
-      emit(DataLoaded((state as DataLoaded).response, response, (state as DataLoaded).response2));
+      emit(DataLoaded((state as DataLoaded).response, response,
+          (state as DataLoaded).response2));
     } catch (e) {
       print(e);
       emit(DataError('An error occurred$e'));
@@ -129,7 +130,6 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
-
       var response = await postService.newChat('Bearer ${AppData.userToken}');
       ChatGptMessageHistory response1 = await postService.gptChatMessages(
           'Bearer ${AppData.userToken}', response.response.data['session_id']);
@@ -139,24 +139,29 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       print(response.response.data['session_id']);
       ProgressDialogUtils.hideProgressDialog();
       print('data');
-      emit(DataLoaded(responseSession, response1, (state as DataLoaded).response2));
+      emit(DataLoaded(
+          responseSession, response1, (state as DataLoaded).response2));
     } catch (e) {
       print(e);
       emit(DataError('An error occurred$e'));
     }
   }
-  _onDeleteChatSession(DeleteChatSession event, Emitter<ChatGPTState> emit) async {
+
+  _onDeleteChatSession(
+      DeleteChatSession event, Emitter<ChatGPTState> emit) async {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
-      var response = await postService.deleteChatgptSession('Bearer ${AppData.userToken}',event.sessionId.toString());
+      var response = await postService.deleteChatgptSession(
+          'Bearer ${AppData.userToken}', event.sessionId.toString());
       print(response.response.data);
       ChatGptSession response1 = await postService.gptChatSession(
         'Bearer ${AppData.userToken}',
       );
       print('data');
       ProgressDialogUtils.hideProgressDialog();
-      emit(DataLoaded(response1, (state as DataLoaded).response1, (state as DataLoaded).response2));
+      emit(DataLoaded(response1, (state as DataLoaded).response1,
+          (state as DataLoaded).response2));
     } catch (e) {
       print(e);
       emit(DataError('An error occurred$e'));

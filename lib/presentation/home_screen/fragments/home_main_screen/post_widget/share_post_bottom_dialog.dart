@@ -1,8 +1,6 @@
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:flutter/material.dart';
 
-
-
 class SharePostBottomDialog extends StatelessWidget {
   SharePostBottomDialog(this.postList, {super.key});
   Post postList;
@@ -31,7 +29,8 @@ class SharePostBottomDialog extends StatelessWidget {
             children: [
               const CircleAvatar(
                 radius: 20,
-                backgroundImage: AssetImage('assets/images/person.png'), // Replace with actual image
+                backgroundImage: AssetImage(
+                    'assets/images/person.png'), // Replace with actual image
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -92,11 +91,10 @@ class SharePostBottomDialog extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildIconColumn(Icons.message, 'Instagram',postList,() async {
-              }),
-              _buildIconColumn(Icons.group, 'Twitter',postList,() async {
-              }),
-              _buildIconColumn(Icons.link, 'Copy',postList,(){}),
+              _buildIconColumn(
+                  Icons.message, 'Instagram', postList, () async {}),
+              _buildIconColumn(Icons.group, 'Twitter', postList, () async {}),
+              _buildIconColumn(Icons.link, 'Copy', postList, () {}),
             ],
           ),
           const SizedBox(height: 10.0),
@@ -112,7 +110,8 @@ class SharePostBottomDialog extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundImage: AssetImage('assets/images/person.png'), // Replace with actual image
+            backgroundImage: AssetImage(
+                'assets/images/person.png'), // Replace with actual image
           ),
           SizedBox(height: 8),
           Text('Pakistan Khan', style: TextStyle(fontSize: 12)),
@@ -121,9 +120,9 @@ class SharePostBottomDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildIconColumn(IconData icon, String label, Post postList,onTap) {
+  Widget _buildIconColumn(IconData icon, String label, Post postList, onTap) {
     return GestureDetector(
-      onTap:()=>onTap,
+      onTap: () => onTap,
       child: Column(
         children: [
           Icon(icon, size: 30),

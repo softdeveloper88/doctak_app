@@ -30,7 +30,7 @@ import 'screen_utils.dart';
 
 class SearchScreen extends StatefulWidget {
   Function? backPress;
-   SearchScreen({this.backPress,super.key});
+  SearchScreen({this.backPress, super.key});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
@@ -53,8 +53,7 @@ class _SearchScreenState extends State<SearchScreen>
         searchTerm: '',
       ),
     );
-    homeBloc
-        .add(LoadSearchPageEvent(page: 1, search: 'a'));
+    homeBloc.add(LoadSearchPageEvent(page: 1, search: 'a'));
     // BlocProvider.of<SearchBloc>(context).add(
     //   GetPost(
     //       page: '1',
@@ -75,6 +74,7 @@ class _SearchScreenState extends State<SearchScreen>
     ));
     super.initState();
   }
+
   // @override
   // void dispose() {
   //   _bannerAd!.dispose();
@@ -130,7 +130,7 @@ class _SearchScreenState extends State<SearchScreen>
   //   }
   // }
   var selectedValue;
-  bool isSearchShow=true;
+  bool isSearchShow = true;
   // final BannerAdManager _bannerAdManager = BannerAdManager();
   Widget _individualTab(String tabName) {
     return Row(
@@ -140,23 +140,26 @@ class _SearchScreenState extends State<SearchScreen>
           Container(
             height: 20,
             width: 1,
-            decoration:  BoxDecoration(
+            decoration: BoxDecoration(
                 border: Border(
                     right: BorderSide(
                         color: svGetBodyColor(),
                         width: 1,
                         style: BorderStyle.solid))),
           ),
-         Expanded(
+        Expanded(
           child: Tab(
-            child: Text(tabName,style: GoogleFonts.poppins(color: svGetBodyColor()),),
+            child: Text(
+              tabName,
+              style: GoogleFonts.poppins(color: svGetBodyColor()),
+            ),
           ),
         ),
         if (tabName == 'Jobs')
           Container(
             height: 20,
             width: 1,
-            decoration:  BoxDecoration(
+            decoration: BoxDecoration(
                 border: Border(
                     right: BorderSide(
                         color: svGetBodyColor(),
@@ -173,18 +176,17 @@ class _SearchScreenState extends State<SearchScreen>
       length: 3,
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
-        appBar:AppBar(
-          backgroundColor:  svGetScaffoldColor(),
-          surfaceTintColor:  svGetScaffoldColor(),
+        appBar: AppBar(
+          backgroundColor: svGetScaffoldColor(),
+          surfaceTintColor: svGetScaffoldColor(),
           iconTheme: IconThemeData(color: context.iconColor),
-          title: Text('Search',
-                          style: boldTextStyle(size: 18)),
-
+          title: Text('Search', style: boldTextStyle(size: 18)),
           leading: IconButton(
-            icon:  Icon(Icons.arrow_back_ios_new_rounded,
-                color: svGetBodyColor()),
-            onPressed:(){widget.backPress!();}
-          ),
+              icon: Icon(Icons.arrow_back_ios_new_rounded,
+                  color: svGetBodyColor()),
+              onPressed: () {
+                widget.backPress!();
+              }),
           elevation: 0,
           centerTitle: true,
           actions: [
@@ -195,92 +197,99 @@ class _SearchScreenState extends State<SearchScreen>
               },
               child: isSearchShow
                   ? Icon(Icons.cancel_outlined,
-                  size: 25,
-                  // height: 16,
-                  // width: 16,
-                  // fit: BoxFit.cover,
-                  color: svGetBodyColor())
-                  .paddingLeft(4):Image.asset(
-                'assets/images/search.png',
-                height: 20,
-                width: 20,
-                color: svGetBodyColor(),
-              ),
+                          size: 25,
+                          // height: 16,
+                          // width: 16,
+                          // fit: BoxFit.cover,
+                          color: svGetBodyColor())
+                      .paddingLeft(4)
+                  : Image.asset(
+                      'assets/images/search.png',
+                      height: 20,
+                      width: 20,
+                      color: svGetBodyColor(),
+                    ),
             ).paddingRight(16)
           ],
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Divider(thickness: 0.3,color: Colors.grey,endIndent: 20,indent: 20,),
-           if(isSearchShow) Container(
-              padding: const EdgeInsets.only(left: 8.0),
-              margin: const EdgeInsets.only(
-                left: 16,
-                top: 0.0,
-                bottom: 0.0,
-                right: 16,
-              ),
-              decoration: BoxDecoration(
-                  color: context.dividerColor.withOpacity(0.4),
-                  borderRadius: radius(5),
-                  border: Border.all(color: svGetBodyColor(), width: 0.3)),
-              child: AppTextField(
-                textFieldType: TextFieldType.NAME,
-                onChanged: (searchTxt) async {
-                  if (_debounce?.isActive ?? false) _debounce?.cancel();
-                  _debounce = Timer(const Duration(milliseconds: 500), () {
-                    searchPeopleBloc.add(
-                      SearchPeopleLoadPageEvent(
+            const Divider(
+              thickness: 0.3,
+              color: Colors.grey,
+              endIndent: 20,
+              indent: 20,
+            ),
+            if (isSearchShow)
+              Container(
+                padding: const EdgeInsets.only(left: 8.0),
+                margin: const EdgeInsets.only(
+                  left: 16,
+                  top: 0.0,
+                  bottom: 0.0,
+                  right: 16,
+                ),
+                decoration: BoxDecoration(
+                    color: context.dividerColor.withOpacity(0.4),
+                    borderRadius: radius(5),
+                    border: Border.all(color: svGetBodyColor(), width: 0.3)),
+                child: AppTextField(
+                  textFieldType: TextFieldType.NAME,
+                  onChanged: (searchTxt) async {
+                    if (_debounce?.isActive ?? false) _debounce?.cancel();
+                    _debounce = Timer(const Duration(milliseconds: 500), () {
+                      searchPeopleBloc.add(
+                        SearchPeopleLoadPageEvent(
+                          page: 1,
+                          searchTerm: searchTxt,
+                        ),
+                      );
+                      homeBloc
+                          .add(LoadSearchPageEvent(page: 1, search: searchTxt));
+                      // BlocProvider.of<SearchBloc>(context).add(
+                      //   GetPost(
+                      //       page: '1',
+                      //       countryId: "1",
+                      //       searchTerm: searchTxt,
+                      //       type: state.typeValue),
+                      // );
+                      // BlocProvider.of<SplashBloc>(context).add(
+                      //     LoadDropdownData(
+                      //         state.countryFlag,
+                      //         state.typeValue,
+                      //         state.searchTerms ?? '',
+                      //         ''));
+                      drugsBloc.add(LoadPageEvent(
                         page: 1,
+                        countryId: '',
                         searchTerm: searchTxt,
-                      ),
-                    );
-                    homeBloc
-                        .add(LoadSearchPageEvent(page: 1, search: searchTxt));
-                    // BlocProvider.of<SearchBloc>(context).add(
-                    //   GetPost(
-                    //       page: '1',
-                    //       countryId: "1",
-                    //       searchTerm: searchTxt,
-                    //       type: state.typeValue),
-                    // );
-                    // BlocProvider.of<SplashBloc>(context).add(
-                    //     LoadDropdownData(
-                    //         state.countryFlag,
-                    //         state.typeValue,
-                    //         state.searchTerms ?? '',
-                    //         ''));
-                    drugsBloc.add(LoadPageEvent(
-                      page: 1,
-                      countryId: '',
-                      searchTerm: searchTxt,
-                    ));
-                  });
-                },
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Search Here',
-                  hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                  suffixIcon: Image.asset(
-                          'images/socialv/icons/ic_Search.png',
-                          height: 16,
-                          width: 16,
-                          fit: BoxFit.cover,
-                          color: svGetBodyColor())
-                      .paddingAll(16),
+                      ));
+                    });
+                  },
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Search Here',
+                    hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                    suffixIcon: Image.asset(
+                            'images/socialv/icons/ic_Search.png',
+                            height: 16,
+                            width: 16,
+                            fit: BoxFit.cover,
+                            color: svGetBodyColor())
+                        .paddingAll(16),
+                  ),
                 ),
               ),
-            ),
             sizedBox10,
             Expanded(
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 2, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
                     child: TabBar(
-                     dividerHeight: 1,
+                      dividerHeight: 1,
                       dividerColor: Colors.grey,
                       onTap: (index) {
                         setState(() {
@@ -307,13 +316,14 @@ class _SearchScreenState extends State<SearchScreen>
                           children: [
                             /// Posts search Data Here
                             SVPostComponent(homeBloc),
+
                             /// Jobs Search Data Here
                             Column(
                               children: [
                                 BlocBuilder<SplashBloc, SplashState>(
                                     builder: (context, state) {
                                   if (state is CountriesDataInitial) {
-                                    return  Column(
+                                    return Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
@@ -321,26 +331,24 @@ class _SearchScreenState extends State<SearchScreen>
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Center(
-                                            child:
-                                                CircularProgressIndicator(color: svGetBodyColor(),)),
+                                            child: CircularProgressIndicator(
+                                          color: svGetBodyColor(),
+                                        )),
                                       ],
                                     );
                                   } else if (state is CountriesDataLoaded) {
                                     for (var element
                                         in state.countriesModel.countries!) {
-                                      if (element.countryName == state.countryFlag) {
-                                        selectedValue = state
-                                                .countriesModel
-                                                .countries
-                                                ?.first
-                                                .countryName ??
+                                      if (element.countryName ==
+                                          state.countryFlag) {
+                                        selectedValue = state.countriesModel
+                                                .countries?.first.countryName ??
                                             element.countryName;
                                       }
                                     }
                                     return Row(
                                       mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         // Expanded(
                                         //   child: Container(
@@ -484,12 +492,12 @@ class _SearchScreenState extends State<SearchScreen>
                                   builder: (context, state) {
                                     print("state $state");
                                     if (state is PaginationLoadingState) {
-                                      return  Expanded(
+                                      return Expanded(
                                           child: Center(
-                                              child:
-                                                  CircularProgressIndicator(color: svGetBodyColor(),)));
-                                    } else if (state
-                                        is PaginationLoadedState) {
+                                              child: CircularProgressIndicator(
+                                        color: svGetBodyColor(),
+                                      )));
+                                    } else if (state is PaginationLoadedState) {
                                       // print(state.drugsModel.length);
                                       return _buildPostList(context);
                                     } else if (state is DataError) {
@@ -527,8 +535,10 @@ class _SearchScreenState extends State<SearchScreen>
                                 print("state $state");
                                 if (state
                                     is SearchPeoplePaginationLoadingState) {
-                                  return  Center(
-                                      child: CircularProgressIndicator(color: svGetBodyColor(),));
+                                  return Center(
+                                      child: CircularProgressIndicator(
+                                    color: svGetBodyColor(),
+                                  ));
                                 } else if (state
                                     is SearchPeoplePaginationLoadedState) {
                                   // print(state.drugsModel.length);
@@ -546,8 +556,7 @@ class _SearchScreenState extends State<SearchScreen>
                                             if (bloc.pageNumber <=
                                                 bloc.numberOfPage) {
                                               if (index ==
-                                                  bloc.searchPeopleData
-                                                          .length -
+                                                  bloc.searchPeopleData.length -
                                                       bloc.nextPageTrigger) {
                                                 bloc.add(
                                                     SearchPeopleCheckIfNeedMoreDataEvent(
@@ -560,9 +569,11 @@ class _SearchScreenState extends State<SearchScreen>
                                                         bloc.searchPeopleData
                                                                 .length -
                                                             1
-                                                ?  Center(
+                                                ? Center(
                                                     child:
-                                                        CircularProgressIndicator(color: svGetBodyColor(),),
+                                                        CircularProgressIndicator(
+                                                      color: svGetBodyColor(),
+                                                    ),
                                                   )
                                                 : SVSearchCardComponent(
                                                     bloc: bloc,
@@ -584,9 +595,10 @@ class _SearchScreenState extends State<SearchScreen>
                                                             'unfollow'));
 
                                                         bloc
-                                                            .searchPeopleData[
-                                                                index]
-                                                            .isFollowedByCurrentUser = false;
+                                                                .searchPeopleData[
+                                                                    index]
+                                                                .isFollowedByCurrentUser =
+                                                            false;
                                                       } else {
                                                         bloc.add(SetUserFollow(
                                                             bloc
@@ -654,234 +666,236 @@ class _SearchScreenState extends State<SearchScreen>
                 }
                 return bloc.numberOfPage != bloc.pageNumber - 1 &&
                         index >= bloc.drugsData.length - 1
-                    ?  Center(
-                        child: CircularProgressIndicator(color: svGetBodyColor(),),
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: svGetBodyColor(),
+                        ),
                       )
-                    :  Container(
-                  margin: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: context.cardColor,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Material(
-                    color: context.cardColor,
-                    elevation: 4,
-                    borderRadius:
-                    const BorderRadius.all(Radius.circular(10)),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Row(
-                          //   mainAxisAlignment:
-                          //   MainAxisAlignment.spaceBetween,
-                          //   children: [
-                          //     // Text(
-                          //     //   selectedIndex == 0 ? "New" : "Expired",
-                          //     //   style: GoogleFonts.poppins(
-                          //     //       color: Colors.red,
-                          //     //       fontWeight: FontWeight.w500,
-                          //     //       fontSize: kDefaultFontSize),
-                          //     // ),
-                          //     const Icon(Icons.bookmark_border),
-                          //   ],
-                          // ),
-                          Text(
-                            bloc.drugsData[index].jobTitle ?? "",
-                            style: GoogleFonts.poppins(
-                                color: svGetBodyColor(),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(bloc.drugsData[index].companyName ?? 'N/A',
-                              style: secondaryTextStyle(
-                                  color: svGetBodyColor())),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: <Widget>[
-                              const Icon(
-                                Icons.location_on,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Expanded(
-                                child: Text(
-                                    bloc.drugsData[index].location ??
-                                        'N/A',
+                    : Container(
+                        margin: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: context.cardColor,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Material(
+                          color: context.cardColor,
+                          elevation: 4,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Row(
+                                //   mainAxisAlignment:
+                                //   MainAxisAlignment.spaceBetween,
+                                //   children: [
+                                //     // Text(
+                                //     //   selectedIndex == 0 ? "New" : "Expired",
+                                //     //   style: GoogleFonts.poppins(
+                                //     //       color: Colors.red,
+                                //     //       fontWeight: FontWeight.w500,
+                                //     //       fontSize: kDefaultFontSize),
+                                //     // ),
+                                //     const Icon(Icons.bookmark_border),
+                                //   ],
+                                // ),
+                                Text(
+                                  bloc.drugsData[index].jobTitle ?? "",
+                                  style: GoogleFonts.poppins(
+                                      color: svGetBodyColor(),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(bloc.drugsData[index].companyName ?? 'N/A',
                                     style: secondaryTextStyle(
                                         color: svGetBodyColor())),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Text('Apply Date',
-                              style: GoogleFonts.poppins(
-                                  color: svGetBodyColor(),
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14)),
-                          Row(
-                            children: [
-                              Column(
-                                mainAxisAlignment:
-                                MainAxisAlignment.start,
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                children: [
-                                  Text('Date From',
-                                      style: secondaryTextStyle(
-                                          color: svGetBodyColor())),
-                                  Row(
-                                    children: <Widget>[
-                                      const Icon(
-                                        Icons.date_range_outlined,
-                                        size: 20,
-                                        color: Colors.grey,
-                                      ),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text(
-                                          DateFormat('MMM dd, yyyy')
-                                              .format(DateTime.parse(bloc
-                                              .drugsData[index]
-                                              .createdAt ??
-                                              'N/A'.toString())),
-                                          style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(
-                                width: 20,
-                              ),
-                              Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                MainAxisAlignment.start,
-                                children: [
-                                  Text('Date To',
-                                      style: secondaryTextStyle(
-                                          color: svGetBodyColor())),
-                                  Row(
-                                    children: <Widget>[
-                                      const Icon(
-                                        Icons.date_range_outlined,
-                                        size: 20,
-                                        color: Colors.grey,
-                                      ),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text(
-                                          DateFormat('MMM dd, yyyy')
-                                              .format(DateTime.parse(bloc
-                                              .drugsData[index]
-                                              .lastDate ??
-                                              'N/A'.toString())),
-                                          style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Text(
-                              'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
-                              style: secondaryTextStyle(
-                                  color: svGetBodyColor())),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  color: Colors.white,
-                                  child: HtmlWidget(
-                                    '<p>${bloc.drugsData[index].description}</p>',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              children: [
-                                TextButton(
-                                  onPressed: () async {
-                                    // final Uri url = Uri.parse(bloc
-                                    //     .drugsData[index]
-                                    //     .link!); // Assuming job.link is a non-null String
-                                    // Show dialog asking the user to confirm navigation
-                                    final shouldLeave =
-                                    await showDialog<bool>(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Leave App'),
-                                        content: const Text(
-                                            'Would you like to leave the app to view this content?'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context)
-                                                    .pop(false),
-                                            child: const Text('No'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context)
-                                                    .pop(true),
-                                            child: const Text('Yes'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    // If the user confirmed, launch the URL
-                                    if (shouldLeave == true) {
-                                      // await launchUrl(url);
-                                    } else if (shouldLeave == false) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                'Leaving the app canceled.')),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                'Leaving the app canceled.')),
-                                      );
-                                    }
-                                  },
-                                  child: const Text(
-                                    'Apply ',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      decoration:
-                                      TextDecoration.underline,
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: <Widget>[
+                                    const Icon(
+                                      Icons.location_on,
+                                      size: 20,
+                                      color: Colors.grey,
                                     ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                          bloc.drugsData[index].location ??
+                                              'N/A',
+                                          style: secondaryTextStyle(
+                                              color: svGetBodyColor())),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                Text('Apply Date',
+                                    style: GoogleFonts.poppins(
+                                        color: svGetBodyColor(),
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14)),
+                                Row(
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Date From',
+                                            style: secondaryTextStyle(
+                                                color: svGetBodyColor())),
+                                        Row(
+                                          children: <Widget>[
+                                            const Icon(
+                                              Icons.date_range_outlined,
+                                              size: 20,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                                DateFormat('MMM dd, yyyy')
+                                                    .format(DateTime.parse(bloc
+                                                            .drugsData[index]
+                                                            .createdAt ??
+                                                        'N/A'.toString())),
+                                                style: secondaryTextStyle(
+                                                    color: svGetBodyColor())),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Text('Date To',
+                                            style: secondaryTextStyle(
+                                                color: svGetBodyColor())),
+                                        Row(
+                                          children: <Widget>[
+                                            const Icon(
+                                              Icons.date_range_outlined,
+                                              size: 20,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                                DateFormat('MMM dd, yyyy')
+                                                    .format(DateTime.parse(bloc
+                                                            .drugsData[index]
+                                                            .lastDate ??
+                                                        'N/A'.toString())),
+                                                style: secondaryTextStyle(
+                                                    color: svGetBodyColor())),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                    'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
+                                    style: secondaryTextStyle(
+                                        color: svGetBodyColor())),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        color: Colors.white,
+                                        child: HtmlWidget(
+                                          '<p>${bloc.drugsData[index].description}</p>',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () async {
+                                          // final Uri url = Uri.parse(bloc
+                                          //     .drugsData[index]
+                                          //     .link!); // Assuming job.link is a non-null String
+                                          // Show dialog asking the user to confirm navigation
+                                          final shouldLeave =
+                                              await showDialog<bool>(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Leave App'),
+                                              content: const Text(
+                                                  'Would you like to leave the app to view this content?'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(false),
+                                                  child: const Text('No'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(true),
+                                                  child: const Text('Yes'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                          // If the user confirmed, launch the URL
+                                          if (shouldLeave == true) {
+                                            // await launchUrl(url);
+                                          } else if (shouldLeave == false) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Leaving the app canceled.')),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Leaving the app canceled.')),
+                                            );
+                                          }
+                                        },
+                                        child: const Text(
+                                          'Apply ',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                        ),
+                      );
                 // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
               },
             ),

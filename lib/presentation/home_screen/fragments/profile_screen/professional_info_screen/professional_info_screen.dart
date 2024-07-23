@@ -27,17 +27,18 @@ bool isEditModeMap = false;
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
 class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
-   @override
+  @override
   void initState() {
-     isEditModeMap = false;
-     widget.profileBloc.add(UpdateSpecialtyDropdownValue(''));
+    isEditModeMap = false;
+    widget.profileBloc.add(UpdateSpecialtyDropdownValue(''));
 
-     super.initState();
+    super.initState();
   }
-  FocusNode focusNode1=FocusNode();
-  FocusNode focusNode2=FocusNode();
-  FocusNode focusNode3=FocusNode();
-  FocusNode focusNode4=FocusNode();
+
+  FocusNode focusNode1 = FocusNode();
+  FocusNode focusNode2 = FocusNode();
+  FocusNode focusNode3 = FocusNode();
+  FocusNode focusNode4 = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,54 +56,55 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
             child: const Icon(Icons.arrow_back_ios)),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
-          if (widget.profileBloc.isMe)   Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: MaterialButton(
-              textColor: Colors.black,
-              onPressed: () {
-                setState(() {
-                  isEditModeMap = !isEditModeMap;
-                });
-              },
-              elevation: 6,
-              color: Colors.white,
-              minWidth: 40,
-              shape: RoundedRectangleBorder(
-                borderRadius: radius(100),
-                side: const BorderSide(color: Colors.blue),
-              ),
-              animationDuration: const Duration(milliseconds: 300),
-              focusColor: SVAppColorPrimary,
-              hoverColor: SVAppColorPrimary,
-              splashColor: SVAppColorPrimary,
-              padding: const EdgeInsets.all(4),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomImageView(
-                    onTap: () {
-                      setState(() {
-                        isEditModeMap = !isEditModeMap;
-                      });
-                    },
-                    color: Colors.blue,
-                    imagePath: 'assets/icon/ic_vector.svg',
-                    height: 15,
-                    width: 15,
-                    // margin: const EdgeInsets.only(bottom: 4),
-                  ),
-                  Text(
-                    "Edit",
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
+          if (widget.profileBloc.isMe)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: MaterialButton(
+                textColor: Colors.black,
+                onPressed: () {
+                  setState(() {
+                    isEditModeMap = !isEditModeMap;
+                  });
+                },
+                elevation: 6,
+                color: Colors.white,
+                minWidth: 40,
+                shape: RoundedRectangleBorder(
+                  borderRadius: radius(100),
+                  side: const BorderSide(color: Colors.blue),
+                ),
+                animationDuration: const Duration(milliseconds: 300),
+                focusColor: SVAppColorPrimary,
+                hoverColor: SVAppColorPrimary,
+                splashColor: SVAppColorPrimary,
+                padding: const EdgeInsets.all(4),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomImageView(
+                      onTap: () {
+                        setState(() {
+                          isEditModeMap = !isEditModeMap;
+                        });
+                      },
                       color: Colors.blue,
+                      imagePath: 'assets/icon/ic_vector.svg',
+                      height: 15,
+                      width: 15,
+                      // margin: const EdgeInsets.only(bottom: 4),
                     ),
-                  ),
-                ],
+                    Text(
+                      "Edit",
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: Padding(
@@ -126,26 +128,31 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                               if (AppData.userType == "doctor")
                                 Text(
                                   'Title and Specialization',
-                                  style: GoogleFonts.poppins(fontSize:16,fontWeight:FontWeight.w500,),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              if (AppData.userType == "doctor") CustomDropdownButtonFormField(
-                                items: state.specialtyDropdownValue,
-                                value: state.selectedSpecialtyDropdownValue,
-                                width: double.infinity,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 0,
+                              if (AppData.userType == "doctor")
+                                CustomDropdownButtonFormField(
+                                  items: state.specialtyDropdownValue,
+                                  value: state.selectedSpecialtyDropdownValue,
+                                  width: double.infinity,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 0,
+                                  ),
+                                  onChanged: (String? newValue) {
+                                    print(newValue);
+                                    print("Specialty $newValue");
+                                    widget.profileBloc.specialtyName =
+                                        newValue!;
+                                    widget.profileBloc.userProfile?.user
+                                        ?.specialty = newValue;
+                                    widget.profileBloc.add(
+                                        UpdateSpecialtyDropdownValue(newValue));
+                                  },
                                 ),
-                                onChanged: (String? newValue) {
-                                  print(newValue);
-                                  print("Specialty $newValue");
-                                  widget.profileBloc.specialtyName = newValue!;
-                                  widget.profileBloc.userProfile?.user?.specialty=newValue;
-                                  widget.profileBloc.add(
-                                      UpdateSpecialtyDropdownValue(
-                                          newValue));
-                                },
-                              ),
                               if (AppData.userType != "doctor")
                                 const SizedBox(height: 10),
                               // if (AppData.userType!="doctor")
@@ -159,15 +166,21 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                           return Text('No widget $state');
                         }
                       }),
-                if (!isEditModeMap) TextFieldEditWidget(
-                  index: 0,
-                  label: 'Title and Specialization',
-                  value: widget.profileBloc.userProfile?.user?.specialty ?? '',
-                  onSave: (value) =>
-                  widget.profileBloc.userProfile?.user?.specialty = value,
-                ),
                 if (!isEditModeMap)
-                  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                  TextFieldEditWidget(
+                    index: 0,
+                    label: 'Title and Specialization',
+                    value:
+                        widget.profileBloc.userProfile?.user?.specialty ?? '',
+                    onSave: (value) =>
+                        widget.profileBloc.userProfile?.user?.specialty = value,
+                  ),
+                if (!isEditModeMap)
+                  Divider(
+                    color: Colors.grey[300],
+                    indent: 10,
+                    endIndent: 10,
+                  ),
                 TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.location_on,
@@ -178,10 +191,16 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   hints: 'Name Hospital/Clinic/Organization/Private Practice',
                   label: 'Current Workplace',
                   value: widget.profileBloc.userProfile?.profile?.address ?? '',
-                  onSave: (value) => widget.profileBloc.userProfile?.profile?.address = value,),
+                  onSave: (value) =>
+                      widget.profileBloc.userProfile?.profile?.address = value,
+                ),
                 // const Divider(),
                 if (!isEditModeMap)
-                  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                  Divider(
+                    color: Colors.grey[300],
+                    indent: 10,
+                    endIndent: 10,
+                  ),
                 TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.account_circle,
@@ -197,7 +216,11 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   maxLines: 1,
                 ),
                 if (!isEditModeMap)
-                  Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                  Divider(
+                    color: Colors.grey[300],
+                    indent: 10,
+                    endIndent: 10,
+                  ),
                 TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.location_on,
@@ -206,10 +229,12 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   hints: 'e.g Doctor of the year',
                   focusNode: focusNode3,
                   label: 'Notable Achievements',
-                  value: widget.profileBloc.userProfile?.profile?.birthplace ?? '',
-                  onSave: (value) => widget.profileBloc.userProfile!.profile?.birthplace = value,
+                  value:
+                      widget.profileBloc.userProfile?.profile?.birthplace ?? '',
+                  onSave: (value) => widget
+                      .profileBloc.userProfile!.profile?.birthplace = value,
                   // maxLines: 1,
-                   textInputType: TextInputType.multiline,
+                  textInputType: TextInputType.multiline,
                 ),
                 // if (!isEditModeMap)   Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
                 // TextFieldEditWidget(
@@ -225,7 +250,12 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                 //       widget.profileBloc.userProfile!.profile?.hobbies = value,
                 //   maxLines: 3,
                 // ),
-                if (!isEditModeMap) Divider(color: Colors.grey[300],indent: 10,endIndent: 10,),
+                if (!isEditModeMap)
+                  Divider(
+                    color: Colors.grey[300],
+                    indent: 10,
+                    endIndent: 10,
+                  ),
                 TextFieldEditWidget(
                   isEditModeMap: isEditModeMap,
                   icon: Icons.live_help,

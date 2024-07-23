@@ -9,13 +9,14 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../../../core/utils/app/AppData.dart';
 import '../screens/comment_screen/bloc/comment_bloc.dart';
 
-
 class SVCommentReplyComponent extends StatelessWidget {
   CommentBloc commentBloc;
   Function(String) onPostComment;
   int id;
-   SVCommentReplyComponent(this.commentBloc,this.id,this.onPostComment, {Key? key}) : super(key: key);
-TextEditingController commentController=TextEditingController();
+  SVCommentReplyComponent(this.commentBloc, this.id, this.onPostComment,
+      {Key? key})
+      : super(key: key);
+  TextEditingController commentController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,14 +29,18 @@ TextEditingController commentController=TextEditingController();
           Row(
             children: [
               16.width,
-              CustomImageView(imagePath:AppData.imageUrl + AppData.profile_pic, height: 48, width: 48, fit: BoxFit.cover).cornerRadiusWithClipRRect(50),
+              CustomImageView(
+                      imagePath: AppData.imageUrl + AppData.profile_pic,
+                      height: 48,
+                      width: 48,
+                      fit: BoxFit.cover)
+                  .cornerRadiusWithClipRRect(50),
               10.width,
               Container(
                 padding: const EdgeInsets.only(left: 4),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: svGetBodyColor())
-                ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: svGetBodyColor())),
                 child: Row(
                   children: [
                     SizedBox(
@@ -47,7 +52,8 @@ TextEditingController commentController=TextEditingController();
                         textFieldType: TextFieldType.MULTILINE,
                         decoration: InputDecoration(
                           hintText: 'Write a comment',
-                          hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                          hintStyle:
+                              secondaryTextStyle(color: svGetBodyColor()),
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
@@ -57,15 +63,15 @@ TextEditingController commentController=TextEditingController();
                   ],
                 ),
               ),
-              TextButton(onPressed:(){
-                if(commentController.text.isNotEmpty) {
-                  onPostComment(commentController.text);
-                  commentController.text='';
-                }
-              },
-                  child: Text
-                    ('Post', style: secondaryTextStyle(color: SVAppColorPrimary))),
-
+              TextButton(
+                  onPressed: () {
+                    if (commentController.text.isNotEmpty) {
+                      onPostComment(commentController.text);
+                      commentController.text = '';
+                    }
+                  },
+                  child: Text('Post',
+                      style: secondaryTextStyle(color: SVAppColorPrimary))),
             ],
           ),
         ],

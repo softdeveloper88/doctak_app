@@ -64,8 +64,10 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                 print("isPermanentlyDenied");
                 // _permissionDialog(context);
               }
-            }else{
-              ProfileImageScreen(imageUrl:'${widget.userProfile?.coverPicture}' ,).launch(context);
+            } else {
+              ProfileImageScreen(
+                imageUrl: '${widget.userProfile?.coverPicture}',
+              ).launch(context);
             }
             // _showFileOptions(false);
           },
@@ -82,8 +84,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                         width: context.width(),
                         height: 130,
                         fit: BoxFit.cover,
-                      )
-                    .cornerRadiusWithClipRRectOnly(
+                      ).cornerRadiusWithClipRRectOnly(
                         bottomLeft: SVAppCommonRadius.toInt(),
                         bottomRight: SVAppCommonRadius.toInt())
                     : CustomImageView(
@@ -92,26 +93,27 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                         fit: BoxFit.cover,
                         width: double.maxFinite,
                       ).cornerRadiusWithClipRRectOnly(
-                        bottomLeft: 20,
-                        bottomRight: 20),
-                        if(!widget.isMe!) Positioned(
-                            left: 16,
-                            top: 30,
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: white,
-                                borderRadius: BorderRadius.circular(40)
-                              ),
-                              child: Center(
-                                child: IconButton(
-                                  onPressed: (){
-                                    Navigator.pop(context);
-                                  },
-                                    icon: const Icon(Icons.arrow_back_ios,)),
-                              ),
-                            )),
+                        bottomLeft: 20, bottomRight: 20),
+                if (!widget.isMe!)
+                  Positioned(
+                      left: 16,
+                      top: 30,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: white,
+                            borderRadius: BorderRadius.circular(40)),
+                        child: Center(
+                          child: IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(
+                                Icons.arrow_back_ios,
+                              )),
+                        ),
+                      )),
                 Positioned(
                   bottom: 0,
                   child: GestureDetector(
@@ -145,9 +147,10 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                           print("isPermanentlyDenied");
                           // _permissionDialog(context);
                         }
-                      }else{
-                        ProfileImageScreen(imageUrl:'${widget.userProfile?.profilePicture}' ,).launch(context);
-
+                      } else {
+                        ProfileImageScreen(
+                          imageUrl: '${widget.userProfile?.profilePicture}',
+                        ).launch(context);
                       }
                       // _showFileOptions(true);
                     },
@@ -160,25 +163,26 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                                   height: 100, width: 100, fit: BoxFit.cover)
                               .cornerRadiusWithClipRRect(SVAppCommonRadius)
                           : CachedNetworkImage(
-                          placeholder: (context, url) => Container(
-                            color:  Colors.transparent,
-                            height: 100,
-                            width: 100,
-                            child:Image.asset(
-                              'images/socialv/faces/face_5.png',
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-
-                          errorWidget: (context, url, error) => Image.asset(
-                            'images/socialv/faces/face_5.png',
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                                  imageUrl: '${widget.userProfile?.profilePicture.validate()}',
+                                  placeholder: (context, url) => Container(
+                                        color: Colors.transparent,
+                                        height: 100,
+                                        width: 100,
+                                        child: Image.asset(
+                                          'images/socialv/faces/face_5.png',
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                  errorWidget: (context, url, error) =>
+                                      Image.asset(
+                                        'images/socialv/faces/face_5.png',
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                  imageUrl:
+                                      '${widget.userProfile?.profilePicture.validate()}',
                                   height: 100,
                                   width: 100,
                                   fit: BoxFit.cover)
