@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen> {
         //   context,
         //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
         // );
-        PusherService(AppData.logInUserId);
+
         initDeepLinks(context);
         // const SVDashboardScreen().launch(context,isNewTask: true);
         // });

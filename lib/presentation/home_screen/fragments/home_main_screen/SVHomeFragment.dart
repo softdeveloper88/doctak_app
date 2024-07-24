@@ -1,3 +1,5 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -29,6 +31,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
 
   @override
   void initState() {
+    PusherService(AppData.logInUserId);
     widget.homeBloc.add(PostLoadPageEvent(page: 1));
     widget.homeBloc.add(AdsSettingEvent());
     super.initState();

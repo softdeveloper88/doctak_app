@@ -3,27 +3,32 @@ import 'package:pusher_client/pusher_client.dart';
 class PusherService {
   late PusherClient pusher;
   late Channel channel;
-
   PusherService(String userId) {
-    PusherOptions options = PusherOptions(
-      cluster: 'ap2',
-      encrypted: true,
-    );
+    try {
+      PusherOptions options = PusherOptions(
+        host:'doctak.net',
+        cluster: 'ap2',
+        encrypted: true,
+      );
 
-    pusher = PusherClient(
-      '8c57d1a09617aace9be6',
-      options,
-      autoConnect: false,
-    );
-    pusher.onConnectionStateChange((state) {
-      print("previousState: ${state!.previousState}, currentState: ${state.currentState}");
-    });
+      pusher = PusherClient(
+        '8c57d1a09617aace9be6',
+        options,
+        autoConnect: false,
+      );
+      pusher.onConnectionStateChange((state) {
+        print("previousState: ${state!.previousState}, currentState: ${state
+            .currentState}");
+      });
 
-    pusher.onConnectionError((error) {
-      print("error: ${error!.message}");
-    });
+      pusher.onConnectionError((error) {
+        print("error: ${error!.message}");
+      });
 
-    connect(userId);
+      connect(userId);
+    }catch(e){
+      print(e);
+    }
   }
 
   void connect(String userId) {
