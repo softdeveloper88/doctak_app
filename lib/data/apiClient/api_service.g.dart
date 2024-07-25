@@ -439,6 +439,39 @@ class _ApiService implements ApiService {
     final value = PostDataModel.fromJson(_result.data!);
     return value;
   }
+  @override
+  Future<NotificationsModel> getMyNotifications(
+    String token,
+    String page,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'page': page,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PostDataModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/notifications',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = NotificationsModel.fromJson(_result.data!);
+    return value;
+  }
 
   @override
   Future<JobsModel> getJobsList(

@@ -104,11 +104,11 @@ Future<void> main() async {
       // showNotification(message.data);
       if (message.notification != null) {
         if (kDebugMode) {
-          print(
-              'Message also contained a notification: ${message.notification}');
+          print('Message also contained a notification: ${message.notification}');
         }
       }
     });
+
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>()
@@ -118,8 +118,7 @@ Future<void> main() async {
       alert: true,
       badge: true,
       sound: true,
-    )
-        .then((value) {
+    ).then((value) {
       debugPrint('value:print');
     });
   }
@@ -326,7 +325,6 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ));
           }
-
           // if(user_type.$=="customer") {
           //   await navigatorKey.currentState!.push(
           //       MaterialPageRoute(builder: (_) =>

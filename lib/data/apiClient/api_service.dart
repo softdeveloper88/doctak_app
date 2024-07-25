@@ -34,6 +34,7 @@ import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_mod
 import 'package:retrofit/retrofit.dart';
 
 import '../models/group_model/group_list_model.dart';
+import '../models/notification_model/notification_model.dart';
 import '../models/post_model/post_likes_model.dart';
 
 part 'api_service.g.dart';
@@ -118,6 +119,11 @@ abstract class ApiService {
   @POST("/user-profile-post")
   Future<PostDataModel> getMyPosts(@Header('Authorization') String token,
       @Query('page') String page, @Query('user_id') String userId);
+
+ @FormUrlEncoded()
+  @POST("/notifications")
+  Future<NotificationsModel> getMyNotifications(@Header('Authorization') String token,
+      @Query('page') String page);
 
   @FormUrlEncoded()
   @GET("/jobs")

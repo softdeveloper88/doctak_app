@@ -3,13 +3,23 @@ import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
+import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
+import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
+import 'package:doctak_app/presentation/notification_screen/notifications_provider.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
+
+import '../../../../data/models/notification_model/notification_model.dart';
 import '../../../../localization/app_localization.dart';
 import '../../../chat_gpt_screen/ChatDetailScreen.dart';
+import '../../../notification_screen/bloc/notification_state.dart';
 import '../../utils/SVColors.dart';
 import 'bloc/home_bloc.dart';
 
@@ -28,10 +38,15 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
 
   // HomeBloc widget.homeBloc = HomeBloc();
   final ScrollController _mainScrollController = ScrollController();
-
+  NotificationBloc notificationBloc=NotificationBloc();
   @override
   void initState() {
-    PusherService(AppData.logInUserId);
+    // PusherService(AppData.logInUserId);
+    notificationBloc.add(
+      NotificationLoadPageEvent(
+        page: 1,
+      ),
+    );
     widget.homeBloc.add(PostLoadPageEvent(page: 1));
     widget.homeBloc.add(AdsSettingEvent());
     super.initState();
@@ -95,8 +110,67 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 " Artificial Intelligence ",
                 style: GoogleFonts.poppins(
                   color: Colors.black,
+                  fontSize: 10.sp,
                   fontWeight: FontWeight.w500,
                 ),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => NotificationScreen(),
+                  ),
+                );
+              },
+              icon: Stack(
+                children: [
+                  IconButton(
+                    color: context.cardColor,
+                    icon: Icon(
+                      CupertinoIcons.bell,
+                      size: 24,
+                      color: context.iconColor,
+                    ),
+                    onPressed: () async {
+                      NotificationScreen().launch(context);
+                    },
+                  ),
+                  Positioned(
+                      right: 10,
+                      top: 0,
+                      child: BlocBuilder<NotificationBloc, NotificationState>(
+                        bloc: notificationBloc,
+                          builder: (context, state) {
+                        int unreadCount = 0;
+                        if (state is PaginationLoadedState) {
+                          // unreadCount = state.unreadCount;
+                          return notificationBloc.totalNotifications>0?Container(
+                            height: 13,
+                            width: 13,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              border: Border.all(
+                                color: Colors.red,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${notificationBloc.totalNotifications ?? ''}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 7.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ):SizedBox();
+                        }else{
+                          return SizedBox();
+                        }
+                      })),
+                ],
               ),
             ),
             IconButton(
