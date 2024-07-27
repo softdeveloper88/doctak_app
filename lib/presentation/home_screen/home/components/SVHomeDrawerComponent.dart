@@ -374,7 +374,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 // color: Colors.red,
               ),
               onPressed: () async {
-                var result = await logoutUserAccount();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                var result = await logoutUserAccount(prefs.getString('device_token'));
                 if (result) {
                   AppSharedPreferences().clearSharedPreferencesData(context);
                   Navigator.pushAndRemoveUntil(
@@ -462,11 +463,12 @@ Since this is a security-sensitive operation, you eventually are asked to login 
     return false;
   }
 
-  Future<bool> logoutUserAccount() async {
+  Future<bool> logoutUserAccount(deviceToken) async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/logout');
     try {
       print(AppData.userToken);
       final response = await http.post(
+        // body: {'device_token':deviceToken},
         apiUrl,
         headers: <String, String>{
           'Authorization': 'Bearer ${AppData.userToken!}',
@@ -481,7 +483,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
         return false;
         throw Exception('Failed to delete account');
       }
-    } catch (error) {
+    }catch (error) {
       return false;
       // throw Exception('Error: $error');
     }

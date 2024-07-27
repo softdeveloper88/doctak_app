@@ -51,7 +51,9 @@ abstract class ApiService {
       @Field("email") String username,
       @Field("password") String password,
       @Field("device_type") String deviceType,
-      @Field("device_id") String deviceId);
+      @Field("device_id") String deviceId,
+      @Field("device_token") String deviceToken
+      );
 
   @FormUrlEncoded()
   @POST("/login")
@@ -64,6 +66,7 @@ abstract class ApiService {
     @Field("isSocialLogin") bool isSocialLogin,
     @Field("provider") String provider,
     @Field("token") String token,
+    @Field("device_token") String deviceToken,
   );
 
   @FormUrlEncoded()
@@ -76,7 +79,9 @@ abstract class ApiService {
       @Field("country") String country,
       @Field("state") String state,
       @Field("specialty") String specialty,
-      @Field("user_type") String userType);
+      @Field("user_type") String userType,
+      @Field("device_token") String deviceToken
+      );
 
   @FormUrlEncoded()
   @POST("/complete-profile")
@@ -88,7 +93,9 @@ abstract class ApiService {
       @Field("state") String state,
       @Field("specialty") String specialty,
       @Field("phone") String phone,
-      @Field("user_type") String userType);
+      @Field("user_type") String userType,
+      // @Field("device_token") String deviceToken,
+      );
 
   @FormUrlEncoded()
   @POST("/forgot_password")

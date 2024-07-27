@@ -75,7 +75,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           event.country,
           event.state,
           event.specialty,
-          event.userType);
+          event.userType,event.deviceToken??"");
       if (response.response.statusCode == 200) {
         ProgressDialogUtils.hideProgressDialog();
         emit(DataLoaded(!(state as DataLoaded).isPasswordVisible,
@@ -112,10 +112,12 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           event.state,
           event.specialty,
           event.phone,
-          event.userType);
+          event.userType,
+      );
 
       if (response.user!.userType != null) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('device_token', event.deviceToken ?? '');
         await prefs.setString('token', response.token ?? '');
         await prefs.setString('userId', response.user?.id ?? '');
         await prefs.setString('name',

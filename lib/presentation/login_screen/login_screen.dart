@@ -15,6 +15,7 @@ import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_outlined_button.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -27,12 +28,20 @@ import '../../widgets/error_dialog.dart';
 import '../home_screen/utils/SVCommon.dart';
 import 'bloc/login_bloc.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   LoginBloc loginBloc = LoginBloc();
+
   Future<void> sendVerificationLink(String email, BuildContext context) async {
     // Show the loading dialog
     showDialog(
@@ -112,8 +121,12 @@ class LoginScreen extends StatelessWidget {
     }
   }
 
+  bool _rememberMe = false;
+
   FocusNode focusNode1 = FocusNode();
+
   FocusNode focusNode2 = FocusNode();
+
   void showVerifyMessage(BuildContext context) {
     showDialog(
       context: context,
@@ -294,8 +307,7 @@ class LoginScreen extends StatelessWidget {
                                                       ImageConstant.imgLocation,
                                                   height: 24,
                                                   width: 24)),
-                                          prefixConstraints:
-                                              const BoxConstraints(
+                                          prefixConstraints: const BoxConstraints(
                                                   maxHeight: 56),
                                           suffix: InkWell(
                                               onTap: () {
@@ -334,6 +346,21 @@ class LoginScreen extends StatelessWidget {
                                           obscureText: state.isShowPassword);
                                     }),
                                 const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value:_rememberMe,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _rememberMe = value!;
+
+                                        });
+
+                                      },
+                                    ),
+                                    const Text('Remember Me')
+                                  ],
+                                ),
                                 Align(
                                     alignment: Alignment.centerRight,
                                     child: GestureDetector(
@@ -349,18 +376,24 @@ class LoginScreen extends StatelessWidget {
                                 svAppButton(
                                   context: context,
                                   text: 'LOGIN',
-                                  onTap: () {
+                                  onTap: () async {
                                     if (_formKey.currentState!.validate()) {
                                       _formKey.currentState!.save();
                                     }
-                                    loginBloc.add(
-                                      LoginButtonPressed(
-                                        username: emailController.text,
-                                        // replace with real input
-                                        password: passwordController
-                                            .text, // replace with real input
-                                      ),
-                                    );
+                                    await FirebaseMessaging.instance.getToken().then((token) async {
+                                      loginBloc.add(
+                                        LoginButtonPressed(
+                                          username: emailController.text,
+                                          // replace with real input
+                                          password: passwordController
+                                              .text,
+                                            rememberMe:_rememberMe,
+
+                                          deviceToken: token??""
+                                          // replace with real input
+                                        ),
+                                      );
+                                    });
                                   },
                                 ),
                                 const SizedBox(height: 25),
@@ -483,6 +516,7 @@ class LoginScreen extends StatelessWidget {
   onPressedGoogleLogin() async {
     try {
       // GoogleSignIn().signOut();
+      await FirebaseMessaging.instance.getToken().then((token) async {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
       print(googleUser.toString());
@@ -498,9 +532,11 @@ class LoginScreen extends StatelessWidget {
           lastName: googleUser.displayName!.split(' ').last,
           isSocialLogin: true,
           provider: 'google',
-          token: 'accessToken'));
+          token: 'accessToken',
+          deviceToken: token??'',
+      ));
       GoogleSignIn().disconnect();
-      // });
+      });
     } on Exception catch (e) {
       print('error is ....... $e');
       // TODO
@@ -541,6 +577,7 @@ class LoginScreen extends StatelessWidget {
       idToken: appleCredential.identityToken,
       rawNonce: rawNonce,
     );
+    await FirebaseMessaging.instance.getToken().then((token) async {
 
     var response =
         await FirebaseAuth.instance.signInWithCredential(oauthCredential);
@@ -550,10 +587,10 @@ class LoginScreen extends StatelessWidget {
         lastName: response.user?.displayName!.split(' ').last ?? ' ',
         isSocialLogin: true,
         provider: 'apple',
-        token: response.user!.uid ?? ''));
+        token: response.user!.uid ?? '', deviceToken: token??'',));
     print("${appleCredential.givenName} ${appleCredential.familyName}");
 
     GoogleSignIn().disconnect();
-    // });
+    });
   }
 }

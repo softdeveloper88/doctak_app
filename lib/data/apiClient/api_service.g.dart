@@ -24,6 +24,7 @@ class _ApiService implements ApiService {
     String password,
     String deviceType,
     String deviceId,
+    String deviceToken
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -33,6 +34,7 @@ class _ApiService implements ApiService {
       'password': password,
       'device_type': deviceType,
       'device_id': deviceId,
+      'device_token': deviceToken,
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<PostLoginDeviceAuthResp>(Options(
@@ -66,6 +68,7 @@ class _ApiService implements ApiService {
     bool isSocialLogin,
     String provider,
     String token,
+    String deviceToken,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -79,6 +82,7 @@ class _ApiService implements ApiService {
       'isSocialLogin': isSocialLogin,
       'provider': provider,
       'token': token,
+      'device_token': deviceToken,
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<PostLoginDeviceAuthResp>(Options(
@@ -112,6 +116,7 @@ class _ApiService implements ApiService {
     String specialty,
     String phone,
     String userType,
+    // String deviceToken,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -125,6 +130,7 @@ class _ApiService implements ApiService {
       'specialty': specialty,
       'phone': phone,
       'user_type': userType,
+      // 'device_token': deviceToken,
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<PostLoginDeviceAuthResp>(Options(
@@ -158,6 +164,7 @@ class _ApiService implements ApiService {
     String state,
     String specialty,
     String userType,
+    String deviceToken,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -171,6 +178,7 @@ class _ApiService implements ApiService {
       'state': state,
       'specialty': specialty,
       'user_type': userType,
+      'device_token': deviceToken,
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<HttpResponse<Map<String, String>>>(Options(

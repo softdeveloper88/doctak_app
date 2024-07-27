@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -100,144 +100,144 @@ import 'voice_message_view1.dart';
 //   }
 // }
 
-class AudioViewer extends StatefulWidget {
-  const AudioViewer({
-    required this.audio,
-    required this.controllable,
-  });
-
-  final String audio;
-  final bool controllable;
-
-  @override
-  State<AudioViewer> createState() => _AudioViewerState();
-}
-
-class _AudioViewerState extends State<AudioViewer> {
-  final player = AudioPlayer();
-  bool isPlaying = false;
-  double sliderValue = 0.0;
-  double duration = 0.0;
-
-  @override
-  void initState() {
-    // player.onPlayerComplete.listen(( state) {
-    //   setState(()  {
-    //     // player.stop();
-    //     duration=0.0;
-    //   });
-    // });
-    player.onPlayerStateChanged.listen((PlayerState state) {
-      if (mounted) {
-        setState(() {
-          isPlaying = state == PlayerState.playing;
-        });
-      }
-    });
-
-    player.onDurationChanged.listen((Duration d) {
-      if (mounted) {
-        setState(() {
-          duration = d.inMilliseconds.toDouble();
-        });
-      }
-    });
-    player.onPositionChanged.listen((Duration p) {
-      if (mounted) {
-        setState(() {
-          sliderValue = p.inMilliseconds.toDouble();
-        });
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    player.dispose();
-    super.dispose();
-  }
-  // void changePlayState() async {
-  //   if (isPlaying) {
-  //     await player.pause();
-  //   } else {
-  //     await player.play(UrlSource(widget.audio),
-  //           position: const Duration(seconds: 0));
-  //     // await player.play(widget.audio, isLocal: true);
-  //   }
-  // }
-
-  void changePlayState() async {
-    if (player.state == PlayerState.playing) {
-      await player.pause();
-    } else {
-      if (player.state == PlayerState.completed) {
-        await player.play(UrlSource(widget.audio),
-            position: const Duration(seconds: 0));
-      }
-      await player.play(UrlSource(widget.audio));
-    }
-
-    setState(() {});
-  }
-
-  void seekToSecond(double second) {
-    Duration newDuration = Duration(milliseconds: second.toInt());
-    player.seek(newDuration);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.controllable
-        ? GestureDetector(
-            onTap: () => changePlayState(),
-            child: Row(
-              children: [
-                if (!isPlaying)
-                  CircleAvatar(
-                    backgroundColor: const Color.fromARGB(255, 209, 208, 208),
-                    radius: 25,
-                    child: IconButton(
-                      padding: const EdgeInsets.all(0),
-                      onPressed: () => changePlayState(),
-                      icon: const Icon(
-                        Icons.play_arrow_rounded,
-                        size: 40,
-                      ),
-                    ),
-                  )
-                else
-                  CircleAvatar(
-                    backgroundColor: const Color.fromARGB(255, 209, 208, 208),
-                    radius: 25,
-                    child: IconButton(
-                      padding: const EdgeInsets.all(0),
-                      onPressed: () => changePlayState(),
-                      icon: const Icon(
-                        Icons.pause,
-                        size: 40,
-                      ),
-                    ),
-                  ),
-                Slider(
-                  value: sliderValue,
-                  min: 0.0,
-                  max: duration,
-                  onChanged: (value) {
-                    seekToSecond(value);
-                    setState(() {
-                      sliderValue = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-          )
-        : const Center(
-            child: Icon(Icons.music_note_rounded),
-          );
-  }
-}
+// class AudioViewer extends StatefulWidget {
+//   const AudioViewer({
+//     required this.audio,
+//     required this.controllable,
+//   });
+//
+//   final String audio;
+//   final bool controllable;
+//
+//   @override
+//   State<AudioViewer> createState() => _AudioViewerState();
+// }
+//
+// class _AudioViewerState extends State<AudioViewer> {
+//   final player = AudioPlayer();
+//   bool isPlaying = false;
+//   double sliderValue = 0.0;
+//   double duration = 0.0;
+//
+//   @override
+//   void initState() {
+//     // player.onPlayerComplete.listen(( state) {
+//     //   setState(()  {
+//     //     // player.stop();
+//     //     duration=0.0;
+//     //   });
+//     // });
+//     player.onPlayerStateChanged.listen((PlayerState state) {
+//       if (mounted) {
+//         setState(() {
+//           isPlaying = state == PlayerState.playing;
+//         });
+//       }
+//     });
+//
+//     player.onDurationChanged.listen((Duration d) {
+//       if (mounted) {
+//         setState(() {
+//           duration = d.inMilliseconds.toDouble();
+//         });
+//       }
+//     });
+//     player.onPositionChanged.listen((Duration p) {
+//       if (mounted) {
+//         setState(() {
+//           sliderValue = p.inMilliseconds.toDouble();
+//         });
+//       }
+//     });
+//     super.initState();
+//   }
+//
+//   @override
+//   void dispose() {
+//     player.dispose();
+//     super.dispose();
+//   }
+//   // void changePlayState() async {
+//   //   if (isPlaying) {
+//   //     await player.pause();
+//   //   } else {
+//   //     await player.play(UrlSource(widget.audio),
+//   //           position: const Duration(seconds: 0));
+//   //     // await player.play(widget.audio, isLocal: true);
+//   //   }
+//   // }
+//
+//   void changePlayState() async {
+//     if (player.state == PlayerState.playing) {
+//       await player.pause();
+//     } else {
+//       if (player.state == PlayerState.completed) {
+//         await player.play(UrlSource(widget.audio),
+//             position: const Duration(seconds: 0));
+//       }
+//       await player.play(UrlSource(widget.audio));
+//     }
+//
+//     setState(() {});
+//   }
+//
+//   void seekToSecond(double second) {
+//     Duration newDuration = Duration(milliseconds: second.toInt());
+//     player.seek(newDuration);
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return widget.controllable
+//         ? GestureDetector(
+//             onTap: () => changePlayState(),
+//             child: Row(
+//               children: [
+//                 if (!isPlaying)
+//                   CircleAvatar(
+//                     backgroundColor: const Color.fromARGB(255, 209, 208, 208),
+//                     radius: 25,
+//                     child: IconButton(
+//                       padding: const EdgeInsets.all(0),
+//                       onPressed: () => changePlayState(),
+//                       icon: const Icon(
+//                         Icons.play_arrow_rounded,
+//                         size: 40,
+//                       ),
+//                     ),
+//                   )
+//                 else
+//                   CircleAvatar(
+//                     backgroundColor: const Color.fromARGB(255, 209, 208, 208),
+//                     radius: 25,
+//                     child: IconButton(
+//                       padding: const EdgeInsets.all(0),
+//                       onPressed: () => changePlayState(),
+//                       icon: const Icon(
+//                         Icons.pause,
+//                         size: 40,
+//                       ),
+//                     ),
+//                   ),
+//                 Slider(
+//                   value: sliderValue,
+//                   min: 0.0,
+//                   max: duration,
+//                   onChanged: (value) {
+//                     seekToSecond(value);
+//                     setState(() {
+//                       sliderValue = value;
+//                     });
+//                   },
+//                 ),
+//               ],
+//             ),
+//           )
+//         : const Center(
+//             child: Icon(Icons.music_note_rounded),
+//           );
+//   }
+// }
 
 class ChatBubble extends StatelessWidget {
   final String message;
@@ -255,11 +255,11 @@ class ChatBubble extends StatelessWidget {
     this.attachmentJson,
   }) : super(key: key);
 
-  Future<dynamic> durationGet(url) async {
-    final player = AudioPlayer();
-    var duration = await player.setSourceUrl(url);
-    return duration;
-  }
+  // Future<dynamic> durationGet(url) async {
+  //   final player = AudioPlayer();
+  //   var duration = await player.setSourceUrl(url);
+  //   return duration;
+  // }
 
   @override
   Widget build(BuildContext context) {

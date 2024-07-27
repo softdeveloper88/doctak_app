@@ -6,6 +6,7 @@ import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
@@ -697,42 +698,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   /// Displays a dialog with the [SignUpSuccessDialog] content.
-  onTapSignUp(BuildContext context) {
+  onTapSignUp(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
     }
     print(emailController.text.toString());
-    if (widget.isSocialLogin == false) {
-      if (passwordController.text != confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Password should be match'),
-        ));
+    await FirebaseMessaging.instance.getToken().then((token) async {
+      if (widget.isSocialLogin == false) {
+        if (passwordController.text != confirmPasswordController.text) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Password should be match'),
+          ));
+        } else {
+          dropdownBloc.add(SignUpButtonPressed(
+              username: emailController.text.toString(),
+              password: passwordController.text.toString(),
+              firstName: firstnameController!.text.toString(),
+              lastName: lastNameController!.text.toString(),
+              country: profileBloc.country ?? 'United Arab Emirates',
+              state: profileBloc.stateName ?? "DUBAI",
+              specialty: profileBloc.specialtyName ?? "",
+              userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
+              deviceToken: token??''
+            // replace with real input
+          ));
+        }
       } else {
-        dropdownBloc.add(SignUpButtonPressed(
-            username: emailController.text.toString(),
-            password: passwordController.text.toString(),
+        dropdownBloc.add(SocialButtonPressed(
+            token: widget.token ?? '',
             firstName: firstnameController!.text.toString(),
             lastName: lastNameController!.text.toString(),
-            country: profileBloc.country??'United Arab Emirates',
-            state: profileBloc.stateName??"DUBAI",
-            specialty: profileBloc.specialtyName??"",
-            userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student'
+            phone: phoneController.text.toString(),
+            country: profileBloc.country ?? 'United Arab Emirates',
+            state: profileBloc.stateName ?? "DUBAI",
+            specialty: profileBloc.specialtyName ?? "",
+            userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
+            deviceToken: token??''
           // replace with real input
         ));
       }
-    } else {
-      dropdownBloc.add(SocialButtonPressed(
-          token: widget.token ?? '',
-          firstName: firstnameController!.text.toString(),
-          lastName: lastNameController!.text.toString(),
-          phone: phoneController.text.toString(),
-          country: profileBloc.country??'United Arab Emirates',
-          state: profileBloc.stateName??"DUBAI",
-          specialty: profileBloc.specialtyName??"",
-          userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student'
-        // replace with real input
-      ));
-    }
+    });
     // showDialog(
     //     context: context,
     //     builder: (_) => AlertDialog(
