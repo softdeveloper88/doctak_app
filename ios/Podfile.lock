@@ -169,9 +169,6 @@ PODS:
   - permission_handler_apple (9.3.0):
     - Flutter
   - PromisesObjC (2.4.0)
-  - pusher_beams_ios (0.0.1):
-    - Flutter
-    - PushNotifications (~> 4.0)
   - pusher_channels_flutter (0.0.1):
     - Flutter
     - PusherSwift (~> 10.1.5)
@@ -185,7 +182,6 @@ PODS:
     - ReachabilitySwift (~> 5.0)
     - Sodium (= 0.8.0)
     - Starscream (~> 3.1)
-  - PushNotifications (4.0.0)
   - ReachabilitySwift (5.2.3)
   - RecaptchaInterop (100.0.0)
   - share_plus (0.0.1):
@@ -243,7 +239,6 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - pdf_viewer_plugin (from `.symlinks/plugins/pdf_viewer_plugin/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-  - pusher_beams_ios (from `.symlinks/plugins/pusher_beams_ios/ios`)
   - pusher_channels_flutter (from `.symlinks/plugins/pusher_channels_flutter/ios`)
   - pusher_client (from `.symlinks/plugins/pusher_client/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -255,6 +250,7 @@ DEPENDENCIES:
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
+  - ZLPhotoBrowser
 
 SPEC REPOS:
   trunk:
@@ -280,7 +276,6 @@ SPEC REPOS:
     - PromisesObjC
     - PusherSwift
     - PusherSwiftWithEncryption
-    - PushNotifications
     - ReachabilitySwift
     - RecaptchaInterop
     - Sodium
@@ -340,8 +335,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/pdf_viewer_plugin/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
-  pusher_beams_ios:
-    :path: ".symlinks/plugins/pusher_beams_ios/ios"
   pusher_channels_flutter:
     :path: ".symlinks/plugins/pusher_channels_flutter/ios"
   pusher_client:
@@ -411,12 +404,10 @@ SPEC CHECKSUMS:
   pdf_viewer_plugin: 45fc2233c590780ca0ca623a1f575e4bd0a72b3a
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  pusher_beams_ios: 3991e6c6186aa392e2c82687f727ffd5075ea268
   pusher_channels_flutter: 01297e6e420e0ad61a6e5901e27bb272a6f58ec2
   pusher_client: ffcefc0aeeb910ef85e82c9bb333146adad0d8ce
   PusherSwift: cad631bad86cfff4b8458dce1310a7774e469b1f
   PusherSwiftWithEncryption: e8626abf1067a7e1b06afde720934fe1872498e3
-  PushNotifications: 2b2174b28bf48b1fe552686d1f95c53d62a4781d
   ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
   share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
@@ -434,6 +425,6 @@ SPEC CHECKSUMS:
   webview_flutter_wkwebview: 2a23822e9039b7b1bc52e5add778e5d89ad488d1
   ZLPhotoBrowser: 4bfab86b851042e18d7f413284472aa68759626a
 
-PODFILE CHECKSUM: 6e8dfe96d681dc52d4ac8c18b8839ff2127571ac
+PODFILE CHECKSUM: f7540e21f3c7c95eec92caba80bc639476e5be0d
 
 COCOAPODS: 1.15.2

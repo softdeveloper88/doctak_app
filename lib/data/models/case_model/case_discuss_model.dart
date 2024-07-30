@@ -110,7 +110,7 @@ Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
 class Data {
   Data({
-      this.id, 
+      this.caseId,
       this.title, 
       this.tags, 
       this.likes, 
@@ -121,7 +121,7 @@ class Data {
       this.comments,});
 
   Data.fromJson(dynamic json) {
-    id = json['id'];
+    caseId = json['case_id'];
     title = json['title'];
     tags = json['tags'];
     likes = json['likes'];
@@ -131,7 +131,7 @@ class Data {
     profilePic = json['profile_pic'];
     comments = json['comments'];
   }
-  int? id;
+  int? caseId;
   String? title;
   dynamic tags;
   int? likes;
@@ -143,7 +143,7 @@ class Data {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    map['id'] = id;
+    map['case_id'] = caseId;
     map['title'] = title;
     map['tags'] = tags;
     map['likes'] = likes;

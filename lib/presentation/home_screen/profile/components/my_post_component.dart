@@ -314,8 +314,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                         onTap: () {
                                           LikesListScreen(
                                                   id: widget.profileBloc
-                                                          .postList[index].id ??
-                                                      0)
+                                                          .postList[index].id.toString() ??
+                                                      '0')
                                               .launch(context);
                                         },
                                         child: Text(

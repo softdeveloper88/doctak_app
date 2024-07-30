@@ -4,8 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class TermsAndConditionScreen extends StatefulWidget {
-  const TermsAndConditionScreen({super.key});
-
+   TermsAndConditionScreen({super.key});
   @override
   State<TermsAndConditionScreen> createState() =>
       _TermsAndConditionScreenState();
@@ -128,10 +127,11 @@ By using the App, you acknowledge that you have read, understood, and agree to b
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _isChecked
-                    ? () async {
+                    ? ()  async {
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
                         await prefs.setBool('acceptTerms', true);
+                        // widget.accept!();
                         LoginScreen().launch(context, isNewTask: true);
                       }
                     : null,

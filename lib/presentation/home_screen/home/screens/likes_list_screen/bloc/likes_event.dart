@@ -9,7 +9,7 @@ class LoadDataValues extends LikesEvent {
 }
 
 class LoadPageEvent extends LikesEvent {
-  int? postId;
+  String? postId;
   LoadPageEvent({this.postId});
   @override
   List<Object?> get props => [postId];

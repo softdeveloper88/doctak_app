@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -6,6 +7,7 @@ import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/case_model/case_comments.dart';
 import 'package:doctak_app/data/models/case_model/case_discuss_model.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -177,7 +179,7 @@ class CaseDiscussionBloc
         event.comment ?? '',
       );
       caseComments.comments?.add(Comments(
-        id: response.comment?.id,
+        id: response.comment?.id.toString(),
         comment: response.comment?.comment,
         likes: 0,
         likedByUser: null,
@@ -211,37 +213,50 @@ class CaseDiscussionBloc
       );
       if(event.actionType=='delete'){
         caseComments.comments?.removeWhere((comment)=>comment.id.toString()==event.caseId);
-      }else if(event.type=='case' && event.actionType=='likes'){
-        var response = await postService.getCaseDiscussList(
-            'Bearer ${AppData.userToken}',
-            '${pageNumber}',
-            '',
-            '');
-        caseDiscussList.addAll(response.data ?? []);
-    // var data=response.data!.singleWhere((caseDiscuss)=>caseDiscuss.id.toString()==event.caseId);
+      }
+      else if(event.type=='case' && event.actionType=='like'){
+       // var message= json.decode(response.data);
+       // print(message['message']);
+       //  var response = await postService.getCaseDiscussList(
+       //      'Bearer ${AppData.userToken}',
+       //      '${pageNumber}',
+       //      '',
+       //      '');
+        // caseDiscussList.addAll(response.data ?? []);
+    int index=caseDiscussList.indexWhere((caseDiscuss)=>caseDiscuss.caseId.toString()==event.caseId);
     // caseDiscussList.add(data);
-    // caseDiscussList[index].likes=(caseDiscussList[index].likes??0)+1;
+    if(!response.data.toString().contains('unliked')) {
+      caseDiscussList[index].likes = (caseDiscussList[index].likes ?? 0) + 1;
+    }else{
+      if( caseDiscussList[index].likes!>0) {
+        caseDiscussList[index].likes = (caseDiscussList[index].likes ?? 0) - 1;
+      }
+    }
+      }
+      else if(event.type=='case_comment' && event.actionType=='likes'){
+       var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
+       (caseComments.comments![index??0].likes??0)+1;
+         // caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes??0+1,
+         //     likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
+         //     id:caseComments.comments?[index??0].id,
+         //     comment: caseComments.comments?[index??0].comment,
+         //     actionType:caseComments.comments?[index??0].actionType,
+         //     createdAt:caseComments.comments?[index??0].createdAt ,
+         //     name:caseComments.comments?[index??0].name ,
+         //     profilePic: caseComments.comments?[index??0].profilePic);
+      }
+      else if(event.type=='case_comment' && event.actionType=='dislikes'){
+       var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
+       (caseComments.comments![index??0].dislikes??0)+1;
 
-      }else if(event.type=='case_comment' && event.actionType=='likes'){
-       var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
-         caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes??0+1,
-             likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
-             id:caseComments.comments?[index??0].id,
-             comment: caseComments.comments?[index??0].comment,
-             actionType:caseComments.comments?[index??0].actionType,
-             createdAt:caseComments.comments?[index??0].createdAt ,
-             name:caseComments.comments?[index??0].name ,
-             profilePic: caseComments.comments?[index??0].profilePic);
-      }else if(event.type=='case_comment' && event.actionType=='dislikes'){
-       var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
-         caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes==0?0:caseComments.comments?[index??0].likes??0-1,
-             likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
-             id:caseComments.comments?[index??0].id,
-             comment: caseComments.comments?[index??0].comment,
-             actionType:caseComments.comments?[index??0].actionType,
-             createdAt:caseComments.comments?[index??0].createdAt ,
-             name:caseComments.comments?[index??0].name ,
-             profilePic: caseComments.comments?[index??0].profilePic);
+        // caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes==0?0:caseComments.comments?[index??0].likes??0-1,
+         //     likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
+         //     id:caseComments.comments?[index??0].id,
+         //     comment: caseComments.comments?[index??0].comment,
+         //     actionType:caseComments.comments?[index??0].actionType,
+         //     createdAt:caseComments.comments?[index??0].createdAt ,
+         //     name:caseComments.comments?[index??0].name ,
+         //     profilePic: caseComments.comments?[index??0].profilePic);
       }
       print(response.response.data);
       emit(PaginationLoadedState());
@@ -270,7 +285,6 @@ class CaseDiscussionBloc
       String mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
       String fileField =
           mimeType.startsWith('image/') ? 'images[]' : 'videos[]';
-
       File file = File(filePath);
 
       if (await file.exists()) {
@@ -295,7 +309,10 @@ class CaseDiscussionBloc
       print(response.body);
       if (response.statusCode == 200) {
         ProgressDialogUtils.hideProgressDialog();
+        showToast('Discuss case has been created');
+        imagefiles.clear();
         emit(PaginationLoadedState());
+
         // selectedFiles.clear(); // Clear all selected files
         // _captionController.clear();
         // ScaffoldMessenger.of(context).showSnackBar(
@@ -324,6 +341,8 @@ class CaseDiscussionBloc
         //   ),
         // );
       } else {
+        showToast('Discuss case has been created');
+
         ProgressDialogUtils.hideProgressDialog();
         emit(PaginationLoadedState());
         print(response.body);

@@ -26,6 +26,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/utils/app/AppData.dart';
 import '../../widgets/error_dialog.dart';
 import '../home_screen/utils/SVCommon.dart';
+import '../terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'bloc/login_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -335,8 +336,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               const BoxConstraints(
                                                   maxHeight: 56),
                                           validator: (value) {
-                                            if (value == null ||
-                                                (!isValidPassword(value,
+                                            if (value == null || (isValidPassword(value,
                                                     isRequired: true))) {
                                               return translation(context)
                                                   .err_msg_please_enter_valid_password;
@@ -377,23 +377,28 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context: context,
                                   text: 'LOGIN',
                                   onTap: () async {
+                                    SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                    await prefs.setBool('acceptTerms', true);
+
                                     if (_formKey.currentState!.validate()) {
                                       _formKey.currentState!.save();
                                     }
-                                    await FirebaseMessaging.instance.getToken().then((token) async {
-                                      loginBloc.add(
-                                        LoginButtonPressed(
-                                          username: emailController.text,
-                                          // replace with real input
-                                          password: passwordController
-                                              .text,
+                                    // TermsAndConditionScreen(accept: () async {
+                                      print('object');
+                                      await FirebaseMessaging.instance.getToken().then((token) async {
+                                        loginBloc.add(LoginButtonPressed(
+                                            username: emailController.text,
+                                            // replace with real input
+                                            password: passwordController.text,
                                             rememberMe:_rememberMe,
-
-                                          deviceToken: token??""
+                                            deviceToken: token??""
                                           // replace with real input
                                         ),
-                                      );
-                                    });
+                                        );
+                                      });
+                                    // },).launch(context, isNewTask: true);
+
                                   },
                                 ),
                                 const SizedBox(height: 25),

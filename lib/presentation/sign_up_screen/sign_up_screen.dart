@@ -3,12 +3,15 @@ import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/presentation/terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nb_utils/nb_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../widgets/app_bar/appbar_title.dart';
@@ -311,6 +314,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               if(widget.isSocialLogin == false) const SizedBox(
                                                   height: 28),
                                               if(widget.isSocialLogin == false) CustomTextFormField(
+
                                                   focusNode: focusNode5,
                                                   controller:
                                                   confirmPasswordController,
@@ -691,8 +695,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return svAppButton(
       context: context,
       text: 'Sign Up',
-      onTap: () {
+      onTap: () async {
+        // SharedPreferences prefs =
+        //     await SharedPreferences.getInstance();
+        // await prefs.setBool('acceptTerms', true);
+        // TermsAndConditionScreen(accept: (){
+        // },).launch(context, isNewTask: true);
         onTapSignUp(context);
+
       },
     );
   }

@@ -104,6 +104,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           'Bearer ${AppData.userToken}', event.userId!);
       List<InterestModel> response1 = await postService.getInterests(
           'Bearer ${AppData.userToken}', event.userId!);
+      add(UpdateSecondDropdownValues(''));
+
       // var  response3 = await postService.getAboutMe(
       //     'Bearer ${AppData.userToken}');
 

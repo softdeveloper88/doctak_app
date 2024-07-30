@@ -220,13 +220,14 @@ abstract class ApiService {
       @Header('Authorization') String token, @Field('user_id') String userId);
 
   //chat gpt api
-
+  @MultiPart()
   @FormUrlEncoded()
-  @GET("/ask-question/{sessionId}/{question}")
+  @POST("/ask-question")
   Future<ChatGptAskQuestionResponse> askQuestionFromGpt(
       @Header('Authorization') String token,
-      @Path("sessionId") String sessionId,
-      @Path("question") String question);
+      @Field("id") String sessionId,
+      @Field("question") String question,
+      @Part(name:'image') String imageUrl,);
 
   @FormUrlEncoded()
   @GET("/gptChat-session")

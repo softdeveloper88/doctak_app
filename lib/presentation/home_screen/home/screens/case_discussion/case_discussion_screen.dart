@@ -851,7 +851,7 @@ class PostCard extends StatelessWidget {
                     );
                     // AddCaseDiscussScreen().launch(context);
                   },
-                  child: const Text('View Detail'),
+                  child: const Text('View details'),
                 ),
                 const Divider(
                   color: Colors.grey,
@@ -861,7 +861,7 @@ class PostCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(onPressed: (){
-                      caseDiscussionBloc.add(CaseDiscussEvent(caseId: caseDiscussList.id.toString(),type: 'case',actionType: 'likes'));
+                      caseDiscussionBloc.add(CaseDiscussEvent(caseId: caseDiscussList.caseId.toString(),type: 'case',actionType: 'like'));
 
                     },icon:Icon(Icons.thumb_up_alt_outlined)),
                     SizedBox(width: 4),

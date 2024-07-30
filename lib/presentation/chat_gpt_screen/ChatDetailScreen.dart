@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
@@ -15,6 +16,7 @@ import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import to use Clipboard
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -197,29 +199,33 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
       onTap: onTap,
       child: Card(
           elevation: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400),
-                  ),
-                  Text(
-                    subTitle,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                        color: svGetBodyColor(),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.normal),
-                  ),
-                ]),
+          child: SizedBox(
+            width: 40.w,
+            height: 20.h,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                          color: Colors.black,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    Text(
+                      subTitle,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                          color: svGetBodyColor(),
+                          fontSize: 8.sp,
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ]),
+            ),
           )),
     );
   }
@@ -418,63 +424,190 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   const SizedBox(height: 30),
-                                  Wrap(
-                                    alignment: WrapAlignment.center,
-                                    // mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      cardIntro('Code Detection',
-                                          'Identify CPT or ICD codes', () {
-                                        // Code Detection: Identify CPT or ICD codes
-                                        isAlreadyAsk = true;
-                                        widget.question =
-                                            'Code Detection: Identify CPT or ICD codes';
-                                        if (isAlreadyAsk) {
+                                  Row(children: [
+                                    cardIntro('Code Detection',
+                                        'Identify CPT or ICD codes', () {
+                                          // Code Detection: Identify CPT or ICD codes
+                                          isAlreadyAsk = true;
+                                          widget.question =
+                                          'Code Detection: Identify CPT or ICD codes';
+                                          if (isAlreadyAsk) {
+                                            setState(() {
+                                              isEmpty = false;
+                                            });
+                                            isAlreadyAsk = false;
+
+                                            // Future.delayed(const Duration(seconds: 1),(){
+                                            drugsAskQuestion(state1, context);
+                                            // });
+                                            // textController.text = widget.question.toString();
+                                          }
+                                        }),
+                                    const SizedBox(width: 10),
+                                    cardIntro('Diagnostic \nSuggestions',
+                                        'Request suggestions based on symptoms',
+                                            () {
+                                          isAlreadyAsk = true;
+                                          widget.question =
+                                          'Diagnostic Suggestions: Request suggestions based on symptoms';
+                                          if (isAlreadyAsk) {
+                                            isAlreadyAsk = false;
+                                            // Future.delayed(const Duration(seconds: 1),(){
+                                            setState(() {
+                                              isEmpty = false;
+                                            });
+                                            drugsAskQuestion(state1, context);
+                                            // });
+                                            // textController.text = widget.question.toString();
+                                          }
+                                        }),
+                                  ],), Row(children: [
+                                    cardIntro('Medication Review',
+                                        'Check interactions and dosage', () {
+                                          // Medication Review: check interactions and dosage
+
+                                          widget.question =
+                                          'Medication Review: check interactions and dosage';
+                                          // Future.delayed(const Duration(seconds: 1),(){
                                           setState(() {
                                             isEmpty = false;
                                           });
-                                          isAlreadyAsk = false;
-
-                                          // Future.delayed(const Duration(seconds: 1),(){
                                           drugsAskQuestion(state1, context);
                                           // });
                                           // textController.text = widget.question.toString();
-                                        }
-                                      }),
-                                      const SizedBox(width: 10),
-                                      cardIntro('Diagnostic \nSuggestions',
-                                          'Request suggestions based on symptoms',
-                                          () {
-                                        isAlreadyAsk = true;
-                                        widget.question =
-                                            'Diagnostic Suggestions: Request suggestions based on symptoms';
-                                        if (isAlreadyAsk) {
-                                          isAlreadyAsk = false;
+                                        }),
+                                    const SizedBox(width: 10),
+                                    cardIntro('Medical images',
+                                        'initial assessment', () async {
+                                          // Medication Review: check interactions and dosage
+                                          widget.question =
+                                          'initial assessment';
+
+                                          const permission = Permission.photos;
+                                          if (await permission.isGranted) {
+                                            _showFileOptions();
+                                          } else if (await permission
+                                              .isDenied) {
+                                            final result =
+                                            await permission.request();
+                                            if (result.isGranted) {
+                                              _showFileOptions();
+                                            } else if (result.isDenied) {
+                                              print("isDenied");
+                                              // _permissionDialog(context);
+                                              _showFileOptions();
+
+                                            } else if (result
+                                                .isPermanentlyDenied) {
+                                              print("isPermanentlyDenied");
+                                              _permissionDialog(context);
+                                            }
+                                          } else if (await permission
+                                              .isPermanentlyDenied) {
+                                            print("isPermanentlyDenied");
+                                            _permissionDialog(context);
+                                          }
                                           // Future.delayed(const Duration(seconds: 1),(){
-                                          setState(() {
-                                            isEmpty = false;
-                                          });
-                                          drugsAskQuestion(state1, context);
+
                                           // });
                                           // textController.text = widget.question.toString();
-                                        }
-                                      }),
-                                      const SizedBox(width: 10),
-                                      cardIntro('Medication Review',
-                                          'Check interactions and dosage', () {
-                                        // Medication Review: check interactions and dosage
-
-                                        widget.question =
-                                            'Medication Review: check interactions and dosage';
-                                        // Future.delayed(const Duration(seconds: 1),(){
-                                        setState(() {
-                                          isEmpty = false;
-                                        });
-                                        drugsAskQuestion(state1, context);
-                                        // });
-                                        // textController.text = widget.question.toString();
-                                      }),
-                                    ],
-                                  ),
+                                        }),
+                                  ],),
+                                  // Wrap(
+                                  //   alignment: WrapAlignment.center,
+                                  //   // mainAxisAlignment: MainAxisAlignment.center,
+                                  //   children: [
+                                  //     cardIntro('Code Detection',
+                                  //         'Identify CPT or ICD codes', () {
+                                  //       // Code Detection: Identify CPT or ICD codes
+                                  //       isAlreadyAsk = true;
+                                  //       widget.question =
+                                  //           'Code Detection: Identify CPT or ICD codes';
+                                  //       if (isAlreadyAsk) {
+                                  //         setState(() {
+                                  //           isEmpty = false;
+                                  //         });
+                                  //         isAlreadyAsk = false;
+                                  //
+                                  //         // Future.delayed(const Duration(seconds: 1),(){
+                                  //         drugsAskQuestion(state1, context);
+                                  //         // });
+                                  //         // textController.text = widget.question.toString();
+                                  //       }
+                                  //     }),
+                                  //     const SizedBox(width: 10),
+                                  //     cardIntro('Diagnostic \nSuggestions',
+                                  //         'Request suggestions based on symptoms',
+                                  //         () {
+                                  //       isAlreadyAsk = true;
+                                  //       widget.question =
+                                  //           'Diagnostic Suggestions: Request suggestions based on symptoms';
+                                  //       if (isAlreadyAsk) {
+                                  //         isAlreadyAsk = false;
+                                  //         // Future.delayed(const Duration(seconds: 1),(){
+                                  //         setState(() {
+                                  //           isEmpty = false;
+                                  //         });
+                                  //         drugsAskQuestion(state1, context);
+                                  //         // });
+                                  //         // textController.text = widget.question.toString();
+                                  //       }
+                                  //     }),
+                                  //     const SizedBox(width: 10),
+                                  //     cardIntro('Medication Review',
+                                  //         'Check interactions and dosage', () {
+                                  //       // Medication Review: check interactions and dosage
+                                  //
+                                  //       widget.question =
+                                  //           'Medication Review: check interactions and dosage';
+                                  //       // Future.delayed(const Duration(seconds: 1),(){
+                                  //       setState(() {
+                                  //         isEmpty = false;
+                                  //       });
+                                  //       drugsAskQuestion(state1, context);
+                                  //       // });
+                                  //       // textController.text = widget.question.toString();
+                                  //     }),
+                                  //     cardIntro('Medical images',
+                                  //         'initial assessment', () async {
+                                  //       // Medication Review: check interactions and dosage
+                                  //           widget.question =
+                                  //           'initial assessment';
+                                  //
+                                  //           const permission = Permission.photos;
+                                  //           if (await permission.isGranted) {
+                                  //             _showFileOptions();
+                                  //           } else if (await permission
+                                  //               .isDenied) {
+                                  //             final result =
+                                  //                 await permission.request();
+                                  //             if (result.isGranted) {
+                                  //               _showFileOptions();
+                                  //             } else if (result.isDenied) {
+                                  //               print("isDenied");
+                                  //               // _permissionDialog(context);
+                                  //               _showFileOptions();
+                                  //
+                                  //             } else if (result
+                                  //                 .isPermanentlyDenied) {
+                                  //               print("isPermanentlyDenied");
+                                  //               _permissionDialog(context);
+                                  //             }
+                                  //           } else if (await permission
+                                  //               .isPermanentlyDenied) {
+                                  //             print("isPermanentlyDenied");
+                                  //             _permissionDialog(context);
+                                  //           }
+                                  //       // Future.delayed(const Duration(seconds: 1),(){
+                                  //       setState(() {
+                                  //         isEmpty = false;
+                                  //       });
+                                  //       drugsAskQuestion(state1, context);
+                                  //       // });
+                                  //       // textController.text = widget.question.toString();
+                                  //     }),
+                                  //   ],
+                                  // ),
                                   const SizedBox(height: 20),
                                   const Text(
                                     'Ready to start? Type your question below or choose a suggested topic.',
@@ -576,10 +709,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 ChatBubble(
                                   text: message.question ?? '',
                                   isUserMessage: true,
+                                  imageUrl:_uploadedFile,
+                                  responseImageUrl: message.imageUrl??'',
                                 ),
                                 ChatBubble(
                                   text: message.response ?? "",
                                   isUserMessage: false,
+                                  imageUrl:_uploadedFile,
+                                  responseImageUrl: message.imageUrl??'',
                                   onTapReginarate: () {
                                     String question = message.question ?? "";
                                     if (question.isEmpty) return;
@@ -592,6 +729,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                           gptSessionId:
                                               selectedSessionId.toString(),
                                           question: question,
+                                          imageUrl:message.imageUrl,
                                           response: 'Generating response...',
                                           createdAt: DateTime.now().toString(),
                                           updatedAt: DateTime.now().toString());
@@ -600,8 +738,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         GetPost(
                                           sessionId:
                                               selectedSessionId.toString(),
-                                          question:
-                                              question, // replace with real input
+                                          question: question,
+                                          // imageUrl: _uploadedFile??''// replace with real input
                                         ),
                                       );
                                       textController.clear();
@@ -710,6 +848,11 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           },
                         ),
                       ),
+                    if (_selectedFile != null)
+                      if (_isImageFile(_selectedFile!))
+                        _buildImagePreview(_selectedFile!),
+                    if (_isDocumentFile(_selectedFile))
+                      _buildDocumentPreview(_selectedFile!),
                     Container(
                       color: context.cardColor,
                       // margin: const EdgeInsets.all(10.0),
@@ -722,6 +865,36 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       padding: const EdgeInsets.all(10.0),
                       child: Row(
                         children: [
+                         IconButton(
+                            icon: const Icon(Icons.attach_file),
+                            onPressed: () async {
+                              const permission = Permission.photos;
+                              if (await permission.isGranted) {
+                                _showFileOptions();
+                              } else if (await permission
+                                  .isDenied) {
+                                final result =
+                                await permission.request();
+                                if (result.isGranted) {
+                                  _showFileOptions();
+                                } else if (result.isDenied) {
+                                  print("isDenied");
+                                  // _permissionDialog(context);
+                                  _showFileOptions();
+
+                                } else if (result
+                                    .isPermanentlyDenied) {
+                                  print("isPermanentlyDenied");
+                                  _permissionDialog(context);
+                                }
+                              } else if (await permission
+                                  .isPermanentlyDenied) {
+                                print("isPermanentlyDenied");
+                                _permissionDialog(context);
+                              }
+                            },
+                          ),
+                          const SizedBox(width: 8.0),
                           Expanded(
                             child: Container(
                               padding: const EdgeInsets.only(left: 8, right: 8),
@@ -781,16 +954,21 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         question: question,
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
-                                        updatedAt: DateTime.now().toString());
+                                        updatedAt: DateTime.now().toString(),
+                                        imageUrl: _selectedFile?.path ?? '');
                                     state1.response1.messages!.add(myMessage);
                                     BlocProvider.of<ChatGPTBloc>(context).add(
                                       GetPost(
                                         sessionId: selectedSessionId.toString(),
                                         question:
-                                            question, // replace with real input
+                                            question,
+                                        imageUrl:  _selectedFile?.path??''// replace with real input
                                       ),
                                     );
+
                                     textController.clear();
+                                    _uploadedFile=_selectedFile;
+                                    _selectedFile = null;
                                     scrollToBottom();
                                   });
                                   // // Add the temporary message (User's question)
@@ -915,6 +1093,167 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           }
         }));
   }
+  bool _isImageFile(File? file) {
+    // Check if the file is an image
+    return true; // Implement your logic here
+  }
+
+
+
+  bool _isDocumentFile(File? file) {
+    // Check if the file is a document
+    return false; // Implement your logic here
+  }
+  File? _selectedFile;
+  File? _uploadedFile;
+  bool _isFileUploading = false;
+  Widget _buildImagePreview(File file) {
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundImage: FileImage(file),
+        ),
+        title: Text(file.path.split('/').last),
+        trailing: IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            setState(() {
+              _selectedFile = null;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoPreview(File? file) {
+    // Implement video preview widget
+    return Container();
+  }
+
+  Widget _buildDocumentPreview(File file) {
+    // Implement document preview widget
+    return Container();
+  }
+
+  void _showFileOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo),
+                title: const Text('Choose from gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  File? file = await _pickFile(ImageSource.gallery);
+                  if (file != null) {
+                    setState(() {
+                      _selectedFile = file;
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take a picture'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  File? file = await _pickFile(ImageSource.camera);
+                  if (file != null) {
+                    setState(() {
+                      _selectedFile = file;
+                    });
+                  }
+                },
+              ),
+              // ListTile(
+              //   leading: const Icon(Icons.insert_drive_file),
+              //   title: const Text('Select a document'),
+              //   onTap: () async {
+              //     Navigator.pop(context);
+              //     File? file = await _pickFile(ImageSource.gallery);
+              //     if (file != null) {
+              //       setState(() {
+              //         _selectedFile = file;
+              //       });
+              //     }
+              //   },
+              // ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<File?> _pickFile(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      return File(pickedFile.path);
+    } else {
+      return null;
+    }
+  }
+
+  Future<File?> _pickVideoFile(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickVideo(source: source);
+
+    if (pickedFile != null) {
+      return File(pickedFile.path);
+    } else {
+      return null;
+    }
+  }
+
+  onSubscriptionCount(String channelName, int subscriptionCount) {}
+
+  Future<void> _permissionDialog(context) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // <-- SEE HERE
+          title: Text(
+            'You want to enable permission?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 14.sp),
+          ),
+          // content: const SingleChildScrollView(
+          //   child: ListBody(
+          // //     children: <Widget>[
+          // //       Text('Are you sure want to enable permission?'),
+          // //     ],
+          //   ),
+          // ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                openAppSettings();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -937,19 +1276,21 @@ class ChatBubble extends StatelessWidget {
   final String text;
   final bool isUserMessage;
   final Function? onTapReginarate;
+   File? imageUrl;
+   String responseImageUrl;
 
   ChatBubble(
       {Key? key,
       required this.text,
       required this.isUserMessage,
-      this.onTapReginarate})
+      this.onTapReginarate, required this.imageUrl,this.responseImageUrl=''})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double bubbleMaxWidth = screenWidth * 0.6;
-
+     print("response1 ${responseImageUrl}");
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
       child: IntrinsicHeight(
@@ -1093,9 +1434,15 @@ class ChatBubble extends StatelessWidget {
                           horizontal: 14.0, vertical: 10.0),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
-                        child: Text(text,
-                            style: const TextStyle(color: Colors.white)),
-                      ),
+                        child:Column(
+                          children: [
+                            imageUrl ==null ? CachedNetworkImage(imageUrl: responseImageUrl):Image(image: FileImage(imageUrl!)),
+                            Text(text,
+                                style: const TextStyle(color: Colors.white)),
+
+                          ],
+                        )
+     ),
                     ),
                   ),
                   CircleAvatar(
@@ -1181,6 +1528,7 @@ class _TypingIndicatorState extends State<TypingIndicators>
       }),
     );
   }
+
 
   @override
   void dispose() {

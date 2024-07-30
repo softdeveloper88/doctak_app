@@ -246,10 +246,10 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     try {
       var streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      print(response.body);
+      print('hiii${response.body}');
       if (response.statusCode == 200) {
         ProgressDialogUtils.hideProgressDialog();
-        emit(ResponseLoadedState(response.body));
+        // emit(ResponseLoadedState(response.body));
         // selectedFiles.clear(); // Clear all selected files
         // _captionController.clear();
         // ScaffoldMessenger.of(context).showSnackBar(
@@ -278,14 +278,16 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
         //   ),
         // );
       } else {
-        ProgressDialogUtils.hideProgressDialog();
-        emit(ResponseLoadedState(response.body));
+        // ProgressDialogUtils.hideProgressDialog();
+        // emit(ResponseLoadedState(response.body));
 
-        print(response.body);
+        print(response.statusCode);
         // ScaffoldMessenger.of(context).showSnackBar(
         //   const SnackBar(content: Text('Failed to upload post')),
         // );
       }
+      emit(ResponseLoadedState(response.body));
+
     } catch (e) {
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(content: Text('Error: $e')),

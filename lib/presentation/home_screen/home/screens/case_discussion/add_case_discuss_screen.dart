@@ -1,5 +1,7 @@
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_event.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_state.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -44,9 +46,12 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
       print('Description: $description');
       print('Keyword: $keyword');
       print('Image Path: ${caseDiscussionBloc.imagefiles}');
+       if(title!.isNotEmpty ||description!.isNotEmpty ||keyword!.isNotEmpty ) {
+         caseDiscussionBloc.add(AddCaseDataEvent(title: title ?? '',
+             description: description ?? '',
+             keyword: keyword ?? ''));
 
-        caseDiscussionBloc.add(AddCaseDataEvent(title: title??'', description: description??'', keyword: keyword??''));
-
+       }
       // You can further process the data or send it to a backend service
     }
   }
@@ -57,7 +62,17 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
       appBar: AppBar(
         title: const Text('Add Case'),
       ),
-      body: Padding(
+      body: BlocListener<CaseDiscussionBloc, CaseDiscussionState>(
+    bloc: caseDiscussionBloc,
+    listener: (BuildContext context, CaseDiscussionState state) {
+    if (state is PaginationLoadedState) {
+      caseDiscussionBloc.add(
+        CaseDiscussionLoadPageEvent(page: 1, countryId: '', searchTerm: ''),
+      );
+      Navigator.pop(context);
+    // var data = jsonDecode(state.message);
+    }},
+    child:Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -117,6 +132,6 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

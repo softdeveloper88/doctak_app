@@ -352,8 +352,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                                       id: widget
                                                               .homeBloc
                                                               .postList[index]
-                                                              .id ??
-                                                          0)
+                                                              .id.toString() ??
+                                                          '0')
                                                   .launch(context);
                                             },
                                             child: Text(

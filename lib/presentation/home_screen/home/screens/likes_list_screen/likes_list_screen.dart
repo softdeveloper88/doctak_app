@@ -10,7 +10,7 @@ import '../../../utils/SVCommon.dart';
 import 'bloc/likes_bloc.dart';
 
 class LikesListScreen extends StatefulWidget {
-  int id;
+  String id;
 
   LikesListScreen({required this.id, Key? key}) : super(key: key);
 
@@ -23,7 +23,7 @@ class _LikesListScreenState extends State<LikesListScreen> {
 
   @override
   void initState() {
-    likesBloc.add(LoadPageEvent(postId: widget.id ?? 0));
+    likesBloc.add(LoadPageEvent(postId: widget.id ?? '0'));
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(context.cardColor);

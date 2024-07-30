@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,12 +17,12 @@ import '../../utils/SVCommon.dart';
 import 'bloc/add_post_bloc.dart';
 import 'components/SVPostOptionsComponent.dart';
 import 'components/SVPostTextComponent.dart';
-import 'components/dynamic_text_font_widget.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
   SVAddPostFragment({required this.refresh, Key? key}) : super(key: key);
   Function refresh;
+
   @override
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
 }
@@ -69,7 +68,6 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   @override
   void initState() {
     currentColor = SVDividerColor;
-    searchPeopleBloc = BlocProvider.of<AddPostBloc>(context);
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(context.cardColor);
@@ -82,6 +80,8 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
         appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground);
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -103,31 +103,26 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
           BlocListener<AddPostBloc, AddPostState>(
             bloc: searchPeopleBloc,
             listener: (BuildContext context, AddPostState state) {
-              if (state is ResponseLoadedState) {
-                var data = jsonDecode(state.message);
-                if (data['success'] == true) {
+              if ( state is ResponseLoadedState) {
+
+                print("State: ${state.toString()}");
+                Map<String, dynamic> jsonMap = json.decode(state.message);
+                if (jsonMap['success'] == true) {
                   searchPeopleBloc.selectedSearchPeopleData.clear();
                   searchPeopleBloc.imagefiles.clear();
                   searchPeopleBloc.title = '';
                   searchPeopleBloc.feeling = '';
                   searchPeopleBloc.backgroundColor = '';
-                  showToast(data['message']);
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //   SnackBar(content: Text(data['message'])),
-                  // );
+                  showToast(jsonMap['message']);
+                  print('Success: ${jsonMap['message']}');
                   widget.refresh();
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop('');
                 } else {
-                  showToast(data['message']);
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //   SnackBar(content: Text(data['message'][0])),
-                  // );
+                  showToast(jsonMap['message']);
+                  print('Error: ${jsonMap['message']}');
                 }
-              } else {
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(content: Text('Something went wrong')),
-                // );
-                print('add${(state)}');
+                // Reset the flag here to ensure it's done only after processing is complete
+
               }
             },
             child: AppButton(
@@ -138,6 +133,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                   fontSize: 18,
                   fontWeight: FontWeight.w500),
               onTap: () {
+                // Reset flag before making a request
                 searchPeopleBloc.add(AddPostDataEvent());
               },
               elevation: 0,
@@ -155,7 +151,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
               children: [
                 CachedNetworkImage(
                   imageUrl:
-                      "${AppData.imageUrl}${AppData.profile_pic.validate()}",
+                  "${AppData.imageUrl}${AppData.profile_pic.validate()}",
                   height: 50,
                   width: 50,
                   fit: BoxFit.cover,
@@ -208,9 +204,6 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
           ],
         ),
       ),
-      // bottomNavigationBar: Column(
-      //     mainAxisSize: MainAxisSize.min,
-      //     children: [SVPostOptionsComponent(searchPeopleBloc)]),
     );
   }
 }

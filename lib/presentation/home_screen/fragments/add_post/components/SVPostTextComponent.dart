@@ -25,20 +25,20 @@ class SVPostTextComponent extends StatefulWidget {
 }
 
 class _SVPostTextComponentState extends State<SVPostTextComponent> {
-  final quill.QuillController _controller = quill.QuillController.basic();
+  // final quill.QuillController _controller = quill.QuillController.basic();
 
-  // TextEditingController textEditingController = TextEditingController();
-  @override
-  void initState() {
-    _controller.readOnly = false;
-    _controller.addListener(_onEditorChanged);
-    super.initState();
-  }
+  TextEditingController textEditingController = TextEditingController();
+  // @override
+  // void initState() {
+  //   // _controller.readOnly = false;
+  //   textEditingController.addListener(_onEditorChanged);
+  //   super.initState();
+  // }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _controller.removeListener(_onEditorChanged);
+    textEditingController.dispose();
+    // textEditingController.removeListener(_onEditorChanged);
 
     super.dispose();
   }
@@ -46,10 +46,10 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
   void _onEditorChanged() {
     // This will be called whenever the document changes
     //String html = convertDeltaToHtml(_controller.document.toDelta());
-    final html = _controller.document.toDelta().toHtml();
-    widget.searchPeopleBloc.add(TextFieldEvent(html));
-    print(html);
-// Load Delta document using HTML
+    // final html = _controller.document.toDelta().toHtml();
+    widget.searchPeopleBloc.add(TextFieldEvent(textEditingController.text));
+    print(textEditingController.text);
+// Load Del-ta document using HTML
 //     _controller.document = quill.Document.fromDelta(quill.Document.fromHtml(html));
   }
 
@@ -69,68 +69,80 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PreferredSize(
-            preferredSize: const Size.fromHeight(kToolbarHeight),
-            child: quill.QuillToolbar.simple(
-              configurations: quill.QuillSimpleToolbarConfigurations(
-                controller: _controller,
-                sharedConfigurations: const quill.QuillSharedConfigurations(
-                  locale: Locale("en"),
-                ),
-                color: Colors.transparent,
-                axis: Axis.horizontal,
-                multiRowsDisplay: false,
-                showBackgroundColorButton: true,
-                showDirection: true,
-                fontFamilyValues: const {
-                  "Sem serifa": "sans-serif",
-                  "Condensada": "sans-serif-condensed",
-                  "Serifada": "serif",
-                  "Monoespaçada": "monospace",
-                },
-              ),
-            ),
-          ),
-          Container(
-            color: widget.colorValue,
-            height: 20.h,
-            child: quill.QuillEditor.basic(
-              focusNode: editorFocusNode,
-              configurations: quill.QuillEditorConfigurations(
-                controller: _controller,
-                placeholder: ' Share what’s on your mind',
-                sharedConfigurations: const quill.QuillSharedConfigurations(
-                  locale: Locale('en'),
-                ),
-              ),
-            ),
-            //      QuillEditor(
-            //   focusNode: FocusNode(),
-            //   // scrollController: _scrollController,
-            //   configurations: QuillEditorConfigurations(
-            //     // embedBuilders: FlutterQuillEmbeds.editorBuilders(
-            //     // imageEmbedConfigurations: QuillEditorImageEmbedConfigurations(
-            //     // imageErrorWidgetBuilder: (context, error, stackTrace) {
-            //     // return Text(
-            //     // 'Error while loading an image: ${error.toString()}',
-            //     // );
-            //     // },
-            //     // imageProviderBuilder: (context, imageUrl) => NetworkImage(
-            //     // imageUrl,
-            //     // ),
-            //     // ),
-            //     // ),
-            //     requestKeyboardFocusOnCheckListChanged: true,
-            //     padding: const EdgeInsets.all(16),
-            //     controller: _controller,
-            //     autoFocus: true,
-            //     sharedConfigurations: const QuillSharedConfigurations(
-            //       locale: Locale("en"),
-            //     ),
-            //   ),
-            //   scrollController: ScrollController(),
-            // )
-          ),
+          Container(color: Colors.white, child: TextFormField(controller:textEditingController,focusNode: editorFocusNode,minLines: 5,maxLines: 10,onChanged: (value){
+           print(value);
+            widget.searchPeopleBloc.add(TextFieldEvent(value));
+
+          },decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: "What's on your mind",
+            focusedBorder: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            errorBorder: InputBorder.none,
+            disabledBorder: InputBorder.none,
+          ),)),
+          // PreferredSize(
+          //   preferredSize: const Size.fromHeight(kToolbarHeight),
+          //   child: quill.QuillToolbar.simple(
+          //     configurations: quill.QuillSimpleToolbarConfigurations(
+          //       controller: _controller,
+          //       sharedConfigurations: const quill.QuillSharedConfigurations(
+          //         locale: Locale("en"),
+          //       ),
+          //       color: Colors.transparent,
+          //       axis: Axis.horizontal,
+          //       multiRowsDisplay: false,
+          //       showBackgroundColorButton: true,
+          //       showDirection: true,
+          //       fontFamilyValues: const {
+          //         "Sem serifa": "sans-serif",
+          //         "Condensada": "sans-serif-condensed",
+          //         "Serifada": "serif",
+          //         "Monoespaçada": "monospace",
+          //       },
+          //     ),
+          //   ),
+          // ),
+          // Container(
+          //   color: widget.colorValue,
+          //   height: 20.h,
+          //   child: quill.QuillEditor.basic(
+          //     focusNode: editorFocusNode,
+          //     configurations: quill.QuillEditorConfigurations(
+          //       controller: _controller,
+          //       placeholder: ' Share what’s on your mind',
+          //       sharedConfigurations: const quill.QuillSharedConfigurations(
+          //         locale: Locale('en'),
+          //       ),
+          //     ),
+          //   ),
+          //   //      QuillEditor(
+          //   //   focusNode: FocusNode(),
+          //   //   // scrollController: _scrollController,
+          //   //   configurations: QuillEditorConfigurations(
+          //   //     // embedBuilders: FlutterQuillEmbeds.editorBuilders(
+          //   //     // imageEmbedConfigurations: QuillEditorImageEmbedConfigurations(
+          //   //     // imageErrorWidgetBuilder: (context, error, stackTrace) {
+          //   //     // return Text(
+          //   //     // 'Error while loading an image: ${error.toString()}',
+          //   //     // );
+          //   //     // },
+          //   //     // imageProviderBuilder: (context, imageUrl) => NetworkImage(
+          //   //     // imageUrl,
+          //   //     // ),
+          //   //     // ),
+          //   //     // ),
+          //   //     requestKeyboardFocusOnCheckListChanged: true,
+          //   //     padding: const EdgeInsets.all(16),
+          //   //     controller: _controller,
+          //   //     autoFocus: true,
+          //   //     sharedConfigurations: const QuillSharedConfigurations(
+          //   //       locale: Locale("en"),
+          //   //     ),
+          //   //   ),
+          //   //   scrollController: ScrollController(),
+          //   // )
+          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
+import '../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'bloc/notification_event.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -146,60 +149,102 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 } else {
                   return InkWell(
                     onTap: () {
+                      print('object');
+                      var typeNotification=bloc.notificationsList[index].type;
+                      if(typeNotification=='simple'){
+
+                      }else if(typeNotification=='post_liked'){
+
+                      }else if(typeNotification=='follow'){
+
+                      }else if(typeNotification=='message'){
+                        print('object');
+                        ChatRoomScreen(
+                          username:
+                          '${bloc.notificationsList[index].user?.name}',
+                          profilePic:
+                          '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                          id: '${bloc.notificationsList[index].user?.id}',
+                          roomId: '',
+                        ).launch(context);
+                      }else if(typeNotification=='post_liked'){
+
+                      }else if(typeNotification=='post_liked'){
+
+                      }else if(typeNotification=='post_liked'){
+
+                      }
                       // JobsDetailsScreen(
                       //         jobId: '${bloc.notificationsList[index].id ?? ''}')
                       //     .launch(context);
                     },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                      decoration: BoxDecoration(
-                        color: bloc.notificationsList[index].isRead!= 1 ? Colors.white : Colors.blue[50],
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6.0,
-                            offset: Offset(0, 3),
+                    child: Material(
+                      color: bloc.notificationsList[index].isRead== 1 ? Colors.white : Colors.blue[50],
+                      // color: Theme.of(context).cardColor,
+                      elevation: 0,
+                      borderRadius: BorderRadius.circular(10),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                        title: Text(
+                          bloc.notificationsList[index].text??"",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.0,
                           ),
-                        ],
-                      ),
-                      child: Material(
-                        color: bloc.notificationsList[index].isRead== 1 ? Colors.white : Colors.blue[50],
-                        // color: Theme.of(context).cardColor,
-                        elevation: 0,
-                        borderRadius: BorderRadius.circular(10),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-                          title: Text(
-                            bloc.notificationsList[index].text??"",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          subtitle: Text(
-                            timeAgo.format(DateTime.parse(bloc.notificationsList[index].createdAt??"")),
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          leading: const CircleAvatar(
-                            backgroundColor: Colors.blue,
-                            child: Icon(
-                              Icons.notifications,
-                              color: Colors.white,
-                            ),
-                          ),
-                          trailing: Icon(
-                            Icons.arrow_forward_ios_outlined,
-                            color: Colors.grey[600],
-                            size: 16.0,
-                          ),
-                          onTap: () {
-                            // Add your onTap functionality here
-                          },
                         ),
+                        subtitle: Text(
+                          timeAgo.format(DateTime.parse(bloc.notificationsList[index].createdAt??"")),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        leading: const CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          child: Icon(
+                            Icons.notifications,
+                            color: Colors.white,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios_outlined,
+                          color: Colors.grey[600],
+                          size: 16.0,
+                        ),
+                        onTap: () {
+                          print('object');
+                          var typeNotification=bloc.notificationsList[index].type;
+                          if(typeNotification=='simple'){
+
+                          } else if(typeNotification=='follow'){
+                            SVProfileFragment(
+                                userId: bloc.notificationsList[index].user?.id)
+                                .launch(context);
+                          }else if(typeNotification=='message'){
+                            print('object');
+                            ChatRoomScreen(
+                              username:
+                              '${bloc.notificationsList[index].user?.name}',
+                              profilePic:
+                              '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                              id: '${bloc.notificationsList[index].user?.id}',
+                              roomId: '',
+                            ).launch(context);
+                          }else if(typeNotification=='post_liked'){
+                            LikesListScreen(
+                                id: bloc.notificationsList[index]
+                                    .postId ??
+                                    '0')
+                                .launch(context);
+                          }else if(typeNotification=='post_liked'){
+
+                          }
+                          // JobsDetailsScreen(
+                          //         jobId: '${bloc.notificationsList[index].id ?? ''}')
+                          //     .launch(context);
+
+                          // Add your onTap functionality here
+                        },
                       ),
                     ),
                   );

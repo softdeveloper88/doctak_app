@@ -116,7 +116,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                             child: Image.asset('assets/icon/whats_icon.png')),
                         GestureDetector(
                             onTap: () {
-                              _sendEmail('doctak@gmail.com');
+                              _sendEmail('Info@doctak.net');
                             },
                             child: Image.asset('assets/icon/email.png')),
                       ],
@@ -138,7 +138,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
     final Uri emailLaunchUri = Uri(
         scheme: 'mailto',
         path: email,
-        queryParameters: {'subject': 'Hello from Doctak.net'});
+        queryParameters: {'subject': ''});
     if (await canLaunch(emailLaunchUri.toString())) {
       await launch(emailLaunchUri.toString());
     } else {

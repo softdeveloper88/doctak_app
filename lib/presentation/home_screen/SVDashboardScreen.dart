@@ -19,176 +19,124 @@ class SVDashboardScreen extends StatefulWidget {
   State<SVDashboardScreen> createState() => _SVDashboardScreenState();
 }
 
-var scaffoldKey = GlobalKey<ScaffoldState>();
-
 class _SVDashboardScreenState extends State<SVDashboardScreen> {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedIndex = 0;
-  HomeBloc homeBloc = HomeBloc();
+  final HomeBloc homeBloc = HomeBloc();
 
-  Widget getFragment() {
-    if (selectedIndex == 0) {
-      return SVHomeFragment(
-        homeBloc: homeBloc,
-        openDrawer: () {
-          scaffoldKey.currentState?.openDrawer();
-        },
-      );
-    } else if (selectedIndex == 1) {
-      return SearchScreen(backPress: () {
-        setState(() {
-          selectedIndex = 0;
-        });
-      });
-    } else if (selectedIndex == 3) {
-      return SVSearchFragment(backPress: () {
-        setState(() {
-          selectedIndex = 0;
-        });
-      });
-    } else if (selectedIndex == 4) {
-      return SVProfileFragment();
-    }
-    return SVHomeFragment(
-        homeBloc: homeBloc,
-        openDrawer: () {
-          scaffoldKey.currentState?.openDrawer();
-        });
-  }
+  late final List<Widget> _fragments;
 
   @override
   void initState() {
     setStatusBarColor(Colors.transparent);
+    _fragments = [
+      SVHomeFragment(
+        homeBloc: homeBloc,
+        openDrawer: () => scaffoldKey.currentState?.openDrawer(),
+      ),
+      SearchScreen(
+        backPress: () => setState(() => selectedIndex = 0),
+      ),
+      SVAddPostFragment(
+        refresh: () {
+          setState(() => selectedIndex = 0);
+          homeBloc.add(PostLoadPageEvent(page: 1));
+
+        },
+      ),
+      SVSearchFragment(
+        backPress: () => setState(() => selectedIndex = 0),
+      ),
+      SVProfileFragment(),
+    ];
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () {
+      onWillPop: () async {
         if (selectedIndex != 0) {
-          setState(() {
-            selectedIndex = 0;
-          });
-          return Future(() => false);
+          setState(() => selectedIndex = 0);
+          return false;
         } else {
-          return Future(() => true);
+          return true;
         }
       },
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
-        body: getFragment(),
+        body: IndexedStack(
+          index: selectedIndex,
+          children: _fragments,
+        ),
         key: scaffoldKey,
         drawer: SVHomeDrawerComponent(),
         bottomNavigationBar: BottomNavigationBar(
           showSelectedLabels: false,
           type: BottomNavigationBarType.fixed,
           items: [
+            _buildBottomNavigationBarItem('ic_Home', 'ic_HomeSelected'),
+            _buildBottomNavigationBarItem('ic_Search', 'ic_SearchSelected'),
+            _buildBottomNavigationBarItem('ic_Plus', 'ic_PlusSelected'),
             BottomNavigationBarItem(
-              icon: Image.asset('images/socialv/icons/ic_Home.png',
-                      height: 24,
-                      width: 24,
-                      fit: BoxFit.cover,
-                      color: context.iconColor)
-                  .paddingTop(12),
+              icon: Icon(
+                Icons.group_outlined,
+                size: 28,
+                color: context.iconColor,
+              ).paddingTop(12),
               label: '',
-              activeIcon: Image.asset(
-                      'images/socialv/icons/ic_HomeSelected.png',
-                      height: 24,
-                      width: 24,
-                      fit: BoxFit.cover)
-                  .paddingTop(12),
+              activeIcon: Icon(
+                Icons.group_outlined,
+                size: 28,
+              ).paddingTop(12),
             ),
             BottomNavigationBarItem(
-              icon: Image.asset('images/socialv/icons/ic_Search.png',
-                      height: 24,
-                      width: 24,
-                      fit: BoxFit.cover,
-                      color: context.iconColor)
-                  .paddingTop(12),
+              icon: _buildProfileAvatar(),
               label: '',
-              activeIcon: Image.asset(
-                      'images/socialv/icons/ic_SearchSelected.png',
-                      height: 24,
-                      width: 24,
-                      fit: BoxFit.cover)
-                  .paddingTop(12),
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset('images/socialv/icons/ic_Plus.png',
-                      height: 24,
-                      width: 24,
-                      fit: BoxFit.cover,
-                      color: context.iconColor)
-                  .paddingTop(12),
-              label: '',
-              activeIcon: Image.asset(
-                      'images/socialv/icons/ic_PlusSelected.png',
-                      height: 24,
-                      width: 24,
-                      fit: BoxFit.cover)
-                  .paddingTop(12),
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.group_outlined,
-                  size: 28,
-                  color: context.iconColor,
-                ).paddingTop(12),
-                // Image.asset('images/socialv/icons/ic_Search.png',
-                //         height: 24,
-                //         width: 24,
-                //         fit: BoxFit.cover,
-                //         color: context.iconColor)
-                //     .paddingTop(12),
-                label: '',
-                activeIcon: const Icon(
-                  Icons.group_outlined,
-                  size: 28,
-                ).paddingTop(12)
-                // Image.asset(
-                //         'images/socialv/icons/ic_SearchSelected.png',
-                //         height: 24,
-                //         width: 24,
-                //         fit: BoxFit.cover)
-                //     .paddingTop(12),
-                ),
-            BottomNavigationBarItem(
-              icon: SizedBox(
-                height: 40.0,
-                width: 40.0,
-                child: CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(
-                  AppData.imageUrl + AppData.profile_pic,
-                )).paddingTop(12),
-              ),
-              label: '',
-              activeIcon: SizedBox(
-                height: 40.0,
-                width: 40.0,
-                child: CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(
-                  AppData.imageUrl + AppData.profile_pic,
-                )).paddingTop(12),
-              ),
-
-              // child:Image.network(AppData.imageUrl + AppData.profile_pic, height: 24, width: 24, fit: BoxFit.cover)).paddingTop(12),
+              activeIcon: _buildProfileAvatar(),
             ),
           ],
           onTap: (val) {
-            selectedIndex = val;
-            setState(() {});
             if (val == 2) {
-              setState(() {});
-              SVAddPostFragment(refresh: () {
-                selectedIndex = 0;
-
-                homeBloc.add(PostLoadPageEvent(page: 1));
-              }).launch(context);
+              _fragments[val].launch(context);
+            } else {
+              setState(() => selectedIndex = val);
             }
           },
           currentIndex: selectedIndex,
         ),
       ),
+    );
+  }
+
+  BottomNavigationBarItem _buildBottomNavigationBarItem(String icon, String activeIcon) {
+    return BottomNavigationBarItem(
+      icon: Image.asset(
+        'images/socialv/icons/$icon.png',
+        height: 24,
+        width: 24,
+        fit: BoxFit.cover,
+        color: context.iconColor,
+      ).paddingTop(12),
+      label: '',
+      activeIcon: Image.asset(
+        'images/socialv/icons/$activeIcon.png',
+        height: 24,
+        width: 24,
+        fit: BoxFit.cover,
+      ).paddingTop(12),
+    );
+  }
+
+  Widget _buildProfileAvatar() {
+    return SizedBox(
+      height: 40.0,
+      width: 40.0,
+      child: CircleAvatar(
+        backgroundImage: CachedNetworkImageProvider(
+          AppData.imageUrl + AppData.profile_pic,
+        ),
+      ).paddingTop(12),
     );
   }
 }

@@ -52,11 +52,12 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
 
   _askQuestion(GetPost event, Emitter<ChatGPTState> emit) async {
     try {
+    print(event.sessionId);
       ChatGptAskQuestionResponse response =
           await postService.askQuestionFromGpt(
-              'Bearer ${AppData.userToken}', event.sessionId, event.question);
+              'Bearer ${AppData.userToken}', event.sessionId, event.question,event.imageUrl??"");
 
-      // var myMessage = Messages(
+      // var myMessage = Messages(anly
       //     id: -1,
       //     gptSessionId: event.sessionId,
       //     question: event.question,

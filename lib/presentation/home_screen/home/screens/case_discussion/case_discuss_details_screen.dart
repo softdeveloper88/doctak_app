@@ -33,7 +33,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
     super.initState();
     commentController = TextEditingController();
     widget.caseDiscussionBloc.add(
-      CaseCommentPageEvent(caseId: widget.caseDiscussList.id.toString()),
+      CaseCommentPageEvent(caseId: widget.caseDiscussList.caseId.toString()),
     );
   }
 
@@ -118,7 +118,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                         MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(onPressed: (){
-                            widget.caseDiscussionBloc.add(CaseDiscussEvent(caseId: widget.caseDiscussList.id.toString(),type: 'case',actionType: 'likes'));
+                            widget.caseDiscussionBloc.add(CaseDiscussEvent(caseId: widget.caseDiscussList.caseId.toString(),type: 'case',actionType: 'likes'));
 
                           },icon:Icon(Icons.thumb_up_alt_outlined)),
                           const SizedBox(width: 4),
@@ -232,7 +232,6 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                                             'Are you sure want to delete comment ?',
                                                             callback: () {
                                                               widget.caseDiscussionBloc.add(CaseDiscussEvent(caseId: widget.caseDiscussionBloc.caseComments.comments![index].id.toString(),type: 'case_comment',actionType: 'delete'));
-
                                                               Navigator.of(context).pop();
                                                             });
                                                       });
@@ -350,7 +349,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                     if (commentController.text.isNotEmpty) {
                       widget.caseDiscussionBloc.add(
                         AddCaseCommentEvent(
-                          caseId: widget.caseDiscussList.id.toString(),
+                          caseId: widget.caseDiscussList.caseId.toString(),
                           comment: commentController.text.toString(),
                         ),
                       );

@@ -1,3 +1,4 @@
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -110,7 +111,7 @@ class CustomTextFormField extends StatelessWidget {
             onSaved ?? (v ?? '');
           },
           initialValue: initialValue,
-          style: secondaryTextStyle(color: SVAppColorPrimary),
+          style: secondaryTextStyle(color: svGetBodyColor(),size: 16),
           // style: textStyle ?? CustomTextStyles.titleMediumMedium,
           obscureText: obscureText!,
           textInputAction: textInputAction,
@@ -127,6 +128,7 @@ class CustomTextFormField extends StatelessWidget {
         prefixIcon: prefix,
         prefixIconConstraints: prefixConstraints,
         suffixIcon: suffix,
+
         suffixIconConstraints: suffixConstraints,
         isDense: true,
         contentPadding:

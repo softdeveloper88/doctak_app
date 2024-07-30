@@ -908,39 +908,82 @@ class _ApiService implements ApiService {
     final value = FollowerDataModel.fromJson(_result.data!);
     return value;
   }
-
   @override
   Future<ChatGptAskQuestionResponse> askQuestionFromGpt(
-    String token,
-    String sessionId,
-    String question,
-  ) async {
+      String token,
+      String sessionId,
+      String question,
+      String imageUrl,
+      ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{r'Authorization': token};
     _headers.removeWhere((k, v) => v == null);
-    const Map<String, dynamic>? _data = null;
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChatGptAskQuestionResponse>(Options(
-      method: 'GET',
+    // final _data = {
+    //   'user_id': userId,
+    //   'room_id': roomId,
+    //   'receiver_id': receiverId,
+    //   'attachment_type': attachmentType,
+    //   'message': message,
+    // };
+    final formData = FormData.fromMap({
+      'id': sessionId,
+      'question': question,
+      'image': await MultipartFile.fromFile(imageUrl),
+    });
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChatGptAskQuestionResponse>(Options(
+      method: 'POST',
       headers: _headers,
       extra: _extra,
-      contentType: 'application/x-www-form-urlencoded',
+      contentType: 'multipart/form-data',
     )
-            .compose(
-              _dio.options,
-              '/ask-question/${sessionId}/${question}',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
+        .compose(
+      _dio.options,
+      '/ask-question',
+      queryParameters: queryParameters,
+      data: formData,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
     final value = ChatGptAskQuestionResponse.fromJson(_result.data!);
     return value;
   }
+  // @override
+  // Future<ChatGptAskQuestionResponse> askQuestionFromGpt(
+  //   String token,
+  //   String sessionId,
+  //   String question,
+  // ) async {
+  //   final _extra = <String, dynamic>{};
+  //   final queryParameters = <String, dynamic>{};
+  //   final _headers = <String, dynamic>{r'Authorization': token};
+  //   _headers.removeWhere((k, v) => v == null);
+  //   const Map<String, dynamic>? _data = null;
+  //   final _result = await _dio.fetch<Map<String, dynamic>>(
+  //       _setStreamType<ChatGptAskQuestionResponse>(Options(
+  //     method: 'GET',
+  //     headers: _headers,
+  //     extra: _extra,
+  //     contentType: 'application/x-www-form-urlencoded',
+  //   )
+  //           .compose(
+  //             _dio.options,
+  //             '/ask-question/${sessionId}/${question}',
+  //             queryParameters: queryParameters,
+  //             data: _data,
+  //           )
+  //           .copyWith(
+  //               baseUrl: _combineBaseUrls(
+  //             _dio.options.baseUrl,
+  //             baseUrl,
+  //           ))));
+  //   final value = ChatGptAskQuestionResponse.fromJson(_result.data!);
+  //   return value;
+  // }
 
   @override
   Future<ChatGptSession> gptChatSession(String token) async {
