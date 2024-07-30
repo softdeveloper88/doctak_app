@@ -2,11 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/about_us/about_us_screen.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
-import 'package:doctak_app/presentation/group_screen/my_groups_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/app_setting_screen/app_setting_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drugs_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/guidelines_screen.dart';
@@ -15,15 +15,14 @@ import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/new
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/suggestion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/models/SVCommonModels.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/web_screen/web_page_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import '../screens/case_discussion/add_case_discuss_screen.dart';
 
 class SVHomeDrawerComponent extends StatefulWidget {
   @override
@@ -192,73 +191,88 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       if (selectedIndex == options.length - 1) {
                         finish(context);
                       }
-                      if (selectedIndex == 0) {
+                      if (selectedIndex == 0) {//about us
+                        finish(context);
+                        const AboutUsScreen().launch(context);
+                      } else if (selectedIndex == 1) {//AI
+                        finish(context);
+                        ChatDetailScreen(isFromMainScreen: true).launch(context);
+                        print(selectedIndex);
+                      } else if (selectedIndex == 2) {//jobs
                         finish(context);
                         const JobsScreen().launch(context);
-                      } else if (selectedIndex == 1) {
+                        print(selectedIndex);
+                      }  else if (selectedIndex == 3) {//drugs list
                         finish(context);
                         const DrugsListScreen().launch(context);
                         print(selectedIndex);
-                      } else if (selectedIndex == 2) {
+                      } else if (selectedIndex == 4) {//case discussion
                         finish(context);
                         print(selectedIndex);
-
-                        ConferencesScreen().launch(context);
+                        CaseDiscussionScreen().launch(context);
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 3) {
+                      } else if (selectedIndex == 5) { //docTak poll
+                        finish(context);
+                        print(selectedIndex);
+                        ComingSoonScreen().launch(context);
+                        // const GuidelinesScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 6) { //groups Formation
+                        finish(context);
+                        print(selectedIndex);
+                        const ComingSoonScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 7) { // guidelines
                         finish(context);
                         print(selectedIndex);
                         const GuidelinesScreen().launch(context);
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 4) {
-                        finish(context);
-                        print(selectedIndex);
-                        const ComingSoonScreen().launch(context);
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 5) {
-                        finish(context);
-                        print(selectedIndex);
-                        const ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 6) {
+                      } else if (selectedIndex == 8) {  // conferences
                         finish(context);
                         print(selectedIndex);
-                        const ComingSoonScreen().launch(context);
+                         ConferencesScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 7) {
+                      } else if (selectedIndex == 9) {  // moh updates
                         finish(context);
                         print(selectedIndex);
                         // MyGroupsScreen().launch(context);
                         ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 8) {
+                      } else if (selectedIndex == 10) { //cme
                         finish(context);
                         print(selectedIndex);
-                        NewsScreen().launch(context);
+                        ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 9) {
+                      } else if (selectedIndex == 11) { // world news
+                        finish(context);
+                        print(selectedIndex);
+                         NewsScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 12) {  // discount
                         finish(context);
                         print(selectedIndex);
                         const ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 10) {
+                      } else if (selectedIndex == 13) {  // suggestions
                         finish(context);
                         print(selectedIndex);
                         const SuggestionScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 11) {
+                      } else if (selectedIndex == 14) { // app setting
                         finish(context);
-                        print(selectedIndex);
+
                         const AppSettingScreen().launch(context);
 
+
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 12) {
+                      } else if (selectedIndex == 15) {  // privacy
                         finish(context);
                         Navigator.push(
                             context,
@@ -267,21 +281,16 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                                     page_name: 'Privacy Policy',
                                     url: 'https://doctak.net/privacy-policy')));
 
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 13) {
-                        finish(context);
-                        print(selectedIndex);
-                        AboutUsScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 14) {
+                      } else if (selectedIndex == 16) {  //logout
                         finish(context);
                         print(selectedIndex);
                         // ComingSoonScreen().launch(context);
                         logoutAccount(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 15) {
+                      } else if (selectedIndex == 17) { // delete
                         print(selectedIndex);
                         deleteAccount(context);
                         // finish(context);
@@ -375,7 +384,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
               ),
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
-                var result = await logoutUserAccount(prefs.getString('device_token'));
+                var result =
+                    await logoutUserAccount(prefs.getString('device_token'));
                 if (result) {
                   AppSharedPreferences().clearSharedPreferencesData(context);
                   Navigator.pushAndRemoveUntil(
@@ -483,7 +493,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
         return false;
         throw Exception('Failed to delete account');
       }
-    }catch (error) {
+    } catch (error) {
       return false;
       // throw Exception('Error: $error');
     }

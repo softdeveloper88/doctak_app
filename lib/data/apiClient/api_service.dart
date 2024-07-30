@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
+import 'package:doctak_app/data/models/case_model/add_comment_model.dart';
+import 'package:doctak_app/data/models/case_model/case_comments.dart';
+import 'package:doctak_app/data/models/case_model/case_discuss_model.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_ask_question_response.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
@@ -31,6 +34,7 @@ import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart';
+import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../models/group_model/group_list_model.dart';
@@ -52,8 +56,7 @@ abstract class ApiService {
       @Field("password") String password,
       @Field("device_type") String deviceType,
       @Field("device_id") String deviceId,
-      @Field("device_token") String deviceToken
-      );
+      @Field("device_token") String deviceToken);
 
   @FormUrlEncoded()
   @POST("/login")
@@ -80,22 +83,21 @@ abstract class ApiService {
       @Field("state") String state,
       @Field("specialty") String specialty,
       @Field("user_type") String userType,
-      @Field("device_token") String deviceToken
-      );
+      @Field("device_token") String deviceToken);
 
   @FormUrlEncoded()
   @POST("/complete-profile")
   Future<PostLoginDeviceAuthResp> completeProfile(
-      @Header('Authorization') String token,
-      @Field("first_name") String firstName,
-      @Field("last_name") String lastName,
-      @Field("country") String country,
-      @Field("state") String state,
-      @Field("specialty") String specialty,
-      @Field("phone") String phone,
-      @Field("user_type") String userType,
-      // @Field("device_token") String deviceToken,
-      );
+    @Header('Authorization') String token,
+    @Field("first_name") String firstName,
+    @Field("last_name") String lastName,
+    @Field("country") String country,
+    @Field("state") String state,
+    @Field("specialty") String specialty,
+    @Field("phone") String phone,
+    @Field("user_type") String userType,
+    // @Field("device_token") String deviceToken,
+  );
 
   @FormUrlEncoded()
   @POST("/forgot_password")
@@ -127,10 +129,10 @@ abstract class ApiService {
   Future<PostDataModel> getMyPosts(@Header('Authorization') String token,
       @Query('page') String page, @Query('user_id') String userId);
 
- @FormUrlEncoded()
+  @FormUrlEncoded()
   @POST("/notifications")
-  Future<NotificationsModel> getMyNotifications(@Header('Authorization') String token,
-      @Query('page') String page);
+  Future<NotificationsModel> getMyNotifications(
+      @Header('Authorization') String token, @Query('page') String page);
 
   @FormUrlEncoded()
   @GET("/jobs")
@@ -178,6 +180,34 @@ abstract class ApiService {
       @Header('Authorization') String token,
       @Query('page') String page,
       @Query('searchTerm') String searchTerm);
+
+  @FormUrlEncoded()
+  @GET("/discuss-case")
+  Future<CaseDiscussModel> getCaseDiscussList(
+    @Header('Authorization') String token,
+    @Query('page') String page,
+    @Query('country') String countryId,
+    @Query('keyword') String searchTerm,
+  );
+
+  @FormUrlEncoded()
+  @GET("/get-comment-discuss-case")
+  Future<CaseComments> getCaseDiscussCommentList(
+    @Header('Authorization') String token,
+    @Query('id') String id,
+  );
+
+  @FormUrlEncoded()
+  @POST("/comment-discuss-case")
+  Future<AddCommentModel> addCommentDiscussCase(
+    @Header('Authorization') String token,
+    @Query('id') String id,
+    @Query('comment') String comment,
+  );
+
+  @FormUrlEncoded()
+  @POST("/discuss-case-action")
+  Future<HttpResponse> discussCaseAction(@Header('Authorization') String token, @Field("id") String userId, @Field("type") String type,@Field('action_type') String actionType);
 
   @FormUrlEncoded()
   @GET("/user/{userId}/{follow}")
@@ -480,6 +510,7 @@ abstract class ApiService {
   @POST("/delete-message")
   Future<HttpResponse> deleteMessage(
       @Header('Authorization') String token, @Field('ic') String commentId);
+
   @FormUrlEncoded()
   @POST("/save-suggestion")
   Future<HttpResponse> saveSuggestion(

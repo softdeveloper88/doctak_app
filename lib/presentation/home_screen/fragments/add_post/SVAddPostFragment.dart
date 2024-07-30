@@ -15,7 +15,6 @@ import '../../../../core/utils/app/AppData.dart';
 import '../../../../main.dart';
 import '../../utils/SVColors.dart';
 import '../../utils/SVCommon.dart';
-import '../home_main_screen/bloc/home_bloc.dart';
 import 'bloc/add_post_bloc.dart';
 import 'components/SVPostOptionsComponent.dart';
 import 'components/SVPostTextComponent.dart';

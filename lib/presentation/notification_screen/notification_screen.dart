@@ -133,8 +133,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 if (bloc.pageNumber <= bloc.numberOfPage) {
                   if (index ==
                       bloc.notificationsList.length - bloc.nextPageTrigger) {
-                    bloc.add(
-                        NotificationCheckIfNeedMoreDataEvent(index: index));
+                    bloc.add(NotificationCheckIfNeedMoreDataEvent(index: index));
                   }
                 }
                 if (bloc.numberOfPage != bloc.pageNumber - 1 &&

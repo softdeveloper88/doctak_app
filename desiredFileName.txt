@@ -221,7 +221,7 @@
   "lbl_details": "Details",
   "lbl_dr_alysa_hana": "Dr. Alysa Hana",
   "lbl_dr_maria_elena": "Dr. Maria Elena",
-  "lbl_doctak": "Doctak.net",
+  "lbl_doctak": "DocTak.net",
   "lbl_obh_combi": "OBH Combi",
   "lbl_panadol": "Panadol",
   "lbl_payment_detail": "Payment Detail",

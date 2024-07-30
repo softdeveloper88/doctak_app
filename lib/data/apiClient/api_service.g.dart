@@ -554,8 +554,143 @@ class _ApiService implements ApiService {
     final value = JobDetailModel.fromJson(_result.data!);
     return value;
   }
-
   @override
+  Future<CaseDiscussModel> getCaseDiscussList(
+      String token,
+      String page,
+      String country,
+      String keyword,
+      ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'page': page,
+      r'country': country,
+      r'searchTerm': keyword,
+      r'keyword': keyword,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<JobsModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+        .compose(
+      _dio.options,
+      '/discuss-case',
+      queryParameters: queryParameters,
+      data: _data,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
+    final value = CaseDiscussModel.fromJson(_result.data!);
+    return value;
+  }
+  @override
+  Future<CaseComments> getCaseDiscussCommentList(
+      String token,
+      String id,
+      ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'id': id,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<JobsModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+        .compose(
+      _dio.options,
+      '/get-comment-discuss-case',
+      queryParameters: queryParameters,
+      data: _data,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
+    final value = CaseComments.fromJson(_result.data!);
+    return value;
+  }
+ @override
+  Future<AddCommentModel> addCommentDiscussCase(
+      String token,
+      String id,
+      String comment,
+      ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'id': id,
+      r'comment': comment,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<JobsModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+        .compose(
+      _dio.options,
+      '/comment-discuss-case',
+      queryParameters: queryParameters,
+      data: _data,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
+    final value = AddCommentModel.fromJson(_result.data!);
+    return value;
+  }
+  @override
+  Future<HttpResponse<dynamic>> discussCaseAction(String token,String id,String type,String actionType) async {
+      final _extra = <String, dynamic>{};
+      final queryParameters = <String, dynamic>{r'id': id,r'type': type,r'action_type': actionType};
+      final _headers = <String, dynamic>{r'Authorization': token};
+      _headers.removeWhere((k, v) => v == null);
+      const Map<String, dynamic>? _data = null;
+      final _result =
+      await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+        method: 'POST',
+        headers: _headers,
+        extra: _extra,
+        contentType: 'application/x-www-form-urlencoded',
+      )
+          .compose(
+        _dio.options,
+        '/discuss-case-action',
+        queryParameters: queryParameters,
+        data: _data,
+      )
+          .copyWith(
+          baseUrl: _combineBaseUrls(
+            _dio.options.baseUrl,
+            baseUrl,
+          ))));
+      final value = _result.data;
+      final httpResponse = HttpResponse(value, _result);
+      return httpResponse;
+    }
+
+    @override
   Future<JobsModel> getSearchJobsList(
     String token,
     String page,

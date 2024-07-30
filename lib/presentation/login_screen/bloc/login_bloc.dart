@@ -102,6 +102,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             if (response.university != null) {
               AppData.university = response.university?.name??'';
              }
+
             AppData.userType = response.user?.userType ?? '';
             AppData.background = response.user?.background ?? '';
             AppData.email = response.user?.email??'';

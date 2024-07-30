@@ -14,7 +14,6 @@ class SVForumTopicComponent extends StatefulWidget {
   @override
   State<SVForumTopicComponent> createState() => _SVForumTopicComponentState();
 }
-
 class _SVForumTopicComponentState extends State<SVForumTopicComponent> {
   List<SVForumTopicModel> topicsList = getTopicsList();
   List<SVForumTopicModel> tempList = [];

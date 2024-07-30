@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';
@@ -14,16 +14,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:video_player/video_player.dart';
 
-class SVPostOptionsComponent extends StatefulWidget {
-  AddPostBloc searchPeopleBloc;
+import '../bloc/case_discussion_event.dart';
 
-  SVPostOptionsComponent(this.searchPeopleBloc, {super.key});
+class FileUploadWidget extends StatefulWidget {
+  CaseDiscussionBloc caseDiscussionBloc;
+
+  FileUploadWidget(this.caseDiscussionBloc, {super.key});
 
   @override
-  State<SVPostOptionsComponent> createState() => _SVPostOptionsComponentState();
+  State<FileUploadWidget> createState() => _FileUploadWidgetState();
 }
 
-class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
+class _FileUploadWidgetState extends State<FileUploadWidget> {
   // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
   late VideoPlayerController _controller;
 
@@ -32,12 +34,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
   openImages() async {
     try {
       var pickedfiles = await imgpicker.pickMultipleMedia();
-      //you can use ImageCourse.camera for Camera capture
       if (pickedfiles != null) {
         for (var element in pickedfiles) {
           imagefiles.add(element);
-          widget.searchPeopleBloc
-              .add(SelectedFiles(pickedfiles: element, isRemove: false));
+          widget.caseDiscussionBloc.add(SelectedFiles(pickedfiles: element, isRemove: false));
         }
         setState(() {});
       } else {
@@ -54,7 +54,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc
+        widget.caseDiscussionBloc
             .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
@@ -73,7 +73,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc
+        widget.caseDiscussionBloc
             .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
@@ -103,45 +103,46 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                BlocBuilder<AddPostBloc, AddPostState>(
+                BlocBuilder<CaseDiscussionBloc, CaseDiscussionState>(
+                  bloc: widget.caseDiscussionBloc,
                     builder: (context, state) {
-                  if (state is PaginationLoadedState) {
-                    return imagefiles != null
-                        ? Wrap(
-                            children: widget.searchPeopleBloc.imagefiles
-                                .map((imageone) {
-                              return Stack(children: [
-                                Card(
-                                  child: SizedBox(
-                                    height: 60, width: 60,
-                                    child: buildMediaItem(File(imageone.path)),
-                                    // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
-                                  ),
+                      if (state is PaginationLoadedState) {
+                        return imagefiles != null
+                            ? Wrap(
+                          children: widget.caseDiscussionBloc.imagefiles
+                              .map((imageone) {
+                            return Stack(children: [
+                              Card(
+                                child: SizedBox(
+                                  height: 60, width: 60,
+                                  child: buildMediaItem(File(imageone.path)),
+                                  // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
                                 ),
-                                Positioned(
-                                  right: 0,
-                                  child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {});
-                                        imagefiles.remove(imageone);
-                                        widget.searchPeopleBloc.add(
-                                            SelectedFiles(
-                                                pickedfiles: imageone,
-                                                isRemove: true));
-                                      },
-                                      child: const Icon(
-                                        Icons.remove_circle_outlined,
-                                        color: Colors.red,
-                                      )),
-                                )
-                              ]);
-                            }).toList(),
-                          )
-                        : Container();
-                  } else {
-                    return Container();
-                  }
-                }),
+                              ),
+                              Positioned(
+                                right: 0,
+                                child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {});
+                                      imagefiles.remove(imageone);
+                                      widget.caseDiscussionBloc.add(
+                                          SelectedFiles(
+                                              pickedfiles: imageone,
+                                              isRemove: true));
+                                    },
+                                    child: const Icon(
+                                      Icons.remove_circle_outlined,
+                                      color: Colors.red,
+                                    )),
+                              )
+                            ]);
+                          }).toList(),
+                        )
+                            : Container();
+                      } else {
+                        return Container();
+                      }
+                    }),
                 // HorizontalList(
                 //   itemCount: list.length,
                 //   itemBuilder: (context, index) {
@@ -249,7 +250,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
               // Image.asset('images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
               // GestureDetector(
               //     onTap: () {
-              //       checkInPlaceBottomSheet(context, widget.searchPeopleBloc);
+              //       checkInPlaceBottomSheet(context, widget.caseDiscussionBloc);
               //     },
               //     child: Image.asset('images/socialv/icons/ic_Location.png',
               //         height: 32, width: 32, fit: BoxFit.cover)),

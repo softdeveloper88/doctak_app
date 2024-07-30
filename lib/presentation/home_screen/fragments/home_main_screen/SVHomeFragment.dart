@@ -86,40 +86,52 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
           actions: [
-            MaterialButton(
-              textColor: Colors.black,
-              // shapeBorder: RoundedRectangleBorder(borderRadius: radius(4),side: BorderSide()),
-              // text: ' Artificial Intelligence ',
-              // textStyle: secondaryTextStyle(color: Colors.white, size: 10),
-              onPressed: () {
-                ChatDetailScreen(isFromMainScreen: true).launch(context);
-              },
-              elevation: 6,
-              color: Colors.white,
-              minWidth: 80,
-              shape: RoundedRectangleBorder(
-                  borderRadius: radius(4),
-                  side: const BorderSide(color: Colors.blue)),
-              animationDuration: const Duration(milliseconds: 300),
-              focusColor: SVAppColorPrimary,
-              hoverColor: SVAppColorPrimary,
-              splashColor: SVAppColorPrimary,
-              height: 25,
-              padding: const EdgeInsets.all(0),
-              child: Text(
-                " Artificial Intelligence ",
-                style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w500,
-                ),
+            IconButton(
+              icon: Image.asset(
+                'assets/images/docktak_ai_light.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.contain,
+                // color: context.iconColor,
               ),
+              onPressed: () {
+                    ChatDetailScreen(isFromMainScreen: true).launch(context);
+              },
             ),
+            // MaterialButton(
+            //   textColor: Colors.black,
+            //   // shapeBorder: RoundedRectangleBorder(borderRadius: radius(4),side: BorderSide()),
+            //   // text: ' Artificial Intelligence ',
+            //   // textStyle: secondaryTextStyle(color: Colors.white, size: 10),
+            //   onPressed: () {
+            //     ChatDetailScreen(isFromMainScreen: true).launch(context);
+            //   },
+            //   elevation: 6,
+            //   color: Colors.white,
+            //   minWidth: 80,
+            //   shape: RoundedRectangleBorder(
+            //       borderRadius: radius(4),
+            //       side: const BorderSide(color: Colors.blue)),
+            //   animationDuration: const Duration(milliseconds: 300),
+            //   focusColor: SVAppColorPrimary,
+            //   hoverColor: SVAppColorPrimary,
+            //   splashColor: SVAppColorPrimary,
+            //   height: 25,
+            //   padding: const EdgeInsets.all(0),
+            //   child: Text(
+            //     " Artificial Intelligence ",
+            //     style: GoogleFonts.poppins(
+            //       color: Colors.black,
+            //       fontSize: 10.sp,
+            //       fontWeight: FontWeight.w500,
+            //     ),
+            //   ),
+            // ),
             IconButton(
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => NotificationScreen(),
+                    builder: (_) => const NotificationScreen(),
                   ),
                 );
               },
@@ -133,7 +145,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                       color: context.iconColor,
                     ),
                     onPressed: () async {
-                      NotificationScreen().launch(context);
+                      const NotificationScreen().launch(context);
                     },
                   ),
                   Positioned(
@@ -165,9 +177,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                                 ),
                               ),
                             ),
-                          ):SizedBox();
+                          ):const SizedBox();
                         }else{
-                          return SizedBox();
+                          return const SizedBox();
                         }
                       })),
                 ],
