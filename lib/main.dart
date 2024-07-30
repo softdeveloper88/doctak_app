@@ -256,7 +256,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // NotificationManger.init(context: context);
     // setFCMSetting();
-    setToken();
+    // setToken();
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? message) {
