@@ -6,6 +6,7 @@ import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/case_model/case_comments.dart';
 import 'package:doctak_app/data/models/case_model/case_discuss_model.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -270,7 +271,6 @@ class CaseDiscussionBloc
       String mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
       String fileField =
           mimeType.startsWith('image/') ? 'images[]' : 'videos[]';
-
       File file = File(filePath);
 
       if (await file.exists()) {
@@ -295,7 +295,10 @@ class CaseDiscussionBloc
       print(response.body);
       if (response.statusCode == 200) {
         ProgressDialogUtils.hideProgressDialog();
+        showToast('Discuss case has been created');
+        imagefiles.clear();
         emit(PaginationLoadedState());
+
         // selectedFiles.clear(); // Clear all selected files
         // _captionController.clear();
         // ScaffoldMessenger.of(context).showSnackBar(
@@ -324,6 +327,8 @@ class CaseDiscussionBloc
         //   ),
         // );
       } else {
+        showToast('Discuss case has been created');
+
         ProgressDialogUtils.hideProgressDialog();
         emit(PaginationLoadedState());
         print(response.body);
