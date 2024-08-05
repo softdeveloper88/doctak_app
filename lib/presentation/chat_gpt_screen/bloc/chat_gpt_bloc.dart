@@ -51,12 +51,20 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   }
 
   _askQuestion(GetPost event, Emitter<ChatGPTState> emit) async {
-    try {
-    print(event.sessionId);
-      ChatGptAskQuestionResponse response =
-          await postService.askQuestionFromGpt(
-              'Bearer ${AppData.userToken}', event.sessionId, event.question,event.imageUrl??"");
-
+    // try {
+      ChatGptAskQuestionResponse response;
+      print('hiii ${event.imageUrl}');
+      if(event.imageUrl!.isNotEmpty) {
+       response =
+      await postService.askQuestionFromGpt(
+          'Bearer ${AppData.userToken}', event.sessionId, event.question,
+          event.imageUrl ?? "");
+    }else{
+       response =
+      await postService.askQuestionFromGptWithoutImage(
+          'Bearer ${AppData.userToken}', event.sessionId, event.question
+         );
+    }
       // var myMessage = Messages(anly
       //     id: -1,
       //     gptSessionId: event.sessionId,
@@ -84,6 +92,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
               id: -1,
               gptSessionId: event.sessionId,
               question: event.question,
+              // imageUrl: event.imageUrl,
               response: typingText,
               createdAt: DateTime.now().toString(),
               updatedAt: DateTime.now().toString());
@@ -92,6 +101,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
                 id: response.responseMessageId,
                 gptSessionId: event.sessionId,
                 question: event.question,
+                // imageUrl: event.imageUrl,
                 response: typingText,
                 createdAt: DateTime.now().toString(),
                 updatedAt: DateTime.now().toString());
@@ -105,10 +115,10 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       }
 
       // emit(QuestionResponseLoaded(response));
-    } catch (e) {
-      print("eee$e");
-      emit(DataError('An error occurred'));
-    }
+    // } catch (e) {
+    //   print("eee$e");
+    //   emit(DataError('An error occurred'));
+    // }
   }
 
   _onGetSessionMessagesList(

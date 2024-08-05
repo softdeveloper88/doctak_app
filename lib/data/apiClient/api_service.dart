@@ -230,6 +230,13 @@ abstract class ApiService {
       @Part(name:'image') String imageUrl,);
 
   @FormUrlEncoded()
+  @POST("/ask-question")
+  Future<ChatGptAskQuestionResponse> askQuestionFromGptWithoutImage(
+      @Header('Authorization') String token,
+      @Field("id") String sessionId,
+      @Field("question") String question,);
+
+  @FormUrlEncoded()
   @GET("/gptChat-session")
   Future<ChatGptSession> gptChatSession(@Header('Authorization') String token);
 

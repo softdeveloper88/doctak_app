@@ -30,14 +30,62 @@ class SVHomeDrawerComponent extends StatefulWidget {
 }
 
 class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
-  final ValueNotifier<int> selectedIndexNotifier = ValueNotifier<int>(-1);
+  int selectedIndex = -1;
 
-  @override
-  void dispose() {
-    selectedIndexNotifier.dispose();
-    super.dispose();
-  }
-
+  // @override
+  // void dispose() {
+  //   _bannerAd!.dispose();
+  //   super.dispose();
+  // }
+  //
+  // @override
+  // void initState() {
+  //   getBannerAds();
+  //   super.initState();
+  // }
+  // bool isLoaded = false;
+  // bool isActive = true;
+  // BannerAd? _bannerAd;
+  //
+  // getBannerAds() {
+  //   _bannerAd = BannerAd(
+  //       size: AdSize.banner,
+  //       adUnitId: AdmobSetting.bannerUnit,
+  //       listener: BannerAdListener(onAdClosed: (Ad ad) {
+  //         debugPrint("Ad Closed");
+  //       }, onAdFailedToLoad: (Ad ad, LoadAdError error) {
+  //         setState(() {
+  //           isLoaded = false;
+  //         });
+  //       }, onAdLoaded: (Ad ad) {
+  //         setState(() {
+  //           isLoaded = true;
+  //         });
+  //         debugPrint('Ad Loaded');
+  //       }, onAdOpened: (Ad ad) {
+  //         debugPrint('Ad opened');
+  //       }),
+  //       request: const AdRequest());
+  //
+  //   _bannerAd!.load();
+  // }
+  // Widget bannerAdLoaded() {
+  //   if (isLoaded == true) {
+  //     return Padding(
+  //       padding: const EdgeInsets.all(8.0),
+  //       child: SizedBox(
+  //         height: _bannerAd!.size.height.toDouble(),
+  //         child: AdWidget(
+  //           ad: _bannerAd!,
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     return const SizedBox(
+  //       height: 8,
+  //     );
+  //   }
+  // }
   @override
   Widget build(BuildContext context) {
     List<SVDrawerModel> options = getDrawerOptions(context);
@@ -50,290 +98,404 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
           width: 300,
           child: ListView(
             children: [
-              SizedBox(height: 40),
-              buildProfileSection(),
-              SizedBox(height: 20),
-              buildDrawerOptions(options),
-              Divider(indent: 16, endIndent: 16, color: Colors.white),
-              buildAppVersionInfo(),
-              SizedBox(height: 20),
+              // 10.height,
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.end,
+              //   children: [
+              //     Padding(
+              //       padding: const EdgeInsets.only(right: 8.0),
+              //       child: Switch(
+              //         onChanged: (val) {
+              //           appStore.toggleDarkMode(value: val);
+              //         },
+              //         value: appStore.isDarkMode,
+              //         activeColor: SVAppColorPrimary,
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              40.height,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CachedNetworkImage(
+                      imageUrl: AppData.imageUrl + AppData.profile_pic,
+                      height: 62,
+                      width: 62,
+                      fit: BoxFit.cover)
+                      .cornerRadiusWithClipRRect(8),
+                  16.width,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppData.userType == 'doctor'
+                              ? "Dr. ${capitalizeWords(AppData.name)}"
+                              : capitalizeWords(AppData.name), // User's name
+                          style: boldTextStyle(size: 18, color: Colors.white),
+                        ),
+                        2.height,
+                        Text(
+                            textAlign: TextAlign.center,
+                            AppData.userType == 'doctor'
+                                ? AppData.specialty
+                                : AppData.userType == 'student'
+                                ? "${AppData.university}\n Student"
+                                : AppData.specialty,
+                            // User's specialty
+                            style: secondaryTextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                  // IconButton(
+                  //   icon: Image.asset('images/socialv/icons/ic_CloseSquare.png',
+                  //       height: 16,
+                  //       width: 16,
+                  //       fit: BoxFit.cover,
+                  //       color: context.iconColor),
+                  //   onPressed: () {
+                  //     finish(context);
+                  //   },
+                  // ),
+                ],
+              ).paddingOnly(left: 16, right: 8, bottom: 20, top: 0),
+              20.height,
+              // if(AppData.isShowGoogleBannerAds??false)bannerAdLoaded(),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.map((e) {
+                  int index = options.indexOf(e);
+                  return SettingItemWidget(
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    decoration: BoxDecoration(
+                        color: selectedIndex == index
+                            ? SVAppColorPrimary.withAlpha(30)
+                            : SVAppColorPrimary),
+                    title: e.title.validate(),
+                    titleTextStyle:
+                    boldTextStyle(size: 14, color: Colors.white),
+                    leading: Image.asset(e.image ?? "",
+                        height: 22,
+                        width: 22,
+                        fit: BoxFit.cover,
+                        color: Colors.white),
+                    onTap: () {
+                      selectedIndex = index;
+                      setState(() {});
+                      if (selectedIndex == options.length - 1) {
+                        finish(context);
+                      }
+                      if (selectedIndex == 0) {//about us
+                        finish(context);
+                        const AboutUsScreen().launch(context);
+                      } else if (selectedIndex == 1) {//AI
+                        finish(context);
+                        ChatDetailScreen(isFromMainScreen: true).launch(context);
+                        print(selectedIndex);
+                      } else if (selectedIndex == 2) {//jobs
+                        finish(context);
+                        const JobsScreen().launch(context);
+                        print(selectedIndex);
+                      }  else if (selectedIndex == 3) {//drugs list
+                        finish(context);
+                        const DrugsListScreen().launch(context);
+                        print(selectedIndex);
+                      } else if (selectedIndex == 4) {//case discussion
+                        finish(context);
+                        print(selectedIndex);
+                        CaseDiscussionScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 5) { //docTak poll
+                        finish(context);
+                        print(selectedIndex);
+                        ComingSoonScreen().launch(context);
+                        // const GuidelinesScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 6) { //groups Formation
+                        finish(context);
+                        print(selectedIndex);
+                        const ComingSoonScreen().launch(context);
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 7) { // guidelines
+                        finish(context);
+                        print(selectedIndex);
+                        const GuidelinesScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 8) {  // conferences
+                        finish(context);
+                        print(selectedIndex);
+                        ConferencesScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 9) {  // moh updates
+                        finish(context);
+                        print(selectedIndex);
+                        // MyGroupsScreen().launch(context);
+                        ComingSoonScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 10) { //cme
+                        finish(context);
+                        print(selectedIndex);
+                        ComingSoonScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 11) { // world news
+                        finish(context);
+                        print(selectedIndex);
+                        NewsScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 12) {  // discount
+                        finish(context);
+                        print(selectedIndex);
+                        const ComingSoonScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 13) {  // suggestions
+                        finish(context);
+                        print(selectedIndex);
+                        const SuggestionScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 14) { // app setting
+                        finish(context);
+
+                        const AppSettingScreen().launch(context);
+
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 15) {  // privacy
+                        finish(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => WebPageScreen(
+                                    page_name: 'Privacy Policy',
+                                    url: 'https://doctak.net/privacy-policy')));
+
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 16) {  //logout
+                        finish(context);
+                        print(selectedIndex);
+                        // ComingSoonScreen().launch(context);
+                        logoutAccount(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 17) { // delete
+                        print(selectedIndex);
+                        deleteAccount(context);
+                        // finish(context);
+                        // SVGroupProfileScreen().launch(context);
+                      }
+                      // else if (selectedIndex == 13) {
+                      //
+                      //   finish(context);
+                      //   print(selectedIndex);
+                      //
+                      //   // SVGroupProfileScreen().launch(context);
+                      // }else if (selectedIndex == 14) {
+                      //   finish(context);
+                      //   print(selectedIndex);
+                      //
+                      //   // SVGroupProfileScreen().launch(context);
+                      // }
+                    },
+                  );
+                }).toList(),
+              ),
+              const Divider(
+                indent: 16,
+                endIndent: 16,
+                color: Colors.white,
+              ),
+              Center(
+                child: SnapHelperWidget<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  onSuccess: (data) => Text(data.version,
+                      style: boldTextStyle(color: Colors.white)),
+                ),
+              ),
+              20.height,
             ],
           ),
         ),
-        buildDrawerCloseButton(),
+        Stack(children: [
+          Container(
+            color: SVAppColorPrimary,
+            // decoration: const BoxDecoration(
+            //     color: Colors.white,
+            //     borderRadius: BorderRadius.only(topRight: Radius.circular(300),bottomRight: Radius.circular(300))
+            // ),
+            width: 20,
+          ),
+          InkWell(
+            onTap: () {
+              finish(context);
+            },
+            child: Container(
+              decoration: const BoxDecoration(
+                  color: SVAppColorPrimary,
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(300),
+                      bottomRight: Radius.circular(300))),
+              margin: const EdgeInsets.only(top: 50),
+              width: 50,
+              height: 100,
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ])
       ],
     );
   }
 
-  Widget buildProfileSection() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        CachedNetworkImage(
-          imageUrl: '${AppData.imageUrl}${AppData.profile_pic}',
-          height: 62,
-          width: 62,
-          fit: BoxFit.cover,
-        ).cornerRadiusWithClipRRect(8),
-        SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppData.userType == 'doctor'
-                    ? "Dr. ${capitalizeWords(AppData.name)}"
-                    : capitalizeWords(AppData.name),
-                style: boldTextStyle(size: 18, color: Colors.white),
+  logoutAccount(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Warning!'),
+          content: const Text('Are sure want to logout account?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text(
+                'Yes',
+                style: TextStyle(color: Colors.red),
+                // color: Colors.red,
               ),
-              SizedBox(height: 2),
-              Text(
-                AppData.userType == 'doctor'
-                    ? AppData.specialty
-                    : AppData.userType == 'student'
-                    ? "${AppData.university}\n Student"
-                    : AppData.specialty,
-                style: secondaryTextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ).paddingOnly(left: 16, right: 8, bottom: 20, top: 0);
-  }
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                var result =
+                await logoutUserAccount(prefs.getString('device_token'));
+                if (result) {
+                  AppSharedPreferences().clearSharedPreferencesData(context);
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginScreen(),
+                      ),
+                          (route) => false);
+                } else {}
 
-  Widget buildDrawerOptions(List<SVDrawerModel> options) {
-    return ValueListenableBuilder<int>(
-      valueListenable: selectedIndexNotifier,
-      builder: (context, selectedIndex, _) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: options.map((e) {
-            int index = options.indexOf(e);
-            return SettingItemWidget(
-              trailing: const Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white,
-                size: 25,
-              ),
-              decoration: BoxDecoration(
-                color: selectedIndex == index
-                    ? SVAppColorPrimary.withAlpha(30)
-                    : SVAppColorPrimary,
-              ),
-              title: e.title.validate(),
-              titleTextStyle: boldTextStyle(size: 14, color: Colors.white),
-              leading: Image.asset(
-                e.image ?? "",
-                height: 22,
-                width: 22,
-                fit: BoxFit.cover,
-                color: Colors.white,
-              ),
-              onTap: () => onDrawerOptionTap(index, options.length),
-            );
-          }).toList(),
+                // Call the delete account function
+              },
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget buildAppVersionInfo() {
-    return Center(
-      child: SnapHelperWidget<PackageInfo>(
-        future: PackageInfo.fromPlatform(),
-        onSuccess: (data) => Text(
-          data.version,
-          style: boldTextStyle(color: Colors.white),
-        ),
-      ),
-    );
-  }
+  deleteAccount(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete your Account?'),
+          content: const Text(
+              '''If you select Delete we will delete your account on our server.
 
-  Widget buildDrawerCloseButton() {
-    return Stack(
-      children: [
-        Container(color: SVAppColorPrimary, width: 20),
-        InkWell(
-          onTap: () => finish(context),
-          child: Container(
-            decoration: BoxDecoration(
-              color: SVAppColorPrimary,
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(300),
-                bottomRight: Radius.circular(300),
+Your app data will also be deleted and you won't be able to retrieve it.
+
+Since this is a security-sensitive operation, you eventually are asked to login before your account can be deleted.'''),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+                // color: Colors.red,
               ),
-            ),
-            margin: EdgeInsets.only(top: 50),
-            width: 50,
-            height: 100,
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 40,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+              onPressed: () async {
+                var result = await deleteUserAccount();
+                if (result) {
+                  AppSharedPreferences().clearSharedPreferencesData(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                } else {}
 
-  void onDrawerOptionTap(int index, int optionsLength) {
-    selectedIndexNotifier.value = index;
-    if (index == optionsLength - 1) {
-      finish(context);
-    }
-    Navigator.pop(context);
-    switch (index) {
-      case 0:
-        AboutUsScreen().launch(context);
-        break;
-      case 1:
-        ChatDetailScreen(isFromMainScreen: true).launch(context);
-        break;
-      case 2:
-        JobsScreen().launch(context);
-        break;
-      case 3:
-        DrugsListScreen().launch(context);
-        break;
-      case 4:
-        CaseDiscussionScreen().launch(context);
-        break;
-      case 5:
-        ComingSoonScreen().launch(context);
-        break;
-      case 6:
-        ComingSoonScreen().launch(context);
-        break;
-      case 7:
-        GuidelinesScreen().launch(context);
-        break;
-      case 8:
-        ConferencesScreen().launch(context);
-        break;
-      case 9:
-        ComingSoonScreen().launch(context);
-        break;
-      case 10:
-        ComingSoonScreen().launch(context);
-        break;
-      case 11:
-        NewsScreen().launch(context);
-        break;
-      case 12:
-        ComingSoonScreen().launch(context);
-        break;
-      case 13:
-        SuggestionScreen().launch(context);
-        break;
-      case 14:
-        AppSettingScreen().launch(context);
-        break;
-      case 15:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WebPageScreen(
-              page_name: 'Privacy Policy',
-              url: 'https://doctak.net/privacy-policy',
+                // Call the delete account function
+              },
             ),
-          ),
+          ],
         );
-        break;
-      case 16:
-        logoutAccount(context);
-        break;
-      case 17:
-        deleteAccount(context);
-        break;
+      },
+    );
+  }
+
+  Future<bool> deleteUserAccount() async {
+    final apiUrl = Uri.parse('${AppData.remoteUrl}/delete-account');
+    try {
+      final response = await http.get(
+        apiUrl,
+        headers: <String, String>{
+          'Authorization': 'Bearer ${AppData.userToken!}',
+        },
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        // Handle successful account deletion
+        return true;
+      } else {
+        return false;
+        throw Exception('Failed to delete account');
+      }
+    } catch (error) {
+      return false;
+      // throw Exception('Error: $error');
     }
+    return false;
   }
 
-  Future<void> logoutAccount(BuildContext context) async {
-    bool? result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Warning!'),
-        content: Text('Are sure want to logout account?'),
-        actions: [
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text(
-              'Yes',
-              style: TextStyle(color: Colors.red),
-            ),
-            onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              bool logoutResult = await logoutUserAccount(prefs.getString('device_token'));
-              if (logoutResult) {
-                AppSharedPreferences().clearSharedPreferencesData(context);
-                LoginScreen().launch(context, isNewTask: true);
-              }
-              Navigator.of(context).pop(true);
-            },
-          ),
-        ],
-      ),
-    );
-    if (result != null && result) {
-      print('User logged out');
+  Future<bool> logoutUserAccount(deviceToken) async {
+    final apiUrl = Uri.parse('${AppData.remoteUrl}/logout');
+    try {
+      print(AppData.userToken);
+      final response = await http.post(
+        // body: {'device_token':deviceToken},
+        apiUrl,
+        headers: <String, String>{
+          'Authorization': 'Bearer ${AppData.userToken!}',
+          // 'Accept':'Application/json'
+        },
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        // Handle successful account deletion
+        return true;
+      } else {
+        return false;
+        throw Exception('Failed to delete account');
+      }
+    } catch (error) {
+      return false;
+      // throw Exception('Error: $error');
     }
-  }
-
-  Future<bool> logoutUserAccount(String? deviceToken) async {
-    String logoutUrl = 'https://doctak.net/api/logout';
-    var response = await http.post(
-      Uri.parse(logoutUrl),
-      body: {'device_token': deviceToken},
-    );
-    return response.statusCode == 200;
-  }
-
-  Future<void> deleteAccount(BuildContext context) async {
-    bool? result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Warning!'),
-        content: Text('Are sure want to delete account?'),
-        actions: [
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text(
-              'Yes',
-              style: TextStyle(color: Colors.red),
-            ),
-            onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              bool deleteResult = await deleteUserAccount(prefs.getString('device_token'));
-              if (deleteResult) {
-                AppSharedPreferences().clearSharedPreferencesData(context);
-                LoginScreen().launch(context, isNewTask: true);
-              }
-              Navigator.of(context).pop(true);
-            },
-          ),
-        ],
-      ),
-    );
-    if (result != null && result) {
-      print('User account deleted');
-    }
-  }
-
-  Future<bool> deleteUserAccount(String? deviceToken) async {
-    String deleteUrl = 'https://doctak.net/api/delete_account';
-    var response = await http.post(
-      Uri.parse(deleteUrl),
-      body: {'device_token': deviceToken},
-    );
-    return response.statusCode == 200;
   }
 }

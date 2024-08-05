@@ -172,7 +172,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
                 return Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    shrinkWrap: true,
+                    // shrinkWrap: true,
                     // physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       if (bloc.pageNumber <= bloc.numberOfPage) {
@@ -232,7 +232,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
               }
             },
           ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(

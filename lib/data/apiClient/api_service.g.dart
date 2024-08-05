@@ -952,6 +952,49 @@ class _ApiService implements ApiService {
     final value = ChatGptAskQuestionResponse.fromJson(_result.data!);
     return value;
   }
+  @override
+  Future<ChatGptAskQuestionResponse> askQuestionFromGptWithoutImage(
+      String token,
+      String sessionId,
+      String question,
+      ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    // final _data = {
+    //   'user_id': userId,
+    //   'room_id': roomId,
+    //   'receiver_id': receiverId,
+    //   'attachment_type': attachmentType,
+    //   'message': message,
+    // };
+    final formData = FormData.fromMap({
+      'id': sessionId,
+      'question': question,
+
+    });
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChatGptAskQuestionResponse>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+        .compose(
+      _dio.options,
+      '/ask-question',
+      queryParameters: queryParameters,
+      data: formData,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
+    final value = ChatGptAskQuestionResponse.fromJson(_result.data!);
+    return value;
+  }
   // @override
   // Future<ChatGptAskQuestionResponse> askQuestionFromGpt(
   //   String token,

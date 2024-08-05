@@ -89,110 +89,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
     }
   }
 
-  // Future<List<Session>> fetchSessions() async {
-  //   final response = await http.get(
-  //     Uri.parse("${AppData.remoteUrl}/gptChat-session"),
-  //     headers: {
-  //       "Authorization": "Bearer ${AppData.userToken}",
-  //       "Content-Type": "application/json"
-  //     },
-  //   );
-  //
-  //   isLoadingMessages = true;
-  //   if (response.statusCode == 200) {
-  //     List<dynamic> sessionsJson = jsonDecode(response.body)['sessions'];
-  //     int sessionId = jsonDecode(response.body)['newSessionId'];
-  //     selectedSessionId = sessionId;
-  //
-  //     loadMessages(selectedSessionId.toString()).then((loadedMessages) {
-  //       // Check again if the widget is still mounted
-  //       if (!mounted) return;
-  //
-  //       setState(() {
-  //         messages = loadedMessages;
-  //         scrollToBottom();
-  //         chatWithAi = "New Session";
-  //         isLoadingMessages = false;
-  //       });
-  //     });
-  //
-  //     return sessionsJson.map((json) => Session.fromJson(json)).toList();
-  //   } else {
-  //     isLoadingMessages = false;
-  //     throw Exception('Failed to load sessions');
-  //   }
-  // }
-
-  // Future<Session> createNewChatSession() async {
-  //   final response = await http.get(
-  //     Uri.parse("${AppData.remoteUrl}/new-chat"),
-  //     headers: {
-  //       "Authorization": "Bearer ${AppData.userToken}",
-  //       "Content-Type": "application/json"
-  //     },
-  //   );
-  //
-  //   if (response.statusCode == 200) {
-  //     var data = jsonDecode(response.body);
-  //     if (data['success']) {
-  //       return Session.fromJson({
-  //         'id': data['session_id'],
-  //         'name': 'New Session',
-  //         'created_at': DateTime.now().toString(),
-  //         'updated_at': DateTime.now().toString()
-  //       });
-  //     } else {
-  //       throw Exception('Failed to create new session');
-  //     }
-  //   } else {
-  //     throw Exception('Failed to create new session');
-  //   }
-  // }
-
-  // Future<List<ChatGPTResponse>> loadMessages(String id) async {
-  //   final response = await http.get(
-  //     Uri.parse("${AppData.remoteUrl}/gptChat-history/$id"),
-  //     headers: {
-  //       "Authorization": "Bearer ${AppData.userToken}",
-  //       "Content-Type": "application/json"
-  //     },
-  //   );
-  //
-  //   if (response.statusCode == 200) {
-  //     List<dynamic> messagesJson = jsonDecode(response.body)['messages'];
-  //
-  //     return messagesJson
-  //         .map((json) => ChatGPTResponse.fromJson(json))
-  //         .toList();
-  //   } else {
-  //     throw Exception('Failed to load messages');
-  //   }
-  // }
-
-  // ... (existing methods including fetchSessions, createNewChatSession, loadMessages)
-
-  // Future<ChatGPTResponse> askQuestion(String sessionId, String question) async {
-  //   final response = await http.get(
-  //     Uri.parse("${AppData.remoteUrl}/ask-question/$sessionId/$question"),
-  //     headers: {
-  //       "Authorization": "Bearer ${AppData.userToken}",
-  //       "Content-Type": "application/json"
-  //     },
-  //   );
-  //
-  //   if (response.statusCode == 200) {
-  //     var data = jsonDecode(response.body);
-  //     return ChatGPTResponse(
-  //         id: data['responseMessageId'],
-  //         gptSessionId: sessionId,
-  //         question: question,
-  //         response: data['content'],
-  //         createdAt: DateTime.now().toString(),
-  //         updatedAt: DateTime.now().toString());
-  //   } else {
-  //     throw Exception('Failed to get response');
-  //   }
-  // }
 
   cardIntro(title, subTitle, onTap) {
     return InkWell(
@@ -213,14 +109,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                           color: Colors.black,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w400),
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500),
                     ),
                     Text(
                       subTitle,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
-                          color: svGetBodyColor(),
+                          color: Colors.black,
                           fontSize: 8.sp,
                           fontWeight: FontWeight.normal),
                     ),
@@ -615,81 +511,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     style: TextStyle(fontSize: 14),
                                   ),
                                   const SizedBox(height: 10),
-                                  // Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   'Your personal & medical assistant powered by Artificial Intelligence',
-                                  //   style: TextStyle(
-                                  //     fontSize: 10.sp,
-                                  //     color: Colors.grey[700],
-                                  //     fontWeight: FontWeight.bold,
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(height: 16.0),
-                                  //  Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   'Welcome, Doctor!',
-                                  //   style: TextStyle(
-                                  //     fontSize: 12.sp,
-                                  //     color: Colors.black,
-                                  //     fontWeight: FontWeight.bold,
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(height: 16.0),
-                                  //
-                                  // Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   'Thank you for using our AI assistant. Here are some things you can do:',
-                                  //   style: TextStyle(
-                                  //     fontSize: 10.sp,
-                                  //     color: Colors.grey[700],
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(height: 16.0),
-                                  // Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   'Request diagnostic suggestions based on symptoms.',
-                                  //   style: TextStyle(
-                                  //     fontSize: 10.sp,
-                                  //     color: Colors.grey[700],
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(height: 8.0),
-                                  // Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   'Review medication interactions or dosages.',
-                                  //   style: TextStyle(
-                                  //     fontSize: 10.sp,
-                                  //     color: Colors.grey[700],
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(height: 8.0),
-                                  // Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   'Detect CPT or ICD code.',
-                                  //   style: TextStyle(
-                                  //     fontSize: 10.sp,
-                                  //     color: Colors.black,
-                                  //     fontWeight: FontWeight.bold
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(height: 8.0),
-                                  // Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   'And much more! Feel free to explore.',
-                                  //   style: TextStyle(
-                                  //     fontSize: 10.sp,
-                                  //     color: Colors.grey[700],
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(height: 16.0),
-                                  // Text(
-                                  //   textAlign: TextAlign.center,
-                                  //   "If you need assistance or have questions, don't hesitate to ask.",
-                                  //   style: TextStyle(
-                                  //     fontSize: 10.sp,
-                                  //     color: Colors.grey[700],
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             ),
@@ -855,13 +676,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       _buildDocumentPreview(_selectedFile!),
                     Container(
                       color: context.cardColor,
-                      // margin: const EdgeInsets.all(10.0),
-                      // Add margin of 10.0 to all sides
-                      // decoration: BoxDecoration(
-                      //   color: Colors.white,
-                      //   border: Border.all(color: Colors.grey),
-                      //   borderRadius: BorderRadius.circular(20.0),
-                      // ),
+
                       padding: const EdgeInsets.all(10.0),
                       child: Row(
                         children: [
@@ -870,20 +685,19 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             onPressed: () async {
                               const permission = Permission.photos;
                               if (await permission.isGranted) {
-                                _showFileOptions();
-                              } else if (await permission
+                                // _showFileOptions();
+                              }  else if (await permission
                                   .isDenied) {
                                 final result =
                                 await permission.request();
                                 if (result.isGranted) {
-                                  _showFileOptions();
+                                  // _showFileOptions();
                                 } else if (result.isDenied) {
                                   print("isDenied");
                                   // _permissionDialog(context);
-                                  _showFileOptions();
+                                  // _showFileOptions();
 
-                                } else if (result
-                                    .isPermanentlyDenied) {
+                                } else if (result.isPermanentlyDenied) {
                                   print("isPermanentlyDenied");
                                   _permissionDialog(context);
                                 }
@@ -892,6 +706,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 print("isPermanentlyDenied");
                                 _permissionDialog(context);
                               }
+                              _showFileOptions();
+
                             },
                           ),
                           const SizedBox(width: 8.0),
@@ -968,6 +784,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
 
                                     textController.clear();
                                     _uploadedFile=_selectedFile;
+
                                     _selectedFile = null;
                                     scrollToBottom();
                                   });
@@ -1290,7 +1107,9 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double bubbleMaxWidth = screenWidth * 0.6;
-     print("response1 ${responseImageUrl}");
+     // print("response1 ${responseImageUrl}");
+
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
       child: IntrinsicHeight(
@@ -1436,7 +1255,8 @@ class ChatBubble extends StatelessWidget {
                         constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
                         child:Column(
                           children: [
-                            imageUrl ==null ? CachedNetworkImage(imageUrl: responseImageUrl):Image(image: FileImage(imageUrl!)),
+                           if(responseImageUrl !='') CustomImageView(imagePath: responseImageUrl)
+                           else if(imageUrl !=null) Image.file(imageUrl!),
                             Text(text,
                                 style: const TextStyle(color: Colors.white)),
 

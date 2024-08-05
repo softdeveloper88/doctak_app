@@ -177,6 +177,7 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
       const SizedBox(height: 10),
       _buildRowinterested(
         onTap: () {
+
           PrivacyInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,

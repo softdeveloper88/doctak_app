@@ -11,6 +11,7 @@ import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../utils/SVColors.dart';
 import '../../../utils/SVCommon.dart';
@@ -119,12 +120,14 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    if(widget.profileBloc.workEducationList!.isEmpty)  SizedBox(height: 80.h,child: const Center(child: Text('No Experience found'))),
                     if (workList.isNotEmpty)
                       _buildWorkInfoFields(workList, 'work'),
                     if (universityList.isNotEmpty)
                       _buildWorkInfoFields(universityList, 'university'),
                     if (highSchool.isNotEmpty)
                       _buildWorkInfoFields(highSchool, 'high_school'),
+                    
                     10.height,
                     // if (isEditModeMap)
                     //   svAppButton(
