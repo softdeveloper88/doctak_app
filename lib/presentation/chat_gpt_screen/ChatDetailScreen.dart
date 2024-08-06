@@ -1160,6 +1160,7 @@ class ChatBubble extends StatelessWidget {
                                         text
                                             .replaceAll("*", '')
                                             .replaceAll('#', ''),
+                                        style: GoogleFonts.poppins(color: Colors.black,fontSize: 12.sp),
                                       ),
                                       const SizedBox(
                                         height: 10,
