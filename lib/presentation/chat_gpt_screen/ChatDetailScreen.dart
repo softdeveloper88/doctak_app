@@ -1175,7 +1175,7 @@ class ChatBubble extends StatelessWidget {
                                     // selectable: true,
                                     // softLineBreak: true,
                                     // shrinkWrap: true,
-                                    style: GoogleFonts.poppins(fontSize: 14),
+                                    style: GoogleFonts.poppins(fontSize: 12.sp,color: Colors.black),
                                     text
                                         .replaceAll("*", '')
                                         .replaceAll('#', ''),
