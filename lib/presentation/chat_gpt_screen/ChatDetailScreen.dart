@@ -381,28 +381,29 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
 
                                           const permission = Permission.photos;
                                           if (await permission.isGranted) {
-                                            _showFileOptions();
-                                          } else if (await permission
+                                            // _showFileOptions();
+                                          }  else if (await permission
                                               .isDenied) {
                                             final result =
                                             await permission.request();
                                             if (result.isGranted) {
-                                              _showFileOptions();
+                                              // _showFileOptions();
                                             } else if (result.isDenied) {
                                               print("isDenied");
                                               // _permissionDialog(context);
-                                              _showFileOptions();
+                                              // _showFileOptions();
 
-                                            } else if (result
-                                                .isPermanentlyDenied) {
+                                            } else if (result.isPermanentlyDenied) {
                                               print("isPermanentlyDenied");
-                                              _permissionDialog(context);
+                                              // _permissionDialog(context);
                                             }
                                           } else if (await permission
                                               .isPermanentlyDenied) {
                                             print("isPermanentlyDenied");
-                                            _permissionDialog(context);
+                                            // _permissionDialog(context);
                                           }
+                                          _showFileOptions();
+
                                           // Future.delayed(const Duration(seconds: 1),(){
 
                                           // });
@@ -699,12 +700,12 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
 
                                 } else if (result.isPermanentlyDenied) {
                                   print("isPermanentlyDenied");
-                                  _permissionDialog(context);
+                                  // _permissionDialog(context);
                                 }
                               } else if (await permission
                                   .isPermanentlyDenied) {
                                 print("isPermanentlyDenied");
-                                _permissionDialog(context);
+                                // _permissionDialog(context);
                               }
                               _showFileOptions();
 

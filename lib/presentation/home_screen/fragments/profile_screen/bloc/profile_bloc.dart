@@ -468,7 +468,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       List<String>? universityDropdownValues =
           await _onGetUniversities(secondDropdownValues.first ?? '');
     }
-    add(UpdateSpecialtyDropdownValue(secondDropdownValues.first ?? ''));
+    // add(UpdateSpecialtyDropdownValue(secondDropdownValues.first ?? ''));
 
     emit(PaginationLoadedState(
         (state as PaginationLoadedState).firstDropdownValues,
