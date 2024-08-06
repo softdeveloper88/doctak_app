@@ -54,7 +54,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // try {
       ChatGptAskQuestionResponse response;
       print('hiii ${event.imageUrl}');
-      if(event.imageUrl!.isNotEmpty) {
+      if(event.imageUrl?.isNotEmpty??false) {
        response =
       await postService.askQuestionFromGpt(
           'Bearer ${AppData.userToken}', event.sessionId, event.question,

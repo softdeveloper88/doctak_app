@@ -1259,8 +1259,7 @@ class ChatBubble extends StatelessWidget {
                           children: [
                            if(responseImageUrl !='') CustomImageView(imagePath: responseImageUrl)
                            else if(imageUrl !=null) Image.file(imageUrl!),
-                            Text(text,
-                                style: const TextStyle(color: Colors.white)),
+                            Text(text, style: const TextStyle(color: Colors.white)),
 
                           ],
                         )
