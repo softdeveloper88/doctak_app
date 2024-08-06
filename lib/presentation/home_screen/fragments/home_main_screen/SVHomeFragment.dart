@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -95,7 +96,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 // color: context.iconColor,
               ),
               onPressed: () {
-                    ChatDetailScreen(isFromMainScreen: true).launch(context);
+                ChatDetailScreen(isFromMainScreen: true).launch(context);
+
               },
             ),
             // MaterialButton(
@@ -158,8 +160,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                         if (state is PaginationLoadedState) {
                           // unreadCount = state.unreadCount;
                           return notificationBloc.totalNotifications>0?Container(
-                            height: 13,
-                            width: 13,
+                            height: 20,
+                            width: 20,
                             decoration: BoxDecoration(
                               color: Colors.red,
                               border: Border.all(
@@ -172,7 +174,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                                 '${notificationBloc.totalNotifications ?? ''}',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 7.5,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

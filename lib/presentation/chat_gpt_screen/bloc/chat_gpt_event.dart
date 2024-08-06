@@ -18,11 +18,13 @@ class IsStatus extends ChatGPTEvent {
 class GetPost extends ChatGPTEvent {
   final String sessionId;
   final String question;
-  String? imageUrl;
-  GetPost({required this.sessionId, required this.question,this.imageUrl});
+  String? imageUrl1;
+  String? imageUrl2;
+  String? imageType;
+  GetPost({required this.sessionId, required this.question,this.imageUrl1,this.imageUrl2,this.imageType});
 
   @override
-  List<Object> get props => [sessionId, question,imageUrl??""];
+  List<Object> get props => [sessionId, question,imageUrl1??"",imageUrl2??"",imageType??''];
 }
 
 class GetDrugAskEvent extends ChatGPTEvent {

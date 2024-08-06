@@ -28,7 +28,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
               child: SingleChildScrollView(
                 child: Text(
                   ''''
-                terms of Service for DocTak.net
+                Terms of Service for DocTak.net
 
 Last Updated: July 2024
 

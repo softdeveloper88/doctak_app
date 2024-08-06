@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/cupertino.dart';
@@ -44,9 +45,10 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
 
         },
       ),
-      SVSearchFragment(
-        backPress: () => setState(() => selectedIndex = 0),
-      ),
+      // SVSearchFragment(
+      //   backPress: () => setState(() => selectedIndex = 0),
+      // ),
+      ChatGptWithImageScreen(isFromMainScreen: true,),
       SVProfileFragment(),
     ];
     super.initState();
@@ -72,32 +74,39 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
         key: scaffoldKey,
         drawer: SVHomeDrawerComponent(),
         bottomNavigationBar: BottomNavigationBar(
-          showSelectedLabels: false,
+          showSelectedLabels: true,
           type: BottomNavigationBarType.fixed,
           items: [
-            _buildBottomNavigationBarItem('ic_Home', 'ic_HomeSelected'),
-            _buildBottomNavigationBarItem('ic_Search', 'ic_SearchSelected'),
-            _buildBottomNavigationBarItem('ic_Plus', 'ic_PlusSelected'),
+            _buildBottomNavigationBarItem('ic_Home', 'ic_HomeSelected','Home'),
+            _buildBottomNavigationBarItem('ic_Search', 'ic_SearchSelected','Search'),
+            _buildBottomNavigationBarItem('ic_Plus', 'ic_PlusSelected',"Add"),
+            // BottomNavigationBarItem(
+            //   icon: Icon(
+            //     Icons.group_outlined,
+            //     size: 28,
+            //     color: context.iconColor,
+            //   ).paddingTop(12),
+            //   label: "Friends",
+            //   activeIcon: Icon(
+            //     Icons.group_outlined,
+            //     size: 28,
+            //   ).paddingTop(12),
+            // ),
             BottomNavigationBarItem(
-              icon: Icon(
-                Icons.group_outlined,
-                size: 28,
-                color: context.iconColor,
-              ).paddingTop(12),
-              label: '',
-              activeIcon: Icon(
-                Icons.group_outlined,
-                size: 28,
-              ).paddingTop(12),
-            ),
-            BottomNavigationBarItem(
+              icon: _buildAIImageAvatar(),
+              label: 'Images',
+              activeIcon: _buildAIImageAvatar(),
+              // activeIcon: _buildProfileAvatar(),
+            ),  BottomNavigationBarItem(
               icon: _buildProfileAvatar(),
-              label: '',
+              label: 'Profile',
               activeIcon: _buildProfileAvatar(),
             ),
           ],
           onTap: (val) {
             if (val == 2) {
+              _fragments[val].launch(context);
+            }else if (val == 3) {
               _fragments[val].launch(context);
             } else {
               setState(() => selectedIndex = val);
@@ -109,16 +118,17 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
     );
   }
 
-  BottomNavigationBarItem _buildBottomNavigationBarItem(String icon, String activeIcon) {
+  BottomNavigationBarItem _buildBottomNavigationBarItem(String icon, String activeIcon,String label) {
     return BottomNavigationBarItem(
       icon: Image.asset(
         'images/socialv/icons/$icon.png',
         height: 24,
         width: 24,
+
         fit: BoxFit.cover,
         color: context.iconColor,
       ).paddingTop(12),
-      label: '',
+      label: label,
       activeIcon: Image.asset(
         'images/socialv/icons/$activeIcon.png',
         height: 24,
@@ -136,6 +146,24 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
         backgroundImage: CachedNetworkImageProvider(
           AppData.imageUrl + AppData.profile_pic,
         ),
+      ).paddingTop(12),
+    );
+  }
+  Widget _buildAIImageAvatar() {
+    return SizedBox(
+      height: 40.0,
+      width: 40.0,
+      child:Image.asset(
+        'assets/images/docktak_ai_light.png',
+        width: 30,
+        height: 30,
+        fit: BoxFit.contain,
+        // color: context.iconColor,
+      // )
+      // CircleAvatar(
+      //   backgroundImage: CachedNetworkImageProvider(
+      //     AppData.imageUrl + AppData.profile_pic,
+      //   ),
       ).paddingTop(12),
     );
   }

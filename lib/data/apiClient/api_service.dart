@@ -227,7 +227,8 @@ abstract class ApiService {
       @Header('Authorization') String token,
       @Field("id") String sessionId,
       @Field("question") String question,
-      @Part(name:'image') String imageUrl,);
+      @Field("image_type") String imageType,
+      @Part(name:'image1') String imageUrl1,@Part(name:'image2') String imageUrl2);
 
   @FormUrlEncoded()
   @POST("/ask-question")

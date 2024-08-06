@@ -913,7 +913,9 @@ class _ApiService implements ApiService {
       String token,
       String sessionId,
       String question,
-      String imageUrl,
+      String imageType,
+      String imageUrl1,
+      String imageUrl2,
       ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -929,7 +931,9 @@ class _ApiService implements ApiService {
     final formData = FormData.fromMap({
       'id': sessionId,
       'question': question,
-      'image': await MultipartFile.fromFile(imageUrl),
+      'image_type': imageType,
+      'image1': await MultipartFile.fromFile(imageUrl1),
+      'image2': await MultipartFile.fromFile(imageUrl2),
     });
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<ChatGptAskQuestionResponse>(Options(

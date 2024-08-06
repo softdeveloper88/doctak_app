@@ -6,9 +6,7 @@ import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/presentation/forgot_password/bloc/forgot_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
-
 import 'forgot_state.dart';
-
 class ForgotBloc extends Bloc<ForgotEvent, ForgotState> {
   final ApiService apiService = ApiService(Dio(BaseOptions(
     followRedirects: true,

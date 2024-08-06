@@ -23,18 +23,23 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
+import '../../widgets/image_upload_widget/bloc/image_upload_bloc.dart';
+import '../../widgets/image_upload_widget/bloc/image_upload_event.dart';
+import '../../widgets/image_upload_widget/bloc/image_upload_state.dart';
+import '../../widgets/image_upload_widget/multiple_image_upload_widget.dart';
 
-class ChatDetailScreen extends StatefulWidget {
+class ChatGptWithImageScreen extends StatefulWidget {
   bool isFromMainScreen;
   String? question;
 
-  ChatDetailScreen({super.key, this.isFromMainScreen = true, this.question});
+  ChatGptWithImageScreen(
+      {super.key, this.isFromMainScreen = true, this.question});
 
   @override
   _ChatGPTScreenState createState() => _ChatGPTScreenState();
 }
 
-class _ChatGPTScreenState extends State<ChatDetailScreen> {
+class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   // ... (existing variables)
 
   final ScrollController _scrollController = ScrollController();
@@ -53,6 +58,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isDeleteButtonClicked = false;
   bool isAlreadyAsk = true;
   bool isEmpty = false;
+  bool isOneTimeImageUploaded = false;
 
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
@@ -135,7 +141,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
-            chatWithAi = state1.response.sessions?.first.name ?? 'New Chat';
+            chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
           }
           if (state1 is DataInitial) {
             return Scaffold(
@@ -158,9 +164,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             print('response ${state1.response.toString()}');
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
-                // setState(() {
+                setState(() {
                   isEmpty = false;
-                // });
+                });
                 isAlreadyAsk = false;
                 // Future.delayed(const Duration(seconds: 1),(){
                 drugsAskQuestion(state1, context);
@@ -179,7 +185,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             BlocProvider.of<ChatGPTBloc>(context)
                                 .add(GetNewChat());
                             Navigator.of(context).pop();
-
+                            isOneTimeImageUploaded = false;
                             selectedSessionId =
                                 BlocProvider.of<ChatGPTBloc>(context)
                                     .newChatSessionId;
@@ -199,6 +205,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           selectedSessionId =
                               session.id; // Update the selected session
                           isLoadingMessages = true;
+                          isOneTimeImageUploaded = true;
                           // });
                           BlocProvider.of<ChatGPTBloc>(context).add(
                             GetMessages(
@@ -535,14 +542,23 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 ChatBubble(
                                   text: message.question ?? '',
                                   isUserMessage: true,
-                                  imageUrl: _uploadedFile,
-                                  responseImageUrl: message.imageUrl ?? '',
+                                  imageUrl1:
+                                      File(selectedImageFiles.first.path ?? ''),
+                                  imageUrl2: selectedImageFiles.length == 2
+                                      ? File(selectedImageFiles.last.path ?? '')
+                                      : null,
+                                  responseImageUrl1: message.imageUrl ?? '',
+                                  responseImageUrl2: message.imageUrl ?? '',
                                 ),
                                 ChatBubble(
                                   text: message.response ?? "",
                                   isUserMessage: false,
-                                  imageUrl: _uploadedFile,
-                                  responseImageUrl: message.imageUrl ?? '',
+                                  imageUrl1:
+                                      File(selectedImageFiles.first.path ?? ''),
+                                  imageUrl2:
+                                      File(selectedImageFiles.last.path ?? ''),
+                                  responseImageUrl1: message.imageUrl ?? '',
+                                  responseImageUrl2: message.imageUrl ?? '',
                                   onTapReginarate: () {
                                     String question = message.question ?? "";
                                     if (question.isEmpty) return;
@@ -674,75 +690,79 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           },
                         ),
                       ),
-                    if (_selectedFile != null)
-                      if (_isImageFile(_selectedFile!))
-                        _buildImagePreview(_selectedFile!),
-                    if (_isDocumentFile(_selectedFile))
-                      _buildDocumentPreview(_selectedFile!),
+
+                    _buildImagePreview(),
+
                     Container(
                       color: context.cardColor,
                       padding: const EdgeInsets.all(10.0),
                       child: Row(
                         children: [
-                          // IconButton(
-                          //   icon: const Icon(Icons.attach_file),
-                          //   onPressed: () async {
-                          //     // const permission = Permission.photos;
-                          //     // if (await permission.isGranted) {
-                          //     //   // _showFileOptions();
-                          //     // } else if (await permission.isDenied) {
-                          //     //   final result = await permission.request();
-                          //     //
-                          //     //   if (result.isGranted) {
-                          //     //     _showFileOptions();
-                          //     //   } else if (result.isDenied) {
-                          //     //     print("isDenied");
-                          //     //     return;
-                          //     //     // _permissionDialog(context);
-                          //     //     // _showFileOptions();
-                          //     //     return;
-                          //     //   } else if (result.isPermanentlyDenied) {
-                          //     //     print("isPermanentlyDenied1");
-                          //     //     _permissionDialog(context);
-                          //     //     return;
-                          //     //   }
-                          //     // } else if (await permission.isPermanentlyDenied) {
-                          //     //   print("isPermanentlyDenied2");
-                          //     //   _permissionDialog(context);
-                          //     //
-                          //     //   return;
-                          //     // }
-                          //     const permission = Permission.photos;
-                          //
-                          //     if (await permission.isGranted) {
-                          //       // Permission is already granted
-                          //       _showFileOptions();
-                          //     } else if (await permission.isDenied) {
-                          //       // Permission was denied; request it
-                          //       final result = await permission.request();
-                          //       print(result);
-                          //       // Check the result after requesting permission
-                          //       if (result.isGranted) {
-                          //         _showFileOptions();
-                          //       } else if (result.isPermanentlyDenied) {
-                          //         // Permission is permanently denied
-                          //         print("Permission is permanently denied.");
-                          //         // _permissionDialog(context);
-                          //         _showFileOptions();
-                          //       } else if (result.isGranted) {
-                          //         _showFileOptions();
-                          //
-                          //         // Permission is still denied
-                          //         print("Permission is denied.");
-                          //       }
-                          //     } else if (await permission.isPermanentlyDenied) {
-                          //       // Permission was permanently denied
-                          //       print("Permission is permanently denied.");
-                          //       _permissionDialog(context);
-                          //     }
-                          //   },
-                          // ),
-                          // const SizedBox(width: 8.0),
+                          IconButton(
+                            icon: const Icon(Icons.attach_file),
+                            onPressed: () async {
+                              // const permission = Permission.photos;
+                              // if (await permission.isGranted) {
+                              //   // _showFileOptions();
+                              // } else if (await permission.isDenied) {
+                              //   final result = await permission.request();
+                              //
+                              //   if (result.isGranted) {
+                              //     _showFileOptions();
+                              //   } else if (result.isDenied) {
+                              //     print("isDenied");
+                              //     return;
+                              //     // _permissionDialog(context);
+                              //     // _showFileOptions();
+                              //     return;
+                              //   } else if (result.isPermanentlyDenied) {
+                              //     print("isPermanentlyDenied1");
+                              //     _permissionDialog(context);
+                              //     return;
+                              //   }
+                              // } else if (await permission.isPermanentlyDenied) {
+                              //   print("isPermanentlyDenied2");
+                              //   _permissionDialog(context);
+                              //
+                              //   return;
+                              // }
+                              if (isOneTimeImageUploaded) {
+                                toasty(context,
+                                    'Only allowed one time image in one session');
+                              } else {
+                                const permission = Permission.photos;
+                                if (await permission.isGranted) {
+                                  // Permission is already granted
+                                  _showBeforeFileOptions();
+                                } else if (await permission.isDenied) {
+                                  // Permission was denied; request it
+                                  final result = await permission.request();
+                                  print(result);
+                                  // Check the result after requesting permission
+                                  if (result.isGranted) {
+                                    _showBeforeFileOptions();
+                                  } else if (result.isPermanentlyDenied) {
+                                    // Permission is permanently denied
+                                    print("Permission is permanently denied.");
+                                    // _permissionDialog(context);
+                                    _showBeforeFileOptions();
+                                  } else if (result.isGranted) {
+                                    _showBeforeFileOptions();
+
+                                    // Permission is still denied
+                                    print("Permission is denied.");
+                                  }
+                                } else if (await permission
+                                    .isPermanentlyDenied) {
+                                  // Permission was permanently denied
+                                  print("Permission is permanently denied.");
+                                  _permissionDialog(context);
+                                }
+                                _showBeforeFileOptions();
+                              }
+                            },
+                          ),
+                          const SizedBox(width: 8.0),
                           Expanded(
                             child: Container(
                               padding: const EdgeInsets.only(left: 8, right: 8),
@@ -760,7 +780,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 maxLines: null,
                                 // Allows for unlimited lines
                                 decoration: const InputDecoration(
-                                  hintText: 'Ask DocTak AI',
+                                  hintText: 'Clinical Summary(e.g age, gender, medical history)',
                                   border: InputBorder.none,
                                 ),
                               ),
@@ -795,6 +815,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   // var tempId =
                                   //     -1; // Unique temporary ID for the response
                                   setState(() {
+                                    isOneTimeImageUploaded = true;
                                     var myMessage = Messages(
                                         id: -1,
                                         gptSessionId:
@@ -803,20 +824,28 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl: _selectedFile?.path ?? '');
+                                        imageUrl:
+                                            selectedImageFiles.first.path ??
+                                                '');
                                     state1.response1.messages!.add(myMessage);
+
                                     BlocProvider.of<ChatGPTBloc>(context).add(
                                       GetPost(
                                           sessionId:
                                               selectedSessionId.toString(),
                                           question: question,
-                                          imageUrl1: _selectedFile?.path ??
-                                              '' // replace with real input
-                                          ),
+                                          imageUrl1:
+                                              selectedImageFiles.first.path ??
+                                                  '',
+                                          imageUrl2:
+                                               selectedImageFiles.last.path??'',
+                                          // replace with real input
+                                          imageType: imageType),
                                     );
-
+                                    imageUploadBloc.imagefiles.clear();
                                     textController.clear();
                                     _uploadedFile = _selectedFile;
+
                                     _selectedFile = null;
                                     scrollToBottom();
                                   });
@@ -930,8 +959,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           direction: Axis.horizontal,
                           directionMarguee: DirectionMarguee.oneDirection,
                           textDirection: TextDirection.ltr,
-                          child: const Text(
-                              'Artificial Intelligence can make mistakes. Consider checking important information.')),
+                          child: const Text('Artificial Intelligence can make mistakes. Consider checking important information.')),
                     )
                   ],
                 ));
@@ -956,24 +984,65 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   File? _selectedFile;
   File? _uploadedFile;
   bool _isFileUploading = false;
+  List<XFile> selectedImageFiles = [];
 
-  Widget _buildImagePreview(File file) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: FileImage(file),
-        ),
-        title: Text(file.path.split('/').last),
-        trailing: IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            setState(() {
-              _selectedFile = null;
-            });
-          },
-        ),
-      ),
+  Widget _buildImagePreview() {
+    return Container(
+      color: Colors.white,
+      width: 100.w,
+      // margin: const EdgeInsets.all(8.0),
+      child: BlocBuilder<ImageUploadBloc, ImageUploadState>(
+          bloc: imageUploadBloc,
+          builder: (context, state) {
+            if (state is FileLoadedState) {
+              return imageUploadBloc.imagefiles != []
+                  ? Wrap(
+                      children: imageUploadBloc.imagefiles.map((imageone) {
+                        return Stack(children: [
+                          Card(
+                            child: SizedBox(
+                              height: 60, width: 60,
+                              child: buildMediaItem(File(imageone.path)),
+                              // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            child: GestureDetector(
+                                onTap: () {
+                                  setState(() {});
+                                  selectedImageFiles.remove(imageone);
+                                  imageUploadBloc.add(SelectedFiles(
+                                      pickedfiles: imageone, isRemove: true));
+                                },
+                                child: const Icon(
+                                  Icons.remove_circle_outlined,
+                                  color: Colors.red,
+                                )),
+                          )
+                        ]);
+                      }).toList(),
+                    )
+                  : Container();
+            } else {
+              return Container();
+            }
+          }),
+      // child:
+      // ListTile(
+      //   leading: CircleAvatar(
+      //     backgroundImage: FileImage(file),
+      //   ),
+      //   title: Text(file.path.split('/').last),
+      //   trailing: IconButton(
+      //     icon: const Icon(Icons.clear),
+      //     onPressed: () {
+      //       setState(() {
+      //         _selectedFile = null;
+      //       });
+      //     },
+      //   ),
+      // ),
     );
   }
 
@@ -987,58 +1056,199 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
     return Container();
   }
 
+  String imageType = '';
+
   void _showFileOptions() {
+    int imageLimit = 0;
+    print(imageType);
+    if (imageType == 'X-ray' || imageType == 'Mammography') {
+      imageLimit = 2;
+    } else {
+      imageLimit = 1;
+    }
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: const Text('Choose from gallery'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.gallery);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a picture'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.camera);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
-                  }
-                },
-              ),
-              // ListTile(
-              //   leading: const Icon(Icons.insert_drive_file),
-              //   title: const Text('Select a document'),
-              //   onTap: () async {
-              //     Navigator.pop(context);
-              //     File? file = await _pickFile(ImageSource.gallery);
-              //     if (file != null) {
-              //       setState(() {
-              //         _selectedFile = file;
-              //       });
-              //     }
-              //   },
-              // ),
-            ],
+          child: MultipleImageUploadWidget(imageUploadBloc,
+              imageLimit: imageLimit, (imageFiles) {
+            selectedImageFiles = imageFiles;
+            print(selectedImageFiles);
+            setState(() {});
+            Navigator.pop(context);
+          }),
+          // Column(
+          //   mainAxisSize: MainAxisSize.min,
+          //   children: <Widget>[
+          //     ListTile(
+          //       leading: const Icon(Icons.photo),
+          //       title: const Text('Choose from gallery'),
+          //       onTap: () async {
+          //         Navigator.pop(context);
+          //         File? file = await _pickFile(ImageSource.gallery);
+          //         if (file != null) {
+          //           setState(() {
+          //             _selectedFile = file;
+          //           });
+          //         }
+          //       },
+          //     ),
+          //     ListTile(
+          //       leading: const Icon(Icons.camera_alt),
+          //       title: const Text('Take a picture'),
+          //       onTap: () async {
+          //         Navigator.pop(context);
+          //         File? file = await _pickFile(ImageSource.camera);
+          //         if (file != null) {
+          //           setState(() {
+          //             _selectedFile = file;
+          //           });
+          //         }
+          //       },
+          //     ),
+          //     // ListTile(
+          //     //   leading: const Icon(Icons.insert_drive_file),
+          //     //   title: const Text('Select a document'),
+          //     //   onTap: () async {
+          //     //     Navigator.pop(context);
+          //     //     File? file = await _pickFile(ImageSource.gallery);
+          //     //     if (file != null) {
+          //     //       setState(() {
+          //     //         _selectedFile = file;
+          //     //       });
+          //     //     }
+          //     //   },
+          //     // ),
+          //   ],
+          // ),
+        );
+      },
+    );
+  }
+
+  ImageUploadBloc imageUploadBloc = ImageUploadBloc();
+
+  void _showBeforeFileOptions() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  "Select Option",
+                  style: GoogleFonts.poppins(fontSize: 18),
+                ),
+                _buildHorizontalOption(
+                  icon: Icons.image_search,
+                  text: 'Dermatological assessment',
+                  onTap: () async {
+                    Navigator.pop(context);
+                    imageType = 'Dermatological';
+                    _showFileOptions();
+                  },
+                ),
+                _buildHorizontalOption(
+                  icon: Icons.image_search,
+                  text: 'ECG analysis',
+                  onTap: () async {
+                    Navigator.pop(context);
+                    imageType = 'ECG';
+                    _showFileOptions();
+                  },
+                ),
+                _buildHorizontalOption(
+                  icon: Icons.image_search,
+                  text: 'X-ray evaluation',
+                  onTap: () async {
+                    Navigator.pop(context);
+                    imageType = 'X-ray';
+                    _showFileOptions();
+                  },
+                ),
+                _buildHorizontalOption(
+                  icon: Icons.image_search,
+                  text: 'CT scan evaluation',
+                  onTap: () async {
+                    Navigator.pop(context);
+                    imageType = 'CT Scan';
+                    _showFileOptions();
+                  },
+                ),
+                _buildHorizontalOption(
+                  icon: Icons.image_search,
+                  text: 'MRI scan evaluation',
+                  onTap: () async {
+                    Navigator.pop(context);
+                    imageType = 'MRI Scan';
+                    _showFileOptions();
+                  },
+                ),
+                _buildHorizontalOption(
+                  icon: Icons.image_search,
+                  text: 'Mammography analysis',
+                  onTap: () async {
+                    Navigator.pop(context);
+                    imageType = 'Mammography';
+                    _showFileOptions();
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildHorizontalOption({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: Colors.grey[200],
+        ),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              icon,
+              size: 30.0,
+              color: Colors.blue,
+            ),
+            const SizedBox(width: 15.0),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16.0,
+              color: Colors.grey,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1126,17 +1336,21 @@ class ChatBubble extends StatelessWidget {
   final String text;
   final bool isUserMessage;
   final Function? onTapReginarate;
-  File? imageUrl;
-  String responseImageUrl;
+  File? imageUrl1;
+  File? imageUrl2;
+  String responseImageUrl1;
+  String responseImageUrl2;
 
-  ChatBubble(
-      {Key? key,
-      required this.text,
-      required this.isUserMessage,
-      this.onTapReginarate,
-      required this.imageUrl,
-      this.responseImageUrl = ''})
-      : super(key: key);
+  ChatBubble({
+    Key? key,
+    required this.text,
+    required this.isUserMessage,
+    this.onTapReginarate,
+    required this.imageUrl1,
+    required this.imageUrl2,
+    this.responseImageUrl1 = '',
+    this.responseImageUrl2 = '',
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1145,7 +1359,7 @@ class ChatBubble extends StatelessWidget {
     // print("response1 ${responseImageUrl}");
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
       child: IntrinsicHeight(
         child: Row(
           mainAxisAlignment:
@@ -1180,48 +1394,38 @@ class ChatBubble extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 0.0, vertical: 6.0),
                           child: ConstrainedBox(
-                            constraints:
-                                BoxConstraints(maxWidth: bubbleMaxWidth),
-                            child: text == 'Generating response...'
-                                ? Column(
-                                    children: [
-                                      Text(
-                                        // fitContent: true,
-                                        // selectable: true,
-                                        // softLineBreak: true,
-                                        // shrinkWrap: true,
-                                        text
-                                            .replaceAll("*", '')
-                                            .replaceAll('#', ''),
-                                        style: GoogleFonts.poppins(
-                                            color: Colors.black,
-                                            fontSize: 12.sp),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      CircularProgressIndicator(
-                                        color: svGetBodyColor(),
-                                      ),
-                                    ],
-                                  )
-                                :      MarkdownBlock(
-                                data: text,
-                                config: MarkdownConfig(configs: [
-
-                                ])),
-                            // Text(
-                            //         // fitContent: true,
-                            //         // selectable: true,
-                            //         // softLineBreak: true,
-                            //         // shrinkWrap: true,
-                            //         style: GoogleFonts.poppins(
-                            //             fontSize: 12.sp, color: Colors.black),
-                            //         text
-                            //             .replaceAll("*", '')
-                            //             .replaceAll('#', ''),
-                            //       ),
-                          ),
+                              constraints:
+                                  BoxConstraints(maxWidth: bubbleMaxWidth),
+                              child: text == 'Generating response...'
+                                  ? Column(
+                                      children: [
+                                        MarkdownBlock(
+                                            data: text,
+                                            config:
+                                                MarkdownConfig(configs: [])),
+                                        // Text(
+                                        //   // fitContent: true,
+                                        //   // selectable: true,
+                                        //   // softLineBreak: true,
+                                        //   // shrinkWrap: true,
+                                        //   text
+                                        //       .replaceAll("*", '')
+                                        //       .replaceAll('#', ''),
+                                        //   style: GoogleFonts.poppins(
+                                        //       color: Colors.black,
+                                        //       fontSize: 12.sp),
+                                        // ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        CircularProgressIndicator(
+                                          color: svGetBodyColor(),
+                                        ),
+                                      ],
+                                    )
+                                  : MarkdownBlock(
+                                      data: text,
+                                    )),
                         ),
                         Divider(
                           color: Colors.grey[200],
@@ -1298,10 +1502,69 @@ class ChatBubble extends StatelessWidget {
                           constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
                           child: Column(
                             children: [
-                              if (responseImageUrl != '')
-                                CustomImageView(imagePath: responseImageUrl)
-                              else if (imageUrl != null)
-                                Image.file(imageUrl!),
+                              if (imageUrl2 != null)
+                                Row(
+                                  children: [
+                                    if (responseImageUrl1 != '')
+                                      SizedBox(
+                                          height: 100,
+                                          width: 25.w,
+                                          child: CustomImageView(
+                                            imagePath: responseImageUrl1,
+                                          ))
+                                    else if (imageUrl1 != null)
+                                      SizedBox(
+                                          height: 100,
+                                          width: 25.w,
+                                          child: imageUrl1 != null
+                                              ? Image.file(
+                                                  imageUrl1!,
+                                                  errorBuilder: (BuildContext
+                                                          context,
+                                                      Object exception,
+                                                      StackTrace? stackTrace) {
+                                                    return SizedBox();
+                                                  },
+                                                )
+                                              : const SizedBox()),
+                                    const SizedBox(
+                                      width: 4,
+                                    ),
+                                    if (responseImageUrl2 != '')
+                                      SizedBox(
+                                          height: 100,
+                                          width: 25.w,
+                                          child: CustomImageView(
+                                            imagePath: responseImageUrl2,
+                                          ))
+                                    else if (imageUrl2 != null)
+                                      SizedBox(
+                                          height: 100,
+                                          width: 25.w,
+                                          child: imageUrl2 != null
+                                              ? Image.file(
+                                                  imageUrl2!,
+                                                  errorBuilder: (BuildContext
+                                                          context,
+                                                      Object exception,
+                                                      StackTrace? stackTrace) {
+                                                    return SizedBox();
+                                                  },
+                                                )
+                                              : const SizedBox()),
+                                  ],
+                                )
+                              else if (responseImageUrl1 != '')
+                                CustomImageView(
+                                  imagePath: responseImageUrl1,
+                                )
+                              else if (imageUrl1 != null)
+                                Image.file(imageUrl1!,errorBuilder: (BuildContext
+                                context,
+                                    Object exception,
+                                    StackTrace? stackTrace) {
+                                  return SizedBox();
+                                },),
                               Text(text,
                                   style: const TextStyle(color: Colors.white)),
                             ],
