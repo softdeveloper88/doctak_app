@@ -178,74 +178,80 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       //         jobId: '${bloc.notificationsList[index].id ?? ''}')
                       //     .launch(context);
                     },
-                    child: Material(
-                      color: bloc.notificationsList[index].isRead== 1 ? Colors.white : Colors.blue[50],
-                      // color: Theme.of(context).cardColor,
-                      elevation: 0,
-                      borderRadius: BorderRadius.circular(10),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-                        title: Text(
-                          bloc.notificationsList[index].text??"",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.0,
+                    child: Column(
+                      children: [
+                        Material(
+                          color: bloc.notificationsList[index].isRead== 1 ? Colors.white : Colors.blue[50],
+                          // color: Theme.of(context).cardColor,
+                          elevation: 0,
+                          borderRadius: BorderRadius.circular(10),
+                          child: ListTile(
+                            dense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                            title: Text(
+                              bloc.notificationsList[index].text??"",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14.0,
+                              ),
+                            ),
+                            subtitle: Text(
+                              timeAgo.format(DateTime.parse(bloc.notificationsList[index].createdAt??"")),
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14.0,
+                              ),
+                            ),
+                            leading: const CircleAvatar(
+                              backgroundColor: Colors.blue,
+                              child: Icon(
+                                Icons.notifications,
+                                color: Colors.white,
+                              ),
+                            ),
+                            trailing: Icon(
+                              Icons.arrow_forward_ios_outlined,
+                              color: Colors.grey[600],
+                              size: 16.0,
+                            ),
+                            onTap: () {
+                              print('object');
+                              var typeNotification=bloc.notificationsList[index].type;
+                              if(typeNotification=='simple'){
+
+                              } else if(typeNotification=='follow'){
+                                SVProfileFragment(
+                                    userId: bloc.notificationsList[index].user?.id)
+                                    .launch(context);
+                              }else if(typeNotification=='message'){
+                                print('object');
+                                ChatRoomScreen(
+                                  username:
+                                  '${bloc.notificationsList[index].user?.name}',
+                                  profilePic:
+                                  '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                                  id: '${bloc.notificationsList[index].user?.id}',
+                                  roomId: '',
+                                ).launch(context);
+                              }else if(typeNotification=='post_liked'){
+                                LikesListScreen(
+                                    id: bloc.notificationsList[index]
+                                        .postId ??
+                                        '0')
+                                    .launch(context);
+                              }else if(typeNotification=='post_liked'){
+
+                              }
+                              // JobsDetailsScreen(
+                              //         jobId: '${bloc.notificationsList[index].id ?? ''}')
+                              //     .launch(context);
+
+                              // Add your onTap functionality here
+                            },
                           ),
                         ),
-                        subtitle: Text(
-                          timeAgo.format(DateTime.parse(bloc.notificationsList[index].createdAt??"")),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14.0,
-                          ),
-                        ),
-                        leading: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.notifications,
-                            color: Colors.white,
-                          ),
-                        ),
-                        trailing: Icon(
-                          Icons.arrow_forward_ios_outlined,
-                          color: Colors.grey[600],
-                          size: 16.0,
-                        ),
-                        onTap: () {
-                          print('object');
-                          var typeNotification=bloc.notificationsList[index].type;
-                          if(typeNotification=='simple'){
-
-                          } else if(typeNotification=='follow'){
-                            SVProfileFragment(
-                                userId: bloc.notificationsList[index].user?.id)
-                                .launch(context);
-                          }else if(typeNotification=='message'){
-                            print('object');
-                            ChatRoomScreen(
-                              username:
-                              '${bloc.notificationsList[index].user?.name}',
-                              profilePic:
-                              '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                              id: '${bloc.notificationsList[index].user?.id}',
-                              roomId: '',
-                            ).launch(context);
-                          }else if(typeNotification=='post_liked'){
-                            LikesListScreen(
-                                id: bloc.notificationsList[index]
-                                    .postId ??
-                                    '0')
-                                .launch(context);
-                          }else if(typeNotification=='post_liked'){
-
-                          }
-                          // JobsDetailsScreen(
-                          //         jobId: '${bloc.notificationsList[index].id ?? ''}')
-                          //     .launch(context);
-
-                          // Add your onTap functionality here
-                        },
-                      ),
+                        const Divider(thickness: 0.2,endIndent: 16,indent: 16,color: Colors.grey,)
+                      ],
                     ),
                   );
                 }

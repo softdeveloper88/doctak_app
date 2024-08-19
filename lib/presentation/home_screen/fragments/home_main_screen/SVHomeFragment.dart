@@ -49,7 +49,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       ),
     );
     widget.homeBloc.add(PostLoadPageEvent(page: 1));
-    widget.homeBloc.add(AdsSettingEvent());
+    // widget.homeBloc.add(AdsSettingEvent());
     super.initState();
   }
 
@@ -58,7 +58,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     await Future.delayed(const Duration(seconds: 2));
     setState(() {
       widget.homeBloc.add(PostLoadPageEvent(page: 1));
-      widget.homeBloc.add(AdsSettingEvent());
+      // widget.homeBloc.add(AdsSettingEvent());
     });
   }
 

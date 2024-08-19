@@ -8,6 +8,7 @@ import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -41,6 +42,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   DropdownBloc dropdownBloc = DropdownBloc();
   ProfileBloc profileBloc = ProfileBloc();
+  bool _isChecked = false;
 
   @override
   void initState() {
@@ -477,6 +479,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           return Container(child:const Text(''));
                                         }
                                       }),
+                                  Row(
+                                    children: <Widget>[
+                                      Checkbox(
+                                        value: _isChecked,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            _isChecked = value!;
+                                          });
+                                        },
+                                      ),
+                                      Expanded(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            style: TextStyle(fontSize: 14.0, color: Colors.black),
+                                            children: <TextSpan>[
+                                              const TextSpan(text: 'I agree to the '),
+                                              TextSpan(
+                                                text: 'Terms and Conditions',
+                                                style: const TextStyle(color: Colors.blue),
+                                                recognizer: TapGestureRecognizer()
+                                                  ..onTap = () {
+                                                    // Handle the click event for Terms and Conditions
+                                                    TermsAndConditionScreen().launch(context, isNewTask: false);
+
+                                                    // You can navigate to the Terms and Conditions page here
+                                                  },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8,),
                                   BlocListener<DropdownBloc, DropdownState>(
                                       listener: (context, state) {
                                         if (state is DataLoaded) {
@@ -528,7 +564,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       },
                                       bloc: dropdownBloc,
                                       child: _buildSignUp(context)),
-
                                   const SizedBox(height: 26),
                                   Align(
                                       alignment: Alignment.centerLeft,
@@ -709,45 +744,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   /// Displays a dialog with the [SignUpSuccessDialog] content.
   onTapSignUp(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-    }
-    print(emailController.text.toString());
-    await FirebaseMessaging.instance.getToken().then((token) async {
-      if (widget.isSocialLogin == false) {
-        if (passwordController.text != confirmPasswordController.text) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Password should be match'),
-          ));
+
+      if (_formKey.currentState!.validate()) {
+        _formKey.currentState!.save();
+      }
+      print(emailController.text.toString());
+      await FirebaseMessaging.instance.getToken().then((token) async {
+        if (widget.isSocialLogin == false) {
+          if (passwordController.text != confirmPasswordController.text) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Password should be match'),
+            ));
+          } else {
+            if(_isChecked) {
+            dropdownBloc.add(SignUpButtonPressed(
+                username: emailController.text.toString(),
+                password: passwordController.text.toString(),
+                firstName: firstnameController!.text.toString(),
+                lastName: lastNameController!.text.toString(),
+                country: profileBloc.country ?? 'United Arab Emirates',
+                state: profileBloc.stateName ?? "DUBAI",
+                specialty: profileBloc.specialtyName ?? "",
+                userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
+                deviceToken: token ?? ''
+              // replace with real input
+            ));
+            }else{
+              toasty(context, "Please accept terms and conditions before proceeds");
+            }
+          }
         } else {
-          dropdownBloc.add(SignUpButtonPressed(
-              username: emailController.text.toString(),
-              password: passwordController.text.toString(),
+          if(_isChecked) {
+          dropdownBloc.add(SocialButtonPressed(
+              token: widget.token ?? '',
               firstName: firstnameController!.text.toString(),
               lastName: lastNameController!.text.toString(),
+              phone: phoneController.text.toString(),
               country: profileBloc.country ?? 'United Arab Emirates',
               state: profileBloc.stateName ?? "DUBAI",
               specialty: profileBloc.specialtyName ?? "",
               userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
-              deviceToken: token??''
+              deviceToken: token ?? ''
             // replace with real input
           ));
+          }else{
+            toasty(context, "Please accept terms and conditions before proceeds");
+          }
         }
-      } else {
-        dropdownBloc.add(SocialButtonPressed(
-            token: widget.token ?? '',
-            firstName: firstnameController!.text.toString(),
-            lastName: lastNameController!.text.toString(),
-            phone: phoneController.text.toString(),
-            country: profileBloc.country ?? 'United Arab Emirates',
-            state: profileBloc.stateName ?? "DUBAI",
-            specialty: profileBloc.specialtyName ?? "",
-            userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
-            deviceToken: token??''
-          // replace with real input
-        ));
-      }
-    });
+
+      });
+
     // showDialog(
     //     context: context,
     //     builder: (_) => AlertDialog(

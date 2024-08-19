@@ -18,6 +18,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightBlue[50],
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
@@ -44,7 +45,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const HtmlWidget('''
-  <h1>Welcome to DocTak.net!</h1>
+  <h1>Welcome to DocTak.net</h1>
 
   <h2>Our Mission</h2>
   <p>At DocTak.net, our mission is to create a comprehensive and innovative social network for doctors and medical students worldwide. We strive to connect medical professionals, provide valuable resources, and foster collaboration and knowledge-sharing across the healthcare community.</p>

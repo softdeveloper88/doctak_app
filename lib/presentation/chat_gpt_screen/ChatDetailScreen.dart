@@ -135,7 +135,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
-            chatWithAi = state1.response.sessions?.first.name ?? 'New Chat';
+            chatWithAi = state1.response.sessions?.first.name ?? 'Next Session';
           }
           if (state1 is DataInitial) {
             return Scaffold(
@@ -159,7 +159,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
                 // setState(() {
-                  isEmpty = false;
+                isEmpty = false;
                 // });
                 isAlreadyAsk = false;
                 // Future.delayed(const Duration(seconds: 1),(){
@@ -242,16 +242,40 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(
-                                  width: 40.w,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      chatWithAi.length > 50
-                                          ? '${chatWithAi.substring(0, 50)}...'
-                                          : chatWithAi,
-                                      style: boldTextStyle(),
-                                      overflow: TextOverflow.ellipsis,
+                                GestureDetector(
+                                  onTap:(){
+                                    if(chatWithAi=="New Session") {
+                                      try {
+                                        BlocProvider.of<ChatGPTBloc>(context)
+                                            .add(GetNewChat());
+                                        // Navigator.of(context).pop();
+
+                                        selectedSessionId =
+                                            BlocProvider
+                                                .of<ChatGPTBloc>(context)
+                                                .newChatSessionId;
+
+                                        // Session newSession = await createNewChatSession();
+                                        // setState(() {
+                                        //   futureSessions = Future(() =>
+                                        //       [newSession, ...(snapshot.data ?? [])]);
+                                        // });
+                                      } catch (e) {
+                                        print(e);
+                                      }
+                                    }
+                                  },
+                                  child: SizedBox(
+                                    width: 40.w,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(chatWithAi=='New Session'?'Next Session':
+                                        chatWithAi.length > 50
+                                            ? '${chatWithAi.substring(0, 50)}...'
+                                            : chatWithAi,
+                                        style: boldTextStyle(),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -363,55 +387,65 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   ),
                                   Row(
                                     children: [
-                                      cardIntro('Medication Review',
-                                          'Check interactions and dosage', () {
-                                        // Medication Review: check interactions and dosage
-
-                                        widget.question =
-                                            'Medication Review: check interactions and dosage';
-                                        // Future.delayed(const Duration(seconds: 1),(){
-                                        setState(() {
-                                          isEmpty = false;
-                                        });
-                                        drugsAskQuestion(state1, context);
-                                        // });
-                                        // textController.text = widget.question.toString();
-                                      }),
+                                      InkWell(
+                                        onTap: () {
+                                          widget.question =
+                                              'Medication Review: check interactions and dosage';
+                                          // Future.delayed(const Duration(seconds: 1),(){
+                                          setState(() {
+                                            isEmpty = false;
+                                          });
+                                          drugsAskQuestion(state1, context);
+                                          // });
+                                          // textController.text = widget.question.toString();
+                                        },
+                                        child: Card(
+                                            elevation: 2,
+                                            child: SizedBox(
+                                              width: 85.w,
+                                              height: 20.h,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        'Medication Review',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 12.sp,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                      ),
+                                                      Text(
+                                                        'Check interactions and dosage',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 8.sp,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .normal),
+                                                      ),
+                                                    ]),
+                                              ),
+                                            )),
+                                      ),
                                       const SizedBox(width: 10),
-                                      cardIntro('Medical images',
-                                          'initial assessment', () async {
-                                        // Medication Review: check interactions and dosage
-                                        widget.question = 'initial assessment';
-
-                                        const permission = Permission.photos;
-                                        if (await permission.isGranted) {
-                                          // _showFileOptions();
-                                        } else if (await permission.isDenied) {
-                                          final result =
-                                              await permission.request();
-                                          if (result.isGranted) {
-                                            // _showFileOptions();
-                                          } else if (result.isDenied) {
-                                            print("isDenied");
-                                            // _permissionDialog(context);
-                                            // _showFileOptions();
-                                          } else if (result
-                                              .isPermanentlyDenied) {
-                                            print("isPermanentlyDenied");
-                                            // _permissionDialog(context);
-                                          }
-                                        } else if (await permission
-                                            .isPermanentlyDenied) {
-                                          print("isPermanentlyDenied");
-                                          // _permissionDialog(context);
-                                        }
-                                        _showFileOptions();
-
-                                        // Future.delayed(const Duration(seconds: 1),(){
-
-                                        // });
-                                        // textController.text = widget.question.toString();
-                                      }),
                                     ],
                                   ),
                                   // Wrap(
@@ -1205,11 +1239,9 @@ class ChatBubble extends StatelessWidget {
                                       ),
                                     ],
                                   )
-                                :      MarkdownBlock(
-                                data: text,
-                                config: MarkdownConfig(configs: [
-
-                                ])),
+                                : MarkdownBlock(
+                                    data: text,
+                                    config: MarkdownConfig(configs: [])),
                             // Text(
                             //         // fitContent: true,
                             //         // selectable: true,

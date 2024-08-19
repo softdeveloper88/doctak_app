@@ -74,7 +74,7 @@ class ChatHistoryScreen extends StatelessWidget {
             if (selectedSessionId == 0 && state1 is DataLoaded) {
               selectedSessionId = state1.response.newSessionId;
               chatWithAi =
-                  state1.response.sessions?.first.name ?? 'New Session';
+                  state1.response.sessions?.first.name ?? 'Next Session';
             }
             if (state1 is DataInitial) {
               return Scaffold(

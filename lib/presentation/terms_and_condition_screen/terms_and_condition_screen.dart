@@ -131,11 +131,12 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
                         await prefs.setBool('acceptTerms', true);
+                        Navigator.pop(context);
                         // widget.accept!();
-                        LoginScreen().launch(context, isNewTask: true);
+                        // LoginScreen().launch(context, isNewTask: true);
                       }
                     : null,
-                child: const Text('Next'),
+                child: const Text('Accept'),
               ),
             ),
           ],

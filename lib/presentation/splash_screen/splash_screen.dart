@@ -139,10 +139,12 @@ class _SplashScreenState extends State<SplashScreen> {
         // );
         // });
       }
-    } else {
-      // LoginScreen().launch(context, isNewTask: true);
 
-      TermsAndConditionScreen().launch(context, isNewTask: true);
+    } else {
+
+      LoginScreen().launch(context, isNewTask: true);
+
+      // TermsAndConditionScreen().launch(context, isNewTask: true);
     }
   }
 

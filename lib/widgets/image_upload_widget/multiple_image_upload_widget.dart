@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 
 import 'bloc/image_upload_event.dart';
@@ -62,10 +63,48 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
         print("No image is selected.");
       }
     } catch (e) {
-      print("error while picking file.");
+      _permissionDialog(context);
+      print("error while picking file.$e");
     }
   }
-
+  Future<void> _permissionDialog(context) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // <-- SEE HERE
+          title: Text(
+            'You want to enable permission?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 14.sp),
+          ),
+          // content: const SingleChildScrollView(
+          //   child: ListBody(
+          // //     children: <Widget>[
+          // //       Text('Are you sure want to enable permission?'),
+          // //     ],
+          //   ),
+          // ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                openAppSettings();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   openVideo() async {
     try {
       var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
@@ -85,7 +124,6 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       print("error while picking file.$e");
     }
   }
-
   openCamera() async {
     try {
       var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera);
@@ -116,199 +154,171 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
         borderRadius: radiusOnly(
             topRight: SVAppContainerRadius, topLeft: SVAppContainerRadius),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                BlocBuilder<ImageUploadBloc, ImageUploadState>(
-                    bloc: widget.imageUploadBloc,
-                    builder: (context, state) {
-                      if (state is FileLoadedState) {
-                        return imagefiles != []
-                            ? Wrap(
-                                children: widget.imageUploadBloc.imagefiles
-                                    .map((imageone) {
-                                  return Stack(children: [
-                                    Card(
-                                      child: SizedBox(
-                                        height: 60, width: 60,
-                                        child:
-                                            buildMediaItem(File(imageone.path)),
-                                        // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  BlocBuilder<ImageUploadBloc, ImageUploadState>(
+                      bloc: widget.imageUploadBloc,
+                      builder: (context, state) {
+                        if (state is FileLoadedState) {
+                          return imagefiles != []
+                              ? Wrap(
+                                  children: widget.imageUploadBloc.imagefiles
+                                      .map((imageone) {
+                                    return Stack(children: [
+                                      Card(
+                                        child: SizedBox(
+                                          height: 60, width: 60,
+                                          child:
+                                              buildMediaItem(File(imageone.path)),
+                                          // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
+                                        ),
                                       ),
-                                    ),
-                                    Positioned(
-                                      right: 0,
-                                      child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {});
-                                            imagefiles.remove(imageone);
+                                      Positioned(
+                                        right: 0,
+                                        child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {});
+                                              imagefiles.remove(imageone);
 
-                                            widget.imageUploadBloc.add(
-                                                SelectedFiles(
-                                                    pickedfiles: imageone,
-                                                    isRemove: true));
-                                          },
-                                          child: const Icon(
-                                            Icons.remove_circle_outlined,
-                                            color: Colors.red,
-                                          )),
-                                    )
-                                  ]);
-                                }).toList(),
-                              )
-                            : Container();
-                      } else {
-                        return Container();
-                      }
-                    }),
-                // HorizontalList(
-                //   itemCount: list.length,
-                //   itemBuilder: (context, index) {
-                //     return Image.asset(list[index], height: 62, width: 52, fit: BoxFit.cover);
-                //   },
-                // )
-              ],
+                                              widget.imageUploadBloc.add(
+                                                  SelectedFiles(
+                                                      pickedfiles: imageone,
+                                                      isRemove: true));
+                                            },
+                                            child: const Icon(
+                                              Icons.remove_circle_outlined,
+                                              color: Colors.red,
+                                            )),
+                                      )
+                                    ]);
+                                  }).toList(),
+                                )
+                              : Container();
+                        } else {
+                          return Container();
+                        }
+                      }),
+                  // HorizontalList(
+                  //   itemCount: list.length,
+                  //   itemBuilder: (context, index) {
+                  //     return Image.asset(list[index], height: 62, width: 52, fit: BoxFit.cover);
+                  //   },
+                  // )
+                ],
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  if (widget.imageLimit == 0) {
-                    openImages();
-                  } else {
-                    if (widget.imageUploadBloc.imagefiles.length + 1 <= widget.imageLimit) {
+            const SizedBox(
+              height: 16,
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if(widget.imageLimit==2)const Text("Please upload one or two of the most relevant images for analysis."),
+                const SizedBox(height: 8),
+                Divider(color: Colors.grey[300]),
+                MaterialButton(
+                  onPressed: () {
+                    if (widget.imageLimit == 0) {
                       openImages();
+                    } else {
+                      if (widget.imageUploadBloc.imagefiles.length + 1 <= widget.imageLimit) {
+                        openImages();
+                      }
                     }
-                  }
-                },
-                child: Row(
-                  children: [
-                    SizedBox(
-                      height: 32,
-                      width: 32,
-                      // color: context.cardColor,
-                      child: Icon(
-                        Icons.image_outlined, size: 32, color: svGetBodyColor(),
-                        // Image.asset('images/socialv/icons/ic_CameraPost.png',
-                        //     height: 22, width: 22, fit: BoxFit.cover),
-                      ),
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100], // Light background color
+                      borderRadius: BorderRadius.circular(8),
+
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      'From Gallery',
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w500,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.image_outlined,
+                          size: 32,
                           color: svGetBodyColor(),
-                          fontSize: kDefaultFontSize),
-                    )
-                  ],
-                ),
-              ),
-              Divider(
-                color: Colors.grey[300],
-              ),
-              // GestureDetector(
-              //   onTap: () {
-              //     openVideo();
-              //   },
-              //   child: Row(
-              //     children: <Widget>[
-              //       Image.asset('images/socialv/icons/ic_Video.png',
-              //           color: svGetBodyColor(),
-              //           height: 32,
-              //           width: 32,
-              //           fit: BoxFit.cover),
-              //       const SizedBox(
-              //         width: 10,
-              //       ),
-              //       Text(
-              //         'Take Video',
-              //         style: GoogleFonts.poppins(
-              //             fontWeight: FontWeight.w500,
-              //             color: svGetBodyColor(),
-              //             fontSize: kDefaultFontSize),
-              //       )
-              //     ],
-              //   ),
-              // ),
-              // Divider(
-              //   color: Colors.grey[300],
-              // ),
-
-              GestureDetector(
-                onTap: () {
-                  if (widget.imageLimit == 0) {
-                    print("zero ${widget.imageLimit}");
-                    openCamera();
-                  } else if (widget.imageUploadBloc.imagefiles.length + 1 <=
-                      widget.imageLimit) {
-                    print(
-                        "not zero ${widget.imageLimit} ${widget.imageUploadBloc.imagefiles.length}");
-
-                    openCamera();
-                  }
-                },
-                child: Row(
-                  children: [
-                    Image.asset('images/socialv/icons/ic_CameraPost.png',
-                        color: svGetBodyColor(),
-                        height: 32,
-                        width: 32,
-                        fit: BoxFit.cover),
-                    const SizedBox(
-                      width: 10,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'From Gallery',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w500,
+                            color: svGetBodyColor(),
+                            fontSize: kDefaultFontSize,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      'Take Picture',
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w500,
-                          color: svGetBodyColor(),
-                          fontSize: kDefaultFontSize),
-                    )
-                  ],
+                  ),
                 ),
-              ),
-              Divider(
-                color: Colors.grey[300],
-              ),
-
-              // Image.asset('images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
-              // GestureDetector(
-              //     onTap: () {
-              //       checkInPlaceBottomSheet(context, widget.imageUploadBloc);
-              //     },
-              //     child: Image.asset('images/socialv/icons/ic_Location.png',
-              //         height: 32, width: 32, fit: BoxFit.cover)),
-              // Image.asset('images/socialv/icons/ic_Paper.png',
-              //     height: 32, width: 32, fit: BoxFit.cover),
-            ],
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(8.0),
-            child: svAppButton(
-              context: context,
-              // style: svAppButton(text: text, onTap: onTap, context: context),
-              onTap: () => widget.onTap(imagefiles),
-              text: 'Next',
+                const SizedBox(height: 8),
+                MaterialButton(
+                  onPressed: () {
+                    if (widget.imageLimit == 0) {
+                      openCamera();
+                    } else if (widget.imageUploadBloc.imagefiles.length + 1 <= widget.imageLimit) {
+                      openCamera();
+                    }
+                  },
+                  // borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100], // Light background color
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          'images/socialv/icons/ic_CameraPost.png',
+                          color: svGetBodyColor(),
+                          height: 32,
+                          width: 32,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Take Picture',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w500,
+                            color: svGetBodyColor(),
+                            fontSize: kDefaultFontSize,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Divider(color: Colors.grey[300]),
+              ],
+            )
+            ,
+            const SizedBox(
+              height: 16,
             ),
-          ),
-        ],
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8.0),
+              child: svAppButton(
+                context: context,
+                // style: svAppButton(text: text, onTap: onTap, context: context),
+                onTap: () => widget.onTap(imagefiles),
+                text: 'Next',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

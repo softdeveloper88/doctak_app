@@ -132,6 +132,7 @@ dependencies:
   flutter_markdown: ^0.7.3
 #  social_share_plugin: ^0.4.2+2
   share_plus: ^10.0.0
+  device_info_plus: ^10.1.2
 #  flutter_markdown_latex: ^0.3.3
 #  record: ^5.0.4
 #  record_mp3: ^3.0.0

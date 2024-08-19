@@ -103,7 +103,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
       child: Card(
           elevation: 2,
           child: SizedBox(
-            width: 40.w,
+            width: 80.w,
             height: 20.h,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -251,14 +251,40 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                               children: [
                                 SizedBox(
                                   width: 40.w,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      chatWithAi.length > 50
-                                          ? '${chatWithAi.substring(0, 50)}...'
-                                          : chatWithAi,
-                                      style: boldTextStyle(),
-                                      overflow: TextOverflow.ellipsis,
+                                  child: InkWell(
+                                    onTap: (){
+
+                                      if(chatWithAi=="New Session") {
+                                        isOneTimeImageUploaded=false;
+                                        try {
+                                          BlocProvider.of<ChatGPTBloc>(context)
+                                              .add(GetNewChat());
+                                          // Navigator.of(context).pop();
+
+                                          selectedSessionId =
+                                              BlocProvider
+                                                  .of<ChatGPTBloc>(context)
+                                                  .newChatSessionId;
+
+                                          // Session newSession = await createNewChatSession();
+                                          // setState(() {
+                                          //   futureSessions = Future(() =>
+                                          //       [newSession, ...(snapshot.data ?? [])]);
+                                          // });
+                                        } catch (e) {
+                                          print(e);
+                                        }
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(chatWithAi=='New Session'?'Next Session':
+                                        chatWithAi.length > 50
+                                            ? '${chatWithAi.substring(0, 50)}...'
+                                            : chatWithAi,
+                                        style: boldTextStyle(),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -329,91 +355,46 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                   ),
                                   const SizedBox(height: 30),
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      cardIntro('Code Detection',
-                                          'Identify CPT or ICD codes', () {
-                                        // Code Detection: Identify CPT or ICD codes
-                                        isAlreadyAsk = true;
-                                        widget.question =
-                                            'Code Detection: Identify CPT or ICD codes';
-                                        if (isAlreadyAsk) {
-                                          setState(() {
-                                            isEmpty = false;
-                                          });
-                                          isAlreadyAsk = false;
-
-                                          // Future.delayed(const Duration(seconds: 1),(){
-                                          drugsAskQuestion(state1, context);
-                                          // });
-                                          // textController.text = widget.question.toString();
-                                        }
-                                      }),
-                                      const SizedBox(width: 10),
-                                      cardIntro('Diagnostic \nSuggestions',
-                                          'Request suggestions based on symptoms',
-                                          () {
-                                        isAlreadyAsk = true;
-                                        widget.question =
-                                            'Diagnostic Suggestions: Request suggestions based on symptoms';
-                                        if (isAlreadyAsk) {
-                                          isAlreadyAsk = false;
-                                          // Future.delayed(const Duration(seconds: 1),(){
-                                          setState(() {
-                                            isEmpty = false;
-                                          });
-                                          drugsAskQuestion(state1, context);
-                                          // });
-                                          // textController.text = widget.question.toString();
-                                        }
-                                      }),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      cardIntro('Medication Review',
-                                          'Check interactions and dosage', () {
-                                        // Medication Review: check interactions and dosage
-
-                                        widget.question =
-                                            'Medication Review: check interactions and dosage';
-                                        // Future.delayed(const Duration(seconds: 1),(){
-                                        setState(() {
-                                          isEmpty = false;
-                                        });
-                                        drugsAskQuestion(state1, context);
-                                        // });
-                                        // textController.text = widget.question.toString();
-                                      }),
-                                      const SizedBox(width: 10),
                                       cardIntro('Medical images',
-                                          'initial assessment', () async {
+                                          'Please upload the medical images for potential diagnoses and analysis', () async {
                                         // Medication Review: check interactions and dosage
-                                        widget.question = 'initial assessment';
+                                        // widget.question = 'initial assessment';
 
-                                        const permission = Permission.photos;
-                                        if (await permission.isGranted) {
-                                          // _showFileOptions();
-                                        } else if (await permission.isDenied) {
-                                          final result =
-                                              await permission.request();
-                                          if (result.isGranted) {
-                                            // _showFileOptions();
-                                          } else if (result.isDenied) {
-                                            print("isDenied");
-                                            // _permissionDialog(context);
-                                            // _showFileOptions();
-                                          } else if (result
+                                        if (isOneTimeImageUploaded) {
+                                          toasty(context,
+                                              'Only allowed one time image in one session');
+                                        } else {
+                                          const permission = Permission.photos;
+                                          if (await permission.isGranted) {
+                                            // Permission is already granted
+                                            _showBeforeFileOptions();
+                                          } else if (await permission.isDenied) {
+                                            // Permission was denied; request it
+                                            final result = await permission.request();
+                                            print(result);
+                                            // Check the result after requesting permission
+                                            if (result.isGranted) {
+                                              _showBeforeFileOptions();
+                                            } else if (result.isPermanentlyDenied) {
+                                              // Permission is permanently denied
+                                              print("Permission is permanently denied.");
+                                              // _permissionDialog(context);
+                                              _showBeforeFileOptions();
+                                            } else if (result.isGranted) {
+                                              _showBeforeFileOptions();
+
+                                              // Permission is still denied
+                                              print("Permission is denied.");
+                                            }
+                                          } else if (await permission
                                               .isPermanentlyDenied) {
-                                            print("isPermanentlyDenied");
-                                            // _permissionDialog(context);
+                                            // Permission was permanently denied
+                                            print("Permission is permanently denied.");
+                                            _permissionDialog(context);
                                           }
-                                        } else if (await permission
-                                            .isPermanentlyDenied) {
-                                          print("isPermanentlyDenied");
-                                          // _permissionDialog(context);
                                         }
-                                        _showFileOptions();
-
                                         // Future.delayed(const Duration(seconds: 1),(){
 
                                         // });
@@ -421,101 +402,6 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       }),
                                     ],
                                   ),
-                                  // Wrap(
-                                  //   alignment: WrapAlignment.center,
-                                  //   // mainAxisAlignment: MainAxisAlignment.center,
-                                  //   children: [
-                                  //     cardIntro('Code Detection',
-                                  //         'Identify CPT or ICD codes', () {
-                                  //       // Code Detection: Identify CPT or ICD codes
-                                  //       isAlreadyAsk = true;
-                                  //       widget.question =
-                                  //           'Code Detection: Identify CPT or ICD codes';
-                                  //       if (isAlreadyAsk) {
-                                  //         setState(() {
-                                  //           isEmpty = false;
-                                  //         });
-                                  //         isAlreadyAsk = false;
-                                  //
-                                  //         // Future.delayed(const Duration(seconds: 1),(){
-                                  //         drugsAskQuestion(state1, context);
-                                  //         // });
-                                  //         // textController.text = widget.question.toString();
-                                  //       }
-                                  //     }),
-                                  //     const SizedBox(width: 10),
-                                  //     cardIntro('Diagnostic \nSuggestions',
-                                  //         'Request suggestions based on symptoms',
-                                  //         () {
-                                  //       isAlreadyAsk = true;
-                                  //       widget.question =
-                                  //           'Diagnostic Suggestions: Request suggestions based on symptoms';
-                                  //       if (isAlreadyAsk) {
-                                  //         isAlreadyAsk = false;
-                                  //         // Future.delayed(const Duration(seconds: 1),(){
-                                  //         setState(() {
-                                  //           isEmpty = false;
-                                  //         });
-                                  //         drugsAskQuestion(state1, context);
-                                  //         // });
-                                  //         // textController.text = widget.question.toString();
-                                  //       }
-                                  //     }),
-                                  //     const SizedBox(width: 10),
-                                  //     cardIntro('Medication Review',
-                                  //         'Check interactions and dosage', () {
-                                  //       // Medication Review: check interactions and dosage
-                                  //
-                                  //       widget.question =
-                                  //           'Medication Review: check interactions and dosage';
-                                  //       // Future.delayed(const Duration(seconds: 1),(){
-                                  //       setState(() {
-                                  //         isEmpty = false;
-                                  //       });
-                                  //       drugsAskQuestion(state1, context);
-                                  //       // });
-                                  //       // textController.text = widget.question.toString();
-                                  //     }),
-                                  //     cardIntro('Medical images',
-                                  //         'initial assessment', () async {
-                                  //       // Medication Review: check interactions and dosage
-                                  //           widget.question =
-                                  //           'initial assessment';
-                                  //
-                                  //           const permission = Permission.photos;
-                                  //           if (await permission.isGranted) {
-                                  //             _showFileOptions();
-                                  //           } else if (await permission
-                                  //               .isDenied) {
-                                  //             final result =
-                                  //                 await permission.request();
-                                  //             if (result.isGranted) {
-                                  //               _showFileOptions();
-                                  //             } else if (result.isDenied) {
-                                  //               print("isDenied");
-                                  //               // _permissionDialog(context);
-                                  //               _showFileOptions();
-                                  //
-                                  //             } else if (result
-                                  //                 .isPermanentlyDenied) {
-                                  //               print("isPermanentlyDenied");
-                                  //               _permissionDialog(context);
-                                  //             }
-                                  //           } else if (await permission
-                                  //               .isPermanentlyDenied) {
-                                  //             print("isPermanentlyDenied");
-                                  //             _permissionDialog(context);
-                                  //           }
-                                  //       // Future.delayed(const Duration(seconds: 1),(){
-                                  //       setState(() {
-                                  //         isEmpty = false;
-                                  //       });
-                                  //       drugsAskQuestion(state1, context);
-                                  //       // });
-                                  //       // textController.text = widget.question.toString();
-                                  //     }),
-                                  //   ],
-                                  // ),
                                   const SizedBox(height: 20),
                                   const Text(
                                     'Ready to start? Type your question below or choose a suggested topic.',
@@ -731,7 +617,8 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     'Only allowed one time image in one session');
                               } else {
                                 const permission = Permission.photos;
-                                if (await permission.isGranted) {
+                                var status = await Permission.storage.request();
+                                if (status.isGranted || await permission.isGranted) {
                                   // Permission is already granted
                                   _showBeforeFileOptions();
                                 } else if (await permission.isDenied) {
@@ -748,7 +635,6 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     _showBeforeFileOptions();
                                   } else if (result.isGranted) {
                                     _showBeforeFileOptions();
-
                                     // Permission is still denied
                                     print("Permission is denied.");
                                   }
@@ -758,7 +644,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                   print("Permission is permanently denied.");
                                   _permissionDialog(context);
                                 }
-                                _showBeforeFileOptions();
+
                               }
                             },
                           ),
@@ -809,8 +695,9 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     : const Icon(Icons.send,
                                         color: Colors.white),
                                 onPressed: () async {
+                                  if(selectedImageFiles.isEmpty)return;
                                   String question = textController.text.trim();
-                                  if (question.isEmpty) return;
+
                                   // String sessionId = selectedSessionId.toString();
                                   // var tempId =
                                   //     -1; // Unique temporary ID for the response
@@ -820,7 +707,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         id: -1,
                                         gptSessionId:
                                             selectedSessionId.toString(),
-                                        question: question,
+                                        question:question,
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
@@ -833,7 +720,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       GetPost(
                                           sessionId:
                                               selectedSessionId.toString(),
-                                          question: question,
+                                          question: question==""?'Analyse Image':question,
                                           imageUrl1:
                                               selectedImageFiles.first.path ??
                                                   '',
@@ -1186,7 +1073,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                 ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
-                  text: 'MRI scan evaluation',
+                  text: 'MRI evaluation',
                   onTap: () async {
                     Navigator.pop(context);
                     imageType = 'MRI Scan';
@@ -1401,8 +1288,7 @@ class ChatBubble extends StatelessWidget {
                                       children: [
                                         MarkdownBlock(
                                             data: text,
-                                            config:
-                                                MarkdownConfig(configs: [])),
+                                            config: MarkdownConfig(configs: [])),
                                         // Text(
                                         //   // fitContent: true,
                                         //   // selectable: true,

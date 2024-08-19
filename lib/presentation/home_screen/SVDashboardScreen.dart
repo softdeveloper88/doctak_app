@@ -48,8 +48,8 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
       // SVSearchFragment(
       //   backPress: () => setState(() => selectedIndex = 0),
       // ),
-      ChatGptWithImageScreen(isFromMainScreen: true,),
       SVProfileFragment(),
+      ChatGptWithImageScreen(isFromMainScreen: true,),
     ];
     super.initState();
   }
@@ -93,20 +93,21 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
             //   ).paddingTop(12),
             // ),
             BottomNavigationBarItem(
+              icon: _buildProfileAvatar(),
+              label: 'Profile',
+              activeIcon: _buildProfileAvatar(),
+            ),
+            BottomNavigationBarItem(
               icon: _buildAIImageAvatar(),
               label: 'Images',
               activeIcon: _buildAIImageAvatar(),
               // activeIcon: _buildProfileAvatar(),
-            ),  BottomNavigationBarItem(
-              icon: _buildProfileAvatar(),
-              label: 'Profile',
-              activeIcon: _buildProfileAvatar(),
             ),
           ],
           onTap: (val) {
             if (val == 2) {
               _fragments[val].launch(context);
-            }else if (val == 3) {
+            }else if (val == 4) {
               _fragments[val].launch(context);
             } else {
               setState(() => selectedIndex = val);
