@@ -809,8 +809,9 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     : const Icon(Icons.send,
                                         color: Colors.white),
                                 onPressed: () async {
+                                  if(selectedImageFiles.isEmpty)return;
                                   String question = textController.text.trim();
-                                  if (question.isEmpty) return;
+
                                   // String sessionId = selectedSessionId.toString();
                                   // var tempId =
                                   //     -1; // Unique temporary ID for the response
@@ -820,7 +821,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         id: -1,
                                         gptSessionId:
                                             selectedSessionId.toString(),
-                                        question: question,
+                                        question: question ==""?"analyse":question,
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
@@ -844,6 +845,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     );
                                     imageUploadBloc.imagefiles.clear();
                                     textController.clear();
+                                    selectedImageFiles=[];
                                     _uploadedFile = _selectedFile;
 
                                     _selectedFile = null;
