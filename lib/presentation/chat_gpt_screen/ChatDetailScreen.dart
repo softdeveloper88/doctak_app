@@ -242,17 +242,24 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                GestureDetector(
-                                  onTap:(){
-                                    if(chatWithAi=="New Session") {
+                                MaterialButton(
+                                  minWidth: 40.w,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    side: const BorderSide(
+                                        color: Colors.black, width: 1.0),
+                                  ),
+                                  color: Colors.lightBlue,
+                                  onPressed: () {
+                                    if (chatWithAi == "New Session") {
                                       try {
                                         BlocProvider.of<ChatGPTBloc>(context)
                                             .add(GetNewChat());
                                         // Navigator.of(context).pop();
 
                                         selectedSessionId =
-                                            BlocProvider
-                                                .of<ChatGPTBloc>(context)
+                                            BlocProvider.of<ChatGPTBloc>(
+                                                    context)
                                                 .newChatSessionId;
 
                                         // Session newSession = await createNewChatSession();
@@ -265,20 +272,20 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       }
                                     }
                                   },
-                                  child: SizedBox(
-                                    width: 40.w,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(chatWithAi=='New Session'?'Next Session':
-                                        chatWithAi.length > 50
-                                            ? '${chatWithAi.substring(0, 50)}...'
-                                            : chatWithAi,
-                                        style: boldTextStyle(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      chatWithAi == 'New Session'
+                                          ? 'Next Session'
+                                          : chatWithAi.length > 50
+                                              ? '${chatWithAi.substring(0, 50)}...'
+                                              : chatWithAi,
+                                      style: GoogleFonts.poppins(color: white),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ),
+
                                 IconButton(
                                   icon: isLoadingMessages
                                       ? Image.asset(

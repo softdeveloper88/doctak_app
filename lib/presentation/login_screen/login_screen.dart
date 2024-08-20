@@ -251,7 +251,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: SingleChildScrollView(
                       padding: EdgeInsets.only(
                           bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: Form(
+                      child:AutofillGroup(
+    child:Form(
                           key: _formKey,
                           child: Container(
                               width: double.maxFinite,
@@ -259,6 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   horizontal: 24, vertical: 39),
                               child: Column(children: [
                                 CustomTextFormField(
+                                     autofillHint: AutofillHints.username,
                                     focusNode: focusNode1,
                                     controller: emailController,
                                     hintText: translation(context)
@@ -292,6 +294,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     builder: (context, state) {
                                       print(state.isShowPassword);
                                       return CustomTextFormField(
+                                          autofillHint: AutofillHints.password,
+
                                           focusNode: focusNode2,
                                           controller: passwordController,
                                           hintText: translation(context)
@@ -435,7 +439,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(height: 29),
                                 _buildSocial(context),
                                 const SizedBox(height: 5)
-                              ]))))))),
+                              ])))))))),
     );
   }
 

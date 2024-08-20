@@ -18,7 +18,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50],
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),

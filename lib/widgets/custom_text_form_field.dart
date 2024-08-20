@@ -6,7 +6,7 @@ import 'package:nb_utils/nb_utils.dart';
 import '../presentation/home_screen/utils/SVColors.dart';
 
 class CustomTextFormField extends StatelessWidget {
-  const CustomTextFormField({
+   CustomTextFormField({
     Key? key,
     this.alignment,
     this.width,
@@ -34,6 +34,7 @@ class CustomTextFormField extends StatelessWidget {
     this.initialValue,
     this.onSaved,
     this.validator,
+    this.autofillHint,
   }) : super(
           key: key,
         );
@@ -84,6 +85,7 @@ class CustomTextFormField extends StatelessWidget {
   final Function? onTap;
   final Function(String)? onSaved;
   final String? initialValue;
+  String? autofillHint;
 
   final FormFieldValidator<String>? validator;
 
@@ -100,6 +102,7 @@ class CustomTextFormField extends StatelessWidget {
   Widget textFormFieldWidget(BuildContext context) => SizedBox(
         width: width ?? double.maxFinite,
         child: TextFormField(
+          autofillHints:[autofillHint??''],
           readOnly: isReadOnly ?? false,
           scrollPadding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),

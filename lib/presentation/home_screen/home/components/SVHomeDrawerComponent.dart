@@ -183,7 +183,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                     leading: Image.asset(e.image ?? "",
                         height: 22,
                         width: 22,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                         color: Colors.white),
                     onTap: () {
                       selectedIndex = index;

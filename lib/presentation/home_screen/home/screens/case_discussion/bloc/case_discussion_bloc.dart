@@ -185,7 +185,7 @@ class CaseDiscussionBloc
         likedByUser: null,
         createdAt: response.comment?.createdAt,
         name: AppData.name,
-        profilePic: AppData.profile_pic,
+        profilePic: "${AppData.imageUrl}${AppData.profile_pic}",
       ));
 
       emit(PaginationLoadedState());

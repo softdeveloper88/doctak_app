@@ -249,42 +249,44 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(
-                                  width: 40.w,
-                                  child: InkWell(
-                                    onTap: (){
+                                MaterialButton(
+                                  minWidth: 40.w,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    side: const BorderSide(color: Colors.black, width: 1.0),
+                                  ),
+                                  color: Colors.lightBlue,
+                                  onPressed: (){
+                                    if(chatWithAi=="New Session") {
+                                      isOneTimeImageUploaded=false;
+                                      try {
+                                        BlocProvider.of<ChatGPTBloc>(context)
+                                            .add(GetNewChat());
+                                        // Navigator.of(context).pop();
 
-                                      if(chatWithAi=="New Session") {
-                                        isOneTimeImageUploaded=false;
-                                        try {
-                                          BlocProvider.of<ChatGPTBloc>(context)
-                                              .add(GetNewChat());
-                                          // Navigator.of(context).pop();
+                                        selectedSessionId =
+                                            BlocProvider
+                                                .of<ChatGPTBloc>(context)
+                                                .newChatSessionId;
 
-                                          selectedSessionId =
-                                              BlocProvider
-                                                  .of<ChatGPTBloc>(context)
-                                                  .newChatSessionId;
-
-                                          // Session newSession = await createNewChatSession();
-                                          // setState(() {
-                                          //   futureSessions = Future(() =>
-                                          //       [newSession, ...(snapshot.data ?? [])]);
-                                          // });
-                                        } catch (e) {
-                                          print(e);
-                                        }
+                                        // Session newSession = await createNewChatSession();
+                                        // setState(() {
+                                        //   futureSessions = Future(() =>
+                                        //       [newSession, ...(snapshot.data ?? [])]);
+                                        // });
+                                      } catch (e) {
+                                        print(e);
                                       }
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(chatWithAi=='New Session'?'Next Session':
-                                        chatWithAi.length > 50
-                                            ? '${chatWithAi.substring(0, 50)}...'
-                                            : chatWithAi,
-                                        style: boldTextStyle(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(chatWithAi=='New Session'?'Next Image':
+                                      chatWithAi.length > 50
+                                          ? '${chatWithAi.substring(0, 50)}...'
+                                          : chatWithAi,
+                                      style: GoogleFonts.poppins(color: white),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ),
@@ -429,9 +431,9 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                   text: message.question ?? '',
                                   isUserMessage: true,
                                   imageUrl1:
-                                      File(selectedImageFiles.first.path ?? ''),
-                                  imageUrl2: selectedImageFiles.length == 2
-                                      ? File(selectedImageFiles.last.path ?? '')
+                                  selectedImageFiles.isNotEmpty?  File(selectedImageFiles.first.path ?? ''):null,
+                                  imageUrl2: selectedImageFiles.isNotEmpty?  selectedImageFiles.length == 2
+                                      ? File(selectedImageFiles.last.path ?? ''):null
                                       : null,
                                   responseImageUrl1: message.imageUrl ?? '',
                                   responseImageUrl2: message.imageUrl ?? '',
@@ -440,9 +442,10 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                   text: message.response ?? "",
                                   isUserMessage: false,
                                   imageUrl1:
-                                      File(selectedImageFiles.first.path ?? ''),
-                                  imageUrl2:
-                                      File(selectedImageFiles.last.path ?? ''),
+                                  selectedImageFiles.isNotEmpty?  File(selectedImageFiles.first.path ?? ''):null,
+                                  imageUrl2: selectedImageFiles.isNotEmpty?  selectedImageFiles.length == 2
+                                      ? File(selectedImageFiles.last.path ?? ''):null
+                                      : null,
                                   responseImageUrl1: message.imageUrl ?? '',
                                   responseImageUrl2: message.imageUrl ?? '',
                                   onTapReginarate: () {
@@ -666,7 +669,8 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                 maxLines: null,
                                 // Allows for unlimited lines
                                 decoration: const InputDecoration(
-                                  hintText: 'Clinical Summary(e.g age, gender, medical history)',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  hintText: 'Clinical Summary e.g age, gender, medical history',
                                   border: InputBorder.none,
                                 ),
                               ),
@@ -958,8 +962,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(16.0),
-          child: MultipleImageUploadWidget(imageUploadBloc,
-              imageLimit: imageLimit, (imageFiles) {
+          child: MultipleImageUploadWidget(imageType: imageType,imageUploadBloc,imageLimit: imageLimit, (imageFiles) {
             selectedImageFiles = imageFiles;
             print(selectedImageFiles);
             setState(() {});
@@ -1409,7 +1412,7 @@ class ChatBubble extends StatelessWidget {
                                                           context,
                                                       Object exception,
                                                       StackTrace? stackTrace) {
-                                                    return SizedBox();
+                                                    return const SizedBox();
                                                   },
                                                 )
                                               : const SizedBox()),
@@ -1434,7 +1437,7 @@ class ChatBubble extends StatelessWidget {
                                                           context,
                                                       Object exception,
                                                       StackTrace? stackTrace) {
-                                                    return SizedBox();
+                                                    return const SizedBox();
                                                   },
                                                 )
                                               : const SizedBox()),
@@ -1449,7 +1452,7 @@ class ChatBubble extends StatelessWidget {
                                 context,
                                     Object exception,
                                     StackTrace? stackTrace) {
-                                  return SizedBox();
+                                  return const SizedBox();
                                 },),
                               Text(text,
                                   style: const TextStyle(color: Colors.white)),

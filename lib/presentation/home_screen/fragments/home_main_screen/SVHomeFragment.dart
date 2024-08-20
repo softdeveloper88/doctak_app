@@ -87,19 +87,19 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
           actions: [
-            IconButton(
-              icon: Image.asset(
-                'assets/images/docktak_ai_light.png',
-                width: 30,
-                height: 30,
-                fit: BoxFit.contain,
-                // color: context.iconColor,
-              ),
-              onPressed: () {
-                ChatDetailScreen(isFromMainScreen: true).launch(context);
-
-              },
-            ),
+            // IconButton(
+            //   icon: Image.asset(
+            //     'assets/images/docktak_ai_light.png',
+            //     width: 30,
+            //     height: 30,
+            //     fit: BoxFit.contain,
+            //     // color: context.iconColor,
+            //   ),
+            //   onPressed: () {
+            //     ChatDetailScreen(isFromMainScreen: true).launch(context);
+            //
+            //   },
+            // ),
             // MaterialButton(
             //   textColor: Colors.black,
             //   // shapeBorder: RoundedRectangleBorder(borderRadius: radius(4),side: BorderSide()),

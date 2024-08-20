@@ -54,7 +54,7 @@ class Comments {
     likedByUser = json['liked_by_user'];
     actionType = json['action_type'];
   }
-  String? id;
+  dynamic id;
   String? comment;
   int? likes;
   int? dislikes;

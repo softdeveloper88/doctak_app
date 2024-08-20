@@ -19,9 +19,10 @@ class MultipleImageUploadWidget extends StatefulWidget {
   ImageUploadBloc imageUploadBloc;
   Function(List<XFile>) onTap;
   int imageLimit;
+  String? imageType;
 
   MultipleImageUploadWidget(this.imageUploadBloc, this.onTap,
-      {this.imageLimit = 0, super.key});
+      {this.imageType,this.imageLimit = 0, super.key});
 
   @override
   State<MultipleImageUploadWidget> createState() =>
@@ -221,10 +222,15 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if(widget.imageLimit==2)const Text("Please upload one or two of the most relevant images for analysis."),
+                if(widget.imageType=="CT Scan" || widget.imageType=="MRI Scan" || widget.imageType=="Mammography")  Text("Please upload one or two of the most relevant images for analysis.",style: GoogleFonts.poppins(color: Colors.black87,fontWeight: FontWeight.bold),),
                 const SizedBox(height: 8),
                 Divider(color: Colors.grey[300]),
                 MaterialButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    side: BorderSide(color: Colors.black, width: 1.0),
+                  ),
+                  color: Colors.lightBlue,
                   onPressed: () {
                     if (widget.imageLimit == 0) {
                       openImages();
@@ -234,27 +240,25 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                       }
                     }
                   },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[100], // Light background color
-                      borderRadius: BorderRadius.circular(8),
-
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.image_outlined,
                           size: 32,
-                          color: svGetBodyColor(),
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          'From Gallery',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w500,
-                            color: svGetBodyColor(),
-                            fontSize: kDefaultFontSize,
+                        Expanded(
+                          child: Text(
+                            'From Gallery',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                              fontSize: kDefaultFontSize,
+                            ),
                           ),
                         ),
                       ],
@@ -263,6 +267,11 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 ),
                 const SizedBox(height: 8),
                 MaterialButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    side: BorderSide(color: Colors.black, width: 1.0),
+                  ),
+                  color: Colors.lightBlue,
                   onPressed: () {
                     if (widget.imageLimit == 0) {
                       openCamera();
@@ -271,28 +280,27 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                     }
                   },
                   // borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[100], // Light background color
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
                         Image.asset(
                           'images/socialv/icons/ic_CameraPost.png',
-                          color: svGetBodyColor(),
+                          color: Colors.white,
                           height: 32,
                           width: 32,
                           fit: BoxFit.cover,
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          'Take Picture',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w500,
-                            color: svGetBodyColor(),
-                            fontSize: kDefaultFontSize,
+                        Expanded(
+                          child: Text(
+                            'Take Picture',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                              fontSize: kDefaultFontSize,
+                            ),
                           ),
                         ),
                       ],
