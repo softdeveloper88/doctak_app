@@ -183,6 +183,7 @@ class CaseDiscussionBloc
         comment: response.comment?.comment,
         likes: 0,
         likedByUser: null,
+        userId: AppData.logInUserId,
         createdAt: response.comment?.createdAt,
         name: AppData.name,
         profilePic: "${AppData.imageUrl}${AppData.profile_pic}",
@@ -235,8 +236,14 @@ class CaseDiscussionBloc
       }
       else if(event.type=='case_comment' && event.actionType=='likes'){
        var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
-       caseComments.comments![index??0].likes=(caseComments.comments![index??0].likes??0)+1;
-
+       if(caseComments.comments![index??0].isLike==null || caseComments.comments![index??0].isLike==0 ||caseComments.comments![index??0].isLike==2) {
+         caseComments.comments![index ?? 0].likes = (caseComments.comments![index ?? 0].likes ?? 0) + 1;
+         if( (caseComments.comments![index ?? 0].dislikes ?? 0)>0) {
+           caseComments.comments![index ?? 0].dislikes =
+               (caseComments.comments![index ?? 0].dislikes ?? 0) - 1;
+         }
+         caseComments.comments![index??0].isLike=1;
+       }
          // caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes??0+1,
          //     likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
          //     id:caseComments.comments?[index??0].id,
@@ -248,8 +255,15 @@ class CaseDiscussionBloc
       }
       else if(event.type=='case_comment' && event.actionType=='dislikes'){
        var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
-       caseComments.comments![index??0].dislikes= (caseComments.comments![index??0].dislikes??0)+1;
-        // caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes==0?0:caseComments.comments?[index??0].likes??0-1,
+       print(caseComments.comments![index??0].isLike);
+       if(caseComments.comments![index??0].isLike==null||caseComments.comments![index??0].isLike==0 ||caseComments.comments![index??0].isLike==1) {
+         if( (caseComments.comments![index ?? 0].likes ?? 0)>0) {
+           caseComments.comments![index ?? 0].likes =
+               (caseComments.comments![index ?? 0].likes ?? 0) - 1;
+         }
+         caseComments.comments![index ?? 0].dislikes = (caseComments.comments![index ?? 0].dislikes ?? 0) + 1;
+         caseComments.comments![index??0].isLike=2;
+       }   // caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes==0?0:caseComments.comments?[index??0].likes??0-1,
          //     likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
          //     id:caseComments.comments?[index??0].id,
          //     comment: caseComments.comments?[index??0].comment,

@@ -794,89 +794,99 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  child: CachedNetworkImage(
-                    imageUrl:
-                        "${AppData.imageUrl}${caseDiscussList.profilePic!.validate()}",
-                    height: 50,
-                    width: 50,
-                    fit: BoxFit.cover,
-                  ).cornerRadiusWithClipRRect(20),
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${caseDiscussList.name}',
-                      style: GoogleFonts.roboto(
-                        fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CaseDiscussDetailsScreen(caseDiscussList, caseDiscussionBloc),
+          ),
+        );
+      },
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          "${AppData.imageUrl}${caseDiscussList.profilePic!.validate()}",
+                      height: 50,
+                      width: 50,
+                      fit: BoxFit.cover,
+                    ).cornerRadiusWithClipRRect(20),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${caseDiscussList.name}',
+                        style: GoogleFonts.roboto(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      caseDiscussList.createdAt.toString(),
-                      style: GoogleFonts.roboto(
-                        color: Colors.grey,
+                      const SizedBox(height: 4),
+                      Text(
+                        caseDiscussList.createdAt.toString(),
+                        style: GoogleFonts.roboto(
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '${caseDiscussList.title}',
-              style: GoogleFonts.roboto(),
-            ),
-            const SizedBox(height: 16),
-            Column(
-              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CaseDiscussDetailsScreen(caseDiscussList, caseDiscussionBloc),
-                      ),
-                    );
-                    // AddCaseDiscussScreen().launch(context);
-                  },
-                  child: const Text('View details'),
-                ),
-                const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(onPressed: (){
-                      caseDiscussionBloc.add(CaseDiscussEvent(caseId: caseDiscussList.caseId.toString(),type: 'case',actionType: 'like'));
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${caseDiscussList.title}',
+                style: GoogleFonts.roboto(),
+              ),
+              const SizedBox(height: 16),
+              Column(
+                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CaseDiscussDetailsScreen(caseDiscussList, caseDiscussionBloc),
+                        ),
+                      );
+                      // AddCaseDiscussScreen().launch(context);
+                    },
+                    child: const Text('View details'),
+                  ),
+                  const Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(onPressed: (){
+                        caseDiscussionBloc.add(CaseDiscussEvent(caseId: caseDiscussList.caseId.toString(),type: 'case',actionType: 'like'));
 
-                    },icon:Icon(Icons.thumb_up_alt_outlined)),
-                    SizedBox(width: 4),
-                    Text('${caseDiscussList.likes} Likes'),
-                    SizedBox(width: 16),
-                    Icon(Icons.comment_outlined),
-                    SizedBox(width: 4),
-                    Text('${caseDiscussList.comments} Comments'),
-                    SizedBox(width: 16),
-                    Text('${caseDiscussList.views} Views'),
-                  ],
-                ),
-              ],
-            ),
-          ],
+                      },icon:Icon(Icons.thumb_up_alt_outlined)),
+                      SizedBox(width: 4),
+                      Text('${caseDiscussList.likes} Likes'),
+                      SizedBox(width: 16),
+                      Icon(Icons.comment_outlined),
+                      SizedBox(width: 4),
+                      Text('${caseDiscussList.comments} Comments'),
+                      SizedBox(width: 16),
+                      Text('${caseDiscussList.views} Views'),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

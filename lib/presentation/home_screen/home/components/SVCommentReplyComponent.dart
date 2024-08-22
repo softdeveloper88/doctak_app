@@ -50,17 +50,25 @@ class SVCommentReplyComponent extends StatelessWidget {
                       child: AppTextField(
                         focus: focusNode,
                         minLines: 1,
-                        textInputAction: TextInputAction.newline,
+                        // textInputAction: TextInputAction.done,
                         controller: commentController,
                         textFieldType: TextFieldType.MULTILINE,
                         decoration: InputDecoration(
                           hintText: 'Write a comment',
-                          hintStyle:
-                              secondaryTextStyle(color: svGetBodyColor()),
+                          hintStyle: secondaryTextStyle(color: svGetBodyColor()),
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
                         ),
+                        onFieldSubmitted: (value) {
+                          // Handle done action here if needed
+                          if (commentController.text.isNotEmpty) {
+                            focusNode.unfocus();
+
+                            onPostComment(commentController.text);
+                            commentController.text = '';
+                          }// Unfocus the text field to dismiss the keyboard
+                        },
                       ),
                     ),
                   ],
@@ -69,9 +77,9 @@ class SVCommentReplyComponent extends StatelessWidget {
               TextButton(
                   onPressed: () {
                     if (commentController.text.isNotEmpty) {
+                      focusNode.unfocus();
                       onPostComment(commentController.text);
                       commentController.text = '';
-                      focusNode.unfocus();
 
                     }
                   },

@@ -9,7 +9,7 @@ const SVAppBorderColor = Color(0xFFD9DFEB);
 const buttonUnSelectColor = Color(0xFFF2F2F2);
 // Tertiary
 
-const SVBodyWhite = Color(0xFF6F7F92);
+const SVBodyWhite = Color(0xFF000000);
 const SVCardGray = Color(0xFFF6F6F6);
 const SVBodyDark = Color(0xFFF5F5F5);
 const SVDividerColor = Color(0xFFE1E5EF);

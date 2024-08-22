@@ -42,6 +42,7 @@ class Comments {
       this.name, 
       this.profilePic, 
       this.likedByUser, 
+      this.isLike=0,
       this.actionType,});
 
   Comments.fromJson(dynamic json) {
@@ -65,6 +66,7 @@ class Comments {
   String? name;
   String? profilePic;
   int? likedByUser;
+  int? isLike;
   dynamic actionType;
 
   Map<String, dynamic> toJson() {

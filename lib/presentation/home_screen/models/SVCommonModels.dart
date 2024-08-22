@@ -12,7 +12,7 @@ class SVDrawerModel {
 List<SVDrawerModel> getDrawerOptions(BuildContext context) {
   List<SVDrawerModel> list = [];
   list.add(SVDrawerModel(image: 'assets/icon/ic_guidlines.png', title: "About Us"));
-  list.add(SVDrawerModel(image: 'assets/images/docktak_ai_dark.png', title: 'Artificial Intelligence'));
+  list.add(SVDrawerModel(image: 'assets/images/docktak_ai_dark.png', title: 'Medical AI'));
   list.add(SVDrawerModel(image: 'assets/icon/ic_jobs.png', title: translation(context).lbl_jobs));
   list.add(SVDrawerModel(image: 'assets/icon/ic_drugs.png', title: translation(context).lbl_drug_list));
   list.add(SVDrawerModel(image: 'assets/icon/ic_conference.png', title: 'Case Discussion'));
@@ -26,7 +26,7 @@ List<SVDrawerModel> getDrawerOptions(BuildContext context) {
   list.add(SVDrawerModel(image: 'assets/icon/ic_world_news.png', title: translation(context).lbl_world_news));
   list.add(SVDrawerModel(image: 'assets/icon/ic_discount.png', title: translation(context).lbl_discounts));
   list.add(SVDrawerModel(image: 'assets/icon/ic_suggestion.png', title: translation(context).lbl_suggestions));
-  list.add(SVDrawerModel(image: 'assets/icon/ic_setting.png', title: 'App Setting'));
+  list.add(SVDrawerModel(image: 'assets/icon/ic_setting.png', title: 'App Settings'));
   // list.add(SVDrawerModel(image: 'assets/icon/ic_Send.png', title: translation(context).lbl_share_app));
   list.add(SVDrawerModel(image: 'assets/images/privacy.png', title: "Privacy Policy"));
   list.add(SVDrawerModel(image: 'assets/icon/ic_logout.png', title: translation(context).lbl_logout));

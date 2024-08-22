@@ -254,195 +254,197 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: SingleChildScrollView(
                       padding: EdgeInsets.only(
                           bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: Form(
-                          key: _formKey,
-                          child: Container(
-                              width: double.maxFinite,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 39),
-                              child: Column(children: [
-                                CustomTextFormField(
-                                    autofillHint: AutofillHints.username,
-                                    focusNode: focusNode1,
-                                    controller: emailController,
-                                    hintText: translation(context)
-                                        .msg_enter_your_email,
-                                    textInputType: TextInputType.emailAddress,
-                                    prefix: Container(
-                                        margin: const EdgeInsets.fromLTRB(
-                                            24, 16, 16, 16),
-                                        child: CustomImageView(
-                                            color: Colors.blueGrey,
-                                            imagePath:
-                                                ImageConstant.imgCheckmark,
-                                            height: 24,
-                                            width: 24)),
-                                    prefixConstraints:
-                                        const BoxConstraints(maxHeight: 56),
-                                    validator: (value) {
-                                      if (value == null ||
-                                          (!isValidEmail(value,
-                                              isRequired: true))) {
-                                        return translation(context)
-                                            .err_msg_please_enter_valid_email;
-                                      }
-                                      return null;
-                                    },
-                                    contentPadding: const EdgeInsets.only(
-                                        top: 18, right: 30, bottom: 18)),
-                                const SizedBox(height: 16),
-                                BlocBuilder<LoginBloc, LoginState>(
-                                    bloc: loginBloc,
-                                    builder: (context, state) {
-                                      print(state.isShowPassword);
-                                      return CustomTextFormField(
-                                          autofillHint: AutofillHints.password,
-                                          focusNode: focusNode2,
-                                          controller: passwordController,
-                                          hintText: translation(context)
-                                              .msg_enter_new_password,
-                                          textInputAction: TextInputAction.done,
-                                          textInputType:
-                                              TextInputType.visiblePassword,
-                                          prefix: Container(
-                                              margin: const EdgeInsets.fromLTRB(
-                                                  24, 16, 16, 16),
-                                              child: CustomImageView(
-                                                  color: Colors.blueGrey,
-                                                  imagePath:
-                                                      ImageConstant.imgLocation,
-                                                  height: 24,
-                                                  width: 24)),
-                                          prefixConstraints:
-                                              const BoxConstraints(
-                                                  maxHeight: 56),
-                                          suffix: InkWell(
-                                              onTap: () {
-                                                loginBloc.add(
-                                                    ChangePasswordVisibilityEvent(
-                                                        value: !state
-                                                            .isShowPassword));
-                                              },
-                                              child: Container(
-                                                  margin:
-                                                      const EdgeInsets.fromLTRB(
-                                                          30, 16, 24, 16),
-                                                  child: state.isShowPassword
-                                                      ? const Icon(
-                                                          Icons.visibility_off,
-                                                          color: Colors.black54,
-                                                          size: 24,
-                                                        )
-                                                      : const Icon(
-                                                          Icons.visibility,
-                                                          color: Colors.black54,
-                                                          size: 24,
-                                                        ))),
-                                          suffixConstraints:
-                                              const BoxConstraints(
-                                                  maxHeight: 56),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                (isValidPassword(value,
-                                                    isRequired: true))) {
-                                              return translation(context)
-                                                  .err_msg_please_enter_valid_password;
-                                            }
-                                            return null;
-                                          },
-                                          obscureText: state.isShowPassword);
-                                    }),
-                                const SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: _rememberMe,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _rememberMe = value!;
-                                        });
+                      child: AutofillGroup(
+                        child: Form(
+                            key: _formKey,
+                            child: Container(
+                                width: double.maxFinite,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 39),
+                                child: Column(children: [
+                                  CustomTextFormField(
+                                      autofillHint: AutofillHints.username,
+                                      focusNode: focusNode1,
+                                      controller: emailController,
+                                      hintText: translation(context)
+                                          .msg_enter_your_email,
+                                      textInputType: TextInputType.emailAddress,
+                                      prefix: Container(
+                                          margin: const EdgeInsets.fromLTRB(
+                                              24, 16, 16, 16),
+                                          child: CustomImageView(
+                                              color: Colors.blueGrey,
+                                              imagePath:
+                                                  ImageConstant.imgCheckmark,
+                                              height: 24,
+                                              width: 24)),
+                                      prefixConstraints:
+                                          const BoxConstraints(maxHeight: 56),
+                                      validator: (value) {
+                                        if (value == null ||
+                                            (!isValidEmail(value,
+                                                isRequired: true))) {
+                                          return translation(context)
+                                              .err_msg_please_enter_valid_email;
+                                        }
+                                        return null;
                                       },
-                                    ),
-                                    const Text('Remember Me')
-                                  ],
-                                ),
-                                Align(
-                                    alignment: Alignment.centerRight,
-                                    child: GestureDetector(
-                                        onTap: () {
-                                          onTapTxtForgotPassword(context);
+                                      contentPadding: const EdgeInsets.only(
+                                          top: 18, right: 30, bottom: 18)),
+                                  const SizedBox(height: 16),
+                                  BlocBuilder<LoginBloc, LoginState>(
+                                      bloc: loginBloc,
+                                      builder: (context, state) {
+                                        print(state.isShowPassword);
+                                        return CustomTextFormField(
+                                            autofillHint: AutofillHints.password,
+                                            focusNode: focusNode2,
+                                            controller: passwordController,
+                                            hintText: translation(context)
+                                                .msg_enter_new_password,
+                                            textInputAction: TextInputAction.done,
+                                            textInputType:
+                                                TextInputType.visiblePassword,
+                                            prefix: Container(
+                                                margin: const EdgeInsets.fromLTRB(
+                                                    24, 16, 16, 16),
+                                                child: CustomImageView(
+                                                    color: Colors.blueGrey,
+                                                    imagePath:
+                                                        ImageConstant.imgLocation,
+                                                    height: 24,
+                                                    width: 24)),
+                                            prefixConstraints:
+                                                const BoxConstraints(
+                                                    maxHeight: 56),
+                                            suffix: InkWell(
+                                                onTap: () {
+                                                  loginBloc.add(
+                                                      ChangePasswordVisibilityEvent(
+                                                          value: !state
+                                                              .isShowPassword));
+                                                },
+                                                child: Container(
+                                                    margin:
+                                                        const EdgeInsets.fromLTRB(
+                                                            30, 16, 24, 16),
+                                                    child: state.isShowPassword
+                                                        ? const Icon(
+                                                            Icons.visibility_off,
+                                                            color: Colors.black54,
+                                                            size: 24,
+                                                          )
+                                                        : const Icon(
+                                                            Icons.visibility,
+                                                            color: Colors.black54,
+                                                            size: 24,
+                                                          ))),
+                                            suffixConstraints:
+                                                const BoxConstraints(
+                                                    maxHeight: 56),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  (isValidPassword(value,
+                                                      isRequired: true))) {
+                                                return translation(context)
+                                                    .err_msg_please_enter_valid_password;
+                                              }
+                                              return null;
+                                            },
+                                            obscureText: state.isShowPassword);
+                                      }),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Checkbox(
+                                        value: _rememberMe,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _rememberMe = value!;
+                                          });
                                         },
-                                        child: Text(
-                                            translation(context)
-                                                .msg_forgot_password,
-                                            style: CustomTextStyles
-                                                .titleSmallPrimary))),
-                                const SizedBox(height: 32),
-                                svAppButton(
-                                  context: context,
-                                  text: 'LOGIN',
-                                  onTap: () async {
-                                    SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
-                                    await prefs.setBool('acceptTerms', true);
-
-                                    if (_formKey.currentState!.validate()) {
-                                      _formKey.currentState!.save();
-                                    }
-                                    // TermsAndConditionScreen(accept: () async {
-                                    print('object');
-                                    await FirebaseMessaging.instance
-                                        .getToken()
-                                        .then((token) async {
-                                      loginBloc.add(
-                                        LoginButtonPressed(
-                                            username: emailController.text,
-                                            // replace with real input
-                                            password: passwordController.text,
-                                            rememberMe: _rememberMe,
-                                            deviceToken: token ?? ""
-                                            // replace with real input
-                                            ),
-                                      );
-                                    });
-                                    // },).launch(context, isNewTask: true);
-                                  },
-                                ),
-                                const SizedBox(height: 25),
-                                Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 48),
-                                        child: Row(children: [
-                                          Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 1),
-                                              child: Text(
-                                                  translation(context)
-                                                      .msg_don_t_have_an_account,
-                                                  style: CustomTextStyles
-                                                      .bodyMediumGray600)),
-                                          GestureDetector(
-                                              onTap: () {
-                                                onTapTxtSignUp(context);
-                                              },
-                                              child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 4),
-                                                  child: Text(
-                                                      translation(context)
-                                                          .lbl_sign_up,
-                                                      style: CustomTextStyles
-                                                          .titleSmallPrimarySemiBold)))
-                                        ]))),
-                                const SizedBox(height: 34),
-                                _buildORDivider(context),
-                                const SizedBox(height: 29),
-                                _buildSocial(context),
-                                const SizedBox(height: 5)
-                              ]))))))),
+                                      ),
+                                      const Text('Remember Me')
+                                    ],
+                                  ),
+                                  Align(
+                                      alignment: Alignment.centerRight,
+                                      child: GestureDetector(
+                                          onTap: () {
+                                            onTapTxtForgotPassword(context);
+                                          },
+                                          child: Text(
+                                              translation(context)
+                                                  .msg_forgot_password,
+                                              style: CustomTextStyles
+                                                  .titleSmallPrimary))),
+                                  const SizedBox(height: 32),
+                                  svAppButton(
+                                    context: context,
+                                    text: 'LOGIN',
+                                    onTap: () async {
+                                      SharedPreferences prefs =
+                                          await SharedPreferences.getInstance();
+                                      await prefs.setBool('acceptTerms', true);
+                        
+                                      if (_formKey.currentState!.validate()) {
+                                        _formKey.currentState!.save();
+                                      }
+                                      // TermsAndConditionScreen(accept: () async {
+                                      print('object');
+                                      await FirebaseMessaging.instance
+                                          .getToken()
+                                          .then((token) async {
+                                        loginBloc.add(
+                                          LoginButtonPressed(
+                                              username: emailController.text,
+                                              // replace with real input
+                                              password: passwordController.text,
+                                              rememberMe: _rememberMe,
+                                              deviceToken: token ?? ""
+                                              // replace with real input
+                                              ),
+                                        );
+                                      });
+                                      // },).launch(context, isNewTask: true);
+                                    },
+                                  ),
+                                  const SizedBox(height: 25),
+                                  Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 48),
+                                          child: Row(children: [
+                                            Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 1),
+                                                child: Text(
+                                                    translation(context)
+                                                        .msg_don_t_have_an_account,
+                                                    style: CustomTextStyles
+                                                        .bodyMediumGray600)),
+                                            GestureDetector(
+                                                onTap: () {
+                                                  onTapTxtSignUp(context);
+                                                },
+                                                child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 4),
+                                                    child: Text(
+                                                        translation(context)
+                                                            .lbl_sign_up,
+                                                        style: CustomTextStyles
+                                                            .titleSmallPrimarySemiBold)))
+                                          ]))),
+                                  const SizedBox(height: 34),
+                                  _buildORDivider(context),
+                                  const SizedBox(height: 29),
+                                  _buildSocial(context),
+                                  const SizedBox(height: 5)
+                                ]))),
+                      ))))),
     );
   }
 

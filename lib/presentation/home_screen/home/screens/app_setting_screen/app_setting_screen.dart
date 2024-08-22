@@ -1,10 +1,13 @@
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
+import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../utils/SVCommon.dart';
 
@@ -22,7 +25,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('App Setting', style: boldTextStyle(size: 20)),
+        title: Text('App settings', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         actions: const [
@@ -99,17 +102,20 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                 },
               ),
             ),
-            // const Divider(color: Colors.grey,),
-            // const ListTile(
-            //   title: Text(
-            //     'Reset Password',
-            //     style: TextStyle(
-            //       fontSize: 18.0,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            //
-            // ),
+            const Divider(color: Colors.grey,),
+            ListTile(
+              trailing: const Icon(Icons.delete,color: Colors.red,),
+              title: const Text(
+                'Delete Account',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: (){
+                deleteAccount(context);
+              },
+            ),
             const Divider(
               color: Colors.grey,
             ),
@@ -118,5 +124,72 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
         ),
       ),
     );
+  }
+  deleteAccount(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete your Account?'),
+          content: const Text(
+              '''If you select Delete we will delete your account on our server.
+
+Your app data will also be deleted and you won't be able to retrieve it.
+
+Since this is a security-sensitive operation, you eventually are asked to login before your account can be deleted.'''),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+                // color: Colors.red,
+              ),
+              onPressed: () async {
+                var result = await deleteUserAccount();
+                if (result) {
+                  AppSharedPreferences().clearSharedPreferencesData(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                } else {}
+
+                // Call the delete account function
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> deleteUserAccount() async {
+    final apiUrl = Uri.parse('${AppData.remoteUrl}/delete-account');
+    try {
+      final response = await http.get(
+        apiUrl,
+        headers: <String, String>{
+          'Authorization': 'Bearer ${AppData.userToken!}',
+        },
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        // Handle successful account deletion
+        return true;
+      } else {
+        return false;
+        throw Exception('Failed to delete account');
+      }
+    } catch (error) {
+      return false;
+      // throw Exception('Error: $error');
+    }
+    return false;
   }
 }

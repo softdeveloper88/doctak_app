@@ -31,9 +31,9 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    print(widget.caseDiscussList.caseId.toString());
     commentController = TextEditingController();
-    widget.caseDiscussionBloc.add(
-      CaseCommentPageEvent(caseId: widget.caseDiscussList.caseId.toString()),
+    widget.caseDiscussionBloc.add(CaseCommentPageEvent(caseId:widget.caseDiscussList.caseId.toString()),
     );
   }
 
@@ -59,110 +59,109 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
           },
         ),
       ),
-      body: Column(
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        child: CachedNetworkImage(
-                          imageUrl:
-                          "${AppData.imageUrl}${widget.caseDiscussList.profilePic!.validate()}",
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.cover,
-                        ).cornerRadiusWithClipRRect(20),
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${widget.caseDiscussList.name}',
-                            style: GoogleFonts.roboto(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.caseDiscussList.createdAt
-                                .toString(),
-                            style: GoogleFonts.roboto(
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '${widget.caseDiscussList.title}',
-                    style: GoogleFonts.roboto(),
-                  ),
-                  const SizedBox(height: 16),
-                  Column(
-                    children: [
-                      const Divider(
-                        color: Colors.grey,
-                        thickness: 1,
-                      ),
-                      Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(onPressed: (){
-                            widget.caseDiscussionBloc.add(CaseDiscussEvent(caseId: widget.caseDiscussList.caseId.toString(),type: 'case',actionType: 'likes'));
-
-                          },icon:Icon(Icons.thumb_up_alt_outlined)),
-                          const SizedBox(width: 4),
-                          Text(
-                              '${widget.caseDiscussList.likes} Likes'),
-                          const SizedBox(width: 16),
-                          const Icon(Icons.comment_outlined),
-                          const SizedBox(width: 4),
-                          Text(
-                              '${widget.caseDiscussList.comments} Comments'),
-                          const SizedBox(width: 16),
-                          Text(
-                              '${widget.caseDiscussList.views} Views'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+      body: BlocConsumer<CaseDiscussionBloc, CaseDiscussionState>(
+        bloc: widget.caseDiscussionBloc,
+        listener: (BuildContext context, CaseDiscussionState state) {
+          if (state is DataError) {
+            // Handle error state
+          }
+        },
+        builder: (context, state) {
+          if (state is PaginationLoadingState) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: svGetBodyColor(),
               ),
-            ),
-          ),
-          BlocConsumer<CaseDiscussionBloc, CaseDiscussionState>(
-            bloc: widget.caseDiscussionBloc,
-            listener: (BuildContext context, CaseDiscussionState state) {
-              if (state is DataError) {
-                // Handle error state
-              }
-            },
-            builder: (context, state) {
-              if (state is PaginationLoadingState) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: svGetBodyColor(),
+            );
+          } else if (state is PaginationLoadedState) {
+            print(state);
+            return Column(
+              children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              child: CachedNetworkImage(
+                                imageUrl:
+                                "${AppData.imageUrl}${widget.caseDiscussList.profilePic!.validate()}",
+                                height: 50,
+                                width: 50,
+                                fit: BoxFit.cover,
+                              ).cornerRadiusWithClipRRect(20),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${widget.caseDiscussList.name}',
+                                  style: GoogleFonts.roboto(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.caseDiscussList.createdAt
+                                      .toString(),
+                                  style: GoogleFonts.roboto(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '${widget.caseDiscussList.title}',
+                          style: GoogleFonts.roboto(),
+                        ),
+                        const SizedBox(height: 16),
+                        Column(
+                          children: [
+                            const Divider(
+                              color: Colors.grey,
+                              thickness: 1,
+                            ),
+                            Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(onPressed: (){
+                                  widget.caseDiscussionBloc.add(CaseDiscussEvent(caseId: widget.caseDiscussList.caseId.toString(),type: 'case',actionType: 'like'));
+
+                                },icon:Icon(Icons.thumb_up_alt_outlined)),
+                                const SizedBox(width: 4),
+                                Text(
+                                    '${widget.caseDiscussList.likes} Likes'),
+                                const SizedBox(width: 16),
+                                const Icon(Icons.comment_outlined),
+                                const SizedBox(width: 4),
+                                Text(
+                                    '${widget.caseDiscussList.comments} Comments'),
+                                const SizedBox(width: 16),
+                                Text(
+                                    '${widget.caseDiscussList.views} Views'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                );
-              } else if (state is PaginationLoadedState) {
-                print(state);
-                return widget.caseDiscussionBloc.caseComments.comments?.isEmpty ??
+                ),
+                widget.caseDiscussionBloc.caseComments.comments?.isEmpty ??
                     false
                     ? const Center(
                   child: Text('No View'),
                 )
-                    : Expanded(
-                      child: ListView.builder(
+                    : Expanded(child: ListView.builder(
                         padding: const EdgeInsets.only(bottom: 80.0),
                         itemCount: widget.caseDiscussionBloc
                             .caseComments.comments?.length,
@@ -301,14 +300,13 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                             ),
                           );
                         },
-                      ),
-                    );
-              } else {
-                return const Center(child: Text("No Comment Found"));
-              }
-            },
-          ),
-        ],
+                      ),),
+              ],
+            );
+          } else {
+            return const Center(child: Text("No Comment Found"));
+          }
+        },
       ),
       bottomSheet: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
