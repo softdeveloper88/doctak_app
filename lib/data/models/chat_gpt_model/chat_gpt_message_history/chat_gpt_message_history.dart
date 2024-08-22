@@ -43,7 +43,8 @@ class Messages {
     this.question,
     this.response,
     this.createdAt,
-    this.imageUrl,
+    this.imageUrl1,
+    this.imageUrl2,
     this.updatedAt,
   });
 
@@ -53,7 +54,8 @@ class Messages {
     question = json['question'];
     response = json['response'];
     createdAt = json['created_at'];
-    imageUrl = json['image_url'];
+    imageUrl1 = json['image_url'];
+    imageUrl2 = json['image_url2'];
     updatedAt = json['updated_at'];
   }
   int? id;
@@ -61,7 +63,8 @@ class Messages {
   String? question;
   String? response;
   String? createdAt;
-  String? imageUrl;
+  String? imageUrl1;
+  String? imageUrl2;
   String? updatedAt;
 
   Map<String, dynamic> toJson() {
@@ -71,7 +74,8 @@ class Messages {
     map['question'] = question;
     map['response'] = response;
     map['created_at'] = createdAt;
-    map['image_url'] = imageUrl;
+    map['image_url'] = imageUrl1;
+    map['image_url2'] = imageUrl2;
     map['updated_at'] = updatedAt;
     return map;
   }

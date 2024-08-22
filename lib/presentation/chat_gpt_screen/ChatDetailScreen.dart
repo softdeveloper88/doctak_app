@@ -53,6 +53,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isDeleteButtonClicked = false;
   bool isAlreadyAsk = true;
   bool isEmpty = false;
+  FocusNode focusNode=FocusNode();
 
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
@@ -573,13 +574,13 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   text: message.question ?? '',
                                   isUserMessage: true,
                                   imageUrl: _uploadedFile,
-                                  responseImageUrl: message.imageUrl ?? '',
+                                  responseImageUrl: message.imageUrl1 ?? '',
                                 ),
                                 ChatBubble(
                                   text: message.response ?? "",
                                   isUserMessage: false,
                                   imageUrl: _uploadedFile,
-                                  responseImageUrl: message.imageUrl ?? '',
+                                  responseImageUrl: message.imageUrl1 ?? '',
                                   onTapReginarate: () {
                                     String question = message.question ?? "";
                                     if (question.isEmpty) return;
@@ -592,7 +593,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                           gptSessionId:
                                               selectedSessionId.toString(),
                                           question: question,
-                                          imageUrl: message.imageUrl,
+                                          imageUrl1: message.imageUrl1,
                                           response: 'Generating response...',
                                           createdAt: DateTime.now().toString(),
                                           updatedAt: DateTime.now().toString());
@@ -791,6 +792,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 borderRadius: BorderRadius.circular(20.0),
                               ),
                               child: TextField(
+                                focusNode: focusNode,
                                 controller: textController,
                                 minLines: 1,
                                 // Minimum lines
@@ -826,6 +828,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     : const Icon(Icons.send,
                                         color: Colors.white),
                                 onPressed: () async {
+                                  focusNode.unfocus();
                                   String question = textController.text.trim();
                                   if (question.isEmpty) return;
                                   // String sessionId = selectedSessionId.toString();
@@ -840,7 +843,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl: _selectedFile?.path ?? '');
+                                        imageUrl1: _selectedFile?.path ?? '');
                                     state1.response1.messages!.add(myMessage);
                                     BlocProvider.of<ChatGPTBloc>(context).add(
                                       GetPost(

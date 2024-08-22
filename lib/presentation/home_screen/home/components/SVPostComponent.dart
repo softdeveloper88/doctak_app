@@ -163,8 +163,8 @@ class _SVPostComponentState extends State<SVPostComponent> {
                           )
                         : Column(
                             children: [
-                              if (index % 5 == 0 && index != 0)
-                                NativeAdWidget(),
+                              // if (index % 5 == 0 && index != 0)
+                                // NativeAdWidget(),
                               Container(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16),

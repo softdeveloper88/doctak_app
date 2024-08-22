@@ -59,7 +59,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   bool isAlreadyAsk = true;
   bool isEmpty = false;
   bool isOneTimeImageUploaded = false;
-
+  FocusNode focusNode=FocusNode();
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
     if (question.isEmpty) return;
@@ -205,6 +205,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         onTap: (session) {
                           chatWithAi = session.name!;
                           isEmptyPage = false;
+                          print(session.id);
                           selectedSessionId =
                               session.id; // Update the selected session
                           isLoadingMessages = true;
@@ -429,6 +430,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                           controller: _scrollController,
                           itemCount: state1.response1.messages!.length,
                           itemBuilder: (context, index) {
+                            print(state1.response1.messages![index].gptSessionId);
                             Messages message =
                             state1.response1.messages![index];
                             return Column(
@@ -446,8 +448,8 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       ? File(selectedImageFiles.last.path ?? '')
                                       : null
                                       : null,
-                                  responseImageUrl1: index!=0?'': message.imageUrl ?? '',
-                                  responseImageUrl2:  index!=0?'':message.imageUrl ?? '',
+                                  responseImageUrl1: index!=0?'': message.imageUrl1 ?? '',
+                                  responseImageUrl2:  index!=0?'':message.imageUrl2 ?? '',
                                 ),
                                 ChatBubble(
                                   text: message.response ?? "",
@@ -462,8 +464,8 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       ? File(selectedImageFiles.last.path ?? '')
                                       : null
                                       : null,
-                                  responseImageUrl1: message.imageUrl ?? '',
-                                  responseImageUrl2: message.imageUrl ?? '',
+                                  responseImageUrl1: message.imageUrl1 ?? '',
+                                  responseImageUrl2: message.imageUrl2 ?? '',
                                   onTapReginarate: () {
                                     String question = message.question ?? "";
                                     if (question.isEmpty) return;
@@ -476,7 +478,8 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                           gptSessionId:
                                           selectedSessionId.toString(),
                                           question: question,
-                                          imageUrl: message.imageUrl,
+                                          imageUrl1: message.imageUrl1,
+                                          imageUrl2: message.imageUrl2,
                                           response: 'Generating response...',
                                           createdAt: DateTime.now().toString(),
                                           updatedAt: DateTime.now().toString());
@@ -682,6 +685,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                 borderRadius: BorderRadius.circular(20.0),
                               ),
                               child: TextField(
+                                focusNode: focusNode,
                                 controller: textController,
                                 minLines: 1,
                                 // Minimum lines
@@ -718,6 +722,8 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     : const Icon(Icons.send,
                                     color: Colors.white),
                                 onPressed: () async {
+                                  focusNode.unfocus();
+
                                   print(selectedSessionId.toString());
                                   if (selectedImageFiles.isEmpty) {
                                     return;
@@ -740,7 +746,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl: '',);
+                                        imageUrl1: '',imageUrl2: '',);
                                       state1.response1.messages!.add(myMessage);
 
                                       BlocProvider.of<ChatGPTBloc>(context).add(
@@ -790,7 +796,9 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl: imageUploadBloc.imagefiles
+                                        imageUrl1: imageUploadBloc.imagefiles
+                                            .first.path ??
+                                            '', imageUrl2: imageUploadBloc.imagefiles
                                             .first.path ??
                                             '',);
                                       state1.response1.messages!.add(myMessage);

@@ -22,7 +22,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<LoadSearchPageEvent>(_onGetSearchPosts);
     on<PostLikeEvent>(_onPostLike);
     on<DeletePostEvent>(_onDeletePost);
-    on<AdsSettingEvent>(_adsSettingApi);
+    // on<AdsSettingEvent>(_adsSettingApi);
     on<PostCheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == postList.length - nextPageTrigger) {
         add(PostLoadPageEvent(page: pageNumber));
