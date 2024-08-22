@@ -17,6 +17,8 @@ class SVCommentReplyComponent extends StatelessWidget {
       {Key? key})
       : super(key: key);
   TextEditingController commentController = TextEditingController();
+  FocusNode focusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -46,6 +48,7 @@ class SVCommentReplyComponent extends StatelessWidget {
                     SizedBox(
                       width: context.width() * 0.6,
                       child: AppTextField(
+                        focus: focusNode,
                         minLines: 1,
                         textInputAction: TextInputAction.newline,
                         controller: commentController,
@@ -68,6 +71,8 @@ class SVCommentReplyComponent extends StatelessWidget {
                     if (commentController.text.isNotEmpty) {
                       onPostComment(commentController.text);
                       commentController.text = '';
+                      focusNode.unfocus();
+
                     }
                   },
                   child: Text('Post',

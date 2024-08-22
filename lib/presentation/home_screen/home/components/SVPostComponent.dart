@@ -701,7 +701,6 @@ class _SVPostComponentState extends State<SVPostComponent> {
     Color bgColor = PostUtils.HexColor(backgroundColor);
 
     Color textColor = PostUtils.contrastingTextColor(bgColor);
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return DecoratedBox(
@@ -719,18 +718,20 @@ class _SVPostComponentState extends State<SVPostComponent> {
               children: [
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
                   if (_isHtml(textToShow))
-                    HtmlWidget(textToShow, onTapUrl: (link) async {
-                      print('link $link');
-                      if (link.contains('doctak/jobs-detail')) {
-                        String jobID = Uri.parse(link).pathSegments.last;
-                        JobsDetailsScreen(
-                          jobId: jobID,
-                        ).launch(context);
-                      } else {
-                        PostUtils.launchURL(context, link);
-                      }
-                      return true;
-                    })
+                    Center(
+                      child: HtmlWidget(textToShow, onTapUrl: (link) async {
+                        print('link $link');
+                        if (link.contains('doctak/jobs-detail')) {
+                          String jobID = Uri.parse(link).pathSegments.last;
+                          JobsDetailsScreen(
+                            jobId: jobID,
+                          ).launch(context);
+                        } else {
+                          PostUtils.launchURL(context, link);
+                        }
+                        return true;
+                      }),
+                    )
                   else
                     Linkify(
                       onOpen: (link) {
@@ -755,15 +756,11 @@ class _SVPostComponentState extends State<SVPostComponent> {
                       linkStyle: const TextStyle(
                         color: Colors.blue,
                       ),
-                      textAlign: TextAlign.left,
+                      textAlign: TextAlign.center,
                     )
                 else if (_isHtml(textToShow))
                   Container(
-                    constraints: const BoxConstraints(
-                      minHeight: 200.0,
-                      minWidth:
-                          double.infinity, // Minimum height of the container
-                    ),
+                    constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
                     child: Center(
                       child: HtmlWidget(
                         textStyle: GoogleFonts.poppins(),
@@ -785,27 +782,32 @@ class _SVPostComponentState extends State<SVPostComponent> {
                     ),
                   )
                 else
-                  Linkify(
-                    onOpen: (link) {
-                      if (link.url.contains('doctak/jobs-detail')) {
-                        String jobID = Uri.parse(link.url).pathSegments.last;
-                        JobsDetailsScreen(
-                          jobId: jobID,
-                        ).launch(context);
-                      } else {
-                        PostUtils.launchURL(context, link.url);
-                      }
-                    },
-                    text: textToShow,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
+                    child: Center(
+                      child: Linkify(
+                        onOpen: (link) {
+                          if (link.url.contains('doctak/jobs-detail')) {
+                            String jobID = Uri.parse(link.url).pathSegments.last;
+                            JobsDetailsScreen(
+                              jobId: jobID,
+                            ).launch(context);
+                          } else {
+                            PostUtils.launchURL(context, link.url);
+                          }
+                        },
+                        text: textToShow,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        linkStyle: const TextStyle(
+                          color: Colors.blue,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
                     ),
-                    linkStyle: const TextStyle(
-                      color: Colors.blue,
-                    ),
-                    textAlign: TextAlign.left,
                   ),
                 if (words.length > 25)
                   TextButton(

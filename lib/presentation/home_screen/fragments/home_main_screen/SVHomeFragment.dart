@@ -43,11 +43,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   @override
   void initState() {
     // PusherService(AppData.logInUserId);
-    notificationBloc.add(
-      NotificationLoadPageEvent(
-        page: 1,
-      ),
-    );
+    notificationBloc.add(NotificationLoadPageEvent(page: 1,),);
     widget.homeBloc.add(PostLoadPageEvent(page: 1));
     // widget.homeBloc.add(AdsSettingEvent());
     super.initState();

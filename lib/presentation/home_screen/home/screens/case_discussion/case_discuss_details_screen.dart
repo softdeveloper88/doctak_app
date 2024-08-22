@@ -27,7 +27,7 @@ class CaseDiscussDetailsScreen extends StatefulWidget {
 
 class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
   late TextEditingController commentController;
-
+   FocusNode focusNode=FocusNode();
   @override
   void initState() {
     super.initState();
@@ -155,6 +155,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                   ),
                 );
               } else if (state is PaginationLoadedState) {
+                print(state);
                 return widget.caseDiscussionBloc.caseComments.comments?.isEmpty ??
                     false
                     ? const Center(
@@ -204,7 +205,9 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                                 ),
                                               ),
                                             ),
-                                            // if (widget.caseDiscussList.name == AppData.name)
+                                            if ( widget.caseDiscussionBloc
+                                                .caseComments
+                                                .comments?[index].userId == AppData.logInUserId)
                                             PopupMenuButton(
                                               itemBuilder: (context) {
                                                 return [
@@ -256,17 +259,23 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                         Row(
                                           children: [
                                             IconButton(
-                                              icon: TextIcon(
-                                                text:'${widget.caseDiscussionBloc
-                                            .caseComments
-                                            .comments?[index].likes}',
-                                                 suffix: const Icon(Icons.thumb_up_alt_outlined,
-                                                  color: Colors.blue)),
                                               onPressed: () {
+
+                                                // (widget.caseDiscussionBloc
+                                                //     .caseComments
+                                                //     .comments?[index].likes??0)+1;
+                                                //
                                                 widget.caseDiscussionBloc.add(CaseDiscussEvent(caseId: widget.caseDiscussionBloc.caseComments.comments![index].id.toString(),type: 'case_comment',actionType: 'likes'));
 
                                                 // Handle like action
                                               },
+
+                                              icon: TextIcon(
+                                                text:'${widget.caseDiscussionBloc
+                                            .caseComments
+                                            .comments?[index].likes??0}',
+                                                 suffix: const Icon(Icons.thumb_up_alt_outlined,
+                                                  color: Colors.blue)),
                                             ),
                                             IconButton(
                                               icon: TextIcon(
@@ -328,6 +337,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                         width: context.width() * 0.6,
                         child: AppTextField(
                           minLines: 1,
+                          focus: focusNode,
                           textInputAction: TextInputAction.newline,
                           controller: commentController,
                           textFieldType: TextFieldType.MULTILINE,
@@ -346,6 +356,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                 ),
                 TextButton(
                   onPressed: () {
+
                     if (commentController.text.isNotEmpty) {
                       widget.caseDiscussionBloc.add(
                         AddCaseCommentEvent(
@@ -353,6 +364,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                           comment: commentController.text.toString(),
                         ),
                       );
+                      focusNode.unfocus();
                       commentController.clear();
                     }
                   },

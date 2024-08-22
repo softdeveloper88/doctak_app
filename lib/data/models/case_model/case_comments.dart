@@ -37,7 +37,8 @@ class Comments {
       this.comment, 
       this.likes, 
       this.dislikes, 
-      this.createdAt, 
+      this.userId,
+      this.createdAt,
       this.name, 
       this.profilePic, 
       this.likedByUser, 
@@ -46,6 +47,7 @@ class Comments {
   Comments.fromJson(dynamic json) {
     id = json['id'];
     comment = json['comment'];
+    userId = json['user_id'];
     likes = json['likes'];
     dislikes = json['dislikes'];
     createdAt = json['created_at'];
@@ -56,6 +58,7 @@ class Comments {
   }
   dynamic id;
   String? comment;
+  String? userId;
   int? likes;
   int? dislikes;
   String? createdAt;
@@ -68,6 +71,7 @@ class Comments {
     final map = <String, dynamic>{};
     map['id'] = id;
     map['comment'] = comment;
+    map['user_id'] = userId;
     map['likes'] = likes;
     map['dislikes'] = dislikes;
     map['created_at'] = createdAt;

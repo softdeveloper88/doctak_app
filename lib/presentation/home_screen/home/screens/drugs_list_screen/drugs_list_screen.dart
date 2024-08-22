@@ -92,6 +92,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                     style: boldTextStyle(size: 20)))),
                         Expanded(
                           child: CustomDropdownField(
+                            isTextBold: true,
                             items: state.countriesModel.countries ?? [],
                             value: state
                                 .countriesModel.countries!.first.countryName,

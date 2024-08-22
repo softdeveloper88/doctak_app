@@ -25,7 +25,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(4),
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), // Added top margin
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8), // Added top margin
       // decoration: BoxDecoration(
       //   borderRadius: BorderRadius.circular(12),
       //

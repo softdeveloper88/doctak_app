@@ -251,7 +251,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   ),
                                   color: Colors.lightBlue,
                                   onPressed: () {
-                                    if (chatWithAi == "New Session") {
+                                    // if (chatWithAi == "New Session") {
                                       try {
                                         BlocProvider.of<ChatGPTBloc>(context)
                                             .add(GetNewChat());
@@ -270,16 +270,12 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       } catch (e) {
                                         print(e);
                                       }
-                                    }
+                                    // }
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      chatWithAi == 'New Session'
-                                          ? 'Next Session'
-                                          : chatWithAi.length > 50
-                                              ? '${chatWithAi.substring(0, 50)}...'
-                                              : chatWithAi,
+                                      'Next Session',
                                       style: GoogleFonts.poppins(color: white),
                                       overflow: TextOverflow.ellipsis,
                                     ),

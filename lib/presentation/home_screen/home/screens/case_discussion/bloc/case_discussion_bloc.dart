@@ -235,7 +235,8 @@ class CaseDiscussionBloc
       }
       else if(event.type=='case_comment' && event.actionType=='likes'){
        var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
-       (caseComments.comments![index??0].likes??0)+1;
+       caseComments.comments![index??0].likes=(caseComments.comments![index??0].likes??0)+1;
+
          // caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes??0+1,
          //     likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
          //     id:caseComments.comments?[index??0].id,
@@ -247,8 +248,7 @@ class CaseDiscussionBloc
       }
       else if(event.type=='case_comment' && event.actionType=='dislikes'){
        var index= caseComments.comments?.indexWhere((item)=>item.id.toString()==event.caseId);
-       (caseComments.comments![index??0].dislikes??0)+1;
-
+       caseComments.comments![index??0].dislikes= (caseComments.comments![index??0].dislikes??0)+1;
         // caseComments.comments?[index??0]=Comments(likes:caseComments.comments?[index??0].likes==0?0:caseComments.comments?[index??0].likes??0-1,
          //     likedByUser: caseComments.comments?[index??0].likedByUser,dislikes:caseComments.comments?[index??0].dislikes,
          //     id:caseComments.comments?[index??0].id,

@@ -43,7 +43,7 @@ class MyPostComponent extends StatefulWidget {
 class _MyPostComponentState extends State<MyPostComponent> {
   HomeBloc homeBloc = HomeBloc();
   int isShowComment = -1;
-  showAlertDialog(BuildContext context, int id) {
+  showAlertDialog(ProfileBloc profileBloc,BuildContext context, int id) {
     // set up the buttons
     Widget cancelButton = TextButton(
       child: const Text(
@@ -60,6 +60,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
       child: const Text("Yes", style: TextStyle(color: Colors.black)),
       onPressed: () async {
         homeBloc.add(DeletePostEvent(postId: id));
+        profileBloc.postList.removeWhere((post)=>post.id==id);
         setState(() {
           Navigator.of(context).pop();
         });
@@ -251,12 +252,15 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                                   builder:
                                                       (BuildContext context) {
                                                     return showAlertDialog(
+                                                        widget
+                                                            .profileBloc,
                                                         context,
                                                         widget
                                                                 .profileBloc
                                                                 .postList[index]
                                                                 .id ??
                                                             0);
+
                                                   },
                                                 );
                                               }
@@ -658,7 +662,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
         return DecoratedBox(
           decoration: BoxDecoration(
             color: (image?.isNotEmpty == true || media?.isNotEmpty == true)
-                ? Colors.white
+                ? Colors.transparent
                 : bgColor,
             borderRadius: BorderRadius.circular(5.0),
           ),
@@ -670,18 +674,20 @@ class _MyPostComponentState extends State<MyPostComponent> {
               children: [
                 if (image?.isNotEmpty == true || media?.isNotEmpty == true)
                   if (_isHtml(textToShow))
-                    HtmlWidget(textToShow, onTapUrl: (link) async {
-                      print('link $link');
-                      if (link.contains('doctak/jobs-detail')) {
-                        String jobID = Uri.parse(link).pathSegments.last;
-                        JobsDetailsScreen(
-                          jobId: jobID,
-                        ).launch(context);
-                      } else {
-                        PostUtils.launchURL(context, link);
-                      }
-                      return true;
-                    })
+                    Center(
+                      child: HtmlWidget(textToShow, onTapUrl: (link) async {
+                        print('link $link');
+                        if (link.contains('doctak/jobs-detail')) {
+                          String jobID = Uri.parse(link).pathSegments.last;
+                          JobsDetailsScreen(
+                            jobId: jobID,
+                          ).launch(context);
+                        } else {
+                          PostUtils.launchURL(context, link);
+                        }
+                        return true;
+                      }),
+                    )
                   else
                     Linkify(
                       onOpen: (link) {
@@ -698,23 +704,19 @@ class _MyPostComponentState extends State<MyPostComponent> {
                       style: TextStyle(
                         fontSize: 14.0,
                         color: (image?.isNotEmpty == true ||
-                                media?.isNotEmpty == true)
-                            ? Colors.black
-                            : Colors.white,
+                            media?.isNotEmpty == true)
+                            ? svGetBodyColor()
+                            : svGetBodyColor(),
                         fontWeight: FontWeight.bold,
                       ),
                       linkStyle: const TextStyle(
                         color: Colors.blue,
                       ),
-                      textAlign: TextAlign.left,
+                      textAlign: TextAlign.center,
                     )
                 else if (_isHtml(textToShow))
                   Container(
-                    constraints: const BoxConstraints(
-                      minHeight: 200.0,
-                      minWidth:
-                          double.infinity, // Minimum height of the container
-                    ),
+                    constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
                     child: Center(
                       child: HtmlWidget(
                         textStyle: GoogleFonts.poppins(),
@@ -736,27 +738,32 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     ),
                   )
                 else
-                  Linkify(
-                    onOpen: (link) {
-                      if (link.url.contains('doctak/jobs-detail')) {
-                        String jobID = Uri.parse(link.url).pathSegments.last;
-                        JobsDetailsScreen(
-                          jobId: jobID,
-                        ).launch(context);
-                      } else {
-                        PostUtils.launchURL(context, link.url);
-                      }
-                    },
-                    text: textToShow,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
+                    child: Center(
+                      child: Linkify(
+                        onOpen: (link) {
+                          if (link.url.contains('doctak/jobs-detail')) {
+                            String jobID = Uri.parse(link.url).pathSegments.last;
+                            JobsDetailsScreen(
+                              jobId: jobID,
+                            ).launch(context);
+                          } else {
+                            PostUtils.launchURL(context, link.url);
+                          }
+                        },
+                        text: textToShow,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        linkStyle: const TextStyle(
+                          color: Colors.blue,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
                     ),
-                    linkStyle: const TextStyle(
-                      color: Colors.blue,
-                    ),
-                    textAlign: TextAlign.left,
                   ),
                 if (words.length > 25)
                   TextButton(
@@ -766,7 +773,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     child: Text(
                       _isExpanded ? 'Show Less' : 'Show More',
                       style: TextStyle(
-                        color: textColor,
+                        color: svGetBodyColor(),
                         shadows: const [
                           Shadow(
                             offset: Offset(1.0, 1.0),

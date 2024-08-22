@@ -18,15 +18,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:http/http.dart' as http;
 import 'package:sizer/sizer.dart';
 
 import '../../core/utils/app/AppData.dart';
-import '../../widgets/error_dialog.dart';
 import '../home_screen/utils/SVCommon.dart';
-import '../terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'bloc/login_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -180,6 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                     return;
                   }
+                  toasty(context, 'Login successfully',bgColor: Colors.green,textColor: Colors.white);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Login successfully'),
@@ -195,6 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                   // Navigate to the home screen or perform desired action
                 } else if (state is SocialLoginSuccess) {
+                  toasty(context, 'Social Login successfully',bgColor: Colors.green,textColor: Colors.white);
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Social Login successfully'),
@@ -238,6 +239,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Navigate to the home screen or perform desired action
                 } else if (state is LoginFailure) {
                   // Show an error message
+                  toasty(context, 'Login failed please try again',bgColor: Colors.red,textColor: Colors.white);
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.error),
@@ -251,8 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: SingleChildScrollView(
                       padding: EdgeInsets.only(
                           bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child:AutofillGroup(
-    child:Form(
+                      child: Form(
                           key: _formKey,
                           child: Container(
                               width: double.maxFinite,
@@ -260,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   horizontal: 24, vertical: 39),
                               child: Column(children: [
                                 CustomTextFormField(
-                                     autofillHint: AutofillHints.username,
+                                    autofillHint: AutofillHints.username,
                                     focusNode: focusNode1,
                                     controller: emailController,
                                     hintText: translation(context)
@@ -295,7 +297,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                       print(state.isShowPassword);
                                       return CustomTextFormField(
                                           autofillHint: AutofillHints.password,
-
                                           focusNode: focusNode2,
                                           controller: passwordController,
                                           hintText: translation(context)
@@ -312,7 +313,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       ImageConstant.imgLocation,
                                                   height: 24,
                                                   width: 24)),
-                                          prefixConstraints: const BoxConstraints(
+                                          prefixConstraints:
+                                              const BoxConstraints(
                                                   maxHeight: 56),
                                           suffix: InkWell(
                                               onTap: () {
@@ -340,7 +342,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                               const BoxConstraints(
                                                   maxHeight: 56),
                                           validator: (value) {
-                                            if (value == null || (isValidPassword(value,
+                                            if (value == null ||
+                                                (isValidPassword(value,
                                                     isRequired: true))) {
                                               return translation(context)
                                                   .err_msg_please_enter_valid_password;
@@ -353,13 +356,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Row(
                                   children: [
                                     Checkbox(
-                                      value:_rememberMe,
+                                      value: _rememberMe,
                                       onChanged: (value) {
                                         setState(() {
                                           _rememberMe = value!;
-
                                         });
-
                                       },
                                     ),
                                     const Text('Remember Me')
@@ -382,27 +383,29 @@ class _LoginScreenState extends State<LoginScreen> {
                                   text: 'LOGIN',
                                   onTap: () async {
                                     SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
+                                        await SharedPreferences.getInstance();
                                     await prefs.setBool('acceptTerms', true);
 
                                     if (_formKey.currentState!.validate()) {
                                       _formKey.currentState!.save();
                                     }
                                     // TermsAndConditionScreen(accept: () async {
-                                      print('object');
-                                      await FirebaseMessaging.instance.getToken().then((token) async {
-                                        loginBloc.add(LoginButtonPressed(
+                                    print('object');
+                                    await FirebaseMessaging.instance
+                                        .getToken()
+                                        .then((token) async {
+                                      loginBloc.add(
+                                        LoginButtonPressed(
                                             username: emailController.text,
                                             // replace with real input
                                             password: passwordController.text,
-                                            rememberMe:_rememberMe,
-                                            deviceToken: token??""
-                                          // replace with real input
-                                        ),
-                                        );
-                                      });
+                                            rememberMe: _rememberMe,
+                                            deviceToken: token ?? ""
+                                            // replace with real input
+                                            ),
+                                      );
+                                    });
                                     // },).launch(context, isNewTask: true);
-
                                   },
                                 ),
                                 const SizedBox(height: 25),
@@ -439,7 +442,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(height: 29),
                                 _buildSocial(context),
                                 const SizedBox(height: 5)
-                              ])))))))),
+                              ]))))))),
     );
   }
 
@@ -526,25 +529,25 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       // GoogleSignIn().signOut();
       await FirebaseMessaging.instance.getToken().then((token) async {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-      print(googleUser.toString());
+        print(googleUser.toString());
 
-      GoogleSignInAuthentication googleSignInAuthentication =
-          await googleUser!.authentication;
-      String accessToken = googleSignInAuthentication.accessToken!;
-      // await FirebaseMessaging.instance.getToken().then((token) async {
-      //   print('token$googleUser');
-      loginBloc.add(SocialLoginButtonPressed(
+        GoogleSignInAuthentication googleSignInAuthentication =
+            await googleUser!.authentication;
+        String accessToken = googleSignInAuthentication.accessToken!;
+        // await FirebaseMessaging.instance.getToken().then((token) async {
+        //   print('token$googleUser');
+        loginBloc.add(SocialLoginButtonPressed(
           email: googleUser.email,
           firstName: googleUser.displayName!.split(' ').first,
           lastName: googleUser.displayName!.split(' ').last,
           isSocialLogin: true,
           provider: 'google',
           token: 'accessToken',
-          deviceToken: token??'',
-      ));
-      GoogleSignIn().disconnect();
+          deviceToken: token ?? '',
+        ));
+        GoogleSignIn().disconnect();
       });
     } on Exception catch (e) {
       print('error is ....... $e');
@@ -587,19 +590,20 @@ class _LoginScreenState extends State<LoginScreen> {
       rawNonce: rawNonce,
     );
     await FirebaseMessaging.instance.getToken().then((token) async {
-
-    var response =
-        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-    loginBloc.add(SocialLoginButtonPressed(
+      var response =
+          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      loginBloc.add(SocialLoginButtonPressed(
         email: response.user?.email ?? ' ',
         firstName: response.user?.displayName!.split(' ').first ?? ' ',
         lastName: response.user?.displayName!.split(' ').last ?? ' ',
         isSocialLogin: true,
         provider: 'apple',
-        token: response.user!.uid ?? '', deviceToken: token??'',));
-    print("${appleCredential.givenName} ${appleCredential.familyName}");
+        token: response.user!.uid ?? '',
+        deviceToken: token ?? '',
+      ));
+      print("${appleCredential.givenName} ${appleCredential.familyName}");
 
-    GoogleSignIn().disconnect();
+      GoogleSignIn().disconnect();
     });
   }
 }
