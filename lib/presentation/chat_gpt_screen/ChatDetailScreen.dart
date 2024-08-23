@@ -799,7 +799,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 maxLines: null,
                                 // Allows for unlimited lines
                                 decoration: const InputDecoration(
-                                  hintText: 'Ask DocTak AI',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  hintText: 'Ask Medical Ai',
                                   border: InputBorder.none,
                                 ),
                               ),

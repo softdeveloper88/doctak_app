@@ -9,16 +9,28 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../../../core/utils/app/AppData.dart';
 import '../screens/comment_screen/bloc/comment_bloc.dart';
 
-class SVCommentReplyComponent extends StatelessWidget {
+class SVCommentReplyComponent extends StatefulWidget {
   CommentBloc commentBloc;
   Function(String) onPostComment;
   int id;
   SVCommentReplyComponent(this.commentBloc, this.id, this.onPostComment,
       {Key? key})
       : super(key: key);
-  TextEditingController commentController = TextEditingController();
-  FocusNode focusNode = FocusNode();
 
+  @override
+  State<SVCommentReplyComponent> createState() => _SVCommentReplyComponentState();
+}
+
+class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
+  TextEditingController commentController = TextEditingController();
+
+  FocusNode focusNode = FocusNode();
+  @override
+  void dispose() {
+    focusNode.unfocus();
+
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -65,7 +77,7 @@ class SVCommentReplyComponent extends StatelessWidget {
                           if (commentController.text.isNotEmpty) {
                             focusNode.unfocus();
 
-                            onPostComment(commentController.text);
+                            widget.onPostComment(commentController.text);
                             commentController.text = '';
                           }// Unfocus the text field to dismiss the keyboard
                         },
@@ -78,7 +90,7 @@ class SVCommentReplyComponent extends StatelessWidget {
                   onPressed: () {
                     if (commentController.text.isNotEmpty) {
                       focusNode.unfocus();
-                      onPostComment(commentController.text);
+                      widget.onPostComment(commentController.text);
                       commentController.text = '';
 
                     }

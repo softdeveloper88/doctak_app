@@ -30,7 +30,7 @@ List<SVDrawerModel> getDrawerOptions(BuildContext context) {
   // list.add(SVDrawerModel(image: 'assets/icon/ic_Send.png', title: translation(context).lbl_share_app));
   list.add(SVDrawerModel(image: 'assets/images/privacy.png', title: "Privacy Policy"));
   list.add(SVDrawerModel(image: 'assets/icon/ic_logout.png', title: translation(context).lbl_logout));
-  list.add(SVDrawerModel(image: 'assets/icon/ic_logout.png', title: translation(context).lbl_delete_account));
+  // list.add(SVDrawerModel(image: 'assets/icon/ic_logout.png', title: translation(context).lbl_delete_account));
 
   return list;
 }

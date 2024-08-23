@@ -290,12 +290,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                         logoutAccount(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 17) { // delete
-                        print(selectedIndex);
-                        deleteAccount(context);
-                        // finish(context);
-                        // SVGroupProfileScreen().launch(context);
                       }
+                      // else if (selectedIndex == 17) { // delete
+                      //   print(selectedIndex);
+                      //   deleteAccount(context);
+                      //   // finish(context);
+                      //   // SVGroupProfileScreen().launch(context);
+                      // }
                       // else if (selectedIndex == 13) {
                       //
                       //   finish(context);
