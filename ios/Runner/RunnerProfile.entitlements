@@ -11,6 +11,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:doctak.page.link</string>
+		<string>webcredentials:doctak.net</string>
 	</array>
 </dict>
 </plist>
