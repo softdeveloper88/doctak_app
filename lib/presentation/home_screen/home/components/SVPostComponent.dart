@@ -1,5 +1,6 @@
 import 'dart:async';
-
+import 'package:html/parser.dart' as html_parser;
+import 'package:html/dom.dart' as dom;
 import 'package:app_links/app_links.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
@@ -19,6 +20,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -689,7 +691,13 @@ class _SVPostComponentState extends State<SVPostComponent> {
 
     // show the dialog
   }
+  String parseHtmlString(String htmlString) {
+    // Parse the HTML string
+    dom.Document document = html_parser.parse(htmlString);
 
+    // Extract and return the text content without tags
+    return document.body?.text ?? '';
+  }
   Widget _buildPlaceholderWithoutFile(
       context, title, backgroundColor, image, media) {
     String fullText = title ?? '';
@@ -703,71 +711,31 @@ class _SVPostComponentState extends State<SVPostComponent> {
     Color textColor = PostUtils.contrastingTextColor(bgColor);
     return LayoutBuilder(
       builder: (context, constraints) {
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: (image?.isNotEmpty == true || media?.isNotEmpty == true)
-                ? Colors.transparent
-                : bgColor,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (image?.isNotEmpty == true || media?.isNotEmpty == true)
-                  if (_isHtml(textToShow))
-                    Center(
-                      child: HtmlWidget(textToShow, onTapUrl: (link) async {
-                        print('link $link');
-                        if (link.contains('doctak/jobs-detail')) {
-                          String jobID = Uri.parse(link).pathSegments.last;
-                          JobsDetailsScreen(
-                            jobId: jobID,
-                          ).launch(context);
-                        } else {
-                          PostUtils.launchURL(context, link);
-                        }
-                        return true;
-                      }),
-                    )
-                  else
-                    Linkify(
-                      onOpen: (link) {
-                        if (link.url.contains('doctak/jobs-detail')) {
-                          String jobID = Uri.parse(link.url).pathSegments.last;
-                          JobsDetailsScreen(
-                            jobId: jobID,
-                          ).launch(context);
-                        } else {
-                          PostUtils.launchURL(context, link.url);
-                        }
-                      },
-                      text: textToShow,
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        color: (image?.isNotEmpty == true ||
-                                media?.isNotEmpty == true)
-                            ? svGetBodyColor()
-                            : svGetBodyColor(),
-                        fontWeight: FontWeight.bold,
-                      ),
-                      linkStyle: const TextStyle(
-                        color: Colors.blue,
-                      ),
-                      textAlign: TextAlign.center,
-                    )
-                else if (_isHtml(textToShow))
-                  Container(
-                    constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
-                    child: Center(
-                      child: HtmlWidget(
-                        textStyle: GoogleFonts.poppins(),
-                        enableCaching: true,
-                        '<div style="text-align: center;">$textToShow</div>',
-                        onTapUrl: (link) async {
-                          print(link);
+        return  GestureDetector(
+            onLongPress: () {
+              Clipboard.setData(ClipboardData(text: parseHtmlString(title)));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Text copied to clipboard")),
+              );
+            },
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: (image?.isNotEmpty == true || media?.isNotEmpty == true)
+                  ? Colors.transparent
+                  : bgColor,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (image?.isNotEmpty == true || media?.isNotEmpty == true)
+                    if (_isHtml(textToShow))
+                      Center(
+                        child: HtmlWidget(textToShow, onTapUrl: (link) async {
+                          print('link $link');
                           if (link.contains('doctak/jobs-detail')) {
                             String jobID = Uri.parse(link).pathSegments.last;
                             JobsDetailsScreen(
@@ -777,15 +745,10 @@ class _SVPostComponentState extends State<SVPostComponent> {
                             PostUtils.launchURL(context, link);
                           }
                           return true;
-                        },
-                      ),
-                    ),
-                  )
-                else
-                  Container(
-                    constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
-                    child: Center(
-                      child: Linkify(
+                        }),
+                      )
+                    else
+                      Linkify(
                         onOpen: (link) {
                           if (link.url.contains('doctak/jobs-detail')) {
                             String jobID = Uri.parse(link.url).pathSegments.last;
@@ -799,36 +762,89 @@ class _SVPostComponentState extends State<SVPostComponent> {
                         text: textToShow,
                         style: TextStyle(
                           fontSize: 14.0,
-                          color: textColor,
+                          color: (image?.isNotEmpty == true ||
+                                  media?.isNotEmpty == true)
+                              ? svGetBodyColor()
+                              : svGetBodyColor(),
                           fontWeight: FontWeight.bold,
                         ),
                         linkStyle: const TextStyle(
                           color: Colors.blue,
                         ),
-                        textAlign: TextAlign.left,
+                        textAlign: TextAlign.center,
+                      )
+                  else if (_isHtml(textToShow))
+                    Container(
+                      constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
+                      child: Center(
+                        child: HtmlWidget(
+                          textStyle: GoogleFonts.poppins(),
+                          enableCaching: true,
+                          '<div style="text-align: center;">$textToShow</div>',
+                          onTapUrl: (link) async {
+                            print(link);
+                            if (link.contains('doctak/jobs-detail')) {
+                              String jobID = Uri.parse(link).pathSegments.last;
+                              JobsDetailsScreen(
+                                jobId: jobID,
+                              ).launch(context);
+                            } else {
+                              PostUtils.launchURL(context, link);
+                            }
+                            return true;
+                          },
+                        ),
                       ),
-                    ),
-                  ),
-                if (words.length > 25)
-                  TextButton(
-                    onPressed: () => setState(() {
-                      _isExpanded = !_isExpanded;
-                    }),
-                    child: Text(
-                      _isExpanded ? 'Show Less' : 'Show More',
-                      style: TextStyle(
-                        color: svGetBodyColor(),
-                        shadows: const [
-                          Shadow(
-                            offset: Offset(1.0, 1.0),
-                            blurRadius: 3.0,
-                            color: Color.fromARGB(255, 0, 0, 0),
+                    )
+                  else
+                    Container(
+                      constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
+                      child: Center(
+                        child: Linkify(
+                          onOpen: (link) {
+                            if (link.url.contains('doctak/jobs-detail')) {
+                              String jobID = Uri.parse(link.url).pathSegments.last;
+                              JobsDetailsScreen(
+                                jobId: jobID,
+                              ).launch(context);
+                            } else {
+                              PostUtils.launchURL(context, link.url);
+                            }
+                          },
+                          text: textToShow,
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ],
+                          linkStyle: const TextStyle(
+                            color: Colors.blue,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                  if (words.length > 25)
+                    TextButton(
+                      onPressed: () => setState(() {
+                        _isExpanded = !_isExpanded;
+                      }),
+                      child: Text(
+                        _isExpanded ? 'Show Less' : 'Show More',
+                        style: TextStyle(
+                          color: svGetBodyColor(),
+                          shadows: const [
+                            Shadow(
+                              offset: Offset(1.0, 1.0),
+                              blurRadius: 3.0,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         );
