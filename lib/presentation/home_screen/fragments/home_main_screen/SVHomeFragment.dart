@@ -130,7 +130,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 FocusManager.instance.primaryFocus?.unfocus();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const NotificationScreen(),
+                    builder: (_) =>  NotificationScreen(notificationBloc),
                   ),
                 );
               },
@@ -146,7 +146,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                     onPressed: () async {
 
                       FocusManager.instance.primaryFocus?.unfocus();
-                      const NotificationScreen().launch(context);
+                       NotificationScreen(notificationBloc).launch(context);
                     },
                   ),
                   Positioned(
@@ -156,6 +156,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                         bloc: notificationBloc,
                           builder: (context, state) {
                         int unreadCount = 0;
+
                         if (state is PaginationLoadedState) {
                           // unreadCount = state.unreadCount;
                           return notificationBloc.totalNotifications>0?Container(
@@ -170,7 +171,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                             ),
                             child: Center(
                               child: Text(
-                                '${notificationBloc.totalNotifications ?? ''}',
+                                '${notificationBloc.totalNotifications ??''}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,

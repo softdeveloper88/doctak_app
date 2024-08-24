@@ -262,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     horizontal: 24, vertical: 39),
                                 child: Column(children: [
                                   CustomTextFormField(
-                                      autofillHint: AutofillHints.username,
+                                      autofillHint: const [AutofillHints.username],
                                       focusNode: focusNode1,
                                       controller: emailController,
                                       hintText: translation(context)
@@ -296,8 +296,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                       builder: (context, state) {
                                         print(state.isShowPassword);
                                         return CustomTextFormField(
-                                            autofillHint: AutofillHints
-                                                .password,
+                                            autofillHint: const [AutofillHints
+                                                .password],
                                             focusNode: focusNode2,
                                             controller: passwordController,
                                             hintText: translation(context)

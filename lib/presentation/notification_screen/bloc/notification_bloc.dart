@@ -51,6 +51,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       notificationsList.addAll(response.notifications?.data?? []);
     }
     totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
+    print(totalNotifications);
+
     emit(PaginationLoadedState());
 
     // emit(DataLoaded(notificationsList));

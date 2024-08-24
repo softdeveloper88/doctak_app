@@ -85,7 +85,7 @@ class CustomTextFormField extends StatelessWidget {
   final Function? onTap;
   final Function(String)? onSaved;
   final String? initialValue;
-  String? autofillHint;
+  List<String>? autofillHint;
 
   final FormFieldValidator<String>? validator;
 
@@ -102,7 +102,7 @@ class CustomTextFormField extends StatelessWidget {
   Widget textFormFieldWidget(BuildContext context) => SizedBox(
         width: width ?? double.maxFinite,
         child: TextFormField(
-          autofillHints:[autofillHint??''],
+          autofillHints:autofillHint??[],
           readOnly: isReadOnly ?? false,
           scrollPadding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),

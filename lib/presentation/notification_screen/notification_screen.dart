@@ -16,14 +16,14 @@ import '../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'bloc/notification_event.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({Key? key}) : super(key: key);
-
+   NotificationScreen(this.notificationBloc, {Key? key}) : super(key: key);
+  NotificationBloc notificationBloc;
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  NotificationBloc notificationBloc = NotificationBloc();
+  // NotificationBloc widget.notificationBloc = NotificationBloc();
   Timer? _debounce;
   final TextEditingController _controller = TextEditingController();
   List<String> _filteredSuggestions = [];
@@ -36,14 +36,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   void initState() {
-    notificationBloc.add(
+    widget.notificationBloc.add(
       NotificationLoadPageEvent(
         page: 1,
       ),
     );
     super.initState();
   }
-
   // var selectedValue;
   // bool isShownSuggestion = false;
   // bool isSearchShow = true;
@@ -73,6 +72,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             icon:
             Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
             onPressed: () {
+              widget.notificationBloc.add(NotificationLoadPageEvent(page: 1,),);
               Navigator.pop(context);
             }),
         actions: const [
@@ -82,7 +82,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       body: Column(
         children: [
           BlocConsumer<NotificationBloc, NotificationState>(
-            bloc: notificationBloc,
+            bloc: widget.notificationBloc,
             // listenWhen: (previous, current) => current is PaginationLoadedState,
             // buildWhen: (previous, current) => current is! PaginationLoadedState,
             listener: (BuildContext context, NotificationState state) {
@@ -124,7 +124,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget _buildPostList(BuildContext context) {
-    final bloc = notificationBloc;
+    final bloc = widget.notificationBloc;
     return Expanded(
       child: bloc.notificationsList.isEmpty
           ? const Center(
