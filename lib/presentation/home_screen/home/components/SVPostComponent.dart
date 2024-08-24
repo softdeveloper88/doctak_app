@@ -45,9 +45,10 @@ class SVPostComponent extends StatefulWidget {
   State<SVPostComponent> createState() => _SVPostComponentState();
 }
 
-int? isShowComment = -1;
 
 class _SVPostComponentState extends State<SVPostComponent> {
+  int? isShowComment = -1;
+
   @override
   void dispose() {
    setState(() {
