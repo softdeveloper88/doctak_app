@@ -37,17 +37,19 @@ import '../screens/comment_screen/SVCommentScreen.dart';
 import '../screens/comment_screen/bloc/comment_bloc.dart';
 
 class SVPostComponent extends StatefulWidget {
-  SVPostComponent(this.homeBloc, {super.key});
+  SVPostComponent(this.homeBloc,{super.key});
 
   HomeBloc homeBloc;
+
 
   @override
   State<SVPostComponent> createState() => _SVPostComponentState();
 }
 
-int? isShowComment = -1;
 
-class _SVPostComponentState extends State<SVPostComponent> {
+class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingObserver{
+  int? isShowComment = -1;
+
   @override
   void dispose() {
    setState(() {
@@ -85,6 +87,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
   // }
   @override
   Widget build(BuildContext context) {
+
     return BlocConsumer<HomeBloc, HomeState>(
       bloc: widget.homeBloc,
       listener: (BuildContext context, HomeState state) {
@@ -438,6 +441,7 @@ class _SVPostComponentState extends State<SVPostComponent> {
                                               if (isShowComment == -1) {
                                                 isShowComment = index;
                                               } else {
+                                                FocusScope.of(context).unfocus();
                                                 isShowComment = -1;
                                               }
                                             });

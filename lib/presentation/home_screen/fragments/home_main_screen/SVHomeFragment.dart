@@ -57,7 +57,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       // widget.homeBloc.add(AdsSettingEvent());
     });
   }
-
   @override
   Widget build(BuildContext context) {
     afterBuildCreated(() {
@@ -127,6 +126,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             // ),
             IconButton(
               onPressed: () {
+
+                FocusManager.instance.primaryFocus?.unfocus();
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => const NotificationScreen(),
@@ -143,6 +144,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                       color: context.iconColor,
                     ),
                     onPressed: () async {
+
+                      FocusManager.instance.primaryFocus?.unfocus();
                       const NotificationScreen().launch(context);
                     },
                   ),
@@ -191,32 +194,40 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 color: context.iconColor,
               ),
               onPressed: () async {
+
+                FocusManager.instance.primaryFocus?.unfocus();
                 UserChatScreen().launch(context);
               },
             ),
           ],
         ),
-        body: RefreshIndicator(
-            onRefresh: _refresh,
-            child: CustomScrollView(
-                shrinkWrap: true,
-                controller: _mainScrollController,
-                physics: const BouncingScrollPhysics(),
-                slivers: <Widget>[
-                  // SliverList(delegate: SliverChildListDelegate([
-                  //
-                  //   // SVStoryComponent(),
-                  //   // 10.height,
-                  // ])),
-                  SliverList(
-                      delegate: SliverChildListDelegate([
-                    UserChatComponent(),
-                    // 10.height,
+        body: GestureDetector(
+          onTap: (){
+
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: RefreshIndicator(
+              onRefresh: _refresh,
+              child: CustomScrollView(
+                  shrinkWrap: true,
+                  controller: _mainScrollController,
+                  physics: const BouncingScrollPhysics(),
+                  slivers: <Widget>[
+                    // SliverList(delegate: SliverChildListDelegate([
+                    //
+                    //   // SVStoryComponent(),
+                    //   // 10.height,
+                    // ])),
+                    SliverList(
+                        delegate: SliverChildListDelegate([
+                      UserChatComponent(),
+                      // 10.height,
+                    ])),
+                    SliverList(
+                        delegate: SliverChildListDelegate([
+                      SVPostComponent(widget.homeBloc),
+                    ])),
                   ])),
-                  SliverList(
-                      delegate: SliverChildListDelegate([
-                    SVPostComponent(widget.homeBloc),
-                  ])),
-                ])));
+        ));
   }
 }
