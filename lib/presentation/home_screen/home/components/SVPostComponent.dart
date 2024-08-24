@@ -48,6 +48,14 @@ class SVPostComponent extends StatefulWidget {
 int? isShowComment = -1;
 
 class _SVPostComponentState extends State<SVPostComponent> {
+  @override
+  void dispose() {
+   setState(() {
+     isShowComment=-1;
+   });
+    super.dispose();
+  }
+
   // createDynamicLink(postTitle, postUrl, imageUrl) async {
   //   final dynamicLinkParams = DynamicLinkParameters(
   //     link: Uri.parse(postUrl),
