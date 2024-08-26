@@ -290,11 +290,11 @@ class LoginScreenState extends State<LoginScreen> {
     if (password != null) {
       passwordController.text = password;
     }
+    // new changes
     await prefs.setBool('acceptTerms', true);
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
     }
-    // TermsAndConditionScreen(accept: () async {
     print('object');
     if (Platform.isAndroid) {
       await FirebaseMessaging.instance
