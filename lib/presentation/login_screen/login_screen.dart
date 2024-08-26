@@ -18,6 +18,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
@@ -235,6 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
                 } else if (state is LoginFailure) {
                   if (mounted) {
+                    TextInput.finishAutofillContext(shouldSave: false);
                     toasty(context, 'Login failed please try again', bgColor: Colors.red, textColor: Colors.white);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -398,6 +400,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       if (Platform.isAndroid) {
                                      await FirebaseMessaging.instance
                                             .getToken().then((token){
+                                              print("token $token");
                                        loginBloc.add(
                                          LoginButtonPressed(
                                              username: emailController.text,
@@ -554,6 +557,7 @@ class _LoginScreenState extends State<LoginScreen> {
       String? token = "";
       if (Platform.isAndroid) {
         await FirebaseMessaging.instance.getToken().then((token) async {
+          debugPrint(token);
           final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
           print(googleUser.toString());
@@ -670,6 +674,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // //     ),
     // //   );
     // }
+    TextInput.finishAutofillContext(shouldSave: true);
     SchedulerBinding.instance.addPostFrameCallback((_) {
       toasty(context, 'Login successfully', bgColor: Colors.green, textColor: Colors.white);
       if (mounted) {

@@ -51,7 +51,8 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   }
 
   _askQuestion(GetPost event, Emitter<ChatGPTState> emit) async {
-    // try {
+
+    try {
       ChatGptAskQuestionResponse response;
       print('image1 ${event.imageUrl1}');
       print('image2 ${event.imageUrl2}');
@@ -116,10 +117,10 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       }
 
       // emit(QuestionResponseLoaded(response));
-    // } catch (e) {
-    //   print("eee$e");
-    //   emit(DataError('An error occurred'));
-    // }
+    } catch (e) {
+      print("eee$e");
+      emit(DataError(e.toString()));
+    }
   }
 
   _onGetSessionMessagesList(
@@ -142,6 +143,8 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
+      emit(DataLoaded(ChatGptSession(), ChatGptMessageHistory(),ChatGptAskQuestionResponse()) );
+
       var response = await postService.newChat('Bearer ${AppData.userToken}');
       ChatGptMessageHistory response1 = await postService.gptChatMessages(
           'Bearer ${AppData.userToken}', response.response.data['session_id']);
@@ -151,8 +154,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       print(response.response.data['session_id']);
       ProgressDialogUtils.hideProgressDialog();
       print('data');
-      emit(DataLoaded(
-          responseSession, response1, (state as DataLoaded).response2));
+      emit(DataLoaded(responseSession, response1, (state as DataLoaded).response2));
     } catch (e) {
       print(e);
       emit(DataError('An error occurred$e'));

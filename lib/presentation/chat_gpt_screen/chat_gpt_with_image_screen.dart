@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
 import 'package:doctak_app/main.dart';
@@ -11,14 +9,13 @@ import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart'
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import to use Clipboard
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:markdown_widget/config/configs.dart';
-import 'package:markdown_widget/widget/markdown_block.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -28,6 +25,7 @@ import '../../widgets/image_upload_widget/bloc/image_upload_event.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_state.dart';
 import '../../widgets/image_upload_widget/multiple_image_upload_widget.dart';
 
+@immutable
 class ChatGptWithImageScreen extends StatefulWidget {
   bool isFromMainScreen;
   String? question;
@@ -36,10 +34,10 @@ class ChatGptWithImageScreen extends StatefulWidget {
       {super.key, this.isFromMainScreen = true, this.question});
 
   @override
-  _ChatGPTScreenState createState() => _ChatGPTScreenState();
+  ChatGPTScreenState createState() => ChatGPTScreenState();
 }
 
-class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
+class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   // ... (existing variables)
 
   final ScrollController _scrollController = ScrollController();
@@ -59,15 +57,12 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   bool isAlreadyAsk = true;
   bool isEmpty = false;
   bool isOneTimeImageUploaded = false;
-  FocusNode focusNode=FocusNode();
+  FocusNode focusNode = FocusNode();
+
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
     if (question.isEmpty) return;
 
-    // String sessionId = selectedSessionId.toString();
-    // var tempId =
-    //     -1; // Unique temporary ID for the response
-    print('object');
     // setState(() {
     var myMessage = Messages(
         id: -1,
@@ -136,11 +131,9 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (context) =>
-        ChatGPTBloc()
-          ..add(LoadDataValues()),
+        create: (context) => ChatGPTBloc()..add(LoadDataValues()),
         child:
-        BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
+            BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
@@ -155,15 +148,15 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                   children: [
                     Center(
                         child: CircularProgressIndicator(
-                          color: svGetBodyColor(),
-                        )),
+                      color: svGetBodyColor(),
+                    )),
                   ],
                 ),
               ),
             );
           } else if (state1 is DataLoaded) {
-            isEmpty = state1.response1.messages!.isEmpty;
-            print('response ${state1.response.toString()}');
+            isEmpty = state1.response1.messages?.isEmpty??false;
+            debugPrint('response ${state1.response.toString()}');
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
                 setState(() {
@@ -189,8 +182,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                             Navigator.of(context).pop();
                             isOneTimeImageUploaded = false;
                             selectedSessionId =
-                                BlocProvider
-                                    .of<ChatGPTBloc>(context)
+                                BlocProvider.of<ChatGPTBloc>(context)
                                     .newChatSessionId;
 
                             // Session newSession = await createNewChatSession();
@@ -199,13 +191,13 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                             //       [newSession, ...(snapshot.data ?? [])]);
                             // });
                           } catch (e) {
-                            print(e);
+                            debugPrint(e.toString());
                           }
                         },
                         onTap: (session) {
                           chatWithAi = session.name!;
                           isEmptyPage = false;
-                          print(session.id);
+                          debugPrint(session.id.toString());
                           selectedSessionId =
                               session.id; // Update the selected session
                           isLoadingMessages = true;
@@ -269,8 +261,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       // Navigator.of(context).pop();
 
                                       selectedSessionId =
-                                          BlocProvider
-                                              .of<ChatGPTBloc>(context)
+                                          BlocProvider.of<ChatGPTBloc>(context)
                                               .newChatSessionId;
 
                                       // Session newSession = await createNewChatSession();
@@ -279,12 +270,13 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       //       [newSession, ...(snapshot.data ?? [])]);
                                       // });
                                     } catch (e) {
-                                      print(e);
+                                      debugPrint(e.toString());
                                     }
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Text('Next Image',
+                                    child: Text(
+                                      'Next Image',
                                       style: GoogleFonts.poppins(color: white),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -293,13 +285,13 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                 IconButton(
                                   icon: isLoadingMessages
                                       ? Image.asset(
-                                    'assets/images/docktak_ai_dark.png',
-                                    height: 25,
-                                    width: 25,
-                                  )
-                                  // ? TypingIndicators(
-                                  //     color: svGetBodyColor(),
-                                  //     size: 2.0) // Custom typing indicator
+                                          'assets/images/docktak_ai_dark.png',
+                                          height: 25,
+                                          width: 25,
+                                        )
+                                      // ? TypingIndicators(
+                                      //     color: svGetBodyColor(),
+                                      //     size: 2.0) // Custom typing indicator
                                       : const Text(""),
                                   onPressed: () {},
                                 )
@@ -360,55 +352,55 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       cardIntro('Medical images',
-                                          'Please upload the medical images for potential diagnoses and analysis', () async {
-                                            // Medication Review: check interactions and dosage
-                                            // widget.question = 'initial assessment';
+                                          'Please upload the medical images for potential diagnoses and analysis',
+                                          () async {
+                                        // Medication Review: check interactions and dosage
+                                        // widget.question = 'initial assessment';
 
-                                            if (isOneTimeImageUploaded) {
-                                              toasty(context,
-                                                  'Only allowed one time image in one session');
-                                            } else {
-                                              const permission = Permission
-                                                  .photos;
-                                              if (await permission.isGranted) {
-                                                // Permission is already granted
-                                                _showBeforeFileOptions();
-                                              } else
-                                              if (await permission.isDenied) {
-                                                // Permission was denied; request it
-                                                final result = await permission
-                                                    .request();
-                                                print(result);
-                                                // Check the result after requesting permission
-                                                if (result.isGranted) {
-                                                  _showBeforeFileOptions();
-                                                } else if (result
-                                                    .isPermanentlyDenied) {
-                                                  // Permission is permanently denied
-                                                  print(
-                                                      "Permission is permanently denied.");
-                                                  // _permissionDialog(context);
-                                                  _showBeforeFileOptions();
-                                                } else if (result.isGranted) {
-                                                  _showBeforeFileOptions();
+                                        if (isOneTimeImageUploaded) {
+                                          toasty(context,
+                                              'Only allowed one time image in one session');
+                                        } else {
+                                          const permission = Permission.photos;
+                                          if (await permission.isGranted) {
+                                            // Permission is already granted
+                                            _showBeforeFileOptions();
+                                          } else if (await permission
+                                              .isDenied) {
+                                            // Permission was denied; request it
+                                            final result =
+                                                await permission.request();
+                                            debugPrint(result.toString());
+                                            // Check the result after requesting permission
+                                            if (result.isGranted) {
+                                              _showBeforeFileOptions();
+                                            } else if (result
+                                                .isPermanentlyDenied) {
+                                              // Permission is permanently denied
+                                              debugPrint(
+                                                  "Permission is permanently denied.");
+                                              // _permissionDialog(context);
+                                              _showBeforeFileOptions();
+                                            } else if (result.isGranted) {
+                                              _showBeforeFileOptions();
 
-                                                  // Permission is still denied
-                                                  print(
-                                                      "Permission is denied.");
-                                                }
-                                              } else if (await permission
-                                                  .isPermanentlyDenied) {
-                                                // Permission was permanently denied
-                                                print(
-                                                    "Permission is permanently denied.");
-                                                _permissionDialog(context);
-                                              }
+                                              // Permission is still denied
+                                              debugPrint(
+                                                  "Permission is denied.");
                                             }
-                                            // Future.delayed(const Duration(seconds: 1),(){
+                                          } else if (await permission
+                                              .isPermanentlyDenied) {
+                                            // Permission was permanently denied
+                                            debugPrint(
+                                                "Permission is permanently denied.");
+                                            _permissionDialog();
+                                          }
+                                        }
+                                        // Future.delayed(const Duration(seconds: 1),(){
 
-                                            // });
-                                            // textController.text = widget.question.toString();
-                                          }),
+                                        // });
+                                        // textController.text = widget.question.toString();
+                                      }),
                                     ],
                                   ),
                                   const SizedBox(height: 20),
@@ -428,41 +420,44 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
-                          itemCount: state1.response1.messages!.length,
+                          itemCount: state1.response1.messages?.length,
                           itemBuilder: (context, index) {
-                            print(state1.response1.messages![index].gptSessionId);
-                            Messages message =
-                            state1.response1.messages![index];
+                            debugPrint(
+                                state1.response1.messages?[index].gptSessionId);
+                            Messages message = state1.response1.messages?[index]??Messages();
                             return Column(
                               children: [
                                 ChatBubble(
                                   text: message.question ?? '',
                                   isUserMessage: true,
-                                  imageUrl1: index!=0?null:
-                                  selectedImageFiles.isNotEmpty
-                                      ? File(
-                                      selectedImageFiles.first.path ?? '')
-                                      : null,
-                                  imageUrl2: index!=0?null:selectedImageFiles.isNotEmpty
-                                      ? selectedImageFiles.length == 2
-                                      ? File(selectedImageFiles.last.path ?? '')
-                                      : null
-                                      : null,
-                                  responseImageUrl1: index!=0?'': message.imageUrl1 ?? '',
-                                  responseImageUrl2:  index!=0?'':message.imageUrl2 ?? '',
+                                  imageUrl1: index != 0
+                                      ? null
+                                      : selectedImageFiles.isNotEmpty
+                                          ? File(selectedImageFiles.first.path)
+                                          : null,
+                                  imageUrl2: index != 0
+                                      ? null
+                                      : selectedImageFiles.isNotEmpty
+                                          ? selectedImageFiles.length == 2
+                                              ? File(
+                                                  selectedImageFiles.last.path)
+                                              : null
+                                          : null,
+                                  responseImageUrl1:
+                                      index != 0 ? '' : message.imageUrl1 ?? '',
+                                  responseImageUrl2:
+                                      index != 0 ? '' : message.imageUrl2 ?? '',
                                 ),
                                 ChatBubble(
                                   text: message.response ?? "",
                                   isUserMessage: false,
-                                  imageUrl1:
-                                  selectedImageFiles.isNotEmpty
-                                      ? File(
-                                      selectedImageFiles.first.path ?? '')
+                                  imageUrl1: selectedImageFiles.isNotEmpty
+                                      ? File(selectedImageFiles.first.path)
                                       : null,
                                   imageUrl2: selectedImageFiles.isNotEmpty
                                       ? selectedImageFiles.length == 2
-                                      ? File(selectedImageFiles.last.path ?? '')
-                                      : null
+                                          ? File(selectedImageFiles.last.path)
+                                          : null
                                       : null,
                                   responseImageUrl1: message.imageUrl1 ?? '',
                                   responseImageUrl2: message.imageUrl2 ?? '',
@@ -476,7 +471,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       var myMessage = Messages(
                                           id: -1,
                                           gptSessionId:
-                                          selectedSessionId.toString(),
+                                              selectedSessionId.toString(),
                                           question: question,
                                           imageUrl1: message.imageUrl1,
                                           imageUrl2: message.imageUrl2,
@@ -487,7 +482,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       BlocProvider.of<ChatGPTBloc>(context).add(
                                         GetPost(
                                           sessionId:
-                                          selectedSessionId.toString(),
+                                              selectedSessionId.toString(),
                                           question: question,
                                           // imageUrl: _uploadedFile??''// replace with real input
                                         ),
@@ -524,7 +519,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       //                   DateTime.now().toString(),
                                       //               updatedAt: DateTime.now()
                                       //                   .toString());
-                                      //       print(typingText);
+                                      //       debugPrint(typingText);
                                       //       if (state1
                                       //               .response2.content!.length ==
                                       //           i) {
@@ -589,7 +584,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     } catch (e) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(SnackBar(
-                                          content: Text('Error: $e')));
+                                              content: Text('Error: $e')));
                                     }
                                   },
                                 ),
@@ -600,7 +595,6 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                       ),
 
                     _buildImagePreview(),
-
                     Container(
                       color: context.cardColor,
                       padding: const EdgeInsets.all(10.0),
@@ -618,18 +612,18 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                               //   if (result.isGranted) {
                               //     _showFileOptions();
                               //   } else if (result.isDenied) {
-                              //     print("isDenied");
+                              //     debugPrint("isDenied");
                               //     return;
                               //     // _permissionDialog(context);
                               //     // _showFileOptions();
                               //     return;
                               //   } else if (result.isPermanentlyDenied) {
-                              //     print("isPermanentlyDenied1");
+                              //     debugPrint("isPermanentlyDenied1");
                               //     _permissionDialog(context);
                               //     return;
                               //   }
                               // } else if (await permission.isPermanentlyDenied) {
-                              //   print("isPermanentlyDenied2");
+                              //   debugPrint("isPermanentlyDenied2");
                               //   _permissionDialog(context);
                               //
                               //   return;
@@ -647,25 +641,27 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                 } else if (await permission.isDenied) {
                                   // Permission was denied; request it
                                   final result = await permission.request();
-                                  print(result);
+                                  debugPrint(result.toString());
                                   // Check the result after requesting permission
                                   if (result.isGranted) {
                                     _showBeforeFileOptions();
                                   } else if (result.isPermanentlyDenied) {
                                     // Permission is permanently denied
-                                    print("Permission is permanently denied.");
+                                    debugPrint(
+                                        "Permission is permanently denied.");
                                     // _permissionDialog(context);
                                     _showBeforeFileOptions();
                                   } else if (result.isGranted) {
                                     _showBeforeFileOptions();
                                     // Permission is still denied
-                                    print("Permission is denied.");
+                                    debugPrint("Permission is denied.");
                                   }
                                 } else if (await permission
                                     .isPermanentlyDenied) {
                                   // Permission was permanently denied
-                                  print("Permission is permanently denied.");
-                                  _permissionDialog(context);
+                                  debugPrint(
+                                      "Permission is permanently denied.");
+                                  _permissionDialog();
                                 }
                               }
                             },
@@ -673,9 +669,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                           const SizedBox(width: 8.0),
                           Expanded(
                             child: Container(
-                              constraints: const BoxConstraints(
-                                maxHeight: 200
-                              ),
+                              constraints: const BoxConstraints(maxHeight: 200),
                               padding: const EdgeInsets.only(left: 8, right: 8),
                               decoration: BoxDecoration(
                                 color: appStore.isDarkMode
@@ -693,7 +687,8 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                 // Allows for unlimited lines
                                 decoration: const InputDecoration(
                                   hintStyle: TextStyle(color: Colors.grey),
-                                  hintText: 'Clinical Summary e.g age, gender, medical history',
+                                  hintText:
+                                      'Clinical Summary e.g age, gender, medical history',
                                   border: InputBorder.none,
                                 ),
                               ),
@@ -717,72 +712,73 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                               child: IconButton(
                                 icon: isWriting
                                     ? const TypingIndicators(
-                                    color: Colors.white,
-                                    size: 2.0) // Custom typing indicator
+                                        color: Colors.white,
+                                        size: 2.0) // Custom typing indicator
                                     : const Icon(Icons.send,
-                                    color: Colors.white),
+                                        color: Colors.white),
                                 onPressed: () async {
                                   focusNode.unfocus();
-
-                                  print(selectedSessionId.toString());
+                                  debugPrint(selectedSessionId.toString());
                                   if (selectedImageFiles.isEmpty) {
                                     return;
-                                  }
-                                  else if (imageUploadBloc.imagefiles.isEmpty &&
+                                  } else if (imageUploadBloc
+                                          .imagefiles.isEmpty &&
                                       isOneTimeImageUploaded) {
-                                    String question = textController.text
-                                        .trim();
+                                    String question =
+                                        textController.text.trim();
                                     // String sessionId = selectedSessionId.toString();
                                     // var tempId =
                                     //     -1; // Unique temporary ID for the response
-                                    if(question !=''){
-                                    setState(() {
-                                      isOneTimeImageUploaded = true;
-                                      var myMessage = Messages(
-                                        id: -1,
-                                        gptSessionId:
-                                        selectedSessionId.toString(),
-                                        question: question,
-                                        response: 'Generating response...',
-                                        createdAt: DateTime.now().toString(),
-                                        updatedAt: DateTime.now().toString(),
-                                        imageUrl1: '',imageUrl2: '',);
-                                      state1.response1.messages!.add(myMessage);
+                                    if (question != '') {
+                                      setState(() {
+                                        isOneTimeImageUploaded = true;
+                                        var myMessage = Messages(
+                                          id: -1,
+                                          gptSessionId:
+                                              selectedSessionId.toString(),
+                                          question: question,
+                                          response: 'Generating response...',
+                                          createdAt: DateTime.now().toString(),
+                                          updatedAt: DateTime.now().toString(),
+                                          imageUrl1: '',
+                                          imageUrl2: '',
+                                        );
+                                        state1.response1.messages!
+                                            .add(myMessage);
 
-                                      BlocProvider.of<ChatGPTBloc>(context).add(
-                                        GetPost(
-                                            sessionId:
-                                            selectedSessionId.toString(),
-                                            question:  question,
-                                            imageUrl1: null,
-                                            imageUrl2: null,
-                                            // replace with real input
-                                            imageType: imageType),
-                                      );
-                                      imageUploadBloc.imagefiles.clear();
-                                      textController.clear();
-                                      _uploadedFile = _selectedFile;
+                                        BlocProvider.of<ChatGPTBloc>(context)
+                                            .add(
+                                          GetPost(
+                                              sessionId:
+                                                  selectedSessionId.toString(),
+                                              question: question,
+                                              imageUrl1: null,
+                                              imageUrl2: null,
+                                              // replace with real input
+                                              imageType: imageType),
+                                        );
+                                        imageUploadBloc.imagefiles.clear();
+                                        textController.clear();
 
-                                      _selectedFile = null;
-                                      scrollToBottom();
-                                    });
+                                        scrollToBottom();
+                                      });
 
-                                    try {
-
-                                      isWriting = false;
-                                      // });
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                          SnackBar(content: Text('Error: $e')));
-                                    }
-                                    }else{
+                                      try {
+                                        isWriting = false;
+                                        // });
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text('Error: $e')));
+                                      }
+                                    } else {
                                       toasty(context, 'Please ask Question');
                                     }
-                                  } else if (imageUploadBloc.imagefiles.isNotEmpty &&
+                                  } else if (imageUploadBloc
+                                          .imagefiles.isNotEmpty &&
                                       !isOneTimeImageUploaded) {
-                                    String question = textController.text
-                                        .trim();
+                                    String question =
+                                        textController.text.trim();
                                     // String sessionId = selectedSessionId.toString();
                                     // var tempId =
                                     //     -1; // Unique temporary ID for the response
@@ -791,137 +787,42 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       var myMessage = Messages(
                                         id: -1,
                                         gptSessionId:
-                                        selectedSessionId.toString(),
+                                            selectedSessionId.toString(),
                                         question: question,
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl1: imageUploadBloc.imagefiles
-                                            .first.path ??
-                                            '', imageUrl2: imageUploadBloc.imagefiles
-                                            .first.path ??
-                                            '',);
+                                        imageUrl1: imageUploadBloc
+                                            .imagefiles.first.path,
+                                        imageUrl2: imageUploadBloc
+                                            .imagefiles.first.path,
+                                      );
                                       state1.response1.messages!.add(myMessage);
 
                                       BlocProvider.of<ChatGPTBloc>(context).add(
                                         GetPost(
                                             sessionId:
-                                            selectedSessionId.toString(),
+                                                selectedSessionId.toString(),
                                             question: question == ""
                                                 ? 'Analyse Image'
                                                 : question,
-                                            imageUrl1:
-                                            imageUploadBloc.imagefiles.first
-                                                .path ??
-                                                '',
-                                            imageUrl2:
-                                            imageUploadBloc.imagefiles.last
-                                                .path ?? '',
+                                            imageUrl1: imageUploadBloc
+                                                .imagefiles.first.path,
+                                            imageUrl2: imageUploadBloc
+                                                .imagefiles.last.path,
                                             // replace with real input
                                             imageType: imageType),
                                       );
                                       imageUploadBloc.imagefiles.clear();
                                       textController.clear();
-                                      _uploadedFile = _selectedFile;
-
-                                      _selectedFile = null;
                                       scrollToBottom();
                                     });
-                                    // // Add the temporary message (User's question)
-                                    // // setState(() {
-                                    // // message.add(myMessage);
-                                    // // scrollToBottom();
-                                    // // });
-                                    //
                                     try {
-                                      //   for (int i = 0; i <= state1.response2.content!.length; i++) {
-                                      //     await Future.delayed(const Duration(
-                                      //         milliseconds:
-                                      //             100)); // Delay to simulate typing speed
-                                      //
-                                      //     int index = state1.response1.messages!
-                                      //         .indexWhere((msg) => msg.id == -1);
-                                      //     if (index != -1) {
-                                      //       // Update the temporary message with gradually more characters of the response
-                                      //       String typingText = state1
-                                      //           .response2.content!
-                                      //           .substring(0, i);
-                                      //       state1.response1.messages![index] =
-                                      //           Messages(
-                                      //               id: -1,
-                                      //               gptSessionId: state1.response.sessions!.first??'',
-                                      //               question: question,
-                                      //               response: typingText,
-                                      //               createdAt:
-                                      //                   DateTime.now().toString(),
-                                      //               updatedAt: DateTime.now()
-                                      //                   .toString());
-                                      //       print(typingText);
-                                      //       if (state1
-                                      //               .response2.content!.length ==
-                                      //           i) {
-                                      //         state1.response1.messages![index] =
-                                      //             Messages(
-                                      //                 id: -1,
-                                      //                 gptSessionId: state1.response.sessions!.first??'',
-                                      //                 question: question,
-                                      //                 response: typingText,
-                                      //                 createdAt: DateTime.now()
-                                      //                     .toString(),
-                                      //                 updatedAt: DateTime.now()
-                                      //                     .toString());
-                                      //       }
-                                      //     }
-                                      //   }
-                                      // ChatGPTResponse newMessage =
-                                      //     await askQuestion(
-                                      //         sessionId, question);
-
-                                      // for (int i = 0;
-                                      //     i <= state1.response2.content!.length;
-                                      //     i++) {
-                                      //   await Future.delayed(const Duration(
-                                      //       milliseconds:
-                                      //           1)); // Delay to simulate typing speed
-                                      //
-                                      //   // setState(() {
-                                      //     int index = state1.response1.messages!.indexWhere(
-                                      //         (msg) => msg.id == tempId);
-                                      //     if (index != -1) {
-                                      //       // Update the temporary message with gradually more characters of the response
-                                      //       String typingText = state1.response2.content!.substring(0, i);
-                                      //       state1.response1.messages![index] = Messages(
-                                      //           id: tempId,
-                                      //           gptSessionId: state1.response.sessions!.first??'',
-                                      //           question: question,
-                                      //           response: typingText,
-                                      //           createdAt:
-                                      //               DateTime.now().toString(),
-                                      //           updatedAt:
-                                      //               DateTime.now().toString());
-                                      //       if (state1.response2.content!.length ==
-                                      //           i) {
-                                      //         state1.response1.messages![index] = Messages(
-                                      //             id: -1,
-                                      //             gptSessionId: state1.response.sessions!.first??'',
-                                      //             question: question,
-                                      //             response: typingText,
-                                      //             createdAt:
-                                      //                 DateTime.now().toString(),
-                                      //             updatedAt: DateTime.now()
-                                      //                 .toString());
-                                      //       }
-                                      //     }
-                                      //   // });
-                                      //   scrollToBottom();
-                                      // }
-                                      // setState(() {
                                       isWriting = false;
-                                      // });
                                     } catch (e) {
                                       ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                          SnackBar(content: Text('Error: $e')));
+                                          .showSnackBar(SnackBar(
+                                              content: Text('Error: $e')));
                                     }
                                   }
                                 },
@@ -945,26 +846,52 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                   ],
                 ));
           } else if (state1 is DataError) {
-            return Scaffold(body: Text(state1.errorMessage.toString()));
+            return Scaffold(
+                body: Container(
+             padding: const EdgeInsets.all(10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Error!",style: GoogleFonts.poppins(color: Colors.red,fontSize: 24,fontWeight: FontWeight.bold),),
+                  const SizedBox(height:10),
+                  Text(
+                    state1.errorMessage.toString(),
+                    style: const TextStyle(color: black),
+                  ),
+                  MaterialButton(onPressed: (){
+                    try {
+                      BlocProvider.of<ChatGPTBloc>(context)
+                          .add(GetNewChat());
+
+                      isOneTimeImageUploaded = false;
+                      selectedSessionId =
+                          BlocProvider.of<ChatGPTBloc>(context)
+                              .newChatSessionId;
+
+                      // Session newSession = await createNewChatSession();
+                      // setState(() {
+                      //   futureSessions = Future(() =>
+                      //       [newSession, ...(snapshot.data ?? [])]);
+                      // });
+                    } catch (e) {
+                      debugPrint(e.toString());
+                    }
+                  },
+
+                    color: appButtonBackgroundColorGlobal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)
+                  ),child: const Text("Try Again",style: TextStyle(color: Colors.white),),
+                  )
+                ],
+              ),
+            ));
           } else {
             return const Text('error');
           }
         }));
   }
 
-  bool _isImageFile(File? file) {
-    // Check if the file is an image
-    return true; // Implement your logic here
-  }
-
-  bool _isDocumentFile(File? file) {
-    // Check if the file is a document
-    return false; // Implement your logic here
-  }
-
-  File? _selectedFile;
-  File? _uploadedFile;
-  bool _isFileUploading = false;
   List<XFile> selectedImageFiles = [];
 
   Widget _buildImagePreview() {
@@ -978,32 +905,32 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
             if (state is FileLoadedState) {
               return imageUploadBloc.imagefiles != []
                   ? Wrap(
-                children: imageUploadBloc.imagefiles.map((imageone) {
-                  return Stack(children: [
-                    Card(
-                      child: SizedBox(
-                        height: 60, width: 60,
-                        child: buildMediaItem(File(imageone.path)),
-                        // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: GestureDetector(
-                          onTap: () {
-                            setState(() {});
-                            selectedImageFiles.remove(imageone);
-                            imageUploadBloc.add(SelectedFiles(
-                                pickedfiles: imageone, isRemove: true));
-                          },
-                          child: const Icon(
-                            Icons.remove_circle_outlined,
-                            color: Colors.red,
-                          )),
+                      children: imageUploadBloc.imagefiles.map((imageone) {
+                        return Stack(children: [
+                          Card(
+                            child: SizedBox(
+                              height: 60, width: 60,
+                              child: buildMediaItem(File(imageone.path)),
+                              // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            child: GestureDetector(
+                                onTap: () {
+                                  setState(() {});
+                                  selectedImageFiles.remove(imageone);
+                                  imageUploadBloc.add(SelectedFiles(
+                                      pickedfiles: imageone, isRemove: true));
+                                },
+                                child: const Icon(
+                                  Icons.remove_circle_outlined,
+                                  color: Colors.red,
+                                )),
+                          )
+                        ]);
+                      }).toList(),
                     )
-                  ]);
-                }).toList(),
-              )
                   : Container();
             } else {
               return Container();
@@ -1027,21 +954,11 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     );
   }
 
-  Widget _buildVideoPreview(File? file) {
-    // Implement video preview widget
-    return Container();
-  }
-
-  Widget _buildDocumentPreview(File file) {
-    // Implement document preview widget
-    return Container();
-  }
-
   String imageType = '';
 
   void _showFileOptions() {
     int imageLimit = 0;
-    print(imageType);
+    debugPrint(imageType);
     if (imageType == 'X-ray' || imageType == 'Mammography') {
       imageLimit = 2;
     } else {
@@ -1053,10 +970,11 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
         return Container(
           padding: const EdgeInsets.all(16.0),
           child: MultipleImageUploadWidget(
-              imageType: imageType, imageUploadBloc, imageLimit: imageLimit, (
-              imageFiles) {
+              imageType: imageType,
+              imageUploadBloc,
+              imageLimit: imageLimit, (imageFiles) {
             selectedImageFiles = imageFiles;
-            print(selectedImageFiles);
+            debugPrint(selectedImageFiles.toString());
             setState(() {});
             Navigator.pop(context);
           }),
@@ -1234,31 +1152,7 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     );
   }
 
-  Future<File?> _pickFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
-    }
-  }
-
-  Future<File?> _pickVideoFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickVideo(source: source);
-
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
-    }
-  }
-
-  onSubscriptionCount(String channelName, int subscriptionCount) {}
-
-  Future<void> _permissionDialog(context) async {
+  Future<void> _permissionDialog() async {
     return showDialog(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -1307,352 +1201,5 @@ class _ChatGPTScreenState extends State<ChatGptWithImageScreen> {
         );
       }
     });
-  }
-
-  deleteRecord(BuildContext context, int id) {}
-
-  editRecord(BuildContext context, int id) {}
-}
-
-class ChatBubble extends StatelessWidget {
-  final String text;
-  final bool isUserMessage;
-  final Function? onTapReginarate;
-  File? imageUrl1;
-  File? imageUrl2;
-  String responseImageUrl1;
-  String responseImageUrl2;
-
-  ChatBubble({
-    Key? key,
-    required this.text,
-    required this.isUserMessage,
-    this.onTapReginarate,
-    required this.imageUrl1,
-    required this.imageUrl2,
-    this.responseImageUrl1 = '',
-    this.responseImageUrl2 = '',
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-    double bubbleMaxWidth = screenWidth * 0.6;
-    // print("response1 ${responseImageUrl}");
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
-      child: IntrinsicHeight(
-        child: Row(
-          mainAxisAlignment:
-          isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-          children: [
-            if (!isUserMessage) ...[
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.end,
-                spacing: 8.0,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: svGetBodyColor(),
-                    child: Image.asset(
-                      'assets/logo/ic_web.png',
-                      width: 25,
-                      height: 25,
-                    ),
-                  ),
-                  Container(
-                    width: 75.w,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          topLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10)),
-                      color:
-                      appStore.isDarkMode ? Colors.white30 : Colors.white,
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 6.0),
-                          child: ConstrainedBox(
-                              constraints:
-                              BoxConstraints(maxWidth: bubbleMaxWidth),
-                              child: text == 'Generating response...'
-                                  ? Column(
-                                children: [
-                                  MarkdownBlock(
-                                      data: text,
-                                      config: MarkdownConfig(configs: [])),
-                                  // Text(
-                                  //   // fitContent: true,
-                                  //   // selectable: true,
-                                  //   // softLineBreak: true,
-                                  //   // shrinkWrap: true,
-                                  //   text
-                                  //       .replaceAll("*", '')
-                                  //       .replaceAll('#', ''),
-                                  //   style: GoogleFonts.poppins(
-                                  //       color: Colors.black,
-                                  //       fontSize: 12.sp),
-                                  // ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  CircularProgressIndicator(
-                                    color: svGetBodyColor(),
-                                  ),
-                                ],
-                              )
-                                  : MarkdownBlock(
-                                data: text,
-                              )),
-                        ),
-                        Divider(
-                          color: Colors.grey[200],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // InkWell(
-                            //   onTap: () => onTapReginarate!(),
-                            //   child: const Padding(
-                            //     padding: EdgeInsets.all(8.0),
-                            //     child: Row(
-                            //       children: [
-                            //         Icon(Icons.change_circle_outlined),
-                            //         Text(' Regenerate')
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
-                            IconButton(
-                              icon: const Icon(Icons.copy),
-                              onPressed: () {
-                                // Copy text to clipboard
-                                Clipboard.setData(ClipboardData(text: text));
-                                // You can show a snackbar or any other feedback here
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Text copied to clipboard'),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              // Expanded(
-              //   flex: 1,
-              //   child: Align(
-              //     alignment: Alignment.topLeft,
-              //     child: IconButton(
-              //       icon: const Icon(Icons.copy),
-              //       onPressed: () {
-              //         // Copy text to clipboard
-              //         Clipboard.setData(ClipboardData(text: text));
-              //         // You can show a snackbar or any other feedback here
-              //         ScaffoldMessenger.of(context).showSnackBar(
-              //           const SnackBar(
-              //             content: Text('Text copied to clipboard'),
-              //           ),
-              //         );
-              //       },
-              //     ),
-              //   ),
-              // ),
-            ] else
-              ...[
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.end,
-                  spacing: 8.0,
-                  children: [
-                    Material(
-                      borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
-                          bottomLeft: Radius.circular(10)),
-                      color: Colors.blue[300],
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14.0, vertical: 10.0),
-                        child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                                maxWidth: bubbleMaxWidth),
-                            child: Column(
-                              children: [
-                                if (imageUrl2 != null)
-                                  Row(
-                                    children: [
-                                      if (responseImageUrl1 != '')
-                                        SizedBox(
-                                            height: 100,
-                                            width: 25.w,
-                                            child: CustomImageView(
-                                              imagePath: responseImageUrl1,
-                                            ))
-                                      else
-                                        if (imageUrl1 != null)
-                                          SizedBox(
-                                              height: 100,
-                                              width: 25.w,
-                                              child: imageUrl1 != null
-                                                  ? Image.file(
-                                                imageUrl1!,
-                                                errorBuilder: (BuildContext
-                                                context,
-                                                    Object exception,
-                                                    StackTrace? stackTrace) {
-                                                  return const SizedBox();
-                                                },
-                                              )
-                                                  : const SizedBox()),
-                                      const SizedBox(
-                                        width: 4,
-                                      ),
-                                      if (responseImageUrl2 != '')
-                                        SizedBox(
-                                            height: 100,
-                                            width: 25.w,
-                                            child: CustomImageView(
-                                              imagePath: responseImageUrl2,
-                                            ))
-                                      else
-                                        if (imageUrl2 != null)
-                                          SizedBox(
-                                              height: 100,
-                                              width: 25.w,
-                                              child: imageUrl2 != null
-                                                  ? Image.file(
-                                                imageUrl2!,
-                                                errorBuilder: (BuildContext
-                                                context,
-                                                    Object exception,
-                                                    StackTrace? stackTrace) {
-                                                  return const SizedBox();
-                                                },
-                                              )
-                                                  : const SizedBox()),
-                                    ],
-                                  )
-                                else
-                                  if (responseImageUrl1 != '')
-                                    CustomImageView(
-                                      imagePath: responseImageUrl1,
-                                    )
-                                  else
-                                    if (imageUrl1 != null)
-                                      Image.file(
-                                        imageUrl1!, errorBuilder: (BuildContext
-                                      context,
-                                          Object exception,
-                                          StackTrace? stackTrace) {
-                                        return const SizedBox();
-                                      },),
-                                Text(text,
-                                    style: const TextStyle(
-                                        color: Colors.white)),
-                              ],
-                            )),
-                      ),
-                    ),
-                    CircleAvatar(
-                      backgroundImage: CachedNetworkImageProvider(
-                          AppData.imageUrl + AppData.profile_pic),
-                      radius: 12,
-                    ),
-                  ],
-                ),
-              ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TypingIndicators extends StatefulWidget {
-  final Color color;
-  final double size;
-
-  const TypingIndicators({Key? key, required this.color, this.size = 10.0})
-      : super(key: key);
-
-  @override
-  _TypingIndicatorState createState() => _TypingIndicatorState();
-}
-
-class _TypingIndicatorState extends State<TypingIndicators>
-    with TickerProviderStateMixin {
-  late List<AnimationController> _controllers;
-  late List<Animation<double>> _animations;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controllers = List.generate(3, (index) {
-      return AnimationController(
-        duration: const Duration(milliseconds: 600),
-        vsync: this,
-      )
-        ..repeat();
-    });
-
-    _animations = _controllers
-        .asMap()
-        .map((i, controller) {
-      return MapEntry(
-        i,
-        Tween(begin: 0.0, end: 8.0).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(0.2 * i, 1.0, curve: Curves.easeInOut),
-          ),
-        ),
-      );
-    })
-        .values
-        .toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _animations[index],
-          builder: (context, child) {
-            return Transform.translate(
-              offset: Offset(0, -_animations[index].value),
-              child: child,
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-            child: CircleAvatar(
-              radius: widget.size,
-              backgroundColor: widget.color,
-            ),
-          ),
-        );
-      }),
-    );
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    super.dispose();
   }
 }
