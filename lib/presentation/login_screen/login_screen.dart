@@ -16,6 +16,7 @@ import 'package:doctak_app/widgets/custom_outlined_button.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -30,11 +31,13 @@ import '../home_screen/utils/SVCommon.dart';
 import 'bloc/login_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen> createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
 
   final TextEditingController passwordController = TextEditingController();
@@ -156,9 +159,183 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
   }
+  List<String> _savedUsernames = [];
 
+  Future<void> _loadSavedUsernames() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _savedUsernames = prefs.getStringList('saved_usernames') ?? [];
+
+    });
+    if (_savedUsernames.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showSavedLogins(context);
+      });
+    }
+  }
+
+  Future<void> _saveLoginDetails(String username, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> usernames = prefs.getStringList('saved_usernames') ?? [];
+    if (!usernames.contains(username)) {
+      usernames.add(username);
+    }
+    await prefs.setStringList('saved_usernames', usernames);
+    await prefs.setString('password_$username', password);
+  }
+  String? selectedUsername;
+  Future<void> _showSavedLogins(BuildContext context1) async {
+    showModalBottomSheet(
+      context: context1,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header text
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Saved Logins',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.headlineSmall?.color,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              _savedUsernames.isNotEmpty
+                  ? ListView.separated(
+                shrinkWrap: true,
+                itemCount: _savedUsernames.length,
+                separatorBuilder: (context, index) => Divider(
+                  color: Colors.grey.shade300,
+                  thickness: 1,
+                  height: 1,
+                ),
+                itemBuilder: (context, index) {
+                  final username = _savedUsernames[index];
+                  final isSelected = selectedUsername == username;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.shade200,
+                      child: Icon(
+                        CupertinoIcons.profile_circled,
+                        color: isSelected
+                            ? Colors.white
+                            : Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    title: Text(
+                      username,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: isSelected
+                            ? Theme.of(context).primaryColor
+                            : Colors.black,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                      Icons.check_circle,
+                      color: Theme.of(context).primaryColor,
+                    )
+                        : null,
+                    onTap: () {
+                      setState(() {
+                        selectedUsername = username;
+                      });
+                      _onUsernameSelected(username);
+                      // Navigator.pop(context1); // Close the sheet after selection
+                    },
+                  );
+                },
+              )
+                  : const Center(
+                child: Text(
+                  'No saved logins available',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _onUsernameSelected(String username) async {
+    Navigator.of(context).pop(); // Close the bottom sheet
+    emailController.text = username;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? password = prefs.getString('password_$username');
+    if (password != null) {
+      passwordController.text = password;
+    }
+    await prefs.setBool('acceptTerms', true);
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+    }
+    // TermsAndConditionScreen(accept: () async {
+    print('object');
+    if (Platform.isAndroid) {
+      await FirebaseMessaging.instance
+          .getToken().then((token){
+        print("token $token");
+        loginBloc.add(
+          LoginButtonPressed(
+              username: emailController.text,
+              // replace with real input
+              password: passwordController.text,
+              rememberMe: _rememberMe,
+              deviceToken: token ?? ""
+            // replace with real input
+          ),
+        );
+      });
+    } else {
+      await FirebaseMessaging.instance
+          .getAPNSToken().then((token){
+        loginBloc.add(
+          LoginButtonPressed(
+              username: emailController.text,
+              // replace with real input
+              password: passwordController.text,
+              rememberMe: _rememberMe,
+              deviceToken: token ?? ""
+            // replace with real input
+          ),
+        );
+      });
+    }
+  }
+  @override
+  void initState() {
+    _loadSavedUsernames();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
+
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -290,8 +467,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         }
                                         return null;
                                       },
-                                      contentPadding: const EdgeInsets.only(
-                                          top: 18, right: 30, bottom: 18)),
+                                      contentPadding: const EdgeInsets.only(top: 18, right: 30, bottom: 18)),
                                   const SizedBox(height: 16),
                                   BlocBuilder<LoginBloc, LoginState>(
                                       bloc: loginBloc,
@@ -396,7 +572,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                       }
                                       // TermsAndConditionScreen(accept: () async {
                                       print('object');
-
                                       if (Platform.isAndroid) {
                                      await FirebaseMessaging.instance
                                             .getToken().then((token){
@@ -664,7 +839,11 @@ class _LoginScreenState extends State<LoginScreen> {
     GoogleSignIn().disconnect();
   }
 
-  void loginApp(BuildContext context) {
+  Future<void> loginApp(BuildContext context) async {
+   print(emailController.text);
+   if(Platform.isIOS) {
+     _saveLoginDetails(emailController.text, passwordController.text);
+   }
     // if (mounted) {
     // // toasty(context, 'Login successfully', bgColor: Colors.green, textColor: Colors.white);
     // //   ScaffoldMessenger.of(context).showSnackBar(
@@ -675,7 +854,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // //   );
     // }
     TextInput.finishAutofillContext(shouldSave: true);
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       toasty(context, 'Login successfully', bgColor: Colors.green, textColor: Colors.white);
       if (mounted) {
         // Navigator.pushReplacement(
@@ -684,7 +863,7 @@ class _LoginScreenState extends State<LoginScreen> {
         //     builder: (BuildContext context) => const SVDashboardScreen(),
         //   ),
         // );
-        SVDashboardScreen().launch(context,isNewTask: true);
+        const SVDashboardScreen().launch(context,isNewTask: true);
       }
     });
   }
