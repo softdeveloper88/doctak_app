@@ -23,6 +23,6 @@ class AppSharedPreferences {
     await prefs.remove('practicingCountry');
     await prefs.remove('gender');
     await prefs.remove('country');
-    await prefs.clear();
+    // await prefs.clear();
   }
 }
