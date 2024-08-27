@@ -867,7 +867,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                       : Container(),
                   if (_selectedFile != null)
                     if (_isImageFile(_selectedFile!))
-                      _buildImagePreview(_selectedFile!),
+                      _buildImagePreview(_selectedFile??File('')),
                   if (_isVideoFile(_selectedFile))
                     _buildVideoPreview(_selectedFile),
                   if (_isDocumentFile(_selectedFile))
@@ -913,15 +913,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                               _showFileOptions();
                                             } else if (result.isDenied) {
                                               print("isDenied");
-                                            } else if (result
-                                                .isPermanentlyDenied) {
+                                            } else if (result.isPermanentlyDenied) {
                                               print("isPermanentlyDenied");
-                                              _permissionDialog(context);
+                                              _showFileOptions();
+                                              // _permissionDialog(context);
                                             }
-                                          } else if (await permission
-                                              .isPermanentlyDenied) {
+                                          } else if (await permission.isPermanentlyDenied) {
+                                            _showFileOptions();
                                             print("isPermanentlyDenied");
-                                            _permissionDialog(context);
+                                            // _permissionDialog(context);
                                           }
                                         },
                                       ),
@@ -1161,10 +1161,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: FileImage(file),
-        ),
-        title: Text(file.path.split('/').last),
+        leading:  Image.file(file,width: 70.w,height: 200,fit: BoxFit.cover,),
+        // title: Text(file.path.split('/').last),
         trailing: IconButton(
           icon: const Icon(Icons.clear),
           onPressed: () {
@@ -1201,11 +1199,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 title: const Text('Choose from gallery'),
                 onTap: () async {
                   Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.gallery);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
+                  try {
+                    File? file = await _pickFile(ImageSource.gallery);
+                    if (file != null) {
+                      setState(() {
+                        _selectedFile = file;
+                      });
+                    }
+                  }catch(e){
+                    _permissionDialog(context);
                   }
                 },
               ),

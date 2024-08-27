@@ -319,7 +319,7 @@ class LoginScreenState extends State<LoginScreen> {
               username: emailController.text,
               // replace with real input
               password: passwordController.text,
-              rememberMe: _rememberMe,
+              rememberMe: true,
               deviceToken: token ?? ""
             // replace with real input
           ),
