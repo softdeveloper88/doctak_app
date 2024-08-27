@@ -155,7 +155,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
               ),
             );
           } else if (state1 is DataLoaded) {
-            isEmpty = state1.response1.messages!.isEmpty;
+            isEmpty = state1.response1.messages?.isEmpty??false;
             print('response ${state1.response.toString()}');
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
@@ -564,10 +564,10 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
-                          itemCount: state1.response1.messages!.length,
+                          itemCount: state1.response1.messages?.length,
                           itemBuilder: (context, index) {
                             Messages message =
-                                state1.response1.messages![index];
+                                state1.response1.messages?[index]??Messages();
                             return Column(
                               children: [
                                 ChatBubble(

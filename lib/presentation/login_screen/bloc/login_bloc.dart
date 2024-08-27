@@ -26,7 +26,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           event.username, event.password, 'mobile', '123456',event.deviceToken);
       log(response);
       if (response.success == true) {
-        ProgressDialogUtils.hideProgressDialog();
         // if (response.user!.emailVerifiedAt == null) {
         //
         //   return;
@@ -113,6 +112,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         emit(LoginSuccess(
             isEmailVerified: response.user?.emailVerifiedAt ?? ''));
+        ProgressDialogUtils.hideProgressDialog();
+
       } else {
         ProgressDialogUtils.hideProgressDialog();
 

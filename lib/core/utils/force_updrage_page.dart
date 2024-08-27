@@ -10,6 +10,8 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app_transitions.dart';
+
 class ForceUpgradePage extends StatefulWidget {
   const ForceUpgradePage({Key? key}) : super(key: key);
 
@@ -81,15 +83,17 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
         });
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const SplashScreen(),
+          CustomPageRoute(
+            page: const SplashScreen(),
+            transitionType: PageTransitionType.fade, // or any other type
           ),
         );
       }
     } else {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const SplashScreen(),
+        CustomPageRoute(
+          page: const SplashScreen(),
+          transitionType: PageTransitionType.fade, // or any other type
         ),
       );
       // Handle the case where packageInfo is null

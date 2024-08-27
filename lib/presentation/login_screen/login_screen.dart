@@ -305,7 +305,7 @@ class LoginScreenState extends State<LoginScreen> {
               username: emailController.text,
               // replace with real input
               password: passwordController.text,
-              rememberMe: _rememberMe,
+              rememberMe: true,
               deviceToken: token ?? ""
             // replace with real input
           ),
@@ -566,7 +566,6 @@ class LoginScreenState extends State<LoginScreen> {
                                       SharedPreferences prefs =
                                       await SharedPreferences.getInstance();
                                       await prefs.setBool('acceptTerms', true);
-
                                       if (_formKey.currentState!.validate()) {
                                         _formKey.currentState!.save();
                                       }
