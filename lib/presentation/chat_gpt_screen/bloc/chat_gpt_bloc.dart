@@ -16,6 +16,7 @@ import 'chat_gpt_state.dart';
 class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   final ApiService postService = ApiService(Dio());
   int newChatSessionId = 0;
+  bool isWait = false;
 
   ChatGPTBloc() : super(DataInitial()) {
     on<LoadDataValues>(_onGetPosts);
@@ -53,6 +54,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   _askQuestion(GetPost event, Emitter<ChatGPTState> emit) async {
 
     try {
+      isWait=true;
       ChatGptAskQuestionResponse response;
       print('image1 ${event.imageUrl1}');
       print('image2 ${event.imageUrl2}');
@@ -85,8 +87,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
             const Duration(milliseconds: 1)); // Delay to simulate typing speed
         int index = (state as DataLoaded)
             .response1
-            .messages!
-            .indexWhere((msg) => msg.id == -1);
+            .messages?.indexWhere((msg) => msg.id == -1)??0;
         if (index != -1) {
           String typingText =
               (state as DataLoaded).response2.content!.substring(0, i);
@@ -109,9 +110,10 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
                 updatedAt: DateTime.now().toString());
           }
         }
+        isWait=false;
+
         emit(DataLoaded((state as DataLoaded).response,
             (state as DataLoaded).response1, response));
-
         // });
         // scrollToBottom();
       }
@@ -144,7 +146,6 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     ProgressDialogUtils.showProgressDialog();
     try {
       emit(DataLoaded(ChatGptSession(), ChatGptMessageHistory(),ChatGptAskQuestionResponse()) );
-
       var response = await postService.newChat('Bearer ${AppData.userToken}');
       ChatGptMessageHistory response1 = await postService.gptChatMessages(
           'Bearer ${AppData.userToken}', response.response.data['session_id']);
@@ -157,7 +158,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       emit(DataLoaded(responseSession, response1, (state as DataLoaded).response2));
     } catch (e) {
       print(e);
-      emit(DataError('An error occurred$e'));
+      emit(DataError('$e'));
     }
   }
 

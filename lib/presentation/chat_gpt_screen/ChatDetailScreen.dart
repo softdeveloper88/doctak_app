@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
 import 'package:doctak_app/main.dart';
@@ -15,11 +12,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import to use Clipboard
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:markdown_widget/config/configs.dart';
-import 'package:markdown_widget/widget/markdown_block.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -55,7 +48,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isDeleteButtonClicked = false;
   bool isAlreadyAsk = true;
   bool isEmpty = false;
-  FocusNode focusNode=FocusNode();
+  FocusNode focusNode = FocusNode();
 
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
@@ -129,6 +122,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           )),
     );
   }
+
   @override
   void dispose() {
     focusNode.unfocus();
@@ -137,6 +131,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
 
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -164,7 +159,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
               ),
             );
           } else if (state1 is DataLoaded) {
-            isEmpty = state1.response1.messages?.isEmpty??false;
+            isEmpty = state1.response1.messages?.isEmpty ?? false;
             print('response ${state1.response.toString()}');
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
@@ -262,7 +257,12 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   color: Colors.lightBlue,
                                   onPressed: () {
                                     // if (chatWithAi == "New Session") {
-                                      try {
+
+                                    try {
+                                      String isEmpty =
+                                          state1.response2.content ?? '';
+
+                                      if (isEmpty != "") {
                                         BlocProvider.of<ChatGPTBloc>(context)
                                             .add(GetNewChat());
                                         // Navigator.of(context).pop();
@@ -271,15 +271,15 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                             BlocProvider.of<ChatGPTBloc>(
                                                     context)
                                                 .newChatSessionId;
-
-                                        // Session newSession = await createNewChatSession();
-                                        // setState(() {
-                                        //   futureSessions = Future(() =>
-                                        //       [newSession, ...(snapshot.data ?? [])]);
-                                        // });
-                                      } catch (e) {
-                                        print(e);
                                       }
+                                      // Session newSession = await createNewChatSession();
+                                      // setState(() {
+                                      //   futureSessions = Future(() =>
+                                      //       [newSession, ...(snapshot.data ?? [])]);
+                                      // });
+                                    } catch (e) {
+                                      print(e);
+                                    }
                                     // }
                                   },
                                   child: Padding(
@@ -291,7 +291,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     ),
                                   ),
                                 ),
-
                                 IconButton(
                                   icon: isLoadingMessages
                                       ? Image.asset(
@@ -461,101 +460,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       const SizedBox(width: 10),
                                     ],
                                   ),
-                                  // Wrap(
-                                  //   alignment: WrapAlignment.center,
-                                  //   // mainAxisAlignment: MainAxisAlignment.center,
-                                  //   children: [
-                                  //     cardIntro('Code Detection',
-                                  //         'Identify CPT or ICD codes', () {
-                                  //       // Code Detection: Identify CPT or ICD codes
-                                  //       isAlreadyAsk = true;
-                                  //       widget.question =
-                                  //           'Code Detection: Identify CPT or ICD codes';
-                                  //       if (isAlreadyAsk) {
-                                  //         setState(() {
-                                  //           isEmpty = false;
-                                  //         });
-                                  //         isAlreadyAsk = false;
-                                  //
-                                  //         // Future.delayed(const Duration(seconds: 1),(){
-                                  //         drugsAskQuestion(state1, context);
-                                  //         // });
-                                  //         // textController.text = widget.question.toString();
-                                  //       }
-                                  //     }),
-                                  //     const SizedBox(width: 10),
-                                  //     cardIntro('Diagnostic \nSuggestions',
-                                  //         'Request suggestions based on symptoms',
-                                  //         () {
-                                  //       isAlreadyAsk = true;
-                                  //       widget.question =
-                                  //           'Diagnostic Suggestions: Request suggestions based on symptoms';
-                                  //       if (isAlreadyAsk) {
-                                  //         isAlreadyAsk = false;
-                                  //         // Future.delayed(const Duration(seconds: 1),(){
-                                  //         setState(() {
-                                  //           isEmpty = false;
-                                  //         });
-                                  //         drugsAskQuestion(state1, context);
-                                  //         // });
-                                  //         // textController.text = widget.question.toString();
-                                  //       }
-                                  //     }),
-                                  //     const SizedBox(width: 10),
-                                  //     cardIntro('Medication Review',
-                                  //         'Check interactions and dosage', () {
-                                  //       // Medication Review: check interactions and dosage
-                                  //
-                                  //       widget.question =
-                                  //           'Medication Review: check interactions and dosage';
-                                  //       // Future.delayed(const Duration(seconds: 1),(){
-                                  //       setState(() {
-                                  //         isEmpty = false;
-                                  //       });
-                                  //       drugsAskQuestion(state1, context);
-                                  //       // });
-                                  //       // textController.text = widget.question.toString();
-                                  //     }),
-                                  //     cardIntro('Medical images',
-                                  //         'initial assessment', () async {
-                                  //       // Medication Review: check interactions and dosage
-                                  //           widget.question =
-                                  //           'initial assessment';
-                                  //
-                                  //           const permission = Permission.photos;
-                                  //           if (await permission.isGranted) {
-                                  //             _showFileOptions();
-                                  //           } else if (await permission
-                                  //               .isDenied) {
-                                  //             final result =
-                                  //                 await permission.request();
-                                  //             if (result.isGranted) {
-                                  //               _showFileOptions();
-                                  //             } else if (result.isDenied) {
-                                  //               print("isDenied");
-                                  //               // _permissionDialog(context);
-                                  //               _showFileOptions();
-                                  //
-                                  //             } else if (result
-                                  //                 .isPermanentlyDenied) {
-                                  //               print("isPermanentlyDenied");
-                                  //               _permissionDialog(context);
-                                  //             }
-                                  //           } else if (await permission
-                                  //               .isPermanentlyDenied) {
-                                  //             print("isPermanentlyDenied");
-                                  //             _permissionDialog(context);
-                                  //           }
-                                  //       // Future.delayed(const Duration(seconds: 1),(){
-                                  //       setState(() {
-                                  //         isEmpty = false;
-                                  //       });
-                                  //       drugsAskQuestion(state1, context);
-                                  //       // });
-                                  //       // textController.text = widget.question.toString();
-                                  //     }),
-                                  //   ],
-                                  // ),
                                   const SizedBox(height: 20),
                                   const Text(
                                     'Ready to start? Type your question below or choose a suggested topic.',
@@ -576,14 +480,15 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           itemCount: state1.response1.messages?.length,
                           itemBuilder: (context, index) {
                             Messages message =
-                                state1.response1.messages?[index]??Messages();
+                                state1.response1.messages?[index] ?? Messages();
                             return Column(
                               children: [
                                 ChatBubble(
                                   text: message.question ?? '',
                                   isUserMessage: true,
                                   imageUrl1: null,
-                                  responseImageUrl1: message.imageUrl1 ?? '', imageUrl2: null,
+                                  responseImageUrl1: message.imageUrl1 ?? '',
+                                  imageUrl2: null,
                                 ),
                                 ChatBubble(
                                   text: message.response ?? "",
@@ -714,7 +619,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                           .showSnackBar(SnackBar(
                                               content: Text('Error: $e')));
                                     }
-                                  }, imageUrl2: null,
+                                  },
+                                  imageUrl2: null,
                                 ),
                               ],
                             );
@@ -788,7 +694,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           Expanded(
                             child: Container(
                               constraints: const BoxConstraints(maxHeight: 200),
-
                               padding: const EdgeInsets.only(left: 8, right: 8),
                               decoration: BoxDecoration(
                                 color: appStore.isDarkMode
@@ -850,14 +755,15 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl1:  '');
+                                        imageUrl1: '');
                                     state1.response1.messages!.add(myMessage);
                                     BlocProvider.of<ChatGPTBloc>(context).add(
                                       GetPost(
                                           sessionId:
                                               selectedSessionId.toString(),
                                           question: question,
-                                          imageUrl1: '' // replace with real input
+                                          imageUrl1:
+                                              '' // replace with real input
                                           ),
                                     );
 
@@ -980,17 +886,61 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   ],
                 ));
           } else if (state1 is DataError) {
-            return Scaffold(body: Text(state1.errorMessage.toString()));
+            return Scaffold(
+                body: Container(
+                  width: 100.w,
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment:CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Error!",
+                    style: GoogleFonts.poppins(
+                        color: Colors.red,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Something went wrong.Please try again...',
+                    style: TextStyle(color: black,fontSize: 16,fontWeight: FontWeight.w500),
+                  ),
+                  MaterialButton(
+                    onPressed: () {
+                      try {
+                        BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                        selectedSessionId =
+                            BlocProvider.of<ChatGPTBloc>(context)
+                                .newChatSessionId;
+
+                        // Session newSession = await createNewChatSession();
+                        // setState(() {
+                        //   futureSessions = Future(() =>
+                        //       [newSession, ...(snapshot.data ?? [])]);
+                        // });
+                      } catch (e) {
+                        debugPrint(e.toString());
+                      }
+                    },
+                    color: appButtonBackgroundColorGlobal,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    child: const Text(
+                      "Try Again",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              ),
+            ));
           } else {
             return const Text('error');
           }
         }));
   }
 
-
   onSubscriptionCount(String channelName, int subscriptionCount) {}
-
-
 
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
