@@ -11,6 +11,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart'
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
+import 'widgets/typing_indicators.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   bool isFromMainScreen;
@@ -127,7 +129,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           )),
     );
   }
+  @override
+  void dispose() {
+    focusNode.unfocus();
+    _scrollController.dispose();
+    textController.dispose();
 
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -573,14 +582,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 ChatBubble(
                                   text: message.question ?? '',
                                   isUserMessage: true,
-                                  imageUrl: _uploadedFile,
-                                  responseImageUrl: message.imageUrl1 ?? '',
+                                  imageUrl1: null,
+                                  responseImageUrl1: message.imageUrl1 ?? '', imageUrl2: null,
                                 ),
                                 ChatBubble(
                                   text: message.response ?? "",
                                   isUserMessage: false,
-                                  imageUrl: _uploadedFile,
-                                  responseImageUrl: message.imageUrl1 ?? '',
+                                  imageUrl1: null,
+                                  responseImageUrl1: message.imageUrl1 ?? '',
                                   onTapReginarate: () {
                                     String question = message.question ?? "";
                                     if (question.isEmpty) return;
@@ -705,18 +714,13 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                           .showSnackBar(SnackBar(
                                               content: Text('Error: $e')));
                                     }
-                                  },
+                                  }, imageUrl2: null,
                                 ),
                               ],
                             );
                           },
                         ),
                       ),
-                    if (_selectedFile != null)
-                      if (_isImageFile(_selectedFile!))
-                        _buildImagePreview(_selectedFile!),
-                    if (_isDocumentFile(_selectedFile))
-                      _buildDocumentPreview(_selectedFile!),
                     Container(
                       color: context.cardColor,
                       padding: const EdgeInsets.all(10.0),
@@ -783,6 +787,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           // const SizedBox(width: 8.0),
                           Expanded(
                             child: Container(
+                              constraints: const BoxConstraints(maxHeight: 200),
+
                               padding: const EdgeInsets.only(left: 8, right: 8),
                               decoration: BoxDecoration(
                                 color: appStore.isDarkMode
@@ -844,21 +850,18 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl1: _selectedFile?.path ?? '');
+                                        imageUrl1:  '');
                                     state1.response1.messages!.add(myMessage);
                                     BlocProvider.of<ChatGPTBloc>(context).add(
                                       GetPost(
                                           sessionId:
                                               selectedSessionId.toString(),
                                           question: question,
-                                          imageUrl1: _selectedFile?.path ??
-                                              '' // replace with real input
+                                          imageUrl1: '' // replace with real input
                                           ),
                                     );
 
                                     textController.clear();
-                                    _uploadedFile = _selectedFile;
-                                    _selectedFile = null;
                                     scrollToBottom();
                                   });
                                   // // Add the temporary message (User's question)
@@ -984,167 +987,10 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
         }));
   }
 
-  bool _isImageFile(File? file) {
-    // Check if the file is an image
-    return true; // Implement your logic here
-  }
-
-  bool _isDocumentFile(File? file) {
-    // Check if the file is a document
-    return false; // Implement your logic here
-  }
-
-  File? _selectedFile;
-  File? _uploadedFile;
-  bool _isFileUploading = false;
-
-  Widget _buildImagePreview(File file) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: FileImage(file),
-        ),
-        title: Text(file.path.split('/').last),
-        trailing: IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            setState(() {
-              _selectedFile = null;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVideoPreview(File? file) {
-    // Implement video preview widget
-    return Container();
-  }
-
-  Widget _buildDocumentPreview(File file) {
-    // Implement document preview widget
-    return Container();
-  }
-
-  void _showFileOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: const Text('Choose from gallery'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.gallery);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a picture'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.camera);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
-                  }
-                },
-              ),
-              // ListTile(
-              //   leading: const Icon(Icons.insert_drive_file),
-              //   title: const Text('Select a document'),
-              //   onTap: () async {
-              //     Navigator.pop(context);
-              //     File? file = await _pickFile(ImageSource.gallery);
-              //     if (file != null) {
-              //       setState(() {
-              //         _selectedFile = file;
-              //       });
-              //     }
-              //   },
-              // ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<File?> _pickFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
-    }
-  }
-
-  Future<File?> _pickVideoFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickVideo(source: source);
-
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
-    }
-  }
 
   onSubscriptionCount(String channelName, int subscriptionCount) {}
 
-  Future<void> _permissionDialog(context) async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          // <-- SEE HERE
-          title: Text(
-            'You want to enable permission?',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: 14.sp),
-          ),
-          // content: const SingleChildScrollView(
-          //   child: ListBody(
-          // //     children: <Widget>[
-          // //       Text('Are you sure want to enable permission?'),
-          // //     ],
-          //   ),
-          // ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Yes'),
-              onPressed: () {
-                openAppSettings();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -1162,280 +1008,280 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
 
   editRecord(BuildContext context, int id) {}
 }
-
-class ChatBubble extends StatelessWidget {
-  final String text;
-  final bool isUserMessage;
-  final Function? onTapReginarate;
-  File? imageUrl;
-  String responseImageUrl;
-
-  ChatBubble(
-      {Key? key,
-      required this.text,
-      required this.isUserMessage,
-      this.onTapReginarate,
-      required this.imageUrl,
-      this.responseImageUrl = ''})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double bubbleMaxWidth = screenWidth * 0.6;
-    // print("response1 ${responseImageUrl}");
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-      child: IntrinsicHeight(
-        child: Row(
-          mainAxisAlignment:
-              isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-          children: [
-            if (!isUserMessage) ...[
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.end,
-                spacing: 8.0,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: svGetBodyColor(),
-                    child: Image.asset(
-                      'assets/logo/ic_web.png',
-                      width: 25,
-                      height: 25,
-                    ),
-                  ),
-                  Container(
-                    width: 75.w,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          topLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10)),
-                      color:
-                          appStore.isDarkMode ? Colors.white30 : Colors.white,
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 6.0),
-                          child: ConstrainedBox(
-                            constraints:
-                                BoxConstraints(maxWidth: bubbleMaxWidth),
-                            child: text == 'Generating response...'
-                                ? Column(
-                                    children: [
-                                      Text(
-                                        // fitContent: true,
-                                        // selectable: true,
-                                        // softLineBreak: true,
-                                        // shrinkWrap: true,
-                                        text
-                                            .replaceAll("*", '')
-                                            .replaceAll('#', ''),
-                                        style: GoogleFonts.poppins(
-                                            color: Colors.black,
-                                            fontSize: 12.sp),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      CircularProgressIndicator(
-                                        color: svGetBodyColor(),
-                                      ),
-                                    ],
-                                  )
-                                : MarkdownBlock(
-                                    data: text,
-                                    config: MarkdownConfig(configs: [])),
-                            // Text(
-                            //         // fitContent: true,
-                            //         // selectable: true,
-                            //         // softLineBreak: true,
-                            //         // shrinkWrap: true,
-                            //         style: GoogleFonts.poppins(
-                            //             fontSize: 12.sp, color: Colors.black),
-                            //         text
-                            //             .replaceAll("*", '')
-                            //             .replaceAll('#', ''),
-                            //       ),
-                          ),
-                        ),
-                        Divider(
-                          color: Colors.grey[200],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // InkWell(
-                            //   onTap: () => onTapReginarate!(),
-                            //   child: const Padding(
-                            //     padding: EdgeInsets.all(8.0),
-                            //     child: Row(
-                            //       children: [
-                            //         Icon(Icons.change_circle_outlined),
-                            //         Text(' Regenerate')
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
-                            IconButton(
-                              icon: const Icon(Icons.copy),
-                              onPressed: () {
-                                // Copy text to clipboard
-                                Clipboard.setData(ClipboardData(text: text));
-                                // You can show a snackbar or any other feedback here
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Text copied to clipboard'),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              // Expanded(
-              //   flex: 1,
-              //   child: Align(
-              //     alignment: Alignment.topLeft,
-              //     child: IconButton(
-              //       icon: const Icon(Icons.copy),
-              //       onPressed: () {
-              //         // Copy text to clipboard
-              //         Clipboard.setData(ClipboardData(text: text));
-              //         // You can show a snackbar or any other feedback here
-              //         ScaffoldMessenger.of(context).showSnackBar(
-              //           const SnackBar(
-              //             content: Text('Text copied to clipboard'),
-              //           ),
-              //         );
-              //       },
-              //     ),
-              //   ),
-              // ),
-            ] else ...[
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.end,
-                spacing: 8.0,
-                children: [
-                  Material(
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10),
-                        bottomLeft: Radius.circular(10)),
-                    color: Colors.blue[300],
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14.0, vertical: 10.0),
-                      child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
-                          child: Column(
-                            children: [
-                              if (responseImageUrl != '')
-                                CustomImageView(imagePath: responseImageUrl)
-                              else if (imageUrl != null)
-                                Image.file(imageUrl!),
-                              Text(text,
-                                  style: const TextStyle(color: Colors.white)),
-                            ],
-                          )),
-                    ),
-                  ),
-                  CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(
-                        AppData.imageUrl + AppData.profile_pic),
-                    radius: 12,
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TypingIndicators extends StatefulWidget {
-  final Color color;
-  final double size;
-
-  const TypingIndicators({Key? key, required this.color, this.size = 10.0})
-      : super(key: key);
-
-  @override
-  _TypingIndicatorState createState() => _TypingIndicatorState();
-}
-
-class _TypingIndicatorState extends State<TypingIndicators>
-    with TickerProviderStateMixin {
-  late List<AnimationController> _controllers;
-  late List<Animation<double>> _animations;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controllers = List.generate(3, (index) {
-      return AnimationController(
-        duration: const Duration(milliseconds: 600),
-        vsync: this,
-      )..repeat();
-    });
-
-    _animations = _controllers
-        .asMap()
-        .map((i, controller) {
-          return MapEntry(
-            i,
-            Tween(begin: 0.0, end: 8.0).animate(
-              CurvedAnimation(
-                parent: controller,
-                curve: Interval(0.2 * i, 1.0, curve: Curves.easeInOut),
-              ),
-            ),
-          );
-        })
-        .values
-        .toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _animations[index],
-          builder: (context, child) {
-            return Transform.translate(
-              offset: Offset(0, -_animations[index].value),
-              child: child,
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-            child: CircleAvatar(
-              radius: widget.size,
-              backgroundColor: widget.color,
-            ),
-          ),
-        );
-      }),
-    );
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-}
+//
+// class ChatBubble extends StatelessWidget {
+//   final String text;
+//   final bool isUserMessage;
+//   final Function? onTapReginarate;
+//   File? imageUrl;
+//   String responseImageUrl;
+//
+//   ChatBubble(
+//       {Key? key,
+//       required this.text,
+//       required this.isUserMessage,
+//       this.onTapReginarate,
+//       required this.imageUrl,
+//       this.responseImageUrl = ''})
+//       : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     double screenWidth = MediaQuery.of(context).size.width;
+//     double bubbleMaxWidth = screenWidth * 0.6;
+//     // print("response1 ${responseImageUrl}");
+//
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+//       child: IntrinsicHeight(
+//         child: Row(
+//           mainAxisAlignment:
+//               isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+//           children: [
+//             if (!isUserMessage) ...[
+//               Wrap(
+//                 crossAxisAlignment: WrapCrossAlignment.end,
+//                 spacing: 8.0,
+//                 children: [
+//                   CircleAvatar(
+//                     backgroundColor: svGetBodyColor(),
+//                     child: Image.asset(
+//                       'assets/logo/ic_web.png',
+//                       width: 25,
+//                       height: 25,
+//                     ),
+//                   ),
+//                   Container(
+//                     width: 75.w,
+//                     decoration: BoxDecoration(
+//                       borderRadius: const BorderRadius.only(
+//                           topRight: Radius.circular(10),
+//                           topLeft: Radius.circular(10),
+//                           bottomRight: Radius.circular(10)),
+//                       color:
+//                           appStore.isDarkMode ? Colors.white30 : Colors.white,
+//                     ),
+//                     child: Column(
+//                       children: [
+//                         Padding(
+//                           padding: const EdgeInsets.symmetric(
+//                               horizontal: 0.0, vertical: 6.0),
+//                           child: ConstrainedBox(
+//                             constraints:
+//                                 BoxConstraints(maxWidth: bubbleMaxWidth),
+//                             child: text == 'Generating response...'
+//                                 ? Column(
+//                                     children: [
+//                                       Text(
+//                                         // fitContent: true,
+//                                         // selectable: true,
+//                                         // softLineBreak: true,
+//                                         // shrinkWrap: true,
+//                                         text
+//                                             .replaceAll("*", '')
+//                                             .replaceAll('#', ''),
+//                                         style: GoogleFonts.poppins(
+//                                             color: Colors.black,
+//                                             fontSize: 12.sp),
+//                                       ),
+//                                       const SizedBox(
+//                                         height: 10,
+//                                       ),
+//                                       CircularProgressIndicator(
+//                                         color: svGetBodyColor(),
+//                                       ),
+//                                     ],
+//                                   )
+//                                 : MarkdownBlock(
+//                                     data: text,
+//                                     config: MarkdownConfig(configs: [])),
+//                             // Text(
+//                             //         // fitContent: true,
+//                             //         // selectable: true,
+//                             //         // softLineBreak: true,
+//                             //         // shrinkWrap: true,
+//                             //         style: GoogleFonts.poppins(
+//                             //             fontSize: 12.sp, color: Colors.black),
+//                             //         text
+//                             //             .replaceAll("*", '')
+//                             //             .replaceAll('#', ''),
+//                             //       ),
+//                           ),
+//                         ),
+//                         Divider(
+//                           color: Colors.grey[200],
+//                         ),
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.end,
+//                           children: [
+//                             // InkWell(
+//                             //   onTap: () => onTapReginarate!(),
+//                             //   child: const Padding(
+//                             //     padding: EdgeInsets.all(8.0),
+//                             //     child: Row(
+//                             //       children: [
+//                             //         Icon(Icons.change_circle_outlined),
+//                             //         Text(' Regenerate')
+//                             //       ],
+//                             //     ),
+//                             //   ),
+//                             // ),
+//                             IconButton(
+//                               icon: const Icon(Icons.copy),
+//                               onPressed: () {
+//                                 // Copy text to clipboard
+//                                 Clipboard.setData(ClipboardData(text: text));
+//                                 // You can show a snackbar or any other feedback here
+//                                 ScaffoldMessenger.of(context).showSnackBar(
+//                                   const SnackBar(
+//                                     content: Text('Text copied to clipboard'),
+//                                   ),
+//                                 );
+//                               },
+//                             ),
+//                           ],
+//                         )
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               // Expanded(
+//               //   flex: 1,
+//               //   child: Align(
+//               //     alignment: Alignment.topLeft,
+//               //     child: IconButton(
+//               //       icon: const Icon(Icons.copy),
+//               //       onPressed: () {
+//               //         // Copy text to clipboard
+//               //         Clipboard.setData(ClipboardData(text: text));
+//               //         // You can show a snackbar or any other feedback here
+//               //         ScaffoldMessenger.of(context).showSnackBar(
+//               //           const SnackBar(
+//               //             content: Text('Text copied to clipboard'),
+//               //           ),
+//               //         );
+//               //       },
+//               //     ),
+//               //   ),
+//               // ),
+//             ] else ...[
+//               Wrap(
+//                 crossAxisAlignment: WrapCrossAlignment.end,
+//                 spacing: 8.0,
+//                 children: [
+//                   Material(
+//                     borderRadius: const BorderRadius.only(
+//                         topLeft: Radius.circular(10),
+//                         topRight: Radius.circular(10),
+//                         bottomLeft: Radius.circular(10)),
+//                     color: Colors.blue[300],
+//                     child: Padding(
+//                       padding: const EdgeInsets.symmetric(
+//                           horizontal: 14.0, vertical: 10.0),
+//                       child: ConstrainedBox(
+//                           constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
+//                           child: Column(
+//                             children: [
+//                               if (responseImageUrl != '')
+//                                 CustomImageView(imagePath: responseImageUrl)
+//                               else if (imageUrl != null)
+//                                 Image.file(imageUrl!),
+//                               Text(text,
+//                                   style: const TextStyle(color: Colors.white)),
+//                             ],
+//                           )),
+//                     ),
+//                   ),
+//                   CircleAvatar(
+//                     backgroundImage: CachedNetworkImageProvider(
+//                         AppData.imageUrl + AppData.profile_pic),
+//                     radius: 12,
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+//
+// class TypingIndicators extends StatefulWidget {
+//   final Color color;
+//   final double size;
+//
+//   const TypingIndicators({Key? key, required this.color, this.size = 10.0})
+//       : super(key: key);
+//
+//   @override
+//   _TypingIndicatorState createState() => _TypingIndicatorState();
+// }
+//
+// class _TypingIndicatorState extends State<TypingIndicators>
+//     with TickerProviderStateMixin {
+//   late List<AnimationController> _controllers;
+//   late List<Animation<double>> _animations;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//
+//     _controllers = List.generate(3, (index) {
+//       return AnimationController(
+//         duration: const Duration(milliseconds: 600),
+//         vsync: this,
+//       )..repeat();
+//     });
+//
+//     _animations = _controllers
+//         .asMap()
+//         .map((i, controller) {
+//           return MapEntry(
+//             i,
+//             Tween(begin: 0.0, end: 8.0).animate(
+//               CurvedAnimation(
+//                 parent: controller,
+//                 curve: Interval(0.2 * i, 1.0, curve: Curves.easeInOut),
+//               ),
+//             ),
+//           );
+//         })
+//         .values
+//         .toList();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       mainAxisSize: MainAxisSize.min,
+//       children: List.generate(3, (index) {
+//         return AnimatedBuilder(
+//           animation: _animations[index],
+//           builder: (context, child) {
+//             return Transform.translate(
+//               offset: Offset(0, -_animations[index].value),
+//               child: child,
+//             );
+//           },
+//           child: Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 2.0),
+//             child: CircleAvatar(
+//               radius: widget.size,
+//               backgroundColor: widget.color,
+//             ),
+//           ),
+//         );
+//       }),
+//     );
+//   }
+//
+//   @override
+//   void dispose() {
+//     for (var controller in _controllers) {
+//       controller.dispose();
+//     }
+//     super.dispose();
+//   }
+// }

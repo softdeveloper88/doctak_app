@@ -33,6 +33,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
 import 'ads_setting/ad_setting.dart';
@@ -72,6 +73,11 @@ GlobalKey(debugLabel: 'Main Navigator');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
   HttpOverrides.global = MyHttpsOverrides();
   // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
   //   systemNavigationBarColor: Colors.white, // navigation bar color

@@ -105,6 +105,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
             ),
           ],
           onTap: (val) {
+
             if (val == 2) {
               _fragments[val].launch(context);
             }else if (val == 4) {
@@ -112,6 +113,8 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
             } else {
               setState(() => selectedIndex = val);
             }
+            FocusManager.instance.primaryFocus?.unfocus();
+
           },
           currentIndex: selectedIndex,
         ),

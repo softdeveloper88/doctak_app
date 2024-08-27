@@ -77,7 +77,10 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               fit: BoxFit.cover,
               color: context.iconColor,
             ),
-            onPressed: () => widget.openDrawer(),
+            onPressed: () { widget.openDrawer();
+            FocusManager.instance.primaryFocus?.unfocus();
+
+            }
           ),
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),

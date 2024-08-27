@@ -127,7 +127,14 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
           )),
     );
   }
+  @override
+  void dispose() {
+    focusNode.unfocus();
+    _scrollController.dispose();
+    textController.dispose();
 
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
