@@ -27,6 +27,7 @@ class ErrorDialog extends StatelessWidget {
 
   List<Widget> _buildErrorWidgets() {
     List<Widget> errorWidgets = [];
+    print(errors);
     errors.forEach((field, errorMessages) {
       for (var errorMessage in errorMessages) {
         errorWidgets.add(Text('- $field: $errorMessage'));

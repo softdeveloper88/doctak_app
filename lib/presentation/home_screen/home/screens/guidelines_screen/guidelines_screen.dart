@@ -196,7 +196,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
               }
             },
           ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(

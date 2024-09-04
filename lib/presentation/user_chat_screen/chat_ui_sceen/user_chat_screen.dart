@@ -447,7 +447,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                     child:
                         Text("No chat found", style: boldTextStyle(size: 16)),
                   )),
-                if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+                // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
               ],
             );
           } else if (state is DataError) {

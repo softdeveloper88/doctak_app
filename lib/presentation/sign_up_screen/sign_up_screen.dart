@@ -476,7 +476,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 const SizedBox(height: 10),
                                               ]);
                                         }else{
-                                          return Container(child:const Text(''));
+                                          return const Text('');
                                         }
                                       }),
                                   Row(
@@ -492,7 +492,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       Expanded(
                                         child: RichText(
                                           text: TextSpan(
-                                            style: TextStyle(fontSize: 14.0, color: Colors.black),
+                                            style: const TextStyle(fontSize: 14.0, color: Colors.black),
                                             children: <TextSpan>[
                                               const TextSpan(text: 'I agree to the '),
                                               TextSpan(
@@ -512,7 +512,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 8,),
+                                  const SizedBox(height: 8,),
                                   BlocListener<DropdownBloc, DropdownState>(
                                       listener: (context, state) {
                                         if (state is DataLoaded) {
@@ -530,16 +530,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   context,
                                                   MaterialPageRoute(
                                                       builder: (context) =>
-                                                          LoginScreen()),
+                                                          const LoginScreen()),
                                                       (route) => false);
                                             } else {
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
                                                 SnackBar(
                                                     content: Text(
-                                                        state.response[
-                                                        'message'])),
+                                                        state.response['message']??"Something went wrong.Please make sure no field left empty")),
                                               );
+                                              print("errors ${state.response}");
+
                                               _showErrorDialog(
                                                   state.response['errors']);
                                             }
@@ -690,12 +691,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         //         height: 24,
         //         width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
-        validator: (value) {
-          if (!isText(value)) {
-            return translation(context).err_msg_please_enter_valid_text;
-          }
-          return null;
-        },
+        // validator: (value) {
+        //   if (!isText(value)) {
+        //     return translation(context).err_msg_please_enter_valid_text;
+        //   }
+        //   return null;
+        // },
         contentPadding: const EdgeInsets.only(top: 18, right: 30, bottom: 18));
   }
 
@@ -774,19 +775,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
             }
           }
         } else {
-          if(_isChecked) {
-          dropdownBloc.add(SocialButtonPressed(
-              token: widget.token ?? '',
-              firstName: firstnameController!.text.toString(),
-              lastName: lastNameController!.text.toString(),
-              phone: phoneController.text.toString(),
-              country: profileBloc.country ?? 'United Arab Emirates',
-              state: profileBloc.stateName ?? "DUBAI",
-              specialty: profileBloc.specialtyName ?? "",
-              userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
-              deviceToken: token ?? ''
-            // replace with real input
-          ));
+          if(firstnameController!.text.isEmpty){
+            toasty(context, "Please enter first name",bgColor: Colors.red,textColor: Colors.white);
+            return;
+          }else if(lastNameController!.text.isEmpty){
+            toasty(context, "Please enter last name",bgColor: Colors.red,textColor: Colors.white);
+
+            return;
+          }else if(phoneController.text.isEmpty){
+            toasty(context, "Please enter phone number",bgColor: Colors.red,textColor: Colors.white);
+
+            return;
+          }else if(profileBloc.country==''){
+            toasty(context, "Please select country",bgColor: Colors.red,textColor: Colors.white);
+
+            return;
+          }else if(profileBloc.stateName==''){
+            toasty(context, "Please select state",bgColor: Colors.red,textColor: Colors.white);
+            return;
+          }else if(dropdownBloc.isDoctorRole){
+            if(profileBloc.specialtyName==null || profileBloc.specialtyName=='' || profileBloc.specialtyName=='Select Specialty'){
+              toasty(context, "Please select specialty",bgColor: Colors.red,textColor: Colors.white);
+              return;
+            }
+          } else if(_isChecked) {
+              dropdownBloc.add(SocialButtonPressed(
+                  token: widget.token ?? '',
+                  firstName: firstnameController!.text.toString(),
+                  lastName: lastNameController!.text.toString(),
+                  phone: phoneController.text.toString(),
+                  country: profileBloc.country ?? 'United Arab Emirates',
+                  state: profileBloc.stateName ?? "DUBAI",
+                  specialty: profileBloc.specialtyName ?? "",
+                  userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
+                  deviceToken: token ?? ''
+                // replace with real input
+              ));
+
           }else{
             toasty(context, "Please accept terms and conditions before proceeds");
           }
@@ -808,7 +833,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   onTapTxtLogIn(BuildContext context) {
     Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
             (route) => false);
   }
 }

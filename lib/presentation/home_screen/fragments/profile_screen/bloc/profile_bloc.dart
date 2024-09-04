@@ -174,6 +174,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         [], 'Select State', [], 'Select Specialty', [], ''));
 
     add(UpdateSecondDropdownValues(countriesList?.first ?? ''));
+    add(UpdateSpecialtyDropdownValue(countriesList?.first ?? ''));
   }
 
   Future<void> _updateProfilePicture(

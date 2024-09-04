@@ -32,7 +32,7 @@ class MultipleImageUploadWidget extends StatefulWidget {
 class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
   // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
   late VideoPlayerController _controller;
-
+  int selectTab=0;
   final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
   int i=0;
@@ -228,10 +228,11 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 MaterialButton(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    side: BorderSide(color: Colors.black, width: 1.0),
+                    side: const BorderSide(color: Colors.black, width: 1.0),
                   ),
-                  color: Colors.lightBlue,
+                  color: imagefiles.isEmpty?Colors.blue:Colors.blueGrey[200],
                   onPressed: () {
+
                     if (widget.imageLimit == 0) {
                       openImages();
                     } else {
@@ -269,10 +270,11 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 MaterialButton(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    side: BorderSide(color: Colors.black, width: 1.0),
+                    side: const BorderSide(color: Colors.black, width: 1.0),
                   ),
-                  color: Colors.lightBlue,
+                  color:imagefiles.isEmpty?Colors.blue:Colors.blueGrey[200],
                   onPressed: () {
+
                     if (widget.imageLimit == 0) {
                       openCamera();
                     } else if (widget.imageUploadBloc.imagefiles.length + 1 <= widget.imageLimit) {
@@ -319,6 +321,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
               width: double.infinity,
               padding: const EdgeInsets.all(8.0),
               child: svAppButton(
+                color: imagefiles.isNotEmpty?Colors.blue:Colors.blueGrey[200],
                 context: context,
                 // style: svAppButton(text: text, onTap: onTap, context: context),
                 onTap: () => widget.onTap(imagefiles),

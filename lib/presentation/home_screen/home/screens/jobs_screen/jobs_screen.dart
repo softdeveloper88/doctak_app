@@ -569,7 +569,7 @@ class _JobsScreenState extends State<JobsScreen> {
                 }
               },
             ),
-            if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+            // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
           ],
         ),
       ),

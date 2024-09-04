@@ -110,7 +110,7 @@ class _EventsScreenState extends State<EventsScreen>
                   //
                 ]),
           ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
+          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
           // Container(
           //   color: svGetScaffoldColor(),
           //   padding: const EdgeInsets.only(bottom: 10),

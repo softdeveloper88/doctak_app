@@ -268,7 +268,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
               }
             },
           ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
       // SingleChildScrollView(

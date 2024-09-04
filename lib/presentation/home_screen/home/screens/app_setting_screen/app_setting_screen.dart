@@ -23,14 +23,17 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('App settings', style: boldTextStyle(size: 20)),
+        title: Text('App Settings', style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
-        actions: const [
-          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-        ],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -119,7 +122,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
             const Divider(
               color: Colors.grey,
             ),
-            if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+            // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
           ],
         ),
       ),

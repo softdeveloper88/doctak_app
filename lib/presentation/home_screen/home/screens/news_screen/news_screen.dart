@@ -138,8 +138,8 @@ class _NewsScreenState extends State<NewsScreen> {
                           }
                         },
                       ),
-                      if (AppData.isShowGoogleBannerAds ?? false)
-                        BannerAdWidget()
+                      // if (AppData.isShowGoogleBannerAds ?? false)
+                      //   BannerAdWidget()
                     ],
                   ),
                 ),

@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart' as dom;
-import 'package:app_links/app_links.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
@@ -18,7 +16,6 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,10 +23,8 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
-
 import '../../fragments/home_main_screen/post_widget/find_likes.dart';
 import '../../fragments/home_main_screen/post_widget/post_media_widget.dart';
 import '../../fragments/home_main_screen/post_widget/text_icon_widget.dart';
@@ -37,57 +32,20 @@ import '../screens/comment_screen/SVCommentScreen.dart';
 import '../screens/comment_screen/bloc/comment_bloc.dart';
 
 class SVPostComponent extends StatefulWidget {
-  SVPostComponent(this.homeBloc,{super.key});
+  SVPostComponent(this.homeBloc, {super.key});
 
   HomeBloc homeBloc;
-
 
   @override
   State<SVPostComponent> createState() => _SVPostComponentState();
 }
 
-
-class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingObserver{
+class _SVPostComponentState extends State<SVPostComponent>
+    with WidgetsBindingObserver {
   int? isShowComment = -1;
 
   @override
-  void dispose() {
-   setState(() {
-     isShowComment=-1;
-   });
-    super.dispose();
-  }
-
-  // createDynamicLink(postTitle, postUrl, imageUrl) async {
-  //   final dynamicLinkParams = DynamicLinkParameters(
-  //     link: Uri.parse(postUrl),
-  //     uriPrefix: "https://doctak.page.link",
-  //     androidParameters: const AndroidParameters(
-  //       packageName: "com.kt.doctak",
-  //       minimumVersion: 41,
-  //     ),
-  //     iosParameters: const IOSParameters(
-  //       bundleId: "com.kt.doctak",
-  //       appStoreId: "6448684340",
-  //       minimumVersion: "2.0.9",
-  //     ),
-  //     googleAnalyticsParameters: const GoogleAnalyticsParameters(
-  //       source: "twitter",
-  //       medium: "social",
-  //       campaign: "example-promo",
-  //     ),
-  //     socialMetaTagParameters: SocialMetaTagParameters(
-  //       title: postTitle,
-  //       imageUrl: Uri.parse(imageUrl),
-  //     ),
-  //   );
-  //   final dynamicLink =
-  //       await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParams);
-  //   Share.share(dynamicLink.shortUrl.toString());
-  // }
-  @override
   Widget build(BuildContext context) {
-
     return BlocConsumer<HomeBloc, HomeState>(
       bloc: widget.homeBloc,
       listener: (BuildContext context, HomeState state) {
@@ -177,7 +135,7 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
                         : Column(
                             children: [
                               // if (index % 5 == 0 && index != 0)
-                                // NativeAdWidget(),
+                              // NativeAdWidget(),
                               Container(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16),
@@ -365,8 +323,8 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
                                                       id: widget
                                                               .homeBloc
                                                               .postList[index]
-                                                              .id.toString() ??
-                                                          '0')
+                                                              .id
+                                                              .toString())
                                                   .launch(context);
                                             },
                                             child: Text(
@@ -441,7 +399,8 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
                                               if (isShowComment == -1) {
                                                 isShowComment = index;
                                               } else {
-                                                FocusScope.of(context).unfocus();
+                                                FocusScope.of(context)
+                                                    .unfocus();
                                                 isShowComment = -1;
                                               }
                                             });
@@ -703,6 +662,7 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
 
     // show the dialog
   }
+
   String parseHtmlString(String htmlString) {
     // Parse the HTML string
     dom.Document document = html_parser.parse(htmlString);
@@ -710,6 +670,7 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
     // Extract and return the text content without tags
     return document.body?.text ?? '';
   }
+
   Widget _buildPlaceholderWithoutFile(
       context, title, backgroundColor, image, media) {
     String fullText = title ?? '';
@@ -723,13 +684,13 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
     Color textColor = PostUtils.contrastingTextColor(bgColor);
     return LayoutBuilder(
       builder: (context, constraints) {
-        return  GestureDetector(
-            onLongPress: () {
-              Clipboard.setData(ClipboardData(text: parseHtmlString(title)));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Text copied to clipboard")),
-              );
-            },
+        return GestureDetector(
+          onLongPress: () {
+            Clipboard.setData(ClipboardData(text: parseHtmlString(title)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Text copied to clipboard")),
+            );
+          },
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: (image?.isNotEmpty == true || media?.isNotEmpty == true)
@@ -763,7 +724,8 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
                       Linkify(
                         onOpen: (link) {
                           if (link.url.contains('doctak/jobs-detail')) {
-                            String jobID = Uri.parse(link.url).pathSegments.last;
+                            String jobID =
+                                Uri.parse(link.url).pathSegments.last;
                             JobsDetailsScreen(
                               jobId: jobID,
                             ).launch(context);
@@ -787,7 +749,8 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
                       )
                   else if (_isHtml(textToShow))
                     Container(
-                      constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
+                      constraints: BoxConstraints(
+                          minHeight: textToShow.length < 25 ? 200 : 0),
                       child: Center(
                         child: HtmlWidget(
                           textStyle: GoogleFonts.poppins(),
@@ -810,12 +773,14 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
                     )
                   else
                     Container(
-                      constraints: BoxConstraints(minHeight:textToShow.length<25?200:0),
+                      constraints: BoxConstraints(
+                          minHeight: textToShow.length < 25 ? 200 : 0),
                       child: Center(
                         child: Linkify(
                           onOpen: (link) {
                             if (link.url.contains('doctak/jobs-detail')) {
-                              String jobID = Uri.parse(link.url).pathSegments.last;
+                              String jobID =
+                                  Uri.parse(link.url).pathSegments.last;
                               JobsDetailsScreen(
                                 jobId: jobID,
                               ).launch(context);
@@ -898,31 +863,4 @@ class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingOb
   }
 
   bool _isExpanded = false;
-
-  void _showBottomSheet(BuildContext context, Post postList) {
-    showModalBottomSheet(
-      showDragHandle: true,
-      enableDrag: true,
-      isScrollControlled: true,
-      isDismissible: false,
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-          return DraggableScrollableSheet(
-              initialChildSize: 0.9,
-              minChildSize: 0.9,
-              maxChildSize: 1.0,
-              expand: false,
-              builder:
-                  (BuildContext context, ScrollController scrollController) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: SharePostBottomDialog(postList),
-                );
-              });
-        });
-      },
-    );
-  }
 }

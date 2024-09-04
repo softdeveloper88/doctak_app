@@ -24,8 +24,6 @@ class SVPostOptionsComponent extends StatefulWidget {
 }
 
 class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
-  // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
-  late VideoPlayerController _controller;
 
   final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
@@ -73,11 +71,9 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc
-            .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
-        // setState(() {
-        // });
+        setState(() {});
       } else {
         print("No image is selected.");
       }
@@ -104,12 +100,12 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             child: Row(
               children: [
                 BlocBuilder<AddPostBloc, AddPostState>(
+                  bloc: widget.searchPeopleBloc,
                     builder: (context, state) {
                   if (state is PaginationLoadedState) {
-                    return imagefiles != null
+                    return imagefiles != []
                         ? Wrap(
-                            children: widget.searchPeopleBloc.imagefiles
-                                .map((imageone) {
+                            children: widget.searchPeopleBloc.imagefiles.map((imageone) {
                               return Stack(children: [
                                 Card(
                                   child: SizedBox(
@@ -271,7 +267,8 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         file,
         fit: BoxFit.cover,
       );
-    } else if (file.path.endsWith('.mp4') || file.path.endsWith('.mov')) {
+    }
+    else if (file.path.endsWith('.mp4') || file.path.endsWith('.mov')) {
       // Display video
       return AspectRatio(
         aspectRatio: 16 / 9,
@@ -279,7 +276,8 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
           selectedByte: file,
         ),
       );
-    } else {
+    }
+    else {
       // Handle other types of files
       return const Text('Unsupported file type');
     }

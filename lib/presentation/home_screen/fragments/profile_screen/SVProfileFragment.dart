@@ -111,19 +111,36 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                   16.height,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                          '${profileBloc.userProfile?.user?.firstName ?? ''} ${profileBloc.userProfile?.user?.lastName ?? ''}',
+                      Text('${profileBloc.userProfile?.user?.firstName ?? ''} ${profileBloc.userProfile?.user?.lastName ?? ''}',
                           style: GoogleFonts.poppins(
-                              color: svGetBodyColor(), fontSize: 12.sp)),
+                              color: svGetBodyColor(), fontSize: 12.sp,fontWeight: FontWeight.w500)),
                       4.width,
                       Image.asset('images/socialv/icons/ic_TickSquare.png',
                           height: 14, width: 14, fit: BoxFit.cover),
                     ],
                   ),
+                  SizedBox(
+                    width: 80.w,
+                    child: Text(profileBloc.userProfile?.user?.country ?? '',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(color: Colors.blue,fontSize: 12,fontWeight: FontWeight.bold,)),
 
-                  Text(profileBloc.userProfile?.user?.specialty ?? '',
-                      style: secondaryTextStyle(color: svGetBodyColor())),
+                  ),
+                  SizedBox(
+                    width: 80.w,
+                    child: Text(profileBloc.userProfile?.user?.specialty ?? '',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 16,fontWeight: FontWeight.w500,)),
+
+                  ),
+                  SizedBox(
+                    width: 80.w,
+                    child: Text(profileBloc.userProfile?.profile?.aboutMe ?? '',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 14,fontWeight: FontWeight.w400,)),
+                  ),
                   // 24.height,
                   if (widget.userId == null) _buildPointsCard(),
                   if (widget.userId != null)
@@ -131,7 +148,10 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         MaterialButton(
-                          height: 30.0,
+                          height: 40.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)
+                          ),
                           minWidth: 100,
                           onPressed: () {
                             ChatRoomScreen(
@@ -143,16 +163,19 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                               roomId: '',
                             ).launch(context);
                           },
-                          elevation: 0,
+                          elevation: 2,
                           color: SVAppColorPrimary,
                           child: Text('Chat',
                               style: boldTextStyle(color: Colors.white)),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 10,
                         ),
                         MaterialButton(
-                          height: 30.0,
+                          height: 40.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)
+                          ),
                           minWidth: 100,
                           onPressed: () {
                             if (profileBloc.userProfile!.isFollowing ?? false) {
@@ -170,7 +193,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                             }
                             setState(() {});
                           },
-                          elevation: 0,
+                          elevation: 2,
                           color: SVAppColorPrimary,
                           child: Text(
                               profileBloc.userProfile?.isFollowing ?? false
@@ -181,7 +204,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                       ],
                     ),
                   24.height,
-                  if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
+                  // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
                   8.height,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,

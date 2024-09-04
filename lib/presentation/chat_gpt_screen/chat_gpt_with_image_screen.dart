@@ -13,6 +13,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -127,6 +128,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
           )),
     );
   }
+
   @override
   void dispose() {
     focusNode.unfocus();
@@ -135,573 +137,531 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
 
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-        child:
-            BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
-          if (selectedSessionId == 0 && state1 is DataLoaded) {
-            selectedSessionId = state1.response.newSessionId;
-            chatWithAi = state1.response.sessions?.first.name ?? 'New Session';
-          }
-          if (state1 is DataInitial) {
-            return Scaffold(
-              body: AnimatedBackground(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Center(
-                        child: CircularProgressIndicator(
-                      color: svGetBodyColor(),
-                    )),
-                  ],
-                ),
-              ),
-            );
-          } else if (state1 is DataLoaded) {
-            isEmpty = state1.response1.messages?.isEmpty??false;
-            debugPrint('response ${state1.response.toString()}');
-            if (!widget.isFromMainScreen) {
-              if (isAlreadyAsk) {
-                setState(() {
-                  isEmpty = false;
-                });
-                isAlreadyAsk = false;
-                // Future.delayed(const Duration(seconds: 1),(){
-                drugsAskQuestion(state1, context);
-                // });
-                // textController.text = widget.question.toString();
-              }
-            }
-            return Scaffold(
-                backgroundColor: svGetBgColor(),
-                appBar: AppBar(
-                  leading: GestureDetector(
-                    onTap: () {
-                      ChatHistoryScreen(
-                        onNewSessionTap: () {
-                          try {
-                            BlocProvider.of<ChatGPTBloc>(context)
-                                .add(GetNewChat());
-                            Navigator.of(context).pop();
-                            isOneTimeImageUploaded = false;
-                            selectedSessionId =
-                                BlocProvider.of<ChatGPTBloc>(context)
-                                    .newChatSessionId;
+    return Scaffold(
+      backgroundColor: svGetBgColor(),
+      body: BlocProvider(
+          create: (context) => ChatGPTBloc()..add(LoadDataValues()),
+          child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+              builder: (context, state1) {
+            if (selectedSessionId == 0 && state1 is DataLoaded) {
+              selectedSessionId = state1.response.newSessionId;
+              chatWithAi =
+                  state1.response.sessions?.first.name ?? 'New Session';
+            } else if (state1 is DataError) {
+              showToast('Something went wrong please try again');
 
-                            // Session newSession = await createNewChatSession();
-                            // setState(() {
-                            //   futureSessions = Future(() =>
-                            //       [newSession, ...(snapshot.data ?? [])]);
+              try {
+                BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+
+                isOneTimeImageUploaded = false;
+                selectedSessionId =
+                    BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+
+                // Session newSession = await createNewChatSession();
+                // setState(() {
+                //   futureSessions = Future(() =>
+                //       [newSession, ...(snapshot.data ?? [])]);
+                // });
+              } catch (e) {
+                debugPrint(e.toString());
+              }
+
+            }
+            if (state1 is DataInitial) {
+              return AnimatedBackground(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Center(
+                      child: CircularProgressIndicator(
+                    color: svGetBodyColor(),
+                  )),
+                ],
+              ));
+            } else if (state1 is DataLoaded) {
+              isEmpty = state1.response1.messages?.isEmpty ?? false;
+              debugPrint('response ${state1.response.toString()}');
+              if (!widget.isFromMainScreen) {
+                if (isAlreadyAsk) {
+                  setState(() {
+                    isEmpty = false;
+                  });
+                  isAlreadyAsk = false;
+                  // Future.delayed(const Duration(seconds: 1),(){
+                  drugsAskQuestion(state1, context);
+                  // });
+                  // textController.text = widget.question.toString();
+                }
+              }
+              return Column(
+                children: <Widget>[
+                  AppBar(
+                    leading: GestureDetector(
+                      onTap: () {
+                        ChatHistoryScreen(
+                          onNewSessionTap: () {
+                            try {
+                              BlocProvider.of<ChatGPTBloc>(context)
+                                  .add(GetNewChat());
+                              Navigator.of(context).pop();
+                              isOneTimeImageUploaded = false;
+                              selectedSessionId =
+                                  BlocProvider.of<ChatGPTBloc>(context)
+                                      .newChatSessionId;
+
+                              // Session newSession = await createNewChatSession();
+                              // setState(() {
+                              //   futureSessions = Future(() =>
+                              //       [newSession, ...(snapshot.data ?? [])]);
+                              // });
+                            } catch (e) {
+                              debugPrint(e.toString());
+                            }
+                          },
+                          onTap: (session) {
+                            chatWithAi = session.name!;
+                            isEmptyPage = false;
+                            debugPrint(session.id.toString());
+                            selectedSessionId =
+                                session.id; // Update the selected session
+                            isLoadingMessages = true;
+                            isOneTimeImageUploaded = true;
                             // });
-                          } catch (e) {
-                            debugPrint(e.toString());
-                          }
-                        },
-                        onTap: (session) {
-                          chatWithAi = session.name!;
-                          isEmptyPage = false;
-                          debugPrint(session.id.toString());
-                          selectedSessionId =
-                              session.id; // Update the selected session
-                          isLoadingMessages = true;
-                          isOneTimeImageUploaded = true;
-                          // });
-                          BlocProvider.of<ChatGPTBloc>(context).add(
-                            GetMessages(
-                                sessionId: selectedSessionId.toString()),
-                          );
-                          // loadMessages(selectedSessionId.toString())
-                          //     .then((loadedMessages) {
-                          //   setState(() {
-                          //     messages = loadedMessages;
-                          //
-                          //     scrollToBottom();
-                          //     chatWithAi = session.name!;
-                          //
-                          //     isLoadingMessages = false;
-                          //   });
-                          // });
-                          Navigator.of(context)
-                              .pop(); // This line will close the drawer
-                        },
-                      ).launch(context);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Image.asset(
-                        'assets/icon/ic_chat_history.png',
-                        color: svGetBodyColor(),
+                            BlocProvider.of<ChatGPTBloc>(context).add(
+                              GetMessages(
+                                  sessionId: selectedSessionId.toString()),
+                            );
+                            // loadMessages(selectedSessionId.toString())
+                            //     .then((loadedMessages) {
+                            //   setState(() {
+                            //     messages = loadedMessages;
+                            //
+                            //     scrollToBottom();
+                            //     chatWithAi = session.name!;
+                            //
+                            //     isLoadingMessages = false;
+                            //   });
+                            // });
+                            Navigator.of(context)
+                                .pop(); // This line will close the drawer
+                          },
+                        ).launch(context);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Image.asset(
+                          'assets/icon/ic_chat_history.png',
+                          color: svGetBodyColor(),
+                        ),
                       ),
                     ),
-                  ),
-                  centerTitle: true,
-                  surfaceTintColor: context.cardColor,
-                  backgroundColor: context.cardColor,
-                  title: Builder(
-                    builder: (context) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            // Wrap the Text widget with Expanded
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                MaterialButton(
-                                  minWidth: 40.w,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    side: const BorderSide(
-                                        color: Colors.black, width: 1.0),
-                                  ),
-                                  color: Colors.lightBlue,
-                                  onPressed: () {
-                                    isOneTimeImageUploaded = false;
-                                    try {
-                                      BlocProvider.of<ChatGPTBloc>(context)
-                                          .add(GetNewChat());
-                                      // Navigator.of(context).pop();
-
-                                      selectedSessionId =
-                                          BlocProvider.of<ChatGPTBloc>(context)
-                                              .newChatSessionId;
-
-                                      // Session newSession = await createNewChatSession();
-                                      // setState(() {
-                                      //   futureSessions = Future(() =>
-                                      //       [newSession, ...(snapshot.data ?? [])]);
-                                      // });
-                                    } catch (e) {
-                                      debugPrint(e.toString());
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Next Image',
-                                      style: GoogleFonts.poppins(color: white),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: isLoadingMessages
-                                      ? Image.asset(
-                                          'assets/images/docktak_ai_dark.png',
-                                          height: 25,
-                                          width: 25,
-                                        )
-                                      // ? TypingIndicators(
-                                      //     color: svGetBodyColor(),
-                                      //     size: 2.0) // Custom typing indicator
-                                      : const Text(""),
-                                  onPressed: () {},
-                                )
-                              ],
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: appStore.isDarkMode
-                                      ? svGetScaffoldColor()
-                                      : cardLightColor),
-                              child: Icon(
-                                Icons.cancel_outlined,
-                                color: svGetBodyColor(),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-                body: Column(
-                  children: <Widget>[
-                    // const SizedBox(height: 10,),
-                    if (isEmpty)
-                      Expanded(
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(16.0),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                    centerTitle: true,
+                    surfaceTintColor: context.cardColor,
+                    backgroundColor: context.cardColor,
+                    title: Builder(
+                      builder: (context) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              // Wrap the Text widget with Expanded
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    'Welcome, Doctor!',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
+                                  MaterialButton(
+                                    minWidth: 40.w,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      side: const BorderSide(
+                                          color: Colors.black, width: 1.0),
+                                    ),
+                                    color: Colors.lightBlue,
+                                    onPressed: () {
+                                      isOneTimeImageUploaded = false;
+                                      try {
+                                        BlocProvider.of<ChatGPTBloc>(context)
+                                            .add(GetNewChat());
+                                        // Navigator.of(context).pop();
+
+                                        selectedSessionId =
+                                            BlocProvider.of<ChatGPTBloc>(
+                                                    context)
+                                                .newChatSessionId;
+
+                                        // Session newSession = await createNewChatSession();
+                                        // setState(() {
+                                        //   futureSessions = Future(() =>
+                                        //       [newSession, ...(snapshot.data ?? [])]);
+                                        // });
+                                      } catch (e) {
+                                        debugPrint(e.toString());
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Next Image',
+                                        style:
+                                            GoogleFonts.poppins(color: white),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
-                                  const Text(
-                                    'Your personal & medical assistant powered by Artificial Intelligence',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  const SizedBox(height: 30),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      cardIntro('Medical images',
-                                          'Please upload the medical images for potential diagnoses and analysis',
-                                          () async {
-                                        // Medication Review: check interactions and dosage
-                                        // widget.question = 'initial assessment';
-
-                                        if (isOneTimeImageUploaded) {
-                                          toasty(context,
-                                              'Only allowed one time image in one session');
-                                        } else {
-                                          const permission = Permission.photos;
-                                          if (await permission.isGranted) {
-                                            // Permission is already granted
-                                            _showBeforeFileOptions();
-                                          } else if (await permission
-                                              .isDenied) {
-                                            // Permission was denied; request it
-                                            final result =
-                                                await permission.request();
-                                            debugPrint(result.toString());
-                                            // Check the result after requesting permission
-                                            if (result.isGranted) {
-                                              _showBeforeFileOptions();
-                                            } else if (result
-                                                .isPermanentlyDenied) {
-                                              // Permission is permanently denied
-                                              debugPrint(
-                                                  "Permission is permanently denied.");
-                                              // _permissionDialog(context);
-                                              _showBeforeFileOptions();
-                                            } else if (result.isGranted) {
-                                              _showBeforeFileOptions();
-
-                                              // Permission is still denied
-                                              debugPrint(
-                                                  "Permission is denied.");
-                                            }
-                                          } else if (await permission
-                                              .isPermanentlyDenied) {
-                                            // Permission was permanently denied
-                                            debugPrint(
-                                                "Permission is permanently denied.");
-                                            _permissionDialog();
-                                          }
-                                        }
-                                        // Future.delayed(const Duration(seconds: 1),(){
-
-                                        // });
-                                        // textController.text = widget.question.toString();
-                                      }),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    'Please upload the medical images for potential diagnoses and analysis',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                  const SizedBox(height: 10),
+                                  IconButton(
+                                    icon: isLoadingMessages
+                                        ? Image.asset(
+                                            'assets/images/docktak_ai_dark.png',
+                                            height: 25,
+                                            width: 25,
+                                          )
+                                        // ? TypingIndicators(
+                                        //     color: svGetBodyColor(),
+                                        //     size: 2.0) // Custom typing indicator
+                                        : const Text(""),
+                                    onPressed: () {},
+                                  )
                                 ],
                               ),
                             ),
-                          ),
-                        ),
-                      )
-                    else
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: state1.response1.messages?.length,
-                          itemBuilder: (context, index) {
-                            debugPrint(
-                                state1.response1.messages?[index].gptSessionId);
-                            Messages message = state1.response1.messages?[index]??Messages();
-                            return Column(
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: appStore.isDarkMode
+                                        ? svGetScaffoldColor()
+                                        : cardLightColor),
+                                child: Icon(
+                                  Icons.cancel_outlined,
+                                  color: svGetBodyColor(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  // const SizedBox(height: 10,),
+                  if (isEmpty)
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(16.0),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                ChatBubble(
-                                  text: message.question ?? '',
-                                  isUserMessage: true,
-                                  imageUrl1: index != 0
-                                      ? null
-                                      : selectedImageFiles.isNotEmpty
-                                          ? File(selectedImageFiles.first.path)
-                                          : null,
-                                  imageUrl2: index != 0
-                                      ? null
-                                      : selectedImageFiles.isNotEmpty
-                                          ? selectedImageFiles.length == 2
-                                              ? File(
-                                                  selectedImageFiles.last.path)
-                                              : null
-                                          : null,
-                                  responseImageUrl1:
-                                      index != 0 ? '' : message.imageUrl1 ?? '',
-                                  responseImageUrl2:
-                                      index != 0 ? '' : message.imageUrl2 ?? '',
+                                const SizedBox(height: 20),
+                                const Text(
+                                  'Welcome, Doctor!',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                ChatBubble(
-                                  text: message.response ?? "",
-                                  isUserMessage: false,
-                                  imageUrl1: selectedImageFiles.isNotEmpty
-                                      ? File(selectedImageFiles.first.path)
-                                      : null,
-                                  imageUrl2: selectedImageFiles.isNotEmpty
-                                      ? selectedImageFiles.length == 2
-                                          ? File(selectedImageFiles.last.path)
-                                          : null
-                                      : null,
-                                  responseImageUrl1: message.imageUrl1 ?? '',
-                                  responseImageUrl2: message.imageUrl2 ?? '',
-                                  onTapReginarate: () {
-                                    String question = message.question ?? "";
-                                    if (question.isEmpty) return;
-                                    // String sessionId = selectedSessionId.toString();
-                                    // var tempId =
-                                    //     -1; // Unique temporary ID for the response
-                                    setState(() {
-                                      var myMessage = Messages(
-                                          id: -1,
-                                          gptSessionId:
-                                              selectedSessionId.toString(),
-                                          question: question,
-                                          imageUrl1: message.imageUrl1,
-                                          imageUrl2: message.imageUrl2,
-                                          response: 'Generating response...',
-                                          createdAt: DateTime.now().toString(),
-                                          updatedAt: DateTime.now().toString());
-                                      state1.response1.messages!.add(myMessage);
-                                      BlocProvider.of<ChatGPTBloc>(context).add(
-                                        GetPost(
-                                          sessionId:
-                                              selectedSessionId.toString(),
-                                          question: question,
-                                          // imageUrl: _uploadedFile??''// replace with real input
-                                        ),
-                                      );
-                                      textController.clear();
-                                      scrollToBottom();
-                                    });
-                                    try {
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'Your personal & medical assistant powered by Artificial Intelligence',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                const SizedBox(height: 30),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    cardIntro('Medical images',
+                                        'Please upload the medical images for potential diagnoses and analysis',
+                                        () async {
+                                      // Medication Review: check interactions and dosage
+                                      // widget.question = 'initial assessment';
 
-                                      isWriting = false;
+                                      if (isOneTimeImageUploaded) {
+                                        toasty(context,
+                                            'Only allowed one time image in one session');
+                                      } else {
+                                        const permission = Permission.photos;
+                                        if (await permission.isGranted) {
+                                          // Permission is already granted
+                                          _showBeforeFileOptions();
+                                        } else if (await permission.isDenied) {
+                                          // Permission was denied; request it
+                                          final result =
+                                              await permission.request();
+                                          debugPrint(result.toString());
+                                          // Check the result after requesting permission
+                                          if (result.isGranted) {
+                                            _showBeforeFileOptions();
+                                          } else if (result
+                                              .isPermanentlyDenied) {
+                                            // Permission is permanently denied
+                                            debugPrint(
+                                                "Permission is permanently denied.");
+                                            // _permissionDialog(context);
+                                            _showBeforeFileOptions();
+                                          } else if (result.isGranted) {
+                                            _showBeforeFileOptions();
+
+                                            // Permission is still denied
+                                            debugPrint("Permission is denied.");
+                                          }
+                                        } else if (await permission
+                                            .isPermanentlyDenied) {
+                                          // Permission was permanently denied
+                                          debugPrint(
+                                              "Permission is permanently denied.");
+                                          _permissionDialog();
+                                        }
+                                      }
+                                      // Future.delayed(const Duration(seconds: 1),(){
+
                                       // });
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: Text('Error: $e')));
-                                    }
-                                  },
+                                      // textController.text = widget.question.toString();
+                                    }),
+                                  ],
                                 ),
+                                const SizedBox(height: 20),
+                                const Text(
+                                  'Please upload the medical images for potential diagnoses and analysis',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(height: 10),
                               ],
-                            );
-                          },
+                            ),
+                          ),
                         ),
                       ),
-
-                    _buildImagePreview(),
-                    Container(
-                      color: context.cardColor,
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.attach_file),
-                            onPressed: () async {
-                              // const permission = Permission.photos;
-                              // if (await permission.isGranted) {
-                              //   // _showFileOptions();
-                              // } else if (await permission.isDenied) {
-                              //   final result = await permission.request();
-                              //
-                              //   if (result.isGranted) {
-                              //     _showFileOptions();
-                              //   } else if (result.isDenied) {
-                              //     debugPrint("isDenied");
-                              //     return;
-                              //     // _permissionDialog(context);
-                              //     // _showFileOptions();
-                              //     return;
-                              //   } else if (result.isPermanentlyDenied) {
-                              //     debugPrint("isPermanentlyDenied1");
-                              //     _permissionDialog(context);
-                              //     return;
-                              //   }
-                              // } else if (await permission.isPermanentlyDenied) {
-                              //   debugPrint("isPermanentlyDenied2");
-                              //   _permissionDialog(context);
-                              //
-                              //   return;
-                              // }
-                              if (isOneTimeImageUploaded) {
-                                toasty(context,
-                                    'Only allowed one time image in one session');
-                              } else {
-                                const permission = Permission.photos;
-                                var status = await Permission.storage.request();
-                                if (status.isGranted ||
-                                    await permission.isGranted) {
-                                  // Permission is already granted
-                                  _showBeforeFileOptions();
-                                } else if (await permission.isDenied) {
-                                  // Permission was denied; request it
-                                  final result = await permission.request();
-                                  debugPrint(result.toString());
-                                  // Check the result after requesting permission
-                                  if (result.isGranted) {
-                                    _showBeforeFileOptions();
-                                  } else if (result.isPermanentlyDenied) {
-                                    // Permission is permanently denied
-                                    debugPrint(
-                                        "Permission is permanently denied.");
-                                    // _permissionDialog(context);
-                                    _showBeforeFileOptions();
-                                  } else if (result.isGranted) {
-                                    _showBeforeFileOptions();
-                                    // Permission is still denied
-                                    debugPrint("Permission is denied.");
+                    )
+                  else
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        itemCount: state1.response1.messages?.length,
+                        itemBuilder: (context, index) {
+                          debugPrint(
+                              state1.response1.messages?[index].gptSessionId);
+                          Messages message =
+                              state1.response1.messages?[index] ?? Messages();
+                          return Column(
+                            children: [
+                              ChatBubble(
+                                text: message.question ?? '',
+                                isUserMessage: true,
+                                imageUrl1: index != 0
+                                    ? null
+                                    : selectedImageFiles.isNotEmpty
+                                        ? File(selectedImageFiles.first.path)
+                                        : null,
+                                imageUrl2: index != 0
+                                    ? null
+                                    : selectedImageFiles.isNotEmpty
+                                        ? selectedImageFiles.length == 2
+                                            ? File(selectedImageFiles.last.path)
+                                            : null
+                                        : null,
+                                responseImageUrl1:
+                                    index != 0 ? '' : message.imageUrl1 ?? '',
+                                responseImageUrl2:
+                                    index != 0 ? '' : message.imageUrl2 ?? '',
+                              ),
+                              ChatBubble(
+                                text: message.response ?? "",
+                                isUserMessage: false,
+                                imageUrl1: selectedImageFiles.isNotEmpty
+                                    ? File(selectedImageFiles.first.path)
+                                    : null,
+                                imageUrl2: selectedImageFiles.isNotEmpty
+                                    ? selectedImageFiles.length == 2
+                                        ? File(selectedImageFiles.last.path)
+                                        : null
+                                    : null,
+                                responseImageUrl1: message.imageUrl1 ?? '',
+                                responseImageUrl2: message.imageUrl2 ?? '',
+                                onTapReginarate: () {
+                                  String question = message.question ?? "";
+                                  if (question.isEmpty) return;
+                                  // String sessionId = selectedSessionId.toString();
+                                  // var tempId =
+                                  //     -1; // Unique temporary ID for the response
+                                  setState(() {
+                                    var myMessage = Messages(
+                                        id: -1,
+                                        gptSessionId:
+                                            selectedSessionId.toString(),
+                                        question: question,
+                                        imageUrl1: message.imageUrl1,
+                                        imageUrl2: message.imageUrl2,
+                                        response: 'Generating response...',
+                                        createdAt: DateTime.now().toString(),
+                                        updatedAt: DateTime.now().toString());
+                                    state1.response1.messages!.add(myMessage);
+                                    BlocProvider.of<ChatGPTBloc>(context).add(
+                                      GetPost(
+                                        sessionId: selectedSessionId.toString(),
+                                        question: question,
+                                        // imageUrl: _uploadedFile??''// replace with real input
+                                      ),
+                                    );
+                                    textController.clear();
+                                    scrollToBottom();
+                                  });
+                                  try {
+                                    isWriting = false;
+                                    // });
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Error: $e')));
                                   }
-                                } else if (await permission
-                                    .isPermanentlyDenied) {
-                                  // Permission was permanently denied
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+
+                  _buildImagePreview(),
+                  Container(
+                    color: context.cardColor,
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.attach_file),
+                          onPressed: () async {
+                            // const permission = Permission.photos;
+                            // if (await permission.isGranted) {
+                            //   // _showFileOptions();
+                            // } else if (await permission.isDenied) {
+                            //   final result = await permission.request();
+                            //
+                            //   if (result.isGranted) {
+                            //     _showFileOptions();
+                            //   } else if (result.isDenied) {
+                            //     debugPrint("isDenied");
+                            //     return;
+                            //     // _permissionDialog(context);
+                            //     // _showFileOptions();
+                            //     return;
+                            //   } else if (result.isPermanentlyDenied) {
+                            //     debugPrint("isPermanentlyDenied1");
+                            //     _permissionDialog(context);
+                            //     return;
+                            //   }
+                            // } else if (await permission.isPermanentlyDenied) {
+                            //   debugPrint("isPermanentlyDenied2");
+                            //   _permissionDialog(context);
+                            //
+                            //   return;
+                            // }
+                            if (isOneTimeImageUploaded) {
+                              toasty(context,
+                                  'Only allowed one time image in one session');
+                            } else {
+                              const permission = Permission.photos;
+                              var status = await Permission.storage.request();
+                              if (status.isGranted ||
+                                  await permission.isGranted) {
+                                // Permission is already granted
+                                _showBeforeFileOptions();
+                              } else if (await permission.isDenied) {
+                                // Permission was denied; request it
+                                final result = await permission.request();
+                                debugPrint(result.toString());
+                                // Check the result after requesting permission
+                                if (result.isGranted) {
+                                  _showBeforeFileOptions();
+                                } else if (result.isPermanentlyDenied) {
+                                  // Permission is permanently denied
                                   debugPrint(
                                       "Permission is permanently denied.");
-                                  _permissionDialog();
+                                  // _permissionDialog(context);
+                                  _showBeforeFileOptions();
+                                } else if (result.isGranted) {
+                                  _showBeforeFileOptions();
+                                  // Permission is still denied
+                                  debugPrint("Permission is denied.");
                                 }
+                              } else if (await permission.isPermanentlyDenied) {
+                                // Permission was permanently denied
+                                debugPrint("Permission is permanently denied.");
+                                _permissionDialog();
                               }
-                            },
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Container(
-                              constraints: const BoxConstraints(maxHeight: 200),
-                              padding: const EdgeInsets.only(left: 8, right: 8),
-                              decoration: BoxDecoration(
-                                color: appStore.isDarkMode
-                                    ? svGetScaffoldColor()
-                                    : cardLightColor,
-                                // border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              child: TextField(
-                                focusNode: focusNode,
-                                controller: textController,
-                                minLines: 1,
-                                // Minimum lines
-                                maxLines: null,
-                                // Allows for unlimited lines
-                                decoration: const InputDecoration(
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  hintText:
-                                      'Clinical Summary e.g age, gender, medical history',
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(4),
+                            }
+                          },
+                        ),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Container(
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            padding: const EdgeInsets.only(left: 8, right: 8),
                             decoration: BoxDecoration(
+                              color: appStore.isDarkMode
+                                  ? svGetScaffoldColor()
+                                  : cardLightColor,
+                              // border: Border.all(color: Colors.grey),
                               borderRadius: BorderRadius.circular(20.0),
                             ),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30.0),
-                                gradient: const LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [Colors.blueAccent, Colors.blue],
-                                  stops: [0.37, 1.0],
-                                ),
+                            child: TextField(
+                              focusNode: focusNode,
+                              controller: textController,
+                              minLines: 1,
+                              // Minimum lines
+                              maxLines: null,
+                              // Allows for unlimited lines
+                              decoration: const InputDecoration(
+                                hintStyle: TextStyle(color: Colors.grey),
+                                hintText:
+                                    'Clinical Summary e.g age, gender, medical history',
+                                border: InputBorder.none,
                               ),
-                              child: IconButton(
-                                icon: isWriting
-                                    ? const TypingIndicators(
-                                        color: Colors.white,
-                                        size: 2.0) // Custom typing indicator
-                                    : const Icon(Icons.send,
-                                        color: Colors.white),
-                                onPressed: () async {
-                                  focusNode.unfocus();
-                                  debugPrint(selectedSessionId.toString());
-                                  if (selectedImageFiles.isEmpty) {
-                                    return;
-                                  } else if (imageUploadBloc
-                                          .imagefiles.isEmpty &&
-                                      isOneTimeImageUploaded) {
-                                    String question =
-                                        textController.text.trim();
-                                    // String sessionId = selectedSessionId.toString();
-                                    // var tempId =
-                                    //     -1; // Unique temporary ID for the response
-                                    if (question != '') {
-                                      setState(() {
-                                        isOneTimeImageUploaded = true;
-                                        var myMessage = Messages(
-                                          id: -1,
-                                          gptSessionId:
-                                              selectedSessionId.toString(),
-                                          question: question,
-                                          response: 'Generating response...',
-                                          createdAt: DateTime.now().toString(),
-                                          updatedAt: DateTime.now().toString(),
-                                          imageUrl1: '',
-                                          imageUrl2: '',
-                                        );
-                                        state1.response1.messages!
-                                            .add(myMessage);
-
-                                        BlocProvider.of<ChatGPTBloc>(context)
-                                            .add(
-                                          GetPost(
-                                              sessionId:
-                                                  selectedSessionId.toString(),
-                                              question: question,
-                                              imageUrl1: null,
-                                              imageUrl2: null,
-                                              // replace with real input
-                                              imageType: imageType),
-                                        );
-                                        imageUploadBloc.imagefiles.clear();
-                                        textController.clear();
-
-                                        scrollToBottom();
-                                      });
-
-                                      try {
-                                        isWriting = false;
-                                        // });
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                                content: Text('Error: $e')));
-                                      }
-                                    } else {
-                                      toasty(context, 'Please ask Question');
-                                    }
-                                  } else if (imageUploadBloc
-                                          .imagefiles.isNotEmpty &&
-                                      !isOneTimeImageUploaded) {
-                                    String question =
-                                        textController.text.trim();
-                                    // String sessionId = selectedSessionId.toString();
-                                    // var tempId =
-                                    //     -1; // Unique temporary ID for the response
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30.0),
+                              gradient: const LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [Colors.blueAccent, Colors.blue],
+                                stops: [0.37, 1.0],
+                              ),
+                            ),
+                            child: IconButton(
+                              icon: isWriting
+                                  ? const TypingIndicators(
+                                      color: Colors.white,
+                                      size: 2.0) // Custom typing indicator
+                                  : const Icon(Icons.send, color: Colors.white),
+                              onPressed: () async {
+                                focusNode.unfocus();
+                                debugPrint(selectedSessionId.toString());
+                                if (selectedImageFiles.isEmpty) {
+                                  return;
+                                } else if (imageUploadBloc.imagefiles.isEmpty &&
+                                    isOneTimeImageUploaded) {
+                                  String question = textController.text.trim();
+                                  // String sessionId = selectedSessionId.toString();
+                                  // var tempId =
+                                  //     -1; // Unique temporary ID for the response
+                                  if (question != '') {
                                     setState(() {
                                       isOneTimeImageUploaded = true;
                                       var myMessage = Messages(
@@ -712,10 +672,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl1: imageUploadBloc
-                                            .imagefiles.first.path,
-                                        imageUrl2: imageUploadBloc
-                                            .imagefiles.first.path,
+                                        imageUrl1: '',
+                                        imageUrl2: '',
                                       );
                                       state1.response1.messages!.add(myMessage);
 
@@ -723,93 +681,154 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         GetPost(
                                             sessionId:
                                                 selectedSessionId.toString(),
-                                            question: question == ""
-                                                ? 'Analyse Image'
-                                                : question,
-                                            imageUrl1: imageUploadBloc
-                                                .imagefiles.first.path,
-                                            imageUrl2: imageUploadBloc
-                                                .imagefiles.last.path,
+                                            question: question,
+                                            imageUrl1: null,
+                                            imageUrl2: null,
                                             // replace with real input
                                             imageType: imageType),
                                       );
                                       imageUploadBloc.imagefiles.clear();
                                       textController.clear();
+
                                       scrollToBottom();
                                     });
+
                                     try {
                                       isWriting = false;
+                                      // });
                                     } catch (e) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(SnackBar(
                                               content: Text('Error: $e')));
                                     }
+                                  } else {
+                                    toasty(context, 'Please ask Question');
                                   }
-                                },
-                              ),
+                                } else if (imageUploadBloc
+                                        .imagefiles.isNotEmpty &&
+                                    !isOneTimeImageUploaded) {
+                                  String question = textController.text.trim();
+                                  // String sessionId = selectedSessionId.toString();
+                                  // var tempId =
+                                  //     -1; // Unique temporary ID for the response
+                                  setState(() {
+                                    isOneTimeImageUploaded = true;
+                                    var myMessage = Messages(
+                                      id: -1,
+                                      gptSessionId:
+                                          selectedSessionId.toString(),
+                                      question: question,
+                                      response: 'Generating response...',
+                                      createdAt: DateTime.now().toString(),
+                                      updatedAt: DateTime.now().toString(),
+                                      imageUrl1:
+                                          imageUploadBloc.imagefiles.first.path,
+                                      imageUrl2:
+                                          imageUploadBloc.imagefiles.first.path,
+                                    );
+                                    state1.response1.messages!.add(myMessage);
+
+                                    BlocProvider.of<ChatGPTBloc>(context).add(
+                                      GetPost(
+                                          sessionId:
+                                              selectedSessionId.toString(),
+                                          question: question == ""
+                                              ? 'Analyse Image'
+                                              : question,
+                                          imageUrl1: imageUploadBloc
+                                              .imagefiles.first.path,
+                                          imageUrl2: imageUploadBloc
+                                              .imagefiles.last.path,
+                                          // replace with real input
+                                          imageType: imageType),
+                                    );
+                                    imageUploadBloc.imagefiles.clear();
+                                    textController.clear();
+                                    scrollToBottom();
+                                  });
+                                  try {
+                                    isWriting = false;
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Error: $e')));
+                                  }
+                                }
+                              },
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      color: Colors.white,
-                      child: Marquee(
-                          pauseDuration: const Duration(milliseconds: 100),
-                          direction: Axis.horizontal,
-                          directionMarguee: DirectionMarguee.oneDirection,
-                          textDirection: TextDirection.ltr,
-                          child: const Text(
-                              'Artificial Intelligence can make mistakes. Consider checking important information.')),
-                    )
-                  ],
-                ));
-          } else if (state1 is DataError) {
-            return Scaffold(
-                body: Container(
-             padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Error!",style: GoogleFonts.poppins(color: Colors.red,fontSize: 24,fontWeight: FontWeight.bold),),
-                  const SizedBox(height:10),
-                  Text(
-                    state1.errorMessage.toString(),
-                    style: const TextStyle(color: black),
                   ),
-                  MaterialButton(onPressed: (){
-                    try {
-                      BlocProvider.of<ChatGPTBloc>(context)
-                          .add(GetNewChat());
-
-                      isOneTimeImageUploaded = false;
-                      selectedSessionId =
-                          BlocProvider.of<ChatGPTBloc>(context)
-                              .newChatSessionId;
-
-                      // Session newSession = await createNewChatSession();
-                      // setState(() {
-                      //   futureSessions = Future(() =>
-                      //       [newSession, ...(snapshot.data ?? [])]);
-                      // });
-                    } catch (e) {
-                      debugPrint(e.toString());
-                    }
-                  },
-
-                    color: appButtonBackgroundColorGlobal,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)
-                  ),child: const Text("Try Again",style: TextStyle(color: Colors.white),),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    color: Colors.white,
+                    child: Marquee(
+                        pauseDuration: const Duration(milliseconds: 100),
+                        direction: Axis.horizontal,
+                        directionMarguee: DirectionMarguee.oneDirection,
+                        textDirection: TextDirection.ltr,
+                        child: const Text(
+                            'Artificial Intelligence can make mistakes. Consider checking important information.')),
                   )
                 ],
-              ),
-            ));
-          } else {
-            return const Text('error');
-          }
-        }));
+              );
+            }
+            else if (state1 is DataError) {
+              return Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Error!",
+                      style: GoogleFonts.poppins(
+                          color: Colors.red,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      state1.errorMessage.toString(),
+                      style: const TextStyle(color: black),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        try {
+                          BlocProvider.of<ChatGPTBloc>(context)
+                              .add(GetNewChat());
+
+                          isOneTimeImageUploaded = false;
+                          selectedSessionId =
+                              BlocProvider.of<ChatGPTBloc>(context)
+                                  .newChatSessionId;
+
+                          // Session newSession = await createNewChatSession();
+                          // setState(() {
+                          //   futureSessions = Future(() =>
+                          //       [newSession, ...(snapshot.data ?? [])]);
+                          // });
+                        } catch (e) {
+                          debugPrint(e.toString());
+                        }
+                      },
+                      color: appButtonBackgroundColorGlobal,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      child: const Text(
+                        "Try Again",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            }
+            else {
+              return const Text('error');
+            }
+          })),
+    );
   }
 
   List<XFile> selectedImageFiles = [];

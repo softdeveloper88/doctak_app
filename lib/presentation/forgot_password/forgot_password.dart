@@ -187,7 +187,13 @@ class ForgotPassword extends StatelessWidget {
   _buildAppBar(BuildContext context) {
     return CustomAppBar(
       height: 140,
-      leadingWidth: 56,
+      leadingWidth: 30,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
       centerTitle: true,
       title: Column(
         mainAxisSize: MainAxisSize.min,

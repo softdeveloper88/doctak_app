@@ -58,7 +58,7 @@
  "msg_network_err": "Network Error",
  "msg_something_went_wrong": "Something Went Wrong!",
  "err_msg_please_enter_valid_email": "Please enter valid email",
- "err_msg_please_enter_valid_password": "Please enter valid password",
+ "err_msg_please_enter_valid_password": "Password should be contain (8-16 chars, with upper,\n lower, number, and special character.",
  "err_msg_please_enter_valid_text": "Please enter valid text",
  "err_msg_please_enter_valid_phone_number": "Please enter valid phone number",
  "auction_product_screen_": "You need to log in",

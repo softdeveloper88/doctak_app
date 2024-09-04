@@ -117,7 +117,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               }
             },
           ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
     );

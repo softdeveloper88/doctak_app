@@ -108,78 +108,76 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        SVProfileFragment(userId: widget.element.id)
-                            .launch(context);
-                      },
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: widget.element.profilePic == ''
-                            ? Image.asset('images/socialv/faces/face_5.png',
-                                    height: 56, width: 56, fit: BoxFit.cover)
-                                .cornerRadiusWithClipRRect(8)
-                                .cornerRadiusWithClipRRect(8)
-                            : CachedNetworkImage(
-                                    imageUrl:
-                                        '${AppData.imageUrl}${widget.element.profilePic.validate()}',
-                                    height: 56,
-                                    width: 56,
-                                    fit: BoxFit.cover)
-                                .cornerRadiusWithClipRRect(30),
-                      ),
-                    ),
-                    10.width,
-                    GestureDetector(
-                      onTap: () {
-                        SVProfileFragment(userId: widget.element.id)
-                            .launch(context);
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                  width: 150,
-                                  child: Text(
-                                      "${widget.element.firstName.validate()} ${widget.element.lastName.validate()}",
-                                      overflow: TextOverflow.clip,
-                                      style: boldTextStyle())),
-                              6.width,
-                              widget.element.isCurrentUser.validate()
-                                  ? Image.asset(
-                                      'images/socialv/icons/ic_TickSquare.png',
-                                      height: 14,
-                                      width: 14,
-                                      fit: BoxFit.cover)
-                                  : const Offstage(),
-                            ],
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      SVProfileFragment(userId: widget.element.id)
+                          .launch(context);
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
                           ),
-                          Text(widget.element.userType.validate(),
-                              style:
-                                  secondaryTextStyle(color: svGetBodyColor())),
                         ],
                       ),
+                      child: widget.element.profilePic == ''
+                          ? Image.asset('images/socialv/faces/face_5.png',
+                                  height: 56, width: 56, fit: BoxFit.cover)
+                              .cornerRadiusWithClipRRect(8)
+                              .cornerRadiusWithClipRRect(8)
+                          : CachedNetworkImage(
+                                  imageUrl:
+                                      '${AppData.imageUrl}${widget.element.profilePic.validate()}',
+                                  height: 56,
+                                  width: 56,
+                                  fit: BoxFit.cover)
+                              .cornerRadiusWithClipRRect(30),
                     ),
-                  ],
-                ),
+                  ),
+                  10.width,
+                  GestureDetector(
+                    onTap: () {
+                      SVProfileFragment(userId: widget.element.id)
+                          .launch(context);
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                                width: 150,
+                                child: Text(
+                                    "${widget.element.firstName.validate()} ${widget.element.lastName.validate()}",
+                                    overflow: TextOverflow.clip,
+                                    style: boldTextStyle())),
+                            6.width,
+                            widget.element.isCurrentUser.validate()
+                                ? Image.asset(
+                                    'images/socialv/icons/ic_TickSquare.png',
+                                    height: 14,
+                                    width: 14,
+                                    fit: BoxFit.cover)
+                                : const Offstage(),
+                          ],
+                        ),
+                        Text(widget.element.userType.validate(),
+                            style:
+                                secondaryTextStyle(color: svGetBodyColor())),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               isLoading
                   ? CircularProgressIndicator(
@@ -215,28 +213,6 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                           ? SVAppColorPrimary
                           : buttonUnSelectColor,
                     ),
-              // ElevatedButton(
-              //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              //   onPressed: () async {
-              //     setState(() {
-              //       isLoading = true; // Set loading state to true when button is clicked
-              //     });
-              //
-              //     // Perform API call
-              //     await widget.onTap();
-              //
-              //     setState(() {
-              //       isLoading = false; // Set loading state to false after API response
-              //     });
-              //   },
-              //   child: isLoading
-              //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
-              //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
-              //   style: ElevatedButton.styleFrom(
-              //     // primary: Colors.blue, // Change button color as needed
-              //     elevation: 0,
-              //   ),
-              // ),
             ],
           ),
         ),

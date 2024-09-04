@@ -86,11 +86,11 @@ bool isValidPhone(
   if (inputString != null && inputString.isNotEmpty) {
     if (inputString.length > 16 || inputString.length < 6) return false;
 
-    const pattern = r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$';
+    // const pattern = r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$';
 
-    final regExp = RegExp(pattern);
+    // final regExp = RegExp(pattern);
 
-    isInputStringValid = regExp.hasMatch(inputString);
+    // isInputStringValid = regExp.hasMatch(inputString);
   }
 
   return isInputStringValid;

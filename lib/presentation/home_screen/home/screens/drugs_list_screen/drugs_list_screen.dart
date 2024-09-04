@@ -420,7 +420,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               }
             },
           ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
     );

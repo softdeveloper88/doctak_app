@@ -1,10 +1,4 @@
-import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/capitalize_words.dart';
-import 'package:doctak_app/data/models/profile_model/interest_model.dart';
-import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
-import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/interested_info_screen/interested_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/personal_info_screen/personal_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/privacy_info_screen/privacy_info_screen.dart';
@@ -12,19 +6,13 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/pro
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/work_info_screen/work_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/profile/components/my_post_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
-import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
-import 'package:doctak_app/widgets/custom_text_form_field.dart';
-import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../../theme/app_decoration.dart';
 import '../../../../widgets/custom_image_view.dart';
-import '../../fragments/profile_screen/bloc/profile_state.dart';
 import '../../utils/SVColors.dart';
 
 class SVProfilePostsComponent extends StatefulWidget {
@@ -129,7 +117,9 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
 
 class AboutWidget extends StatelessWidget {
   AboutWidget({required this.profileBloc, super.key});
+
   ProfileBloc profileBloc;
+
   @override
   Widget build(BuildContext context) {
     return _buildScrollview(context, profileBloc);
@@ -177,7 +167,6 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
       const SizedBox(height: 10),
       _buildRowinterested(
         onTap: () {
-
           PrivacyInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,

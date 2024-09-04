@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:sizer/sizer.dart';
 
 class ProfileImageScreen extends StatelessWidget {
   final String imageUrl;
@@ -13,13 +14,17 @@ class ProfileImageScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          PhotoView(
-            imageProvider: NetworkImage(imageUrl),
-            backgroundDecoration: const BoxDecoration(
-              color: Colors.black,
+          Positioned.fill(
+            child: PhotoView(
+              maxScale: PhotoViewComputedScale.contained,
+              filterQuality: FilterQuality.high,
+              imageProvider: NetworkImage(
+                // imagePath:
+                imageUrl,
+
+                // fit: BoxFit.contain,
+              ),
             ),
-            minScale: PhotoViewComputedScale.contained,
-            maxScale: PhotoViewComputedScale.covered * 2,
           ),
           Positioned(
             top: 40,
@@ -31,6 +36,7 @@ class ProfileImageScreen extends StatelessWidget {
               },
             ),
           ),
+
           // Positioned(
           //   bottom: 40,
           //   right: 20,

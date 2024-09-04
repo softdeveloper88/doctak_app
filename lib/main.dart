@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:app_links/app_links.dart';
+
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
-import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -13,7 +11,6 @@ import 'package:doctak_app/presentation/home_screen/home/screens/conferences_scr
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/store/AppStore.dart';
 import 'package:doctak_app/presentation/home_screen/utils/AppTheme.dart';
@@ -22,7 +19,6 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/theme/bloc/theme_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +27,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
@@ -45,6 +41,7 @@ import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart'
 
 AppStore appStore = AppStore();
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 Future<dynamic> _throwGetMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint('PUSH RECEIVED');
@@ -63,13 +60,14 @@ Future<dynamic> _throwGetMessage(RemoteMessage message) async {
   // }
   // showNotification(message.data);
 }
+
 /// Create a [AndroidNotificationChannel] for heads up notifications
 late AndroidNotificationChannel channel;
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 final GlobalKey<NavigatorState> navigatorKey =
-GlobalKey(debugLabel: 'Main Navigator');
+    GlobalKey(debugLabel: 'Main Navigator');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -110,21 +108,23 @@ Future<void> main() async {
       // showNotification(message.data);
       if (message.notification != null) {
         if (kDebugMode) {
-          print('Message also contained a notification: ${message.notification}');
+          print(
+              'Message also contained a notification: ${message.notification}');
         }
       }
     });
 
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
-    ).then((value) {
+    )
+        .then((value) {
       debugPrint('value:print');
     });
   }
@@ -134,11 +134,11 @@ Future<void> main() async {
   // await DoctakFirebaseRemoteConfig.initialize();
   // AdmobSetting appOpenAdManager = AdmobSetting()..loadAd();
   // WidgetsBinding.instance!.addObserver(AppLifecycle(appOpenAdManager: appOpenAdManager));
-  AdmobSetting.initialization();
-  MobileAds.instance.initialize();
-  if (Platform.isAndroid) {
-    AdmobSetting.initialization();
-  }
+  // AdmobSetting.initialization();
+  // MobileAds.instance.initialize();
+  // if (Platform.isAndroid) {
+  //   AdmobSetting.initialization();
+  // }
   Future.wait([
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -151,6 +151,7 @@ Future<void> main() async {
 
 class MyApp extends StatefulWidget {
   final GlobalKey<NavigatorState>? navigatorKey;
+
   MyApp({this.navigatorKey});
 
   @override
@@ -165,14 +166,16 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   Locale? _locale;
+
   setLocale(Locale locale) {
     setState(() {
       _locale = locale;
     });
   }
+
   // final _navigatorKey = GlobalKey<NavigatorState>();
   void setFCMSetting() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -201,7 +204,7 @@ class _MyAppState extends State<MyApp> {
     }
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
     /// Update the iOS foreground notification presentation options to allow
@@ -218,19 +221,21 @@ class _MyAppState extends State<MyApp> {
       }
     });
   }
+
   @override
   void didChangeDependencies() {
     getLocale().then((locale) => {setLocale(locale)});
     super.didChangeDependencies();
   }
-  Future<bool> sendFcmMessage(String title, String message,
-      String token) async {
+
+  Future<bool> sendFcmMessage(
+      String title, String message, String token) async {
     try {
       var url = 'https://fcm.googleapis.com/fcm/send';
       var header = {
         'Content-Type': 'application/json',
         'Authorization':
-        'Bearer AAAA4y01nWA:APA91bEcfbKn4ZZ-1WPyK4FFepBC4_PWOthWPwz5yoK7b2rcftt2O9_xy5tOaeoeceVaPR5eY7Y6cX_YtIBq7WL11NN8dB3mtpQ8Tq-cNYf8x_FfyG_Hpps6wsMeY1btHcdUqaWEByTd',
+            'Bearer AAAA4y01nWA:APA91bEcfbKn4ZZ-1WPyK4FFepBC4_PWOthWPwz5yoK7b2rcftt2O9_xy5tOaeoeceVaPR5eY7Y6cX_YtIBq7WL11NN8dB3mtpQ8Tq-cNYf8x_FfyG_Hpps6wsMeY1btHcdUqaWEByTd',
       };
       var request = {
         'registration_ids': [token],
@@ -244,11 +249,12 @@ class _MyAppState extends State<MyApp> {
         print(response.body);
       }
       return true;
-    } catch (e, s) {
+    } catch (e) {
       print(e);
       return false;
     }
   }
+
   setToken() async {
     await FirebaseMessaging.instance.getToken().then((token) async {
       sendFcmMessage('dfd', 'df', token.toString());
@@ -301,7 +307,7 @@ class _MyAppState extends State<MyApp> {
     });
     // 2. This method only call when App in forground it mean app must be opened
     FirebaseMessaging.onMessage.listen(
-          (message) async {
+      (message) async {
         if (kDebugMode) {
           print('FirebaseMessaging.onMessage.listen');
         }
@@ -349,7 +355,7 @@ class _MyAppState extends State<MyApp> {
     );
     // 3. This method only call when App in background and not terminated(not closed)
     FirebaseMessaging.onMessageOpenedApp.listen(
-          (message) async {
+      (message) async {
         print('FirebaseMessaging.onMessageOpenedApp.listen');
         if (message.notification != null) {
           RemoteNotification? notification = message.notification;
@@ -381,6 +387,7 @@ class _MyAppState extends State<MyApp> {
     );
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Sizer(

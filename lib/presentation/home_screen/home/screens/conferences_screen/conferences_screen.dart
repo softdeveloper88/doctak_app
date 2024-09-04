@@ -192,8 +192,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 // bloc: conferenceBloc,
                 builder: (context, state) {
                   if (state is CountriesDataLoaded1) {
-                    List<String>? list =
-                        state.countriesModelList.cast<String>();
+                    // List<String>? list = state.countriesModelList.cast<String>();
                     return Row(
                       children: [
                         if (isSearchShow)
@@ -227,7 +226,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                     );
                                     BlocProvider.of<SplashBloc>(context)
                                         .add(LoadDropdownData1(
-                                      state.countryName ?? '',
+                                      state.countryName,
                                       searchTxt,
                                     ));
                                   });
@@ -297,7 +296,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 }
               },
             ),
-            if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+            // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
           ],
         ));
   }
