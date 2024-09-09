@@ -18,11 +18,11 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: Colors.green,
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('About Us', style: boldTextStyle(size: 20)),
+        title: Text('About Us', style: boldTextStyle(size: 18,)),
         elevation: 0,
         centerTitle: true,
         actions: const [

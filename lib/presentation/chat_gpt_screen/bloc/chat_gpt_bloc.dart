@@ -78,16 +78,13 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       //     updatedAt: DateTime.now().toString());
       // (state as DataLoaded).response1.messages!.add(myMessage);
       // emit(DataLoaded(ChatGptSession(), ChatGptMessageHistory(), response));
-      emit(DataLoaded((state as DataLoaded).response,
-          (state as DataLoaded).response1, response));
+      emit(DataLoaded((state as DataLoaded).response, (state as DataLoaded).response1, response));
       for (int i = 0;
           i <= (state as DataLoaded).response2.content!.length;
           i++) {
         await Future.delayed(
             const Duration(milliseconds: 1)); // Delay to simulate typing speed
-        int index = (state as DataLoaded)
-            .response1
-            .messages?.indexWhere((msg) => msg.id == -1)??0;
+        int index = (state as DataLoaded).response1.messages?.indexWhere((msg) => msg.id == -1)??0;
         if (index != -1) {
           String typingText =
               (state as DataLoaded).response2.content!.substring(0, i);

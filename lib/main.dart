@@ -447,8 +447,7 @@ class _MyAppState extends State<MyApp> {
                         //     '',
                         //   ),
                         // ],
-                        localizationsDelegates:
-                            AppLocalizations.localizationsDelegates,
+                        localizationsDelegates: AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         locale: _locale,
                         home: const ForceUpgradePage(),

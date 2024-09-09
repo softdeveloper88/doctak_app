@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.0.1+60
+version: 3.0.3+63
 
 environment:
   sdk: '>=3.5.1 <4.0.0'
@@ -75,7 +75,7 @@ dependencies:
   provider: ^6.0.5
   flutter_switch: ^0.3.2
   font_awesome_flutter: ^10.5.0
-  pusher_channels_flutter: ^2.2.0
+  pusher_channels_flutter: ^2.2.1
   flutter_plugin_android_lifecycle: ^2.0.16
 #  agora_rtm: ^1.5.8
 #  agora_rtc_engine: ^6.2.2
@@ -90,7 +90,7 @@ dependencies:
 #  flutter_background_service: ^5.0.1
 #  awesome_notifications: ^0.6.5
   permission_handler: ^11.3.1
-  firebase_auth: ^5.1.1
+  firebase_auth: ^5.1.4
   flutter_local_notifications: ^17.2.2
   firebase_messaging: ^15.0.3
   overlay_support: ^2.1.0
@@ -180,6 +180,7 @@ flutter:
     - images/socialv/
     - images/socialv/icons/
     - images/socialv/gifs/
+    - shorebird.yaml
   fonts:
     - family: Raleway
       fonts:

@@ -32,7 +32,7 @@ target 'Runner' do
   use_modular_headers!
   pod 'Toast', '~> 4.0'
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-
+  $FirebaseSDKVersion = '10.29.0'
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
