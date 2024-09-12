@@ -182,14 +182,7 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
                               fit: BoxFit.contain,
                             ))),
                     8.width,
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: Text("Doctak.net",
-                    //       style: primaryTextStyle(
-                    //           color: Colors.white,
-                    //           size: 24,
-                    //           weight: FontWeight.w500)),
-                    // ),
+
                   ],
                 ),
               ],

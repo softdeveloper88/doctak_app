@@ -185,7 +185,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               ));
             } else if (state1 is DataLoaded) {
               isEmpty = state1.response1.messages?.isEmpty ?? false;
-              debugPrint('response ${state1.response.toString()}');
+              debugPrint('response chat ${state1.response.toString()}');
               if (!widget.isFromMainScreen) {
                 if (isAlreadyAsk) {
                   setState(() {

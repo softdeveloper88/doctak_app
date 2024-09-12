@@ -748,6 +748,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (_formKey.currentState!.validate()) {
         _formKey.currentState!.save();
+      }else{
+        return;
       }
       print(emailController.text.toString());
       await FirebaseMessaging.instance.getToken().then((token) async {

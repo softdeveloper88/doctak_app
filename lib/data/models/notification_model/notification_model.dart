@@ -312,7 +312,7 @@ class User {
   dynamic isAdmin;
   String? createdAt;
   String? updatedAt;
-  int? activeStatus;
+  dynamic activeStatus;
   dynamic avatar;
   int? darkMode;
   dynamic messengerColor;

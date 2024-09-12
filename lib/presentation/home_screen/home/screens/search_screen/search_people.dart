@@ -49,10 +49,8 @@ class SearchPeopleList extends StatelessWidget {
                   // physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     if (bloc.pageNumber <= bloc.numberOfPage) {
-                      if (index ==
-                          bloc.searchPeopleData.length - bloc.nextPageTrigger) {
-                        bloc.add(
-                            SearchPeopleCheckIfNeedMoreDataEvent(index: index));
+                      if (index == bloc.searchPeopleData.length - bloc.nextPageTrigger) {
+                        bloc.add(SearchPeopleCheckIfNeedMoreDataEvent(index: index));
                       }
                     }
                     return bloc.numberOfPage != bloc.pageNumber - 1 &&
