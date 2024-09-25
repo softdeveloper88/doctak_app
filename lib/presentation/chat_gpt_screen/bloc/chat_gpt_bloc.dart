@@ -134,6 +134,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
           (state as DataLoaded).response2));
     } catch (e) {
       print(e);
+      ProgressDialogUtils.hideProgressDialog();
       emit(DataError('An error occurred$e'));
     }
   }
@@ -155,6 +156,8 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       emit(DataLoaded(responseSession, response1, (state as DataLoaded).response2));
     } catch (e) {
       print(e);
+      ProgressDialogUtils.hideProgressDialog();
+
       emit(DataError('$e'));
     }
   }

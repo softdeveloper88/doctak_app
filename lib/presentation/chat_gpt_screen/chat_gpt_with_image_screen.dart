@@ -137,7 +137,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
 
     super.dispose();
   }
-
+bool isError=false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,20 +151,23 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               chatWithAi =
                   state1.response.sessions?.first.name ?? 'New Session';
             } else if (state1 is DataError) {
+
               showToast('Something went wrong please try again');
-
               try {
-                BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-
-                isOneTimeImageUploaded = false;
-                selectedSessionId =
-                    BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
-
-                // Session newSession = await createNewChatSession();
-                // setState(() {
-                //   futureSessions = Future(() =>
-                //       [newSession, ...(snapshot.data ?? [])]);
-                // });
+                if(isError) {
+                  BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                  isOneTimeImageUploaded = false;
+                  isError=false;
+                  selectedSessionId =
+                      BlocProvider
+                          .of<ChatGPTBloc>(context)
+                          .newChatSessionId;
+                  // Session newSession = await createNewChatSession();
+                  // setState(() {
+                  //   futureSessions = Future(() =>
+                  //       [newSession, ...(snapshot.data ?? [])]);
+                  // });
+                }
               } catch (e) {
                 debugPrint(e.toString());
               }
@@ -224,6 +227,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                             }
                           },
                           onTap: (session) {
+                            isError=true;
                             chatWithAi = session.name!;
                             isEmptyPage = false;
                             debugPrint(session.id.toString());
@@ -651,6 +655,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       size: 2.0) // Custom typing indicator
                                   : const Icon(Icons.send, color: Colors.white),
                               onPressed: () async {
+                                isError=true;
                                 focusNode.unfocus();
                                 debugPrint(selectedSessionId.toString());
                                 if (selectedImageFiles.isEmpty) {

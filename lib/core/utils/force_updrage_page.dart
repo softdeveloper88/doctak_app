@@ -40,30 +40,45 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
   }
 
   Future<Map<String, dynamic>> fetchLatestVersion() async {
-    var response;
-    if (Platform.isAndroid) {
-      response = await http
-          .get(Uri.parse('https://doctak.net/api/v1/version/Android'));
-    } else {
-      response =
-          await http.get(Uri.parse('https://doctak.net/api/v1/version/iOS'));
-    }
-    print(response.body);
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load version info');
+    try {
+      var response;
+      if (Platform.isAndroid) {
+        response = await http
+            .get(Uri.parse('https://doctak.net/api/v1/version/Android'));
+      } else {
+        response =
+        await http.get(Uri.parse('https://doctak.net/api/v1/version/iOS'));
+      }
+      print(response.body);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return <String, dynamic>{};
+      }
+    }catch(e){
+      return <String, dynamic>{};
     }
   }
 
   Future<void> _checkAppVersion() async {
     if (packageInfo != null) {
+      SharedPreferences prefs =
+      await SharedPreferences.getInstance();
       final latestVersionInfo = await fetchLatestVersion();
-      final latestVersion = latestVersionInfo['data']['version'];
-      final mandatory = latestVersionInfo['data']['mandatory'];
-
+      var latestVersion;
+      var latestVersionLocal;
+     var mandatory;
+      if(latestVersionInfo.isNotEmpty) {
+         latestVersion = latestVersionInfo['data']['version'];
+            await prefs.setString('latest_version', latestVersion);
+           latestVersionLocal=prefs.getString('latest_version');
+          mandatory = latestVersionInfo['data']['mandatory'];
+      }else{
+        latestVersionLocal=prefs.getString('latest_version');
+      }
+      print(latestVersionLocal);
       Version version1 = Version.parse(packageInfo!.version);
-      Version version2 = Version.parse(latestVersion);
+      Version version2 = Version.parse(latestVersionLocal);
 
       // final url = latestVersionInfo['url'];
       print(latestVersionInfo);

@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
+import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_bloc.dart';
@@ -29,11 +29,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
-import 'ads_setting/ad_setting.dart';
 import 'core/network/my_https_override.dart';
+import 'core/notification_service.dart';
 import 'core/utils/navigator_service.dart';
 import 'core/utils/pref_utils.dart';
 import 'localization/app_localization.dart';
@@ -42,9 +43,47 @@ import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart'
 AppStore appStore = AppStore();
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
+
 Future<dynamic> _throwGetMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint('PUSH RECEIVED');
+
+  await showNotificationWithCustomIcon(
+      message.notification,
+      message.notification?.title ??'',
+      message.notification?.body ??'',
+      message.data['image'] ?? '',
+      message.data['banner'] ?? '');
+  // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  // FlutterLocalNotificationsPlugin();
+  // const AndroidInitializationSettings initializationSettingsAndroid =
+  // AndroidInitializationSettings('ic_stat_name');
+  // const InitializationSettings initializationSettings = InitializationSettings(
+  //     android: initializationSettingsAndroid);
+  // await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+  //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+  // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
+  // RemoteNotification? notification = message.notification;
+  // AndroidNotification? android = message.notification?.android;
+  // if (notification != null && android != null) {
+  //   flutterLocalNotificationsPlugin.show(
+  //       notification.hashCode,
+  //       notification.title,
+  //       notification.body,
+  //       NotificationDetails(
+  //         android: AndroidNotificationDetails(
+  //           channel.id,
+  //           channel.name,
+  //           largeIcon: largeIcon,
+  //           styleInformation: BigPictureStyleInformation(
+  //             largeIcon,
+  //             contentTitle: notification.title,
+  //             summaryText: notification.body,
+  //           ),
+  //           icon: 'ic_stat_name',
+  //         ),
+  //       ));
+  // }
   // if(user_type.$=="customer") {
   //   await navigatorKey.currentState?.push(
   //       MaterialPageRoute(builder: (context) =>
@@ -61,6 +100,50 @@ Future<dynamic> _throwGetMessage(RemoteMessage message) async {
   // showNotification(message.data);
 }
 
+Future<void> showNotificationWithCustomIcon(notification, String title,
+    String body, String imageUrl, String bannerImage) async {
+  final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl(imageUrl);
+  ByteArrayAndroidBitmap banner;
+  if (bannerImage != '') {
+    banner = await _getImageFromUrl(bannerImage);
+  } else {
+    banner = ByteArrayAndroidBitmap(Uint8List(0));
+  }
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  //
+  // const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
+  //
+  // const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+  //
+  // await flutterLocalNotificationsPlugin.initialize(initializationSettings, onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+  channel = const AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title // description
+    importance: Importance.max,
+  );
+  flutterLocalNotificationsPlugin.show(
+      notification.hashCode,
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          color: Colors.transparent,
+          channel.id,
+          channel.name,
+          largeIcon: largeIcon,
+          styleInformation: bannerImage != ''
+              ? BigPictureStyleInformation(
+                  banner,
+                  contentTitle: notification.title,
+                  summaryText: notification.body,
+                )
+              : null,
+          icon: 'ic_stat_name',
+        ),
+      ));
+}
+
 /// Create a [AndroidNotificationChannel] for heads up notifications
 late AndroidNotificationChannel channel;
 
@@ -68,6 +151,18 @@ late AndroidNotificationChannel channel;
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 final GlobalKey<NavigatorState> navigatorKey =
     GlobalKey(debugLabel: 'Main Navigator');
+
+@pragma('vm:entry-point')
+void onDidReceiveNotificationResponse(
+    NotificationResponse notificationResponse) async {
+  final String? payload = notificationResponse.payload;
+  if (notificationResponse.payload != null) {
+    debugPrint('notification payload: $payload');
+  }
+  NavigatorService.navigatorKey.currentState?.push(
+    MaterialPageRoute(builder: (context) => const ComingSoonScreen()),
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,66 +188,100 @@ Future<void> main() async {
   } else {
     await Firebase.initializeApp();
   }
-  if (!kIsWeb) {
+  // if (!kIsWeb) {
     channel = const AndroidNotificationChannel(
       'high_importance_channel', // id
       'High Importance Notifications', // title // description
       importance: Importance.max,
     );
-    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
-    //App is in the foreground
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Got a message, app is in the foreground!');
-      debugPrint('Message data: $message');
-      // showNotification(message.data);
-      if (message.notification != null) {
-        if (kDebugMode) {
-          print(
-              'Message also contained a notification: ${message.notification}');
-        }
-      }
-    });
+    // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    //     FlutterLocalNotificationsPlugin();
+    // const AndroidInitializationSettings initializationSettingsAndroid =
+    //     AndroidInitializationSettings('ic_stat_name');
+    // const InitializationSettings initializationSettings =
+    //     InitializationSettings(android: initializationSettingsAndroid);
+    // await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+    //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+    // // flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    // FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
+  //   //App is in the foreground
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+  //     debugPrint('Got a message, app is in the foreground!');
+  //     debugPrint('Message data: $message');
+  //     await showNotificationWithCustomIcon(message.notification,message.notification?.title??'', message.notification!.body.toString(),message.data['image'],message.data['banner']);
+  //     // showNotification(message.data);
+  //     // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
+  //     // RemoteNotification? notification = message.notification;
+  //     // AndroidNotification? android = message.notification?.android;
+  //     // if (notification != null && android != null) {
+  //     //   flutterLocalNotificationsPlugin.show(
+  //     //       notification.hashCode,
+  //     //       notification.title,
+  //     //       notification.body,
+  //     //       NotificationDetails(
+  //     //         android: AndroidNotificationDetails(
+  //     //           channel.id,
+  //     //           channel.name,
+  //     //           largeIcon: largeIcon,
+  //     //           styleInformation: BigPictureStyleInformation(
+  //     //             largeIcon,
+  //     //             contentTitle: notification.title,
+  //     //             summaryText: notification.body,
+  //     //           ),
+  //     //           icon: 'ic_stat_name',
+  //     //         ),
+  //     //       ));
+  //     // }
+  //     if (message.notification != null) {
+  //       if (kDebugMode) {
+  //         print(
+  //             'Message also contained a notification: ${message.notification}');
+  //       }
+  //     }
+  //   });
+  //
+  //   await flutterLocalNotificationsPlugin
+  //       .resolvePlatformSpecificImplementation<
+  //           AndroidFlutterLocalNotificationsPlugin>()
+  //       ?.createNotificationChannel(channel);
+  //   await FirebaseMessaging.instance
+  //       .setForegroundNotificationPresentationOptions(
+  //     alert: true,
+  //     badge: true,
+  //     sound: true,
+  //   )
+  //       .then((value) {
+  //     debugPrint('value:print');
+  //   });
+  // }
+ // Get the notification payload if the app was terminated
+  String? payload = await NotificationService.getNotificationPayload();
+  // Initialize the notification service
 
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    )
-        .then((value) {
-      debugPrint('value:print');
-    });
-  }
+
+  // Get the initial notification data if the app was launched from a terminated state by tapping a notification
+  String? initialRoute = await NotificationService.getInitialNotificationRoute();
+
+  // Use the notification data (payload or route) to navigate to a specific screen
+
   appStore.toggleDarkMode(value: false);
   WidgetsFlutterBinding.ensureInitialized();
-  // await Upgrader.clearSavedSettings(); //live update
-  // await DoctakFirebaseRemoteConfig.initialize();
-  // AdmobSetting appOpenAdManager = AdmobSetting()..loadAd();
-  // WidgetsBinding.instance!.addObserver(AppLifecycle(appOpenAdManager: appOpenAdManager));
-  // AdmobSetting.initialization();
-  // MobileAds.instance.initialize();
-  // if (Platform.isAndroid) {
-  //   AdmobSetting.initialization();
-  // }
   Future.wait([
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]),
     PrefUtils().init()
   ]).then((value) {
-    runApp(MyApp());
+
+    runApp(MyApp(initialRoute:initialRoute));
+
   });
 }
 
 class MyApp extends StatefulWidget {
-  final GlobalKey<NavigatorState>? navigatorKey;
+  final String? initialRoute;
 
-  MyApp({this.navigatorKey});
+  const MyApp({Key? key, this.initialRoute}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -228,165 +357,218 @@ class _MyAppState extends State<MyApp> {
     super.didChangeDependencies();
   }
 
-  Future<bool> sendFcmMessage(
-      String title, String message, String token) async {
-    try {
-      var url = 'https://fcm.googleapis.com/fcm/send';
-      var header = {
-        'Content-Type': 'application/json',
-        'Authorization':
-            'Bearer AAAA4y01nWA:APA91bEcfbKn4ZZ-1WPyK4FFepBC4_PWOthWPwz5yoK7b2rcftt2O9_xy5tOaeoeceVaPR5eY7Y6cX_YtIBq7WL11NN8dB3mtpQ8Tq-cNYf8x_FfyG_Hpps6wsMeY1btHcdUqaWEByTd',
-      };
-      var request = {
-        'registration_ids': [token],
-        'priority': 'high',
-        'important': 'max',
-        'notification': {'body': message, 'title': title}
-      };
-      var response = await http.post(Uri.parse(url),
-          headers: header, body: json.encode(request));
-      if (kDebugMode) {
-        print(response.body);
-      }
-      return true;
-    } catch (e) {
-      print(e);
-      return false;
-    }
-  }
-
+  // Future<bool> sendFcmMessage(
+  //     String title, String message, String token) async {
+  //   try {
+  //     var url = 'https://fcm.googleapis.com/fcm/send';
+  //     var header = {
+  //       'Content-Type': 'application/json',
+  //       'Authorization':
+  //           'Bearer AAAA4y01nWA:APA91bEcfbKn4ZZ-1WPyK4FFepBC4_PWOthWPwz5yoK7b2rcftt2O9_xy5tOaeoeceVaPR5eY7Y6cX_YtIBq7WL11NN8dB3mtpQ8Tq-cNYf8x_FfyG_Hpps6wsMeY1btHcdUqaWEByTd',
+  //     };
+  //     var request = {
+  //       'registration_ids': [token],
+  //       'priority': 'high',
+  //       'important': 'max',
+  //       'notification': {'body': message, 'title': title}
+  //     };
+  //     var response = await http.post(Uri.parse(url),
+  //         headers: header, body: json.encode(request));
+  //     if (kDebugMode) {
+  //       print(response.body);
+  //     }
+  //     return true;
+  //   } catch (e) {
+  //     print(e);
+  //     return false;
+  //   }
+  // }
   setToken() async {
     await FirebaseMessaging.instance.getToken().then((token) async {
-      sendFcmMessage('dfd', 'df', token.toString());
-      if (kDebugMode) {
-        print(token);
-      }
+      log('token ${token}');
     });
   }
 
   @override
   void initState() {
-    // NotificationManger.init(context: context);
-    // setFCMSetting();
-    // setToken();
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) {
-      if (message != null) {
-        FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-          RemoteNotification? notification = message.notification;
-          AndroidNotification? android = message.notification?.android;
-          if (notification != null && android != null) {
-            flutterLocalNotificationsPlugin.show(
-                notification.hashCode,
-                notification.title,
-                notification.body,
-                NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    channel.id,
-                    channel.name,
-                    icon: '@mipmap/icon_launcher',
-                  ),
-                ));
-          }
-          // if(user_type.$=="customer") {
-          //   await navigatorKey.currentState!.push(
-          //       MaterialPageRoute(builder: (_) =>
-          //           NotificationsScreen(isWorkshop:false
-          //           ))
-          //   );
-          // }else{
-          //   await navigatorKey.currentState!.push(
-          //       MaterialPageRoute(builder: (_) =>
-          //           NotificationsScreen(isWorkshop: true
-          //           ))
-          //   );
-          // }
-        });
-      }
-    });
-    // 2. This method only call when App in forground it mean app must be opened
-    FirebaseMessaging.onMessage.listen(
-      (message) async {
-        if (kDebugMode) {
-          print('FirebaseMessaging.onMessage.listen');
-        }
-        if (message.notification != null) {
-          if (kDebugMode) {
-            print(message.notification!.title);
-          }
-          if (kDebugMode) {
-            print(message.notification!.body);
-          }
-          if (kDebugMode) {
-            print('message.data11 ${message.data}');
-          }
-          // showNotification(message.data);
-          RemoteNotification? notification = message.notification;
-          AndroidNotification? android = message.notification?.android;
-          if (notification != null && android != null) {
-            flutterLocalNotificationsPlugin.show(
-                notification.hashCode,
-                notification.title,
-                notification.body,
-                NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    channel.id,
-                    channel.name,
-                    icon: '@mipmap/ic_launcher',
-                  ),
-                ));
-          }
-          // if(user_type.$=="customer") {
-          //   await navigatorKey.currentState!.push(
-          //       MaterialPageRoute(builder: (_) =>
-          //           NotificationsScreen(isWorkshop:false
-          //           ))
-          //   );
-          // }else{
-          //   await navigatorKey.currentState!.push(
-          //       MaterialPageRoute(builder: (_) =>
-          //           NotificationsScreen(isWorkshop: true
-          //           ))
-          //   );
-          // }
-        }
-      },
-    );
-    // 3. This method only call when App in background and not terminated(not closed)
-    FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) async {
-        print('FirebaseMessaging.onMessageOpenedApp.listen');
-        if (message.notification != null) {
-          RemoteNotification? notification = message.notification;
-          AndroidNotification? android = message.notification?.android;
-          if (notification != null && android != null) {
-            flutterLocalNotificationsPlugin.show(
-                notification.hashCode,
-                notification.title,
-                notification.body,
-                NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    channel.id,
-                    channel.name,
-                    icon: '@mipmap/ic_launcher',
-                  ),
-                ));
-            // await navigatorKey.currentState!.push(
-            //     MaterialPageRoute(builder: (_) =>  NotificationsScreen(
-            //     ))
-            // );
-          }
-
-          // showNotification(message.data);
-          print(message.notification!.title);
-          print(message.notification!.body);
-          print("message.data22 ${message.data['_id']}");
-        }
-      },
-    );
+    setFCMSetting();
+    setToken();
     super.initState();
   }
+  //   setToken();
+  //   FirebaseMessaging.instance
+  //       .getInitialMessage()
+  //       .then((RemoteMessage? message) {
+  //       print('message test $message');
+  //     if (message != null) {
+  //       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+  //         NavigatorService.navigatorKey.currentState?.push(
+  //           MaterialPageRoute(builder: (context) => ComingSoonScreen()),
+  //         );
+  //         await showNotificationWithCustomIcon(
+  //             message.notification,
+  //             message.notification?.title ?? '',
+  //             message.notification!.body.toString(),
+  //             message.data['image']??'',
+  //             message.data['banner']??'');
+  //         // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
+  //         //
+  //         // RemoteNotification? notification = message.notification;
+  //         // AndroidNotification? android = message.notification?.android;
+  //         // if (notification != null && android != null) {
+  //         //   flutterLocalNotificationsPlugin.show(
+  //         //       notification.hashCode,
+  //         //       notification.title,
+  //         //       notification.body,
+  //         //       NotificationDetails(
+  //         //
+  //         //         android: AndroidNotificationDetails(
+  //         //           color: Colors.transparent,
+  //         //           largeIcon: largeIcon,
+  //         //           styleInformation: BigPictureStyleInformation(
+  //         //             largeIcon,
+  //         //             contentTitle: notification.title,
+  //         //             summaryText: notification.body,
+  //         //           ),
+  //         //           channel.id,
+  //         //           channel.name,
+  //         //
+  //         //           icon: 'ic_stat_name',
+  //         //         ),
+  //         //       ));
+  //         // }
+  //         // if(user_type.$=="customer") {
+  //         //   await navigatorKey.currentState!.push(
+  //         //       MaterialPageRoute(builder: (_) =>
+  //         //           NotificationsScreen(isWorkshop:false
+  //         //           ))
+  //         //   );
+  //         // }else{
+  //         //   await navigatorKey.currentState!.push(
+  //         //       MaterialPageRoute(builder: (_) =>
+  //         //           NotificationsScreen(isWorkshop: true
+  //         //           ))
+  //         //   );
+  //         // }
+  //       });
+  //     }
+  //   });
+  //   // 2. This method only call when App in forground it mean app must be opened
+  //   FirebaseMessaging.onMessage.listen(
+  //     (message) async {
+  //       if (kDebugMode) {
+  //         print('FirebaseMessaging.onMessage.listen');
+  //       }
+  //       if (message.notification != null) {
+  //         if (kDebugMode) {
+  //           print(message.notification!.title);
+  //         }
+  //         if (kDebugMode) {
+  //           print(message.notification!.body);
+  //         }
+  //         if (kDebugMode) {
+  //           print('message.data11 ${message.data}');
+  //         }
+  //         // showNotification(message.data);
+  //         // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
+  //
+  //         RemoteNotification? notification = message.notification;
+  //         AndroidNotification? android = message.notification?.android;
+  //         // print(message.data);
+  //         NavigatorService.navigatorKey.currentState?.push(
+  //           MaterialPageRoute(builder: (context) => ComingSoonScreen()),
+  //         );
+  //         await showNotificationWithCustomIcon(
+  //             message.notification,
+  //             message.notification?.title ?? '',
+  //             message.notification!.body.toString(),
+  //             message.data['image']??'',
+  //             message.data['banner']??'');
+  //
+  //         // if (notification != null && android != null) {
+  //         //   flutterLocalNotificationsPlugin.show(
+  //         //       notification.hashCode,
+  //         //       notification.title,
+  //         //       notification.body,
+  //         //       NotificationDetails(
+  //         //         android: AndroidNotificationDetails(
+  //         //           channel.id,
+  //         //           channel.name,
+  //         //           largeIcon: largeIcon,
+  //         //           styleInformation: BigPictureStyleInformation(
+  //         //             largeIcon,
+  //         //             contentTitle: notification.title,
+  //         //             summaryText: notification.body,
+  //         //           ),
+  //         //           icon: 'ic_stat_name',
+  //         //         ),
+  //         //       ));
+  //         // }
+  //         // if(user_type.$=="customer") {
+  //         //   await navigatorKey.currentState!.push(
+  //         //       MaterialPageRoute(builder: (_) =>
+  //         //           NotificationsScreen(isWorkshop:false
+  //         //           ))
+  //         //   );
+  //         // }else{
+  //         //   await navigatorKey.currentState!.push(
+  //         //       MaterialPageRoute(builder: (_) =>
+  //         //           NotificationsScreen(isWorkshop: true
+  //         //           ))
+  //         //   );
+  //         // }
+  //       }
+  //     },
+  //   );
+  //   // 3. This method only call when App in background and not terminated(not closed)
+  //   FirebaseMessaging.onMessageOpenedApp.listen(
+  //     (message) async {
+  //       print('FirebaseMessaging.onMessageOpenedApp.listen');
+  //       if (message.notification != null) {
+  //         RemoteNotification? notification = message.notification;
+  //         AndroidNotification? android = message.notification?.android;
+  //         await showNotificationWithCustomIcon(
+  //             message.notification,
+  //             message.notification?.title ?? '',
+  //             message.notification!.body.toString(),
+  //             message.data['image']??'',
+  //             message.data['banner']??'');
+  //         // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
+  //         //
+  //         // if (notification != null && android != null) {
+  //         //   flutterLocalNotificationsPlugin.show(
+  //         //       notification.hashCode,
+  //         //       notification.title,
+  //         //       notification.body,
+  //         //
+  //         //       NotificationDetails(
+  //         //         android: AndroidNotificationDetails(
+  //         //           channel.id,
+  //         //           channel.name,
+  //         //           icon: 'ic_stat_name',
+  //         //           largeIcon: largeIcon,
+  //         //           styleInformation: BigPictureStyleInformation(
+  //         //             largeIcon,
+  //         //             contentTitle: notification.title,
+  //         //             summaryText: notification.body,
+  //         //           ),
+  //         //         ),
+  //         //       ));
+  //         //   // await navigatorKey.currentState!.push(
+  //         //   //     MaterialPageRoute(builder: (_) =>  NotificationsScreen(
+  //         //   //     ))
+  //         //   // );
+  //         // }
+  //
+  //         // showNotification(message.data);
+  //         print(message.notification!.title);
+  //         print(message.notification!.body);
+  //         print("message.data22 ${message}");
+  //       }
+  //     },
+  //   );
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -423,6 +605,11 @@ class _MyAppState extends State<MyApp> {
                         // theme: theme,
                         title: 'doctak_app',
                         navigatorKey: NavigatorService.navigatorKey,
+                        initialRoute: widget.initialRoute ?? '/',
+                        routes: {
+                          '/': (context) => const ForceUpgradePage(),
+                          '/follow_request': (context) => const ComingSoonScreen(),
+                        },
                         debugShowCheckedModeBanner: false,
                         scrollBehavior: SBehavior(),
                         theme: AppTheme.lightTheme,
@@ -447,10 +634,11 @@ class _MyAppState extends State<MyApp> {
                         //     '',
                         //   ),
                         // ],
-                        localizationsDelegates: AppLocalizations.localizationsDelegates,
+                        localizationsDelegates:
+                            AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         locale: _locale,
-                        home: const ForceUpgradePage(),
+                        // home: ForceUpgradePage(),
                         // initialRoute: AppRoutes.splashScreen,
                       ));
             },
@@ -459,4 +647,14 @@ class _MyAppState extends State<MyApp> {
       },
     );
   }
+}
+
+Future<ByteArrayAndroidBitmap> _getImageFromUrl(String imageUrl) async {
+  final response = await http.get(Uri.parse(imageUrl));
+  final directory = await getTemporaryDirectory();
+  final filePath = '${directory.path}/user_image.png';
+  final file = File(filePath);
+  await file.writeAsBytes(response.bodyBytes);
+  final Uint8List imageBytes = await file.readAsBytes();
+  return ByteArrayAndroidBitmap(imageBytes);
 }

@@ -48,13 +48,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
       emit(PostPaginationLoadedState());
 
-      // emit(DataLoaded(postList));
     } catch (e) {
       print(e);
 
-      emit(PostPaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
+      // emit(PostPaginationLoadedState());
+      emit(PostDataError('An error occurred $e'));
     }
   }
 

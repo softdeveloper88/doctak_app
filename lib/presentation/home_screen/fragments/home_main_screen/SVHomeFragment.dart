@@ -129,7 +129,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             // ),
             IconButton(
               onPressed: () {
-
                 FocusManager.instance.primaryFocus?.unfocus();
                 Navigator.of(context).push(
                   MaterialPageRoute(

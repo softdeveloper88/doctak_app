@@ -14,8 +14,7 @@ class FollowerScreen extends StatefulWidget {
   Function? backPress;
   bool isFollowersScreen;
   String userId;
-  FollowerScreen(
-      {this.backPress,
+  FollowerScreen({this.backPress,
       super.key,
       required this.isFollowersScreen,
       required this.userId});
