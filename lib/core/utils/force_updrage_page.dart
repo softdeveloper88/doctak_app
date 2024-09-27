@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'app_transitions.dart';
 
 class ForceUpgradePage extends StatefulWidget {
-  const ForceUpgradePage({Key? key}) : super(key: key);
+   ForceUpgradePage({Key? key}) : super(key: key);
 
   @override
   State<ForceUpgradePage> createState() => _ForceUpgradeState();
@@ -27,7 +28,8 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
   @override
   void initState() {
     super.initState();
-    _initialize();
+      _initialize();
+
   }
 
   Future<void> _initialize() async {

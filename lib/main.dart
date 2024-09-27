@@ -5,12 +5,17 @@ import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/bloc/conference_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/store/AppStore.dart';
 import 'package:doctak_app/presentation/home_screen/utils/AppTheme.dart';
@@ -39,6 +44,8 @@ import 'core/utils/navigator_service.dart';
 import 'core/utils/pref_utils.dart';
 import 'localization/app_localization.dart';
 import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import 'presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
+import 'presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 
 AppStore appStore = AppStore();
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -188,6 +195,9 @@ Future<void> main() async {
   } else {
     await Firebase.initializeApp();
   }
+  NotificationService.initialize();
+  RemoteMessage? initialRoute = await NotificationService.getInitialNotificationRoute();
+  // if(initialRoute?.data['type']??'')
   // if (!kIsWeb) {
     channel = const AndroidNotificationChannel(
       'high_importance_channel', // id
@@ -255,17 +265,13 @@ Future<void> main() async {
   //   });
   // }
  // Get the notification payload if the app was terminated
-  String? payload = await NotificationService.getNotificationPayload();
   // Initialize the notification service
-
-
   // Get the initial notification data if the app was launched from a terminated state by tapping a notification
-  String? initialRoute = await NotificationService.getInitialNotificationRoute();
 
   // Use the notification data (payload or route) to navigate to a specific screen
 
   appStore.toggleDarkMode(value: false);
-  WidgetsFlutterBinding.ensureInitialized();
+
   Future.wait([
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -273,15 +279,16 @@ Future<void> main() async {
     PrefUtils().init()
   ]).then((value) {
 
-    runApp(MyApp(initialRoute:initialRoute));
+    runApp(MyApp(initialRoute:initialRoute?.data['type']??'',id:initialRoute?.data['id']??''));
 
   });
 }
 
 class MyApp extends StatefulWidget {
   final String? initialRoute;
+  String? id;
 
-  const MyApp({Key? key, this.initialRoute}) : super(key: key);
+   MyApp({Key? key, this.initialRoute,this.id}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -599,16 +606,55 @@ class _MyAppState extends State<MyApp> {
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
+              print('route ${widget.initialRoute}');
               return Observer(
                   builder: (_) => MaterialApp(
                         scaffoldMessengerKey: globalMessengerKey,
                         // theme: theme,
                         title: 'doctak_app',
                         navigatorKey: NavigatorService.navigatorKey,
-                        initialRoute: widget.initialRoute ?? '/',
+                        initialRoute: '/${widget.initialRoute}',
                         routes: {
-                          '/': (context) => const ForceUpgradePage(),
-                          '/follow_request': (context) => const ComingSoonScreen(),
+                          // follow_request
+                          // friend_request
+                          // message_received
+                          // comments_on_posts
+                          // new_like
+                          // new_tag
+                          // new_mention
+                          // event_invitation
+                          // new_content
+                          // group_update
+                          // account_activity
+                          // system_update
+                          // reminder
+                          // recommendation
+                          // feedback_request
+                          // new_job_posted
+                          // conference_invitation
+                          // comment_tag
+                          // job_update
+                          // new_discuss_case
+                          // discuss_case_comment
+                          // discuss_case_like
+                          // discuss_case_comment_like
+                          // like_comment_on_post
+                          // likes_on_posts
+                          // like_comments
+                          '/': (context) =>  ForceUpgradePage(),
+                          '/follow_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
+                          '/friend_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
+                          '/message_received': (context) =>  SVProfileFragment(userId: widget.id??'',),
+                          '/comments_on_posts': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
+                          '/like_comment_on_post': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
+                          '/like_comments': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
+                           '/new_like': (context) =>   LikesListScreen(id: widget.id??'0',),
+                           '/likes_on_posts': (context) =>   LikesListScreen(id: widget.id??'0',),
+                           '/new_job_posted': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
+                           '/job_update': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
+                           '/conference_invitation': (context) =>   ConferencesScreen(),
+                           '/new_discuss_case': (context) =>   const CaseDiscussionScreen(),
+                           '/discuss_case_comment': (context) =>   const CaseDiscussionScreen(),
                         },
                         debugShowCheckedModeBanner: false,
                         scrollBehavior: SBehavior(),
@@ -638,7 +684,7 @@ class _MyAppState extends State<MyApp> {
                             AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         locale: _locale,
-                        // home: ForceUpgradePage(),
+                        // home: ForceUpgradePage(widget.initialRoute??""),
                         // initialRoute: AppRoutes.splashScreen,
                       ));
             },

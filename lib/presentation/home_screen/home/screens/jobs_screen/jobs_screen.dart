@@ -24,6 +24,7 @@ import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
 import '../../../../splash_screen/bloc/splash_state.dart';
 import 'bloc/jobs_event.dart';
+import 'document_upload_dialog.dart';
 
 class JobsScreen extends StatefulWidget {
   const JobsScreen({Key? key}) : super(key: key);
@@ -220,7 +221,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                     border: Border.all(
                                         color: svGetBodyColor(), width: 0.3)),
                                 child:
-                                    // CustomDropdownSearch(
+                                // CustomDropdownSearch(
                                     //   onChanged: (searchTxt) {
                                     //     if (_debounce?.isActive ?? false)
                                     //       _debounce?.cancel();
@@ -632,42 +633,72 @@ class _JobsScreenState extends State<JobsScreen> {
                                         fontWeight: FontWeight.w500,
                                         fontSize: kDefaultFontSize),
                                   ),
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () {
-                                      // _showBottomSheet(context,widget
-                                      //     .homeBloc
-                                      //     .postList[index]);
-                                      createDynamicLink(
-                                          '${bloc.drugsData[index].jobTitle ?? ""} \n  Apply Link: ${bloc.drugsData[index].link ?? ''}',
-                                          'https://doctak.net/job/${bloc.drugsData[index].id}',
-                                          bloc.drugsData[index].link ?? '');
-                                      // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
-                                      //     "Company : ${bloc.drugsData[index].companyName}\n"
-                                      //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
-                                      //     "Date From: ${ bloc.drugsData[index]
-                                      //     .createdAt ??
-                                      //     'N/A'}\n"
-                                      //     "Date To: ${ bloc.drugsData[index]
-                                      //     .lastDate ??
-                                      //     'N/A'}\n"
-                                      //     "Experience: ${ bloc.drugsData[index]
-                                      //     .experience ??
-                                      //     'N/A'}\n"
-                                      //     "Job Apply Link: ${ bloc.drugsData[index]
-                                      //     .link ??
-                                      //     'N/A'}\n" );
-                                    },
-                                    child: Icon(
-                                      Icons.share_sharp,
-                                      size: 22,
-                                      // 'images/socialv/icons/ic_share.png',
-                                      // height: 22,
-                                      // width: 22,
-                                      // fit: BoxFit.cover,
-                                      color: context.iconColor,
-                                    ),
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        splashColor: Colors.transparent,
+                                        highlightColor: Colors.transparent,
+                                        onTap: () {
+                                          // _showBottomSheet(context,widget
+                                          //     .homeBloc
+                                          //     .postList[index]);
+                                          createDynamicLink(
+                                              '${bloc.drugsData[index].jobTitle ?? ""} \n  Apply Link: ${bloc.drugsData[index].link ?? ''}',
+                                              'https://doctak.net/job/${bloc.drugsData[index].id}',
+                                              bloc.drugsData[index].link ?? '');
+                                          // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
+                                          //     "Company : ${bloc.drugsData[index].companyName}\n"
+                                          //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
+                                          //     "Date From: ${ bloc.drugsData[index]
+                                          //     .createdAt ??
+                                          //     'N/A'}\n"
+                                          //     "Date To: ${ bloc.drugsData[index]
+                                          //     .lastDate ??
+                                          //     'N/A'}\n"
+                                          //     "Experience: ${ bloc.drugsData[index]
+                                          //     .experience ??
+                                          //     'N/A'}\n"
+                                          //     "Job Apply Link: ${ bloc.drugsData[index]
+                                          //     .link ??
+                                          //     'N/A'}\n" );
+                                        },
+                                        child: Icon(
+                                          Icons.share_sharp,
+                                          size: 22,
+                                          // 'images/socialv/icons/ic_share.png',
+                                          // height: 22,
+                                          // width: 22,
+                                          // fit: BoxFit.cover,
+                                          color: context.iconColor,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20,),
+                                      MaterialButton(
+                                        shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(20)
+                                        ),
+                                        color: Colors.blue,
+                                        splashColor: Colors.blue,
+                                        highlightColor: Colors.green,
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return DocumentUploadDialog();  // Call the dialog from here
+                                            },
+                                          );
+
+                                        },
+                                        child: const Text(
+                                          "Apply",
+                                          style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
+                                          // 'images/socialv/icons/ic_share.png',
+                                          // height: 22,
+                                          // width: 22,
+                                          // fit: BoxFit.cover,
+
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -850,7 +881,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                         }
                                       },
                                       child: const Text(
-                                        'Apply ',
+                                        'Visit Site ',
                                         style: TextStyle(
                                           color: Colors.blue,
                                           decoration: TextDecoration.underline,

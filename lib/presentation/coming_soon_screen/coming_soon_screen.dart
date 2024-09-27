@@ -1,8 +1,9 @@
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class ComingSoonScreen extends StatelessWidget {
-  const ComingSoonScreen({Key? key}) : super(key: key);
+ const  ComingSoonScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +33,16 @@ class ComingSoonWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.cardColor,
-        iconTheme: IconThemeData(color: context.iconColor),
+        iconTheme: IconThemeData(
+            color: context.iconColor),
         title: Text('Coming Soon', style: boldTextStyle(size: 20)),
         elevation: 0,
+        leading: IconButton(
+            icon:
+            Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            onPressed: () {
+              Navigator.pushNamed(context,'/');
+            }),
         centerTitle: true,
       ),
       body: Container(

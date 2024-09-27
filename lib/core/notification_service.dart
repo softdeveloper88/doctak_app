@@ -2,6 +2,11 @@ import 'dart:io';
 
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,13 +16,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../presentation/coming_soon_screen/coming_soon_screen.dart';
+import '../presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import '../presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-  static final FirebaseMessaging _firebaseMessaging =
-      FirebaseMessaging.instance;
-
+  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   static const String _payloadKey = 'type';
 
   // Initialize the notification services (both local and FCM)
@@ -32,7 +37,7 @@ class NotificationService {
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) async {
         if (notificationResponse.payload != null) {
-          _handleNotificationTap(notificationResponse.payload!);
+          _handleNotificationTap(notificationResponse.payload!,notificationResponse.payload!);
         }
       },
     );
@@ -42,56 +47,49 @@ class NotificationService {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _showLocalNotification(message);
+
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handleNotificationTap(message.data['type']);
+
+      _handleNotificationTap(message.data['type'],message.data['id']);
     });
 
     // For terminated state handling
-    RemoteMessage? initialMessage =
-        await _firebaseMessaging.getInitialMessage();
+    RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
-      _handleNotificationTap(initialMessage.data['type']);
+      _handleNotificationTap(initialMessage.data['type'],initialMessage.data['id']);
     }
   }
-
-  static Future<String?> getInitialNotificationRoute() async {
+  static Future<RemoteMessage?> getInitialNotificationRoute() async {
     // For Firebase Messaging
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     print('initialMessage $initialMessage');
     if (initialMessage != null) {
-      print(initialMessage.data['type']);
+      print('type ${initialMessage.data['type']}');
       // Extract the route or screen from the notification data
-      return initialMessage
-          .data['type']; // Assuming 'screen' is the key in your payload
+      return initialMessage; // Assuming 'screen' is the key in your payload
     }
     // For local notifications
-    final NotificationAppLaunchDetails? details =
-        await _localNotificationsPlugin.getNotificationAppLaunchDetails();
-    if (details?.didNotificationLaunchApp ?? false) {
-      return details!.notificationResponse?.payload ??
-          ''; // Assuming payload contains route
-    }
 
     return null;
   }
 
   // Show local notification when FCM is received
   static Future<void> _showLocalNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'your_channel_id', // Channel ID
-      'your_channel_name', // Channel name
-      channelDescription: 'your_channel_description', // Channel description
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+    // const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    //     AndroidNotificationDetails(
+    //   'your_channel_id', // Channel ID
+    //   'your_channel_name', // Channel name
+    //   channelDescription: 'your_channel_description', // Channel description
+    //   importance: Importance.max,
+    //   priority: Priority.high,
+    //   playSound: true,
+    // );
+    //
+    // const NotificationDetails platformChannelSpecifics =
+    //     NotificationDetails(android: androidPlatformChannelSpecifics);
     await showNotificationWithCustomIcon(
         message.notification,
         message.data,
@@ -114,7 +112,10 @@ class NotificationService {
 
   static Future<void> showNotificationWithCustomIcon(notification, data,
       String title, String body, String imageUrl, String bannerImage) async {
-    final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl(imageUrl);
+     ByteArrayAndroidBitmap largeIcon= ByteArrayAndroidBitmap(Uint8List(0));
+    if(imageUrl!='') {
+       largeIcon = await _getImageFromUrl(imageUrl);
+    }
     ByteArrayAndroidBitmap banner;
     if (bannerImage != '') {
       banner = await _getImageFromUrl(bannerImage);
@@ -124,11 +125,11 @@ class NotificationService {
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
     //
-    // const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
     //
-    // const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
     //
-    // await flutterLocalNotificationsPlugin.initialize(initializationSettings, onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings, onDidReceiveNotificationResponse: null);
     var channel = const AndroidNotificationChannel(
       'high_importance_channel', // id
       'High Importance Notifications', // title // description
@@ -174,15 +175,15 @@ class NotificationService {
   }
 
   // Handle notification tap (local or FCM)
-  static Future<void> _handleNotificationTap(String payload) async {
+  static Future<void> _handleNotificationTap(String payload,String id) async {
     // Save the payload to shared preferences for later retrieval
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_payloadKey, payload);
 
     // Use Navigator to go to the specific screen
-    _navigateToScreen(payload);
-  }
+    _navigateToScreen(payload,id);
 
+  }
   // Get the notification payload when the app is terminated
   static Future<String?> getNotificationPayload() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -196,15 +197,30 @@ class NotificationService {
   }
 
   // Navigate to the specific screen based on the payload
-  static void _navigateToScreen(String payload) {
+  static void _navigateToScreen(String payload,String id) {
     if (NavigatorService.navigatorKey.currentState != null) {
       NavigatorService.navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (context) {
-          print(payload);
-          if (payload == 'follow_request') {
-            return const ComingSoonScreen();
+          if (payload == 'follow_request' || payload== 'friend_request'|| payload== 'message_received' ) {
+            return  SVProfileFragment(userId: id,);
+
+          }else if (payload == 'comments_on_posts' ||payload == 'like_comment_on_post'|| payload == 'like_comments') {
+            return  SVCommentScreen(id: int.parse(id), homeBloc: HomeBloc(),);
+
+          }else if (payload == 'new_like'||payload == 'likes_on_posts') {
+            return  LikesListScreen(id:id);
+
+          }else if (payload == 'new_job_posted'||payload == 'job_update') {
+            return  JobsDetailsScreen(jobId: id,);
+
+          }else if (payload == 'conference_invitation') {
+            return  ConferencesScreen();
+
+          }else if (payload == 'new_discuss_case' || payload == 'discuss_case_comment') {
+            return  const CaseDiscussionScreen();
+
           }
-          return const ForceUpgradePage(); // Default route if payload does not match
+          return  ForceUpgradePage(); // Default route if payload does not match
         }),
       );
     }

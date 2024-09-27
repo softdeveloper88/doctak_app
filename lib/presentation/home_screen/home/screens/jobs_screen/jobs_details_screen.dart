@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -105,38 +106,68 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   fontWeight: FontWeight.w500,
                                   fontSize: kDefaultFontSize),
                             ),
-                            InkWell(
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () {
-                                // _showBottomSheet(context,widget
-                                //     .homeBloc
-                                //     .postList[index]);
-                                createDynamicLink(
-                                    '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
-                                    'https://doctak.net/job/${jobsBloc.jobDetailModel.job?.id}',
-                                    jobsBloc.jobDetailModel.job?.link ?? '');
-                                // Share.share("Job Title: ${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n"
-                                //     "Company : ${jobsBloc.jobDetailModel.job?.companyName}\n"
-                                //     "Location: ${jobsBloc.jobDetailModel.job?.location ?? 'N/A'}\n"
-                                //     "Date From: ${ jobsBloc.jobDetailModel.job?.createdAt ??
-                                //     'N/A'}\n"
-                                //     "Date To: ${ jobsBloc.jobDetailModel.job?.lastDate ??
-                                //     'N/A'}\n"
-                                //     "Experience: ${ jobsBloc.jobDetailModel.job?.experience ??
-                                //     'N/A'}\n"
-                                //     "Job Apply Link: ${jobsBloc.jobDetailModel.job?.link ??
-                                //     'N/A'}\n" );
-                              },
-                              child: Icon(
-                                Icons.share_sharp,
-                                size: 22,
-                                // 'images/socialv/icons/ic_share.png',
-                                // height: 22,
-                                // width: 22,
-                                // fit: BoxFit.cover,
-                                color: context.iconColor,
-                              ),
+                            Row(
+                              children: [
+                                InkWell(
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () {
+                                    // _showBottomSheet(context,widget
+                                    //     .homeBloc
+                                    //     .postList[index]);
+                                    createDynamicLink(
+                                        '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
+                                        'https://doctak.net/job/${jobsBloc.jobDetailModel.job?.id}',
+                                        jobsBloc.jobDetailModel.job?.link ?? '');
+                                    // Share.share("Job Title: ${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n"
+                                    //     "Company : ${jobsBloc.jobDetailModel.job?.companyName}\n"
+                                    //     "Location: ${jobsBloc.jobDetailModel.job?.location ?? 'N/A'}\n"
+                                    //     "Date From: ${ jobsBloc.jobDetailModel.job?.createdAt ??
+                                    //     'N/A'}\n"
+                                    //     "Date To: ${ jobsBloc.jobDetailModel.job?.lastDate ??
+                                    //     'N/A'}\n"
+                                    //     "Experience: ${ jobsBloc.jobDetailModel.job?.experience ??
+                                    //     'N/A'}\n"
+                                    //     "Job Apply Link: ${jobsBloc.jobDetailModel.job?.link ??
+                                    //     'N/A'}\n" );
+                                  },
+                                  child: Icon(
+                                    Icons.share_sharp,
+                                    size: 22,
+                                    // 'images/socialv/icons/ic_share.png',
+                                    // height: 22,
+                                    // width: 22,
+                                    // fit: BoxFit.cover,
+                                    color: context.iconColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 20,),
+                                MaterialButton(
+                                  shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(20)
+                                  ),
+                                  color: Colors.blue,
+                                  splashColor: Colors.blue,
+                                  highlightColor: Colors.green,
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return DocumentUploadDialog();  // Call the dialog from here
+                                      },
+                                    );
+
+                                  },
+                                  child: const Text(
+                                    "Apply",
+                                    style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
+                                    // 'images/socialv/icons/ic_share.png',
+                                    // height: 22,
+                                    // width: 22,
+                                    // fit: BoxFit.cover,
+
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
