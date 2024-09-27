@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
@@ -34,7 +35,7 @@ class _DocumentUploadDialogState extends State<DocumentUploadDialog> {
       _isUploading = true;
     });
 
-    final uri = Uri.parse('https://your-server-endpoint.com/upload');
+    final uri = Uri.parse('${AppData.remoteUrl}/upload');
     var request = http.MultipartRequest('POST', uri);
     request.files.add(await http.MultipartFile.fromPath('document', _documentFile!.path));
 

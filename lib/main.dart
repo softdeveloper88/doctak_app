@@ -117,7 +117,7 @@ Future<void> showNotificationWithCustomIcon(notification, String title,
     banner = ByteArrayAndroidBitmap(Uint8List(0));
   }
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
   //
   // const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
   //
@@ -141,10 +141,10 @@ Future<void> showNotificationWithCustomIcon(notification, String title,
           largeIcon: largeIcon,
           styleInformation: bannerImage != ''
               ? BigPictureStyleInformation(
-                  banner,
-                  contentTitle: notification.title,
-                  summaryText: notification.body,
-                )
+            banner,
+            contentTitle: notification.title,
+            summaryText: notification.body,
+          )
               : null,
           icon: 'ic_stat_name',
         ),
@@ -157,7 +157,7 @@ late AndroidNotificationChannel channel;
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 final GlobalKey<NavigatorState> navigatorKey =
-    GlobalKey(debugLabel: 'Main Navigator');
+GlobalKey(debugLabel: 'Main Navigator');
 
 @pragma('vm:entry-point')
 void onDidReceiveNotificationResponse(
@@ -199,21 +199,21 @@ Future<void> main() async {
   RemoteMessage? initialRoute = await NotificationService.getInitialNotificationRoute();
   // if(initialRoute?.data['type']??'')
   // if (!kIsWeb) {
-    channel = const AndroidNotificationChannel(
-      'high_importance_channel', // id
-      'High Importance Notifications', // title // description
-      importance: Importance.max,
-    );
-    // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    //     FlutterLocalNotificationsPlugin();
-    // const AndroidInitializationSettings initializationSettingsAndroid =
-    //     AndroidInitializationSettings('ic_stat_name');
-    // const InitializationSettings initializationSettings =
-    //     InitializationSettings(android: initializationSettingsAndroid);
-    // await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-    //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
-    // // flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    // FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
+  channel = const AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title // description
+    importance: Importance.max,
+  );
+  // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  //     FlutterLocalNotificationsPlugin();
+  // const AndroidInitializationSettings initializationSettingsAndroid =
+  //     AndroidInitializationSettings('ic_stat_name');
+  // const InitializationSettings initializationSettings =
+  //     InitializationSettings(android: initializationSettingsAndroid);
+  // await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+  //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+  // // flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  // FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
   //   //App is in the foreground
   //   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
   //     debugPrint('Got a message, app is in the foreground!');
@@ -264,7 +264,7 @@ Future<void> main() async {
   //     debugPrint('value:print');
   //   });
   // }
- // Get the notification payload if the app was terminated
+  // Get the notification payload if the app was terminated
   // Initialize the notification service
   // Get the initial notification data if the app was launched from a terminated state by tapping a notification
 
@@ -288,7 +288,7 @@ class MyApp extends StatefulWidget {
   final String? initialRoute;
   String? id;
 
-   MyApp({Key? key, this.initialRoute,this.id}) : super(key: key);
+  MyApp({Key? key, this.initialRoute,this.id}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -302,7 +302,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
 
   Locale? _locale;
 
@@ -340,7 +340,7 @@ class _MyAppState extends State<MyApp> {
     }
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+        AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
     /// Update the iOS foreground notification presentation options to allow
@@ -394,6 +394,8 @@ class _MyAppState extends State<MyApp> {
     await FirebaseMessaging.instance.getToken().then((token) async {
       log('token ${token}');
     });
+  var tp= await FirebaseMessaging.instance.getAPNSToken();
+  print(tp);
   }
 
   @override
@@ -599,94 +601,94 @@ class _MyAppState extends State<MyApp> {
             BlocProvider(create: (context) => ChatBloc()),
             BlocProvider(
                 create: (context) => ThemeBloc(
-                      ThemeState(
-                        themeType: PrefUtils().getThemeData(),
-                      ),
-                    )),
+                  ThemeState(
+                    themeType: PrefUtils().getThemeData(),
+                  ),
+                )),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               print('route ${widget.initialRoute}');
               return Observer(
                   builder: (_) => MaterialApp(
-                        scaffoldMessengerKey: globalMessengerKey,
-                        // theme: theme,
-                        title: 'doctak_app',
-                        navigatorKey: NavigatorService.navigatorKey,
-                        initialRoute: '/${widget.initialRoute}',
-                        routes: {
-                          // follow_request
-                          // friend_request
-                          // message_received
-                          // comments_on_posts
-                          // new_like
-                          // new_tag
-                          // new_mention
-                          // event_invitation
-                          // new_content
-                          // group_update
-                          // account_activity
-                          // system_update
-                          // reminder
-                          // recommendation
-                          // feedback_request
-                          // new_job_posted
-                          // conference_invitation
-                          // comment_tag
-                          // job_update
-                          // new_discuss_case
-                          // discuss_case_comment
-                          // discuss_case_like
-                          // discuss_case_comment_like
-                          // like_comment_on_post
-                          // likes_on_posts
-                          // like_comments
-                          '/': (context) =>  ForceUpgradePage(),
-                          '/follow_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
-                          '/friend_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
-                          '/message_received': (context) =>  SVProfileFragment(userId: widget.id??'',),
-                          '/comments_on_posts': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
-                          '/like_comment_on_post': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
-                          '/like_comments': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
-                           '/new_like': (context) =>   LikesListScreen(id: widget.id??'0',),
-                           '/likes_on_posts': (context) =>   LikesListScreen(id: widget.id??'0',),
-                           '/new_job_posted': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
-                           '/job_update': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
-                           '/conference_invitation': (context) =>   ConferencesScreen(),
-                           '/new_discuss_case': (context) =>   const CaseDiscussionScreen(),
-                           '/discuss_case_comment': (context) =>   const CaseDiscussionScreen(),
-                        },
-                        debugShowCheckedModeBanner: false,
-                        scrollBehavior: SBehavior(),
-                        theme: AppTheme.lightTheme,
-                        darkTheme: AppTheme.darkTheme,
-                        themeMode: appStore.isDarkMode
-                            ? ThemeMode.dark
-                            : ThemeMode.light,
-                        //     localizationsDelegates: const [
-                        //
-                        //   // AppLocalizationDelegate(),
-                        //   GlobalMaterialLocalizations.delegate,
-                        //   GlobalWidgetsLocalizations.delegate,
-                        //   GlobalCupertinoLocalizations.delegate,
-                        // ],
-                        // supportedLocales: const [
-                        //   Locale(
-                        //     'en',
-                        //     '',
-                        //   ),
-                        //   Locale(
-                        //     'ar',
-                        //     '',
-                        //   ),
-                        // ],
-                        localizationsDelegates:
-                            AppLocalizations.localizationsDelegates,
-                        supportedLocales: AppLocalizations.supportedLocales,
-                        locale: _locale,
-                        // home: ForceUpgradePage(widget.initialRoute??""),
-                        // initialRoute: AppRoutes.splashScreen,
-                      ));
+                    scaffoldMessengerKey: globalMessengerKey,
+                    // theme: theme,
+                    title: 'doctak_app',
+                    navigatorKey: NavigatorService.navigatorKey,
+                    initialRoute: '/${widget.initialRoute}',
+                    routes: {
+                      // follow_request
+                      // friend_request
+                      // message_received
+                      // comments_on_posts
+                      // new_like
+                      // new_tag
+                      // new_mention
+                      // event_invitation
+                      // new_content
+                      // group_update
+                      // account_activity
+                      // system_update
+                      // reminder
+                      // recommendation
+                      // feedback_request
+                      // new_job_posted
+                      // conference_invitation
+                      // comment_tag
+                      // job_update
+                      // new_discuss_case
+                      // discuss_case_comment
+                      // discuss_case_like
+                      // discuss_case_comment_like
+                      // like_comment_on_post
+                      // likes_on_posts
+                      // like_comments
+                      '/': (context) =>  ForceUpgradePage(),
+                      '/follow_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
+                      '/friend_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
+                      '/message_received': (context) =>  SVProfileFragment(userId: widget.id??'',),
+                      '/comments_on_posts': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
+                      '/like_comment_on_post': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
+                      '/like_comments': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
+                      '/new_like': (context) =>   LikesListScreen(id: widget.id??'0',),
+                      '/likes_on_posts': (context) =>   LikesListScreen(id: widget.id??'0',),
+                      '/new_job_posted': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
+                      '/job_update': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
+                      '/conference_invitation': (context) =>   ConferencesScreen(),
+                      '/new_discuss_case': (context) =>   const CaseDiscussionScreen(),
+                      '/discuss_case_comment': (context) =>   const CaseDiscussionScreen(),
+                    },
+                    debugShowCheckedModeBanner: false,
+                    scrollBehavior: SBehavior(),
+                    theme: AppTheme.lightTheme,
+                    darkTheme: AppTheme.darkTheme,
+                    themeMode: appStore.isDarkMode
+                        ? ThemeMode.dark
+                        : ThemeMode.light,
+                    //     localizationsDelegates: const [
+                    //
+                    //   // AppLocalizationDelegate(),
+                    //   GlobalMaterialLocalizations.delegate,
+                    //   GlobalWidgetsLocalizations.delegate,
+                    //   GlobalCupertinoLocalizations.delegate,
+                    // ],
+                    // supportedLocales: const [
+                    //   Locale(
+                    //     'en',
+                    //     '',
+                    //   ),
+                    //   Locale(
+                    //     'ar',
+                    //     '',
+                    //   ),
+                    // ],
+                    localizationsDelegates:
+                    AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    locale: _locale,
+                    // home: ForceUpgradePage(widget.initialRoute??""),
+                    // initialRoute: AppRoutes.splashScreen,
+                  ));
             },
           ),
         );

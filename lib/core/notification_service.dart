@@ -21,7 +21,7 @@ import '../presentation/home_screen/fragments/profile_screen/SVProfileFragment.d
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
   static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   static const String _payloadKey = 'type';
 
@@ -29,9 +29,16 @@ class NotificationService {
   static Future<void> initialize() async {
     // Initialize local notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('ic_stat_name');
+    AndroidInitializationSettings('ic_stat_name');
+    const DarwinInitializationSettings initializationSettingsIOS =
+    DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
     const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    InitializationSettings(android: initializationSettingsAndroid,iOS: initializationSettingsIOS);
     await _localNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse:
@@ -64,7 +71,7 @@ class NotificationService {
   static Future<RemoteMessage?> getInitialNotificationRoute() async {
     // For Firebase Messaging
     RemoteMessage? initialMessage =
-        await FirebaseMessaging.instance.getInitialMessage();
+    await FirebaseMessaging.instance.getInitialMessage();
     print('initialMessage $initialMessage');
     if (initialMessage != null) {
       print('type ${initialMessage.data['type']}');
@@ -112,9 +119,9 @@ class NotificationService {
 
   static Future<void> showNotificationWithCustomIcon(notification, data,
       String title, String body, String imageUrl, String bannerImage) async {
-     ByteArrayAndroidBitmap largeIcon= ByteArrayAndroidBitmap(Uint8List(0));
+    ByteArrayAndroidBitmap largeIcon= ByteArrayAndroidBitmap(Uint8List(0));
     if(imageUrl!='') {
-       largeIcon = await _getImageFromUrl(imageUrl);
+      largeIcon = await _getImageFromUrl(imageUrl);
     }
     ByteArrayAndroidBitmap banner;
     if (bannerImage != '') {
@@ -123,7 +130,7 @@ class NotificationService {
       banner = ByteArrayAndroidBitmap(Uint8List(0));
     }
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
     //
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
     //
@@ -164,10 +171,10 @@ class NotificationService {
             largeIcon: largeIcon,
             styleInformation: bannerImage != ''
                 ? BigPictureStyleInformation(
-                    banner,
-                    contentTitle: notification.title,
-                    summaryText: notification.body,
-                  )
+              banner,
+              contentTitle: notification.title,
+              summaryText: notification.body,
+            )
                 : null,
             icon: 'ic_stat_name',
           ),
