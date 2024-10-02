@@ -2,6 +2,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/components/SVSearchCardComponent.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -90,9 +91,21 @@ class SearchPeopleList extends StatelessWidget {
                   itemCount: bloc.searchPeopleData.length,
                 );
         } else if (state is SearchPeopleDataError) {
-          return Center(
-            child: Text(state.errorMessage),
-          );
+          return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+            try {
+              searchPeopleBloc.add(
+                SearchPeopleLoadPageEvent(
+                  page: 1,
+                  searchTerm: '',
+                ),
+              );
+
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+
+          });
+
         } else {
           return const Center(child: Text('Search Peoples'));
         }

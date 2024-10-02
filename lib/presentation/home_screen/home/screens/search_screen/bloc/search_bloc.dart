@@ -55,9 +55,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     } catch (e) {
       print(e);
 
-      emit(PaginationLoadedState());
+      // emit(PaginationLoadedState());
 
-      // emit(DataError('An error occurred $e'));
+      emit(DataError('An error occurred $e'));
     }
   }
 

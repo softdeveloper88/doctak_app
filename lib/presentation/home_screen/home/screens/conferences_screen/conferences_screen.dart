@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -9,6 +7,7 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -22,6 +21,7 @@ import 'bloc/conference_state.dart';
 
 class ConferencesScreen extends StatefulWidget {
   ConferencesScreen({this.isFromSplash = false, super.key});
+
   bool isFromSplash;
 
   @override
@@ -253,7 +253,19 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                     BlocProvider.of<SplashBloc>(context).add(
                       LoadDropdownData1('', ''),
                     );
-                    return const Center();
+                    return RetryWidget(
+                        errorMessage: "Something went wrong please try again",
+                        onRetry: () {
+                          try {
+                            conferenceBloc.add(LoadPageEvent(
+                              page: 1,
+                              countryName: 'all',
+                              searchTerm: '',
+                            ));
+                          } catch (e) {
+                            debugPrint(e.toString());
+                          }
+                        });
                   } else {
                     BlocProvider.of<SplashBloc>(context).add(
                       LoadDropdownData1('', ''),
@@ -286,11 +298,19 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
                 } else if (state is DataError) {
-                  return Expanded(
-                    child: Center(
-                      child: Text(state.errorMessage),
-                    ),
-                  );
+                  return RetryWidget(
+                      errorMessage: "Something went wrong please try again",
+                      onRetry: () {
+                        try {
+                          conferenceBloc.add(LoadPageEvent(
+                            page: 1,
+                            countryName: 'all',
+                            searchTerm: '',
+                          ));
+                        } catch (e) {
+                          debugPrint(e.toString());
+                        }
+                      });
                 } else {
                   return const Expanded(child: Center(child: Text('')));
                 }

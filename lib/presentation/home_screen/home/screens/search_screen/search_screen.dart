@@ -6,6 +6,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/s
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -311,8 +312,7 @@ class _SearchScreenState extends State<SearchScreen>
                 );
 
                 return Center(
-                    child: Text(
-                        'Error: ${state.errorMessage}'));
+                    child: Text(''));
               } else {
                 BlocProvider.of<SplashBloc>(context).add(
                   LoadDropdownData('', '', '', ''),
@@ -348,11 +348,26 @@ class _SearchScreenState extends State<SearchScreen>
               // print(state.drugsModel.length);
               return SearchJobList(drugsBloc);
             } else if (state is DataError) {
-              return Expanded(
-                child: Center(
-                  child: Text(state.errorMessage),
-                ),
-              );
+              return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+                try {
+                  searchPeopleBloc.add(
+                    SearchPeopleLoadPageEvent(
+                      page: 1,
+                      searchTerm: '',
+                    ),
+                  );
+                  homeBloc.add(LoadSearchPageEvent(page: 1, search: 'a'));
+                  drugsBloc.add(LoadPageEvent(
+                    page: 1,
+                    countryId: '',
+                    searchTerm: '',
+                  ));
+                } catch (e) {
+                  debugPrint(e.toString());
+                }
+
+              });
+
             } else {
               return const Expanded(
                   child: Center(child: Text('')));

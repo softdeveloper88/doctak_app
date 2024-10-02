@@ -194,6 +194,7 @@ Future<void> main() async {
     );
   } else {
     await Firebase.initializeApp();
+    // await Firebase.initializeApp();
   }
   NotificationService.initialize();
   RemoteMessage? initialRoute = await NotificationService.getInitialNotificationRoute();

@@ -72,7 +72,7 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
 
       // emit(PaginationLoadedState());
 
-      emit(SearchPeopleDataError('No Data Found'));
+      emit(SearchPeopleDataError(e.toString()));
     }
   }
 

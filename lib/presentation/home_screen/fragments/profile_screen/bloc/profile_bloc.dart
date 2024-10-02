@@ -63,7 +63,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // emit(PaginationLoadingState());
     }
 
-    // try {
+    try {
     PostDataModel response = await postService.getMyPosts(
         'Bearer ${AppData.userToken}', '$pageNumber', AppData.logInUserId);
     print('repsones$response');
@@ -83,18 +83,18 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         ''));
     // emit(PaginationLoadedState());
     // emit(DataLoaded(postList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   emit(PaginationLoadedState());
-    //
-    //   // emit(DataError('An error occurred $e'));
-    // }
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState());
+
+      emit(DataError('An error occurred $e'));
+    }
   }
 
   _onGetProfile(LoadPageEvent event, Emitter<ProfileState> emit) async {
     emit(PaginationLoadingState());
-    // try {
+    try {
     if (pageNumber == 1) {
       print("data ${event.userId}");
       PostDataModel postDataModelResponse = await postService.getMyPosts(
@@ -157,13 +157,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // ));
     // emit(PaginationLoadedState());
     // emit(DataLoaded(postList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   emit(PaginationLoadedState());
-    //
-    //   // emit(DataError('An error occurred $e'));
-    // }
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState(e.toString()));
+
+      emit(DataError('An error occurred $e'));
+    }
   }
 
   Future<void> _updateFirstDropdownValue(
@@ -214,7 +214,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   _onUpdateProfile(UpdateProfileEvent event, Emitter<ProfileState> emit) async {
     // emit(DataInitial());
     // ProgressDialogUtils.showProgressDialog();
-    // try {
+    try {
     // print((specialtyName ?? event.userProfile?.user?.specialty ?? ''));
     int privacyLength = (event.userProfile?.privacySetting?.length ?? 0);
     event.userProfile?.privacySetting?.forEach((e) {
@@ -452,10 +452,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     //   ProgressDialogUtils.hideProgressDialog();
     //   emit(LoginFailure(error: 'Invalid credentials'));
     // }
-    //   } catch (e) {
-    //     print(e);
-    //     emit(DataError('An error occurred'));
-    //   }
+      } catch (e) {
+        print(e);
+        emit(DataError('An error occurred'));
+      }
   }
 
   void _updateSecondDropdownValues(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart' as dom;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -591,48 +592,62 @@ class _SVPostComponentState extends State<SVPostComponent>
                   // physics: const NeverScrollableScrollPhysics(),
                 );
         } else if (state is PostDataError) {
-                return Container(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Error!",
-                  style: GoogleFonts.poppins(
-                      color: Colors.red,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  state.errorMessage.toString(),
-                  style: const TextStyle(color: black),
-                ),
-                MaterialButton(
-                  onPressed: () {
-                    try {
-                      widget.homeBloc.add(PostLoadPageEvent(page: 1));
+          return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+                      try {
+                        widget.homeBloc.add(PostLoadPageEvent(page: 1));
 
-                      // Session newSession = await createNewChatSession();
-                      // setState(() {
-                      //   futureSessions = Future(() =>
-                      //       [newSession, ...(snapshot.data ?? [])]);
-                      // });
-                    } catch (e) {
-                      debugPrint(e.toString());
-                    }
-                  },
-                  color: appButtonBackgroundColorGlobal,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  child: const Text(
-                    "Try Again",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )
-              ],
-            ),
-          );
+                        // Session newSession = await createNewChatSession();
+                        // setState(() {
+                        //   futureSessions = Future(() =>
+                        //       [newSession, ...(snapshot.data ?? [])]);
+                        // });
+                      } catch (e) {
+                        debugPrint(e.toString());
+                      }
+
+          });
+          //       return Container(
+          //   padding: const EdgeInsets.all(10),
+          //   child: Column(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       Text(
+          //         "Error!",
+          //         style: GoogleFonts.poppins(
+          //             color: Colors.red,
+          //             fontSize: 24,
+          //             fontWeight: FontWeight.bold),
+          //       ),
+          //       const SizedBox(height: 10),
+          //       Text(
+          //         state.errorMessage.toString(),
+          //         style: const TextStyle(color: black),
+          //       ),
+          //       MaterialButton(
+          //         onPressed: () {
+          //           try {
+          //             widget.homeBloc.add(PostLoadPageEvent(page: 1));
+          //
+          //             // Session newSession = await createNewChatSession();
+          //             // setState(() {
+          //             //   futureSessions = Future(() =>
+          //             //       [newSession, ...(snapshot.data ?? [])]);
+          //             // });
+          //           } catch (e) {
+          //             debugPrint(e.toString());
+          //           }
+          //         },
+          //         color: appButtonBackgroundColorGlobal,
+          //         shape: RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.circular(10)),
+          //         child: const Text(
+          //           "Try Again",
+          //           style: TextStyle(color: Colors.white),
+          //         ),
+          //       )
+          //     ],
+          //   ),
+          // );
         } else {
           return const Center(child: Text('Search Post'));
         }

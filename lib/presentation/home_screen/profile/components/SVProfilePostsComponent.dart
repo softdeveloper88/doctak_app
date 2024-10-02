@@ -18,7 +18,7 @@ import '../../utils/SVColors.dart';
 class SVProfilePostsComponent extends StatefulWidget {
   ProfileBloc profileBloc;
 
-  SVProfilePostsComponent(this.profileBloc, {Key? key}) : super(key: key);
+    SVProfilePostsComponent(this.profileBloc, {Key? key}) : super(key: key);
 
   @override
   State<SVProfilePostsComponent> createState() =>

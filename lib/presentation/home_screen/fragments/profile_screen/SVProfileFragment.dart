@@ -4,6 +4,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -294,7 +295,21 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
               ),
             );
           } else if (state is DataError) {
-            return Center(child: Text('Error: ${state.errorMessage}'));
+            return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+              try {
+                print(widget.userId);
+                if (widget.userId == null) {
+                  print('object1 ${AppData.logInUserId}');
+                  profileBloc.add(LoadPageEvent(userId: AppData.logInUserId, page: 1));
+                } else {
+                  print('object ${widget.userId}');
+                  profileBloc.add(LoadPageEvent(userId: widget.userId, page: 1));
+                }
+              } catch (e) {
+                debugPrint(e.toString());
+              }
+
+            });
           } else {
             return Center(child: Text('Unknown state${state.toString()}'));
           }

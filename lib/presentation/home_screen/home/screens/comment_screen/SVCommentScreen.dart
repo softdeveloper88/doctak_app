@@ -4,6 +4,7 @@ import 'package:doctak_app/presentation/home_screen/home/components/SVCommentCom
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/models/SVCommentModel.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -111,9 +112,18 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                                 comment: commentBloc.postList[index]);
                           }),
                     );
-            } else {
-              return const Center(child: Text("No Comment Found"));
+            } else if(state is DataError){
+              return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+                try {
+                  commentBloc.add(LoadPageEvent(postId: widget.id ?? 0));
+
+                } catch (e) {
+                  debugPrint(e.toString());
+                }
+
+              });
             }
+            return Container();
           }),
       // Stack(
       //   alignment: Alignment.bottomCenter,
