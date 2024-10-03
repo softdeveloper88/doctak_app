@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 
 class DocumentUploadDialog extends StatefulWidget {
+  String jobId;
+  DocumentUploadDialog(this.jobId, {super.key});
   @override
   _DocumentUploadDialogState createState() => _DocumentUploadDialogState();
 }
@@ -28,19 +31,36 @@ class _DocumentUploadDialogState extends State<DocumentUploadDialog> {
   }
 
   // Function to send document to server
-  Future<void> _uploadDocument() async {
+  Future<void> _uploadDocument(jobId) async {
     if (_documentFile == null) return;
 
     setState(() {
       _isUploading = true;
     });
+    final Dio _dio = Dio(BaseOptions(baseUrl: AppData.remoteUrl2));
 
-    final uri = Uri.parse('${AppData.remoteUrl}/upload');
-    var request = http.MultipartRequest('POST', uri);
-    request.files.add(await http.MultipartFile.fromPath('document', _documentFile!.path));
+    final response = await _dio.post(
+      '/jobs/apply',
+      data:  FormData.fromMap({
+        'job_id':jobId,
+        'cv': _documentFile!.path !=""?await MultipartFile.fromFile( _documentFile!.path, filename:  _documentFile!.path):"",
 
-    var response = await request.send();
+      }),
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer ${AppData.userToken}',
+          // Add Bearer token to headers
+        },
+        contentType: 'multipart/form-data', // Ensure content type is multipart
 
+      ),
+    );
+    // final uri = Uri.parse('${AppData.remoteUrl2}/jobs/apply');
+    // var request = http.MultipartRequest('POST', uri);
+    // request.files.add(await http.MultipartFile.fromPath('cv', _documentFile!.path));
+    // request.fields['job_id'] = jobId;
+    // var response = await request.send();
+      print(response);
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Document uploaded successfully!')),
@@ -82,7 +102,9 @@ class _DocumentUploadDialogState extends State<DocumentUploadDialog> {
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _documentFile != null && !_isUploading ? _uploadDocument : null,
+          onPressed: _documentFile != null && !_isUploading ? () {
+            _uploadDocument(widget.jobId);
+          } : null,
           child: _isUploading
               ? const CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),

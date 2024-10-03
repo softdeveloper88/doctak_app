@@ -9,7 +9,6 @@ class ThemeChangeEvent extends ThemeEvent {
   }
 
   final String themeType;
-
   @override
   List<Object?> get props => [];
 }

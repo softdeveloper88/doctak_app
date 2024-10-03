@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nb_utils/nb_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../SVDashboardScreen.dart';
 import 'bloc/jobs_bloc.dart';
 import 'bloc/jobs_state.dart';
@@ -16,14 +17,17 @@ import 'bloc/jobs_state.dart';
 class JobsDetailsScreen extends StatefulWidget {
   JobsDetailsScreen(
       {required this.jobId, this.isFromSplash = false, super.key});
+
   String jobId;
   bool isFromSplash;
+
   @override
   State<JobsDetailsScreen> createState() => _JobsDetailsScreenState();
 }
 
 class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   JobsBloc jobsBloc = JobsBloc();
+
   @override
   void initState() {
     jobsBloc.add(
@@ -108,6 +112,48 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                             ),
                             Row(
                               children: [
+                                Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Colors.orangeAccent),
+                                  child: const Text(
+                                    'Sponsored',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                MaterialButton(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  color: Colors.blue,
+                                  splashColor: Colors.blue,
+                                  highlightColor: Colors.green,
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return DocumentUploadDialog(widget
+                                            .jobId); // Call the dialog from here
+                                      },
+                                    );
+                                  },
+                                  child: const Text(
+                                    "Apply",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w400),
+                                    // 'images/socialv/icons/ic_share.png',
+                                    // height: 22,
+                                    // width: 22,
+                                    // fit: BoxFit.cover,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
                                 InkWell(
                                   splashColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
@@ -118,7 +164,8 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                     createDynamicLink(
                                         '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
                                         'https://doctak.net/job/${jobsBloc.jobDetailModel.job?.id}',
-                                        jobsBloc.jobDetailModel.job?.link ?? '');
+                                        jobsBloc.jobDetailModel.job?.link ??
+                                            '');
                                     // Share.share("Job Title: ${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n"
                                     //     "Company : ${jobsBloc.jobDetailModel.job?.companyName}\n"
                                     //     "Location: ${jobsBloc.jobDetailModel.job?.location ?? 'N/A'}\n"
@@ -141,33 +188,40 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                     color: context.iconColor,
                                   ),
                                 ),
-                                const SizedBox(width: 20,),
-                                MaterialButton(
-                                  shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(20)
-                                  ),
-                                  color: Colors.blue,
-                                  splashColor: Colors.blue,
-                                  highlightColor: Colors.green,
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return DocumentUploadDialog();  // Call the dialog from here
-                                      },
-                                    );
-
-                                  },
-                                  child: const Text(
-                                    "Apply",
-                                    style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
-                                    // 'images/socialv/icons/ic_share.png',
-                                    // height: 22,
-                                    // width: 22,
-                                    // fit: BoxFit.cover,
-
-                                  ),
-                                ),
                               ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.grey)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.orangeAccent),
+                                    child: const Text(
+                                      'Withdraw Application',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  TextButton(
+                                    onPressed: () {},
+                                    child: Text(
+                                      "Applicants",
+                                      style: GoogleFonts.poppins(
+                                          color: Colors.blue),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -349,7 +403,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   }
                                 },
                                 child: const Text(
-                                  'Apply ',
+                                  'Visit Site ',
                                   style: TextStyle(
                                     color: Colors.blue,
                                     decoration: TextDecoration.underline,

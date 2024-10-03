@@ -18,6 +18,22 @@ class GetPost extends JobsEvent {
   @override
   List<Object> get props => [page, countryId, searchTerm];
 }
+class WithDrawApplicant extends JobsEvent {
+  final String? jobId;
+
+
+  WithDrawApplicant({this.jobId});
+  @override
+  List<Object> get props => [jobId!];
+}
+class ShowApplicantEvent extends JobsEvent {
+  final String? jobId;
+
+
+  ShowApplicantEvent({this.jobId});
+  @override
+  List<Object> get props => [jobId!];
+}
 
 class JobLoadPageEvent extends JobsEvent {
   int? page;

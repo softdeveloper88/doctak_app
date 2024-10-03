@@ -635,6 +635,41 @@ class _JobsScreenState extends State<JobsScreen> {
                                   ),
                                   Row(
                                     children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(5),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: Colors.orangeAccent
+                                        ),
+                                        child: const Text('Sponsored',style: TextStyle(color: Colors.white),),
+                                      ),
+                                      const SizedBox(width: 10,),
+                                      MaterialButton(
+                                        shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(10)
+                                        ),
+                                        color: Colors.blue,
+                                        splashColor: Colors.blue,
+                                        highlightColor: Colors.green,
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return DocumentUploadDialog(bloc.drugsData[index].id.toString());  // Call the dialog from here
+                                            },
+                                          );
+
+                                        },
+                                        child: const Text(
+                                          "Apply",
+                                          style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
+                                          // 'images/socialv/icons/ic_share.png',
+                                          // height: 22,
+                                          // width: 22,
+                                          // fit: BoxFit.cover,
+
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20,),
                                       InkWell(
                                         splashColor: Colors.transparent,
                                         highlightColor: Colors.transparent,
@@ -670,32 +705,6 @@ class _JobsScreenState extends State<JobsScreen> {
                                           // width: 22,
                                           // fit: BoxFit.cover,
                                           color: context.iconColor,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 20,),
-                                      MaterialButton(
-                                        shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(20)
-                                        ),
-                                        color: Colors.blue,
-                                        splashColor: Colors.blue,
-                                        highlightColor: Colors.green,
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return DocumentUploadDialog();  // Call the dialog from here
-                                            },
-                                          );
-
-                                        },
-                                        child: const Text(
-                                          "Apply",
-                                          style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
-                                          // 'images/socialv/icons/ic_share.png',
-                                          // height: 22,
-                                          // width: 22,
-                                          // fit: BoxFit.cover,
-
                                         ),
                                       ),
                                     ],

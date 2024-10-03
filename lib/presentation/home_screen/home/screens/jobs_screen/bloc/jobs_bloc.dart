@@ -20,6 +20,8 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     on<JobLoadPageEvent>(_onGetJobs);
     on<GetPost>(_onGetJobs1);
     on<JobDetailPageEvent>(_onGetJobDetail);
+    on<WithDrawApplicant>(_withDrawApplicant);
+    on<ShowApplicantEvent>(_showApplicant);
     on<JobCheckIfNeedMoreDataEvent>((event, emit) async {
       // emit(PaginationLoadingState());
       if (event.index == drugsData.length - nextPageTrigger) {
@@ -108,4 +110,61 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       emit(DataError('No Data Found'));
     }
   }
+  _withDrawApplicant(WithDrawApplicant event, Emitter<JobsState> emit) async {
+    // emit(PaginationInitialState());
+    // ProgressDialogUtils.showProgressDialog();
+
+    // emit(PaginationLoadingState());
+    try {
+      Dio dio = Dio();
+
+      try {
+        Response response = await dio.get(
+          '${AppData.remoteUrl2}/jobs/${event.jobId}/withdraw-application', // Add query parameters
+          options: Options(headers: {
+            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+          }),
+        );
+        print(response.data);
+      } catch (e) {
+        print('Error: $e');
+      }
+      emit(PaginationLoadedState());
+      // emit(DataLoaded(drugsData));
+    } catch (e) {
+      // ProgressDialogUtils.hideProgressDialog();
+      print(e);
+
+      emit(DataError('No Data Found'));
+    }
+  }
+  _showApplicant(ShowApplicantEvent event, Emitter<JobsState> emit) async {
+    // emit(PaginationInitialState());
+    // ProgressDialogUtils.showProgressDialog();
+
+    // emit(PaginationLoadingState());
+    try {
+      Dio dio = Dio();
+
+      try {
+        Response response = await dio.get(
+          '${AppData.remoteUrl2}/jobs/${event.jobId}/applicants', // Add query parameters
+          options: Options(headers: {
+            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+          }),
+        );
+        print(response.data);
+      } catch (e) {
+        print('Error: $e');
+      }
+      emit(PaginationLoadedState());
+      // emit(DataLoaded(drugsData));
+    } catch (e) {
+      // ProgressDialogUtils.hideProgressDialog();
+      print(e);
+
+      emit(DataError('No Data Found'));
+    }
+  }
+
 }

@@ -7,6 +7,7 @@ class AppData {
   static var basePath = "https://doctak.net/public/";
   static var imageUrl = "https://doctak-file.s3.ap-south-1.amazonaws.com/";
   static var remoteUrl = "https://doctak.net/api/v1";
+  static var remoteUrl2 = "https://doctak.net/api/v2";
   static var userProfileUrl = "https://doctak.net/";
   static const chatifyUrl = "https://doctak.net/chatify/api/";
 
