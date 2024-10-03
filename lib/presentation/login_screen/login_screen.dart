@@ -313,7 +313,7 @@ class LoginScreenState extends State<LoginScreen> {
       });
     } else {
       await FirebaseMessaging.instance
-          .getAPNSToken().then((token){
+          .getToken().then((token){
         loginBloc.add(
           LoginButtonPressed(
               username: emailController.text,
@@ -588,7 +588,7 @@ class LoginScreenState extends State<LoginScreen> {
                                      });
                                       } else {
                                          await FirebaseMessaging.instance
-                                            .getAPNSToken().then((token){
+                                            .getToken().then((token){
                                           loginBloc.add(
                                             LoginButtonPressed(
                                                 username: emailController.text,
@@ -753,7 +753,7 @@ class LoginScreenState extends State<LoginScreen> {
           GoogleSignIn().disconnect();
         });
       } else {
-         await FirebaseMessaging.instance.getAPNSToken().then((token) async {
+         await FirebaseMessaging.instance.getToken().then((token) async {
            final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
            print(googleUser.toString());
@@ -820,7 +820,7 @@ class LoginScreenState extends State<LoginScreen> {
     if (Platform.isAndroid) {
       token = await FirebaseMessaging.instance.getToken();
     } else {
-      token = await FirebaseMessaging.instance.getAPNSToken();
+      token = await FirebaseMessaging.instance.getToken();
     }
     var response =
     await FirebaseAuth.instance.signInWithCredential(oauthCredential);

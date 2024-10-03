@@ -120,7 +120,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 textFieldType: TextFieldType.NAME,
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  hintText: 'Search Here ',
+                  hintText: 'Search  ',
                   hintStyle: secondaryTextStyle(color: svGetBodyColor()),
                   suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
                           height: 16,

@@ -218,7 +218,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             },
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: 'Search Here',
+                              hintText: 'Search ',
                               hintStyle:
                                   secondaryTextStyle(color: svGetBodyColor()),
                               suffixIcon: Image.asset(

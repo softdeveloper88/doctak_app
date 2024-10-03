@@ -2,6 +2,7 @@ import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -190,40 +191,59 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 ),
                               ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.grey)),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Colors.orangeAccent),
-                                    child: const Text(
-                                      'Withdraw Application',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: Text(
-                                      "Applicants",
-                                      style: GoogleFonts.poppins(
-                                          color: Colors.blue),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+
                           ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.white,
+                              border: Border.all(color: Colors.grey)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: (){
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return CustomAlertDialog(
+                                          mainTitle:"Withdraw Applicant",
+                                           yesButtonText: 'Withdraw',
+                                            title: 'Are you sure want to withdraw your application ?',
+                                            callback: () {
+                                              jobsBloc.add(
+                                                  WithDrawApplicant(jobId:widget.jobId));
+
+                                              Navigator.of(context).pop();
+                                            });
+                                      });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Colors.orangeAccent),
+                                  child: const Text(
+                                    'Withdraw Application',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  "Applicants",
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.blue),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         Text(
                           jobsBloc.jobDetailModel.job?.jobTitle ?? "",

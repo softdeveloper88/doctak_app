@@ -68,7 +68,7 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
             },
             decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: 'Search Here',
+              hintText: 'Search',
               hintStyle: secondaryTextStyle(color: svGetBodyColor()),
               suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
                       height: 16,

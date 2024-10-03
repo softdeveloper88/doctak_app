@@ -7,9 +7,11 @@ import 'package:sizer/sizer.dart';
 class CustomAlertDialog extends StatelessWidget {
   final VoidCallback callback;
   final String title;
+  final String? yesButtonText;
+  final String? mainTitle;
 
   const CustomAlertDialog(
-      {Key? key, required this.title, required this.callback})
+      {Key? key, required this.title, required this.callback,this.yesButtonText,this.mainTitle})
       : super(key: key);
 
   @override
@@ -20,13 +22,13 @@ class CustomAlertDialog extends StatelessWidget {
       ),
       elevation: 0,
       backgroundColor: Colors.transparent,
-      child: confirmationCustomAlertDialog(context, title, callback),
+      child: confirmationCustomAlertDialog(context, title, callback,yesButtonText??"DELETE",mainTitle??"Delete ?"),
     );
   }
 }
 
 confirmationCustomAlertDialog(
-    BuildContext context, String title, VoidCallback callBack) {
+    BuildContext context, String title, VoidCallback callBack,String yesButtonText,String mainTitle) {
   return Center(
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -54,7 +56,7 @@ confirmationCustomAlertDialog(
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 8.0),
-                                child: Text("Delete ?",
+                                child: Text(mainTitle,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.poppins(
                                         fontSize: 10.sp,
@@ -133,7 +135,7 @@ confirmationCustomAlertDialog(
                               onPressed: callBack,
                               child: Center(
                                 child: Text(
-                                  "DELETE",
+                                  yesButtonText,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.w400,
