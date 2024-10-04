@@ -3,6 +3,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/jobs_model/job_detail_model.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'jobs_event.dart';
@@ -119,7 +120,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       Dio dio = Dio();
 
       try {
-        Response response = await dio.get(
+        Response response = await dio.post(
           '${AppData.remoteUrl2}/jobs/${event.jobId}/withdraw-application', // Add query parameters
           options: Options(headers: {
             'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
@@ -142,28 +143,28 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
 
-    // emit(PaginationLoadingState());
+    emit(PaginationLoadingState());
     try {
       Dio dio = Dio();
 
-      try {
-        Response response = await dio.get(
-          '${AppData.remoteUrl2}/jobs/${event.jobId}/applicants', // Add query parameters
-          options: Options(headers: {
-            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-          }),
-        );
-        print(response.data);
-      } catch (e) {
-        print('Error: $e');
-      }
+
+        // Response response = await dio.get(
+        //   '${AppData.remoteUrl2}/jobs/${event.jobId}/applicants', // Add query parameters
+        //   options: Options(headers: {
+        //     'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+        //   }),
+        // );
+        // showToast('message');
+        // print(response.data);
+        //
       emit(PaginationLoadedState());
       // emit(DataLoaded(drugsData));
     } catch (e) {
       // ProgressDialogUtils.hideProgressDialog();
       print(e);
+      emit(PaginationLoadedState());
 
-      emit(DataError('No Data Found'));
+      // emit(DataError('No Data Found'));
     }
   }
 

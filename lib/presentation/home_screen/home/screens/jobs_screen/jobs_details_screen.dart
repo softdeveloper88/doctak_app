@@ -1,6 +1,8 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job_applicant_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
@@ -203,7 +205,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              GestureDetector(
+                              if(jobsBloc.jobDetailModel.job?.userId != AppData.logInUserId)  GestureDetector(
                                 onTap: (){
                                   showDialog(
                                       context: context,
@@ -234,8 +236,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              TextButton(
-                                onPressed: () {},
+                             if(jobsBloc.jobDetailModel.job?.userId ==AppData.logInUserId) TextButton(
+                                onPressed: () {
+                                  JobApplicantScreen(widget.jobId,jobsBloc).launch(context);
+                                },
                                 child: Text(
                                   "Applicants",
                                   style: GoogleFonts.poppins(

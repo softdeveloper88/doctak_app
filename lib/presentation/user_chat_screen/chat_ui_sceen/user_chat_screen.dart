@@ -197,66 +197,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                 ),
                               )
                             :
-                            // Card(
-                            //
-                            //   elevation: 2,
-                            //   shape: RoundedRectangleBorder(
-                            //     borderRadius: BorderRadius.circular(8),
-                            //   ),
-                            //   child: ListTile(
-                            //     leading: InkWell(
-                            //       onTap: () {
-                            //         // Handle profile picture tap
-                            //       },
-                            //       child: Container(
-                            //         width: 60,
-                            //         height: 60,
-                            //         decoration: BoxDecoration(
-                            //           shape: BoxShape.circle,
-                            //           boxShadow: [
-                            //             BoxShadow(
-                            //               color: Colors.grey.withOpacity(0.5),
-                            //               spreadRadius: 2,
-                            //               blurRadius: 5,
-                            //               offset: const Offset(0, 3),
-                            //             ),
-                            //           ],
-                            //         ),
-                            //         child: CircleAvatar(
-                            //           radius: 30,
-                            //           backgroundImage: CachedNetworkImageProvider(
-                            //             '${AppData.imageUrl}${bloc.contactsList[index].profilePic}',
-                            //           ),
-                            //         ),
-                            //       ),
-                            //     ),
-                            //     title: Text(
-                            //       '${bloc.contactsList[index].firstName} ${bloc.contactsList[index].lastName}',
-                            //       style: const TextStyle(
-                            //         fontWeight: FontWeight.bold,
-                            //         fontSize: 16,
-                            //         color: Colors.black87,
-                            //       ),
-                            //     ),
-                            //     subtitle: Text(
-                            //       bloc.contactsList[index].latestMessage ?? 'No recent messages',
-                            //       style: TextStyle(
-                            //         fontSize: 14,
-                            //         color: Colors.grey[600],
-                            //       ),
-                            //     ),
-                            //     onTap: () {
-                            //       ChatRoomScreen(
-                            //         username: '${bloc.contactsList[index].firstName} ${bloc.contactsList[index].lastName}',
-                            //         profilePic: '${bloc.contactsList[index].profilePic}',
-                            //         id: '',
-                            //         roomId: '${bloc.contactsList[index].roomId}',
-                            //       ).launch(context);
-                            //       // Add navigation logic or any other action on contact tap
-                            //     },
-                            //   )
-                            //
-                            // );
+
                             Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: InkWell(

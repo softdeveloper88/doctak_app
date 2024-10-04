@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
+
 JobDetailModel jobDetailModelFromJson(String str) =>
     JobDetailModel.fromJson(json.decode(str));
 String jobDetailModelToJson(JobDetailModel data) => json.encode(data.toJson());
@@ -63,7 +65,7 @@ class Job {
     if (json['applicants'] != null) {
       applicants = [];
       json['applicants'].forEach((v) {
-        applicants?.add(Application.fromJson(v));
+        applicants?.add(Applicants.fromJson(v));
       });
     }
     user = json['user'] != null ? User.fromJson(json['user']) : null;
@@ -87,7 +89,7 @@ class Job {
   String? jobImage;
   String? countryId;
   String? lastDate;
-  List<dynamic>? applicants;
+  List<Applicants>? applicants;
   User? user;
   List<dynamic>? specialties;
 
