@@ -42,6 +42,7 @@ import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
 import 'core/utils/navigator_service.dart';
 import 'core/utils/pref_utils.dart';
+import 'firebase_options.dart';
 import 'localization/app_localization.dart';
 import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
@@ -170,32 +171,41 @@ void onDidReceiveNotificationResponse(
     MaterialPageRoute(builder: (context) => const ComingSoonScreen()),
   );
 }
+void checkNotificationPermission() async {
+  var status = await Permission.notification.status;
 
+  if (status.isDenied) {
+    // Request permission if it's denied
+    await Permission.notification.request();
+  }
+}
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Permission.notification.isDenied.then((value) {
-    if (value) {
-      Permission.notification.request();
-    }
-  });
   HttpOverrides.global = MyHttpsOverrides();
   // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
   //   systemNavigationBarColor: Colors.white, // navigation bar color
   //   statusBarColor: Colors.white, // status bar color
   // ));
-  if (Platform.isAndroid) {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
-        appId: "1:975716064608:android:c1a4889c2863e014749205",
-        messagingSenderId: "975716064608",
-        projectId: "doctak-322cc",
-      ),
-    );
-  } else {
-    await Firebase.initializeApp();
-    // await Firebase.initializeApp();
-  }
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+  // if (Platform.isAndroid) {
+  //   await Firebase.initializeApp(
+  //     options: const FirebaseOptions(
+  //       apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
+  //       appId: "1:975716064608:android:c1a4889c2863e014749205",
+  //       messagingSenderId: "975716064608",
+  //       projectId: "doctak-322cc",
+  //     ),
+  //   );
+  // } else {
+  //   await Firebase.initializeApp();
+  //   // await Firebase.initializeApp();
+  // }
+
+
+
+
+
+  checkNotificationPermission();
   NotificationService.initialize();
   RemoteMessage? initialRoute = await NotificationService.getInitialNotificationRoute();
   // if(initialRoute?.data['type']??'')

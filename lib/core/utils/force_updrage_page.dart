@@ -76,7 +76,7 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
            latestVersionLocal=prefs.getString('latest_version');
           mandatory = latestVersionInfo['data']['mandatory'];
       }else{
-        latestVersionLocal=prefs.getString('latest_version');
+        latestVersionLocal=prefs.getString('latest_version')??'1.0.1';
       }
       print(latestVersionLocal);
       Version version1 = Version.parse(packageInfo!.version);

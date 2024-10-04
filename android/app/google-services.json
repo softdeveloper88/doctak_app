@@ -23,42 +23,13 @@
           }
         },
         {
-          "client_id": "975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "975716064608-coi3ro178313fuatut7octgh5ju0tn3h.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.dinosoftlabs.POPUP",
-                "app_store_id": "231231231"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:975716064608:android:5c4bbe180a8cd794749205",
-        "android_client_info": {
-          "package_name": "com.kt.doctak.debug"
-        }
-      },
-      "oauth_client": [
+          "client_id": "975716064608-l220b110f8b4b34tch898ieq273jesea.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kt.doctak",
+            "certificate_hash": "c6ccae7f5e486234696589435680c5b99d30460a"
+          }
+        },
         {
           "client_id": "975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com",
           "client_type": 3
