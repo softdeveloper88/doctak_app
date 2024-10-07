@@ -200,11 +200,6 @@ Future<void> main() async {
   //   await Firebase.initializeApp();
   //   // await Firebase.initializeApp();
   // }
-
-
-
-
-
   checkNotificationPermission();
   NotificationService.initialize();
   RemoteMessage? initialRoute = await NotificationService.getInitialNotificationRoute();

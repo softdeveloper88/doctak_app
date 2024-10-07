@@ -312,8 +312,7 @@ class LoginScreenState extends State<LoginScreen> {
         );
       });
     } else {
-      await FirebaseMessaging.instance
-          .getToken().then((token){
+      String? token= await FirebaseMessaging.instance.getToken();
         loginBloc.add(
           LoginButtonPressed(
               username: emailController.text,
@@ -324,7 +323,6 @@ class LoginScreenState extends State<LoginScreen> {
             // replace with real input
           ),
         );
-      });
     }
   }
   @override
@@ -753,8 +751,9 @@ class LoginScreenState extends State<LoginScreen> {
           GoogleSignIn().disconnect();
         });
       } else {
-         await FirebaseMessaging.instance.getToken().then((token) async {
-           final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+        String? token= await FirebaseMessaging.instance.getToken();
+
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
            print(googleUser.toString());
 
@@ -773,7 +772,7 @@ class LoginScreenState extends State<LoginScreen> {
              deviceToken: token ?? '',
            ));
            GoogleSignIn().disconnect();
-         });
+
       }
 
     } on Exception catch (e) {
