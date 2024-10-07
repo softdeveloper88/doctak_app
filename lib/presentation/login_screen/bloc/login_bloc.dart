@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
@@ -22,8 +23,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(LoginLoading());
     ProgressDialogUtils.showProgressDialog();
     try {
+      DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+      String deviceId='';
+      String deviceType='';
+      if(isAndroid){
+        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+        print('Running on ${androidInfo.model}');
+        deviceType="android";
+        deviceId=androidInfo.id;
+      }else{
+        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+        print('Running on ${iosInfo.utsname.machine}');  // e.g. "iPod7,1"
+        deviceType="android";
+        deviceId=iosInfo.identifierForVendor.toString();
+      }
       final response = await apiService.login(
-          event.username, event.password, 'mobile', '123456',event.deviceToken);
+          event.username, event.password, deviceType, deviceId,event.deviceToken);
       log(response);
       if (response.success == true) {
         // if (response.user!.emailVerifiedAt == null) {
@@ -131,12 +146,26 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(LoginLoading());
     ProgressDialogUtils.showProgressDialog();
     // try {
+    DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+    String deviceId='';
+    String deviceType='';
+    if(isAndroid){
+      AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+      print('Running on ${androidInfo.model}');
+     deviceType="android";
+     deviceId=androidInfo.id;
+    }else{
+      IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+      print('Running on ${iosInfo.utsname.machine}');  // e.g. "iPod7,1"
+      deviceType="android";
+      deviceId=iosInfo.identifierForVendor.toString();
+    }
     final response = await apiService.loginWithSocial(
         event.email,
         event.firstName,
         event.lastName,
-        'mobile',
-        '123456',
+        deviceType,
+        deviceId,
         event.isSocialLogin,
         event.provider,
         '4a080919-3829-4b4a-abdc-95b1267c4371',

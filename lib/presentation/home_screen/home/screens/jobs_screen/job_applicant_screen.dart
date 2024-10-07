@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -22,12 +23,13 @@ class JobApplicantScreen extends StatefulWidget {
 
 class _JobApplicantScreenState extends State<JobApplicantScreen> {
   // JobsBloc widget.jobBloc = JobsBloc();
-
+  List<Applicants> applicantList=[];
   @override
   void initState() {
     setStatusBarColor(svGetScaffoldColor());
-
-    widget.jobBloc.add(ShowApplicantEvent(jobId: widget.jobId));
+    Data jobsModel = widget.jobBloc.drugsData.singleWhere((job)=>job.id.toString()==widget.jobId.toString());
+    applicantList=jobsModel.applicants!.toList();
+    // widget.jobBloc.add(ShowApplicantEvent(jobId: widget.jobId));
     super.initState();
   }
 
@@ -70,7 +72,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
           } else if (state is PaginationLoadedState) {
             return ListView.builder(
               itemCount:
-                  widget.jobBloc.jobDetailModel.job?.applicants?.length ?? 0,
+                  widget.jobBloc.drugsData[0].applicants?.length ?? 0,
               itemBuilder: (context, index) {
                 var bloc = widget.jobBloc;
 
@@ -128,7 +130,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                                 placeHolder:
                                                     'images/socialv/faces/face_5.png',
                                                 imagePath:
-                                                    '${AppData.imageUrl}${bloc.jobDetailModel.job?.applicants?[index].profilePic.validate()}',
+                                                    '${AppData.imageUrl}${applicantList[index].profilePic.validate()}',
                                                 height: 56,
                                                 width: 56,
                                                 fit: BoxFit.cover)
@@ -145,7 +147,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                         SizedBox(
                                             width: 150,
                                             child: Text(
-                                                "${bloc.jobDetailModel.job?.applicants?[index].name.validate()}",
+                                                "${applicantList[index].name.validate()}",
                                                 overflow: TextOverflow.clip,
                                                 style: GoogleFonts.poppins(
                                                     color: svGetBodyColor(),
@@ -158,8 +160,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                       ],
                                     ),
                                     Text(
-                                        bloc.jobDetailModel.job
-                                                ?.applicants?[index].email ??
+                                        applicantList[index].email ??
                                             "",
                                         style: secondaryTextStyle(
                                             color: svGetBodyColor())),
@@ -169,8 +170,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                             ),
                           ),
                           Text(
-                              timeAgo.format(DateTime.parse(bloc.jobDetailModel
-                                      .job?.applicants?[index].createdAt ??
+                              timeAgo.format(DateTime.parse(applicantList[index].createdAt ??
                                   "")),
                               style: secondaryTextStyle(
                                   color: svGetBodyColor(), size: 12)),

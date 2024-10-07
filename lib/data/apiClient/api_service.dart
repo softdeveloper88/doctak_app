@@ -70,6 +70,7 @@ abstract class ApiService {
     @Field("provider") String provider,
     @Field("token") String token,
     @Field("device_token") String deviceToken,
+
   );
 
   @FormUrlEncoded()
@@ -83,7 +84,10 @@ abstract class ApiService {
       @Field("state") String state,
       @Field("specialty") String specialty,
       @Field("user_type") String userType,
-      @Field("device_token") String deviceToken);
+      @Field("device_token") String deviceToken,
+      @Field("device_type") String deviceType,
+      @Field("device_id") String deviceId,
+      );
 
   @FormUrlEncoded()
   @POST("/complete-profile")

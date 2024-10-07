@@ -165,6 +165,8 @@ class _ApiService implements ApiService {
     String specialty,
     String userType,
     String deviceToken,
+      String deviceType,
+      String deviceId,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -179,6 +181,8 @@ class _ApiService implements ApiService {
       'specialty': specialty,
       'user_type': userType,
       'device_token': deviceToken,
+      'device_type': deviceType,
+      'device_id': deviceId,
     };
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<HttpResponse<Map<String, String>>>(Options(

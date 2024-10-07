@@ -15,6 +15,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   int numberOfPage = 1;
   List<Data> drugsData = [];
   JobDetailModel jobDetailModel = JobDetailModel();
+  Applicants? applicants=Applicants();
   final int nextPageTrigger = 1;
 
   JobsBloc() : super(PaginationInitialState()) {
@@ -148,12 +149,13 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       Dio dio = Dio();
 
 
-        // Response response = await dio.get(
-        //   '${AppData.remoteUrl2}/jobs/${event.jobId}/applicants', // Add query parameters
-        //   options: Options(headers: {
-        //     'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-        //   }),
-        // );
+        var response = await dio.get(
+          '${AppData.remoteUrl2}/jobs/${event.jobId}/applicants', // Add query parameters
+          options: Options(headers: {
+            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+          }),
+        );
+
         // showToast('message');
         // print(response.data);
         //

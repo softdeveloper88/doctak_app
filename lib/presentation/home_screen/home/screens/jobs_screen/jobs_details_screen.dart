@@ -115,7 +115,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                             ),
                             Row(
                               children: [
-                                Container(
+                            if(jobsBloc.jobDetailModel.job?.promoted !=0 )   Container(
                                   padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
@@ -128,7 +128,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 const SizedBox(
                                   width: 10,
                                 ),
-                                MaterialButton(
+                              if(jobsBloc.jobDetailModel.hasApplied !=false)  MaterialButton(
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10)),
                                   color: Colors.blue,
@@ -215,8 +215,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                            yesButtonText: 'Withdraw',
                                             title: 'Are you sure want to withdraw your application ?',
                                             callback: () {
-                                              jobsBloc.add(
-                                                  WithDrawApplicant(jobId:widget.jobId));
+                                              jobsBloc.add(WithDrawApplicant(jobId:widget.jobId));
 
                                               Navigator.of(context).pop();
                                             });

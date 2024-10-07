@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
@@ -149,8 +152,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 } else {
                   return InkWell(
                     onTap: () {
-                      print('object');
                       var typeNotification=bloc.notificationsList[index].type;
+                      print(typeNotification);
                       if(typeNotification=='simple'){
 
                       }else if(typeNotification=='post_liked'){
@@ -158,7 +161,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       }else if(typeNotification=='follow'){
 
                       }else if(typeNotification=='message'){
-                        print('object');
+
                         ChatRoomScreen(
                           username:
                           '${bloc.notificationsList[index].user?.name}',
@@ -168,7 +171,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           roomId: '',
                         ).launch(context);
                       }else if(typeNotification=='post_liked'){
-
+                      LikesListScreen(id:bloc.notificationsList[index].postId).launch(context);
                       }else if(typeNotification=='post_liked'){
 
                       }else if(typeNotification=='post_liked'){
@@ -217,11 +220,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             onTap: () {
                               print('object');
                               var typeNotification=bloc.notificationsList[index].type;
+                              print(typeNotification);
                               if(typeNotification=='simple'){
 
                               } else if(typeNotification=='follow'){
                                 SVProfileFragment(
-                                    userId: bloc.notificationsList[index].user?.id)
+                                    userId: bloc.notificationsList[index].userId)
                                     .launch(context);
                               }else if(typeNotification=='message'){
                                 print('object');
@@ -230,22 +234,45 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   '${bloc.notificationsList[index].user?.name}',
                                   profilePic:
                                   '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                                  id: '${bloc.notificationsList[index].user?.id}',
+                                  id: '${bloc.notificationsList[index].userId}',
                                   roomId: '',
                                 ).launch(context);
-                              }else if(typeNotification=='post_liked'){
+                              }else if(typeNotification=='post_liked' || typeNotification=='like_on_posts'){
                                 LikesListScreen(
                                     id: bloc.notificationsList[index]
                                         .postId ??
                                         '0')
                                     .launch(context);
-                              }else if(typeNotification=='post_liked'){
-
+                              }else if(typeNotification=='comments_on_posts'){
+                                SVCommentScreen(
+                                    id: int.parse(bloc.notificationsList[index]
+                                        .postId ??
+                                        '0'), homeBloc: HomeBloc(),)
+                                    .launch(context);
                               }
-                              // JobsDetailsScreen(
-                              //         jobId: '${bloc.notificationsList[index].id ?? ''}')
-                              //     .launch(context);
+                              if (typeNotification == 'follow_request' || typeNotification== 'friend_request'|| typeNotification== 'message_received' ) {
+                                SVProfileFragment(
+                                    userId: bloc.notificationsList[index].userId)
+                                    .launch(context);
 
+                              }else if (typeNotification == 'comments_on_posts' ||typeNotification == 'like_comment_on_post'|| typeNotification == 'like_comments') {
+                                SVCommentScreen(
+                                  id: int.parse(bloc.notificationsList[index]
+                                      .postId ??
+                                      '0'), homeBloc: HomeBloc(),)
+                                    .launch(context);
+                              }else if (typeNotification == 'new_like'||typeNotification == 'likes_on_posts') {
+                                LikesListScreen(
+                                    id: bloc.notificationsList[index]
+                                        .postId ??
+                                        '0')
+                                    .launch(context);
+
+                              }else if (typeNotification == 'new_job_posted'||typeNotification == 'job_update') {
+                                JobsDetailsScreen(
+                                        jobId: '${bloc.notificationsList[index].postId ?? ''}')
+                                    .launch(context);
+                              }
                               // Add your onTap functionality here
                             },
                           ),

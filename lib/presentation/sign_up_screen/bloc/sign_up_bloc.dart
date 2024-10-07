@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
@@ -9,6 +10,7 @@ import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/core/app_export.dart';
@@ -66,6 +68,20 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       SignUpButtonPressed event, Emitter<DropdownState> emit) async {
     ProgressDialogUtils.showProgressDialog();
     try {
+      DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+      String deviceId='';
+      String deviceType='';
+      if(isAndroid){
+        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+        print('Running on ${androidInfo.model}');
+        deviceType="android";
+        deviceId=androidInfo.id;
+      }else{
+        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+        print('Running on ${iosInfo.utsname.machine}');  // e.g. "iPod7,1"
+        deviceType="android";
+        deviceId=iosInfo.identifierForVendor.toString();
+      }
       print(event.firstName);
       final response = await apiService.register(
           event.firstName,
@@ -75,7 +91,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           event.country,
           event.state,
           event.specialty,
-          event.userType,event.deviceToken??"");
+          event.userType,event.deviceToken??"",deviceType,deviceId);
       if (response.response.statusCode == 200) {
         ProgressDialogUtils.hideProgressDialog();
         emit(DataLoaded(!(state as DataLoaded).isPasswordVisible,
