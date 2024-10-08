@@ -156,26 +156,54 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       print(typeNotification);
                       if(typeNotification=='simple'){
 
-                      }else if(typeNotification=='post_liked'){
-
-                      }else if(typeNotification=='follow'){
-
+                      } else if(typeNotification=='follow'){
+                        SVProfileFragment(
+                            userId: bloc.notificationsList[index].userId)
+                            .launch(context);
                       }else if(typeNotification=='message'){
-
+                        print('object');
                         ChatRoomScreen(
                           username:
                           '${bloc.notificationsList[index].user?.name}',
                           profilePic:
                           '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                          id: '${bloc.notificationsList[index].user?.id}',
+                          id: '${bloc.notificationsList[index].userId}',
                           roomId: '',
                         ).launch(context);
-                      }else if(typeNotification=='post_liked'){
-                      LikesListScreen(id:bloc.notificationsList[index].postId).launch(context);
-                      }else if(typeNotification=='post_liked'){
+                      }else if(typeNotification=='post_liked' || typeNotification=='like_on_posts'){
+                        LikesListScreen(
+                            id: bloc.notificationsList[index]
+                                .postId ??
+                                '0')
+                            .launch(context);
+                      }else if(typeNotification=='comments_on_posts'){
+                        SVCommentScreen(
+                          id: int.parse(bloc.notificationsList[index]
+                              .postId ??
+                              '0'), homeBloc: HomeBloc(),)
+                            .launch(context);
+                      } else if (typeNotification == 'follow_request' || typeNotification== 'friend_request'|| typeNotification== 'message_received' ) {
+                        SVProfileFragment(
+                            userId: bloc.notificationsList[index].userId)
+                            .launch(context);
 
-                      }else if(typeNotification=='post_liked'){
+                      }else if (typeNotification == 'comments_on_posts' ||typeNotification == 'like_comment_on_post'|| typeNotification == 'like_comments') {
+                        SVCommentScreen(
+                          id: int.parse(bloc.notificationsList[index]
+                              .postId ??
+                              '0'), homeBloc: HomeBloc(),)
+                            .launch(context);
+                      }else if (typeNotification == 'new_like'||typeNotification == 'likes_on_posts') {
+                        LikesListScreen(
+                            id: bloc.notificationsList[index]
+                                .postId ??
+                                '0')
+                            .launch(context);
 
+                      }else if (typeNotification == 'new_job_posted'||typeNotification == 'job_update') {
+                        JobsDetailsScreen(
+                            jobId: '${bloc.notificationsList[index].postId ?? ''}')
+                            .launch(context);
                       }
                       // JobsDetailsScreen(
                       //         jobId: '${bloc.notificationsList[index].id ?? ''}')
@@ -218,7 +246,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               size: 16.0,
                             ),
                             onTap: () {
-                              print('object');
+
                               var typeNotification=bloc.notificationsList[index].type;
                               print(typeNotification);
                               if(typeNotification=='simple'){
@@ -249,8 +277,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         .postId ??
                                         '0'), homeBloc: HomeBloc(),)
                                     .launch(context);
-                              }
-                              if (typeNotification == 'follow_request' || typeNotification== 'friend_request'|| typeNotification== 'message_received' ) {
+                              } else if (typeNotification == 'follow_request' || typeNotification== 'friend_request'|| typeNotification== 'message_received' ) {
                                 SVProfileFragment(
                                     userId: bloc.notificationsList[index].userId)
                                     .launch(context);
