@@ -20,11 +20,11 @@ class GetPost extends NotificationEvent {
 
 class NotificationLoadPageEvent extends NotificationEvent {
   int? page;
-
+  String? readStatus;
   NotificationLoadPageEvent(
-      {this.page,});
+      {this.page,this.readStatus});
   @override
-  List<Object?> get props => [page,];
+  List<Object?> get props => [page,readStatus];
 }
 
 class NotificationDetailPageEvent extends NotificationEvent {
@@ -33,6 +33,13 @@ class NotificationDetailPageEvent extends NotificationEvent {
   NotificationDetailPageEvent({this.jobId});
   @override
   List<Object?> get props => [jobId];
+}
+class ReadNotificationEvent extends NotificationEvent {
+  String? notificationId;
+
+  ReadNotificationEvent({this.notificationId});
+  @override
+  List<Object?> get props => [notificationId];
 }
 
 class NotificationCheckIfNeedMoreDataEvent extends NotificationEvent {

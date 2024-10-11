@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart' as dom;

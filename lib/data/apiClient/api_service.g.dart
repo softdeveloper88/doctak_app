@@ -415,6 +415,35 @@ class _ApiService implements ApiService {
     final value = PostDataModel.fromJson(_result.data!);
     return value;
   }
+ @override
+  Future<PostDetailModel> getDetailsPosts(
+    String token,
+    String postId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PostDataModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/posts/${postId}',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = PostDetailModel.fromJson(_result.data!);
+    return value;
+  }
 
   @override
   Future<PostDataModel> getMyPosts(
@@ -452,7 +481,7 @@ class _ApiService implements ApiService {
     return value;
   }
   @override
-  Future<NotificationsModel> getMyNotifications(
+  Future<NotificationModel> getMyNotifications(
     String token,
     String page,
   ) async {
@@ -481,8 +510,101 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = NotificationsModel.fromJson(_result.data!);
+    final value = NotificationModel.fromJson(_result.data!);
     return value;
+  }
+  @override
+  Future<NotificationModel> getSelectedNotifications(
+    String token,
+    String page,
+    String readStatus,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'page': page,
+    };
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PostDataModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/notifications/${readStatus}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = NotificationModel.fromJson(_result.data!);
+    return value;
+  }
+ @override
+ Future<HttpResponse<dynamic>> readNotification(
+    String token,
+    String notificationId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PostDataModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/notifications/${notificationId}/mark-read',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
+  }
+  @override
+ Future<HttpResponse<dynamic>> readAllSelectedNotifications(
+    String token,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PostDataModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/notifications/mark-read',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
   }
 
   @override

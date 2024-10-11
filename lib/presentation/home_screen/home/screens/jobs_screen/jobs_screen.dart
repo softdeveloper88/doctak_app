@@ -635,7 +635,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                   ),
                                   Row(
                                     children: [
-                                      Container(
+                                     if(bloc.drugsData[index].promoted !=0) Container(
                                         padding: const EdgeInsets.all(5),
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(10),
@@ -644,7 +644,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                         child: const Text('Sponsored',style: TextStyle(color: Colors.white),),
                                       ),
                                       const SizedBox(width: 10,),
-                                      MaterialButton(
+                                      if(bloc.drugsData[index].user!.id != AppData.logInUserId) MaterialButton(
                                         shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(10)
                                         ),
                                         color: Colors.blue,

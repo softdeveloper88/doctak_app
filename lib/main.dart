@@ -5,6 +5,7 @@ import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_bloc.dart';
@@ -653,11 +654,11 @@ class _MyAppState extends State<MyApp> {
                       '/follow_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
                       '/friend_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
                       '/message_received': (context) =>  SVProfileFragment(userId: widget.id??'',),
-                      '/comments_on_posts': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
-                      '/like_comment_on_post': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
-                      '/like_comments': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'), homeBloc: HomeBloc(),),
-                      '/new_like': (context) =>   LikesListScreen(id: widget.id??'0',),
-                      '/likes_on_posts': (context) =>   LikesListScreen(id: widget.id??'0',),
+                      '/comments_on_posts': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
+                      '/like_comment_on_post': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
+                      '/like_comments': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
+                      '/new_like': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
+                      '/likes_on_posts': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
                       '/new_job_posted': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
                       '/job_update': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),
                       '/conference_invitation': (context) =>   ConferencesScreen(),

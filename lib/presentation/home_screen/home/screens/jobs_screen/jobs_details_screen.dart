@@ -113,6 +113,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   fontWeight: FontWeight.w500,
                                   fontSize: kDefaultFontSize),
                             ),
+
                             Row(
                               children: [
                             if(jobsBloc.jobDetailModel.job?.promoted !=0 )   Container(
@@ -128,7 +129,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 const SizedBox(
                                   width: 10,
                                 ),
-                              if(jobsBloc.jobDetailModel.hasApplied !=false)  MaterialButton(
+                              if(jobsBloc.jobDetailModel.hasApplied !=false && jobsBloc.jobDetailModel.job?.user!.id != AppData.logInUserId)  MaterialButton(
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10)),
                                   color: Colors.blue,
@@ -196,6 +197,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
                           ],
                         ),
+                        SizedBox(height: 10,),
                         Container(
                           padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
@@ -205,7 +207,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if(jobsBloc.jobDetailModel.job?.userId != AppData.logInUserId)  GestureDetector(
+                              if(jobsBloc.jobDetailModel.job?.user?.id != AppData.logInUserId)  GestureDetector(
                                 onTap: (){
                                   showDialog(
                                       context: context,
@@ -235,7 +237,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               const SizedBox(
                                 width: 10,
                               ),
-                             if(jobsBloc.jobDetailModel.job?.userId ==AppData.logInUserId) TextButton(
+                             if(jobsBloc.jobDetailModel.job?.user!.id == AppData.logInUserId) TextButton(
                                 onPressed: () {
                                   JobApplicantScreen(widget.jobId,jobsBloc).launch(context);
                                 },

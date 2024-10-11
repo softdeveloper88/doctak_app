@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/data/models/post_model/post_detail_model.dart';
 import 'package:doctak_app/data/models/post_model/post_likes_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,13 +17,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   int numberOfPage = 1;
   List<Post> postList = [];
   final int nextPageTrigger = 1;
-
+  PostDetailModel? postData;
   HomeBloc() : super(DataInitial()) {
     on<PostLoadPageEvent>(_onGetPosts);
     on<LoadSearchPageEvent>(_onGetSearchPosts);
     on<PostLikeEvent>(_onPostLike);
     on<DeletePostEvent>(_onDeletePost);
-    // on<AdsSettingEvent>(_adsSettingApi);
+    on<DetailsPostEvent>(_onGetDetailsPosts);
     on<PostCheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == postList.length - nextPageTrigger) {
         add(PostLoadPageEvent(page: pageNumber));
@@ -46,6 +47,25 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         pageNumber = pageNumber + 1;
         postList.addAll(response.posts?.data ?? []);
       }
+      emit(PostPaginationLoadedState());
+
+    } catch (e) {
+      print(e);
+
+      // emit(PostPaginationLoadedState());
+      emit(PostDataError('An error occurred $e'));
+    }
+  }
+  _onGetDetailsPosts(DetailsPostEvent event, Emitter<HomeState> emit) async {
+
+      emit(PostPaginationLoadingState());
+
+    try {
+      postData = await postService.getDetailsPosts(
+        'Bearer ${AppData.userToken}',
+        event.postId.toString()
+      );
+      print('post $postData');
       emit(PostPaginationLoadedState());
 
     } catch (e) {

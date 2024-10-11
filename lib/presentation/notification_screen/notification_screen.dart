@@ -1,26 +1,32 @@
 import 'dart:async';
 
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../widgets/custom_image_view.dart';
 import '../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'bloc/notification_event.dart';
 
 class NotificationScreen extends StatefulWidget {
-   NotificationScreen(this.notificationBloc, {Key? key}) : super(key: key);
+  NotificationScreen(this.notificationBloc, {Key? key}) : super(key: key);
   NotificationBloc notificationBloc;
+
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
@@ -30,6 +36,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Timer? _debounce;
   final TextEditingController _controller = TextEditingController();
   List<String> _filteredSuggestions = [];
+  int selectIndex = 0;
 
   @override
   void dispose() {
@@ -40,12 +47,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
     widget.notificationBloc.add(
-      NotificationLoadPageEvent(
-        page: 1,
-      ),
+      NotificationLoadPageEvent(page: 1, readStatus: ''),
     );
     super.initState();
   }
+
   // var selectedValue;
   // bool isShownSuggestion = false;
   // bool isSearchShow = true;
@@ -62,64 +68,193 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-        backgroundColor: context.cardColor,
-        iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Notifications', style: boldTextStyle(size: 20)),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-            icon:
-            Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-            onPressed: () {
-              widget.notificationBloc.add(NotificationLoadPageEvent(page: 1,),);
-              Navigator.pop(context);
-            }),
-        actions: const [
-          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-        ],
-      ),
-      body: Column(
-        children: [
-          BlocConsumer<NotificationBloc, NotificationState>(
-            bloc: widget.notificationBloc,
-            // listenWhen: (previous, current) => current is PaginationLoadedState,
-            // buildWhen: (previous, current) => current is! PaginationLoadedState,
-            listener: (BuildContext context, NotificationState state) {
-              if (state is DataError) {
-                // showDialog(
-                //   context: context,
-                //   builder: (context) => AlertDialog(
-                //     content: Text(state.errorMessage),
-                //   ),
-                // );
-              }
-            },
-            builder: (context, state) {
-              if (state is PaginationLoadingState) {
-                return Expanded(
-                    child: Center(
-                        child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                )));
-              } else if (state is PaginationLoadedState) {
-                // print(state.drugsModel.length);
-                return _buildPostList(context);
-              } else if (state is DataError) {
-                return Expanded(
-                  child: Center(
-                    child: Text(state.errorMessage),
-                  ),
-                );
-              } else {
-                return const Expanded(
-                    child: Center(child: Text('Something went wrong')));
-              }
-            },
+    return DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: svGetScaffoldColor(),
+          appBar: AppBar(
+            backgroundColor: context.cardColor,
+            iconTheme: IconThemeData(color: context.iconColor),
+            title: Text('Notifications', style: boldTextStyle(size: 20)),
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new_rounded,
+                    color: svGetBodyColor()),
+                onPressed: () {
+                  widget.notificationBloc.add(
+                    NotificationLoadPageEvent(
+                      page: 1,
+                    ),
+                  );
+                  Navigator.pop(context);
+                }),
+            actions: const [
+              // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+            ],
           ),
+          body: Column(
+            children: [
+              tabWidget(),
+              // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+            ],
+          ),
+        ));
+  }
+
+  Widget _individualTab(String tabName) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (tabName == 'Unread')
+          Container(
+            height: 20,
+            width: 1,
+            decoration: BoxDecoration(
+                border: Border(
+                    right: BorderSide(
+                        color: svGetBodyColor(),
+                        width: 1,
+                        style: BorderStyle.solid))),
+          ),
+        Expanded(
+          child: Tab(
+            child: Text(
+              tabName,
+              style: GoogleFonts.poppins(color: svGetBodyColor()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget tabWidget() {
+    return Expanded(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+            child: TabBar(
+              dividerHeight: 1,
+              dividerColor: Colors.grey,
+              onTap: (index) {
+                setState(() {
+                  selectIndex = index;
+                });
+                if (index == 0) {
+                  widget.notificationBloc
+                      .add(NotificationLoadPageEvent(page: 1, readStatus: ''));
+                } else if (index == 1) {
+                  widget.notificationBloc.add(
+                      NotificationLoadPageEvent(page: 1, readStatus: 'unread'));
+                }
+              },
+              indicatorWeight: 4,
+              unselectedLabelColor: Colors.grey,
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelPadding: const EdgeInsets.all(4),
+              indicatorColor: SVAppColorPrimary,
+              tabs: [
+                _individualTab('All'),
+                _individualTab('Unread'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: svGetScaffoldColor(),
+              child: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    /// Notification All
+                    BlocConsumer<NotificationBloc, NotificationState>(
+                      bloc: widget.notificationBloc,
+                      // listenWhen: (previous, current) => current is PaginationLoadedState,
+                      // buildWhen: (previous, current) => current is! PaginationLoadedState,
+                      listener:
+                          (BuildContext context, NotificationState state) {
+                        if (state is DataError) {
+                          // showDialog(
+                          //   context: context,
+                          //   builder: (context) => AlertDialog(
+                          //     content: Text(state.errorMessage),
+                          //   ),
+                          // );
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state is PaginationLoadingState) {
+                          return Center(
+                              child: CircularProgressIndicator(
+                            color: svGetBodyColor(),
+                          ));
+                        } else if (state is PaginationLoadedState) {
+                          // print(state.drugsModel.length);
+                          return _buildPostList(context);
+                        } else if (state is DataError) {
+                          return Center(
+                            child: Text(state.errorMessage),
+                          );
+                        } else {
+                          return const Center(
+                              child: Text('Something went wrong'));
+                        }
+                      },
+                    ),
+
+                    /// Notification Unread
+                    BlocConsumer<NotificationBloc, NotificationState>(
+                      bloc: widget.notificationBloc,
+                      // listenWhen: (previous, current) => current is PaginationLoadedState,
+                      // buildWhen: (previous, current) => current is! PaginationLoadedState,
+                      listener:
+                          (BuildContext context, NotificationState state) {
+                        if (state is DataError) {
+                          // showDialog(
+                          //   context: context,
+                          //   builder: (context) => AlertDialog(
+                          //     content: Text(state.errorMessage),
+                          //   ),
+                          // );
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state is PaginationLoadingState) {
+                          return Center(
+                              child: CircularProgressIndicator(
+                            color: svGetBodyColor(),
+                          ));
+                        } else if (state is PaginationLoadedState) {
+                          // print(state.drugsModel.length);
+                          return _buildPostList(context);
+                        } else if (state is DataError) {
+                          return Center(
+                            child: Text(state.errorMessage),
+                          );
+                        } else {
+                          return const Center(
+                              child: Text('Something went wrong'));
+                        }
+                      },
+                    ),
+                  ]),
+            ),
+          ),
+         if(selectIndex==1) MaterialButton(
+            onPressed: () {
+              widget.notificationBloc
+                  .add(NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'));
+
+            },
+           minWidth: 100.w,
+            color: Colors.blue,
+            child: Text(
+              'Mark All Read',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          )
           // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
@@ -128,189 +263,202 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Widget _buildPostList(BuildContext context) {
     final bloc = widget.notificationBloc;
-    return Expanded(
-      child: bloc.notificationsList.isEmpty
-          ? const Center(
-              child: Text("No Notification Found"),
-            )
-          : ListView.builder(
-              itemCount: bloc.notificationsList.length,
-              itemBuilder: (context, index) {
-                if (bloc.pageNumber <= bloc.numberOfPage) {
-                  if (index ==
-                      bloc.notificationsList.length - bloc.nextPageTrigger) {
-                    bloc.add(NotificationCheckIfNeedMoreDataEvent(index: index));
-                  }
+    return bloc.notificationsList.isEmpty
+        ? const Center(
+            child: Text("No Notification Found"),
+          )
+        : ListView.builder(
+            itemCount: bloc.notificationsList.length,
+            itemBuilder: (context, index) {
+              if (bloc.pageNumber <= bloc.numberOfPage) {
+                if (index ==
+                    bloc.notificationsList.length - bloc.nextPageTrigger) {
+                  bloc.add(NotificationCheckIfNeedMoreDataEvent(index: index));
                 }
-                if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-                    index >= bloc.notificationsList.length - 1) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: svGetBodyColor(),
-                    ),
-                  );
-                } else {
-                  return InkWell(
-                    onTap: () {
-                      var typeNotification=bloc.notificationsList[index].type;
-                      print(typeNotification);
-                      if(typeNotification=='simple'){
-
-                      } else if(typeNotification=='follow'){
-                        SVProfileFragment(
-                            userId: bloc.notificationsList[index].userId)
-                            .launch(context);
-                      }else if(typeNotification=='message'){
-                        print('object');
-                        ChatRoomScreen(
-                          username:
-                          '${bloc.notificationsList[index].user?.name}',
-                          profilePic:
-                          '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                          id: '${bloc.notificationsList[index].userId}',
-                          roomId: '',
-                        ).launch(context);
-                      }else if(typeNotification=='post_liked' || typeNotification=='like_on_posts'){
-                        LikesListScreen(
-                            id: bloc.notificationsList[index]
-                                .postId ??
-                                '0')
-                            .launch(context);
-                      }else if(typeNotification=='comments_on_posts'){
-                        SVCommentScreen(
-                          id: int.parse(bloc.notificationsList[index]
-                              .postId ??
-                              '0'), homeBloc: HomeBloc(),)
-                            .launch(context);
-                      } else if (typeNotification == 'follow_request' || typeNotification== 'friend_request'|| typeNotification== 'message_received' ) {
-                        SVProfileFragment(
-                            userId: bloc.notificationsList[index].userId)
-                            .launch(context);
-
-                      }else if (typeNotification == 'comments_on_posts' ||typeNotification == 'like_comment_on_post'|| typeNotification == 'like_comments') {
-                        SVCommentScreen(
-                          id: int.parse(bloc.notificationsList[index]
-                              .postId ??
-                              '0'), homeBloc: HomeBloc(),)
-                            .launch(context);
-                      }else if (typeNotification == 'new_like'||typeNotification == 'likes_on_posts') {
-                        LikesListScreen(
-                            id: bloc.notificationsList[index]
-                                .postId ??
-                                '0')
-                            .launch(context);
-
-                      }else if (typeNotification == 'new_job_posted'||typeNotification == 'job_update') {
-                        JobsDetailsScreen(
-                            jobId: '${bloc.notificationsList[index].postId ?? ''}')
-                            .launch(context);
-                      }
-                      // JobsDetailsScreen(
-                      //         jobId: '${bloc.notificationsList[index].id ?? ''}')
-                      //     .launch(context);
-                    },
-                    child: Column(
-                      children: [
-                        Material(
-                          color: bloc.notificationsList[index].isRead== 1 ? Colors.white : Colors.blue[50],
-                          // color: Theme.of(context).cardColor,
-                          elevation: 0,
-                          borderRadius: BorderRadius.circular(10),
-                          child: ListTile(
-                            dense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-                            title: Text(
-                              bloc.notificationsList[index].text??"",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14.0,
-                              ),
+              }
+              if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+                  index >= bloc.notificationsList.length - 1) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: svGetBodyColor(),
+                  ),
+                );
+              } else {
+                return InkWell(
+                  onTap: () {
+                    bloc.add(ReadNotificationEvent(
+                        notificationId: bloc.notificationsList[index].id
+                            .toString()));
+                    bloc.notificationsList[index].isRead=1;
+                    var typeNotification = bloc.notificationsList[index].type;
+                    print(typeNotification);
+                    if (typeNotification == 'simple') {
+                    } else if (typeNotification == 'follow') {
+                      SVProfileFragment(
+                              userId: bloc.notificationsList[index].userId)
+                          .launch(context);
+                    } else if (typeNotification == 'message') {
+                      print('object');
+                      ChatRoomScreen(
+                        username:
+                            '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
+                        profilePic:
+                            '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                        id: '${bloc.notificationsList[index].userId}',
+                        roomId: '',
+                      ).launch(context);
+                    } else if (typeNotification == 'post_liked' ||
+                        typeNotification == 'like_on_posts') {
+                      PostDetailsScreen(
+                          postId: bloc.notificationsList[index].postId.toInt())
+                          .launch(context);
+                    } else if (typeNotification == 'comments_on_posts') {
+                      PostDetailsScreen(
+                          postId: bloc.notificationsList[index].postId.toInt())
+                          .launch(context);
+                    } else if (typeNotification == 'follow_request' ||
+                        typeNotification == 'friend_request' ||
+                        typeNotification == 'message_received') {
+                      SVProfileFragment(
+                              userId: bloc.notificationsList[index].userId)
+                          .launch(context);
+                    } else if (typeNotification == 'comments_on_posts' ||
+                        typeNotification == 'like_comment_on_post' ||
+                        typeNotification == 'like_comments') {
+                      PostDetailsScreen(
+                          postId: bloc.notificationsList[index].postId.toInt())
+                          .launch(context);
+                    } else if (typeNotification == 'new_like' ||
+                        typeNotification == 'likes_on_posts') {
+                      PostDetailsScreen(
+                              postId: bloc.notificationsList[index].postId.toInt())
+                          .launch(context);
+                    } else if (typeNotification == 'new_job_posted' ||
+                        typeNotification == 'job_update') {
+                      JobsDetailsScreen(
+                              jobId: bloc.notificationsList[index].postId ?? '')
+                          .launch(context);
+                    }
+                    // JobsDetailsScreen(
+                    //         jobId: '${bloc.notificationsList[index].id ?? ''}')
+                    //     .launch(context);
+                  },
+                  child: Column(
+                    children: [
+                      Material(
+                        color: bloc.notificationsList[index].isRead == 1
+                            ? Colors.white
+                            : Colors.blue[50],
+                        // color: Theme.of(context).cardColor,
+                        elevation: 0,
+                        borderRadius: BorderRadius.circular(10),
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 16.0),
+                          title: Text(
+                            bloc.notificationsList[index].text ?? '',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.0,
                             ),
-                            subtitle: Text(
-                              timeAgo.format(DateTime.parse(bloc.notificationsList[index].createdAt??"")),
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14.0,
-                              ),
-                            ),
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.blue,
-                              child: Icon(
-                                Icons.notifications,
-                                color: Colors.white,
-                              ),
-                            ),
-                            trailing: Icon(
-                              Icons.arrow_forward_ios_outlined,
-                              color: Colors.grey[600],
-                              size: 16.0,
-                            ),
-                            onTap: () {
-
-                              var typeNotification=bloc.notificationsList[index].type;
-                              print(typeNotification);
-                              if(typeNotification=='simple'){
-
-                              } else if(typeNotification=='follow'){
-                                SVProfileFragment(
-                                    userId: bloc.notificationsList[index].userId)
-                                    .launch(context);
-                              }else if(typeNotification=='message'){
-                                print('object');
-                                ChatRoomScreen(
-                                  username:
-                                  '${bloc.notificationsList[index].user?.name}',
-                                  profilePic:
-                                  '${bloc.notificationsList[index].user?.profilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                                  id: '${bloc.notificationsList[index].userId}',
-                                  roomId: '',
-                                ).launch(context);
-                              }else if(typeNotification=='post_liked' || typeNotification=='like_on_posts'){
-                                LikesListScreen(
-                                    id: bloc.notificationsList[index]
-                                        .postId ??
-                                        '0')
-                                    .launch(context);
-                              }else if(typeNotification=='comments_on_posts'){
-                                SVCommentScreen(
-                                    id: int.parse(bloc.notificationsList[index]
-                                        .postId ??
-                                        '0'), homeBloc: HomeBloc(),)
-                                    .launch(context);
-                              } else if (typeNotification == 'follow_request' || typeNotification== 'friend_request'|| typeNotification== 'message_received' ) {
-                                SVProfileFragment(
-                                    userId: bloc.notificationsList[index].userId)
-                                    .launch(context);
-
-                              }else if (typeNotification == 'comments_on_posts' ||typeNotification == 'like_comment_on_post'|| typeNotification == 'like_comments') {
-                                SVCommentScreen(
-                                  id: int.parse(bloc.notificationsList[index]
-                                      .postId ??
-                                      '0'), homeBloc: HomeBloc(),)
-                                    .launch(context);
-                              }else if (typeNotification == 'new_like'||typeNotification == 'likes_on_posts') {
-                                LikesListScreen(
-                                    id: bloc.notificationsList[index]
-                                        .postId ??
-                                        '0')
-                                    .launch(context);
-
-                              }else if (typeNotification == 'new_job_posted'||typeNotification == 'job_update') {
-                                JobsDetailsScreen(
-                                        jobId: '${bloc.notificationsList[index].postId ?? ''}')
-                                    .launch(context);
-                              }
-                              // Add your onTap functionality here
-                            },
                           ),
+                          subtitle: Text(
+                            timeAgo.format(DateTime.parse(
+                                bloc.notificationsList[index].createdAt ?? "")),
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14.0,
+                            ),
+                          ),
+                          leading: CircleAvatar(
+                            child: CustomImageView(
+                              imagePath:
+                                  '${AppData.imageUrl}${bloc.notificationsList[index].senderProfilePic ?? ''}',
+                            ),
+                          ),
+                          trailing: Icon(
+                            Icons.arrow_forward_ios_outlined,
+                            color: Colors.grey[600],
+                            size: 16.0,
+                          ),
+                          onTap: () {
+                            bloc.add(ReadNotificationEvent(
+                                notificationId: bloc.notificationsList[index].id
+                                    .toString()));
+                            bloc.notificationsList[index].isRead=1;
+
+                            var typeNotification =
+                                bloc.notificationsList[index].type;
+                            print(typeNotification);
+                            if (typeNotification == 'simple') {
+
+                            } else if (typeNotification == 'follow') {
+                              SVProfileFragment(
+                                      userId:
+                                          bloc.notificationsList[index].userId)
+                                  .launch(context);
+                            } else if (typeNotification == 'message') {
+                              print('object');
+                              ChatRoomScreen(
+                                username:
+                                    '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
+                                profilePic:
+                                    '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                                id: '${bloc.notificationsList[index].userId}',
+                                roomId: '',
+                              ).launch(context);
+                            } else if (typeNotification == 'post_liked' ||
+                                typeNotification == 'like_on_posts') {
+                              PostDetailsScreen(
+                                  postId: bloc.notificationsList[index].postId.toInt())
+                                  .launch(context);
+                            } else if (typeNotification ==
+                                'comments_on_posts') {
+                              PostDetailsScreen(
+                                  postId: bloc.notificationsList[index].postId.toInt())
+                                  .launch(context);
+                            } else if (typeNotification == 'follow_request' ||
+                                typeNotification == 'friend_request' ||
+                                typeNotification == 'message_received') {
+                              SVProfileFragment(
+                                      userId:
+                                          bloc.notificationsList[index].userId)
+                                  .launch(context);
+                            } else if (typeNotification ==
+                                    'comments_on_posts' ||
+                                typeNotification == 'like_comment_on_post' ||
+                                typeNotification == 'like_comments') {
+                              PostDetailsScreen(
+                                  postId: bloc.notificationsList[index].postId.toInt())
+                                  .launch(context);
+                            } else if (typeNotification == 'new_like' ||
+                                typeNotification == 'likes_on_posts') {
+                              PostDetailsScreen(
+                                  postId: bloc.notificationsList[index].postId.toInt())
+                                  .launch(context);
+                            } else if (typeNotification == 'new_job_posted' ||
+                                typeNotification == 'job_update') {
+                              JobsDetailsScreen(
+                                      jobId:
+                                          '${bloc.notificationsList[index].postId ?? ''}')
+                                  .launch(context);
+                            }
+                            // Add your onTap functionality here
+                          },
                         ),
-                        const Divider(thickness: 0.2,endIndent: 16,indent: 16,color: Colors.grey,)
-                      ],
-                    ),
-                  );
-                }
-              },
-            ),
-    );
+                      ),
+                      const Divider(
+                        thickness: 0.2,
+                        endIndent: 16,
+                        indent: 16,
+                        color: Colors.grey,
+                      )
+                    ],
+                  ),
+                );
+              }
+            },
+          );
   }
 }

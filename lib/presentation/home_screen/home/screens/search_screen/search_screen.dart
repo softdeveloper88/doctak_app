@@ -311,7 +311,7 @@ class _SearchScreenState extends State<SearchScreen>
                   LoadDropdownData('', '', '', ''),
                 );
 
-                return Center(
+                return const Center(
                     child: Text(''));
               } else {
                 BlocProvider.of<SplashBloc>(context).add(

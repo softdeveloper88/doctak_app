@@ -23,13 +23,12 @@ class JobApplicantScreen extends StatefulWidget {
 
 class _JobApplicantScreenState extends State<JobApplicantScreen> {
   // JobsBloc widget.jobBloc = JobsBloc();
-  List<Applicants> applicantList=[];
   @override
   void initState() {
     setStatusBarColor(svGetScaffoldColor());
-    Data jobsModel = widget.jobBloc.drugsData.singleWhere((job)=>job.id.toString()==widget.jobId.toString());
-    applicantList=jobsModel.applicants!.toList();
-    // widget.jobBloc.add(ShowApplicantEvent(jobId: widget.jobId));
+    // Data jobsModel = widget.jobBloc.drugsData.singleWhere((job)=>job.id.toString()==widget.jobId.toString());
+    // applicantList=jobsModel.applicants!.toList();
+    widget.jobBloc.add(ShowApplicantEvent(jobId: widget.jobId));
     super.initState();
   }
 
@@ -72,7 +71,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
           } else if (state is PaginationLoadedState) {
             return ListView.builder(
               itemCount:
-                  widget.jobBloc.drugsData[0].applicants?.length ?? 0,
+                  widget.jobBloc.jobApplicantsModel?.applicants?.length ?? 0,
               itemBuilder: (context, index) {
                 var bloc = widget.jobBloc;
 
@@ -130,7 +129,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                                 placeHolder:
                                                     'images/socialv/faces/face_5.png',
                                                 imagePath:
-                                                    '${AppData.imageUrl}${applicantList[index].profilePic.validate()}',
+                                                    '${AppData.imageUrl}${widget.jobBloc.jobApplicantsModel?.applicants![index].user?.profilePic.validate()}',
                                                 height: 56,
                                                 width: 56,
                                                 fit: BoxFit.cover)
@@ -147,7 +146,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                         SizedBox(
                                             width: 150,
                                             child: Text(
-                                                "${applicantList[index].name.validate()}",
+                                                "${widget.jobBloc.jobApplicantsModel?.applicants?[index].user?.name.validate()}",
                                                 overflow: TextOverflow.clip,
                                                 style: GoogleFonts.poppins(
                                                     color: svGetBodyColor(),
@@ -160,7 +159,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                       ],
                                     ),
                                     Text(
-                                        applicantList[index].email ??
+                                        widget.jobBloc.jobApplicantsModel?.applicants?[index].user?.email ??
                                             "",
                                         style: secondaryTextStyle(
                                             color: svGetBodyColor())),
@@ -170,7 +169,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                             ),
                           ),
                           Text(
-                              timeAgo.format(DateTime.parse(applicantList[index].createdAt ??
+                              timeAgo.format(DateTime.parse(widget.jobBloc.jobApplicantsModel?.applicants?[index].createdAt ??
                                   "")),
                               style: secondaryTextStyle(
                                   color: svGetBodyColor(), size: 12)),

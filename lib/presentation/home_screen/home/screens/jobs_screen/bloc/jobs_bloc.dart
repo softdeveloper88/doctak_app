@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/models/jobs_model/job_applicants_model.dart';
 import 'package:doctak_app/data/models/jobs_model/job_detail_model.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
@@ -15,7 +16,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   int numberOfPage = 1;
   List<Data> drugsData = [];
   JobDetailModel jobDetailModel = JobDetailModel();
-  Applicants? applicants=Applicants();
+  JobApplicantsModel? jobApplicantsModel=JobApplicantsModel();
   final int nextPageTrigger = 1;
 
   JobsBloc() : super(PaginationInitialState()) {
@@ -155,7 +156,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
             'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
           }),
         );
-
+      jobApplicantsModel=JobApplicantsModel.fromJson(response.data);
         // showToast('message');
         // print(response.data);
         //

@@ -26,11 +26,12 @@ import 'component/error_dialog.dart';
 class SignUpScreen extends StatefulWidget {
 
   SignUpScreen(
-      {this.isSocialLogin=false, this.firstName, this.lastName, this.token, Key? key})
+      {this.isSocialLogin=false, this.firstName, this.lastName,this.email, this.token, Key? key})
       : super(key: key);
   bool? isSocialLogin;
   String? firstName = '';
   String? lastName = '';
+  String? email = '';
   String? token = '';
 
   @override
@@ -52,6 +53,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     firstnameController = TextEditingController(text: widget.firstName);
     lastNameController = TextEditingController(text: widget.lastName);
+
+    emailController = TextEditingController(text:  widget.email);
     print('object');
     super.initState();
   }
@@ -63,7 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   TextEditingController? lastNameController;
 
-  final TextEditingController emailController = TextEditingController();
+   TextEditingController emailController = TextEditingController();
 
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
@@ -746,12 +749,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Displays a dialog with the [SignUpSuccessDialog] content.
   onTapSignUp(BuildContext context) async {
 
-      if (_formKey.currentState!.validate()) {
-        _formKey.currentState!.save();
-      }else{
-        return;
-      }
-      print(emailController.text.toString());
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Field must be filled'),
+      ));
+      return;
+
+    }
+
       await FirebaseMessaging.instance.getToken().then((token) async {
         if (widget.isSocialLogin == false) {
           if (passwordController.text != confirmPasswordController.text) {
@@ -777,48 +785,58 @@ class _SignUpScreenState extends State<SignUpScreen> {
             }
           }
         } else {
-          if(firstnameController!.text.isEmpty){
-            toasty(context, "Please enter first name",bgColor: Colors.red,textColor: Colors.white);
+          print('social');
+          if (firstnameController!.text.isEmpty) {
+            toasty(context, "Please enter first name", bgColor: Colors.red,
+                textColor: Colors.white);
             return;
-          }else if(lastNameController!.text.isEmpty){
-            toasty(context, "Please enter last name",bgColor: Colors.red,textColor: Colors.white);
+          } else if (lastNameController!.text.isEmpty) {
+            toasty(context, "Please enter last name", bgColor: Colors.red,
+                textColor: Colors.white);
 
             return;
-          }else if(phoneController.text.isEmpty){
-            toasty(context, "Please enter phone number",bgColor: Colors.red,textColor: Colors.white);
+          } else if (phoneController.text.isEmpty) {
+            toasty(context, "Please enter phone number", bgColor: Colors.red,
+                textColor: Colors.white);
 
             return;
-          }else if(profileBloc.country==''){
-            toasty(context, "Please select country",bgColor: Colors.red,textColor: Colors.white);
+          } else if (profileBloc.country == '') {
+            toasty(context, "Please select country", bgColor: Colors.red,
+                textColor: Colors.white);
 
             return;
-          }else if(profileBloc.stateName==''){
-            toasty(context, "Please select state",bgColor: Colors.red,textColor: Colors.white);
+          } else if (profileBloc.stateName == '') {
+            toasty(context, "Please select state", bgColor: Colors.red,
+                textColor: Colors.white);
             return;
-          }else if(dropdownBloc.isDoctorRole){
-            if(profileBloc.specialtyName==null || profileBloc.specialtyName=='' || profileBloc.specialtyName=='Select Specialty'){
-              toasty(context, "Please select specialty",bgColor: Colors.red,textColor: Colors.white);
+          } else if (dropdownBloc.isDoctorRole &&(profileBloc.specialtyName == null ||
+                profileBloc.specialtyName == '' ||
+                profileBloc.specialtyName == 'Select Specialty')) {
+              toasty(context, "Please select specialty", bgColor: Colors.red,
+                  textColor: Colors.white);
               return;
-            }
-          } else if(_isChecked) {
-              dropdownBloc.add(SocialButtonPressed(
-                  token: widget.token ?? '',
-                  firstName: firstnameController!.text.toString(),
-                  lastName: lastNameController!.text.toString(),
-                  phone: phoneController.text.toString(),
-                  country: profileBloc.country ?? 'United Arab Emirates',
-                  state: profileBloc.stateName ?? "DUBAI",
-                  specialty: profileBloc.specialtyName ?? "",
-                  userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
-                  deviceToken: token ?? ''
-                // replace with real input
-              ));
 
-          }else{
+
+          } else if (!_isChecked) {
+
             toasty(context, "Please accept terms and conditions before proceeds");
+
+          } else {
+            print('valid');
+            dropdownBloc.add(SocialButtonPressed(
+                token: widget.token ?? '',
+                firstName: firstnameController!.text.toString(),
+                lastName: lastNameController!.text.toString(),
+                phone: phoneController.text.toString(),
+                country: profileBloc.country ?? 'United Arab Emirates',
+                state: profileBloc.stateName ?? "DUBAI",
+                specialty: profileBloc.specialtyName ?? "",
+                userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
+                deviceToken: token ?? ''
+              // replace with real input
+            ));
           }
         }
-
       });
 
     // showDialog(

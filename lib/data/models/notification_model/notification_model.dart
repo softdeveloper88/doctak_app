@@ -1,11 +1,11 @@
 import 'dart:convert';
-NotificationsModel notificationModelFromJson(String str) => NotificationsModel.fromJson(json.decode(str));
-String notificationModelToJson(NotificationsModel data) => json.encode(data.toJson());
-class NotificationsModel {
-  NotificationsModel({
+NotificationModel notificationModelFromJson(String str) => NotificationModel.fromJson(json.decode(str));
+String notificationModelToJson(NotificationModel data) => json.encode(data.toJson());
+class NotificationModel {
+  NotificationModel({
       this.notifications,});
 
-  NotificationsModel.fromJson(dynamic json) {
+  NotificationModel.fromJson(dynamic json) {
     notifications = json['notifications'] != null ? Notifications.fromJson(json['notifications']) : null;
   }
   Notifications? notifications;
@@ -137,6 +137,8 @@ class Data {
       this.userName, 
       this.groupName, 
       this.postId, 
+      this.groupEventId, 
+      this.groupId, 
       this.invitationId, 
       this.text, 
       this.url, 
@@ -145,9 +147,15 @@ class Data {
       this.type, 
       this.createdAt, 
       this.updatedAt, 
-      this.groupEventId, 
-      this.groupId, 
-      this.user,});
+      this.toUserId, 
+      this.senderFirstName, 
+      this.senderLastName, 
+      this.senderSpecialty, 
+      this.senderProfilePic, 
+      this.receiverFirstName, 
+      this.receiverLastName, 
+      this.receiverSpecialty, 
+      this.receiverProfilePic,});
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -155,6 +163,8 @@ class Data {
     userName = json['user_name'];
     groupName = json['group_name'];
     postId = json['post_id'];
+    groupEventId = json['group_event_id'];
+    groupId = json['group_id'];
     invitationId = json['invitation_id'];
     text = json['text'];
     url = json['url'];
@@ -163,15 +173,23 @@ class Data {
     type = json['type'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    groupEventId = json['group_event_id'];
-    groupId = json['group_id'];
-    user = json['user'] != null ? User.fromJson(json['user']) : null;
+    toUserId = json['to_user_id'];
+    senderFirstName = json['sender_first_name'];
+    senderLastName = json['sender_last_name'];
+    senderSpecialty = json['sender_specialty'];
+    senderProfilePic = json['sender_profile_pic'];
+    receiverFirstName = json['receiver_first_name'];
+    receiverLastName = json['receiver_last_name'];
+    receiverSpecialty = json['receiver_specialty'];
+    receiverProfilePic = json['receiver_profile_pic'];
   }
   int? id;
   String? userId;
   dynamic userName;
   dynamic groupName;
-  dynamic postId;
+  String? postId;
+  dynamic groupEventId;
+  dynamic groupId;
   dynamic invitationId;
   String? text;
   String? url;
@@ -180,9 +198,15 @@ class Data {
   String? type;
   String? createdAt;
   String? updatedAt;
-  dynamic groupEventId;
-  dynamic groupId;
-  User? user;
+  String? toUserId;
+  String? senderFirstName;
+  String? senderLastName;
+  String? senderSpecialty;
+  String? senderProfilePic;
+  String? receiverFirstName;
+  String? receiverLastName;
+  String? receiverSpecialty;
+  String? receiverProfilePic;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -191,6 +215,8 @@ class Data {
     map['user_name'] = userName;
     map['group_name'] = groupName;
     map['post_id'] = postId;
+    map['group_event_id'] = groupEventId;
+    map['group_id'] = groupId;
     map['invitation_id'] = invitationId;
     map['text'] = text;
     map['url'] = url;
@@ -199,162 +225,15 @@ class Data {
     map['type'] = type;
     map['created_at'] = createdAt;
     map['updated_at'] = updatedAt;
-    map['group_event_id'] = groupEventId;
-    map['group_id'] = groupId;
-    if (user != null) {
-      map['user'] = user?.toJson();
-    }
-    return map;
-  }
-
-}
-
-User userFromJson(String str) => User.fromJson(json.decode(str));
-String userToJson(User data) => json.encode(data.toJson());
-class User {
-  User({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.emailVerifiedAt, 
-      this.userType, 
-      this.name, 
-      this.email, 
-      this.token, 
-      this.phone, 
-      this.licenseNo, 
-      this.specialty, 
-      this.status, 
-      this.role, 
-      this.gender, 
-      this.dob, 
-      this.clinicName, 
-      this.college, 
-      this.countryOrigin, 
-      this.profilePic, 
-      this.practicingCountry, 
-      this.otpCode, 
-      this.balance, 
-      this.title, 
-      this.city, 
-      this.country, 
-      this.isAdmin, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.activeStatus, 
-      this.avatar, 
-      this.darkMode, 
-      this.messengerColor, 
-      this.isPremium, 
-      this.background,});
-
-  User.fromJson(dynamic json) {
-    id = json['id'];
-    firstName = json['first_name'];
-    lastName = json['last_name'];
-    emailVerifiedAt = json['email_verified_at'];
-    userType = json['user_type'];
-    name = json['name'];
-    email = json['email'];
-    token = json['token'];
-    phone = json['phone'];
-    licenseNo = json['license_no'];
-    specialty = json['specialty'];
-    status = json['status'];
-    role = json['role'];
-    gender = json['gender'];
-    dob = json['dob'];
-    clinicName = json['clinic_name'];
-    college = json['college'];
-    countryOrigin = json['country_origin'];
-    profilePic = json['profile_pic'];
-    practicingCountry = json['practicing_country'];
-    otpCode = json['otp_code'];
-    balance = json['balance'];
-    title = json['title'];
-    city = json['city'];
-    country = json['country'];
-    isAdmin = json['is_admin'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    activeStatus = json['active_status'];
-    avatar = json['avatar'];
-    darkMode = json['dark_mode'];
-    messengerColor = json['messenger_color'];
-    isPremium = json['is_premium'];
-    background = json['background'];
-  }
-  String? id;
-  String? firstName;
-  String? lastName;
-  String? emailVerifiedAt;
-  String? userType;
-  String? name;
-  String? email;
-  dynamic token;
-  String? phone;
-  String? licenseNo;
-  String? specialty;
-  String? status;
-  String? role;
-  String? gender;
-  String? dob;
-  String? clinicName;
-  String? college;
-  String? countryOrigin;
-  String? profilePic;
-  String? practicingCountry;
-  dynamic otpCode;
-  int? balance;
-  String? title;
-  String? city;
-  String? country;
-  dynamic isAdmin;
-  String? createdAt;
-  String? updatedAt;
-  dynamic activeStatus;
-  dynamic avatar;
-  int? darkMode;
-  dynamic messengerColor;
-  int? isPremium;
-  String? background;
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['id'] = id;
-    map['first_name'] = firstName;
-    map['last_name'] = lastName;
-    map['email_verified_at'] = emailVerifiedAt;
-    map['user_type'] = userType;
-    map['name'] = name;
-    map['email'] = email;
-    map['token'] = token;
-    map['phone'] = phone;
-    map['license_no'] = licenseNo;
-    map['specialty'] = specialty;
-    map['status'] = status;
-    map['role'] = role;
-    map['gender'] = gender;
-    map['dob'] = dob;
-    map['clinic_name'] = clinicName;
-    map['college'] = college;
-    map['country_origin'] = countryOrigin;
-    map['profile_pic'] = profilePic;
-    map['practicing_country'] = practicingCountry;
-    map['otp_code'] = otpCode;
-    map['balance'] = balance;
-    map['title'] = title;
-    map['city'] = city;
-    map['country'] = country;
-    map['is_admin'] = isAdmin;
-    map['created_at'] = createdAt;
-    map['updated_at'] = updatedAt;
-    map['active_status'] = activeStatus;
-    map['avatar'] = avatar;
-    map['dark_mode'] = darkMode;
-    map['messenger_color'] = messengerColor;
-    map['is_premium'] = isPremium;
-    map['background'] = background;
+    map['to_user_id'] = toUserId;
+    map['sender_first_name'] = senderFirstName;
+    map['sender_last_name'] = senderLastName;
+    map['sender_specialty'] = senderSpecialty;
+    map['sender_profile_pic'] = senderProfilePic;
+    map['receiver_first_name'] = receiverFirstName;
+    map['receiver_last_name'] = receiverLastName;
+    map['receiver_specialty'] = receiverSpecialty;
+    map['receiver_profile_pic'] = receiverProfilePic;
     return map;
   }
 

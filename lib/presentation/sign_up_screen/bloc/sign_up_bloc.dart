@@ -131,10 +131,8 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           event.userType,
       );
       log(event.token);
-      print(event.firstName);
-      print(event.lastName);
 
-    print(response.toJson());
+    print('response ${response.toJson()}');
       if (response.user!.userType != null) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('device_token', event.deviceToken ?? '');

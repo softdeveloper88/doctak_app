@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
@@ -212,10 +213,10 @@ class NotificationService {
             return  SVProfileFragment(userId: id,);
 
           }else if (payload == 'comments_on_posts' ||payload == 'like_comment_on_post'|| payload == 'like_comments') {
-            return  SVCommentScreen(id: int.parse(id), homeBloc: HomeBloc(),);
+            return  PostDetailsScreen(postId: int.parse(id),);
 
           }else if (payload == 'new_like'||payload == 'likes_on_posts') {
-            return  LikesListScreen(id:id);
+            return  PostDetailsScreen(postId: int.parse(id),);
 
           }else if (payload == 'new_job_posted'||payload == 'job_update') {
             return  JobsDetailsScreen(jobId: id,);

@@ -388,6 +388,7 @@ class LoginScreenState extends State<LoginScreen> {
                               isSocialLogin: true,
                               firstName: state.response.user?.firstName ?? '',
                               lastName: state.response.user?.lastName ?? '',
+                              email: state.response.user?.email ?? '',
                               token: state.response.token ?? '',
                             ),
                           ),
@@ -403,6 +404,8 @@ class LoginScreenState extends State<LoginScreen> {
                             isSocialLogin: true,
                             firstName: state.response.user?.firstName ?? '',
                             lastName: state.response.user?.lastName ?? '',
+                            email: state.response.user?.email ?? '',
+
                             token: state.response.token ?? '',
                           ),
                         ),

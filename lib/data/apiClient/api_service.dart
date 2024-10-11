@@ -27,6 +27,7 @@ import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_
 import 'package:doctak_app/data/models/news_model/news_model.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/data/models/post_model/post_detail_model.dart';
 import 'package:doctak_app/data/models/profile_model/family_relationship_model.dart';
 import 'package:doctak_app/data/models/profile_model/interest_model.dart';
 import 'package:doctak_app/data/models/profile_model/place_live_model.dart';
@@ -129,14 +130,33 @@ abstract class ApiService {
       @Header('Authorization') String token, @Query('page') String page);
 
   @FormUrlEncoded()
+  @GET("/posts/{postId}")
+  Future<PostDetailModel> getDetailsPosts(@Header('Authorization') String token, @Path('postId') String postId);
+
+  @FormUrlEncoded()
   @POST("/user-profile-post")
   Future<PostDataModel> getMyPosts(@Header('Authorization') String token,
       @Query('page') String page, @Query('user_id') String userId);
 
   @FormUrlEncoded()
-  @POST("/notifications")
-  Future<NotificationsModel> getMyNotifications(
+  @GET("/notifications")
+  Future<NotificationModel> getMyNotifications(
       @Header('Authorization') String token, @Query('page') String page);
+
+  @FormUrlEncoded()
+  @GET("/notifications/{readStatus}")
+  Future<NotificationModel> getSelectedNotifications(
+      @Header('Authorization') String token, @Query('page') String page,@Path("readStatus") String readStatus);
+
+  @FormUrlEncoded()
+  @POST("/notifications/mark-read")
+  Future<HttpResponse> readAllSelectedNotifications(
+      @Header('Authorization') String token);
+
+  @FormUrlEncoded()
+  @POST("/notifications/{notificationId}/mark-read")
+  Future<HttpResponse> readNotification(
+      @Header('Authorization') String token,@Path("notificationId") String notificationId);
 
   @FormUrlEncoded()
   @GET("/jobs")

@@ -64,6 +64,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
           'Bearer ${AppData.userToken}', event.sessionId, event.question,
           event.imageType ?? "",event.imageUrl1 ?? "",event.imageUrl2 ?? "");
     }else{
+        print(event.question);
        response =
       await postService.askQuestionFromGptWithoutImage(
           'Bearer ${AppData.userToken}', event.sessionId, event.question
