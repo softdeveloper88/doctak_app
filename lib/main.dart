@@ -41,6 +41,7 @@ import 'package:sizer/sizer.dart';
 
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
+import 'core/utils/get_shared_value.dart';
 import 'core/utils/navigator_service.dart';
 import 'core/utils/pref_utils.dart';
 import 'firebase_options.dart';
@@ -183,6 +184,7 @@ void checkNotificationPermission() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
+  initializeAsync();
   // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
   //   systemNavigationBarColor: Colors.white, // navigation bar color
   //   statusBarColor: Colors.white, // status bar color
@@ -615,7 +617,8 @@ class _MyAppState extends State<MyApp> {
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
-              print('route ${widget.initialRoute}');
+
+              print('route ${widget.id}');
               return Observer(
                   builder: (_) => MaterialApp(
                     scaffoldMessengerKey: globalMessengerKey,
@@ -654,9 +657,9 @@ class _MyAppState extends State<MyApp> {
                       '/follow_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
                       '/friend_request': (context) =>  SVProfileFragment(userId: widget.id??'',),
                       '/message_received': (context) =>  SVProfileFragment(userId: widget.id??'',),
-                      '/comments_on_posts': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
-                      '/like_comment_on_post': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
-                      '/like_comments': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
+                      '/comments_on_posts': (context) =>   SVCommentScreen(id: int.parse(widget.id??"0"),homeBloc: HomeBloc(),),
+                      '/like_comment_on_post': (context) =>   SVCommentScreen(id: int.parse(widget.id??"0"),homeBloc: HomeBloc(),),
+                      '/like_comments': (context) =>   SVCommentScreen(id: int.parse(widget.id??'0'),homeBloc: HomeBloc(),),
                       '/new_like': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
                       '/likes_on_posts': (context) =>   PostDetailsScreen(postId: int.parse(widget.id??'0'),),
                       '/new_job_posted': (context) =>   JobsDetailsScreen(jobId: widget.id??'0',),

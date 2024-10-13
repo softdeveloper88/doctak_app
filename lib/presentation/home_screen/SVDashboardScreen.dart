@@ -24,7 +24,6 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedIndex = 0;
   final HomeBloc homeBloc = HomeBloc();
-
   late final List<Widget> _fragments;
 
   @override

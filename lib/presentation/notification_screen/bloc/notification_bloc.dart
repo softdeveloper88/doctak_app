@@ -23,6 +23,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationLoadPageEvent>(_onGetNotification);
     on<GetPost>(_onGetNotification1);
     on<NotificationDetailPageEvent>(_onGetJobDetail);
+    on<NotificationCounter>(_counterNotification);
     on<ReadNotificationEvent>(_readNotification);
     on<NotificationCheckIfNeedMoreDataEvent>((event, emit) async {
       // emit(PaginationLoadingState());
@@ -110,6 +111,36 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
      totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
    notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
     print(response.data);
+
+    emit(PaginationLoadedState());
+
+    // emit(DataLoaded(notificationsList));
+    // } catch (e) {
+    //   print(e);
+    //
+    //   // emit(PaginationLoadedState());
+    //
+    //   emit(DataError('No Data Found'));
+    // }
+  }
+  _counterNotification(NotificationCounter event, Emitter<NotificationState> emit) async {
+    // emit(DrugsDataInitial());
+
+    // ProgressDialogUtils.showProgressDialog();
+    // try {
+
+    Dio dio = Dio();
+
+
+    var response = await dio.get(
+      '${AppData.remoteUrl}/notifications/unread/count', // Add query parameters
+      options: Options(headers: {
+        'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+      }),
+    );
+    totalNotifications=response.data['unread_count'];
+   // notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
+    print(response.data['unread_count']);
 
     emit(PaginationLoadedState());
 

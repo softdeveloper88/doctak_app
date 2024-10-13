@@ -34,6 +34,12 @@ class NotificationDetailPageEvent extends NotificationEvent {
   @override
   List<Object?> get props => [jobId];
 }
+class NotificationCounter extends NotificationEvent {
+
+  NotificationCounter();
+  @override
+  List<Object?> get props => [];
+}
 class ReadNotificationEvent extends NotificationEvent {
   String? notificationId;
 

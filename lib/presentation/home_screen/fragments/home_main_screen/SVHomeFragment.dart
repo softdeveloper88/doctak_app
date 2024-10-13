@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
@@ -43,10 +45,28 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   @override
   void initState() {
     // PusherService(AppData.logInUserId);
-    notificationBloc.add(NotificationLoadPageEvent(page: 1,),);
     widget.homeBloc.add(PostLoadPageEvent(page: 1));
+    _startTimer();
+
     // widget.homeBloc.add(AdsSettingEvent());
     super.initState();
+  }
+  Timer? _timer;
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 20), (timer) {
+      notificationCounter();
+    });
+  }
+
+  void notificationCounter() {
+    // Add your Bloc event here
+    notificationBloc.add(NotificationCounter());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
   }
 
   Future<void> _refresh() async {

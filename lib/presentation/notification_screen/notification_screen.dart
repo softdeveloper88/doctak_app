@@ -285,64 +285,65 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 );
               } else {
                 return InkWell(
-                  onTap: () {
-                    bloc.add(ReadNotificationEvent(
-                        notificationId: bloc.notificationsList[index].id
-                            .toString()));
-                    bloc.notificationsList[index].isRead=1;
-                    var typeNotification = bloc.notificationsList[index].type;
-                    print(typeNotification);
-                    if (typeNotification == 'simple') {
-                    } else if (typeNotification == 'follow') {
-                      SVProfileFragment(
-                              userId: bloc.notificationsList[index].userId)
-                          .launch(context);
-                    } else if (typeNotification == 'message') {
-                      print('object');
-                      ChatRoomScreen(
-                        username:
-                            '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
-                        profilePic:
-                            '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                        id: '${bloc.notificationsList[index].userId}',
-                        roomId: '',
-                      ).launch(context);
-                    } else if (typeNotification == 'post_liked' ||
-                        typeNotification == 'like_on_posts') {
-                      PostDetailsScreen(
-                          postId: bloc.notificationsList[index].postId.toInt())
-                          .launch(context);
-                    } else if (typeNotification == 'comments_on_posts') {
-                      PostDetailsScreen(
-                          postId: bloc.notificationsList[index].postId.toInt())
-                          .launch(context);
-                    } else if (typeNotification == 'follow_request' ||
-                        typeNotification == 'friend_request' ||
-                        typeNotification == 'message_received') {
-                      SVProfileFragment(
-                              userId: bloc.notificationsList[index].userId)
-                          .launch(context);
-                    } else if (typeNotification == 'comments_on_posts' ||
-                        typeNotification == 'like_comment_on_post' ||
-                        typeNotification == 'like_comments') {
-                      PostDetailsScreen(
-                          postId: bloc.notificationsList[index].postId.toInt())
-                          .launch(context);
-                    } else if (typeNotification == 'new_like' ||
-                        typeNotification == 'likes_on_posts') {
-                      PostDetailsScreen(
-                              postId: bloc.notificationsList[index].postId.toInt())
-                          .launch(context);
-                    } else if (typeNotification == 'new_job_posted' ||
-                        typeNotification == 'job_update') {
-                      JobsDetailsScreen(
-                              jobId: bloc.notificationsList[index].postId ?? '')
-                          .launch(context);
-                    }
-                    // JobsDetailsScreen(
-                    //         jobId: '${bloc.notificationsList[index].id ?? ''}')
-                    //     .launch(context);
-                  },
+                  // onTap: () {
+                  //   bloc.add(ReadNotificationEvent(
+                  //       notificationId: bloc.notificationsList[index].id
+                  //           .toString()));
+                  //   bloc.notificationsList[index].isRead=1;
+                  //   var typeNotification = bloc.notificationsList[index].type;
+                  //   print(typeNotification);
+                  //   if (typeNotification == 'simple') {
+                  //     print( bloc.notificationsList[index].postId);
+                  //   } else if (typeNotification == 'follow') {
+                  //     SVProfileFragment(
+                  //             userId: bloc.notificationsList[index].userId)
+                  //         .launch(context);
+                  //   } else if (typeNotification == 'message') {
+                  //     print('object');
+                  //     ChatRoomScreen(
+                  //       username:
+                  //           '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
+                  //       profilePic:
+                  //           '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                  //       id: '${bloc.notificationsList[index].userId}',
+                  //       roomId: '',
+                  //     ).launch(context);
+                  //   } else if (typeNotification == 'post_liked' ||
+                  //       typeNotification == 'like_on_posts') {
+                  //     PostDetailsScreen(
+                  //         postId: bloc.notificationsList[index].postId.toInt())
+                  //         .launch(context);
+                  //   } else if (typeNotification == 'comments_on_posts') {
+                  //     PostDetailsScreen(
+                  //         postId: bloc.notificationsList[index].postId.toInt())
+                  //         .launch(context);
+                  //   } else if (typeNotification == 'follow_request' ||
+                  //       typeNotification == 'friend_request' ||
+                  //       typeNotification == 'message_received') {
+                  //     SVProfileFragment(
+                  //             userId: bloc.notificationsList[index].userId)
+                  //         .launch(context);
+                  //   } else if (typeNotification == 'comments_on_posts' ||
+                  //       typeNotification == 'like_comment_on_post' ||
+                  //       typeNotification == 'like_comments') {
+                  //     PostDetailsScreen(
+                  //         postId: bloc.notificationsList[index].postId.toInt())
+                  //         .launch(context);
+                  //   } else if (typeNotification == 'new_like' ||
+                  //       typeNotification == 'likes_on_posts') {
+                  //     PostDetailsScreen(
+                  //             postId: bloc.notificationsList[index].postId.toInt())
+                  //         .launch(context);
+                  //   } else if (typeNotification == 'new_job_posted' ||
+                  //       typeNotification == 'job_update') {
+                  //     JobsDetailsScreen(
+                  //             jobId: bloc.notificationsList[index].postId ?? '')
+                  //         .launch(context);
+                  //   }
+                  //   // JobsDetailsScreen(
+                  //   //         jobId: '${bloc.notificationsList[index].id ?? ''}')
+                  //   //     .launch(context);
+                  // },
                   child: Column(
                     children: [
                       Material(
@@ -356,13 +357,25 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           dense: true,
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 10.0, horizontal: 16.0),
-                          title: Text(
-                            bloc.notificationsList[index].text ?? '',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14.0,
-                            ),
-                          ),
+                          title: RichText(
+                            text: TextSpan(
+                                text:'${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''} ' , // Default style for the initial part
+                                style: const TextStyle(
+                                  color: Colors.black, // Default color
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,// Default font size
+                                ),
+                            children:[
+                              TextSpan(
+                                text: bloc.notificationsList[index].text??"",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black, // Change color to blue
+                                ),
+                              ),
+
+                            ])),
                           subtitle: Text(
                             timeAgo.format(DateTime.parse(
                                 bloc.notificationsList[index].createdAt ?? "")),
@@ -383,15 +396,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             size: 16.0,
                           ),
                           onTap: () {
+
                             bloc.add(ReadNotificationEvent(
                                 notificationId: bloc.notificationsList[index].id
                                     .toString()));
                             bloc.notificationsList[index].isRead=1;
-
                             var typeNotification =
                                 bloc.notificationsList[index].type;
                             print(typeNotification);
                             if (typeNotification == 'simple') {
+                              print(bloc.notificationsList[index].postId);
 
                             } else if (typeNotification == 'follow') {
                               SVProfileFragment(
@@ -399,7 +413,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                           bloc.notificationsList[index].userId)
                                   .launch(context);
                             } else if (typeNotification == 'message') {
-                              print('object');
                               ChatRoomScreen(
                                 username:
                                     '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
@@ -413,12 +426,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               PostDetailsScreen(
                                   postId: bloc.notificationsList[index].postId.toInt())
                                   .launch(context);
-                            } else if (typeNotification ==
-                                'comments_on_posts') {
-                              PostDetailsScreen(
-                                  postId: bloc.notificationsList[index].postId.toInt())
-                                  .launch(context);
-                            } else if (typeNotification == 'follow_request' ||
+                            }
+                            // else if (typeNotification ==
+                            //     'comments_on_posts') {
+                            //   // PostDetailsScreen(
+                            //   //     postId: bloc.notificationsList[index].postId.toInt())
+                            //   //     .launch(context);
+                            //   SVCommentScreen(
+                            //     id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
+                            //       .launch(context);
+                            // }
+                            else if (typeNotification == 'follow_request' ||
                                 typeNotification == 'friend_request' ||
                                 typeNotification == 'message_received') {
                               SVProfileFragment(
@@ -429,8 +447,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                     'comments_on_posts' ||
                                 typeNotification == 'like_comment_on_post' ||
                                 typeNotification == 'like_comments') {
-                              PostDetailsScreen(
-                                  postId: bloc.notificationsList[index].postId.toInt())
+                              // PostDetailsScreen(
+                              //     postId: bloc.notificationsList[index].postId.toInt())
+                              //     .launch(context);
+                              SVCommentScreen(
+                                id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
                                   .launch(context);
                             } else if (typeNotification == 'new_like' ||
                                 typeNotification == 'likes_on_posts') {

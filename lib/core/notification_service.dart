@@ -213,7 +213,7 @@ class NotificationService {
             return  SVProfileFragment(userId: id,);
 
           }else if (payload == 'comments_on_posts' ||payload == 'like_comment_on_post'|| payload == 'like_comments') {
-            return  PostDetailsScreen(postId: int.parse(id),);
+            return  SVCommentScreen(id: int.parse(id),homeBloc: HomeBloc(),);
 
           }else if (payload == 'new_like'||payload == 'likes_on_posts') {
             return  PostDetailsScreen(postId: int.parse(id),);
