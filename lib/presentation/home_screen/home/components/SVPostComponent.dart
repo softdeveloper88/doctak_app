@@ -292,7 +292,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                             widget
                                                 .homeBloc.postList[index].image,
                                             widget
-                                                .homeBloc.postList[index].media)
+                                                .homeBloc.postList[index].media,index)
                                         // ? svRobotoText(
                                         // text: homeBloc.postList[index].title.validate(),
                                         // textAlign: TextAlign.start).paddingSymmetric(
@@ -727,10 +727,11 @@ class _SVPostComponentState extends State<SVPostComponent>
   }
 
   Widget _buildPlaceholderWithoutFile(
-      context, title, backgroundColor, image, media) {
+      context, title, backgroundColor, image, media, int index) {
     String fullText = title ?? '';
     List<String> words = fullText.split(' ');
-    String textToShow = _isExpanded || words.length <= 25
+    bool isExpanded = _expandedIndex == index;
+    String textToShow = isExpanded || words.length <= 25
         ? fullText
         : '${words.take(20).join(' ')}...';
 
@@ -859,10 +860,14 @@ class _SVPostComponentState extends State<SVPostComponent>
                   if (words.length > 25)
                     TextButton(
                       onPressed: () => setState(() {
-                        _isExpanded = !_isExpanded;
+                        if (isExpanded) {
+                          _expandedIndex = -1; // Collapse if already expanded
+                        } else {
+                          _expandedIndex = index; // Expand the clicked item
+                        }
                       }),
                       child: Text(
-                        _isExpanded ? 'Show Less' : 'Show More',
+                        isExpanded ? 'Show Less' : 'Show More',
                         style: TextStyle(
                           color: svGetBodyColor(),
                           shadows: const [
@@ -917,5 +922,5 @@ class _SVPostComponentState extends State<SVPostComponent>
         });
   }
 
-  bool _isExpanded = false;
+  int _expandedIndex = -1;
 }

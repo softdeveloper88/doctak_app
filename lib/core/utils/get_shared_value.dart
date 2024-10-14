@@ -17,7 +17,6 @@ void initializeAsync() async {
    String? university = prefs.getString('university') ?? '';
    String? countryName = prefs.getString('country') ?? '';
    String? currency = prefs.getString('currency') ?? '';
-
    if (userToken != null) {
      AppData.userToken = userToken;
      AppData.logInUserId = userId;

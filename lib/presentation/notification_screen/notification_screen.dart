@@ -404,15 +404,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             var typeNotification =
                                 bloc.notificationsList[index].type;
                             print(typeNotification);
-                            if (typeNotification == 'simple') {
-                              print(bloc.notificationsList[index].postId);
-
-                            } else if (typeNotification == 'follow') {
-                              SVProfileFragment(
-                                      userId:
-                                          bloc.notificationsList[index].userId)
-                                  .launch(context);
-                            } else if (typeNotification == 'message') {
+                           if (typeNotification == 'message') {
                               ChatRoomScreen(
                                 username:
                                     '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
@@ -438,18 +430,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             // }
                             else if (typeNotification == 'follow_request' ||
                                 typeNotification == 'friend_request' ||
-                                typeNotification == 'message_received') {
+                                typeNotification == 'message_received' || typeNotification == 'follower_notification'|| typeNotification == 'un_follower_notification') {
+
                               SVProfileFragment(
                                       userId:
-                                          bloc.notificationsList[index].userId)
+                                          bloc.notificationsList[index].fromUserId)
                                   .launch(context);
-                            } else if (typeNotification ==
-                                    'comments_on_posts' ||
-                                typeNotification == 'like_comment_on_post' ||
-                                typeNotification == 'like_comments') {
-                              // PostDetailsScreen(
-                              //     postId: bloc.notificationsList[index].postId.toInt())
-                              //     .launch(context);
+                            } else if (typeNotification == 'comments_on_posts' || typeNotification == 'like_comment_on_post' || typeNotification == 'like_comments') {
+
                               SVCommentScreen(
                                 id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
                                   .launch(context);
@@ -458,12 +446,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               PostDetailsScreen(
                                   postId: bloc.notificationsList[index].postId.toInt())
                                   .launch(context);
-                            } else if (typeNotification == 'new_job_posted' ||
-                                typeNotification == 'job_update') {
+                            } else if (typeNotification == 'new_job_posted' || typeNotification == 'job_update') {
+
                               JobsDetailsScreen(
-                                      jobId:
-                                          '${bloc.notificationsList[index].postId ?? ''}')
-                                  .launch(context);
+                                      jobId: bloc.notificationsList[index].postId ?? '').launch(context);
                             }
                             // Add your onTap functionality here
                           },

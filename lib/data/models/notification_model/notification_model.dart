@@ -147,7 +147,7 @@ class Data {
       this.type, 
       this.createdAt, 
       this.updatedAt, 
-      this.toUserId, 
+      this.fromUserId,
       this.senderFirstName, 
       this.senderLastName, 
       this.senderSpecialty, 
@@ -173,7 +173,7 @@ class Data {
     type = json['type'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    toUserId = json['to_user_id'];
+    fromUserId = json['from_user_id'];
     senderFirstName = json['sender_first_name'];
     senderLastName = json['sender_last_name'];
     senderSpecialty = json['sender_specialty'];
@@ -198,7 +198,7 @@ class Data {
   String? type;
   String? createdAt;
   String? updatedAt;
-  String? toUserId;
+  String? fromUserId;
   String? senderFirstName;
   String? senderLastName;
   String? senderSpecialty;
@@ -225,7 +225,7 @@ class Data {
     map['type'] = type;
     map['created_at'] = createdAt;
     map['updated_at'] = updatedAt;
-    map['to_user_id'] = toUserId;
+    map['from_user_id'] = fromUserId;
     map['sender_first_name'] = senderFirstName;
     map['sender_last_name'] = senderLastName;
     map['sender_specialty'] = senderSpecialty;

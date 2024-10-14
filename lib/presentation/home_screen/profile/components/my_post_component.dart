@@ -287,7 +287,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                         widget
                                             .profileBloc.postList[index].image,
                                         widget
-                                            .profileBloc.postList[index].media)
+                                            .profileBloc.postList[index].media,index)
                                     // ? svRobotoText(
                                     // text: homeBloc.postList[index].title.validate(),
                                     // textAlign: TextAlign.start).paddingSymmetric(
@@ -647,10 +647,11 @@ class _MyPostComponentState extends State<MyPostComponent> {
   }
 
   Widget _buildPlaceholderWithoutFile(
-      context, title, backgroundColor, image, media) {
+      context, title, backgroundColor, image, media,index) {
     String fullText = title ?? '';
     List<String> words = fullText.split(' ');
-    String textToShow = _isExpanded || words.length <= 25
+    bool isExpanded = _expandedIndex == index;
+    String textToShow = isExpanded || words.length <= 25
         ? fullText
         : '${words.take(20).join(' ')}...';
 
@@ -768,10 +769,14 @@ class _MyPostComponentState extends State<MyPostComponent> {
                 if (words.length > 25)
                   TextButton(
                     onPressed: () => setState(() {
-                      _isExpanded = !_isExpanded;
+                      if (isExpanded) {
+                        _expandedIndex = -1; // Collapse if already expanded
+                      } else {
+                        _expandedIndex = index; // Expand the clicked item
+                      }
                     }),
                     child: Text(
-                      _isExpanded ? 'Show Less' : 'Show More',
+                      isExpanded ? 'Show Less' : 'Show More',
                       style: TextStyle(
                         color: svGetBodyColor(),
                         shadows: const [
@@ -831,61 +836,5 @@ class _MyPostComponentState extends State<MyPostComponent> {
         });
   }
 
-  // List<Map<String, String>> mediaUrls = [];
-  // for (var media in widget.profileBloc.postList[index].media ?? []) {
-  //   if (media.mediaType == 'image') {
-  //     // mediaUrls.add("",AppData.imageUrl + media.mediaPath);
-  //     Map<String, String> newMedia = {
-  //       "url": AppData.imageUrl + media.mediaPath,
-  //       "type": "image"
-  //     };
-  //     mediaUrls.add(newMedia);
-  //     mediaWidgets.add(
-  //       GestureDetector(
-  //         // onTap: () => _showFullScreenImage(
-  //         //     1, AppData.imageUrl + media.mediaPath, widget.post, []),
-  //         child:CustomImageView(
-  //           // placeholder: 'assets/logo/loading.gif',
-  //           // Local asset for shimmer
-  //           imagePath: AppData.imageUrl + media.mediaPath,
-  //           fit: BoxFit.cover,
-  //           width: double.infinity,
-  //           height: 300,
-  //           // fadeInDuration: const Duration(milliseconds: 300),
-  //           // fadeOutDuration: const Duration(milliseconds: 300),
-  //         ),
-  //       ),
-  //     );
-  //   } else if (media.mediaType == 'video') {
-  //     // Map<String, String> newMedia1 = {"url": "https://doctak-file.s3.ap-south-1.amazonaws.com/posts/1702706840657d3e981707e0.58712680.png", "type": "image"};
-  //     // Map<String, String> newMedia2 = {"url": "https://doctak-file.s3.ap-south-1.amazonaws.com/posts/1702706840657d3e981707e0.58712680.png", "type": "image"};
-  //     Map<String, String> newMedia = {
-  //       "url": AppData.imageUrl + media.mediaPath,
-  //       "type": "video"
-  //     };
-  //     // mediaUrls.add(newMedia1);
-  //     mediaUrls.add(newMedia);
-  //     // mediaUrls.add(newMedia2);
-  //     // mediaUrls.add(AppData.imageUrl + media.mediaPath);
-  //     // Include video player widget
-  //     mediaWidgets.add(
-  //       VideoPlayerWidget(videoUrl: AppData.imageUrl + media.mediaPath),
-  //     );
-  //   }
-  // }
-  // if (mediaUrls.length > 1) {
-  //   return PhotoGrid(
-  //     imageUrls: mediaUrls,
-  //     onImageClicked: (i) => '',// _showFullScreenImage(
-  //     // 1, mediaUrls[i]["url"]!, widget.post, mediaUrls),
-  //     onExpandClicked: () =>'',
-  //     // FullScreenImageWidget(2, '', widget.post, mediaUrls),
-  //     maxImages: 2,
-  //   );
-  // } else {
-  //   return Column(children: mediaWidgets);
-  // }
-  // }
-
-  bool _isExpanded = false;
+  int _expandedIndex = -1;
 }
