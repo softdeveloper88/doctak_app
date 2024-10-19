@@ -118,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.countryName = countryName;
       AppData.currency = currency;
     }
-    if (acceptTerms) {
+    if (rememberMe) {
       if (userToken != null) {
         //Future.delayed(const Duration(seconds: 1), () {
         // Navigator.pushReplacement(

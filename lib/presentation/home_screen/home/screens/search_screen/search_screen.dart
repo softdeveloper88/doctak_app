@@ -124,7 +124,7 @@ class _SearchScreenState extends State<SearchScreen>
       children: [
         if (tabName == 'Jobs')
           Container(
-            height: 20,
+            height: 30,
             width: 1,
             decoration: BoxDecoration(
                 border: Border(
@@ -143,7 +143,7 @@ class _SearchScreenState extends State<SearchScreen>
         ),
         if (tabName == 'Jobs')
           Container(
-            height: 20,
+            height: 30,
             width: 1,
             decoration: BoxDecoration(
                 border: Border(
@@ -181,7 +181,7 @@ class _SearchScreenState extends State<SearchScreen>
                 isSearchShow = !isSearchShow;
               },
               child: isSearchShow
-                  ? Icon(Icons.cancel_outlined,
+                  ? Icon(Icons.close,
                           size: 25,
                           // height: 16,
                           // width: 16,
@@ -200,22 +200,21 @@ class _SearchScreenState extends State<SearchScreen>
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Divider(
-              thickness: 0.3,
-              color: Colors.grey,
-              endIndent: 20,
-              indent: 20,
-            ),
+            // const Divider(
+            //   thickness: 0.3,
+            //   color: Colors.grey,
+            //   endIndent: 20,
+            //   indent: 20,
+            // ),
             if (isSearchShow)
               searchDataWidget(),
-            sizedBox10,
+            sizedBox5,
             tabWidget(),
           ],
         ),
       ),
     );
   }
-
 
   Widget jobWidgetList(){
     return  Column(
@@ -252,14 +251,14 @@ class _SearchScreenState extends State<SearchScreen>
                   children: [
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding:  const EdgeInsets.only(left: 8.0,right: 8.0),
                         child: CustomDropdownField(
                           items: state.countriesModel
                               .countries ??
                               [],
                           value: state.countriesModel
                               .countries!.first.countryName,
-                          width: 50,
+                          width: 30,
                           contentPadding:
                           const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -378,48 +377,45 @@ class _SearchScreenState extends State<SearchScreen>
     );
   }
  Widget searchDataWidget() {
-    return  Container(
-      padding: const EdgeInsets.only(left: 8.0),
-      margin: const EdgeInsets.only(
-        left: 16,
-        top: 0.0,
-        bottom: 0.0,
-        right: 16,
-      ),
-      decoration: BoxDecoration(
-          color: context.dividerColor.withOpacity(0.4),
-          borderRadius: radius(5),
-          border: Border.all(color: svGetBodyColor(), width: 0.3)),
-      child: AppTextField(
-        textFieldType: TextFieldType.NAME,
-        onChanged: (searchTxt) async {
-          if (_debounce?.isActive ?? false) _debounce?.cancel();
-          _debounce = Timer(const Duration(milliseconds: 500), () {
-            searchPeopleBloc.add(
-              SearchPeopleLoadPageEvent(
+    return  Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Container(
+        padding: const EdgeInsets.only(left: 8.0),
+        decoration: BoxDecoration(
+            color: context.dividerColor.withOpacity(0.4),
+            borderRadius: radius(5),
+            border: Border.all(color: svGetBodyColor(), width: 0.5)),
+        child: AppTextField(
+          textFieldType: TextFieldType.NAME,
+          onChanged: (searchTxt) async {
+            if (_debounce?.isActive ?? false) _debounce?.cancel();
+            _debounce = Timer(const Duration(milliseconds: 500), () {
+              searchPeopleBloc.add(
+                SearchPeopleLoadPageEvent(
+                  page: 1,
+                  searchTerm: searchTxt,
+                ),
+              );
+              homeBloc.add(LoadSearchPageEvent(page: 1, search: searchTxt));
+              drugsBloc.add(LoadPageEvent(
                 page: 1,
+                countryId: '',
                 searchTerm: searchTxt,
-              ),
-            );
-            homeBloc.add(LoadSearchPageEvent(page: 1, search: searchTxt));
-            drugsBloc.add(LoadPageEvent(
-              page: 1,
-              countryId: '',
-              searchTerm: searchTxt,
-            ));
-          });
-        },
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: 'Search ',
-          hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-          suffixIcon: Image.asset(
-              'images/socialv/icons/ic_Search.png',
-              height: 16,
-              width: 16,
-              fit: BoxFit.cover,
-              color: svGetBodyColor())
-              .paddingAll(16),
+              ));
+            });
+          },
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Search ',
+            hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+            suffixIcon: Image.asset(
+                'images/socialv/icons/ic_Search.png',
+                height: 16,
+                width: 16,
+                fit: BoxFit.cover,
+                color: svGetBodyColor())
+                .paddingAll(16),
+          ),
         ),
       ),
     );
@@ -429,8 +425,7 @@ class _SearchScreenState extends State<SearchScreen>
       child: Column(
         children: [
           Padding(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
             child: TabBar(
               dividerHeight: 1,
               dividerColor: Colors.grey,
@@ -453,7 +448,7 @@ class _SearchScreenState extends State<SearchScreen>
           ),
           Expanded(
             child: Container(
-              color: svGetScaffoldColor(),
+              color: svGetBgColor(),
               child: TabBarView(
                   physics: const NeverScrollableScrollPhysics(),
                   children: [

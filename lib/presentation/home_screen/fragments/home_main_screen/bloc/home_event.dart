@@ -36,15 +36,17 @@ class PostUserLikeEvent extends HomeEvent {
 
 class DeletePostEvent extends HomeEvent {
   int? postId;
+
   DeletePostEvent({this.postId});
   @override
   List<Object?> get props => [postId];
 }
 class DetailsPostEvent extends HomeEvent {
   int? postId;
-  DetailsPostEvent({this.postId});
+  int? commentId;
+  DetailsPostEvent({this.postId,this.commentId});
   @override
-  List<Object?> get props => [postId];
+  List<Object?> get props => [postId,commentId];
 }
 
 class ChangeCheckBoxEvent extends HomeEvent {

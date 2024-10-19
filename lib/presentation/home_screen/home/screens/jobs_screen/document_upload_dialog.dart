@@ -62,6 +62,7 @@ class _DocumentUploadDialogState extends State<DocumentUploadDialog> {
     // var response = await request.send();
       print(response);
     if (response.statusCode == 200) {
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Document uploaded successfully!')),
       );

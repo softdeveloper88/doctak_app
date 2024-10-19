@@ -706,64 +706,86 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-        backgroundColor: svGetBgColor(),
+        backgroundColor: Colors.grey[200],
         appBar: AppBar(
           surfaceTintColor: context.cardColor,
           backgroundColor: context.cardColor,
-          toolbarHeight: 100,
+          // toolbarHeight: 80,
           leading: IconButton(
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            iconSize: 20,
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          centerTitle: true,
-          title: Column(
+          centerTitle: false,
+          title: Row(
             children: [
-              Text(
-                widget.username,
-                style: GoogleFonts.poppins(
-                    fontSize: 20, fontWeight: FontWeight.w600),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(1, 3),
+                        ),
+                      ],
+                    ),
+                    child: widget.profilePic == ''
+                        ? CircleAvatar(
+                      child: Image.asset('images/socialv/faces/face_5.png',
+                          height: 56, width: 56, fit: BoxFit.cover)
+                          .cornerRadiusWithClipRRect(8)
+                          .cornerRadiusWithClipRRect(8),
+                    )
+                        : CircleAvatar(
+                      child: CustomImageView(
+                          imagePath:
+                          '${AppData.imageUrl}${widget.profilePic.validate()}',
+                          height: 56,
+                          width: 56,
+                          fit: BoxFit.cover)
+                          .cornerRadiusWithClipRRect(30),
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                '',
-                style: GoogleFonts.poppins(
-                    fontSize: 12, fontWeight: FontWeight.w400),
+              const SizedBox(width: 10,),
+              Expanded(
+                child: Text(
+                  widget.username,
+                  style: GoogleFonts.poppins(
+                      fontSize: 20, fontWeight: FontWeight.w600),
+                ),
               ),
+
             ],
           ),
           actions: [
-            Row(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(right: 16),
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+            PopupMenuButton(
+              itemBuilder: (context) {
+                return [
+                  PopupMenuItem(
+                    child: Builder(builder: (context) {
+                      return Column(
+                        children: ["Media",'Delete Chat'].map((String item) {
+                          return PopupMenuItem(
+                            value: item,
+                            child: Text(item),
+                          );
+                        }).toList(),
+                      );
+                    }),
                   ),
-                  child: widget.profilePic == ''
-                      ? Image.asset('images/socialv/faces/face_5.png',
-                              height: 56, width: 56, fit: BoxFit.cover)
-                          .cornerRadiusWithClipRRect(8)
-                          .cornerRadiusWithClipRRect(8)
-                      : CachedNetworkImage(
-                              imageUrl:
-                                  '${AppData.imageUrl}${widget.profilePic.validate()}',
-                              height: 56,
-                              width: 56,
-                              fit: BoxFit.cover)
-                          .cornerRadiusWithClipRRect(30),
-                ),
-              ],
-            ),
+                ];
+              },
+              onSelected: (value) {
+
+                },
+            )
           ],
         ),
         body: BlocConsumer<ChatBloc, ChatState>(
@@ -781,8 +803,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             }
           },
           builder: (context, state) {
-            print("state $state");
-
             if (state is PaginationLoadingState) {
               return Center(
                 child: CircularProgressIndicator(
@@ -902,24 +922,31 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                     : IconButton(
                                         icon: const Icon(Icons.attach_file),
                                         onPressed: () async {
-                                          const permission = Permission.photos;
-                                          if (await permission.isGranted) {
+                                          const permission = Permission.storage;
+                                          const permission1 = Permission.photos;
+                                          var status = await permission.status;
+                                          print(status);
+                                          if (await permission1.isGranted) {
                                             _showFileOptions();
-                                          } else if (await permission
-                                              .isDenied) {
-                                            final result =
-                                                await permission.request();
-                                            if (result.isGranted) {
+                                            // _selectFiles(context);
+                                          } else if (await permission1.isDenied) {
+                                            final result = await permission1.request();
+                                            if (status.isGranted) {
                                               _showFileOptions();
+                                              // _selectFiles(context);
+                                              print("isGranted");
+                                            } else if (result.isGranted) {
+                                              _showFileOptions();
+                                              // _selectFiles(context);
+                                              print("isGranted");
                                             } else if (result.isDenied) {
+                                              final result = await permission.request();
                                               print("isDenied");
                                             } else if (result.isPermanentlyDenied) {
                                               print("isPermanentlyDenied");
-                                              _showFileOptions();
                                               // _permissionDialog(context);
                                             }
                                           } else if (await permission.isPermanentlyDenied) {
-                                            _showFileOptions();
                                             print("isPermanentlyDenied");
                                             // _permissionDialog(context);
                                           }
@@ -973,7 +1000,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                       )
                                     : IconButton(
                                         onPressed: () async {
-                                          if (textController.text.isNotEmpty) {
+                                          if (textController.text.isNotEmpty && _selectedFile==null ) {
                                             String message =
                                                 textController.text;
                                             _isFileUploading = true;
@@ -986,6 +1013,22 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                                 attachmentType: 'file',
                                                 file: _selectedFile?.path ?? '',
                                                 message: message));
+                                            textController.clear();
+                                            setState(() {});
+                                            _selectedFile = null;
+                                            scrollToBottom();
+                                          }else{
+                                            String message = textController.text;
+                                            _isFileUploading = true;
+                                            chatBloc.add(SendMessageEvent(
+                                                userId: AppData.logInUserId,
+                                                roomId: widget.roomId == ''
+                                                    ? chatBloc.roomId
+                                                    : widget.roomId,
+                                                receiverId: widget.id,
+                                                attachmentType: 'file',
+                                                file: _selectedFile?.path ?? '',
+                                                message: message ==''?' ':message));
                                             textController.clear();
                                             setState(() {});
                                             _selectedFile = null;
@@ -1375,7 +1418,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   }
 
   void _startTimerForChat() {
-    _timerChat = Timer.periodic(Duration(seconds: 10), (timer) {
+    _timerChat = Timer.periodic(const Duration(seconds: 10), (timer) {
       print('call timer');
       chatBloc.add(LoadRoomMessageEvent(
           page: 0, userId: widget.id, roomId: widget.roomId));

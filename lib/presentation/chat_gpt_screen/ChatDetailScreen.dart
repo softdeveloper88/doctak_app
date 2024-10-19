@@ -17,6 +17,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
+import 'widgets/card_intro.dart';
 import 'widgets/typing_indicators.dart';
 
 class ChatDetailScreen extends StatefulWidget {
@@ -85,42 +86,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error: $e')));
     }
-  }
-
-  cardIntro(title, subTitle, onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Card(
-          elevation: 2,
-          child: SizedBox(
-            width: 40.w,
-            height: 20.h,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      subTitle,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 8.sp,
-                          fontWeight: FontWeight.normal),
-                    ),
-                  ]),
-            ),
-          )),
-    );
   }
 
   @override
@@ -233,7 +198,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       ),
                     ),
                   ),
-                  centerTitle: true,
+                  centerTitle: false,
                   surfaceTintColor: context.cardColor,
                   backgroundColor: context.cardColor,
                   title: Builder(
@@ -251,8 +216,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   minWidth: 40.w,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10.0),
-                                    side: const BorderSide(
-                                        color: Colors.black, width: 1.0),
+                                    // side: const BorderSide(
+                                    //     color: Colors.black, width: 1.0),
                                   ),
                                   color: Colors.lightBlue,
                                   onPressed: () {
@@ -294,7 +259,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 IconButton(
                                   icon: isLoadingMessages
                                       ? Image.asset(
-                                          'assets/images/docktak_ai_dark.png',
+                                          'assets/images/docktak_ai_light.png',
                                           height: 25,
                                           width: 25,
                                         )
@@ -319,7 +284,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       ? svGetScaffoldColor()
                                       : cardLightColor),
                               child: Icon(
-                                Icons.cancel_outlined,
+                                Icons.close,
                                 color: svGetBodyColor(),
                               ),
                             ),
@@ -358,8 +323,10 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   ),
                                   const SizedBox(height: 30),
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      cardIntro('Code Detection',
+                                      cardIntro(
+                                           width: 40.w,                                          'Code Detection',
                                           'Identify CPT or ICD codes', () {
                                         // Code Detection: Identify CPT or ICD codes
                                         isAlreadyAsk = true;
@@ -378,7 +345,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         }
                                       }),
                                       const SizedBox(width: 10),
-                                      cardIntro('Diagnostic \nSuggestions',
+                                      cardIntro(
+                                          width: 40.w,
+                                          'Diagnostic \nSuggestions',
                                           'Request suggestions based on symptoms',
                                           () {
                                         isAlreadyAsk = true;
@@ -398,6 +367,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     ],
                                   ),
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+
                                     children: [
                                       InkWell(
                                         onTap: () {
@@ -958,280 +929,3 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
 
   editRecord(BuildContext context, int id) {}
 }
-//
-// class ChatBubble extends StatelessWidget {
-//   final String text;
-//   final bool isUserMessage;
-//   final Function? onTapReginarate;
-//   File? imageUrl;
-//   String responseImageUrl;
-//
-//   ChatBubble(
-//       {Key? key,
-//       required this.text,
-//       required this.isUserMessage,
-//       this.onTapReginarate,
-//       required this.imageUrl,
-//       this.responseImageUrl = ''})
-//       : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     double screenWidth = MediaQuery.of(context).size.width;
-//     double bubbleMaxWidth = screenWidth * 0.6;
-//     // print("response1 ${responseImageUrl}");
-//
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-//       child: IntrinsicHeight(
-//         child: Row(
-//           mainAxisAlignment:
-//               isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-//           children: [
-//             if (!isUserMessage) ...[
-//               Wrap(
-//                 crossAxisAlignment: WrapCrossAlignment.end,
-//                 spacing: 8.0,
-//                 children: [
-//                   CircleAvatar(
-//                     backgroundColor: svGetBodyColor(),
-//                     child: Image.asset(
-//                       'assets/logo/ic_web.png',
-//                       width: 25,
-//                       height: 25,
-//                     ),
-//                   ),
-//                   Container(
-//                     width: 75.w,
-//                     decoration: BoxDecoration(
-//                       borderRadius: const BorderRadius.only(
-//                           topRight: Radius.circular(10),
-//                           topLeft: Radius.circular(10),
-//                           bottomRight: Radius.circular(10)),
-//                       color:
-//                           appStore.isDarkMode ? Colors.white30 : Colors.white,
-//                     ),
-//                     child: Column(
-//                       children: [
-//                         Padding(
-//                           padding: const EdgeInsets.symmetric(
-//                               horizontal: 0.0, vertical: 6.0),
-//                           child: ConstrainedBox(
-//                             constraints:
-//                                 BoxConstraints(maxWidth: bubbleMaxWidth),
-//                             child: text == 'Generating response...'
-//                                 ? Column(
-//                                     children: [
-//                                       Text(
-//                                         // fitContent: true,
-//                                         // selectable: true,
-//                                         // softLineBreak: true,
-//                                         // shrinkWrap: true,
-//                                         text
-//                                             .replaceAll("*", '')
-//                                             .replaceAll('#', ''),
-//                                         style: GoogleFonts.poppins(
-//                                             color: Colors.black,
-//                                             fontSize: 12.sp),
-//                                       ),
-//                                       const SizedBox(
-//                                         height: 10,
-//                                       ),
-//                                       CircularProgressIndicator(
-//                                         color: svGetBodyColor(),
-//                                       ),
-//                                     ],
-//                                   )
-//                                 : MarkdownBlock(
-//                                     data: text,
-//                                     config: MarkdownConfig(configs: [])),
-//                             // Text(
-//                             //         // fitContent: true,
-//                             //         // selectable: true,
-//                             //         // softLineBreak: true,
-//                             //         // shrinkWrap: true,
-//                             //         style: GoogleFonts.poppins(
-//                             //             fontSize: 12.sp, color: Colors.black),
-//                             //         text
-//                             //             .replaceAll("*", '')
-//                             //             .replaceAll('#', ''),
-//                             //       ),
-//                           ),
-//                         ),
-//                         Divider(
-//                           color: Colors.grey[200],
-//                         ),
-//                         Row(
-//                           mainAxisAlignment: MainAxisAlignment.end,
-//                           children: [
-//                             // InkWell(
-//                             //   onTap: () => onTapReginarate!(),
-//                             //   child: const Padding(
-//                             //     padding: EdgeInsets.all(8.0),
-//                             //     child: Row(
-//                             //       children: [
-//                             //         Icon(Icons.change_circle_outlined),
-//                             //         Text(' Regenerate')
-//                             //       ],
-//                             //     ),
-//                             //   ),
-//                             // ),
-//                             IconButton(
-//                               icon: const Icon(Icons.copy),
-//                               onPressed: () {
-//                                 // Copy text to clipboard
-//                                 Clipboard.setData(ClipboardData(text: text));
-//                                 // You can show a snackbar or any other feedback here
-//                                 ScaffoldMessenger.of(context).showSnackBar(
-//                                   const SnackBar(
-//                                     content: Text('Text copied to clipboard'),
-//                                   ),
-//                                 );
-//                               },
-//                             ),
-//                           ],
-//                         )
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               // Expanded(
-//               //   flex: 1,
-//               //   child: Align(
-//               //     alignment: Alignment.topLeft,
-//               //     child: IconButton(
-//               //       icon: const Icon(Icons.copy),
-//               //       onPressed: () {
-//               //         // Copy text to clipboard
-//               //         Clipboard.setData(ClipboardData(text: text));
-//               //         // You can show a snackbar or any other feedback here
-//               //         ScaffoldMessenger.of(context).showSnackBar(
-//               //           const SnackBar(
-//               //             content: Text('Text copied to clipboard'),
-//               //           ),
-//               //         );
-//               //       },
-//               //     ),
-//               //   ),
-//               // ),
-//             ] else ...[
-//               Wrap(
-//                 crossAxisAlignment: WrapCrossAlignment.end,
-//                 spacing: 8.0,
-//                 children: [
-//                   Material(
-//                     borderRadius: const BorderRadius.only(
-//                         topLeft: Radius.circular(10),
-//                         topRight: Radius.circular(10),
-//                         bottomLeft: Radius.circular(10)),
-//                     color: Colors.blue[300],
-//                     child: Padding(
-//                       padding: const EdgeInsets.symmetric(
-//                           horizontal: 14.0, vertical: 10.0),
-//                       child: ConstrainedBox(
-//                           constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
-//                           child: Column(
-//                             children: [
-//                               if (responseImageUrl != '')
-//                                 CustomImageView(imagePath: responseImageUrl)
-//                               else if (imageUrl != null)
-//                                 Image.file(imageUrl!),
-//                               Text(text,
-//                                   style: const TextStyle(color: Colors.white)),
-//                             ],
-//                           )),
-//                     ),
-//                   ),
-//                   CircleAvatar(
-//                     backgroundImage: CachedNetworkImageProvider(
-//                         AppData.imageUrl + AppData.profile_pic),
-//                     radius: 12,
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// class TypingIndicators extends StatefulWidget {
-//   final Color color;
-//   final double size;
-//
-//   const TypingIndicators({Key? key, required this.color, this.size = 10.0})
-//       : super(key: key);
-//
-//   @override
-//   _TypingIndicatorState createState() => _TypingIndicatorState();
-// }
-//
-// class _TypingIndicatorState extends State<TypingIndicators>
-//     with TickerProviderStateMixin {
-//   late List<AnimationController> _controllers;
-//   late List<Animation<double>> _animations;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//
-//     _controllers = List.generate(3, (index) {
-//       return AnimationController(
-//         duration: const Duration(milliseconds: 600),
-//         vsync: this,
-//       )..repeat();
-//     });
-//
-//     _animations = _controllers
-//         .asMap()
-//         .map((i, controller) {
-//           return MapEntry(
-//             i,
-//             Tween(begin: 0.0, end: 8.0).animate(
-//               CurvedAnimation(
-//                 parent: controller,
-//                 curve: Interval(0.2 * i, 1.0, curve: Curves.easeInOut),
-//               ),
-//             ),
-//           );
-//         })
-//         .values
-//         .toList();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       mainAxisSize: MainAxisSize.min,
-//       children: List.generate(3, (index) {
-//         return AnimatedBuilder(
-//           animation: _animations[index],
-//           builder: (context, child) {
-//             return Transform.translate(
-//               offset: Offset(0, -_animations[index].value),
-//               child: child,
-//             );
-//           },
-//           child: Padding(
-//             padding: const EdgeInsets.symmetric(horizontal: 2.0),
-//             child: CircleAvatar(
-//               radius: widget.size,
-//               backgroundColor: widget.color,
-//             ),
-//           ),
-//         );
-//       }),
-//     );
-//   }
-//
-//   @override
-//   void dispose() {
-//     for (var controller in _controllers) {
-//       controller.dispose();
-//     }
-//     super.dispose();
-//   }
-// }

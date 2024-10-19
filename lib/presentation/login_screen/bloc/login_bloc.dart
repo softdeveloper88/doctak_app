@@ -48,6 +48,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         if(event.rememberMe) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', response.token ?? '');
+            await  prefs.setBool('rememberMe',event.rememberMe);
+
           await prefs.setString('device_token', event.deviceToken ?? '');
           await prefs.setString('userId', response.user?.id ?? '');
           await prefs.setString('name',
@@ -181,6 +183,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if (response.user?.userType != null) {
         if (response.recentCreated == false) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
+          await  prefs.setBool('rememberMe',true);
           await prefs.setString('device_token', event.deviceToken ?? '');
           await prefs.setString('token', response.token ?? '');
           await prefs.setString('userId', response.user?.id ?? '');

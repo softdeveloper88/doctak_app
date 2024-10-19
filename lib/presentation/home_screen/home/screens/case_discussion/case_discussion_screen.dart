@@ -77,7 +77,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: svGetBgColor(),
         body: Column(
           children: [
             BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
@@ -102,108 +102,98 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                             element.countryName;
                   }
                 }
-                return Column(
-                  children: [
-                    AppBar(
-                      surfaceTintColor: svGetScaffoldColor(),
-                      backgroundColor: svGetScaffoldColor(),
-                      iconTheme: IconThemeData(color: context.iconColor),
-                      title: Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                              child: Center(
-                                  child: Text('Case Discussion',
-                                      textAlign: TextAlign.center,
-                                      style: boldTextStyle(size: 18)))),
-                          Expanded(
-                            child: CustomDropdownField(
-                              items: state.countriesModel.countries ?? [],
-                              value: state.countriesModel.countries?.first
-                                      .countryName ??
-                                  '',
-                              width: 50,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 0,
-                              ),
-                              onChanged: (String? newValue) {
-                                var index = state.countriesModel.countries!
-                                    .indexWhere((element) =>
-                                        newValue == element.countryName);
-                                var countryId =
-                                    state.countriesModel.countries![index].id;
-                                BlocProvider.of<SplashBloc>(context).add(
-                                    LoadDropdownData(
-                                        countryId.toString(),
-                                        state.typeValue,
-                                        state.searchTerms ?? '',
-                                        state.isExpired ?? 'New'));
-                                caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
-                                  page: 1,
-                                  countryId: countryId.toString(),
-                                  searchTerm: state.searchTerms ?? "",
-                                ));
+                return Container(
+                  color: svGetScaffoldColor(),
+                  child: Column(
+                    children: [
+                      AppBar(
 
-                                // caseDiscusstionBloc
-                                //     .add(UpdateFirstDropdownValue(newValue!));
-                              },
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              setState(() {});
-                              isSearchShow = !isSearchShow;
-                            },
-                            child: isSearchShow
-                                ? Icon(Icons.cancel_outlined,
-                                        size: 25,
-                                        // height: 16,
-                                        // width: 16,
-                                        // fit: BoxFit.cover,
-                                        color: svGetBodyColor())
-                                    .paddingLeft(4)
-                                : Image.asset(
-                                    'assets/images/search.png',
-                                    height: 20,
-                                    width: 20,
-                                    color: svGetBodyColor(),
-                                  ),
-                          ).paddingRight(16)
-                        ],
-                      ),
-                      leading: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new_rounded,
-                            color: svGetBodyColor()),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                      elevation: 0,
-                      centerTitle: true,
-                    ),
-                    Divider(
-                      color: Colors.grey[300],
-                      endIndent: 16,
-                      indent: 16,
-                    ),
-                    Column(
-                      children: [
-                        Column(
+                        surfaceTintColor: svGetScaffoldColor(),
+                        backgroundColor: svGetScaffoldColor(),
+                        iconTheme: IconThemeData(color: context.iconColor),
+                        title: Row(
+                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            if (isSearchShow)
-                              Container(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                margin: const EdgeInsets.only(
-                                  left: 16,
-                                  top: 16.0,
-                                  bottom: 16.0,
-                                  right: 16,
+                            Expanded(
+                                child: Text('Case Discussion',
+                                    textAlign: TextAlign.center,
+                                    style: boldTextStyle(size: 18))),
+                            Expanded(
+                              child: CustomDropdownField(
+                                items: state.countriesModel.countries ?? [],
+                                value: state.countriesModel.countries?.first
+                                        .countryName ??
+                                    '',
+                                width: 50,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 0,
                                 ),
+                                onChanged: (String? newValue) {
+                                  var index = state.countriesModel.countries!
+                                      .indexWhere((element) =>
+                                          newValue == element.countryName);
+                                  var countryId =
+                                      state.countriesModel.countries![index].id;
+                                  BlocProvider.of<SplashBloc>(context).add(
+                                      LoadDropdownData(
+                                          countryId.toString(),
+                                          state.typeValue,
+                                          state.searchTerms ?? '',
+                                          state.isExpired ?? 'New'));
+                                  caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
+                                    page: 1,
+                                    countryId: countryId.toString(),
+                                    searchTerm: state.searchTerms ?? "",
+                                  ));
+
+                                  // caseDiscusstionBloc
+                                  //     .add(UpdateFirstDropdownValue(newValue!));
+                                },
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                setState(() {});
+                                isSearchShow = !isSearchShow;
+                              },
+                              child: isSearchShow
+                                  ? Icon(Icons.close,
+                                          size: 25,
+                                          // height: 16,
+                                          // width: 16,
+                                          // fit: BoxFit.cover,
+                                          color: svGetBodyColor())
+                                      .paddingLeft(4)
+                                  : Image.asset(
+                                      'assets/images/search.png',
+                                      height: 20,
+                                      width: 20,
+                                      color: svGetBodyColor(),
+                                    ),
+                            ).paddingRight(16)
+                          ],
+                        ),
+                        leading: IconButton(
+                          icon: Icon(Icons.arrow_back_ios_new_rounded,
+                              color: svGetBodyColor()),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        elevation: 0,
+                        centerTitle: false,
+                      ),
+                      Column(
+                        children: [
+                          if (isSearchShow)
+                            Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Container(
+                                padding: const EdgeInsets.only(left: 8.0),
                                 decoration: BoxDecoration(
-                                    color:
-                                        context.dividerColor.withOpacity(0.4),
+                                    color: context.dividerColor.withOpacity(0.4),
                                     borderRadius: radius(5),
                                     border: Border.all(
-                                        color: svGetBodyColor(), width: 0.3)),
+                                        color: svGetBodyColor(), width: 0.5)),
                                 child: AppTextField(
                                   controller: _controller,
                                   textFieldType: TextFieldType.NAME,
@@ -269,173 +259,46 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                                   ),
                                 ),
                               ),
-                            // if (isShownSuggestion)
-                            //   ListView.builder(
-                            //     shrinkWrap: true,
-                            //     itemCount: _filteredSuggestions.length,
-                            //     itemBuilder: (context, index) {
-                            //       return Container(
-                            //         color: Colors.white,
-                            //         child: ListTile(
-                            //           title: Text(_filteredSuggestions[index]),
-                            //           onTap: () {
-                            //             setState(() {});
-                            //             isShownSuggestion = false;
-                            //             _controller.text =
-                            //             _filteredSuggestions[index];
-                            //             BlocProvider.of<SplashBloc>(context)
-                            //                 .add(LoadDropdownData(
-                            //                 state.countryFlag,
-                            //                 state.typeValue,
-                            //                 _filteredSuggestions[index] ??
-                            //                     '',
-                            //                 state.isExpired));
-                            //             caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
-                            //               page: 1,
-                            //               countryId: state.countryFlag != ''
-                            //                   ? state.countryFlag
-                            //                   : '${state.countriesModel.countries?.first.id ?? 1}',
-                            //               searchTerm:
-                            //               _filteredSuggestions[index],
-                            //             ));
-                            //             // Do something with the selected suggestion
-                            //           },
-                            //         ),
-                            //       );
-                            //     },
-                            //   ),
-                          ],
-                        ),
-                        // Padding(
-                        //   padding: const EdgeInsets.all(8.0),
-                        //   child: Row(
-                        //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        //     children: [
-                        //       Column(
-                        //         children: [
-                        //           TextButton(
-                        //             onPressed: () {
-                        //               selectedIndex = 0;
-                        //               BlocProvider.of<SplashBloc>(context).add(
-                        //                   LoadDropdownData(
-                        //                       state.countryFlag,
-                        //                       "New",
-                        //                       state.searchTerms ?? '',
-                        //                       'New'));
-                        //               caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
-                        //                   page: 1,
-                        //                   countryId: state.countryFlag != ''
-                        //                       ? state.countryFlag
-                        //                       : '${state.countriesModel.countries?.first.id ?? 1}',
-                        //                   searchTerm: state.searchTerms ?? '',
-                        //                   isExpired: 'New'));
-                        //             },
-                        //             child: Text(
-                        //               'New',
-                        //               style: TextStyle(
-                        //                 color: SVAppColorPrimary,
-                        //                 fontSize: 14,
-                        //                 fontWeight: selectedIndex == 0
-                        //                     ? FontWeight.bold
-                        //                     : FontWeight.normal,
-                        //               ),
-                        //             ),
-                        //           ),
-                        //           Container(
-                        //             height: 2,
-                        //             width: context.width() / 2 - 10,
-                        //             color: selectedIndex == 0
-                        //                 ? SVAppColorPrimary
-                        //                 : SVAppColorPrimary.withOpacity(0.2),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //       Center(
-                        //           child: Container(
-                        //             color: Colors.grey,
-                        //             height: 30,
-                        //             width: 1,
-                        //           )),
-                        //       Column(
-                        //         children: [
-                        //           TextButton(
-                        //             onPressed: () {
-                        //               selectedIndex = 1;
-                        //               BlocProvider.of<SplashBloc>(context).add(
-                        //                   LoadDropdownData(
-                        //                       state.countryFlag,
-                        //                       "Expired",
-                        //                       state.searchTerms ?? '',
-                        //                       'Expired'));
-                        //               caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
-                        //                   page: 1,
-                        //                   countryId: state.countryFlag != ''
-                        //                       ? state.countryFlag
-                        //                       : '${state.countriesModel.countries?.first.id ?? 1}',
-                        //                   searchTerm: state.searchTerms ?? '');
-                        //             },
-                        //             child: Text(
-                        //               'Expired',
-                        //               style: TextStyle(
-                        //                 color: SVAppColorPrimary,
-                        //                 fontSize: 14,
-                        //                 fontWeight: selectedIndex == 1
-                        //                     ? FontWeight.bold
-                        //                     : FontWeight.normal,
-                        //               ),
-                        //             ),
-                        //           ),
-                        //           Container(
-                        //             height: 2,
-                        //             width: context.width() / 2 - 10,
-                        //             color: selectedIndex == 1
-                        //                 ? SVAppColorPrimary
-                        //                 : SVAppColorPrimary.withOpacity(0.2),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //       16.height,
-                        //     ],
-                        //   ),
-                        // ),
-                        // Padding(
-                        //   padding: const EdgeInsets.all(16.0),
-                        //   child: CustomDropdownButtonFormField(
-                        //     items: list1,
-                        //     value: list1.first,
-                        //     width: 100,
-                        //     contentPadding: const EdgeInsets.symmetric(
-                        //       horizontal: 10,
-                        //       vertical: 0,
-                        //     ),
-                        //     onChanged: (String? newValue) {
-                        //       print(newValue);
-                        //       // caseDiscusstionBloc.add(
-                        //       //   GetPost(
-                        //       //       page: '1',
-                        //       //       countryId: state.countryFlag,
-                        //       //       searchTerm: '',
-                        //       //       type: newValue!),
-                        //       // );
-                        //       BlocProvider.of<SplashBloc>(context).add(
-                        //           LoadDropdownData(
-                        //               state.countryFlag,
-                        //               newValue ?? "",
-                        //               state.searchTerms ?? '',
-                        //               newValue!));
-                        //       caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
-                        //           page: 1,
-                        //           countryId: state.countryFlag != ''
-                        //               ? state.countryFlag
-                        //               : '${state.countriesModel.countries?.first.id ?? 1}',
-                        //           searchTerm: state.searchTerms ?? '',
-                        //           isExpired: newValue));
-                        //     },
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                  ],
+                            ),
+                          // if (isShownSuggestion)
+                          //   ListView.builder(
+                          //     shrinkWrap: true,
+                          //     itemCount: _filteredSuggestions.length,
+                          //     itemBuilder: (context, index) {
+                          //       return Container(
+                          //         color: Colors.white,
+                          //         child: ListTile(
+                          //           title: Text(_filteredSuggestions[index]),
+                          //           onTap: () {
+                          //             setState(() {});
+                          //             isShownSuggestion = false;
+                          //             _controller.text =
+                          //             _filteredSuggestions[index];
+                          //             BlocProvider.of<SplashBloc>(context)
+                          //                 .add(LoadDropdownData(
+                          //                 state.countryFlag,
+                          //                 state.typeValue,
+                          //                 _filteredSuggestions[index] ??
+                          //                     '',
+                          //                 state.isExpired));
+                          //             caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
+                          //               page: 1,
+                          //               countryId: state.countryFlag != ''
+                          //                   ? state.countryFlag
+                          //                   : '${state.countriesModel.countries?.first.id ?? 1}',
+                          //               searchTerm:
+                          //               _filteredSuggestions[index],
+                          //             ));
+                          //             // Do something with the selected suggestion
+                          //           },
+                          //         ),
+                          //       );
+                          //     },
+                          //   ),
+                        ],
+                      ),
+                    ],
+                  ),
                 );
               } else if (state is CountriesDataError) {
                 BlocProvider.of<SplashBloc>(context).add(

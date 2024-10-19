@@ -43,7 +43,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        centerTitle: true,
+        centerTitle: false,
         title: Text(
           'Applicants',
           style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),

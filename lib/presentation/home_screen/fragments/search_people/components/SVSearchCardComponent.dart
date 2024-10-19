@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/models/SVSearchModel.dart';
@@ -122,9 +123,9 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 3,
                             offset: const Offset(0, 3),
                           ),
                         ],
@@ -171,7 +172,7 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                                 : const Offstage(),
                           ],
                         ),
-                        Text(widget.element.userType.validate(),
+                        Text(capitalizeWords(widget.element.specialty??widget.element.userType??"Doctor"),
                             style:
                                 secondaryTextStyle(color: svGetBodyColor())),
                       ],

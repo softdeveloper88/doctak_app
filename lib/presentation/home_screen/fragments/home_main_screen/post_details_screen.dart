@@ -20,6 +20,7 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../../../core/utils/app/AppData.dart';
 import '../../../../data/models/post_model/post_data_model.dart';
@@ -31,8 +32,9 @@ import 'post_widget/full_screen_image_widget.dart';
 
 class PostDetailsScreen extends StatefulWidget {
   int? postId;
+  int? commentId;
 
-  PostDetailsScreen({this.postId, super.key});
+  PostDetailsScreen({this.postId,this.commentId, super.key});
 
   @override
   State<PostDetailsScreen> createState() => _PostDetailsScreenState();
@@ -43,14 +45,20 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
 
   @override
   void initState() {
-    homeBloc.add(DetailsPostEvent(postId: widget.postId ?? 0));
+    if(widget.commentId !=null) {
+     print(widget.commentId);
+      homeBloc.add(DetailsPostEvent(commentId: widget.commentId ?? 0,postId: 0));
+    }else{
+      homeBloc.add(DetailsPostEvent(postId: widget.postId ?? 0,commentId: 0));
+
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           backgroundColor: svGetScaffoldColor(),
           surfaceTintColor: svGetScaffoldColor(),
@@ -130,402 +138,419 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                 return SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                              borderRadius: radius(SVAppCommonRadius),
-                              color: context.cardColor),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: InkWell(
-                                      onTap: () {
-                                        SVProfileFragment(
-                                                userId: homeBloc
-                                                    .postData?.post?.user?.id)
-                                            .launch(context);
-                                      },
-                                      child: Row(
-                                        children: [
-                                          CachedNetworkImage(
-                                            imageUrl:
-                                                "${AppData.imageUrl}${homeBloc.postData?.post?.user?.profilePic!.validate()}",
-                                            height: 50,
-                                            width: 50,
-                                            fit: BoxFit.cover,
-                                          ).cornerRadiusWithClipRRect(20),
-                                          12.width,
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              TextIconWidget(
-                                                  text: homeBloc.postData?.post
-                                                          ?.user?.name ??
-                                                      '',
-                                                  suffix: Image.asset(
-                                                      'images/socialv/icons/ic_TickSquare.png',
-                                                      height: 14,
-                                                      width: 14,
-                                                      fit: BoxFit.cover),
-                                                  textStyle: boldTextStyle()),
-                                              Row(
-                                                children: [
-                                                  Text('',
-                                                      style: secondaryTextStyle(
-                                                          color: svGetBodyColor(),
-                                                          size: 12)),
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 8.0),
-                                                    child: Icon(
-                                                      Icons.access_time,
-                                                      size: 20,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                          // 4.width,
-                                        ],
-                                      ).paddingSymmetric(horizontal: 16),
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      if (homeBloc.postData?.post?.userId ==
-                                          AppData.logInUserId)
-                                        PopupMenuButton(
-                                          itemBuilder: (context) {
-                                            return [
-                                              PopupMenuItem(
-                                                child:
-                                                    Builder(builder: (context) {
-                                                  return Column(
-                                                    children: ["Delete"]
-                                                        .map((String item) {
-                                                      return PopupMenuItem(
-                                                        value: item,
-                                                        child: Text(item),
-                                                      );
-                                                    }).toList(),
-                                                  );
-                                                }),
-                                              ),
-                                            ];
-                                          },
-                                          onSelected: (value) {
-                                            if (value == 'Delete') {
-                                              showDialog(
-                                                context: context,
-                                                builder: (BuildContext context) {
-                                                  return showAlertDialog(
-                                                      context,
-                                                      homeBloc.postData?.post
-                                                              ?.id ??
-                                                          0);
-                                                },
-                                              );
-                                            }
-                                          },
-                                        )
-                                      // IconButton(onPressed: () {},
-                                      //     icon: const Icon(Icons.more_horiz)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              16.height,
-                              homeBloc.postData?.post?.title?.isNotEmpty ?? false
-                                  ? _buildPlaceholderWithoutFile(
-                                      context,
-                                      homeBloc.postData?.post?.title ?? '',
-                                      homeBloc.postData?.post?.backgroundColor ??
-                                          '#ffff',
-                                      homeBloc.postData?.post?.image,
-                                      homeBloc.postData?.post?.media)
-                                  // ? svRobotoText(
-                                  // text: homeBloc.postData?.post?.title.validate(),
-                                  // textAlign: TextAlign.start).paddingSymmetric(
-                                  // horizontal: 16)
-                                  : const Offstage(),
-                              homeBloc.postData?.post?.title?.isNotEmpty ?? false
-                                  ? 16.height
-                                  : const Offstage(),
-                              _buildMediaContent(context)
-                                  .cornerRadiusWithClipRRect(0)
-                                  .center(),
-                              // Image.asset('',
-                              //   // homeBloc.postData?.post?.image?.validate(),
-                              //   height: 300,
-                              //   width: context.width() - 32,
-                              //   fit: BoxFit.cover,
-                              // ).cornerRadiusWithClipRRect(SVAppCommonRadius).center(),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 8.0, right: 8.0, top: 8.0),
+                    padding: const EdgeInsets.only(top: 16),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                        borderRadius: radius(SVAppCommonRadius),
+                        color: context.cardColor),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  SVProfileFragment(
+                                          userId:
+                                              homeBloc.postData?.post?.user?.id)
+                                      .launch(context);
+                                },
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        LikesListScreen(
-                                                id: homeBloc.postData?.post?.id
-                                                        ?.toString() ??
-                                                    '0')
-                                            .launch(context);
-                                      },
-                                      child: Text(
-                                          '${homeBloc.postData?.post?.likes?.length ?? 0.validate()} Likes',
-                                          style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
+                                    CachedNetworkImage(
+                                      imageUrl:
+                                          "${AppData.imageUrl}${homeBloc.postData?.post?.user?.profilePic??''}",
+                                      height: 50,
+                                      width: 50,
+                                      fit: BoxFit.cover,
+                                    ).cornerRadiusWithClipRRect(20),
+                                    12.width,
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextIconWidget(
+                                            text: homeBloc.postData?.post?.user
+                                                    ?.name ??
+                                                '',
+                                            suffix: Image.asset(
+                                                'images/socialv/icons/ic_TickSquare.png',
+                                                height: 14,
+                                                width: 14,
+                                                fit: BoxFit.cover),
+                                            textStyle: boldTextStyle()),
+                                        Row(
+                                          children: [
+                                            Text(
+                                                timeAgo.format(DateTime.parse(
+                                                    homeBloc.postData?.post
+                                                            ?.createdAt ??
+                                                        "")),
+                                                style: secondaryTextStyle(
+                                                    color: svGetBodyColor(),
+                                                    size: 12)),
+                                            const Padding(
+                                              padding:
+                                                  EdgeInsets.only(left: 8.0),
+                                              child: Icon(
+                                                Icons.access_time,
+                                                size: 20,
+                                                color: Colors.grey,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                    InkWell(
-                                      onTap: () {
-                                        SVCommentScreen(
-                                                homeBloc: homeBloc,
-                                                id: homeBloc.postData?.post?.id ??
-                                                    0)
-                                            .launch(context);
-                                      },
-                                      child: Text(
-                                          '${homeBloc.postData?.post?.comments?.length ?? 0.validate()} comments',
-                                          style: secondaryTextStyle(
-                                              color: svGetBodyColor())),
-                                    ),
+                                    // 4.width,
                                   ],
-                                ),
+                                ).paddingSymmetric(horizontal: 16),
                               ),
-                              const Divider(
-                                color: Colors.grey,
-                                thickness: 0.2,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  InkWell(
-                                      splashColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () {
-                                        homeBloc.add(PostLikeEvent(
-                                            postId: homeBloc.postData?.post?.id ??
-                                                0));
-                                      },
-                                      child: Column(
-                                        children: [
-                                          findIsLiked(
-                                                  homeBloc.postData?.post?.likes)
-                                              ? Image.asset(
-                                                  'images/socialv/icons/ic_HeartFilled.png',
-                                                  height: 20,
-                                                  width: 22,
-                                                  fit: BoxFit.fill)
-                                              : Image.asset(
-                                                  'images/socialv/icons/ic_Heart.png',
-                                                  height: 22,
-                                                  width: 22,
-                                                  fit: BoxFit.cover,
-                                                  color: context.iconColor,
-                                                ),
-                                          Text('Like',
-                                              style: secondaryTextStyle(
-                                                  color: svGetBodyColor())),
-                                        ],
-                                      )),
-                                  InkWell(
-                                    splashColor: Colors.grey,
-                                    highlightColor: Colors.grey,
-                                    onTap: () {
-                                      setState(() {
-                                        // if (isShowComment == -1) {
-                                        //   isShowComment = index;
-                                        // } else {
-                                        //   FocusScope.of(context)
-                                        //       .unfocus();
-                                        //   isShowComment = -1;
-                                        // }
-                                      });
-                                      // SVCommentScreen(
-                                      //         id: widget
-                                      //                 .homeBloc
-                                      //                 .postData
-                                      //                 .id ??
-                                      //             0)
-                                      //     .launch(context);
-                                    },
-                                    child: Column(
-                                      children: [
-                                        Image.asset(
-                                          'images/socialv/icons/ic_Chat.png',
-                                          height: 22,
-                                          width: 22,
-                                          fit: BoxFit.cover,
-                                          color: context.iconColor,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                if (homeBloc.postData?.post?.userId ==
+                                    AppData.logInUserId)
+                                  PopupMenuButton(
+                                    itemBuilder: (context) {
+                                      return [
+                                        PopupMenuItem(
+                                          child: Builder(builder: (context) {
+                                            return Column(
+                                              children:
+                                                  ["Delete"].map((String item) {
+                                                return PopupMenuItem(
+                                                  value: item,
+                                                  child: Text(item),
+                                                );
+                                              }).toList(),
+                                            );
+                                          }),
                                         ),
-                                        Text('Comment',
-                                            style: secondaryTextStyle(
-                                                color: svGetBodyColor())),
-                                      ],
-                                    ),
-                                  ),
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () {
-                                      // _showBottomSheet(context,widget
-                                      //     .homeBloc
-                                      //     .postData);
-                                      String mediaLink;
-                                      if (homeBloc.postData?.post?.media
-                                              ?.isNotEmpty ??
-                                          false) {
-                                        mediaLink = homeBloc.postData?.post?.media
-                                                ?.first.mediaPath ??
-                                            "";
-                                      } else {
-                                        mediaLink = '';
+                                      ];
+                                    },
+                                    onSelected: (value) {
+                                      if (value == 'Delete') {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return showAlertDialog(
+                                                context,
+                                                homeBloc.postData?.post?.id ??
+                                                    0);
+                                          },
+                                        );
                                       }
-                                      createDynamicLink(
-                                          removeHtmlTags(
-                                              homeBloc.postData?.post?.title ??
-                                                  ''),
-                                          'https://doctak.net/post/${homeBloc.postData?.post?.id}',
-                                          mediaLink);
-                                      // _handleIncomingLinks();
-                                      //   Share.share('${removeHtmlTags(widget
-                                      //     .homeBloc
-                                      //     .postData?.title??'')}\n https://doctak.net/post/${widget
-                                      //       .homeBloc
-                                      //       .postData?.id} \n'
-                                      //       '${AppData.imageUrl}$mediaLink');
-                                      // // shareImageWithText('${AppData.imageUrl}$mediaLink',removeHtmlTags(widget
-                                      //     .homeBloc
-                                      //     .postData?.title??''));
                                     },
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          Icons.share_sharp,
-                                          size: 22,
-                                          // 'images/socialv/icons/ic_share.png',
-                                          // height: 22,
-                                          // width: 22,
-                                          // fit: BoxFit.cover,
-                                          color: context.iconColor,
-                                        ),
-                                        Text('share',
-                                            style: secondaryTextStyle(
-                                                color: svGetBodyColor())),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ).paddingSymmetric(horizontal: 16),
-                              // if (isShowComment == index)
-                              SVCommentReplyComponent(
-                                  CommentBloc(), homeBloc.postData?.post?.id ?? 0,
-                                  (value) {
-                                if (value.isNotEmpty) {
-                                  var comments = CommentBloc();
-                                  comments.add(PostCommentEvent(
-                                      postId: homeBloc.postData?.post?.id ?? 0,
-                                      comment: value));
-                  
-                                  homeBloc.postData?.post?.comments!
-                                      .add(Comments());
-                                  setState(() {
-                                    // isShowComment = -1;
-                                  });
-                                }
-                              })
-                              // const Divider(indent: 16, endIndent: 16, height: 20),
-                              // Row(
-                              //   mainAxisAlignment: MainAxisAlignment.center,
-                              //   children: [
-                              //     SizedBox(
-                              //       width: 56,
-                              //       child: Stack(
-                              //         alignment: Alignment.centerLeft,
-                              //         children: [
-                              //           Positioned(
-                              //             right: 0,
-                              //             child: Container(
-                              //               decoration: BoxDecoration(
-                              //                   border: Border.all(
-                              //                       color: Colors.white, width: 2),
-                              //                   borderRadius: radius(100)),
-                              //               child: Image.asset(
-                              //                   'images/socialv/faces/face_1.png',
-                              //                   height: 24,
-                              //                   width: 24,
-                              //                   fit: BoxFit.cover)
-                              //                   .cornerRadiusWithClipRRect(100),
-                              //             ),
-                              //           ),
-                              //           Positioned(
-                              //             left: 14,
-                              //             child: Container(
-                              //               decoration: BoxDecoration(
-                              //                   border: Border.all(
-                              //                       color: Colors.white, width: 2),
-                              //                   borderRadius: radius(100)),
-                              //               child: Image.asset(
-                              //                   'images/socialv/faces/face_2.png',
-                              //                   height: 24,
-                              //                   width: 24,
-                              //                   fit: BoxFit.cover)
-                              //                   .cornerRadiusWithClipRRect(100),
-                              //             ),
-                              //           ),
-                              //           Positioned(
-                              //             child: Container(
-                              //               decoration: BoxDecoration(
-                              //                   border: Border.all(
-                              //                       color: Colors.white, width: 2),
-                              //                   borderRadius: radius(100)),
-                              //               child: Image.asset(
-                              //                   'images/socialv/faces/face_3.png',
-                              //                   height: 24,
-                              //                   width: 24,
-                              //                   fit: BoxFit.cover)
-                              //                   .cornerRadiusWithClipRRect(100),
-                              //             ),
-                              //           ),
-                              //         ],
-                              //       ),
-                              //     ),
-                              //     10.width,
-                              // //     RichText(
-                              // //       text: TextSpan(
-                              // //         text: 'Liked By ',
-                              // //         style: secondaryTextStyle(
-                              // //             color: svGetBodyColor(), size: 12),
-                              // //         children: <TextSpan>[
-                              // //           TextSpan(text: 'Ms.Mountain ',
-                              // //               style: boldTextStyle(size: 12)),
-                              // //           TextSpan(text: 'And ',
-                              // //               style: secondaryTextStyle(
-                              // //                   color: svGetBodyColor(), size: 12)),
-                              // //           TextSpan(text: '${homeBloc.postData?.post?.likes?.length??0} Others ',
-                              // //               style: boldTextStyle(size: 12)),
-                              // //         ],
-                              // //       ),
-                              // //     )
-                              //   ],
-                              // )
+                                  )
+                                // IconButton(onPressed: () {},
+                                //     icon: const Icon(Icons.more_horiz)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        16.height,
+                        homeBloc.postData?.post?.title?.isNotEmpty ?? false
+                            ? _buildPlaceholderWithoutFile(
+                                context,
+                                homeBloc.postData?.post?.title ?? '',
+                                homeBloc.postData?.post?.backgroundColor ??
+                                    '#ffff',
+                                homeBloc.postData?.post?.image,
+                                homeBloc.postData?.post?.media)
+                            // ? svRobotoText(
+                            // text: homeBloc.postData?.post?.title.validate(),
+                            // textAlign: TextAlign.start).paddingSymmetric(
+                            // horizontal: 16)
+                            : const Offstage(),
+                        homeBloc.postData?.post?.title?.isNotEmpty ?? false
+                            ? 16.height
+                            : const Offstage(),
+                        _buildMediaContent(context)
+                            .cornerRadiusWithClipRRect(0)
+                            .center(),
+                        // Image.asset('',
+                        //   // homeBloc.postData?.post?.image?.validate(),
+                        //   height: 300,
+                        //   width: context.width() - 32,
+                        //   fit: BoxFit.cover,
+                        // ).cornerRadiusWithClipRRect(SVAppCommonRadius).center(),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 8.0, right: 8.0, top: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  LikesListScreen(
+                                          id: homeBloc.postData?.post?.id
+                                                  ?.toString() ??
+                                              '0')
+                                      .launch(context);
+                                },
+                                child: Text(
+                                    '${homeBloc.postData?.post?.likes?.length ?? 0.validate()} Likes',
+                                    style: secondaryTextStyle(
+                                        color: svGetBodyColor())),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  SVCommentScreen(
+                                          homeBloc: homeBloc,
+                                          id: homeBloc.postData?.post?.id ?? 0)
+                                      .launch(context);
+                                },
+                                child: Text(
+                                    '${homeBloc.postData?.post?.comments?.length ?? 0.validate()} comments',
+                                    style: secondaryTextStyle(
+                                        color: svGetBodyColor())),
+                              ),
                             ],
                           ),
                         ),
+                        const Divider(
+                          color: Colors.grey,
+                          thickness: 0.2,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () {
+                                  homeBloc.add(PostLikeEvent(
+                                      postId:
+                                          homeBloc.postData?.post?.id ?? 0));
+                                },
+                                child: Column(
+                                  children: [
+                                    findIsLiked(homeBloc.postData?.post?.likes)
+                                        ? Image.asset(
+                                            'images/socialv/icons/ic_HeartFilled.png',
+                                            height: 20,
+                                            width: 22,
+                                            fit: BoxFit.fill)
+                                        : Image.asset(
+                                            'images/socialv/icons/ic_Heart.png',
+                                            height: 22,
+                                            width: 22,
+                                            fit: BoxFit.cover,
+                                            color: context.iconColor,
+                                          ),
+                                    Text('Like',
+                                        style: secondaryTextStyle(
+                                            color: svGetBodyColor())),
+                                  ],
+                                )),
+                            InkWell(
+                              splashColor: Colors.grey,
+                              highlightColor: Colors.grey,
+                              onTap: () {
+                                setState(() {
+                                  // if (isShowComment == -1) {
+                                  //   isShowComment = index;
+                                  // } else {
+                                  //   FocusScope.of(context)
+                                  //       .unfocus();
+                                  //   isShowComment = -1;
+                                  // }
+                                });
+                                // SVCommentScreen(
+                                //         id: widget
+                                //                 .homeBloc
+                                //                 .postData
+                                //                 .id ??
+                                //             0)
+                                //     .launch(context);
+                              },
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    'images/socialv/icons/ic_Chat.png',
+                                    height: 22,
+                                    width: 22,
+                                    fit: BoxFit.cover,
+                                    color: context.iconColor,
+                                  ),
+                                  Text('Comment',
+                                      style: secondaryTextStyle(
+                                          color: svGetBodyColor())),
+                                ],
+                              ),
+                            ),
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () {
+                                // _showBottomSheet(context,widget
+                                //     .homeBloc
+                                //     .postData);
+                                String mediaLink;
+                                if (homeBloc
+                                        .postData?.post?.media?.isNotEmpty ??
+                                    false) {
+                                  mediaLink = homeBloc.postData?.post?.media
+                                          ?.first.mediaPath ??
+                                      "";
+                                } else {
+                                  mediaLink = '';
+                                }
+                                createDynamicLink(
+                                    removeHtmlTags(
+                                        homeBloc.postData?.post?.title ?? ''),
+                                    'https://doctak.net/post/${homeBloc.postData?.post?.id}',
+                                    mediaLink);
+                                // _handleIncomingLinks();
+                                //   Share.share('${removeHtmlTags(widget
+                                //     .homeBloc
+                                //     .postData?.title??'')}\n https://doctak.net/post/${widget
+                                //       .homeBloc
+                                //       .postData?.id} \n'
+                                //       '${AppData.imageUrl}$mediaLink');
+                                // // shareImageWithText('${AppData.imageUrl}$mediaLink',removeHtmlTags(widget
+                                //     .homeBloc
+                                //     .postData?.title??''));
+                              },
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.share_sharp,
+                                    size: 22,
+                                    // 'images/socialv/icons/ic_share.png',
+                                    // height: 22,
+                                    // width: 22,
+                                    // fit: BoxFit.cover,
+                                    color: context.iconColor,
+                                  ),
+                                  Text('share',
+                                      style: secondaryTextStyle(
+                                          color: svGetBodyColor())),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ).paddingSymmetric(horizontal: 16),
+                        Divider(
+                          color: Colors.grey[300],
+                        ),
+                       if( widget.commentId !=null) Container(
+                          margin: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                          // Added top margin
+                          // decoration: BoxDecoration(
+                          //   borderRadius: BorderRadius.circular(12),
+                          //
+                          // ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  SVProfileFragment(
+                                          userId: homeBloc.postData
+                                              ?.specificComment?.userId)
+                                      .launch(context);
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 24,
+                                      backgroundImage: NetworkImage(
+                                          '${AppData.imageUrl}${homeBloc.postData?.specificComment?.commenterProfilePic ?? ''}'),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          homeBloc.postData?.specificComment
+                                                  ?.commenterName ??
+                                              'No Name',
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        // Added margin between name and verified icon
+                                        Image.asset(
+                                            'images/socialv/icons/ic_TickSquare.png',
+                                            height: 14,
+                                            width: 14,
+                                            fit: BoxFit.cover),
+                                      ],
+                                    ),
+                                    const Spacer(),
+
+                                    //            IconButton(
+                                    // onPressed: (){
+                                    //
+                                    // },
+                                    //            icon:const Icon(Icons.delete,color: Colors.red,))
+                                    //
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                  homeBloc.postData?.specificComment?.comment ??
+                                      '',
+                                  style: GoogleFonts.poppins(
+                                      color: svGetBodyColor(), fontSize: 16)
+                                  // TextStyle(color: Colors.grey[800], fontSize: 16),
+                                  ),
+                              Text(
+                                timeAgo.format(DateTime.parse(homeBloc
+                                        .postData?.specificComment?.createdAt ??
+                                    "")),
+                                style: const TextStyle(
+                                    color: Colors.grey, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        if( widget.commentId !=null) Center(
+                          child: TextButton(
+                              onPressed: () {
+                                SVCommentScreen(
+                                  id: homeBloc.postData?.post?.id?.toInt() ?? 0,
+                                  homeBloc: HomeBloc(),
+                                ).launch(context);
+                              },
+                              child: Text(
+                                "More Comments",
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16, fontWeight: FontWeight.w500),
+                              )),
+                        ),
+                        SVCommentReplyComponent(
+                            CommentBloc(), homeBloc.postData?.post?.id ?? 0,
+                            (value) {
+                          if (value.isNotEmpty) {
+                            var comments = CommentBloc();
+                            comments.add(PostCommentEvent(
+                                postId: homeBloc.postData?.post?.id ?? 0,
+                                comment: value));
+
+                            homeBloc.postData?.post?.comments!.add(Comments());
+                            setState(() {
+                              // isShowComment = -1;
+                            });
+                          }
+                        })
+                      ],
+                    ),
+                  ),
                 );
               } else {
                 return RetryWidget(

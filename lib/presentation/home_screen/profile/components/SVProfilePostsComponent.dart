@@ -102,7 +102,6 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
               16.height,
             ],
           ),
-          16.height,
           selectedIndex == 0
               ? MyPostComponent(widget.profileBloc)
               : AboutWidget(
@@ -199,6 +198,7 @@ Widget _buildRowinterested(
   return GestureDetector(
     onTap: () => onTap(),
     child: Container(
+      margin: const EdgeInsets.only(left: 10,right: 10),
       padding: const EdgeInsets.symmetric(
         horizontal: 15,
         vertical: 18,

@@ -33,6 +33,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   @override
   void initState() {
+    print(widget.jobId);
     jobsBloc.add(
       JobDetailPageEvent(jobId: widget.jobId),
     );
@@ -46,9 +47,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Job Details', style: boldTextStyle(size: 20)),
+        title: Text('Job Detail', style: boldTextStyle(size: 18)),
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new_rounded,

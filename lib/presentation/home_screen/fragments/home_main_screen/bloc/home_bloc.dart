@@ -2,8 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
-import 'package:doctak_app/data/models/post_model/post_detail_model.dart';
-import 'package:doctak_app/data/models/post_model/post_likes_model.dart';
+import 'package:doctak_app/data/models/post_model/post_details_data_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,7 +16,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   int numberOfPage = 1;
   List<Post> postList = [];
   final int nextPageTrigger = 1;
-  PostDetailModel? postData;
+  var postData;
   HomeBloc() : super(DataInitial()) {
     on<PostLoadPageEvent>(_onGetPosts);
     on<LoadSearchPageEvent>(_onGetSearchPosts);
@@ -61,10 +60,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(PostPaginationLoadingState());
 
     try {
-      postData = await postService.getDetailsPosts(
-        'Bearer ${AppData.userToken}',
-        event.postId.toString()
-      );
+      if(event.commentId !=0) {
+       print(event.commentId);
+        postData = await postService.getDetailsPosts(
+            'Bearer ${AppData.userToken}',
+            event.commentId.toString()
+        );
+      }else{
+        postData = await postService.getDetailsLikesPosts(
+            'Bearer ${AppData.userToken}',
+            event.postId.toString());
+      }
       print('post $postData');
       emit(PostPaginationLoadedState());
 

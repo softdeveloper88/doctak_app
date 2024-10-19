@@ -13,12 +13,12 @@ class SVForumRepliesComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) => Container(
         decoration: BoxDecoration(
             color: context.cardColor, borderRadius: radius(SVAppCommonRadius)),
-        padding: EdgeInsets.all(16),
-        margin: EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -39,7 +39,7 @@ class SVForumRepliesComponent extends StatelessWidget {
                         color: SVAppColorPrimary, weight: FontWeight.w700)),
               ],
             ),
-            Divider(height: 50),
+            const Divider(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -65,7 +65,7 @@ class SVForumRepliesComponent extends StatelessWidget {
                                     height: 14,
                                     width: 14,
                                     fit: BoxFit.cover)
-                                : Offstage(),
+                                : const Offstage(),
                           ],
                           mainAxisSize: MainAxisSize.min,
                         ),
@@ -78,7 +78,7 @@ class SVForumRepliesComponent extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                       color: SVAppColorPrimary.withAlpha(30),
                       borderRadius: radius(SVAppContainerRadius)),
@@ -95,7 +95,7 @@ class SVForumRepliesComponent extends StatelessWidget {
       ),
       itemCount: repliesList.length,
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
     );
   }
 }

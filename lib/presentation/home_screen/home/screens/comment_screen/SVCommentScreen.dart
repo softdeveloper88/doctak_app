@@ -30,6 +30,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
     afterBuildCreated(() {
       setStatusBarColor(context.cardColor);
     });
+
   }
 
   @override
@@ -45,7 +46,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Comments', style: boldTextStyle(size: 20)),
+        title: Text('Comments', style: boldTextStyle(size: 18)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -79,6 +80,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                 color: svGetBodyColor(),
               ));
             } else if (state is PaginationLoadedState) {
+
               // print(state.drugsModel.length);
               return commentBloc.postList.isEmpty
                   ? const Center(
@@ -138,14 +140,19 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       //     // SVCommentReplyComponent(),
       //   ],
       // ),
-      bottomSheet: SVCommentReplyComponent(commentBloc, widget.id, (value) {
-        if (value.isNotEmpty) {
-          commentBloc.add(PostCommentEvent(postId: widget.id, comment: value));
-          value = '';
-          // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
-          //  homeBloc.postList[index].comments!.add(Comments());
-        }
-      }),
+      bottomSheet: Container(
+        color: svGetBgColor(),
+        margin: EdgeInsets.only(bottom: 20),
+        padding: EdgeInsets.only(bottom: 16),
+        child: SVCommentReplyComponent(commentBloc, widget.id, (value) {
+          if (value.isNotEmpty) {
+            commentBloc.add(PostCommentEvent(postId: widget.id, comment: value));
+            value = '';
+            // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
+            //  homeBloc.postList[index].comments!.add(Comments());
+          }
+        }),
+      ),
     );
   }
 }

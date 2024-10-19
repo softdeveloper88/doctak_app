@@ -46,9 +46,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   void initState() {
-    widget.notificationBloc.add(
-      NotificationLoadPageEvent(page: 1, readStatus: ''),
-    );
+
+      widget.notificationBloc.add(NotificationLoadPageEvent(page: 1, readStatus: ''),
+      );
+
     super.initState();
   }
 
@@ -68,9 +69,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 2,
-        child: Scaffold(
+    return Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: svGetScaffoldColor(),
           appBar: AppBar(
@@ -78,7 +77,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             iconTheme: IconThemeData(color: context.iconColor),
             title: Text('Notifications', style: boldTextStyle(size: 20)),
             elevation: 0,
-            centerTitle: true,
+            centerTitle: false,
             leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios_new_rounded,
                     color: svGetBodyColor()),
@@ -96,169 +95,61 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           body: Column(
             children: [
-              tabWidget(),
+              Expanded(
+                child: BlocConsumer<NotificationBloc, NotificationState>(
+                  bloc: widget.notificationBloc,
+                  // listenWhen: (previous, current) => current is PaginationLoadedState,
+                  // buildWhen: (previous, current) => current is! PaginationLoadedState,
+                  listener:
+                      (BuildContext context, NotificationState state) {
+                    if (state is DataError) {
+                      // showDialog(
+                      //   context: context,
+                      //   builder: (context) => AlertDialog(
+                      //     content: Text(state.errorMessage),
+                      //   ),
+                      // );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is PaginationLoadingState) {
+                      return Center(
+                          child: CircularProgressIndicator(
+                            color: svGetBodyColor(),
+                          ));
+                    } else if (state is PaginationLoadedState) {
+                      // print(state.drugsModel.length);
+                      return _buildPostList(context);
+                    } else if (state is DataError) {
+                      return Center(
+                        child: Text(state.errorMessage),
+                      );
+                    } else {
+                      return const Center(
+                          child: Text('Something went wrong'));
+                    }
+                  },
+                ),
+              ),
+              if(widget.notificationBloc.totalNotifications>0)  MaterialButton(
+                onPressed: () {
+                  if (widget.notificationBloc.totalNotifications > 0) {
+                    widget.notificationBloc.add(
+                      NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'),
+                    );
+                  }
+                },
+                minWidth: 100.w,
+                color: Colors.blue,
+                child: Text(
+                  'Mark All Read',
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
+              )
               // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
             ],
           ),
-        ));
-  }
-
-  Widget _individualTab(String tabName) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (tabName == 'Unread')
-          Container(
-            height: 20,
-            width: 1,
-            decoration: BoxDecoration(
-                border: Border(
-                    right: BorderSide(
-                        color: svGetBodyColor(),
-                        width: 1,
-                        style: BorderStyle.solid))),
-          ),
-        Expanded(
-          child: Tab(
-            child: Text(
-              tabName,
-              style: GoogleFonts.poppins(color: svGetBodyColor()),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget tabWidget() {
-    return Expanded(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
-            child: TabBar(
-              dividerHeight: 1,
-              dividerColor: Colors.grey,
-              onTap: (index) {
-                setState(() {
-                  selectIndex = index;
-                });
-                if (index == 0) {
-                  widget.notificationBloc
-                      .add(NotificationLoadPageEvent(page: 1, readStatus: ''));
-                } else if (index == 1) {
-                  widget.notificationBloc.add(
-                      NotificationLoadPageEvent(page: 1, readStatus: 'unread'));
-                }
-              },
-              indicatorWeight: 4,
-              unselectedLabelColor: Colors.grey,
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelPadding: const EdgeInsets.all(4),
-              indicatorColor: SVAppColorPrimary,
-              tabs: [
-                _individualTab('All'),
-                _individualTab('Unread'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: svGetScaffoldColor(),
-              child: TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    /// Notification All
-                    BlocConsumer<NotificationBloc, NotificationState>(
-                      bloc: widget.notificationBloc,
-                      // listenWhen: (previous, current) => current is PaginationLoadedState,
-                      // buildWhen: (previous, current) => current is! PaginationLoadedState,
-                      listener:
-                          (BuildContext context, NotificationState state) {
-                        if (state is DataError) {
-                          // showDialog(
-                          //   context: context,
-                          //   builder: (context) => AlertDialog(
-                          //     content: Text(state.errorMessage),
-                          //   ),
-                          // );
-                        }
-                      },
-                      builder: (context, state) {
-                        if (state is PaginationLoadingState) {
-                          return Center(
-                              child: CircularProgressIndicator(
-                            color: svGetBodyColor(),
-                          ));
-                        } else if (state is PaginationLoadedState) {
-                          // print(state.drugsModel.length);
-                          return _buildPostList(context);
-                        } else if (state is DataError) {
-                          return Center(
-                            child: Text(state.errorMessage),
-                          );
-                        } else {
-                          return const Center(
-                              child: Text('Something went wrong'));
-                        }
-                      },
-                    ),
-
-                    /// Notification Unread
-                    BlocConsumer<NotificationBloc, NotificationState>(
-                      bloc: widget.notificationBloc,
-                      // listenWhen: (previous, current) => current is PaginationLoadedState,
-                      // buildWhen: (previous, current) => current is! PaginationLoadedState,
-                      listener:
-                          (BuildContext context, NotificationState state) {
-                        if (state is DataError) {
-                          // showDialog(
-                          //   context: context,
-                          //   builder: (context) => AlertDialog(
-                          //     content: Text(state.errorMessage),
-                          //   ),
-                          // );
-                        }
-                      },
-                      builder: (context, state) {
-                        if (state is PaginationLoadingState) {
-                          return Center(
-                              child: CircularProgressIndicator(
-                            color: svGetBodyColor(),
-                          ));
-                        } else if (state is PaginationLoadedState) {
-                          // print(state.drugsModel.length);
-                          return _buildPostList(context);
-                        } else if (state is DataError) {
-                          return Center(
-                            child: Text(state.errorMessage),
-                          );
-                        } else {
-                          return const Center(
-                              child: Text('Something went wrong'));
-                        }
-                      },
-                    ),
-                  ]),
-            ),
-          ),
-         if(selectIndex==1) MaterialButton(
-            onPressed: () {
-              widget.notificationBloc
-                  .add(NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'));
-
-            },
-           minWidth: 100.w,
-            color: Colors.blue,
-            child: Text(
-              'Mark All Read',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-          )
-          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
-        ],
-      ),
-    );
+        );
   }
 
   Widget _buildPostList(BuildContext context) {
@@ -271,9 +162,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
             itemCount: bloc.notificationsList.length,
             itemBuilder: (context, index) {
               if (bloc.pageNumber <= bloc.numberOfPage) {
-                if (index ==
-                    bloc.notificationsList.length - bloc.nextPageTrigger) {
+                if (index == bloc.notificationsList.length - bloc.nextPageTrigger) {
                   bloc.add(NotificationCheckIfNeedMoreDataEvent(index: index));
+                  print(index);
                 }
               }
               if (bloc.numberOfPage != bloc.pageNumber - 1 &&
@@ -419,34 +310,38 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   postId: bloc.notificationsList[index].postId.toInt())
                                   .launch(context);
                             }
-                            // else if (typeNotification ==
-                            //     'comments_on_posts') {
-                            //   // PostDetailsScreen(
-                            //   //     postId: bloc.notificationsList[index].postId.toInt())
-                            //   //     .launch(context);
-                            //   SVCommentScreen(
-                            //     id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
-                            //       .launch(context);
-                            // }
+                            else if ( typeNotification == 'message_received' ) {
+                             ChatRoomScreen(
+                               username:
+                               '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
+                               profilePic:
+                               '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                               id: '${bloc.notificationsList[index].fromUserId}',
+                               roomId: '',
+                             ).launch(context);
+
+                            }
                             else if (typeNotification == 'follow_request' ||
                                 typeNotification == 'friend_request' ||
-                                typeNotification == 'message_received' || typeNotification == 'follower_notification'|| typeNotification == 'un_follower_notification') {
+                                typeNotification == 'follower_notification'|| typeNotification == 'un_follower_notification') {
 
                               SVProfileFragment(
                                       userId:
                                           bloc.notificationsList[index].fromUserId)
                                   .launch(context);
                             } else if (typeNotification == 'comments_on_posts' || typeNotification == 'like_comment_on_post' || typeNotification == 'like_comments') {
-
-                              SVCommentScreen(
-                                id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
-                                  .launch(context);
+                             PostDetailsScreen(
+                                 commentId: bloc.notificationsList[index].postId.toInt())
+                                 .launch(context);
+                              // SVCommentScreen(
+                              //   id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
+                              //     .launch(context);
                             } else if (typeNotification == 'new_like' ||
                                 typeNotification == 'likes_on_posts') {
                               PostDetailsScreen(
                                   postId: bloc.notificationsList[index].postId.toInt())
                                   .launch(context);
-                            } else if (typeNotification == 'new_job_posted' || typeNotification == 'job_update') {
+                            } else if (typeNotification == 'new_job_posted'|| typeNotification == 'job_post_notification' || typeNotification == 'job_update') {
 
                               JobsDetailsScreen(
                                       jobId: bloc.notificationsList[index].postId ?? '').launch(context);

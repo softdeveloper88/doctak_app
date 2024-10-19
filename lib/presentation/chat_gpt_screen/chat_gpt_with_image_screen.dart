@@ -9,6 +9,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart'
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/widgets/card_intro.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -93,41 +94,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     }
   }
 
-  cardIntro(title, subTitle, onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Card(
-          elevation: 2,
-          child: SizedBox(
-            width: 80.w,
-            height: 20.h,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      subTitle,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 8.sp,
-                          fontWeight: FontWeight.normal),
-                    ),
-                  ]),
-            ),
-          )),
-    );
-  }
 
   @override
   void dispose() {
@@ -282,8 +248,8 @@ bool isError=false;
                                     minWidth: 40.w,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10.0),
-                                      side: const BorderSide(
-                                          color: Colors.black, width: 1.0),
+                                      // side: const BorderSide(
+                                      //     color: Colors.black, width: 1.0),
                                     ),
                                     color: Colors.lightBlue,
                                     onPressed: () {
@@ -320,7 +286,7 @@ bool isError=false;
                                   IconButton(
                                     icon: isLoadingMessages
                                         ? Image.asset(
-                                            'assets/images/docktak_ai_dark.png',
+                                            'assets/images/docktak_ai_light.png',
                                             height: 25,
                                             width: 25,
                                           )
@@ -345,7 +311,7 @@ bool isError=false;
                                         ? svGetScaffoldColor()
                                         : cardLightColor),
                                 child: Icon(
-                                  Icons.cancel_outlined,
+                                  Icons.close,
                                   color: svGetBodyColor(),
                                 ),
                               ),
@@ -537,136 +503,163 @@ bool isError=false;
 
                   _buildImagePreview(),
                   Container(
-                    color: context.cardColor,
                     padding: const EdgeInsets.all(10.0),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.attach_file),
-                          onPressed: () async {
-                            // const permission = Permission.photos;
-                            // if (await permission.isGranted) {
-                            //   // _showFileOptions();
-                            // } else if (await permission.isDenied) {
-                            //   final result = await permission.request();
-                            //
-                            //   if (result.isGranted) {
-                            //     _showFileOptions();
-                            //   } else if (result.isDenied) {
-                            //     debugPrint("isDenied");
-                            //     return;
-                            //     // _permissionDialog(context);
-                            //     // _showFileOptions();
-                            //     return;
-                            //   } else if (result.isPermanentlyDenied) {
-                            //     debugPrint("isPermanentlyDenied1");
-                            //     _permissionDialog(context);
-                            //     return;
-                            //   }
-                            // } else if (await permission.isPermanentlyDenied) {
-                            //   debugPrint("isPermanentlyDenied2");
-                            //   _permissionDialog(context);
-                            //
-                            //   return;
-                            // }
-                            if (isOneTimeImageUploaded) {
-                              toasty(context,
-                                  'Only allowed one time image in one session');
-                            } else {
-                              const permission = Permission.photos;
-                              var status = await Permission.storage.request();
-                              if (status.isGranted ||
-                                  await permission.isGranted) {
-                                // Permission is already granted
-                                _showBeforeFileOptions();
-                              } else if (await permission.isDenied) {
-                                // Permission was denied; request it
-                                final result = await permission.request();
-                                debugPrint(result.toString());
-                                // Check the result after requesting permission
-                                if (result.isGranted) {
+                    color: context.cardColor,
+                    child: Container(
+                      margin: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: appStore.isDarkMode
+                            ? svGetScaffoldColor()
+                            : cardLightColor,
+                        // border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.attach_file),
+                            onPressed: () async {
+                              if (isOneTimeImageUploaded) {
+                                toasty(context,
+                                    'Only allowed one time image in one session');
+                              } else {
+                                const permission = Permission.photos;
+                                var status = await Permission.storage.request();
+                                if (status.isGranted ||
+                                    await permission.isGranted) {
+                                  // Permission is already granted
                                   _showBeforeFileOptions();
-                                } else if (result.isPermanentlyDenied) {
-                                  // Permission is permanently denied
-                                  debugPrint(
-                                      "Permission is permanently denied.");
-                                  // _permissionDialog(context);
-                                  _showBeforeFileOptions();
-                                } else if (result.isGranted) {
-                                  _showBeforeFileOptions();
-                                  // Permission is still denied
-                                  debugPrint("Permission is denied.");
+                                } else if (await permission.isDenied) {
+                                  // Permission was denied; request it
+                                  final result = await permission.request();
+                                  debugPrint(result.toString());
+                                  // Check the result after requesting permission
+                                  if (result.isGranted) {
+                                    _showBeforeFileOptions();
+                                  } else if (result.isPermanentlyDenied) {
+                                    // Permission is permanently denied
+                                    debugPrint(
+                                        "Permission is permanently denied.");
+                                    // _permissionDialog(context);
+                                    _showBeforeFileOptions();
+                                  } else if (result.isGranted) {
+                                    _showBeforeFileOptions();
+                                    // Permission is still denied
+                                    debugPrint("Permission is denied.");
+                                  }
+                                } else if (await permission.isPermanentlyDenied) {
+                                  // Permission was permanently denied
+                                  debugPrint("Permission is permanently denied.");
+                                  _permissionDialog();
                                 }
-                              } else if (await permission.isPermanentlyDenied) {
-                                // Permission was permanently denied
-                                debugPrint("Permission is permanently denied.");
-                                _permissionDialog();
                               }
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: Container(
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            padding: const EdgeInsets.only(left: 8, right: 8),
+                            },
+                          ),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 200),
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: TextField(
+                                focusNode: focusNode,
+                                controller: textController,
+                                minLines: 1,
+                                // Minimum lines
+                                maxLines: null,
+                                // Allows for unlimited lines
+                                decoration: const InputDecoration(
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  hintText:
+                                      'Clinical Summary e.g age, gender, medical history',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: appStore.isDarkMode
-                                  ? svGetScaffoldColor()
-                                  : cardLightColor,
-                              // border: Border.all(color: Colors.grey),
                               borderRadius: BorderRadius.circular(20.0),
                             ),
-                            child: TextField(
-                              focusNode: focusNode,
-                              controller: textController,
-                              minLines: 1,
-                              // Minimum lines
-                              maxLines: null,
-                              // Allows for unlimited lines
-                              decoration: const InputDecoration(
-                                hintStyle: TextStyle(color: Colors.grey),
-                                hintText:
-                                    'Clinical Summary e.g age, gender, medical history',
-                                border: InputBorder.none,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30.0),
+                                gradient: const LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [Colors.blueAccent, Colors.blue],
+                                  stops: [0.37, 1.0],
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30.0),
-                              gradient: const LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [Colors.blueAccent, Colors.blue],
-                                stops: [0.37, 1.0],
-                              ),
-                            ),
-                            child: IconButton(
-                              icon: isWriting
-                                  ? const TypingIndicators(
-                                      color: Colors.white,
-                                      size: 2.0) // Custom typing indicator
-                                  : const Icon(Icons.send, color: Colors.white),
-                              onPressed: () async {
-                                isError=true;
-                                focusNode.unfocus();
-                                debugPrint(selectedSessionId.toString());
-                                if (selectedImageFiles.isEmpty) {
-                                  return;
-                                } else if (imageUploadBloc.imagefiles.isEmpty &&
-                                    isOneTimeImageUploaded) {
-                                  String question = textController.text.trim();
-                                  // String sessionId = selectedSessionId.toString();
-                                  // var tempId =
-                                  //     -1; // Unique temporary ID for the response
-                                  if (question != '') {
+                              child: IconButton(
+                                icon: isWriting
+                                    ? const TypingIndicators(
+                                        color: Colors.white,
+                                        size: 2.0) // Custom typing indicator
+                                    : const Icon(Icons.send, color: Colors.white),
+                                onPressed: () async {
+                                  isError=true;
+                                  focusNode.unfocus();
+                                  debugPrint(selectedSessionId.toString());
+                                  if (selectedImageFiles.isEmpty) {
+                                    return;
+                                  } else if (imageUploadBloc.imagefiles.isEmpty &&
+                                      isOneTimeImageUploaded) {
+                                    String question = textController.text.trim();
+                                    // String sessionId = selectedSessionId.toString();
+                                    // var tempId =
+                                    //     -1; // Unique temporary ID for the response
+                                    if (question != '') {
+                                      setState(() {
+                                        isOneTimeImageUploaded = true;
+                                        var myMessage = Messages(
+                                          id: -1,
+                                          gptSessionId:
+                                              selectedSessionId.toString(),
+                                          question: question,
+                                          response: 'Generating response...',
+                                          createdAt: DateTime.now().toString(),
+                                          updatedAt: DateTime.now().toString(),
+                                          imageUrl1: '',
+                                          imageUrl2: '',
+                                        );
+                                        state1.response1.messages!.add(myMessage);
+
+                                        BlocProvider.of<ChatGPTBloc>(context).add(
+                                          GetPost(
+                                              sessionId:
+                                                  selectedSessionId.toString(),
+                                              question: question,
+                                              imageUrl1: null,
+                                              imageUrl2: null,
+                                              // replace with real input
+                                              imageType: imageType),
+                                        );
+                                        imageUploadBloc.imagefiles.clear();
+                                        textController.clear();
+
+                                        scrollToBottom();
+                                      });
+
+                                      try {
+                                        isWriting = false;
+                                        // });
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text('Error: $e')));
+                                      }
+                                    } else {
+                                      toasty(context, 'Please ask Question');
+                                    }
+                                  } else if (imageUploadBloc
+                                          .imagefiles.isNotEmpty &&
+                                      !isOneTimeImageUploaded) {
+                                    String question = textController.text.trim();
+                                    // String sessionId = selectedSessionId.toString();
+                                    // var tempId =
+                                    //     -1; // Unique temporary ID for the response
                                     setState(() {
                                       isOneTimeImageUploaded = true;
                                       var myMessage = Messages(
@@ -677,8 +670,10 @@ bool isError=false;
                                         response: 'Generating response...',
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl1: '',
-                                        imageUrl2: '',
+                                        imageUrl1:
+                                            imageUploadBloc.imagefiles.first.path,
+                                        imageUrl2:
+                                            imageUploadBloc.imagefiles.first.path,
                                       );
                                       state1.response1.messages!.add(myMessage);
 
@@ -686,83 +681,33 @@ bool isError=false;
                                         GetPost(
                                             sessionId:
                                                 selectedSessionId.toString(),
-                                            question: question,
-                                            imageUrl1: null,
-                                            imageUrl2: null,
+                                            question: question == ""
+                                                ? 'Analyse Image'
+                                                : question,
+                                            imageUrl1: imageUploadBloc
+                                                .imagefiles.first.path,
+                                            imageUrl2: imageUploadBloc
+                                                .imagefiles.last.path,
                                             // replace with real input
                                             imageType: imageType),
                                       );
                                       imageUploadBloc.imagefiles.clear();
                                       textController.clear();
-
                                       scrollToBottom();
                                     });
-
                                     try {
                                       isWriting = false;
-                                      // });
                                     } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: Text('Error: $e')));
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Error: $e')));
                                     }
-                                  } else {
-                                    toasty(context, 'Please ask Question');
                                   }
-                                } else if (imageUploadBloc
-                                        .imagefiles.isNotEmpty &&
-                                    !isOneTimeImageUploaded) {
-                                  String question = textController.text.trim();
-                                  // String sessionId = selectedSessionId.toString();
-                                  // var tempId =
-                                  //     -1; // Unique temporary ID for the response
-                                  setState(() {
-                                    isOneTimeImageUploaded = true;
-                                    var myMessage = Messages(
-                                      id: -1,
-                                      gptSessionId:
-                                          selectedSessionId.toString(),
-                                      question: question,
-                                      response: 'Generating response...',
-                                      createdAt: DateTime.now().toString(),
-                                      updatedAt: DateTime.now().toString(),
-                                      imageUrl1:
-                                          imageUploadBloc.imagefiles.first.path,
-                                      imageUrl2:
-                                          imageUploadBloc.imagefiles.first.path,
-                                    );
-                                    state1.response1.messages!.add(myMessage);
-
-                                    BlocProvider.of<ChatGPTBloc>(context).add(
-                                      GetPost(
-                                          sessionId:
-                                              selectedSessionId.toString(),
-                                          question: question == ""
-                                              ? 'Analyse Image'
-                                              : question,
-                                          imageUrl1: imageUploadBloc
-                                              .imagefiles.first.path,
-                                          imageUrl2: imageUploadBloc
-                                              .imagefiles.last.path,
-                                          // replace with real input
-                                          imageType: imageType),
-                                    );
-                                    imageUploadBloc.imagefiles.clear();
-                                    textController.clear();
-                                    scrollToBottom();
-                                  });
-                                  try {
-                                    isWriting = false;
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Error: $e')));
-                                  }
-                                }
-                              },
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Container(

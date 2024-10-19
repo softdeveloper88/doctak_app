@@ -1,19 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/presentation/group_screen/group_create_screen.dart';
-import 'package:doctak_app/presentation/group_screen/group_view_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
-
 import 'package:nb_utils/nb_utils.dart';
+import 'package:timeago/timeago.dart' as timeAgo;
 
 import 'chat_room_screen.dart';
 
@@ -36,7 +29,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
@@ -44,7 +37,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        centerTitle: true,
+        centerTitle: false,
         title: Text(
           'Chats',
           style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
@@ -196,10 +189,13 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                   color: svGetBodyColor(),
                                 ),
                               )
-                            :
-
-                            Padding(
-                                padding: const EdgeInsets.all(8.0),
+                            : Container(
+                          
+                                margin: const EdgeInsets.only(top: 8.0,left: 8.0,right: 8.0),
+                                decoration: BoxDecoration(
+                                  color: svGetScaffoldColor(),
+                                  borderRadius: BorderRadius.circular(10)
+                                ),
                                 child: InkWell(
                                   onTap: () {
                                     ChatRoomScreen(
@@ -235,9 +231,9 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                     boxShadow: [
                                                       BoxShadow(
                                                         color: Colors.grey
-                                                            .withOpacity(0.5),
-                                                        spreadRadius: 2,
-                                                        blurRadius: 5,
+                                                            .withOpacity(0.3),
+                                                        spreadRadius:1,
+                                                        blurRadius: 3,
                                                         offset:
                                                             const Offset(0, 3),
                                                       ),

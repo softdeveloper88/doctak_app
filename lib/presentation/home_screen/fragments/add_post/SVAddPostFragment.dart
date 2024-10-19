@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
@@ -173,9 +174,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                         ),
                       ],
                     ),
-                    Text(AppData.userType,
+                    Text(capitalizeWords(AppData.specialty),
                         style: secondaryTextStyle(
-                            color: svGetBodyColor(), size: 12)),
+                            color: svGetBodyColor(), size: 13)),
                   ],
                 ),
                 4.width,

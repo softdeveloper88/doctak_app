@@ -55,7 +55,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: svGetBgColor(),
         appBar: AppBar(
           // toolbarHeight: 200,
           leading: GestureDetector(
@@ -70,6 +70,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
 
           backgroundColor: svGetScaffoldColor(),
           iconTheme: IconThemeData(color: context.iconColor),
+
           title: BlocConsumer<SplashBloc, SplashState>(
               listener: (e, state) {},
               builder: (context, state) {
@@ -118,7 +119,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                               isSearchShow = !isSearchShow;
                             },
                             child: isSearchShow
-                                ? Icon(Icons.cancel_outlined,
+                                ? Icon(Icons.close,
                                         size: 25,
                                         // height: 16,
                                         // width: 16,
@@ -176,11 +177,11 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 } else if (state is DataError) {
                   return Center(child: Text('Error: $state'));
                 } else {
-                  return Center(child: Text('Unknown state$state'));
+                  return const Center(child: Text(''));
                 }
               }),
           elevation: 0,
-          centerTitle: true,
+          centerTitle: false,
           // actions:  [
           //   // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
           // ],
@@ -198,51 +199,50 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                         if (isSearchShow)
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              margin: const EdgeInsets.only(
-                                left: 16,
-                                top: 16.0,
-                                bottom: 16.0,
-                                right: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                  color: context.dividerColor.withOpacity(0.4),
-                                  borderRadius: radius(5),
-                                  border: Border.all(
-                                      color: Colors.black, width: 0.3)),
-                              child: AppTextField(
-                                textFieldType: TextFieldType.NAME,
-                                onChanged: (searchTxt) async {
-                                  if (_debounce?.isActive ?? false)
-                                    _debounce?.cancel();
-                                  _debounce = Timer(
-                                      const Duration(milliseconds: 500), () {
-                                    conferenceBloc.add(
-                                      LoadPageEvent(
-                                        page: 1,
-                                        countryName: state.countryName,
-                                        searchTerm: searchTxt,
-                                      ),
-                                    );
-                                    BlocProvider.of<SplashBloc>(context)
-                                        .add(LoadDropdownData1(
-                                      state.countryName,
-                                      searchTxt,
-                                    ));
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Search Conferences',
-                                  hintStyle: secondaryTextStyle(
-                                      color: svGetBodyColor()),
-                                  suffixIcon: Image.asset(
-                                          'images/socialv/icons/ic_Search.png',
-                                          height: 16,
-                                          width: 16,
-                                          fit: BoxFit.cover,
-                                          color: svGetBodyColor())
-                                      .paddingAll(16),
+                              color: svGetScaffoldColor(),
+                              padding: const EdgeInsets.all(10.0),
+                              child: Container(
+                                padding: const EdgeInsets.only(left: 8.0),
+
+                                decoration: BoxDecoration(
+                                    color: context.dividerColor.withOpacity(0.4),
+                                    borderRadius: radius(5),
+                                    border: Border.all(
+                                        color: Colors.black, width: 0.5)),
+                                child: AppTextField(
+                                  textFieldType: TextFieldType.NAME,
+                                  onChanged: (searchTxt) async {
+                                    if (_debounce?.isActive ?? false)
+                                      _debounce?.cancel();
+                                    _debounce = Timer(
+                                        const Duration(milliseconds: 500), () {
+                                      conferenceBloc.add(
+                                        LoadPageEvent(
+                                          page: 1,
+                                          countryName: state.countryName,
+                                          searchTerm: searchTxt,
+                                        ),
+                                      );
+                                      BlocProvider.of<SplashBloc>(context)
+                                          .add(LoadDropdownData1(
+                                        state.countryName,
+                                        searchTxt,
+                                      ));
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: 'Search Conferences',
+                                    hintStyle: secondaryTextStyle(
+                                        color: svGetBodyColor()),
+                                    suffixIcon: Image.asset(
+                                            'images/socialv/icons/ic_Search.png',
+                                            height: 16,
+                                            width: 16,
+                                            fit: BoxFit.cover,
+                                            color: svGetBodyColor())
+                                        .paddingAll(16),
+                                  ),
                                 ),
                               ),
                             ),

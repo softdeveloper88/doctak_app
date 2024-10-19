@@ -75,7 +75,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
               Navigator.pop(context);
             }),
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         actions: [
           InkWell(
             onTap: () {
@@ -83,7 +83,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
               isSearchShow = !isSearchShow;
             },
             child: isSearchShow
-                ? Icon(Icons.cancel_outlined,
+                ? Icon(Icons.close,
                         size: 25,
                         // height: 16,
                         // width: 16,

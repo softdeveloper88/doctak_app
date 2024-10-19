@@ -45,7 +45,7 @@ class SearchPeopleList extends StatelessWidget {
                   child: Text("No Result Found"),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.only(left: 16,top: 8,right: 16,bottom: 16),
                   shrinkWrap: true,
                   // physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {

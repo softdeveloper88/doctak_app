@@ -28,7 +28,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationCheckIfNeedMoreDataEvent>((event, emit) async {
       // emit(PaginationLoadingState());
       if (event.index == notificationsList.length - nextPageTrigger) {
-        add(NotificationLoadPageEvent(page: pageNumber));
+        print('length ${notificationsList.length}');
+        add(NotificationLoadPageEvent(page: pageNumber,readStatus: ''));
+
       }
     });
   }
@@ -51,37 +53,21 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         'Bearer ${AppData.userToken}',
         '$pageNumber',
       );
+       print(response.toJson());
        numberOfPage = response.notifications?.lastPage ?? 0;
        if (pageNumber < numberOfPage + 1) {
          pageNumber = pageNumber + 1;
          notificationsList.addAll(response.notifications?.data?? []);
        }
-       totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
-       print(totalNotifications);
 
-    }else if(event.readStatus=='unread'){
-      print(event.readStatus);
-      response = await postService.getSelectedNotifications(
-        'Bearer ${AppData.userToken}',
-        '$pageNumber',
-        event.readStatus??""
-      );
-      numberOfPage = response.notifications?.lastPage ?? 0;
-      if (pageNumber < numberOfPage + 1) {
-        pageNumber = pageNumber + 1;
-        notificationsList.addAll(response.notifications?.data?? []);
-      }
-      totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
-      print(totalNotifications);
 
-    }else{
+    }else if(event.readStatus=='mark-read'){
       var response = await postService.readAllSelectedNotifications(
           'Bearer ${AppData.userToken}',
 
       );
       // notificationsModel.notifications?.data. where((e)=>e.isRead==1)=0;
       print(response.data);
-      totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
 
     }
 
@@ -108,8 +94,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         event.notificationId??""
       );
 
-     totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
-   notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
+     // totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
+     notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
     print(response.data);
 
     emit(PaginationLoadedState());

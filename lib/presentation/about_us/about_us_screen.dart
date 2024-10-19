@@ -24,7 +24,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
         iconTheme: IconThemeData(color: context.iconColor),
         title: Text('About Us', style: boldTextStyle(size: 18,)),
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         actions: const [
           // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
         ],

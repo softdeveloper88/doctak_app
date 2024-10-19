@@ -51,7 +51,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
@@ -59,7 +59,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
         ),
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
-        centerTitle: true,
+        centerTitle: false,
         title: Text(
           'Search Contacts',
           style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
@@ -68,32 +68,30 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
       body: Column(
         children: [
           Container(
-            padding: const EdgeInsets.only(left: 8.0),
-            margin: const EdgeInsets.only(
-              left: 16,
-              top: 16.0,
-              bottom: 16.0,
-              right: 16,
-            ),
-            decoration: BoxDecoration(
-                color: context.dividerColor.withOpacity(0.4),
-                borderRadius: radius(5),
-                border: Border.all(color: Colors.black, width: 0.3)),
-            child: Center(
-              child: AppTextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                textFieldType: TextFieldType.NAME,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Search ',
-                  hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                  suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                          height: 16,
-                          width: 16,
-                          fit: BoxFit.cover,
-                          color: svGetBodyColor())
-                      .paddingAll(16),
+            color: svGetScaffoldColor(),
+            padding: const EdgeInsets.all(10.0),
+            child: Container(
+              padding: const EdgeInsets.only(left: 8.0),
+              decoration: BoxDecoration(
+                  color: context.dividerColor.withOpacity(0.4),
+                  borderRadius: radius(5),
+                  border: Border.all(color: Colors.black, width: 0.5)),
+              child: Center(
+                child: AppTextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  textFieldType: TextFieldType.NAME,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Search ',
+                    hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                    suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
+                            height: 16,
+                            width: 16,
+                            fit: BoxFit.cover,
+                            color: svGetBodyColor())
+                        .paddingAll(16),
+                  ),
                 ),
               ),
             ),
@@ -159,75 +157,12 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                               ),
                             )
                           :
-                          // Padding(
-                          //       padding: const EdgeInsets.all(8.0),
-                          //       child: Material(
-                          //                               elevation: 2,
-                          //                               shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(8),
-                          //                               ),
-                          //                               child: Padding(
-                          //       padding: const EdgeInsets.all(10.0),
-                          //       child: ListTile(
-                          //         leading:GestureDetector(
-                          //           onTap: (){
-                          //             SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
-                          //
-                          //           },
-                          //           child: Container(
-                          //             width: 60,
-                          //             height: 60,
-                          //             decoration: BoxDecoration(
-                          //               shape: BoxShape.circle,
-                          //               boxShadow: [
-                          //                 BoxShadow(
-                          //                   color: Colors.grey.withOpacity(0.5),
-                          //                   spreadRadius: 2,
-                          //                   blurRadius: 5,
-                          //                   offset: const Offset(0, 3),
-                          //                 ),
-                          //               ],
-                          //             ),
-                          //             child: CircleAvatar(
-                          //               radius: 30,
-                          //               backgroundImage: CachedNetworkImageProvider(
-                          //                 '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}',
-                          //               ),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //         // GestureDetector(
-                          //         //   onTap: (){
-                          //         //     SVProfileFragment(userId:bloc.searchContactsList[index].id).launch(context);
-                          //         //   },
-                          //         //   child: CircleAvatar(
-                          //         //     radius: 30,
-                          //         //     backgroundImage: CachedNetworkImageProvider(
-                          //         //         '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic}'
-                          //         //     ),
-                          //         //   ),
-                          //         // ),
-                          //         title: Text(
-                          //           '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',
-                          //           style: const TextStyle(
-                          //             fontWeight: FontWeight.bold,
-                          //             fontSize: 16,
-                          //           ),
-                          //         ),
-                          //         trailing: const Icon(
-                          //           Icons.chat, // Use the chat icon or any other icon you prefer
-                          //           color: Colors.blue, // Set the color of the icon
-                          //         ),
-                          //         onTap: () {
-                          //           ChatRoomScreen(username: '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',profilePic: '${bloc.searchContactsList[index].profilePic}',id: '${bloc.searchContactsList[index].id}',roomId: '',).launch(context);
-                          //
-                          //           // Add navigation logic or any other action on contact tap
-                          //         },
-                          //       ),
-                          //                               ),
-                          //                             ),
-                          //     );
-                          Padding(
+                          Container(
+                            margin: const EdgeInsets.only(top: 8.0,left: 8.0,right: 8.0),
+                            decoration: BoxDecoration(
+                                color: svGetScaffoldColor(),
+                                borderRadius: BorderRadius.circular(10)
+                            ),
                               padding: const EdgeInsets.all(8.0),
                               child: InkWell(
                                 onTap: () {
@@ -280,8 +215,8 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                                     BoxShadow(
                                                       color: Colors.grey
                                                           .withOpacity(0.5),
-                                                      spreadRadius: 2,
-                                                      blurRadius: 5,
+                                                      spreadRadius: 1,
+                                                      blurRadius: 3,
                                                       offset:
                                                           const Offset(0, 3),
                                                     ),

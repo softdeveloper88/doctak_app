@@ -91,7 +91,7 @@ class _JobsScreenState extends State<JobsScreen> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: svGetBgColor(),
         body: Column(
           children: [
             BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
@@ -128,10 +128,9 @@ class _JobsScreenState extends State<JobsScreen> {
                         // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                              child: Center(
-                                  child: Text('Jobs',
-                                      textAlign: TextAlign.center,
-                                      style: boldTextStyle(size: 18)))),
+                              child: Text('Jobs',
+                                  textAlign: TextAlign.left,
+                                  style: boldTextStyle(size: 18))),
                           Expanded(
                             child: CustomDropdownField(
                               items: state.countriesModel.countries ?? [],
@@ -172,7 +171,7 @@ class _JobsScreenState extends State<JobsScreen> {
                               isSearchShow = !isSearchShow;
                             },
                             child: isSearchShow
-                                ? Icon(Icons.cancel_outlined,
+                                ? Icon(Icons.close,
                                         size: 25,
                                         // height: 16,
                                         // width: 16,
@@ -194,328 +193,322 @@ class _JobsScreenState extends State<JobsScreen> {
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       elevation: 0,
-                      centerTitle: true,
+                      centerTitle: false,
                     ),
-                    Divider(
-                      color: Colors.grey[300],
-                      endIndent: 16,
-                      indent: 16,
-                    ),
-                    Column(
-                      children: [
-                        Column(
-                          children: [
-                            if (isSearchShow)
-                              Container(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                margin: const EdgeInsets.only(
-                                  left: 16,
-                                  top: 16.0,
-                                  bottom: 16.0,
-                                  right: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                    color:
-                                        context.dividerColor.withOpacity(0.4),
-                                    borderRadius: radius(5),
-                                    border: Border.all(
-                                        color: svGetBodyColor(), width: 0.3)),
-                                child:
-                                // CustomDropdownSearch(
-                                    //   onChanged: (searchTxt) {
-                                    //     if (_debounce?.isActive ?? false)
-                                    //       _debounce?.cancel();
-                                    //
-                                    //     _debounce = Timer(
-                                    //         const Duration(milliseconds: 500), () {
-                                    //       // jobsBloc.add(
-                                    //       //   GetPost(
-                                    //       //     page: '1',
-                                    //       //     countryId: AppData.countryName,
-                                    //       //     searchTerm: searchTxt,
-                                    //       //   ),
-                                    //       // );
-                                    //       BlocProvider.of<SplashBloc>(context).add(
-                                    //           LoadDropdownData(
-                                    //               state.countryFlag,
-                                    //               state.typeValue,
-                                    //               searchTxt ?? '',
-                                    //               state.isExpired));
-                                    //       jobsBloc.add(JobLoadPageEvent(
-                                    //         page: 1,
-                                    //         countryId: state.countryFlag != ''
-                                    //             ? state.countryFlag
-                                    //             : '${state.countriesModel.countries?.first.id ?? 1}',
-                                    //         searchTerm: searchTxt,
-                                    //       ));
-                                    //     });
-                                    //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                    //   },
-                                    //   hintText: 'Search speciality',
-                                    //   textController: _controller,
-                                    //   items: profileBloc.specialtyList ?? [],
-                                    //   dropdownHeight: 300,
-                                    //   onSelect: (searchTxt) {
-                                    //     if (_debounce?.isActive ?? false)
-                                    //       _debounce?.cancel();
-                                    //
-                                    //     _debounce = Timer(
-                                    //         const Duration(milliseconds: 500), () {
-                                    //       // jobsBloc.add(
-                                    //       //   GetPost(
-                                    //       //     page: '1',
-                                    //       //     countryId: AppData.countryName,
-                                    //       //     searchTerm: searchTxt,
-                                    //       //   ),
-                                    //       // );
-                                    //       BlocProvider.of<SplashBloc>(context).add(
-                                    //           LoadDropdownData(
-                                    //               state.countryFlag,
-                                    //               state.typeValue,
-                                    //               searchTxt ?? '',
-                                    //               state.isExpired));
-                                    //       jobsBloc.add(JobLoadPageEvent(
-                                    //         page: 1,
-                                    //         countryId: state.countryFlag != ''
-                                    //             ? state.countryFlag
-                                    //             : '${state.countriesModel.countries?.first.id ?? 1}',
-                                    //         searchTerm: searchTxt,
-                                    //       ));
-                                    //     });
-                                    //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                    //   },
-                                    // )
-                                    AppTextField(
-                                  controller: _controller,
-                                  textFieldType: TextFieldType.NAME,
-                                  onChanged: (searchTxt) async {
-                                    // if (_debounce?.isActive ?? false)
-                                    //   _debounce?.cancel();
-                                    // _debounce = Timer(const Duration(milliseconds: 500), () {
-                                    _filterSuggestions(searchTxt);
-                                    isShownSuggestion = true;
-                                    // jobsBloc.add(
-                                    //   GetPost(
-                                    //     page: '1',
-                                    //     countryId: AppData.countryName,
-                                    //     searchTerm: searchTxt,
-                                    //   ),
-                                    // );
-                                    // BlocProvider.of<SplashBloc>(context).add(
-                                    //     LoadDropdownData(
-                                    //         state.countryFlag,
-                                    //         state.typeValue,
-                                    //         searchTxt ?? '',
-                                    //         state.isExpired));
-                                    // jobsBloc.add(JobLoadPageEvent(
-                                    //   page: 1,
-                                    //   countryId: state.countryFlag != ''
-                                    //       ? state.countryFlag
-                                    //       : '${state.countriesModel.countries?.first.id ?? 1}',
-                                    //   searchTerm: searchTxt,
-                                    // ));
-                                    // });
-                                    // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                  },
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Search by Specialty',
-                                    hintStyle: secondaryTextStyle(
-                                        color: svGetBodyColor()),
-                                    suffixIcon: GestureDetector(
-                                      onTap: () {
-                                        isShownSuggestion = true;
-                                        BlocProvider.of<SplashBloc>(context)
-                                            .add(LoadDropdownData(
-                                                state.countryFlag,
-                                                state.typeValue,
-                                                _controller.text ?? '',
-                                                state.isExpired));
-                                        jobsBloc.add(JobLoadPageEvent(
-                                          page: 1,
-                                          countryId: state.countryFlag != ''
-                                              ? state.countryFlag
-                                              : '${state.countriesModel.countries?.first.id ?? 1}',
-                                          searchTerm: _controller.text,
-                                        ));
-                                      },
-                                      child: Image.asset(
-                                              'images/socialv/icons/ic_Search.png',
-                                              height: 16,
-                                              width: 16,
-                                              fit: BoxFit.cover,
-                                              color: svGetBodyColor())
-                                          .paddingAll(16),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (isShownSuggestion)
-                              ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: _filteredSuggestions.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    color: Colors.white,
-                                    child: ListTile(
-                                      title: Text(_filteredSuggestions[index]),
-                                      onTap: () {
-                                        setState(() {});
-                                        isShownSuggestion = false;
-                                        _controller.text =
-                                            _filteredSuggestions[index];
-                                        BlocProvider.of<SplashBloc>(context)
-                                            .add(LoadDropdownData(
-                                                state.countryFlag,
-                                                state.typeValue,
-                                                _filteredSuggestions[index] ??
-                                                    '',
-                                                state.isExpired));
-                                        jobsBloc.add(JobLoadPageEvent(
-                                          page: 1,
-                                          countryId: state.countryFlag != ''
-                                              ? state.countryFlag
-                                              : '${state.countriesModel.countries?.first.id ?? 1}',
-                                          searchTerm:
-                                              _filteredSuggestions[index],
-                                        ));
-                                        // Do something with the selected suggestion
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    Container(
+                      color: svGetScaffoldColor(),
+                      child: Column(
+                        children: [
+                          Column(
                             children: [
-                              Column(
-                                children: [
-                                  TextButton(
-                                    onPressed: () {
-                                      selectedIndex = 0;
-                                      BlocProvider.of<SplashBloc>(context).add(
-                                          LoadDropdownData(
-                                              state.countryFlag,
-                                              "New",
-                                              state.searchTerms ?? '',
-                                              'New'));
-                                      jobsBloc.add(JobLoadPageEvent(
-                                          page: 1,
-                                          countryId: state.countryFlag != ''
-                                              ? state.countryFlag
-                                              : '${state.countriesModel.countries?.first.id ?? 1}',
-                                          searchTerm: state.searchTerms ?? '',
-                                          isExpired: 'New'));
-                                    },
-                                    child: Text(
-                                      'New',
-                                      style: TextStyle(
-                                        color: SVAppColorPrimary,
-                                        fontSize: 14,
-                                        fontWeight: selectedIndex == 0
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 2,
-                                    width: context.width() / 2 - 10,
-                                    color: selectedIndex == 0
-                                        ? SVAppColorPrimary
-                                        : SVAppColorPrimary.withOpacity(0.2),
-                                  ),
-                                ],
-                              ),
-                              Center(
+                              if (isSearchShow)
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
                                   child: Container(
-                                color: Colors.grey,
-                                height: 30,
-                                width: 1,
-                              )),
-                              Column(
-                                children: [
-                                  TextButton(
-                                    onPressed: () {
-                                      selectedIndex = 1;
-                                      BlocProvider.of<SplashBloc>(context).add(
-                                          LoadDropdownData(
-                                              state.countryFlag,
-                                              "Expired",
-                                              state.searchTerms ?? '',
-                                              'Expired'));
-                                      jobsBloc.add(JobLoadPageEvent(
-                                          page: 1,
-                                          countryId: state.countryFlag != ''
-                                              ? state.countryFlag
-                                              : '${state.countriesModel.countries?.first.id ?? 1}',
-                                          searchTerm: state.searchTerms ?? '',
-                                          isExpired: 'Expired'));
-                                    },
-                                    child: Text(
-                                      'Expired',
-                                      style: TextStyle(
-                                        color: SVAppColorPrimary,
-                                        fontSize: 14,
-                                        fontWeight: selectedIndex == 1
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    decoration: BoxDecoration(
+                                        color: context.dividerColor.withOpacity(0.4),
+                                        borderRadius: radius(5),
+                                        border: Border.all(
+                                            color: svGetBodyColor(), width: 0.5)),
+                                    child:
+                                    // CustomDropdownSearch(
+                                        //   onChanged: (searchTxt) {
+                                        //     if (_debounce?.isActive ?? false)
+                                        //       _debounce?.cancel();
+                                        //
+                                        //     _debounce = Timer(
+                                        //         const Duration(milliseconds: 500), () {
+                                        //       // jobsBloc.add(
+                                        //       //   GetPost(
+                                        //       //     page: '1',
+                                        //       //     countryId: AppData.countryName,
+                                        //       //     searchTerm: searchTxt,
+                                        //       //   ),
+                                        //       // );
+                                        //       BlocProvider.of<SplashBloc>(context).add(
+                                        //           LoadDropdownData(
+                                        //               state.countryFlag,
+                                        //               state.typeValue,
+                                        //               searchTxt ?? '',
+                                        //               state.isExpired));
+                                        //       jobsBloc.add(JobLoadPageEvent(
+                                        //         page: 1,
+                                        //         countryId: state.countryFlag != ''
+                                        //             ? state.countryFlag
+                                        //             : '${state.countriesModel.countries?.first.id ?? 1}',
+                                        //         searchTerm: searchTxt,
+                                        //       ));
+                                        //     });
+                                        //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                                        //   },
+                                        //   hintText: 'Search speciality',
+                                        //   textController: _controller,
+                                        //   items: profileBloc.specialtyList ?? [],
+                                        //   dropdownHeight: 300,
+                                        //   onSelect: (searchTxt) {
+                                        //     if (_debounce?.isActive ?? false)
+                                        //       _debounce?.cancel();
+                                        //
+                                        //     _debounce = Timer(
+                                        //         const Duration(milliseconds: 500), () {
+                                        //       // jobsBloc.add(
+                                        //       //   GetPost(
+                                        //       //     page: '1',
+                                        //       //     countryId: AppData.countryName,
+                                        //       //     searchTerm: searchTxt,
+                                        //       //   ),
+                                        //       // );
+                                        //       BlocProvider.of<SplashBloc>(context).add(
+                                        //           LoadDropdownData(
+                                        //               state.countryFlag,
+                                        //               state.typeValue,
+                                        //               searchTxt ?? '',
+                                        //               state.isExpired));
+                                        //       jobsBloc.add(JobLoadPageEvent(
+                                        //         page: 1,
+                                        //         countryId: state.countryFlag != ''
+                                        //             ? state.countryFlag
+                                        //             : '${state.countriesModel.countries?.first.id ?? 1}',
+                                        //         searchTerm: searchTxt,
+                                        //       ));
+                                        //     });
+                                        //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                                        //   },
+                                        // )
+                                        AppTextField(
+                                      controller: _controller,
+                                      textFieldType: TextFieldType.NAME,
+                                      onChanged: (searchTxt) async {
+                                        // if (_debounce?.isActive ?? false)
+                                        //   _debounce?.cancel();
+                                        // _debounce = Timer(const Duration(milliseconds: 500), () {
+                                        _filterSuggestions(searchTxt);
+                                        isShownSuggestion = true;
+                                        // jobsBloc.add(
+                                        //   GetPost(
+                                        //     page: '1',
+                                        //     countryId: AppData.countryName,
+                                        //     searchTerm: searchTxt,
+                                        //   ),
+                                        // );
+                                        // BlocProvider.of<SplashBloc>(context).add(
+                                        //     LoadDropdownData(
+                                        //         state.countryFlag,
+                                        //         state.typeValue,
+                                        //         searchTxt ?? '',
+                                        //         state.isExpired));
+                                        // jobsBloc.add(JobLoadPageEvent(
+                                        //   page: 1,
+                                        //   countryId: state.countryFlag != ''
+                                        //       ? state.countryFlag
+                                        //       : '${state.countriesModel.countries?.first.id ?? 1}',
+                                        //   searchTerm: searchTxt,
+                                        // ));
+                                        // });
+                                        // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                                      },
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: 'Search by Specialty',
+                                        hintStyle: secondaryTextStyle(
+                                            color: svGetBodyColor()),
+                                        suffixIcon: GestureDetector(
+                                          onTap: () {
+                                            isShownSuggestion = true;
+                                            BlocProvider.of<SplashBloc>(context)
+                                                .add(LoadDropdownData(
+                                                    state.countryFlag,
+                                                    state.typeValue,
+                                                    _controller.text ?? '',
+                                                    state.isExpired));
+                                            jobsBloc.add(JobLoadPageEvent(
+                                              page: 1,
+                                              countryId: state.countryFlag != ''
+                                                  ? state.countryFlag
+                                                  : '${state.countriesModel.countries?.first.id ?? 1}',
+                                              searchTerm: _controller.text,
+                                            ));
+                                          },
+                                          child: Image.asset(
+                                                  'images/socialv/icons/ic_Search.png',
+                                                  height: 16,
+                                                  width: 16,
+                                                  fit: BoxFit.cover,
+                                                  color: svGetBodyColor())
+                                              .paddingAll(16),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  Container(
-                                    height: 2,
-                                    width: context.width() / 2 - 10,
-                                    color: selectedIndex == 1
-                                        ? SVAppColorPrimary
-                                        : SVAppColorPrimary.withOpacity(0.2),
-                                  ),
-                                ],
-                              ),
-                              16.height,
+                                ),
+                              if (isShownSuggestion)
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: _filteredSuggestions.length,
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      color: Colors.white,
+                                      child: ListTile(
+                                        title: Text(_filteredSuggestions[index]),
+                                        onTap: () {
+                                          setState(() {});
+                                          isShownSuggestion = false;
+                                          _controller.text =
+                                              _filteredSuggestions[index];
+                                          BlocProvider.of<SplashBloc>(context)
+                                              .add(LoadDropdownData(
+                                                  state.countryFlag,
+                                                  state.typeValue,
+                                                  _filteredSuggestions[index] ??
+                                                      '',
+                                                  state.isExpired));
+                                          jobsBloc.add(JobLoadPageEvent(
+                                            page: 1,
+                                            countryId: state.countryFlag != ''
+                                                ? state.countryFlag
+                                                : '${state.countriesModel.countries?.first.id ?? 1}',
+                                            searchTerm:
+                                                _filteredSuggestions[index],
+                                          ));
+                                          // Do something with the selected suggestion
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
                             ],
                           ),
-                        ),
-                        // Padding(
-                        //   padding: const EdgeInsets.all(16.0),
-                        //   child: CustomDropdownButtonFormField(
-                        //     items: list1,
-                        //     value: list1.first,
-                        //     width: 100,
-                        //     contentPadding: const EdgeInsets.symmetric(
-                        //       horizontal: 10,
-                        //       vertical: 0,
-                        //     ),
-                        //     onChanged: (String? newValue) {
-                        //       print(newValue);
-                        //       // jobsBloc.add(
-                        //       //   GetPost(
-                        //       //       page: '1',
-                        //       //       countryId: state.countryFlag,
-                        //       //       searchTerm: '',
-                        //       //       type: newValue!),
-                        //       // );
-                        //       BlocProvider.of<SplashBloc>(context).add(
-                        //           LoadDropdownData(
-                        //               state.countryFlag,
-                        //               newValue ?? "",
-                        //               state.searchTerms ?? '',
-                        //               newValue!));
-                        //       jobsBloc.add(JobLoadPageEvent(
-                        //           page: 1,
-                        //           countryId: state.countryFlag != ''
-                        //               ? state.countryFlag
-                        //               : '${state.countriesModel.countries?.first.id ?? 1}',
-                        //           searchTerm: state.searchTerms ?? '',
-                        //           isExpired: newValue));
-                        //     },
-                        //   ),
-                        // ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0,top: 8.0,right: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        selectedIndex = 0;
+                                        BlocProvider.of<SplashBloc>(context).add(
+                                            LoadDropdownData(
+                                                state.countryFlag,
+                                                "New",
+                                                state.searchTerms ?? '',
+                                                'New'));
+                                        jobsBloc.add(JobLoadPageEvent(
+                                            page: 1,
+                                            countryId: state.countryFlag != ''
+                                                ? state.countryFlag
+                                                : '${state.countriesModel.countries?.first.id ?? 1}',
+                                            searchTerm: state.searchTerms ?? '',
+                                            isExpired: 'New'));
+                                      },
+                                      child: Text(
+                                        'New',
+                                        style: TextStyle(
+                                          color: SVAppColorPrimary,
+                                          fontSize: 14,
+                                          fontWeight: selectedIndex == 0
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 2,
+                                      width: context.width() / 2 - 10,
+                                      color: selectedIndex == 0
+                                          ? SVAppColorPrimary
+                                          : SVAppColorPrimary.withOpacity(0.2),
+                                    ),
+                                  ],
+                                ),
+                                Center(
+                                    child: Container(
+                                  color: Colors.grey,
+                                  height: 30,
+                                  width: 1,
+                                )),
+                                Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        selectedIndex = 1;
+                                        BlocProvider.of<SplashBloc>(context).add(
+                                            LoadDropdownData(
+                                                state.countryFlag,
+                                                "Expired",
+                                                state.searchTerms ?? '',
+                                                'Expired'));
+                                        jobsBloc.add(JobLoadPageEvent(
+                                            page: 1,
+                                            countryId: state.countryFlag != ''
+                                                ? state.countryFlag
+                                                : '${state.countriesModel.countries?.first.id ?? 1}',
+                                            searchTerm: state.searchTerms ?? '',
+                                            isExpired: 'Expired'));
+                                      },
+                                      child: Text(
+                                        'Expired',
+                                        style: TextStyle(
+                                          color: SVAppColorPrimary,
+                                          fontSize: 14,
+                                          fontWeight: selectedIndex == 1
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 2,
+                                      width: context.width() / 2 - 10,
+                                      color: selectedIndex == 1
+                                          ? SVAppColorPrimary
+                                          : SVAppColorPrimary.withOpacity(0.2),
+                                    ),
+                                  ],
+                                ),
+                                16.height,
+                              ],
+                            ),
+                          ),
+                          // Padding(
+                          //   padding: const EdgeInsets.all(16.0),
+                          //   child: CustomDropdownButtonFormField(
+                          //     items: list1,
+                          //     value: list1.first,
+                          //     width: 100,
+                          //     contentPadding: const EdgeInsets.symmetric(
+                          //       horizontal: 10,
+                          //       vertical: 0,
+                          //     ),
+                          //     onChanged: (String? newValue) {
+                          //       print(newValue);
+                          //       // jobsBloc.add(
+                          //       //   GetPost(
+                          //       //       page: '1',
+                          //       //       countryId: state.countryFlag,
+                          //       //       searchTerm: '',
+                          //       //       type: newValue!),
+                          //       // );
+                          //       BlocProvider.of<SplashBloc>(context).add(
+                          //           LoadDropdownData(
+                          //               state.countryFlag,
+                          //               newValue ?? "",
+                          //               state.searchTerms ?? '',
+                          //               newValue!));
+                          //       jobsBloc.add(JobLoadPageEvent(
+                          //           page: 1,
+                          //           countryId: state.countryFlag != ''
+                          //               ? state.countryFlag
+                          //               : '${state.countriesModel.countries?.first.id ?? 1}',
+                          //           searchTerm: state.searchTerms ?? '',
+                          //           isExpired: newValue));
+                          //     },
+                          //   ),
+                          // ),
+                        ],
+                      ),
                     ),
                   ],
                 );
@@ -607,14 +600,14 @@ class _JobsScreenState extends State<JobsScreen> {
                           .launch(context);
                     },
                     child: Container(
-                      margin: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.only(left: 10,right: 10,bottom: 16),
                       decoration: BoxDecoration(
                         color: context.cardColor,
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Material(
                         color: context.cardColor,
-                        elevation: 4,
+                        elevation: 2,
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10)),
                         child: Container(

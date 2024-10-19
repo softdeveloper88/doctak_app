@@ -41,9 +41,9 @@ class ComingSoonWidget extends StatelessWidget {
             icon:
             Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
             onPressed: () {
-              Navigator.pushNamed(context,'/');
+              Navigator.pop(context);
             }),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: Container(
         padding: const EdgeInsets.all(20),

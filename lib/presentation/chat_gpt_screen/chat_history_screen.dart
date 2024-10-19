@@ -59,7 +59,7 @@ class ChatHistoryScreen extends StatelessWidget {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        centerTitle: true,
+        centerTitle: false,
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
         title: Text(

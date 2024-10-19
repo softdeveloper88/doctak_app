@@ -136,7 +136,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                 IconButton(onPressed: (){
                                   widget.caseDiscussionBloc.add(CaseDiscussEvent(caseId: widget.caseDiscussList.caseId.toString(),type: 'case',actionType: 'like'));
 
-                                },icon:Icon(Icons.thumb_up_alt_outlined)),
+                                },icon:const Icon(Icons.thumb_up_alt_outlined)),
                                 const SizedBox(width: 4),
                                 Text(
                                     '${widget.caseDiscussList.likes} Likes'),
@@ -158,9 +158,11 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                 ),
                 widget.caseDiscussionBloc.caseComments.comments?.isEmpty ??
                     false
-                    ? const Center(
-                  child: Text('No View'),
-                )
+                    ? const Expanded(
+                      child: Center(
+                                        child: Text('No answer added yet'),
+                                      ),
+                    )
                     : Expanded(child: ListView.builder(
                         padding: const EdgeInsets.only(bottom: 80.0),
                         itemCount: widget.caseDiscussionBloc
@@ -304,7 +306,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
               ],
             );
           } else {
-            return const Center(child: Text("No Comment Found"));
+            return const Center(child: Text("No Answer Found"));
           }
         },
       ),

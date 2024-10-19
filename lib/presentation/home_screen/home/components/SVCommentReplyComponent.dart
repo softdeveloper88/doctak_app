@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../../core/utils/app/AppData.dart';
 import '../screens/comment_screen/bloc/comment_bloc.dart';
@@ -34,7 +35,7 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.only(top: 16),
       color: svGetBgColor(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -45,58 +46,74 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
               16.width,
               CustomImageView(
                       imagePath: AppData.imageUrl + AppData.profile_pic,
-                      height: 48,
-                      width: 48,
+                      height: 10.w,
+                      width: 10.w,
                       fit: BoxFit.cover)
                   .cornerRadiusWithClipRRect(50),
               10.width,
               Container(
                 padding: const EdgeInsets.only(left: 4),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: svGetBodyColor())),
+                  color: context.cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  // border: Border.all(color: svGetBodyColor())
+                ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    SizedBox(
-                      width: context.width() * 0.6,
-                      child: AppTextField(
-                        focus: focusNode,
-                        minLines: 1,
-                        // textInputAction: TextInputAction.done,
-                        controller: commentController,
-                        textFieldType: TextFieldType.MULTILINE,
-                        decoration: InputDecoration(
-                          hintText: 'Write a comment',
-                          hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                        ),
-                        onFieldSubmitted: (value) {
-                          // Handle done action here if needed
-                          if (commentController.text.isNotEmpty) {
-                            focusNode.unfocus();
+                    Container(
+                      padding: const EdgeInsets.only(left: 4),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          // border: Border.all(color: svGetBodyColor())
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width:78.w,
+                            child: AppTextField(
+                              suffix:  TextButton(
+                                  onPressed: () {
+                                    if (commentController.text.isNotEmpty) {
+                                      focusNode.unfocus();
+                                      widget.onPostComment(commentController.text);
+                                      commentController.text = '';
 
-                            widget.onPostComment(commentController.text);
-                            commentController.text = '';
-                          }// Unfocus the text field to dismiss the keyboard
-                        },
+                                    }
+                                  },
+                                  child: Text('Post',
+                                      style: secondaryTextStyle(color: SVAppColorPrimary))),
+                              focus: focusNode,
+                              minLines: 1,
+                              // textInputAction: TextInputAction.done,
+                              controller: commentController,
+                              textFieldType: TextFieldType.MULTILINE,
+                              decoration: InputDecoration(
+                                hintText: ' Write a comment',
+                                hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                              ),
+                              onFieldSubmitted: (value) {
+                                // Handle done action here if needed
+                                if (commentController.text.isNotEmpty) {
+                                  focusNode.unfocus();
+
+                                  widget.onPostComment(commentController.text);
+                                  commentController.text = '';
+                                }// Unfocus the text field to dismiss the keyboard
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
+
                   ],
                 ),
               ),
-              TextButton(
-                  onPressed: () {
-                    if (commentController.text.isNotEmpty) {
-                      focusNode.unfocus();
-                      widget.onPostComment(commentController.text);
-                      commentController.text = '';
-
-                    }
-                  },
-                  child: Text('Post',
-                      style: secondaryTextStyle(color: SVAppColorPrimary))),
             ],
           ),
         ],

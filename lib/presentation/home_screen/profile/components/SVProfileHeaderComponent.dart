@@ -96,24 +96,31 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                         bottomLeft: 20, bottomRight: 20),
                 if (!widget.isMe!)
                   Positioned(
-                      left: 16,
-                      top: 30,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            color: white,
-                            borderRadius: BorderRadius.circular(40)),
-                        child: Center(
-                          child: IconButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: const Icon(
-                                Icons.arrow_back_ios,
-                              )),
+                    left: 16,
+                    top: 30,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Ensure to use a valid color like `Colors.white`
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: IconButton(
+                        // Remove unnecessary alignment here
+                        padding: EdgeInsets.zero, // Ensure no internal padding
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Padding(
+                          padding: EdgeInsets.only(left: 4.0),
+                          child: Icon(
+                            Icons.arrow_back_ios,
+                            size: 20, // Set the desired size for the icon
+                          ),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 Positioned(
                   bottom: 0,
                   child: GestureDetector(

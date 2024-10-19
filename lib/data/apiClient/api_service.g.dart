@@ -416,7 +416,36 @@ class _ApiService implements ApiService {
     return value;
   }
  @override
-  Future<PostDetailModel> getDetailsPosts(
+  Future<PostDetailsDataModel> getDetailsPosts(
+    String token,
+    String postId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PostDataModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+            .compose(
+              _dio.options,
+              '/post-by-comment/${postId}',
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = PostDetailsDataModel.fromJson(_result.data!);
+    return value;
+  }
+  @override
+  Future<PostDetailModel> getDetailsLikesPosts(
     String token,
     String postId,
   ) async {

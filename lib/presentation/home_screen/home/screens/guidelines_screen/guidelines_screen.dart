@@ -47,17 +47,16 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
 
   var selectedValue;
   GuidelinesBloc guidelineBloc = GuidelinesBloc();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
@@ -70,7 +69,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
               isSearchShow = !isSearchShow;
             },
             child: isSearchShow
-                ? Icon(Icons.cancel_outlined,
+                ? Icon(Icons.close,
                         size: 25,
                         // height: 16,
                         // width: 16,
@@ -91,43 +90,44 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
         children: [
           if (isSearchShow)
             Container(
-              padding: const EdgeInsets.only(left: 8.0),
-              margin: const EdgeInsets.only(
-                left: 16,
-                top: 16.0,
-                bottom: 16.0,
-                right: 16,
-              ),
-              decoration: BoxDecoration(
-                  color: context.dividerColor.withOpacity(0.4),
-                  borderRadius: radius(5),
-                  border: Border.all(color: svGetBodyColor(), width: 0.3)),
-              child: AppTextField(
-                onChanged: (searchTxt) async {
-                  if (_debounce?.isActive ?? false) _debounce?.cancel();
-                  _debounce = Timer(const Duration(milliseconds: 500), () {
-                    guidelineBloc.add(
-                      LoadPageEvent(
-                        page: 1,
-                        searchTerm: searchTxt,
-                      ),
-                    );
-                    // guidelineBloc.add(SearchFieldData(
-                    //    searchTxt,
-                    // ));
-                  });
-                },
-                textFieldType: TextFieldType.NAME,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Search  ',
-                  hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                  suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                          height: 16,
-                          width: 16,
-                          fit: BoxFit.cover,
-                          color: svGetBodyColor())
-                      .paddingAll(16),
+              color: svGetScaffoldColor(),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  padding: const EdgeInsets.only(left: 8.0),
+
+                  decoration: BoxDecoration(
+                      color: context.dividerColor.withOpacity(0.4),
+                      borderRadius: radius(5),
+                      border: Border.all(color: svGetBodyColor(), width: 0.5)),
+                  child: AppTextField(
+                    onChanged: (searchTxt) async {
+                      if (_debounce?.isActive ?? false) _debounce?.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 500), () {
+                        guidelineBloc.add(
+                          LoadPageEvent(
+                            page: 1,
+                            searchTerm: searchTxt,
+                          ),
+                        );
+                        // guidelineBloc.add(SearchFieldData(
+                        //    searchTxt,
+                        // ));
+                      });
+                    },
+                    textFieldType: TextFieldType.NAME,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Search  ',
+                      hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                      suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
+                              height: 16,
+                              width: 16,
+                              fit: BoxFit.cover,
+                              color: svGetBodyColor())
+                          .paddingAll(16),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -159,7 +159,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 final bloc = guidelineBloc;
                 return Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.only(left: 16,right: 16,bottom: 16),
                     shrinkWrap: true,
                     // physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
@@ -246,7 +246,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
         //     offset: const Offset(0, 3),
         //   ),
         // ],
-        color: appStore.isDarkMode ? context.cardColor : Colors.grey[300],
+        color: appStore.isDarkMode ? context.cardColor : context.cardColor ,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(

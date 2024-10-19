@@ -12,7 +12,7 @@ class SVDrawerModel {
 List<SVDrawerModel> getDrawerOptions(BuildContext context) {
   List<SVDrawerModel> list = [];
   list.add(SVDrawerModel(image: 'assets/icon/ic_guidlines.png', title: "About Us"));
-  list.add(SVDrawerModel(image: 'assets/images/docktak_ai_dark.png', title: 'Medical AI'));
+  list.add(SVDrawerModel(image: 'assets/images/docktak_ai_light.png', title: 'Medical AI'));
   list.add(SVDrawerModel(image: 'assets/icon/ic_jobs.png', title: translation(context).lbl_jobs));
   list.add(SVDrawerModel(image: 'assets/icon/ic_drugs.png', title: translation(context).lbl_drug_list));
   list.add(SVDrawerModel(image: 'assets/icon/ic_conference.png', title: 'Case Discussion'));

@@ -56,7 +56,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: svGetBgColor(),
       body: Column(
         children: [
           BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
@@ -139,7 +139,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             isSearchShow = !isSearchShow;
                           },
                           child: isSearchShow
-                              ? Icon(Icons.cancel_outlined,
+                              ? Icon(Icons.close,
                                       size: 25,
                                       // height: 16,
                                       // width: 16,
@@ -168,205 +168,201 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
                     ],
                   ),
-                  Divider(
-                    color: Colors.grey[300],
-                    endIndent: 16,
-                    indent: 16,
-                  ),
-                  Column(
-                    children: [
-                      if (isSearchShow)
-                        Container(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          margin: const EdgeInsets.only(
-                            left: 16,
-                            top: 8.0,
-                            bottom: 0.0,
-                            right: 16,
-                          ),
-                          decoration: BoxDecoration(
-                              color: context.dividerColor.withOpacity(0.4),
-                              borderRadius: radius(5),
-                              border: Border.all(
-                                  color: svGetBodyColor(), width: 0.3)),
-                          child: AppTextField(
-                            textFieldType: TextFieldType.NAME,
-                            onChanged: (searchTxt) async {
-                              if (_debounce?.isActive ?? false)
-                                _debounce?.cancel();
-                              _debounce =
-                                  Timer(const Duration(milliseconds: 500), () {
-                                // BlocProvider.of<DrugsBloc>(context).add(
-                                //   GetPost(
-                                //       page: '1',
-                                //       countryId: "1",
-                                //       searchTerm: searchTxt,
-                                //       type: state.typeValue),
-                                // );
-                                BlocProvider.of<SplashBloc>(context).add(
-                                    LoadDropdownData(state.countryFlag,
-                                        state.typeValue, searchTxt ?? '', ''));
-                                drugsBloc.add(LoadPageEvent(
-                                    page: 1,
-                                    countryId: state.countryFlag != ''
-                                        ? state.countryFlag
-                                        : '${state.countriesModel.countries?.first.id ?? 1}',
-                                    searchTerm: searchTxt,
-                                    type: state.typeValue));
-                              });
-                              // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                            },
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Search ',
-                              hintStyle:
-                                  secondaryTextStyle(color: svGetBodyColor()),
-                              suffixIcon: Image.asset(
-                                      'images/socialv/icons/ic_Search.png',
-                                      height: 16,
-                                      width: 16,
-                                      fit: BoxFit.cover,
-                                      color: svGetBodyColor())
-                                  .paddingAll(16),
-                            ),
-                          ),
-                        ),
-                      // Padding(
-                      //   padding: const EdgeInsets.all(16.0),
-                      //   child: CustomDropdownButtonFormField(
-                      //     items: list1,
-                      //     value: list1.first,
-                      //     width: 100,
-                      //     contentPadding: const EdgeInsets.symmetric(
-                      //       horizontal: 10,
-                      //       vertical: 0,
-                      //     ),
-                      //     onChanged: (String? newValue) {
-                      //       print(newValue);
-                      //       // BlocProvider.of<DrugsBloc>(context).add(
-                      //       //   GetPost(
-                      //       //       page: '1',
-                      //       //       countryId: state.countryFlag,
-                      //       //       searchTerm: '',
-                      //       //       type: newValue!),
-                      //       // );
-                      //       BlocProvider.of<SplashBloc>(context).add(
-                      //           LoadDropdownData(
-                      //               state.countryFlag,
-                      //               newValue ?? "Brand",
-                      //               state.searchTerms ?? '',
-                      //               ''));
-                      //       drugsBloc.add(LoadPageEvent(
-                      //           page: 1,
-                      //           countryId: state.countryFlag != ''
-                      //               ? state.countryFlag
-                      //               : '${state.countriesModel.countries?.first.id ?? 1}',
-                      //           searchTerm: state.searchTerms ?? '',
-                      //           type: newValue!));
-                      //     },
-                      //   ),
-                      // ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Column(
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    selectedIndex = 0;
+                  Container(
+                    color: svGetScaffoldColor(),
+                    child: Column(
+                      children: [
+                        if (isSearchShow)
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Container(
+                              padding: const EdgeInsets.only(left: 8.0),
+
+                              decoration: BoxDecoration(
+                                  color: context.dividerColor.withOpacity(0.4),
+                                  borderRadius: radius(5),
+                                  border: Border.all(
+                                      color: svGetBodyColor(), width: 0.5)),
+                              child: AppTextField(
+                                textFieldType: TextFieldType.NAME,
+                                onChanged: (searchTxt) async {
+                                  if (_debounce?.isActive ?? false)
+                                    _debounce?.cancel();
+                                  _debounce =
+                                      Timer(const Duration(milliseconds: 500), () {
                                     // BlocProvider.of<DrugsBloc>(context).add(
                                     //   GetPost(
                                     //       page: '1',
-                                    //       countryId: state.countryFlag,
-                                    //       searchTerm: '',
-                                    //       type: newValue!),
+                                    //       countryId: "1",
+                                    //       searchTerm: searchTxt,
+                                    //       type: state.typeValue),
                                     // );
                                     BlocProvider.of<SplashBloc>(context).add(
-                                        LoadDropdownData(
-                                            state.countryFlag,
-                                            "Brand",
-                                            state.searchTerms ?? '',
-                                            ''));
+                                        LoadDropdownData(state.countryFlag,
+                                            state.typeValue, searchTxt ?? '', ''));
                                     drugsBloc.add(LoadPageEvent(
                                         page: 1,
                                         countryId: state.countryFlag != ''
                                             ? state.countryFlag
                                             : '${state.countriesModel.countries?.first.id ?? 1}',
-                                        searchTerm: state.searchTerms ?? '',
-                                        type: 'Brand'));
-                                  },
-                                  child: Text(
-                                    'Brand',
-                                    style: TextStyle(
-                                      color: SVAppColorPrimary,
-                                      fontSize: 14,
-                                      fontWeight: selectedIndex == 0
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                        searchTerm: searchTxt,
+                                        type: state.typeValue));
+                                  });
+                                  // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
+                                },
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Search ',
+                                  hintStyle:
+                                      secondaryTextStyle(color: svGetBodyColor()),
+                                  suffixIcon: Image.asset(
+                                          'images/socialv/icons/ic_Search.png',
+                                          height: 16,
+                                          width: 16,
+                                          fit: BoxFit.cover,
+                                          color: svGetBodyColor())
+                                      .paddingAll(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        // Padding(
+                        //   padding: const EdgeInsets.all(16.0),
+                        //   child: CustomDropdownButtonFormField(
+                        //     items: list1,
+                        //     value: list1.first,
+                        //     width: 100,
+                        //     contentPadding: const EdgeInsets.symmetric(
+                        //       horizontal: 10,
+                        //       vertical: 0,
+                        //     ),
+                        //     onChanged: (String? newValue) {
+                        //       print(newValue);
+                        //       // BlocProvider.of<DrugsBloc>(context).add(
+                        //       //   GetPost(
+                        //       //       page: '1',
+                        //       //       countryId: state.countryFlag,
+                        //       //       searchTerm: '',
+                        //       //       type: newValue!),
+                        //       // );
+                        //       BlocProvider.of<SplashBloc>(context).add(
+                        //           LoadDropdownData(
+                        //               state.countryFlag,
+                        //               newValue ?? "Brand",
+                        //               state.searchTerms ?? '',
+                        //               ''));
+                        //       drugsBloc.add(LoadPageEvent(
+                        //           page: 1,
+                        //           countryId: state.countryFlag != ''
+                        //               ? state.countryFlag
+                        //               : '${state.countriesModel.countries?.first.id ?? 1}',
+                        //           searchTerm: state.searchTerms ?? '',
+                        //           type: newValue!));
+                        //     },
+                        //   ),
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Column(
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      selectedIndex = 0;
+                                      // BlocProvider.of<DrugsBloc>(context).add(
+                                      //   GetPost(
+                                      //       page: '1',
+                                      //       countryId: state.countryFlag,
+                                      //       searchTerm: '',
+                                      //       type: newValue!),
+                                      // );
+                                      BlocProvider.of<SplashBloc>(context).add(
+                                          LoadDropdownData(
+                                              state.countryFlag,
+                                              "Brand",
+                                              state.searchTerms ?? '',
+                                              ''));
+                                      drugsBloc.add(LoadPageEvent(
+                                          page: 1,
+                                          countryId: state.countryFlag != ''
+                                              ? state.countryFlag
+                                              : '${state.countriesModel.countries?.first.id ?? 1}',
+                                          searchTerm: state.searchTerms ?? '',
+                                          type: 'Brand'));
+                                    },
+                                    child: Text(
+                                      'Brand',
+                                      style: TextStyle(
+                                        color: SVAppColorPrimary,
+                                        fontSize: 14,
+                                        fontWeight: selectedIndex == 0
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Container(
-                                  height: 2,
-                                  width: context.width() / 2 - 10,
-                                  color: selectedIndex == 0
-                                      ? SVAppColorPrimary
-                                      : SVAppColorPrimary.withOpacity(0.2),
-                                ),
-                              ],
-                            ),
-                            Center(
-                                child: Container(
-                              color: Colors.grey,
-                              height: 30,
-                              width: 1,
-                            )),
-                            Column(
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    selectedIndex = 1;
-                                    BlocProvider.of<SplashBloc>(context).add(
-                                        LoadDropdownData(
-                                            state.countryFlag,
-                                            "Generic",
-                                            state.searchTerms ?? '',
-                                            ''));
-                                    drugsBloc.add(LoadPageEvent(
-                                        page: 1,
-                                        countryId: state.countryFlag != ''
-                                            ? state.countryFlag
-                                            : '${state.countriesModel.countries?.first.id ?? 1}',
-                                        searchTerm: state.searchTerms ?? '',
-                                        type: 'Generic'));
-                                  },
-                                  child: Text(
-                                    'Generic',
-                                    style: TextStyle(
-                                      color: SVAppColorPrimary,
-                                      fontSize: 14,
-                                      fontWeight: selectedIndex == 1
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                  Container(
+                                    height: 2,
+                                    width: context.width() / 2 - 10,
+                                    color: selectedIndex == 0
+                                        ? SVAppColorPrimary
+                                        : SVAppColorPrimary.withOpacity(0.2),
+                                  ),
+                                ],
+                              ),
+                              Center(
+                                  child: Container(
+                                color: Colors.grey,
+                                height: 30,
+                                width: 1,
+                              )),
+                              Column(
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      selectedIndex = 1;
+                                      BlocProvider.of<SplashBloc>(context).add(
+                                          LoadDropdownData(
+                                              state.countryFlag,
+                                              "Generic",
+                                              state.searchTerms ?? '',
+                                              ''));
+                                      drugsBloc.add(LoadPageEvent(
+                                          page: 1,
+                                          countryId: state.countryFlag != ''
+                                              ? state.countryFlag
+                                              : '${state.countriesModel.countries?.first.id ?? 1}',
+                                          searchTerm: state.searchTerms ?? '',
+                                          type: 'Generic'));
+                                    },
+                                    child: Text(
+                                      'Generic',
+                                      style: TextStyle(
+                                        color: SVAppColorPrimary,
+                                        fontSize: 14,
+                                        fontWeight: selectedIndex == 1
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Container(
-                                  height: 2,
-                                  width: context.width() / 2 - 10,
-                                  color: selectedIndex == 1
-                                      ? SVAppColorPrimary
-                                      : SVAppColorPrimary.withOpacity(0.2),
-                                ),
-                              ],
-                            ),
-                            16.height,
-                          ],
+                                  Container(
+                                    height: 2,
+                                    width: context.width() / 2 - 10,
+                                    color: selectedIndex == 1
+                                        ? SVAppColorPrimary
+                                        : SVAppColorPrimary.withOpacity(0.2),
+                                  ),
+                                ],
+                              ),
+                              16.height,
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               );
@@ -466,7 +462,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: svGetBodyColor().withOpacity(0.15),
+                                color: svGetBodyColor().withOpacity(0.10),
                                 spreadRadius: 0,
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
@@ -593,9 +589,9 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(child: Text(genericName)),
+          Expanded(child: Text(genericName,style: GoogleFonts.poppins(color: Colors.black,fontSize: 15),)),
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.close,size: 15,),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -661,7 +657,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Image.asset(
-                'assets/images/docktak_ai_dark.png',
+                'assets/images/docktak_ai_light.png',
                 height: 25,
                 width: 25,
               ),
@@ -669,7 +665,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 child: Text(
                   question,
                   style: TextStyle(
-                    fontSize: 16.0,
+                    fontSize: 14.0,
                     color: Colors.blue[900],
                     fontWeight: FontWeight.bold,
                   ),
@@ -677,7 +673,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                size: 16.0,
+                size: 14.0,
                 color: Colors.blue[900],
               ),
             ],

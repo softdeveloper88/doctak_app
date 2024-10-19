@@ -140,7 +140,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                               // NativeAdWidget(),
                               Container(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                    const EdgeInsets.only(top: 8),
                                 margin: const EdgeInsets.symmetric(vertical: 8),
                                 decoration: BoxDecoration(
                                     borderRadius: radius(SVAppCommonRadius),
@@ -486,7 +486,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                           ),
                                         ),
                                       ],
-                                    ).paddingSymmetric(horizontal: 16),
+                                    ).paddingSymmetric(horizontal: 16,vertical: 10),
                                     if (isShowComment == index)
                                       SVCommentReplyComponent(
                                           CommentBloc(),
