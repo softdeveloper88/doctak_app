@@ -206,8 +206,7 @@ Future<void> main() async {
   checkNotificationPermission();
   NotificationService.initialize();
   RemoteMessage? initialRoute = await NotificationService.getInitialNotificationRoute();
-  // if(initialRoute?.data['type']??'')
-  // if (!kIsWeb) {
+ print(initialRoute?.data.toString());
   channel = const AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title // description

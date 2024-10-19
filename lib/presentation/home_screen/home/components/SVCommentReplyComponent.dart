@@ -42,14 +42,16 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
         children: [
           //Divider(indent: 16, endIndent: 16, height: 20),
           Row(
+             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              16.width,
-              CustomImageView(
-                      imagePath: AppData.imageUrl + AppData.profile_pic,
-                      height: 10.w,
-                      width: 10.w,
-                      fit: BoxFit.cover)
-                  .cornerRadiusWithClipRRect(50),
+              CircleAvatar(
+                child: CustomImageView(
+                        imagePath: AppData.imageUrl + AppData.profile_pic,
+                        height: 40,
+                        width: 40,
+                        fit: BoxFit.cover)
+                    .cornerRadiusWithClipRRect(50),
+              ),
               10.width,
               Container(
                 padding: const EdgeInsets.only(left: 4),
