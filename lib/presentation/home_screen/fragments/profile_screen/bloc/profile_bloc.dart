@@ -131,6 +131,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     List<String>? countriesList = await _onGetCountries();
     List<String>? stateList = await _onGetStates(
         userProfile?.user?.country ?? countriesList?.first ?? '');
+    print('countriesList $countriesList');
+    print('user country ${userProfile?.user?.country}');
     List<String>? specialtyList = await _onGetSpecialty();
     emit(PaginationLoadedState(
         countriesList ?? [],
@@ -169,12 +171,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _updateFirstDropdownValue(
       UpdateFirstDropdownValue event, Emitter<ProfileState> emit) async {
     List<String>? countriesList = await _onGetCountries();
-
+      print(countriesList);
     emit(PaginationLoadedState(countriesList ?? [], countriesList?.first ?? '',
         [], 'Select State', [], 'Select Specialty', [], ''));
 
-    add(UpdateSecondDropdownValues(countriesList?.first ?? ''));
-    add(UpdateSpecialtyDropdownValue(countriesList?.first ?? ''));
+    add(UpdateSecondDropdownValues(countriesList?.first ?? 'United Arab Emirates'));
+    add(UpdateSpecialtyDropdownValue(countriesList?.first ?? 'United Arab Emirates'));
   }
 
   Future<void> _updateProfilePicture(
@@ -683,21 +685,22 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   _onGetStates(String value) async {
     // emit(DataLoading());
-    try {
+    // try {
       final response = await postService.getStates(value);
 
       // if (response.data!.isNotEmpty) {
       // emit(DataSuccess(countriesModel: response));
       List<String> list = [];
+      print(response.data);
       response.data.forEach((element) {
         list.add(element['state_name']);
       });
       print("states : ${list.toString()}");
       return list;
-    } catch (e) {
-      print(e);
-      // emit(DataFailure(error: 'An error occurred'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //   // emit(DataFailure(error: 'An error occurred'));
+    // }
   }
 
   Future<List<String>>? _onGetUniversities(String value) async {

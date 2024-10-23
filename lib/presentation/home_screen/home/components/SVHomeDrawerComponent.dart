@@ -180,11 +180,17 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                     title: e.title.validate(),
                     titleTextStyle:
                     boldTextStyle(size: 14, color: Colors.white),
-                    leading: Image.asset(e.image ?? "",
+                    leading: (e.title=="Post a poll"|| e.title=='Groups Formation'||e.title=='Privacy Policy')?Image.asset(e.image ?? "",
                         height: 22,
                         width: 22,
                         fit: BoxFit.contain,
-                        color: Colors.white),
+                        color:Colors.white,
+                        ):Image.asset(e.image ?? "",
+                        height: 22,
+                        width: 22,
+                        fit: BoxFit.contain,
+
+                        ),
                     onTap: () {
                       selectedIndex = index;
                       setState(() {});

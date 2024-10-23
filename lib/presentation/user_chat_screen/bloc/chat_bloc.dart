@@ -139,7 +139,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (event.page == 1) {
       messagesList.clear();
       messagePageNumber = 1;
-      emit(PaginationLoadingState());
+      if(event.isFirstLoading??false) {
+        emit(PaginationLoadingState());
+      }
       print('page ${event.page}');
     } else if (event.page == 0) {
       // messagesList.clear();
@@ -150,8 +152,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       MessageModel response = await postService.getRoomMessenger(
           'Bearer ${AppData.userToken}',
           '$messagePageNumber',
-          event.userId!,
-          event.roomId!);
+          event.userId??"",
+          event.roomId??"");
       roomId = response.roomId.toString();
       print(roomId);
       messageNumberOfPage = response.lastPage ?? 0;

@@ -101,9 +101,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     print("id${widget.id}roomid${widget.roomId}");
     _isRecording = false;
     chatBloc.add(LoadRoomMessageEvent(
-        page: 1, userId: widget.id, roomId: widget.roomId));
+        page: 1, userId: widget.id, roomId: widget.roomId,isFirstLoading: true));
     ConnectPusher();
-
     // fetchMessages();
     // _createClient();
   }
@@ -299,9 +298,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
     if (pusher != null) {
       // Successfully created and connected to Pusher
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('userId');
       clientListenChannel = await pusher.subscribe(
-        channelName: "private-chatify." + AppData.logInUserId,
+        channelName: 'private-chatify.$userId',
         onMemberAdded: (member) {
           // print("Member added: $member");
         },
@@ -378,7 +378,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           }
         },
       );
-
+    print(widget.id);
       clientSendChannel = await pusher.subscribe(
         channelName: "private-chatify.${widget.id}",
         onMemberAdded: (member) {

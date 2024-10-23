@@ -15,8 +15,8 @@ List<SVDrawerModel> getDrawerOptions(BuildContext context) {
   list.add(SVDrawerModel(image: 'assets/images/docktak_ai_light.png', title: 'Medical AI'));
   list.add(SVDrawerModel(image: 'assets/icon/ic_jobs.png', title: translation(context).lbl_jobs));
   list.add(SVDrawerModel(image: 'assets/icon/ic_drugs.png', title: translation(context).lbl_drug_list));
-  list.add(SVDrawerModel(image: 'assets/icon/ic_conference.png', title: 'Case Discussion'));
-  list.add(SVDrawerModel(image: 'assets/icon/ic_conference.png', title: 'Post a poll'));
+  list.add(SVDrawerModel(image: 'assets/icon/ic_discussion.png', title: 'Case Discussion'));
+  list.add(SVDrawerModel(image: 'assets/icon/ic_poll.png', title: 'Post a poll'));
   list.add(SVDrawerModel(image: 'assets/images/img_group.png', title: 'Groups Formation'));
   list.add(SVDrawerModel(image: 'assets/icon/ic_guidlines.png', title: translation(context).lbl_guidelines));
   list.add(SVDrawerModel(image: 'assets/icon/ic_conference.png', title: translation(context).lbl_conference));

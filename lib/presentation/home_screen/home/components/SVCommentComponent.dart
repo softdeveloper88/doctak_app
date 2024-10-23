@@ -58,62 +58,63 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                   style: GoogleFonts.poppins(fontSize: 14.0),
                 ),
                 const SizedBox(height: 8.0),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('comment reply not functional '),
-                            backgroundColor: Colors.blue,
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Reply',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13.0,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Like not functional '),
-                            backgroundColor: Colors.blue,
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Like',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13.0,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    // Row(
-                    //   children: [
-                    //     Text(
-                    //       '1',
-                    //       style: GoogleFonts.poppins(
-                    //         fontSize: 13.0,
-                    //         color: Colors.red[400],
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 4.0),
-                    //     const Icon(
-                    //       Icons.favorite,
-                    //       size: 16.0,
-                    //       color: Colors.red,
-                    //     ),
-                    //   ],
-                    // ),
-                  ],
-                ),
+                const Divider(color: Colors.grey,thickness: 1,)
+                // Row(
+                //   children: [
+                //     TextButton(
+                //       onPressed: () {
+                //         ScaffoldMessenger.of(context).showSnackBar(
+                //           const SnackBar(
+                //             content: Text('comment reply not functional '),
+                //             backgroundColor: Colors.blue,
+                //           ),
+                //         );
+                //       },
+                //       child: Text(
+                //         'Reply',
+                //         style: GoogleFonts.poppins(
+                //           fontSize: 13.0,
+                //           color: Colors.grey[600],
+                //         ),
+                //       ),
+                //     ),
+                //     TextButton(
+                //       onPressed: () {
+                //         ScaffoldMessenger.of(context).showSnackBar(
+                //           const SnackBar(
+                //             content: Text('Like not functional '),
+                //             backgroundColor: Colors.blue,
+                //           ),
+                //         );
+                //       },
+                //       child: Text(
+                //         'Like',
+                //         style: GoogleFonts.poppins(
+                //           fontSize: 13.0,
+                //           color: Colors.grey[600],
+                //         ),
+                //       ),
+                //     ),
+                //     const Spacer(),
+                //     // Row(
+                //     //   children: [
+                //     //     Text(
+                //     //       '1',
+                //     //       style: GoogleFonts.poppins(
+                //     //         fontSize: 13.0,
+                //     //         color: Colors.red[400],
+                //     //       ),
+                //     //     ),
+                //     //     const SizedBox(width: 4.0),
+                //     //     const Icon(
+                //     //       Icons.favorite,
+                //     //       size: 16.0,
+                //     //       color: Colors.red,
+                //     //     ),
+                //     //   ],
+                //     // ),
+                //   ],
+                // ),
               ],
             ),
           ),

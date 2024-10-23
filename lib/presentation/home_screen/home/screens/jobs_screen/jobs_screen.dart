@@ -137,10 +137,11 @@ class _JobsScreenState extends State<JobsScreen> {
                               value: state.countriesModel.countries?.first
                                       .countryName ??
                                   '',
-                              width: 50,
+
+                              // width: 50,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 10,
-                                vertical: 0,
+                                vertical: 5,
                               ),
                               onChanged: (String? newValue) {
                                 var index = state.countriesModel.countries!

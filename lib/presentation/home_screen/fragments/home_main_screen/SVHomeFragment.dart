@@ -1,29 +1,19 @@
 import 'dart:async';
 
-import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/pusher_service.dart';
-import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
-import 'package:doctak_app/presentation/notification_screen/notifications_provider.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:provider/provider.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../../data/models/notification_model/notification_model.dart';
 import '../../../../localization/app_localization.dart';
-import '../../../chat_gpt_screen/ChatDetailScreen.dart';
 import '../../../notification_screen/bloc/notification_state.dart';
-import '../../utils/SVColors.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
@@ -41,7 +31,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
 
   // HomeBloc widget.homeBloc = HomeBloc();
   final ScrollController _mainScrollController = ScrollController();
-  NotificationBloc notificationBloc=NotificationBloc();
+  NotificationBloc notificationBloc = NotificationBloc();
+
   @override
   void initState() {
     // PusherService(AppData.logInUserId);
@@ -51,7 +42,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     // widget.homeBloc.add(AdsSettingEvent());
     super.initState();
   }
+
   Timer? _timer;
+
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 20), (timer) {
       notificationCounter();
@@ -77,6 +70,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       // widget.homeBloc.add(AdsSettingEvent());
     });
   }
+
   @override
   Widget build(BuildContext context) {
     afterBuildCreated(() {
@@ -90,18 +84,17 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           backgroundColor: svGetScaffoldColor(),
           elevation: 0,
           leading: IconButton(
-            icon: Image.asset(
-              'images/socialv/icons/ic_More.png',
-              width: 18,
-              height: 18,
-              fit: BoxFit.cover,
-              color: context.iconColor,
-            ),
-            onPressed: () { widget.openDrawer();
-            FocusManager.instance.primaryFocus?.unfocus();
-
-            }
-          ),
+              icon: Image.asset(
+                'images/socialv/icons/ic_More.png',
+                width: 18,
+                height: 18,
+                fit: BoxFit.cover,
+                color: context.iconColor,
+              ),
+              onPressed: () {
+                widget.openDrawer();
+                FocusManager.instance.primaryFocus?.unfocus();
+              }),
           title: Text(translation(context).lbl_home,
               style: boldTextStyle(size: 18)),
           actions: [
@@ -152,7 +145,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 FocusManager.instance.primaryFocus?.unfocus();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) =>  NotificationScreen(notificationBloc),
+                    builder: (_) => NotificationScreen(notificationBloc),
                   ),
                 );
               },
@@ -166,46 +159,47 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                       color: context.iconColor,
                     ),
                     onPressed: () async {
-
                       FocusManager.instance.primaryFocus?.unfocus();
-                       NotificationScreen(notificationBloc).launch(context);
+                      NotificationScreen(notificationBloc).launch(context);
                     },
                   ),
                   Positioned(
                       right: 10,
                       top: 0,
                       child: BlocBuilder<NotificationBloc, NotificationState>(
-                        bloc: notificationBloc,
+                          bloc: notificationBloc,
                           builder: (context, state) {
-                        int unreadCount = 0;
+                            int unreadCount = 0;
 
-                        if (state is PaginationLoadedState) {
-                          // unreadCount = state.unreadCount;
-                          return notificationBloc.totalNotifications>0?Container(
-                            height: 20,
-                            width: 20,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              border: Border.all(
-                                color: Colors.red,
-                              ),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${notificationBloc.totalNotifications ??''}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ):const SizedBox();
-                        }else{
-                          return const SizedBox();
-                        }
-                      })),
+                            if (state is PaginationLoadedState) {
+                              // unreadCount = state.unreadCount;
+                              return notificationBloc.totalNotifications > 0
+                                  ? Container(
+                                      height: 20,
+                                      width: 20,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        border: Border.all(
+                                          color: Colors.red,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${notificationBloc.totalNotifications ?? ''}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox();
+                            } else {
+                              return const SizedBox();
+                            }
+                          })),
                 ],
               ),
             ),
@@ -217,7 +211,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 color: context.iconColor,
               ),
               onPressed: () async {
-
                 FocusManager.instance.primaryFocus?.unfocus();
                 UserChatScreen().launch(context);
               },
@@ -225,8 +218,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           ],
         ),
         body: GestureDetector(
-          onTap: (){
-
+          onTap: () {
             FocusManager.instance.primaryFocus?.unfocus();
           },
           child: RefreshIndicator(

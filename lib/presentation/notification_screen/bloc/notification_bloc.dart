@@ -44,7 +44,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       emit(PaginationLoadingState());
     }
     // ProgressDialogUtils.showProgressDialog();
-    // try {
+    try {
     NotificationModel response;
     print('status ${event.readStatus}');
 
@@ -74,13 +74,13 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     emit(PaginationLoadedState());
 
     // emit(DataLoaded(notificationsList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   // emit(PaginationLoadedState());
-    //
-    //   emit(DataError('No Data Found'));
-    // }
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState());
+
+      emit(DataError('No Data Found'));
+    }
   }
   _readNotification(ReadNotificationEvent event, Emitter<NotificationState> emit) async {
     // emit(DrugsDataInitial());

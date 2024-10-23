@@ -304,13 +304,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 id: '${bloc.notificationsList[index].userId}',
                                 roomId: '',
                               ).launch(context);
-                            } else if (typeNotification == 'post_liked' ||
-                                typeNotification == 'like_on_posts') {
-                              PostDetailsScreen(
-                                  postId: bloc.notificationsList[index].postId.toInt())
-                                  .launch(context);
-                            }
-                            else if ( typeNotification == 'message_received' ) {
+                            } else if ( typeNotification == 'message_received' ) {
                              ChatRoomScreen(
                                username:
                                '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
@@ -319,7 +313,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                id: '${bloc.notificationsList[index].fromUserId}',
                                roomId: '',
                              ).launch(context);
-
                             }
                             else if (typeNotification == 'follow_request' ||
                                 typeNotification == 'friend_request' ||
@@ -336,8 +329,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               // SVCommentScreen(
                               //   id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
                               //     .launch(context);
-                            } else if (typeNotification == 'new_like' ||
-                                typeNotification == 'likes_on_posts') {
+                            } else if (typeNotification == 'new_like' || typeNotification == 'like_on_posts' ||
+                                typeNotification == 'likes_on_posts' || typeNotification == 'post_liked') {
                               PostDetailsScreen(
                                   postId: bloc.notificationsList[index].postId.toInt())
                                   .launch(context);

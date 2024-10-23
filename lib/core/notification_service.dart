@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
@@ -6,6 +7,8 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/p
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,13 +18,70 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
   static const String _payloadKey = 'type';
+  static const String _payloadId = 'id';
+
+  static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
+    await Firebase.initializeApp();
+    debugPrint('PUSH RECEIVED');
+
+    await showNotificationWithCustomIcon(
+        message.notification,
+        message.data,
+        message.notification?.title ?? '',
+        message.notification?.body ?? '',
+        message.data['image'] ?? '',
+        message.data['banner'] ?? '');
+    // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    // FlutterLocalNotificationsPlugin();
+    // const AndroidInitializationSettings initializationSettingsAndroid =
+    // AndroidInitializationSettings('ic_stat_name');
+    // const InitializationSettings initializationSettings = InitializationSettings(
+    //     android: initializationSettingsAndroid);
+    // await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+    //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
+    // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
+    // RemoteNotification? notification = message.notification;
+    // AndroidNotification? android = message.notification?.android;
+    // if (notification != null && android != null) {
+    //   flutterLocalNotificationsPlugin.show(
+    //       notification.hashCode,
+    //       notification.title,
+    //       notification.body,
+    //       NotificationDetails(
+    //         android: AndroidNotificationDetails(
+    //           channel.id,
+    //           channel.name,
+    //           largeIcon: largeIcon,
+    //           styleInformation: BigPictureStyleInformation(
+    //             largeIcon,
+    //             contentTitle: notification.title,
+    //             summaryText: notification.body,
+    //           ),
+    //           icon: 'ic_stat_name',
+    //         ),
+    //       ));
+    // }
+    // if(user_type.$=="customer") {
+    //   await navigatorKey.currentState?.push(
+    //       MaterialPageRoute(builder: (context) =>
+    //           NotificationsScreen(isWorkshop:false
+    //           ))
+    //   );
+    // }else{
+    //   await navigatorKey.currentState?.push(
+    //       MaterialPageRoute(builder: (context) =>
+    //           NotificationsScreen(isWorkshop: true
+    //           ))
+    //   );
+    // }
+    // showNotification(message.data);
+  }
 
   // Initialize the notification services (both local and FCM)
   static Future<void> initialize() async {
@@ -34,7 +94,6 @@ class NotificationService {
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-
     const InitializationSettings initializationSettings =
         InitializationSettings(
             android: initializationSettingsAndroid,
@@ -43,22 +102,24 @@ class NotificationService {
       initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) async {
+        print('notification ${notificationResponse.payload}');
         if (notificationResponse.payload != null) {
           _handleNotificationTap(
-              notificationResponse.payload!, notificationResponse.payload!);
+              notificationResponse.payload!,notificationResponse.payload!, notificationResponse.payload!,notificationResponse.payload!);
         }
       },
     );
 
     // Initialize FCM and handle background/terminated state
     await _firebaseMessaging.requestPermission();
+    FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _showLocalNotification(message);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handleNotificationTap(message.data['type'], message.data['id']);
+      _handleNotificationTap(message.notification?.title??"",message.data['image'],message.data['type'], message.data['id']);
     });
 
     // For terminated state handling
@@ -66,6 +127,8 @@ class NotificationService {
         await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
       _handleNotificationTap(
+          initialMessage.notification?.title??'',
+          initialMessage.data['image'],
           initialMessage.data['type'], initialMessage.data['id']);
     }
   }
@@ -187,13 +250,14 @@ class NotificationService {
   }
 
   // Handle notification tap (local or FCM)
-  static Future<void> _handleNotificationTap(String payload, String id) async {
+  static Future<void> _handleNotificationTap(String title,String profilePic,String payload, String id) async {
     // Save the payload to shared preferences for later retrieval
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_payloadKey, payload);
+    await prefs.setString(_payloadId, id);
 
     // Use Navigator to go to the specific screen
-    _navigateToScreen(payload, id);
+    _navigateToScreen(title,profilePic,payload, id);
   }
 
   // Get the notification payload when the app is terminated
@@ -209,16 +273,24 @@ class NotificationService {
   }
 
   // Navigate to the specific screen based on the payload
-  static void _navigateToScreen(String payload, String id) {
+  static void _navigateToScreen(String username,String profilePic,String payload, String id) {
+    print('payload $payload');
+    print('id $id');
     if (NavigatorService.navigatorKey.currentState != null) {
       NavigatorService.navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (context) {
-          if (payload == 'follow_request' ||
-              payload == 'friend_request' ||
-              payload == 'message_received') {
-            return SVProfileFragment(
-              userId: id,
+          if (payload =='message_received') {
+            return ChatRoomScreen(
+              id: id,
+              roomId:'', username: username ,profilePic: profilePic
+              ,
             );
+          }else if (payload == 'follow_request' || payload == 'follower_notification' || payload == 'un_follower_notification' ||
+              payload == 'friend_request' ) {
+
+            return SVProfileFragment(
+              userId: id,);
+
           } else if (payload == 'comments_on_posts' ||
               payload == 'like_comment_on_post' ||
               payload == 'like_comments') {

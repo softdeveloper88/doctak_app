@@ -61,7 +61,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
@@ -101,42 +101,34 @@ class _FollowerScreenState extends State<FollowerScreen> {
       ),
       body: Column(
         children: [
-          const Divider(
-            thickness: 0.3,
-            color: Colors.grey,
-            endIndent: 20,
-            indent: 20,
-          ),
           if (isSearchShow)
             Container(
-              padding: const EdgeInsets.only(left: 8.0),
-              margin: const EdgeInsets.only(
-                left: 16,
-                top: 16.0,
-                bottom: 16.0,
-                right: 16,
-              ),
-              decoration: BoxDecoration(
-                  color: context.dividerColor.withOpacity(0.4),
-                  borderRadius: radius(5),
-                  border: Border.all(color: Colors.black, width: 0.3)),
-              child: Padding(
+              color: svGetScaffoldColor(),
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: AppTextField(
-                  controller: _searchController,
-                  onChanged: _onSearchChanged,
-                  textFieldType: TextFieldType.NAME,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Search People ',
-                    hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                    suffixIcon: Image.asset(
-                            'images/socialv/icons/ic_Search.png',
-                            height: 16,
-                            width: 16,
-                            fit: BoxFit.cover,
-                            color: svGetBodyColor())
-                        .paddingAll(16),
+                decoration: BoxDecoration(
+                    color: context.dividerColor.withOpacity(0.4),
+                    borderRadius: radius(5),
+                    border: Border.all(color: Colors.black, width: 0.5)),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: AppTextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    textFieldType: TextFieldType.NAME,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Search People ',
+                      hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                      suffixIcon: Image.asset(
+                              'images/socialv/icons/ic_Search.png',
+                              height: 16,
+                              width: 16,
+                              fit: BoxFit.cover,
+                              color: svGetBodyColor())
+                          .paddingAll(16),
+                    ),
                   ),
                 ),
               ),

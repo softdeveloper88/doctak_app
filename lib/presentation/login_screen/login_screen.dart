@@ -142,7 +142,6 @@ class LoginScreenState extends State<LoginScreen> {
             TextButton(
               onPressed: () async {
                 // Add your logic for resending the verification link here
-
                 String email = emailController.text;
                 sendVerificationLink(email, context);
               },

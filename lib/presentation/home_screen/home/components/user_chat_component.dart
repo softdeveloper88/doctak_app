@@ -112,12 +112,17 @@ class _UserChatComponentState extends State<UserChatComponent> {
                             //     .launch(context);
                           }),
                           10.height,
-                          Text(
-                              '${chatBloc.contactsList[index].firstName.validate()} ${chatBloc.contactsList[index].lastName.validate()}',
-                              style: secondaryTextStyle(
-                                  size: 12,
-                                  color: context.iconColor,
-                                  weight: FontWeight.w500)),
+                          SizedBox(
+                            width: 60,
+                            child: Text(
+                              overflow: TextOverflow.ellipsis,
+
+                                '${chatBloc.contactsList[index].firstName.validate()} ${chatBloc.contactsList[index].lastName.validate()}',
+                                style: secondaryTextStyle(
+                                    size: 12,
+                                    color: context.iconColor,
+                                    weight: FontWeight.w500)),
+                          ),
                         ],
                       );
                     },

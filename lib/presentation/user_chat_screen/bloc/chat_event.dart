@@ -57,9 +57,10 @@ class LoadRoomMessageEvent extends ChatEvent {
   int? page;
   String? userId;
   String? roomId;
-  LoadRoomMessageEvent({this.page, this.userId, this.roomId});
+  bool? isFirstLoading;
+  LoadRoomMessageEvent({this.page, this.userId, this.roomId,this.isFirstLoading=false});
   @override
-  List<Object?> get props => [page, userId, roomId];
+  List<Object?> get props => [page, userId, roomId,isFirstLoading];
 }
 
 class CheckIfNeedMoreDataEvent extends ChatEvent {

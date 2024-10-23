@@ -66,12 +66,14 @@ class CustomDropdownField extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      items[index].countryName ?? '',
-                      overflow: TextOverflow.visible,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: svGetBodyColor(),
+                    Expanded(
+                      child: Text(
+                        items[index].countryName ?? '',
+                        overflow: TextOverflow.visible,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: svGetBodyColor(),
+                        ),
                       ),
                     ),
                   ],
@@ -84,12 +86,12 @@ class CustomDropdownField extends StatelessWidget {
               return Align(
                 alignment: Alignment.centerRight,
                 child: Text(
+                  maxLines: 1,
                   item.countryName ?? '',
                   style: TextStyle(
                     color: isTextBold ? svGetBodyColor() : Colors.grey,
                     fontSize: 12,
-                    fontWeight:
-                        isTextBold ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               );

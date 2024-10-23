@@ -248,7 +248,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                             ),
                                             10.width,
                                             SizedBox(
-                                              width: 70.w,
+                                              width: 60.w,
                                               child: Text(
                                                   "${bloc.searchContactsList[index].firstName.validate()} ${bloc.searchContactsList[index].lastName.validate()}",
                                                   overflow: TextOverflow.clip,

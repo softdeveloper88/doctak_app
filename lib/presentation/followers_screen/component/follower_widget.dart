@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/followers_model/follower_data_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/presentation/followers_screen/bloc/followers_bloc.dart';
@@ -77,6 +78,7 @@ import 'package:nb_utils/nb_utils.dart';
 // }
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 class FollowerWidget extends StatefulWidget {
   var element;
@@ -153,20 +155,39 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SizedBox(
-                                width: 150,
-                                child: Text(widget.element?.name ?? "No Name",
-                                    overflow: TextOverflow.clip,
-                                    style: boldTextStyle())),
-                            6.width,
-                            Image.asset(
-                                'images/socialv/icons/ic_TickSquare.png',
-                                height: 14,
-                                width: 14,
-                                fit: BoxFit.cover)
+                                width: 50.w,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Wrap(
+                                          children:  [
+                                            Text(
+                                                "${widget.element.name??''}",
+                                                overflow: TextOverflow.clip,
+                                                maxLines: 2,
+                                                style: boldTextStyle()),
+                                            6.width,
+                                            Image.asset(
+                                                'images/socialv/icons/ic_TickSquare.png',
+                                                height: 14,
+                                                width: 14,
+                                                fit: BoxFit.cover)
+                                          ]),
+                                    ),
+
+                                  ],
+                                ))
+
+                            ,
                           ],
                         ),
-                        Text(widget.element?.specialty ?? "",
-                            style: secondaryTextStyle(color: svGetBodyColor())),
+                        SizedBox(
+                          width: 50.w,
+                          child: Text(capitalizeWords(widget.element.specialty??"Doctor"),
+                              overflow: TextOverflow.clip,
+                              style:
+                              secondaryTextStyle(color: svGetBodyColor())),
+                        ),
                       ],
                     ),
                   ],

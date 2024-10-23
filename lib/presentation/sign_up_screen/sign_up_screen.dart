@@ -12,9 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../widgets/app_bar/appbar_title.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_event.dart';
@@ -479,7 +477,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 const SizedBox(height: 10),
                                               ]);
                                         }else{
-                                          return const Text('');
+                                          return const Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Center(child: CircularProgressIndicator(),),
+                                                Text('Wait a moment more field Loading...',style: TextStyle(color: Colors.blue,fontWeight: FontWeight.bold,fontFamily: "Robotic"),),
+                                              ],
+                                            ),
+                                          );
                                         }
                                       }),
                                   Row(
@@ -635,14 +642,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         controller: firstnameController,
         hintText: translation(context).lbl_enter_your_name1,
     prefix: const SizedBox(width: 10,),
-    //     prefix: Container(
-    //         margin: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-    //         // child: CustomImageView(
-    //         //     color: Colors.black54,
-    //         //     imagePath: ImageConstant.imgLock,
-    //         //     height: 24,
-    //         //     width: 24)
-    // ),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
@@ -839,14 +838,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
       });
 
-    // showDialog(
-    //     context: context,
-    //     builder: (_) => AlertDialog(
-    //           content: SignUpSuccessDialog.builder(context),
-    //           backgroundColor: Colorsansparent,
-    //           contentPadding: EdgeInsets.zero,
-    //           insetPadding: const EdgeInsets.only(left: 0),
-    //         ));
   }
 
   /// Navigates to the loginScreen when the action is triggered.
@@ -857,47 +848,5 @@ class _SignUpScreenState extends State<SignUpScreen> {
             (route) => false);
   }
 }
-// class DropdownWidget extends StatefulWidget {
-//   final List<Countries> dynamicValues;
-//
-//
-//   DropdownWidget(this.dynamicValues,);
-//
-//   @override
-//   _DropdownWidgetState createState() => _DropdownWidgetState();
-// }
-//
-// class _DropdownWidgetState extends State<DropdownWidget> {
-//   String? selectedValue;
-//   @override
-//   Widget build(BuildContext context) {
-//     print(widget.dynamicValues.toString());
-//     return Padding(
-//           padding: const EdgeInsets.all(10),
-//           child: CustomDropdownButtonFormField(
-//             items: widget.dynamicValues,
-//             value: widget.dynamicValues.first.countryName,
-//             width: double.infinity,
-//             contentPadding: const EdgeInsets.symmetric(
-//               horizontal: 10,
-//               vertical: 0,
-//             ),
-//             onChanged: (value) {
-//               setState(() {
-//                 // if (value == 'Filter By Delivery Status') {
-//                 //   _orders = _searchResult;
-//                 // } else {
-//                 //   print(value.toString());
-//                 //   _orders = _searchResult
-//                 //       .where((item) => item.deliveryStatus!
-//                 //       .toLowerCase()
-//                 //       .contains(
-//                 //       value.toString().toLowerCase()))
-//                 //       .toList();
-//                 // }
-//               });
-//             },
-//           ),
-//         );
-//   }
+
 // }
