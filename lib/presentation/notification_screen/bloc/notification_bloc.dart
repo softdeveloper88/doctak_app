@@ -124,7 +124,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
       }),
     );
-    totalNotifications=response.data['unread_count'];
+    totalNotifications=response.data['unread_count'].toInt();
    // notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
 
     emit(PaginationLoadedState());

@@ -45,8 +45,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         //
         //   return;
         // }
+        if (response.user?.emailVerifiedAt != '') {
+
         if(event.rememberMe) {
-          if (response.user?.emailVerifiedAt != '') {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.setString('token', response.token ?? '');
             await prefs.setBool('rememberMe', event.rememberMe);
@@ -112,9 +113,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               AppData.currency = currency;
             }
           } else {
-            // SharedPreferences prefs = await SharedPreferences.getInstance();
-            // await prefs.setString('token', response.token ?? '');
-            // String? userToken = prefs.getString('token') ?? '';
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('token', response.token ?? '');
+            String? userToken = prefs.getString('token') ?? '';
             AppData.userToken = response.token ?? '';
             AppData.logInUserId = response.user?.id ?? '';
             AppData.name =
