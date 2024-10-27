@@ -11,6 +11,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app/app_shared_preferences.dart';
 import 'app_transitions.dart';
 
 class ForceUpgradePage extends StatefulWidget {
@@ -119,6 +120,8 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
   }
 
   void _launchAppOrPlayStore() {
+    AppSharedPreferences().clearSharedPreferencesData(context);
+
     final appId = Platform.isAndroid ? packageInfo!.packageName : '6448684340';
     final url = Uri.parse(
       Platform.isAndroid
