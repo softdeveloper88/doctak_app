@@ -1,9 +1,15 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
+import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
+
+import '../../utils/SVCommon.dart';
 
 class SVCommentComponent extends StatefulWidget {
   final PostComments comment;
@@ -23,10 +29,16 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundImage:
-                NetworkImage('${AppData.imageUrl}${widget.comment.profilePic}'),
-            radius: 24.0,
+          InkWell(
+            onTap: () {
+              SVProfileFragment(userId: widget.comment.userId)
+                  .launch(context);
+            },
+            child: CircleAvatar(
+              backgroundImage:
+                  NetworkImage('${AppData.imageUrl}${widget.comment.profilePic}'),
+              radius: 24.0,
+            ),
           ),
           const SizedBox(width: 12.0),
           Expanded(
@@ -35,21 +47,76 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      widget.comment.name ?? 'No Name',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14.0,
+                    Expanded(
+                      flex: 5,
+                      child: InkWell(
+                        onTap: () {
+                          SVProfileFragment(userId: widget.comment.userId)
+                              .launch(context);
+                        },
+                        child: RichText(
+                            textAlign: TextAlign.left,
+                            text: TextSpan(
+                              style: GoogleFonts.poppins(
+                                  fontSize: 12.sp, color: svGetBodyColor()),
+                              children: <TextSpan>[
+                                // TextSpan(text: title),
+                                TextSpan(
+                                    text: widget.comment.name??"",
+                                    style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w500)),
+                                TextSpan(
+                                    text: ' ${timeAgo.format(DateTime.parse(widget.comment.createdAt!))}',
+
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12.0,
+                                    color: Colors.grey[600],
+                                  ))
+                              ],
+                            )),
                       ),
+
                     ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
-                      style: GoogleFonts.poppins(
-                        fontSize: 12.0,
-                        color: Colors.grey[600],
+                    Spacer(),
+                    if (widget.comment.userId == AppData.logInUserId)
+                      Expanded(
+                        child: PopupMenuButton(
+                          itemBuilder: (context) {
+                            return [
+                              PopupMenuItem(
+                                child: Builder(builder: (context) {
+                                  return Column(
+                                    children: ["Delete"].map((String item) {
+                                      return PopupMenuItem(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                  );
+                                }),
+                              ),
+                            ];
+                          },
+                          onSelected: (value) {
+                            if (value == 'Delete') {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CustomAlertDialog(
+                                        title:
+                                            'Are you sure want to delete comment ?',
+                                        callback: () {
+                                          widget.commentBloc.add(
+                                              DeleteCommentEvent(
+                                                  commentId: widget.comment.id
+                                                      .toString()));
+                                          Navigator.of(context).pop();
+                                        });
+                                  });
+                            }
+                          },
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 4.0),
@@ -58,7 +125,10 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                   style: GoogleFonts.poppins(fontSize: 14.0),
                 ),
                 const SizedBox(height: 8.0),
-                const Divider(color: Colors.grey,thickness: 1,)
+                const Divider(
+                  color: Colors.grey,
+                  thickness: 1,
+                )
                 // Row(
                 //   children: [
                 //     TextButton(

@@ -22,6 +22,7 @@ class ChatBubble extends StatelessWidget {
   final String profile;
   final String? attachmentJson;
   final String? createAt;
+  final int? seen;
 
   const ChatBubble({
     Key? key,
@@ -30,6 +31,7 @@ class ChatBubble extends StatelessWidget {
     required this.createAt,
     required this.profile,
     this.attachmentJson,
+    this.seen,
   }) : super(key: key);
 
   @override
@@ -86,13 +88,22 @@ class ChatBubble extends StatelessWidget {
                           // const SizedBox(height: 4.0),
                           Align(
                             alignment: Alignment.bottomRight,
-                            child: Text(
-                              timeAgo.format(DateTime.parse(createAt.toString())),
-                              style: GoogleFonts.poppins(
-                                fontSize: 10.0,
-                                fontWeight: FontWeight.w500,
-                                color: isMe ? Colors.white70 : Colors.black54,
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  timeAgo.format(DateTime.parse(createAt.toString())),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.w500,
+                                    color: isMe ? Colors.white70 : Colors.black54,
+                                  ),
+
+                                ),
+                                const SizedBox(width: 10,),
+                               if(isMe)
+                                 if(seen==1)Image.asset('assets/icon/ic_seen.png',height: 20,width: 20,) else Image.asset('assets/icon/ic_unseen.png',height: 20,width: 20,)
+                              ],
                             ),
                           ),
                         ],

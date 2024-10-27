@@ -155,7 +155,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                     color: context.cardColor,
                     icon: Icon(
                       CupertinoIcons.bell,
-                      size: 24,
+                      size: 30,
                       color: context.iconColor,
                     ),
                     onPressed: () async {
@@ -164,7 +164,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                     },
                   ),
                   Positioned(
-                      right: 10,
+                      right: 4,
                       top: 0,
                       child: BlocBuilder<NotificationBloc, NotificationState>(
                           bloc: notificationBloc,
@@ -175,8 +175,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                               // unreadCount = state.unreadCount;
                               return notificationBloc.totalNotifications > 0
                                   ? Container(
-                                      height: 20,
-                                      width: 20,
+                                      height: 25,
+                                      width: 25,
                                       decoration: BoxDecoration(
                                         color: Colors.red,
                                         border: Border.all(
@@ -189,7 +189,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                                           '${notificationBloc.totalNotifications ?? ''}',
                                           style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 10,
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),

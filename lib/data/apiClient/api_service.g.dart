@@ -445,6 +445,37 @@ class _ApiService implements ApiService {
     return value;
   }
   @override
+  Future<HttpResponse> updateReadStatus(String token, String userId,String roomId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    final _data = {
+      'user_id': userId,
+      'room_id': roomId,
+    };
+    final _result =
+    await _dio.fetch(_setStreamType<HttpResponse<dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+      contentType: 'application/x-www-form-urlencoded',
+    )
+        .compose(
+      _dio.options,
+      '/update-seen-status',
+      queryParameters: queryParameters,
+      data: _data,
+    )
+        .copyWith(
+        baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        ))));
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
+  }
+  @override
   Future<PostDetailModel> getDetailsLikesPosts(
     String token,
     String postId,

@@ -508,6 +508,10 @@ abstract class ApiService {
       @Header('Authorization') String token, @Query('page') String page);
 
   @FormUrlEncoded()
+  @POST("/update-seen-status")
+  Future<HttpResponse> updateReadStatus(@Header('Authorization') String token, @Query('user_id') String userId,@Query('room_id') String roomId);
+
+  @FormUrlEncoded()
   @POST("/search-contacts")
   Future<SearchContactsModel> searchContacts(
       @Header('Authorization') String token,

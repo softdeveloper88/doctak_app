@@ -10,6 +10,7 @@ import 'package:doctak_app/data/models/chat_model/send_message_model.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -45,6 +46,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<LoadRoomMessageEvent>(_onGetMessages);
     on<SendMessageEvent>(_onSendMessages);
     on<DeleteMessageEvent>(_onDeleteMessages);
+    on<ChatReadStatusEvent>(_updateChatReadStatus);
     on<SelectedFiles>(_selectedFile);
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == contactsList.length - nextPageTrigger) {
@@ -123,6 +125,26 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       // emit(DataError('An error occurred $e'));
     }
   }
+  _updateChatReadStatus(ChatReadStatusEvent event, Emitter<ChatState> emit) async {
+
+    try {
+      if(event.roomId !='') {
+        var response1 = await postService.updateReadStatus(
+            'Bearer ${AppData.userToken}',
+            event.userId ?? "", event.roomId ?? '');
+        print('response1 $response1');
+      }
+      emit(PaginationLoadedState());
+
+      // emit(DataLoaded(contactsList));
+    } catch (e) {
+      print(e);
+
+      emit(PaginationLoadedState());
+
+      // emit(DataError('An error occurred $e'));
+    }
+  }
 
   void addUserIfNotExists(
       List<Messages> oldMessages, List<Messages> newMessages) {
@@ -149,12 +171,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
     try {
       print(event.page);
+
       MessageModel response = await postService.getRoomMessenger(
           'Bearer ${AppData.userToken}',
           '$messagePageNumber',
           event.userId??"",
           event.roomId??"");
+
       roomId = response.roomId.toString();
+      var response1 = await postService.updateReadStatus(
+          'Bearer ${AppData.userToken}',
+          event.userId ?? "", roomId ?? event.roomId??'');
       print(roomId);
       messageNumberOfPage = response.lastPage ?? 0;
       if (messagePageNumber < messageNumberOfPage + 1) {

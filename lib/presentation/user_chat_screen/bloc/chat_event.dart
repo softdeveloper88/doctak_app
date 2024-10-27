@@ -52,6 +52,13 @@ class LoadContactsEvent extends ChatEvent {
   @override
   List<Object?> get props => [page, keyword];
 }
+class ChatReadStatusEvent extends ChatEvent {
+  String? userId;
+  String? roomId;
+  ChatReadStatusEvent({this.userId,this.roomId});
+  @override
+  List<Object?> get props => [userId,Fontisto.room];
+}
 
 class LoadRoomMessageEvent extends ChatEvent {
   int? page;

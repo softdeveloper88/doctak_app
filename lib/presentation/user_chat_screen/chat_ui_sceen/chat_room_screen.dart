@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/main.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
@@ -98,10 +98,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     setStatusBarColor(svGetScaffoldColor());
     // Handle completion
     _startTimerForChat();
-    print("id${widget.id}roomid${widget.roomId}");
+    seenSenderMessage(1);
     _isRecording = false;
     chatBloc.add(LoadRoomMessageEvent(
-        page: 1, userId: widget.id, roomId: widget.roomId,isFirstLoading: true));
+        page: 1,
+        userId: widget.id,
+        roomId: widget.roomId,
+        isFirstLoading: true));
+    chatBloc.add(ChatReadStatusEvent(
+      userId: widget.id,
+      roomId: widget.roomId,));
     ConnectPusher();
     // fetchMessages();
     // _createClient();
@@ -169,6 +175,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       setState(() {});
     });
   }
+
 //   void _createClient() async {
 //     _client =
 //         await AgoraRtmClient.createInstance('f2cf99f1193a40e69546157883b2159f');
@@ -298,10 +305,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
     if (pusher != null) {
       // Successfully created and connected to Pusher
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? userId = prefs.getString('userId');
       clientListenChannel = await pusher.subscribe(
-        channelName: 'private-chatify.$userId',
+        channelName: 'private-chatify.${AppData.logInUserId}',
         onMemberAdded: (member) {
           // print("Member added: $member");
         },
@@ -330,7 +335,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               var messageData = event.data;
               messageData = json.decode(messageData);
               var status = messageData['status'];
-
               if (status == "web") {
                 final htmlMessage = event.data;
                 var message = json.decode(htmlMessage);
@@ -345,12 +349,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 final parts = textMessageWithTime.split('1 second ago');
                 textMessage =
                     parts.first.trim(); // Take the first part (the message)
+
               }
               if (status == "api") {
                 var message = messageData['message'];
 
                 textMessage = message['message'];
                 print(textMessage);
+
               }
               print(textMessage);
               // setState(() {
@@ -371,6 +377,55 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               });
 
               break;
+
+            case 'client-seen':
+                var textMessage = "";
+                var messageData = event.data;
+                messageData = json.decode(messageData);
+                var status = messageData['status'];
+                if (status == "web") {
+                  final htmlMessage = event.data;
+                  var message = json.decode(htmlMessage);
+
+                  // Use the html package to parse the HTML and extract text content
+                  final document = htmlParser.parse(message['message']);
+
+                  final messageDiv = document.querySelector('.message');
+                  final textMessageWithTime = messageDiv?.text.trim() ?? "";
+
+// Split the textMessageWithTime by the "time ago" portion
+                  final parts = textMessageWithTime.split('1 second ago');
+                  textMessage =
+                      parts.first.trim(); // Take the first part (the message)
+
+                }
+                if (status == "api") {
+                  var message = messageData['message'];
+
+                  textMessage = message['message'];
+                  print(textMessage);
+
+                }
+                print(textMessage);
+                // setState(() {
+                typingTimer = Timer(const Duration(seconds: 2), () {
+                  chatBloc.add(ChatReadStatusEvent(
+                      userId: widget.id,
+                      roomId: widget.roomId,));
+                  // chatBloc.add(LoadRoomMessageEvent(
+                  //     page: 0, userId: widget.id, roomId: widget.roomId));
+                  // });
+                  // messagesList.insert(
+                  //   0,
+                  //   Message(
+                  //     body: textMessage, // Use the extracted text content
+                  //     toId: AppData.logInUserId,
+                  //     fromId: widget.id,
+                  //   ),
+                  // );
+                  // isLoading = false;
+                });
+              break;
             // Add more cases for other event types as needed
             default:
               // Handle unknown event types or ignore them
@@ -378,7 +433,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           }
         },
       );
-    print(widget.id);
+      print(widget.id);
       clientSendChannel = await pusher.subscribe(
         channelName: "private-chatify.${widget.id}",
         onMemberAdded: (member) {
@@ -398,6 +453,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       // print("Failed to connect to Pusher");
     }
   }
+
   // void ConnectPusher() async {
   //   // Create the Pusher client
   //   await pusher.init(
@@ -530,166 +586,29 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
-  // void _selectFiles(BuildContext context) async {
-  //   ImagePickerPlus picker = ImagePickerPlus(context);
-  //   SelectedImagesDetails? details = await picker.pickBoth(
-  //     source: ImageSource.both,
-  //     multiSelection: true,
-  //     galleryDisplaySettings:
-  //     GalleryDisplaySettings(cropImage: false, showImagePreview: true),
-  //   );
-  //   if (details != null) {
-  //     setState(() {
-  //       selectedFiles = details.selectedFiles;
-  //     });
-  //   }
-  // }
-
-  // Future<void> fetchMessages() async {
-  //   try {
-  //     String? token = AppData.userToken; // Replace with your token
-  //
-  //     String id = widget.id; // Replace with the user's ID
-  //     final RemoteService service = RemoteService();
-  //     userMessagesList = await service.fetchChatMessages(token!, id);
-  //
-  //     setState(() {
-  //       messagesList = userMessagesList.messages!;
-  //       isMessageLoaded = true;
-  //     });
-  //   } catch (e) {
-  //     print('Error fetching messages: $e');
-  //   }
-  // }
-
-  // Function to handle file attachment and sending
-  // You will need to implement this logic
-
-  // void _showIncomingCallDialog() {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: Text('Incoming Call'),
-  //         content: Text('You have an incoming call from ${widget.username}'),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               // Reject the call
-  //
-  //               _client
-  //                   ?.getRtmCallManager()
-  //                   .refuseRemoteInvitation(_remoteInvitation!);
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: Text('Reject'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               // Accept the call
-  //               _client
-  //                   ?.getRtmCallManager()
-  //                   .acceptRemoteInvitation(_remoteInvitation!);
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: Text('Accept'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-  // Future<void> sendMessage(String message, String messageType) async {
-  //   try {
-  //     setState(() {
-  //       isLoading = true;
-  //     });
-  //
-  //     String? token = AppData.userToken; // Replace with your token
-  //     String id = widget.id; // Replace with the user's ID
-  //     String temporaryMsgId = '123'; // Replace with your temporary message ID
-  //
-  //     final Uri uri = Uri.parse('${AppData.chatifyUrl}sendMessage');
-  //
-  //     if (selectedFiles.isNotEmpty) {
-  //       // If files are selected, prepare a MultipartRequest
-  //       var request = http.MultipartRequest('POST', uri)
-  //         ..fields['type'] = messageType
-  //         ..fields['message'] = message
-  //         ..fields['temporaryMsgId'] = temporaryMsgId
-  //         ..fields['id'] = id
-  //         ..headers['Authorization'] = 'Bearer $token';
-  //
-  //       for (var file in selectedFiles) {
-  //         String mimeType = lookupMimeType(file.selectedFile.path) ??
-  //             'application/octet-stream';
-  //         request.files.add(
-  //           http.MultipartFile.fromBytes(
-  //             'file', // Field name for the file
-  //             file.selectedFile.readAsBytesSync(),
-  //             filename: basename(file.selectedFile.path),
-  //             contentType: MediaType.parse(mimeType),
-  //           ),
-  //         );
-  //       }
-  //
-  //       var streamedResponse = await request.send();
-  //       final response = await http.Response.fromStream(streamedResponse);
-  //       handleResponse(response, message, "123");
-  //       setState(() {
-  //         selectedFiles.clear(); // Clear all selected files
-  //       });
-  //     } else {
-  //       // If no files are selected, send a standard POST request
-  //       final response = await http.post(
-  //         uri,
-  //         headers: {
-  //           'Authorization': 'Bearer $token',
-  //           'Accept': 'application/json',
-  //         },
-  //         body: {
-  //           'type': messageType,
-  //           'message': message,
-  //           'temporaryMsgId': temporaryMsgId,
-  //           'id': id,
-  //         },
-  //       );
-  //
-  //       handleResponse(response, message, id);
-  //     }
-  //   } catch (e) {
-  //     print('Error sending message: $e');
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
-
-  // void handleResponse(http.Response response, String message, String id) {
-  //   if (response.statusCode == 200) {
-  //     final responseJson = json.decode(response.body);
-  //     final fromId = responseJson['message']['from_id'];
-  //     setState(() {
-  //       messagesList.insert(
-  //         0,
-  //         Message(
-  //           body: message,
-  //           toId: id,
-  //           fromId: fromId,
-  //         ),
-  //       );
-  //       isLoading = false;
-  //     });
-  //   } else {
-  //     final responseJson = json.decode(response.body);
-  //     final errorMessage = responseJson['error'] as String? ?? 'Unknown error';
-  //     print('Failed to send message. Error: $errorMessage');
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
+  void seenSenderMessage(int seenStatus) async {
+    String eventName = "client-seen"; // Replace with your event name
+// String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
+    Map<String, dynamic> eventData = {
+      "from_id": AppData.logInUserId,
+      "to_id": widget.id,
+      "seen": seenStatus,
+    };
+    // Convert the Map to a JSON string
+    String data = jsonEncode(eventData);
+    // Create a PusherEvent and pass the eventData
+    PusherEvent event = PusherEvent(
+      channelName: "private-chatify.${widget.id}",
+      eventName: eventName,
+      data: data, // Pass the eventData map
+    );
+   print("e");
+    try {
+      await clientSendChannel.trigger(event);
+    } catch (e) {
+      print(e);
+    }
+  }
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -713,7 +632,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           // toolbarHeight: 80,
           leading: IconButton(
             iconSize: 20,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            icon:
+                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
             onPressed: () => Navigator.of(context).pop(),
           ),
           centerTitle: false,
@@ -735,33 +655,55 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                       ],
                     ),
                     child: widget.profilePic == ''
-                        ? CircleAvatar(
-                      child: Image.asset('images/socialv/faces/face_5.png',
-                          height: 56, width: 56, fit: BoxFit.cover)
-                          .cornerRadiusWithClipRRect(8)
-                          .cornerRadiusWithClipRRect(8),
-                    )
-                        : CircleAvatar(
-                      child: CustomImageView(
-                          imagePath:
-                          '${AppData.imageUrl}${widget.profilePic.validate()}',
-                          height: 56,
-                          width: 56,
-                          fit: BoxFit.cover)
-                          .cornerRadiusWithClipRRect(30),
-                    ),
+                        ? InkWell(
+                      onTap: () {
+                        SVProfileFragment(userId: widget.id)
+                            .launch(context);
+                      },
+                          child: CircleAvatar(
+                              child: Image.asset(
+                                      'images/socialv/faces/face_5.png',
+                                      height: 56,
+                                      width: 56,
+                                      fit: BoxFit.cover)
+                                  .cornerRadiusWithClipRRect(8)
+                                  .cornerRadiusWithClipRRect(8),
+                            ),
+                        )
+                        : InkWell(
+                            onTap: () {
+                              SVProfileFragment(userId: widget.id)
+                                  .launch(context);
+                            },
+                            child: CircleAvatar(
+                              child: CustomImageView(
+                                      imagePath:
+                                          '${AppData.imageUrl}${widget.profilePic.validate()}',
+                                      height: 56,
+                                      width: 56,
+                                      fit: BoxFit.cover)
+                                  .cornerRadiusWithClipRRect(30),
+                            ),
+                          ),
                   ),
                 ],
               ),
-              const SizedBox(width: 10,),
+              const SizedBox(
+                width: 10,
+              ),
               Expanded(
-                child: Text(
-                  widget.username,
-                  style: GoogleFonts.poppins(
-                      fontSize: 20, fontWeight: FontWeight.w600),
+                child: InkWell(
+                  onTap: () {
+                    SVProfileFragment(userId: widget.id)
+                        .launch(context);
+                  },
+                  child: Text(
+                    widget.username,
+                    style: GoogleFonts.poppins(
+                        fontSize: 20, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
-
             ],
           ),
           actions: [
@@ -771,7 +713,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   PopupMenuItem(
                     child: Builder(builder: (context) {
                       return Column(
-                        children: ["Media",'Delete Chat'].map((String item) {
+                        children: ["Media", 'Delete Chat'].map((String item) {
                           return PopupMenuItem(
                             value: item,
                             child: Text(item),
@@ -782,9 +724,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   ),
                 ];
               },
-              onSelected: (value) {
-
-                },
+              onSelected: (value) {},
             )
           ],
         ),
@@ -876,6 +816,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                   attachmentJson:
                                       bloc.messagesList[index].attachment,
                                   createAt: bloc.messagesList[index].createdAt,
+                                  seen: bloc.messagesList[index].seen,
                                 ),
                               );
                       },
@@ -887,9 +828,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                       : Container(),
                   if (_selectedFile != null)
                     if (_isImageFile(_selectedFile!))
-                      _buildImagePreview(_selectedFile??File('')),
+                      _buildImagePreview(_selectedFile ?? File('')),
                   if (_isVideoFile(_selectedFile))
-                    _buildVideoPreview(_selectedFile),
+                    _buildVideoPreview(_selectedFile?? File('')),
                   if (_isDocumentFile(_selectedFile))
                     _buildDocumentPreview(_selectedFile!),
                   Container(
@@ -930,7 +871,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                             _showFileOptions();
                                             // _selectFiles(context);
                                           } else if (await permission1.isDenied) {
-                                            final result = await permission1.request();
+                                            final result =
+                                                await permission1.request();
                                             if (status.isGranted) {
                                               _showFileOptions();
                                               // _selectFiles(context);
@@ -940,13 +882,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                               // _selectFiles(context);
                                               print("isGranted");
                                             } else if (result.isDenied) {
-                                              final result = await permission.request();
+                                              final result =
+                                                  await permission.request();
                                               print("isDenied");
-                                            } else if (result.isPermanentlyDenied) {
+                                            } else if (result
+                                                .isPermanentlyDenied) {
                                               print("isPermanentlyDenied");
                                               // _permissionDialog(context);
                                             }
-                                          } else if (await permission.isPermanentlyDenied) {
+                                          } else if (await permission
+                                              .isPermanentlyDenied) {
                                             print("isPermanentlyDenied");
                                             // _permissionDialog(context);
                                           }
@@ -982,6 +927,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                                   TextInputAction.newline,
                                               onChanged: (Text) {
                                                 onTextFieldFocused(true);
+
                                               },
                                               onTapOutside: (text) {
                                                 onTextFieldFocused(false);
@@ -1000,7 +946,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                       )
                                     : IconButton(
                                         onPressed: () async {
-                                          if (textController.text.isNotEmpty && _selectedFile==null ) {
+                                          if (textController.text.isNotEmpty) {
                                             String message =
                                                 textController.text;
                                             _isFileUploading = true;
@@ -1017,8 +963,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                             setState(() {});
                                             _selectedFile = null;
                                             scrollToBottom();
-                                          }else{
-                                            String message = textController.text;
+                                          } else if(textController.text.isEmpty &&  _selectedFile != null ){
+                                            String message =
+                                                textController.text;
                                             _isFileUploading = true;
                                             chatBloc.add(SendMessageEvent(
                                                 userId: AppData.logInUserId,
@@ -1028,7 +975,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                                 receiverId: widget.id,
                                                 attachmentType: 'file',
                                                 file: _selectedFile?.path ?? '',
-                                                message: message ==''?' ':message));
+                                                message: message == ''
+                                                    ? ' '
+                                                    : message));
                                             textController.clear();
                                             setState(() {});
                                             _selectedFile = null;
@@ -1203,31 +1152,100 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Widget _buildImagePreview(File file) {
     return Card(
       margin: const EdgeInsets.all(8.0),
-      child: ListTile(
-        leading:  Image.file(file,width: 70.w,height: 200,fit: BoxFit.cover,),
-        // title: Text(file.path.split('/').last),
-        trailing: IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            setState(() {
-              _selectedFile = null;
-            });
-          },
-        ),
+      child:  Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+              height: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10)
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: Image.file(
+                file,
+                width: 150,
+                height: 100,
+                fit: BoxFit.contain,
+              ),
+            ),
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              setState(() {
+                _selectedFile = null;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildVideoPreview(File? file) {
     // Implement video preview widget
-    return Container();
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      child:  Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            height: 100,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10)
+            ),
+            padding: const EdgeInsets.all(8.0),
+            child: Image.file(
+              file??File(''),
+              width: 150,
+              height: 100,
+              fit: BoxFit.contain,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              setState(() {
+                _selectedFile = null;
+              });
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDocumentPreview(File file) {
     // Implement document preview widget
-    return Container();
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      child:  Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            height: 100,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10)
+            ),
+            padding: const EdgeInsets.all(8.0),
+            child: Image.file(
+              file,
+              width: 150,
+              height: 100,
+              fit: BoxFit.contain,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              setState(() {
+                _selectedFile = null;
+              });
+            },
+          ),
+        ],
+      ),
+    );
   }
-
   void _showFileOptions() {
     showModalBottomSheet(
       context: context,
@@ -1249,7 +1267,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                         _selectedFile = file;
                       });
                     }
-                  }catch(e){
+                  } catch (e) {
                     _permissionDialog(context);
                   }
                 },
@@ -1423,6 +1441,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       chatBloc.add(LoadRoomMessageEvent(
           page: 0, userId: widget.id, roomId: widget.roomId));
     });
+
   }
 
 // List<RtmAttribute> convertToRtmAttributes(Map<String, dynamic> attributes) {
@@ -1499,61 +1518,6 @@ class TypingIndicator extends StatelessWidget {
 }
 
 // Include your _DisplayVideo class here...
-
-class _DisplayVideo extends StatefulWidget {
-  final selectedByte;
-
-  const _DisplayVideo({Key? key, required this.selectedByte}) : super(key: key);
-
-  @override
-  State<_DisplayVideo> createState() => _DisplayVideoState();
-}
-
-class _DisplayVideoState extends State<_DisplayVideo> {
-  late VideoPlayerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.file(widget.selectedByte.selectedFile)
-      ..initialize().then((_) {
-        setState(() {});
-        _controller.setLooping(true);
-      });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: <Widget>[
-                VideoPlayer(_controller),
-                ClosedCaption(text: _controller.value.caption.text),
-                _ControlsOverlay(controller: _controller),
-                VideoProgressIndicator(_controller, allowScrubbing: true),
-              ],
-            ),
-          )
-        : SizedBox(
-            height: 200,
-            child: Center(
-                child: CircularProgressIndicator(
-              color: svGetBodyColor(),
-            )),
-          );
-  }
-
-  @override
-  Future<void> dispose() async {
-    _controller.dispose();
-    await FlutterSoundRecord().dispose();
-
-    super.dispose();
-  }
-}
 
 class FullScreenVideoPage extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
@@ -1685,7 +1649,6 @@ class VoiceRecordingPainter extends CustomPainter {
 
     canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

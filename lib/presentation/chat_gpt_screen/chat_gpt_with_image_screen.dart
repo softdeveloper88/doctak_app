@@ -946,15 +946,15 @@ bool isError=false;
                     _showFileOptions();
                   },
                 ),
-                _buildHorizontalOption(
-                  icon: Icons.image_search,
-                  text: 'ECG analysis',
-                  onTap: () async {
-                    Navigator.pop(context);
-                    imageType = 'ECG';
-                    _showFileOptions();
-                  },
-                ),
+                // _buildHorizontalOption(
+                //   icon: Icons.image_search,
+                //   text: 'ECG analysis',
+                //   onTap: () async {
+                //     Navigator.pop(context);
+                //     imageType = 'ECG';
+                //     _showFileOptions();
+                //   },
+                // ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
                   text: 'X-ray evaluation',

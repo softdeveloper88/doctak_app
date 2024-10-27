@@ -56,6 +56,7 @@ class Messages {
     this.attachment,
     this.attachmentType,
     this.createdAt,
+    this.seen,
   });
 
   Messages.fromJson(dynamic json) {
@@ -66,6 +67,7 @@ class Messages {
     attachment = json['attachment'];
     attachmentType = json['attachment_type'];
     createdAt = json['created_at'];
+    seen = json['seen'];
   }
   String? id;
   String? userId;
@@ -74,6 +76,7 @@ class Messages {
   dynamic attachment;
   dynamic attachmentType;
   String? createdAt;
+  int? seen;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -84,6 +87,7 @@ class Messages {
     map['attachment'] = attachment;
     map['attachment_type'] = attachmentType;
     map['created_at'] = createdAt;
+    map['seen'] = seen;
     return map;
   }
 }

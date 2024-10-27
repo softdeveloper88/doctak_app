@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
@@ -223,49 +224,55 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                 onTap: () {
                                                   // SVProfileFragment(userId:bloc.contactsList[index].id).launch(context);
                                                 },
-                                                child: Container(
-                                                  width: 50,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.grey
-                                                            .withOpacity(0.3),
-                                                        spreadRadius:1,
-                                                        blurRadius: 3,
-                                                        offset:
-                                                            const Offset(0, 3),
-                                                      ),
-                                                    ],
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    SVProfileFragment(userId: bloc.contactsList[index].id)
+                                                        .launch(context);
+                                                  },
+                                                  child: Container(
+                                                    width: 50,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.grey
+                                                              .withOpacity(0.3),
+                                                          spreadRadius:1,
+                                                          blurRadius: 3,
+                                                          offset:
+                                                              const Offset(0, 3),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child:
+                                                        // bloc
+                                                        //             .contactsList[
+                                                        //                 index]
+                                                        //             .profilePic ==
+                                                        //         ''
+                                                        //     ? Image.asset(
+                                                        //             'images/socialv/faces/face_5.png',
+                                                        //             height: 56,
+                                                        //             width: 56,
+                                                        //             fit: BoxFit
+                                                        //                 .cover)
+                                                        //         .cornerRadiusWithClipRRect(
+                                                        //             8)
+                                                        //         .cornerRadiusWithClipRRect(
+                                                        //             8)
+                                                        //     :
+                                                        CustomImageView(
+                                                                placeHolder:
+                                                                    'images/socialv/faces/face_5.png',
+                                                                imagePath:
+                                                                    '${AppData.imageUrl}${bloc.contactsList[index].profilePic.validate()}',
+                                                                height: 56,
+                                                                width: 56,
+                                                                fit: BoxFit.cover)
+                                                            .cornerRadiusWithClipRRect(
+                                                                30),
                                                   ),
-                                                  child:
-                                                      // bloc
-                                                      //             .contactsList[
-                                                      //                 index]
-                                                      //             .profilePic ==
-                                                      //         ''
-                                                      //     ? Image.asset(
-                                                      //             'images/socialv/faces/face_5.png',
-                                                      //             height: 56,
-                                                      //             width: 56,
-                                                      //             fit: BoxFit
-                                                      //                 .cover)
-                                                      //         .cornerRadiusWithClipRRect(
-                                                      //             8)
-                                                      //         .cornerRadiusWithClipRRect(
-                                                      //             8)
-                                                      //     :
-                                                      CustomImageView(
-                                                              placeHolder:
-                                                                  'images/socialv/faces/face_5.png',
-                                                              imagePath:
-                                                                  '${AppData.imageUrl}${bloc.contactsList[index].profilePic.validate()}',
-                                                              height: 56,
-                                                              width: 56,
-                                                              fit: BoxFit.cover)
-                                                          .cornerRadiusWithClipRRect(
-                                                              30),
                                                 ),
                                               ),
                                               10.width,

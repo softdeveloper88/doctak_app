@@ -275,10 +275,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               fontSize: 14.0,
                             ),
                           ),
-                          leading: CircleAvatar(
-                            child: CustomImageView(
-                              imagePath:
-                                  '${AppData.imageUrl}${bloc.notificationsList[index].senderProfilePic ?? ''}',
+                          leading: InkWell(
+                            onTap: (){
+                              SVProfileFragment(
+                                  userId:
+                                  bloc.notificationsList[index].fromUserId)
+                                  .launch(context);
+                            },
+                            child: CircleAvatar(
+                              child: CustomImageView(
+                                fit: BoxFit.cover,
+                                width: 40,
+                                height: 40,
+                                radius: BorderRadius.circular(20),
+                                imagePath:
+                                    '${AppData.imageUrl}${bloc.notificationsList[index].senderProfilePic ?? ''}',
+                              ),
                             ),
                           ),
                           trailing: Icon(
