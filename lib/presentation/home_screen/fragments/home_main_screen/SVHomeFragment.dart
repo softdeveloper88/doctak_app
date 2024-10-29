@@ -155,7 +155,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                     color: context.cardColor,
                     icon: Icon(
                       CupertinoIcons.bell,
-                      size: 30,
+                      size: 28,
                       color: context.iconColor,
                     ),
                     onPressed: () async {
@@ -175,8 +175,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                               // unreadCount = state.unreadCount;
                               return notificationBloc.totalNotifications > 0
                                   ? Container(
-                                      height: 25,
-                                      width: 25,
+                                      height: 20,
+                                      width: 20,
                                       decoration: BoxDecoration(
                                         color: Colors.red,
                                         border: Border.all(

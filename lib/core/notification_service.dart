@@ -12,6 +12,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_badge/flutter_app_badge.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -115,10 +116,13 @@ class NotificationService {
     FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      NotificationService.incrementBadgeCount();
       _showLocalNotification(message);
+
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      NotificationService.clearBadgeCount();
       _handleNotificationTap(message.notification?.title??"",message.data['image'],message.data['type'], message.data['id']);
     });
 
@@ -317,5 +321,17 @@ class NotificationService {
         }),
       );
     }
+  }
+
+  static int notificationCount = 0;
+
+  static void incrementBadgeCount() {
+    notificationCount++;
+    FlutterAppBadge.count(notificationCount);
+  }
+
+  static void clearBadgeCount() {
+    notificationCount = 0;
+    FlutterAppBadge.count(0);
   }
 }

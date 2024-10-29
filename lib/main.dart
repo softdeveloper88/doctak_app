@@ -52,106 +52,6 @@ import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart'
 AppStore appStore = AppStore();
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-Future<dynamic> _throwGetMessage(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  debugPrint('PUSH RECEIVED');
-
-  await showNotificationWithCustomIcon(
-      message.notification,
-      message.notification?.title ?? '',
-      message.notification?.body ?? '',
-      message.data['image'] ?? '',
-      message.data['banner'] ?? '');
-  // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  // FlutterLocalNotificationsPlugin();
-  // const AndroidInitializationSettings initializationSettingsAndroid =
-  // AndroidInitializationSettings('ic_stat_name');
-  // const InitializationSettings initializationSettings = InitializationSettings(
-  //     android: initializationSettingsAndroid);
-  // await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-  //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
-  // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
-  // RemoteNotification? notification = message.notification;
-  // AndroidNotification? android = message.notification?.android;
-  // if (notification != null && android != null) {
-  //   flutterLocalNotificationsPlugin.show(
-  //       notification.hashCode,
-  //       notification.title,
-  //       notification.body,
-  //       NotificationDetails(
-  //         android: AndroidNotificationDetails(
-  //           channel.id,
-  //           channel.name,
-  //           largeIcon: largeIcon,
-  //           styleInformation: BigPictureStyleInformation(
-  //             largeIcon,
-  //             contentTitle: notification.title,
-  //             summaryText: notification.body,
-  //           ),
-  //           icon: 'ic_stat_name',
-  //         ),
-  //       ));
-  // }
-  // if(user_type.$=="customer") {
-  //   await navigatorKey.currentState?.push(
-  //       MaterialPageRoute(builder: (context) =>
-  //           NotificationsScreen(isWorkshop:false
-  //           ))
-  //   );
-  // }else{
-  //   await navigatorKey.currentState?.push(
-  //       MaterialPageRoute(builder: (context) =>
-  //           NotificationsScreen(isWorkshop: true
-  //           ))
-  //   );
-  // }
-  // showNotification(message.data);
-}
-
-Future<void> showNotificationWithCustomIcon(notification, String title,
-    String body, String imageUrl, String bannerImage) async {
-  final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl(imageUrl);
-  ByteArrayAndroidBitmap banner;
-  if (bannerImage != '') {
-    banner = await _getImageFromUrl(bannerImage);
-  } else {
-    banner = ByteArrayAndroidBitmap(Uint8List(0));
-  }
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  //
-  // const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
-  //
-  // const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-  //
-  // await flutterLocalNotificationsPlugin.initialize(initializationSettings, onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
-  channel = const AndroidNotificationChannel(
-    'high_importance_channel', // id
-    'High Importance Notifications', // title // description
-    importance: Importance.max,
-  );
-  flutterLocalNotificationsPlugin.show(
-      notification.hashCode,
-      title,
-      body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          color: Colors.transparent,
-          channel.id,
-          channel.name,
-          largeIcon: largeIcon,
-          styleInformation: bannerImage != ''
-              ? BigPictureStyleInformation(
-                  banner,
-                  contentTitle: notification.title,
-                  summaryText: notification.body,
-                )
-              : null,
-          icon: 'ic_stat_name',
-        ),
-      ));
-}
-
 /// Create a [AndroidNotificationChannel] for heads up notifications
 late AndroidNotificationChannel channel;
 
@@ -321,6 +221,8 @@ class _MyAppState extends State<MyApp> {
   setLocale(Locale locale) {
     setState(() {
       _locale = locale;
+        NotificationService.clearBadgeCount(); // Clears badge when app resumes
+
     });
   }
 
@@ -373,6 +275,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void didChangeDependencies() {
     getLocale().then((locale) => {setLocale(locale)});
+
     super.didChangeDependencies();
   }
 
@@ -747,14 +650,4 @@ class _MyAppState extends State<MyApp> {
       },
     );
   }
-}
-
-Future<ByteArrayAndroidBitmap> _getImageFromUrl(String imageUrl) async {
-  final response = await http.get(Uri.parse(imageUrl));
-  final directory = await getTemporaryDirectory();
-  final filePath = '${directory.path}/user_image.png';
-  final file = File(filePath);
-  await file.writeAsBytes(response.bodyBytes);
-  final Uint8List imageBytes = await file.readAsBytes();
-  return ByteArrayAndroidBitmap(imageBytes);
 }

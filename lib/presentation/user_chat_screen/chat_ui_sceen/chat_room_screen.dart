@@ -98,7 +98,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     setStatusBarColor(svGetScaffoldColor());
     // Handle completion
     _startTimerForChat();
-    seenSenderMessage(1);
+    // seenSenderMessage(1);
     _isRecording = false;
     chatBloc.add(LoadRoomMessageEvent(
         page: 1,
