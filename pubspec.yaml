@@ -135,7 +135,7 @@ dependencies:
   share_plus: ^10.0.0
   device_info_plus: ^10.1.2
   file_picker: ^8.1.2
-  flutter_app_badge: ^2.0.2
+  app_badge_plus: ^1.1.5
 #  flutter_markdown_latex: ^0.3.3
 #  record: ^5.0.4
 #  record_mp3: ^3.0.0

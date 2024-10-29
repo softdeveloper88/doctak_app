@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
@@ -12,7 +13,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_badge/flutter_app_badge.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -38,6 +38,8 @@ class NotificationService {
         message.notification?.body ?? '',
         message.data['image'] ?? '',
         message.data['banner'] ?? '');
+    NotificationService.incrementBadgeCount();
+
     // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     // FlutterLocalNotificationsPlugin();
     // const AndroidInitializationSettings initializationSettingsAndroid =
@@ -327,11 +329,11 @@ class NotificationService {
 
   static void incrementBadgeCount() {
     notificationCount++;
-    FlutterAppBadge.count(notificationCount);
+    AppBadgePlus.updateBadge(notificationCount);
   }
 
   static void clearBadgeCount() {
     notificationCount = 0;
-    FlutterAppBadge.count(0);
+    AppBadgePlus.updateBadge(notificationCount);
   }
 }
