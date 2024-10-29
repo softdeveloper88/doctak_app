@@ -30,7 +30,7 @@ class NotificationService {
   static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
     debugPrint('PUSH RECEIVED');
-
+    NotificationService.incrementBadgeCount();
     await showNotificationWithCustomIcon(
         message.notification,
         message.data,
@@ -38,8 +38,6 @@ class NotificationService {
         message.notification?.body ?? '',
         message.data['image'] ?? '',
         message.data['banner'] ?? '');
-    NotificationService.incrementBadgeCount();
-
     // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     // FlutterLocalNotificationsPlugin();
     // const AndroidInitializationSettings initializationSettingsAndroid =
