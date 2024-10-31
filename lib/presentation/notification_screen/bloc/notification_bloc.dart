@@ -86,7 +86,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     // emit(DrugsDataInitial());
 
     // ProgressDialogUtils.showProgressDialog();
-    // try {
+    try {
 
 
      var response = await postService.readNotification(
@@ -95,25 +95,28 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       );
 
      // totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
-     notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
-    print(response.data);
+    if(totalNotifications>0) {
+      totalNotifications = -1;
 
+      notificationsModel.notifications?.data?[notificationsList.indexWhere((
+          e) => e.id.toString() == event.notificationId)].isRead = 1;
+    }
     emit(PaginationLoadedState());
 
     // emit(DataLoaded(notificationsList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   // emit(PaginationLoadedState());
-    //
-    //   emit(DataError('No Data Found'));
-    // }
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState());
+
+      emit(DataError('No Data Found'));
+    }
   }
   _counterNotification(NotificationCounter event, Emitter<NotificationState> emit) async {
     // emit(DrugsDataInitial());
 
     // ProgressDialogUtils.showProgressDialog();
-    // try {
+    try {
 
     Dio dio = Dio();
 
@@ -130,13 +133,13 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     emit(PaginationLoadedState());
 
     // emit(DataLoaded(notificationsList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   // emit(PaginationLoadedState());
-    //
-    //   emit(DataError('No Data Found'));
-    // }
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState());
+
+      emit(DataError('No Data Found'));
+    }
   }
 
   _onGetJobDetail(NotificationDetailPageEvent event, Emitter<NotificationState> emit) async {

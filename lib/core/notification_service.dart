@@ -122,7 +122,7 @@ class NotificationService {
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      NotificationService.clearBadgeCount();
+      // NotificationService.clearBadgeCount();
       _handleNotificationTap(message.notification?.title??"",message.data['image'],message.data['type'], message.data['id']);
     });
 

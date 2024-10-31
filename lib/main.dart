@@ -316,6 +316,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
     setToken();
     super.initState();
