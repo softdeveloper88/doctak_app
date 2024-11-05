@@ -87,7 +87,50 @@ void checkNotificationPermission() async {
     await Permission.notification.request();
   }
 }
+void setFCMSetting() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    if (kDebugMode) {
+      print('User granted permission');
+    }
+  } else if (settings.authorizationStatus ==
+      AuthorizationStatus.provisional) {
+    if (kDebugMode) {
+      print('User granted provisional permission');
+    }
+  } else {
+    if (kDebugMode) {
+      print('User declined or has not accepted permission');
+    }
+  }
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
 
+  /// Update the iOS foreground notification presentation options to allow
+  /// heads up notifications.
+  await FirebaseMessaging.instance
+      .setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  )
+      .then((value) {
+    if (kDebugMode) {
+      print('value:print');
+    }
+  });
+}
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
@@ -96,6 +139,7 @@ Future<void> main() async {
   //   systemNavigationBarColor: Colors.white, // navigation bar color
   //   statusBarColor: Colors.white, // status bar color
   // ));
+  setFCMSetting();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

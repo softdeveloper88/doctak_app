@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:app_badge_plus/app_badge_plus.dart';
@@ -13,12 +12,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -30,7 +31,7 @@ class NotificationService {
   static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
     debugPrint('PUSH RECEIVED');
-    NotificationService.incrementBadgeCount();
+    await NotificationService.incrementBadgeCount();
     await showNotificationWithCustomIcon(
         message.notification,
         message.data,
@@ -94,6 +95,7 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+          defaultPresentBadge: true,
     );
     const InitializationSettings initializationSettings =
         InitializationSettings(
@@ -106,7 +108,10 @@ class NotificationService {
         print('notification ${notificationResponse.payload}');
         if (notificationResponse.payload != null) {
           _handleNotificationTap(
-              notificationResponse.payload!,notificationResponse.payload!, notificationResponse.payload!,notificationResponse.payload!);
+              notificationResponse.payload!,
+              notificationResponse.payload!,
+              notificationResponse.payload!,
+              notificationResponse.payload!);
         }
       },
     );
@@ -115,15 +120,15 @@ class NotificationService {
     await _firebaseMessaging.requestPermission();
     FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      NotificationService.incrementBadgeCount();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      await NotificationService.incrementBadgeCount();
       _showLocalNotification(message);
-
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       // NotificationService.clearBadgeCount();
-      _handleNotificationTap(message.notification?.title??"",message.data['image'],message.data['type'], message.data['id']);
+      _handleNotificationTap(message.notification?.title ?? "",
+          message.data['image'], message.data['type'], message.data['id']);
     });
 
     // For terminated state handling
@@ -131,9 +136,10 @@ class NotificationService {
         await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
       _handleNotificationTap(
-          initialMessage.notification?.title??'',
+          initialMessage.notification?.title ?? '',
           initialMessage.data['image'],
-          initialMessage.data['type'], initialMessage.data['id']);
+          initialMessage.data['type'],
+          initialMessage.data['id']);
     }
   }
 
@@ -254,14 +260,15 @@ class NotificationService {
   }
 
   // Handle notification tap (local or FCM)
-  static Future<void> _handleNotificationTap(String title,String profilePic,String payload, String id) async {
+  static Future<void> _handleNotificationTap(
+      String title, String profilePic, String payload, String id) async {
     // Save the payload to shared preferences for later retrieval
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_payloadKey, payload);
     await prefs.setString(_payloadId, id);
 
     // Use Navigator to go to the specific screen
-    _navigateToScreen(title,profilePic,payload, id);
+    _navigateToScreen(title, profilePic, payload, id);
   }
 
   // Get the notification payload when the app is terminated
@@ -277,24 +284,27 @@ class NotificationService {
   }
 
   // Navigate to the specific screen based on the payload
-  static void _navigateToScreen(String username,String profilePic,String payload, String id) {
+  static void _navigateToScreen(
+      String username, String profilePic, String payload, String id) {
     print('payload $payload');
     print('id $id');
     if (NavigatorService.navigatorKey.currentState != null) {
       NavigatorService.navigatorKey.currentState?.push(
         MaterialPageRoute(builder: (context) {
-          if (payload =='message_received') {
+          if (payload == 'message_received') {
             return ChatRoomScreen(
               id: id,
-              roomId:'', username: username ,profilePic: profilePic
-              ,
+              roomId: '',
+              username: username,
+              profilePic: profilePic,
             );
-          }else if (payload == 'follow_request' || payload == 'follower_notification' || payload == 'un_follower_notification' ||
-              payload == 'friend_request' ) {
-
+          } else if (payload == 'follow_request' ||
+              payload == 'follower_notification' ||
+              payload == 'un_follower_notification' ||
+              payload == 'friend_request') {
             return SVProfileFragment(
-              userId: id,);
-
+              userId: id,
+            );
           } else if (payload == 'comments_on_posts' ||
               payload == 'like_comment_on_post' ||
               payload == 'like_comments') {
@@ -325,13 +335,16 @@ class NotificationService {
 
   static int notificationCount = 0;
 
-  static void incrementBadgeCount() {
+static  Future<void> incrementBadgeCount() async {
     notificationCount++;
     AppBadgePlus.updateBadge(notificationCount);
+    FlutterAppBadger.updateBadgeCount(notificationCount);
   }
 
-  static void clearBadgeCount() {
+  static  Future<void> clearBadgeCount() async {
     notificationCount = 0;
     AppBadgePlus.updateBadge(notificationCount);
+    FlutterAppBadger.removeBadge();
+    FlutterAppBadger.updateBadgeCount(0);
   }
 }
