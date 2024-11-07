@@ -93,6 +93,8 @@ class NotificationService {
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
       requestAlertPermission: true,
+      defaultPresentSound: true,
+      defaultPresentAlert: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
           defaultPresentBadge: true,
@@ -220,7 +222,9 @@ class NotificationService {
       'High Importance Notifications', // title // description
       importance: Importance.max,
     );
-    const AndroidNotificationDetails(
+    AndroidNotificationDetails(
+      channelShowBadge: true,
+      icon: initializationSettingsAndroid.defaultIcon,
       'high_importance_channel', // Channel ID
       'High Importance Notifications', // Channel name
       channelDescription: 'your_channel_description', // Channel description
@@ -243,6 +247,12 @@ class NotificationService {
         payload: data['type'],
         NotificationDetails(
           android: AndroidNotificationDetails(
+            channelShowBadge: true,
+            icon: initializationSettingsAndroid.defaultIcon,
+            channelDescription: 'your_channel_description', // Channel description
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: true,
             color: Colors.transparent,
             channel.id,
             channel.name,
@@ -254,7 +264,7 @@ class NotificationService {
                     summaryText: notification.body,
                   )
                 : null,
-            icon: 'ic_stat_name',
+             // icon: 'ic_stat_name',
           ),
         ));
   }
