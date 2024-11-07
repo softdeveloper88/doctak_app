@@ -32,6 +32,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_badge_control/flutter_app_badge_control.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -408,6 +409,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
+    FlutterAppBadgeControl.updateBadgeCount(1);
     setToken();
     _initializeFlutterFireFuture = _initializeFlutterFire();
     super.initState();
