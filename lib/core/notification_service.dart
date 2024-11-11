@@ -133,16 +133,16 @@ class NotificationService {
           message.data['image'], message.data['type'], message.data['id']);
     });
 
-    // For terminated state handling
-    RemoteMessage? initialMessage =
-        await _firebaseMessaging.getInitialMessage();
-    if (initialMessage != null) {
-      _handleNotificationTap(
-          initialMessage.notification?.title ?? '',
-          initialMessage.data['image'],
-          initialMessage.data['type'],
-          initialMessage.data['id']);
-    }
+    // // For terminated state handling
+    // RemoteMessage? initialMessage =
+    //     await _firebaseMessaging.getInitialMessage();
+    // if (initialMessage != null) {
+    //   _handleNotificationTap(
+    //       initialMessage.notification?.title ?? '',
+    //       initialMessage.data['image'],
+    //       initialMessage.data['type'],
+    //       initialMessage.data['id']);
+    // }
   }
 
   static Future<RemoteMessage?> getInitialNotificationRoute() async {

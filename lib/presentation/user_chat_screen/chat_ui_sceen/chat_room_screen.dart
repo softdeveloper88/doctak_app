@@ -68,7 +68,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   late PusherChannel clientListenChannel;
   late PusherChannel clientSendChannel;
   bool isSomeoneTyping = false;
-
+  bool isDataLoaded=true;
   // List<SelectedByte> selectedFiles = [];
   bool isMessageLoaded = false; // Initialize it as per your logic
   File? _selectedFile;
@@ -103,7 +103,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         page: 1,
         userId: widget.id,
         roomId: widget.roomId,
-        isFirstLoading: true));
+        isFirstLoading: isDataLoaded));
     chatBloc.add(ChatReadStatusEvent(
       userId: widget.id,
       roomId: widget.roomId,));
@@ -754,6 +754,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 ),
               );
             } else if (state is PaginationLoadedState) {
+              isDataLoaded=false;
               var bloc = chatBloc;
               return Column(
                 children: [
@@ -1441,10 +1442,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   void _startTimerForChat() {
     _timerChat = Timer.periodic(const Duration(seconds: 10), (timer) {
-      print('call timer');
-      chatBloc.add(LoadRoomMessageEvent(
-          page: 0, userId: widget.id, roomId: widget.roomId));
+      if(!isDataLoaded) {
+        chatBloc.add(LoadRoomMessageEvent(
+            page: 0, userId: widget.id, roomId: widget.roomId));
+      }
     });
+
 
   }
 

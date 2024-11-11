@@ -334,13 +334,13 @@ class _MyAppState extends State<MyApp> {
   //     return false;
   //   }
   // }
-  setToken() async {
-    await FirebaseMessaging.instance.getToken().then((token) async {
-      log('token ${token}');
-    });
-    var tp = await FirebaseMessaging.instance.getAPNSToken();
-    print(tp);
-  }
+  // setToken() async {
+  //   await FirebaseMessaging.instance.getToken().then((token) async {
+  //     log('token ${token}');
+  //   });
+  //   var tp = await FirebaseMessaging.instance.getAPNSToken();
+  //   print(tp);
+  // }
   late Future<void> _initializeFlutterFireFuture;
 
 
@@ -362,7 +362,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
-    setToken();
+    // setToken();
     _initializeFlutterFireFuture = _initializeFlutterFire();
     super.initState();
   }
