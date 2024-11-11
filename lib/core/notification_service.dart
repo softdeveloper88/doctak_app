@@ -308,7 +308,7 @@ class NotificationService {
               id: id,
               roomId: '',
               username: username,
-              profilePic: profilePic,
+              profilePic: profilePic.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')
             );
           } else if (payload == 'follow_request' ||
               payload == 'follower_notification' ||

@@ -624,7 +624,7 @@ class _MyAppState extends State<MyApp> {
                                 id:  widget.id.toString(),
                                 roomId: '',
                                username: widget.message?.notification?.title??"",
-                               profilePic: widget.message?.data['image']??'',
+                               profilePic:widget.message?.data['image']??''.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '') ,
 
                               ),
                           '/comments_on_posts': (context) => PostDetailsScreen(
