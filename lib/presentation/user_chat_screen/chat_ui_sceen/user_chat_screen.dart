@@ -162,15 +162,15 @@ class _UserChatScreenState extends State<UserChatScreen> {
                       },
                     ),
                   ),
-                if (chatBloc.contactsList.isNotEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Contacts',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                // if (chatBloc.contactsList.isNotEmpty)
+                //   const Padding(
+                //     padding: EdgeInsets.all(16.0),
+                //     child: Text(
+                //       'Contacts',
+                //       style:
+                //           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                //     ),
+                //   ),
                 if (chatBloc.contactsList.isNotEmpty)
                   Expanded(
                     child: ListView.builder(

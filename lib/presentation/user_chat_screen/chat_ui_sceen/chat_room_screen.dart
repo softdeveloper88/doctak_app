@@ -704,7 +704,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   child: Text(
                     widget.username,
                     style: GoogleFonts.poppins(
-                        fontSize: 20, fontWeight: FontWeight.w600),
+                        fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
