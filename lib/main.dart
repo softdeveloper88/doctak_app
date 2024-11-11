@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
@@ -32,7 +31,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_badge_control/flutter_app_badge_control.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -88,50 +86,6 @@ void checkNotificationPermission() async {
     await Permission.notification.request();
   }
 }
-void setFCMSetting() async {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    if (kDebugMode) {
-      print('User granted permission');
-    }
-  } else if (settings.authorizationStatus ==
-      AuthorizationStatus.provisional) {
-    if (kDebugMode) {
-      print('User granted provisional permission');
-    }
-  } else {
-    if (kDebugMode) {
-      print('User declined or has not accepted permission');
-    }
-  }
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-      AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
-
-  /// Update the iOS foreground notification presentation options to allow
-  /// heads up notifications.
-  await FirebaseMessaging.instance
-      .setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  )
-      .then((value) {
-    if (kDebugMode) {
-      print('value:print');
-    }
-  });
-}
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
@@ -140,7 +94,6 @@ Future<void> main() async {
   //   systemNavigationBarColor: Colors.white, // navigation bar color
   //   statusBarColor: Colors.white, // status bar color
   // ));
-  setFCMSetting();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -409,7 +362,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
-    FlutterAppBadgeControl.updateBadgeCount(1);
     setToken();
     _initializeFlutterFireFuture = _initializeFlutterFire();
     super.initState();

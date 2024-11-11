@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:app_badge_plus/app_badge_plus.dart';
+import 'package:clear_all_notifications/clear_all_notifications.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
@@ -109,11 +109,11 @@ class NotificationService {
           (NotificationResponse notificationResponse) async {
         print('notification ${notificationResponse.payload}');
         if (notificationResponse.payload != null) {
-          _handleNotificationTap(
-              notificationResponse.payload!,
-              notificationResponse.payload!,
-              notificationResponse.payload!,
-              notificationResponse.payload!);
+          // _handleNotificationTap(
+          //     notificationResponse.payload!,
+          //     notificationResponse.payload!,
+          //     notificationResponse.payload!,
+          //     notificationResponse.payload!);
         }
       },
     );
@@ -347,14 +347,13 @@ class NotificationService {
 
 static  Future<void> incrementBadgeCount() async {
     notificationCount++;
-    AppBadgePlus.updateBadge(notificationCount);
     FlutterAppBadger.updateBadgeCount(notificationCount);
   }
 
   static  Future<void> clearBadgeCount() async {
     notificationCount = 0;
-    AppBadgePlus.updateBadge(notificationCount);
     FlutterAppBadger.removeBadge();
     FlutterAppBadger.updateBadgeCount(0);
+    await ClearAllNotifications.clear();
   }
 }
