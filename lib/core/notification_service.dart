@@ -297,6 +297,8 @@ class NotificationService {
   static void _navigateToScreen(
       String username, String profilePic, String payload, String id) {
     print('payload $payload');
+    print('username $username');
+    print('id $id');
     print('id $id');
     if (NavigatorService.navigatorKey.currentState != null) {
       NavigatorService.navigatorKey.currentState?.push(
