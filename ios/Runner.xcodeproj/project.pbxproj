@@ -10,7 +10,6 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		189C325D2CB3CB5900DCB469 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 189C325C2CB3CB5900DCB469 /* GoogleService-Info.plist */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
-		3377DEB62CB469410028068A /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3377DEB52CB469410028068A /* XCTest.framework */; };
 		33F872382CE35A3E00997940 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33F872372CE35A3E00997940 /* Assets.xcassets */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
@@ -82,7 +81,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3377DEB62CB469410028068A /* XCTest.framework in Frameworks */,
 				BEBEC5460BECD6CDE229A2CB /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
