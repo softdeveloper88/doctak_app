@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:clear_all_notifications/clear_all_notifications.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
@@ -128,7 +129,7 @@ class NotificationService {
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      NotificationService.clearBadgeCount();
+      // NotificationService.clearBadgeCount();
       _handleNotificationTap(message.notification?.title ?? "",
           message.data['image'], message.data['type'], message.data['id']);
     });
@@ -353,11 +354,13 @@ class NotificationService {
 
 static  Future<void> incrementBadgeCount() async {
     notificationCount++;
+    AppBadgePlus.updateBadge(notificationCount);
     FlutterAppBadger.updateBadgeCount(notificationCount);
   }
 
   static  Future<void> clearBadgeCount() async {
     notificationCount = 0;
+    AppBadgePlus.updateBadge(notificationCount);
     FlutterAppBadger.removeBadge();
     FlutterAppBadger.updateBadgeCount(0);
     await ClearAllNotifications.clear();
