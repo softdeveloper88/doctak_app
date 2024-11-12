@@ -27,7 +27,7 @@ class NotificationService {
       FirebaseMessaging.instance;
   static const String _payloadKey = 'type';
   static const String _payloadId = 'id';
-
+  @pragma('vm:entry-point')
   static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
     debugPrint('PUSH RECEIVED');
@@ -128,7 +128,7 @@ class NotificationService {
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      // NotificationService.clearBadgeCount();
+      NotificationService.clearBadgeCount();
       _handleNotificationTap(message.notification?.title ?? "",
           message.data['image'], message.data['type'], message.data['id']);
     });
@@ -221,7 +221,12 @@ class NotificationService {
       'high_importance_channel', // id
       'High Importance Notifications', // title // description
       importance: Importance.max,
+      showBadge: true
     );
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
     AndroidNotificationDetails(
       channelShowBadge: true,
       icon: initializationSettingsAndroid.defaultIcon,
@@ -239,7 +244,6 @@ class NotificationService {
     //   platformChannelSpecifics,
     //   payload: message.data['type'], // Pass payload from FCM data
     // );
-
     _localNotificationsPlugin.show(
         notification.hashCode,
         title,
@@ -247,15 +251,15 @@ class NotificationService {
         payload: data['type'],
         NotificationDetails(
           android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
             channelShowBadge: true,
             icon: initializationSettingsAndroid.defaultIcon,
-            channelDescription: 'your_channel_description', // Channel description
+            channelDescription: channel.name, // Channel description
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,
             color: Colors.transparent,
-            channel.id,
-            channel.name,
             largeIcon: largeIcon,
             styleInformation: bannerImage != ''
                 ? BigPictureStyleInformation(
