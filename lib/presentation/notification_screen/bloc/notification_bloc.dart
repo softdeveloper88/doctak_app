@@ -16,7 +16,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   int numberOfPage = 1;
   List<Data> notificationsList = [];
   int totalNotifications=0;
-  NotificationModel notificationsModel = NotificationModel();
+  NotificationModel? notificationsModel;
   final int nextPageTrigger = 1;
 
   NotificationBloc() : super(PaginationInitialState()) {
@@ -98,7 +98,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     if(totalNotifications>0) {
       totalNotifications = -1;
 
-      notificationsModel.notifications?.data?[notificationsList.indexWhere((
+      notificationsModel?.notifications?.data?[notificationsList.indexWhere((
           e) => e.id.toString() == event.notificationId)].isRead = 1;
     }
     emit(PaginationLoadedState());
