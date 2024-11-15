@@ -63,11 +63,11 @@ class ChatBubble extends StatelessWidget {
                         maxWidth: 60.w,
                       ),
                       padding: const EdgeInsets.symmetric(
-                          vertical: 2.0, horizontal: 8.0),
+                          vertical: 1.0, horizontal: 8.0),
                       decoration: BoxDecoration(
                         color: isMe ? Colors.blue[300] : Colors.grey[300],
                         borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(12.0),
+                          topLeft: Radius.circular(isMe ? 0.0 : 12.0),
                           bottomRight: Radius.circular(isMe ? 0.0 : 12.0),
                           topRight: Radius.circular(isMe ? 12.0 : 0.0),
                           bottomLeft: Radius.circular(isMe ? 12.0 : 0.0),
@@ -81,7 +81,8 @@ class ChatBubble extends StatelessWidget {
                             message,
                             style: TextStyle(
                               color: isMe ? Colors.white : Colors.black,
-                              fontSize: 16.0,
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w400
                             ),
                           ),
                           if (attachmentJson != null) _buildAttachment(context),
@@ -94,15 +95,15 @@ class ChatBubble extends StatelessWidget {
                                 Text(
                                   timeAgo.format(DateTime.parse(createAt.toString())),
                                   style: GoogleFonts.poppins(
-                                    fontSize: 10.0,
+                                    fontSize: 8.0,
                                     fontWeight: FontWeight.w500,
                                     color: isMe ? Colors.white70 : Colors.black54,
                                   ),
 
                                 ),
-                                const SizedBox(width: 10,),
+                                const SizedBox(width: 5,),
                                if(isMe)
-                                 if(seen==1)Image.asset('assets/icon/ic_seen.png',height: 20,width: 20,) else Image.asset('assets/icon/ic_unseen.png',height: 20,width: 20,)
+                                 if(seen==1)Image.asset('assets/icon/ic_seen.png',height: 15,width: 15,) else Image.asset('assets/icon/ic_unseen.png',height: 15,width: 15,)
                               ],
                             ),
                           ),

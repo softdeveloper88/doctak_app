@@ -4,7 +4,7 @@ String jobDetailModelToJson(JobDetailModel data) => json.encode(data.toJson());
 class JobDetailModel {
   JobDetailModel({
       this.job, 
-      this.hasApplied, 
+      this.hasApplied,
       this.totalApplicants, 
       this.isViewedByAdmin,});
 

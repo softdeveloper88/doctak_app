@@ -634,10 +634,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           surfaceTintColor: context.cardColor,
           backgroundColor: context.cardColor,
           // toolbarHeight: 80,
+          leadingWidth: 30,
           leading: IconButton(
             iconSize: 20,
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
             onPressed: () => Navigator.of(context).pop(),
           ),
           centerTitle: false,
@@ -693,7 +693,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 ],
               ),
               const SizedBox(
-                width: 10,
+                width: 5,
               ),
               Expanded(
                 child: InkWell(

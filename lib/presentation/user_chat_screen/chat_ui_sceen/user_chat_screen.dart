@@ -199,6 +199,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                 ),
                                 child: InkWell(
                                   onTap: () {
+                                    bloc.contactsList[index].unreadCount=0;
                                     ChatRoomScreen(
                                       username:
                                           '${bloc.contactsList[index].firstName ?? ''} ${bloc.contactsList[index].lastName ?? ''}',
@@ -220,59 +221,54 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                         Expanded(
                                           child: Row(
                                             children: [
-                                              GestureDetector(
+                                              InkWell(
                                                 onTap: () {
-                                                  // SVProfileFragment(userId:bloc.contactsList[index].id).launch(context);
+                                                  SVProfileFragment(userId: bloc.contactsList[index].id)
+                                                      .launch(context);
                                                 },
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    SVProfileFragment(userId: bloc.contactsList[index].id)
-                                                        .launch(context);
-                                                  },
-                                                  child: Container(
-                                                    width: 50,
-                                                    height: 50,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.grey
-                                                              .withOpacity(0.3),
-                                                          spreadRadius:1,
-                                                          blurRadius: 3,
-                                                          offset:
-                                                              const Offset(0, 3),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child:
-                                                        // bloc
-                                                        //             .contactsList[
-                                                        //                 index]
-                                                        //             .profilePic ==
-                                                        //         ''
-                                                        //     ? Image.asset(
-                                                        //             'images/socialv/faces/face_5.png',
-                                                        //             height: 56,
-                                                        //             width: 56,
-                                                        //             fit: BoxFit
-                                                        //                 .cover)
-                                                        //         .cornerRadiusWithClipRRect(
-                                                        //             8)
-                                                        //         .cornerRadiusWithClipRRect(
-                                                        //             8)
-                                                        //     :
-                                                        CustomImageView(
-                                                                placeHolder:
-                                                                    'images/socialv/faces/face_5.png',
-                                                                imagePath:
-                                                                    '${AppData.imageUrl}${bloc.contactsList[index].profilePic.validate()}',
-                                                                height: 56,
-                                                                width: 56,
-                                                                fit: BoxFit.cover)
-                                                            .cornerRadiusWithClipRRect(
-                                                                30),
+                                                child: Container(
+                                                  width: 50,
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.3),
+                                                        spreadRadius:1,
+                                                        blurRadius: 3,
+                                                        offset:
+                                                            const Offset(0, 3),
+                                                      ),
+                                                    ],
                                                   ),
+                                                  child:
+                                                      // bloc
+                                                      //             .contactsList[
+                                                      //                 index]
+                                                      //             .profilePic ==
+                                                      //         ''
+                                                      //     ? Image.asset(
+                                                      //             'images/socialv/faces/face_5.png',
+                                                      //             height: 56,
+                                                      //             width: 56,
+                                                      //             fit: BoxFit
+                                                      //                 .cover)
+                                                      //         .cornerRadiusWithClipRRect(
+                                                      //             8)
+                                                      //         .cornerRadiusWithClipRRect(
+                                                      //             8)
+                                                      //     :
+                                                      CustomImageView(
+                                                              placeHolder:
+                                                                  'images/socialv/faces/face_5.png',
+                                                              imagePath:
+                                                                  '${AppData.imageUrl}${bloc.contactsList[index].profilePic.validate()}',
+                                                              height: 56,
+                                                              width: 56,
+                                                              fit: BoxFit.cover)
+                                                          .cornerRadiusWithClipRRect(
+                                                              30),
                                                 ),
                                               ),
                                               10.width,
@@ -306,12 +302,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                     ],
                                                   ),
                                                   Text(
-                                                      (bloc
-                                                                      .contactsList[
-                                                                          index]
-                                                                      .latestMessage
-                                                                      ?.length ??
-                                                                  0) >
+                                                      (bloc.contactsList[index].latestMessage?.length ?? 0) >
                                                               20
                                                           ? '${bloc.contactsList[index].latestMessage?.substring(0, 20)}.....' ??
                                                               ''
@@ -328,14 +319,38 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                             ],
                                           ),
                                         ),
-                                        Text(
-                                            timeAgo.format(DateTime.parse(bloc
-                                                    .contactsList[index]
-                                                    .createdAt ??
-                                                '')),
-                                            style: secondaryTextStyle(
-                                                color: svGetBodyColor(),
-                                                size: 12)),
+                                        Column(
+                                          children: [
+                                            if((bloc.contactsList[index].unreadCount??0) > 0)
+                                                 Container(
+                                              height: 20,
+                                              width: 20,
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                border: Border.all(
+                                                  color: Colors.red,
+                                                ),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  '${bloc.contactsList[index].unreadCount??0}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Text(timeAgo.format(DateTime.parse(bloc
+                                                        .contactsList[index]
+                                                        .latestMessageTime ?? '2024-01-01 00:00:00')),
+                                                style: secondaryTextStyle(
+                                                    color: svGetBodyColor(),
+                                                    size: 12)),
+                                          ],
+                                        ),
                                         // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
                                         //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
                                         //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',

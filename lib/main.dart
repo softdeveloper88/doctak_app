@@ -209,9 +209,7 @@ Future<void> main() async {
   // Get the initial notification data if the app was launched from a terminated state by tapping a notification
 
   // Use the notification data (payload or route) to navigate to a specific screen
-
   appStore.toggleDarkMode(value: false);
-
   Future.wait([
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,

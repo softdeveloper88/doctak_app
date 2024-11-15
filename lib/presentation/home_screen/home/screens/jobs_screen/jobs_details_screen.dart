@@ -130,7 +130,8 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 const SizedBox(
                                   width: 10,
                                 ),
-                              if(jobsBloc.jobDetailModel.hasApplied !=false && jobsBloc.jobDetailModel.job?.user!.id != AppData.logInUserId)  MaterialButton(
+                              //&& jobsBloc.jobDetailModel.job?.user!.id != AppData.logInUserId
+                              if(jobsBloc.jobDetailModel.hasApplied == null )  MaterialButton(
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10)),
                                   color: Colors.blue,

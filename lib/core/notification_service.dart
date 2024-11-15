@@ -85,7 +85,6 @@ class NotificationService {
     // }
     // showNotification(message.data);
   }
-
   // Initialize the notification services (both local and FCM)
   static Future<void> initialize() async {
     // Initialize local notifications

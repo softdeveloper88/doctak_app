@@ -66,6 +66,7 @@ class Contacts extends Equatable {
     this.profilePic,
     this.latestMessage,
     this.latestMessageTime,
+    this.unreadCount,
   });
 
   Contacts.fromJson(dynamic json) {
@@ -77,6 +78,7 @@ class Contacts extends Equatable {
     profilePic = json['profile_pic'];
     latestMessage = json['latest_message'];
     latestMessageTime = json['latest_message_time'];
+    unreadCount = json['unread_count'];
   }
   dynamic id;
   dynamic roomId;
@@ -86,6 +88,7 @@ class Contacts extends Equatable {
   String? profilePic;
   String? latestMessage;
   String? latestMessageTime;
+  int? unreadCount;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -97,6 +100,7 @@ class Contacts extends Equatable {
     map['profile_pic'] = profilePic;
     map['latest_message'] = latestMessage;
     map['latest_message_time'] = latestMessageTime;
+    map['unread_count'] = unreadCount;
     return map;
   }
 

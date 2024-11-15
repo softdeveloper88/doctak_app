@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
@@ -6,6 +8,7 @@ import 'package:doctak_app/data/models/jobs_model/job_detail_model.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 import 'jobs_event.dart';
 import 'jobs_state.dart';
@@ -78,6 +81,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     JobDetailModel response = await postService.getJobsDetails(
         'Bearer ${AppData.userToken}', event.jobId.toString());
     jobDetailModel = response;
+    log(jobDetailModel.toJson().toString());
     emit(PaginationLoadedState());
     // emit(DataLoaded(drugsData));
     // } catch (e) {
@@ -128,7 +132,8 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
             'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
           }),
         );
-        print(response.data);
+        toast(response.data['success']);
+        print("response ${response.data}");
       } catch (e) {
         print('Error: $e');
       }
