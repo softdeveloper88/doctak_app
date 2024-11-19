@@ -1,3 +1,4 @@
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
@@ -26,7 +27,13 @@ class _UserChatScreenState extends State<UserChatScreen> {
     chatBloc.add(LoadPageEvent(page: 1));
     super.initState();
   }
-
+  String sanitizeString(String input) {
+    try {
+      return String.fromCharCodes(input.codeUnits);
+    } catch (e) {
+      return "Invalid String";
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -263,7 +270,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                               placeHolder:
                                                                   'images/socialv/faces/face_5.png',
                                                               imagePath:
-                                                                  '${AppData.imageUrl}${bloc.contactsList[index].profilePic.validate()}',
+                                                                  '${AppData.imageUrl}${bloc.contactsList[index].profilePic??''}',
                                                               height: 56,
                                                               width: 56,
                                                               fit: BoxFit.cover)
@@ -283,7 +290,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                       SizedBox(
                                                           width: 150,
                                                           child: Text(
-                                                              "${bloc.contactsList[index].firstName.validate()} ${bloc.contactsList[index].lastName.validate()}",
+                                                              sanitizeString("${bloc.contactsList[index].firstName??""} ${bloc.contactsList[index].lastName??''}"),
                                                               overflow:
                                                                   TextOverflow
                                                                       .clip,
@@ -302,14 +309,9 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                     ],
                                                   ),
                                                   Text(
-                                                      (bloc.contactsList[index].latestMessage?.length ?? 0) >
-                                                              20
-                                                          ? '${bloc.contactsList[index].latestMessage?.substring(0, 20)}.....' ??
-                                                              ''
-                                                          : bloc
-                                                                  .contactsList[
-                                                                      index]
-                                                                  .latestMessage ??
+                                                      (bloc.contactsList[index].latestMessage?.length ?? 0) > 20
+                                                          ? '${bloc.contactsList[index].latestMessage?.substring(0, 15)}....'
+                                                          : bloc.contactsList[index].latestMessage ??
                                                               "",
                                                       style: secondaryTextStyle(
                                                           color:
@@ -406,7 +408,8 @@ class _UserChatScreenState extends State<UserChatScreen> {
                     child:
                         Text("No chat found", style: boldTextStyle(size: 16)),
                   )),
-                // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+                if (AppData.isShowGoogleBannerAds ?? false)BannerAdWidget(),
+
               ],
             );
           } else if (state is DataError) {

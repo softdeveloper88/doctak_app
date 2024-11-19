@@ -324,7 +324,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
               }
             },
           ),
-          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
 
           // Add your list or search results display here
         ],

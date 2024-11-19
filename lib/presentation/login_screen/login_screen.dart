@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/forgot_password/forgot_password.dart';
@@ -640,7 +641,9 @@ class LoginScreenState extends State<LoginScreen> {
                                   _buildORDivider(context),
                                   const SizedBox(height: 29),
                                   _buildSocial(context),
-                                  const SizedBox(height: 5)
+                                  const SizedBox(height: 5),
+                                  NativeAdWidget()
+
                                 ]))),
                       ))))),
     );

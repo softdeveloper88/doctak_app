@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -203,9 +205,9 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                               padding: const EdgeInsets.all(10.0),
                               child: Container(
                                 padding: const EdgeInsets.only(left: 8.0),
-
                                 decoration: BoxDecoration(
-                                    color: context.dividerColor.withOpacity(0.4),
+                                    color:
+                                        context.dividerColor.withOpacity(0.4),
                                     borderRadius: radius(5),
                                     border: Border.all(
                                         color: Colors.black, width: 0.5)),
@@ -337,16 +339,21 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                     bloc.conferenceList.length - bloc.nextPageTrigger) {
                   bloc.add(CheckIfNeedMoreDataEvent(index: index));
                 }
-                return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                        index >= bloc.conferenceList.length - 1
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: svGetBodyColor(),
-                        ),
-                      )
-                    : ConferenceWidget(
-                        conference: bloc.conferenceList[index],
-                      );
+                if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+                    index >= bloc.conferenceList.length - 1) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: svGetBodyColor(),
+                    ),
+                  );
+                } else if ((index % 5 == 0 && index != 0) &&
+                    AppData.isShowGoogleNativeAds) {
+                  return NativeAdWidget();
+                } else {
+                  return ConferenceWidget(
+                    conference: bloc.conferenceList[index],
+                  );
+                }
                 //     : Container(
                 //   margin: const EdgeInsets.symmetric(vertical: 5),
                 //   padding: const EdgeInsets.all(8),

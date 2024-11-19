@@ -52,7 +52,7 @@ class _SearchScreenState extends State<SearchScreen>
         searchTerm: '',
       ),
     );
-    homeBloc.add(LoadSearchPageEvent(page: 1, search: 'a'));
+    homeBloc.add(LoadSearchPageEvent(page: 1, search: ''));
     drugsBloc.add(LoadPageEvent(
       page: 1,
       countryId: '',

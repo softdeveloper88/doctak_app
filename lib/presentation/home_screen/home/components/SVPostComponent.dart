@@ -1,9 +1,5 @@
-import 'dart:async';
-import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
-import 'package:doctak_app/widgets/retry_widget.dart';
-import 'package:html/parser.dart' as html_parser;
-import 'package:html/dom.dart' as dom;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
@@ -11,22 +7,25 @@ import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/share_post_bottom_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as html_parser;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
+
 import '../../fragments/home_main_screen/post_widget/find_likes.dart';
 import '../../fragments/home_main_screen/post_widget/post_media_widget.dart';
 import '../../fragments/home_main_screen/post_widget/text_icon_widget.dart';
@@ -126,487 +125,458 @@ class _SVPostComponentState extends State<SVPostComponent>
                       }
                     }
 
-                    return widget.homeBloc.numberOfPage !=
-                                widget.homeBloc.pageNumber - 1 &&
-                            index >= widget.homeBloc.postList.length - 1
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              color: svGetBodyColor(),
-                            ),
-                          )
-                        : Column(
-                            children: [
-                              // if (index % 5 == 0 && index != 0)
-                              // NativeAdWidget(),
-                              Container(
-                                padding:
-                                    const EdgeInsets.only(top: 8),
-                                margin: const EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                    borderRadius: radius(SVAppCommonRadius),
-                                    color: context.cardColor),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                    if (widget.homeBloc.numberOfPage !=
+                            widget.homeBloc.pageNumber - 1 &&
+                        index >= widget.homeBloc.postList.length - 1) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: svGetBodyColor(),
+                        ),
+                      );
+                    } else if ((index % 5 == 0 && index != 0) && AppData.isShowGoogleNativeAds) {
+                      return NativeAdWidget();
+                    } else {
+                      return Container(
+                        padding: const EdgeInsets.only(top: 8),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                            borderRadius: radius(SVAppCommonRadius),
+                            color: context.cardColor),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      SVProfileFragment(
+                                              userId: widget.homeBloc
+                                                  .postList[index].user?.id)
+                                          .launch(context);
+                                    },
+                                    child: Row(
                                       children: [
-                                        Expanded(
-                                          child: InkWell(
-                                            onTap: () {
-                                              SVProfileFragment(
-                                                      userId: widget
-                                                          .homeBloc
-                                                          .postList[index]
-                                                          .user
-                                                          ?.id)
-                                                  .launch(context);
-                                            },
-                                            child: Row(
-                                              children: [
-                                                CachedNetworkImage(
-                                                  imageUrl:
-                                                      "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
-                                                  height: 50,
-                                                  width: 50,
-                                                  fit: BoxFit.cover,
-                                                ).cornerRadiusWithClipRRect(20),
-                                                12.width,
-                                                Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    TextIconWidget(
-                                                        text: widget
-                                                                .homeBloc
-                                                                .postList[index]
-                                                                .user
-                                                                ?.name ??
-                                                            '',
-                                                        suffix: Image.asset(
-                                                            'images/socialv/icons/ic_TickSquare.png',
-                                                            height: 14,
-                                                            width: 14,
-                                                            fit: BoxFit.cover),
-                                                        textStyle:
-                                                            boldTextStyle()),
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                            timeAgo.format(DateTime
-                                                                .parse(widget
-                                                                    .homeBloc
-                                                                    .postList[
-                                                                        index]
-                                                                    .createdAt!)),
-                                                            style: secondaryTextStyle(
-                                                                color:
-                                                                    svGetBodyColor(),
-                                                                size: 12)),
-                                                        const Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 8.0),
-                                                          child: Icon(
-                                                            Icons.access_time,
-                                                            size: 20,
-                                                            color: Colors.grey,
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                // 4.width,
-                                              ],
-                                            ).paddingSymmetric(horizontal: 16),
-                                          ),
-                                        ),
-                                        Row(
+                                        CachedNetworkImage(
+                                          imageUrl:
+                                              "${AppData.imageUrl}${widget.homeBloc.postList[index].user?.profilePic!.validate()}",
+                                          height: 50,
+                                          width: 50,
+                                          fit: BoxFit.cover,
+                                        ).cornerRadiusWithClipRRect(20),
+                                        12.width,
+                                        Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            if (widget.homeBloc.postList[index]
-                                                    .userId ==
-                                                AppData.logInUserId)
-                                              PopupMenuButton(
-                                                itemBuilder: (context) {
-                                                  return [
-                                                    PopupMenuItem(
-                                                      child: Builder(
-                                                          builder: (context) {
-                                                        return Column(
-                                                          children: [
-                                                            "Delete"
-                                                          ].map((String item) {
-                                                            return PopupMenuItem(
-                                                              value: item,
-                                                              child: Text(item),
-                                                            );
-                                                          }).toList(),
-                                                        );
-                                                      }),
-                                                    ),
-                                                  ];
-                                                },
-                                                onSelected: (value) {
-                                                  if (value == 'Delete') {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return showAlertDialog(
-                                                            context,
-                                                            widget
-                                                                    .homeBloc
-                                                                    .postList[
-                                                                        index]
-                                                                    .id ??
-                                                                0);
-                                                      },
-                                                    );
-                                                  }
-                                                },
-                                              )
-                                            // IconButton(onPressed: () {},
-                                            //     icon: const Icon(Icons.more_horiz)),
+                                            TextIconWidget(
+                                                text: widget
+                                                        .homeBloc
+                                                        .postList[index]
+                                                        .user
+                                                        ?.name ??
+                                                    '',
+                                                suffix: Image.asset(
+                                                    'images/socialv/icons/ic_TickSquare.png',
+                                                    height: 14,
+                                                    width: 14,
+                                                    fit: BoxFit.cover),
+                                                textStyle: boldTextStyle()),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                    timeAgo.format(
+                                                        DateTime.parse(widget
+                                                            .homeBloc
+                                                            .postList[index]
+                                                            .createdAt!)),
+                                                    style: secondaryTextStyle(
+                                                        color: svGetBodyColor(),
+                                                        size: 12)),
+                                                const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 8.0),
+                                                  child: Icon(
+                                                    Icons.access_time,
+                                                    size: 20,
+                                                    color: Colors.grey,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ],
                                         ),
+                                        // 4.width,
                                       ],
-                                    ),
-                                    16.height,
-                                    widget.homeBloc.postList[index].title
-                                            .validate()
-                                            .isNotEmpty
-                                        ? _buildPlaceholderWithoutFile(
-                                            context,
-                                            widget.homeBloc.postList[index]
-                                                    .title ??
-                                                '',
-                                            widget.homeBloc.postList[index]
-                                                    .backgroundColor ??
-                                                '#ffff',
-                                            widget
-                                                .homeBloc.postList[index].image,
-                                            widget
-                                                .homeBloc.postList[index].media,index)
-                                        // ? svRobotoText(
-                                        // text: homeBloc.postList[index].title.validate(),
-                                        // textAlign: TextAlign.start).paddingSymmetric(
-                                        // horizontal: 16)
-                                        : const Offstage(),
-                                    widget.homeBloc.postList[index].title
-                                            .validate()
-                                            .isNotEmpty
-                                        ? 16.height
-                                        : const Offstage(),
-                                    _buildMediaContent(context, index)
-                                        .cornerRadiusWithClipRRect(0)
-                                        .center(),
-                                    // Image.asset('',
-                                    //   // homeBloc.postList[index].image?.validate(),
-                                    //   height: 300,
-                                    //   width: context.width() - 32,
-                                    //   fit: BoxFit.cover,
-                                    // ).cornerRadiusWithClipRRect(SVAppCommonRadius).center(),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 8.0, right: 8.0, top: 8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              LikesListScreen(
-                                                      id: widget
-                                                              .homeBloc
-                                                              .postList[index]
-                                                              .id
-                                                              .toString())
-                                                  .launch(context);
-                                            },
-                                            child: Text(
-                                                '${widget.homeBloc.postList[index].likes?.length ?? 0.validate()} Likes',
-                                                style: secondaryTextStyle(
-                                                    color: svGetBodyColor())),
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              SVCommentScreen(
-                                                      homeBloc: widget.homeBloc,
-                                                      id: widget
-                                                              .homeBloc
-                                                              .postList[index]
-                                                              .id ??
-                                                          0)
-                                                  .launch(context);
-                                            },
-                                            child: Text(
-                                                '${widget.homeBloc.postList[index].comments?.length ?? 0.validate()} comments',
-                                                style: secondaryTextStyle(
-                                                    color: svGetBodyColor())),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Divider(
-                                      color: Colors.grey,
-                                      thickness: 0.2,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                    ).paddingSymmetric(horizontal: 16),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    if (widget
+                                            .homeBloc.postList[index].userId ==
+                                        AppData.logInUserId)
+                                      PopupMenuButton(
+                                        itemBuilder: (context) {
+                                          return [
+                                            PopupMenuItem(
+                                              child:
+                                                  Builder(builder: (context) {
+                                                return Column(
+                                                  children: ["Delete"]
+                                                      .map((String item) {
+                                                    return PopupMenuItem(
+                                                      value: item,
+                                                      child: Text(item),
+                                                    );
+                                                  }).toList(),
+                                                );
+                                              }),
+                                            ),
+                                          ];
+                                        },
+                                        onSelected: (value) {
+                                          if (value == 'Delete') {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return showAlertDialog(
+                                                    context,
+                                                    widget
+                                                            .homeBloc
+                                                            .postList[index]
+                                                            .id ??
+                                                        0);
+                                              },
+                                            );
+                                          }
+                                        },
+                                      )
+                                    // IconButton(onPressed: () {},
+                                    //     icon: const Icon(Icons.more_horiz)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            16.height,
+                            widget.homeBloc.postList[index].title
+                                    .validate()
+                                    .isNotEmpty
+                                ? _buildPlaceholderWithoutFile(
+                                    context,
+                                    widget.homeBloc.postList[index].title ?? '',
+                                    widget.homeBloc.postList[index]
+                                            .backgroundColor ??
+                                        '#ffff',
+                                    widget.homeBloc.postList[index].image,
+                                    widget.homeBloc.postList[index].media,
+                                    index)
+                                // ? svRobotoText(
+                                // text: homeBloc.postList[index].title.validate(),
+                                // textAlign: TextAlign.start).paddingSymmetric(
+                                // horizontal: 16)
+                                : const Offstage(),
+                            widget.homeBloc.postList[index].title
+                                    .validate()
+                                    .isNotEmpty
+                                ? 16.height
+                                : const Offstage(),
+                            _buildMediaContent(context, index)
+                                .cornerRadiusWithClipRRect(0)
+                                .center(),
+                            // Image.asset('',
+                            //   // homeBloc.postList[index].image?.validate(),
+                            //   height: 300,
+                            //   width: context.width() - 32,
+                            //   fit: BoxFit.cover,
+                            // ).cornerRadiusWithClipRRect(SVAppCommonRadius).center(),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 8.0, right: 8.0, top: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      LikesListScreen(
+                                              id: widget
+                                                  .homeBloc.postList[index].id
+                                                  .toString())
+                                          .launch(context);
+                                    },
+                                    child: Text(
+                                        '${widget.homeBloc.postList[index].likes?.length ?? 0.validate()} Likes',
+                                        style: secondaryTextStyle(
+                                            color: svGetBodyColor())),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      SVCommentScreen(
+                                              homeBloc: widget.homeBloc,
+                                              id: widget.homeBloc
+                                                      .postList[index].id ??
+                                                  0)
+                                          .launch(context);
+                                    },
+                                    child: Text(
+                                        '${widget.homeBloc.postList[index].comments?.length ?? 0.validate()} comments',
+                                        style: secondaryTextStyle(
+                                            color: svGetBodyColor())),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Divider(
+                              color: Colors.grey,
+                              thickness: 0.2,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InkWell(
+                                    splashColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () {
+                                      widget.homeBloc.add(PostLikeEvent(
+                                          postId: widget.homeBloc
+                                                  .postList[index].id ??
+                                              0));
+                                    },
+                                    child: Column(
                                       children: [
-                                        InkWell(
-                                            splashColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () {
-                                              widget.homeBloc.add(PostLikeEvent(
-                                                  postId: widget.homeBloc
-                                                          .postList[index].id ??
-                                                      0));
-                                            },
-                                            child: Column(
-                                              children: [
-                                                findIsLiked(widget.homeBloc
-                                                        .postList[index].likes)
-                                                    ? Image.asset(
-                                                        'images/socialv/icons/ic_HeartFilled.png',
-                                                        height: 20,
-                                                        width: 22,
-                                                        fit: BoxFit.fill)
-                                                    : Image.asset(
-                                                        'images/socialv/icons/ic_Heart.png',
-                                                        height: 22,
-                                                        width: 22,
-                                                        fit: BoxFit.cover,
-                                                        color:
-                                                            context.iconColor,
-                                                      ),
-                                                Text('Like',
-                                                    style: secondaryTextStyle(
-                                                        color:
-                                                            svGetBodyColor())),
-                                              ],
-                                            )),
-                                        InkWell(
-                                          splashColor: Colors.grey,
-                                          highlightColor: Colors.grey,
-                                          onTap: () {
-                                            setState(() {
-                                              if (isShowComment == -1) {
-                                                isShowComment = index;
-                                              } else {
-                                                FocusScope.of(context)
-                                                    .unfocus();
-                                                isShowComment = -1;
-                                              }
-                                            });
-                                            // SVCommentScreen(
-                                            //         id: widget
-                                            //                 .homeBloc
-                                            //                 .postList[index]
-                                            //                 .id ??
-                                            //             0)
-                                            //     .launch(context);
-                                          },
-                                          child: Column(
-                                            children: [
-                                              Image.asset(
-                                                'images/socialv/icons/ic_Chat.png',
+                                        findIsLiked(widget
+                                                .homeBloc.postList[index].likes)
+                                            ? Image.asset(
+                                                'images/socialv/icons/ic_HeartFilled.png',
+                                                height: 20,
+                                                width: 22,
+                                                fit: BoxFit.fill)
+                                            : Image.asset(
+                                                'images/socialv/icons/ic_Heart.png',
                                                 height: 22,
                                                 width: 22,
                                                 fit: BoxFit.cover,
                                                 color: context.iconColor,
                                               ),
-                                              Text('Comment',
-                                                  style: secondaryTextStyle(
-                                                      color: svGetBodyColor())),
-                                            ],
-                                          ),
-                                        ),
-                                        InkWell(
-                                          splashColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: () {
-                                            // _showBottomSheet(context,widget
-                                            //     .homeBloc
-                                            //     .postList[index]);
-                                            String mediaLink;
-                                            if (widget.homeBloc.postList[index]
-                                                .media!.isNotEmpty) {
-                                              mediaLink = widget
-                                                      .homeBloc
-                                                      .postList[index]
-                                                      .media
-                                                      ?.first
-                                                      .mediaPath ??
-                                                  "";
-                                            } else {
-                                              mediaLink = '';
-                                            }
-                                            createDynamicLink(
-                                                removeHtmlTags(widget
-                                                        .homeBloc
-                                                        .postList[index]
-                                                        .title ??
-                                                    ''),
-                                                'https://doctak.net/post/${widget.homeBloc.postList[index].id}',
-                                                mediaLink);
-                                            // _handleIncomingLinks();
-                                            //   Share.share('${removeHtmlTags(widget
-                                            //     .homeBloc
-                                            //     .postList[index].title??'')}\n https://doctak.net/post/${widget
-                                            //       .homeBloc
-                                            //       .postList[index].id} \n'
-                                            //       '${AppData.imageUrl}$mediaLink');
-                                            // // shareImageWithText('${AppData.imageUrl}$mediaLink',removeHtmlTags(widget
-                                            //     .homeBloc
-                                            //     .postList[index].title??''));
-                                          },
-                                          child: Column(
-                                            children: [
-                                              Icon(
-                                                Icons.share_sharp,
-                                                size: 22,
-                                                // 'images/socialv/icons/ic_share.png',
-                                                // height: 22,
-                                                // width: 22,
-                                                // fit: BoxFit.cover,
-                                                color: context.iconColor,
-                                              ),
-                                              Text('share',
-                                                  style: secondaryTextStyle(
-                                                      color: svGetBodyColor())),
-                                            ],
-                                          ),
-                                        ),
+                                        Text('Like',
+                                            style: secondaryTextStyle(
+                                                color: svGetBodyColor())),
                                       ],
-                                    ).paddingSymmetric(horizontal: 16,vertical: 10),
-                                    if (isShowComment == index)
-                                      SVCommentReplyComponent(
-                                          CommentBloc(),
-                                          widget.homeBloc.postList[index].id ??
-                                              0, (value) {
-                                        if (value.isNotEmpty) {
-                                          var comments = CommentBloc();
-                                          comments.add(PostCommentEvent(
-                                              postId: widget.homeBloc
-                                                      .postList[index].id ??
-                                                  0,
-                                              comment: value));
-
-                                          widget.homeBloc.postList[index]
-                                              .comments!
-                                              .add(Comments());
-                                          setState(() {
-                                            isShowComment = -1;
-                                          });
-                                        }
-                                      })
-                                    // const Divider(indent: 16, endIndent: 16, height: 20),
-                                    // Row(
-                                    //   mainAxisAlignment: MainAxisAlignment.center,
-                                    //   children: [
-                                    //     SizedBox(
-                                    //       width: 56,
-                                    //       child: Stack(
-                                    //         alignment: Alignment.centerLeft,
-                                    //         children: [
-                                    //           Positioned(
-                                    //             right: 0,
-                                    //             child: Container(
-                                    //               decoration: BoxDecoration(
-                                    //                   border: Border.all(
-                                    //                       color: Colors.white, width: 2),
-                                    //                   borderRadius: radius(100)),
-                                    //               child: Image.asset(
-                                    //                   'images/socialv/faces/face_1.png',
-                                    //                   height: 24,
-                                    //                   width: 24,
-                                    //                   fit: BoxFit.cover)
-                                    //                   .cornerRadiusWithClipRRect(100),
-                                    //             ),
-                                    //           ),
-                                    //           Positioned(
-                                    //             left: 14,
-                                    //             child: Container(
-                                    //               decoration: BoxDecoration(
-                                    //                   border: Border.all(
-                                    //                       color: Colors.white, width: 2),
-                                    //                   borderRadius: radius(100)),
-                                    //               child: Image.asset(
-                                    //                   'images/socialv/faces/face_2.png',
-                                    //                   height: 24,
-                                    //                   width: 24,
-                                    //                   fit: BoxFit.cover)
-                                    //                   .cornerRadiusWithClipRRect(100),
-                                    //             ),
-                                    //           ),
-                                    //           Positioned(
-                                    //             child: Container(
-                                    //               decoration: BoxDecoration(
-                                    //                   border: Border.all(
-                                    //                       color: Colors.white, width: 2),
-                                    //                   borderRadius: radius(100)),
-                                    //               child: Image.asset(
-                                    //                   'images/socialv/faces/face_3.png',
-                                    //                   height: 24,
-                                    //                   width: 24,
-                                    //                   fit: BoxFit.cover)
-                                    //                   .cornerRadiusWithClipRRect(100),
-                                    //             ),
-                                    //           ),
-                                    //         ],
-                                    //       ),
-                                    //     ),
-                                    //     10.width,
-                                    // //     RichText(
-                                    // //       text: TextSpan(
-                                    // //         text: 'Liked By ',
-                                    // //         style: secondaryTextStyle(
-                                    // //             color: svGetBodyColor(), size: 12),
-                                    // //         children: <TextSpan>[
-                                    // //           TextSpan(text: 'Ms.Mountain ',
-                                    // //               style: boldTextStyle(size: 12)),
-                                    // //           TextSpan(text: 'And ',
-                                    // //               style: secondaryTextStyle(
-                                    // //                   color: svGetBodyColor(), size: 12)),
-                                    // //           TextSpan(text: '${widget.homeBloc.postList[index].likes?.length??0} Others ',
-                                    // //               style: boldTextStyle(size: 12)),
-                                    // //         ],
-                                    // //       ),
-                                    // //     )
-                                    //   ],
-                                    // )
-                                  ],
+                                    )),
+                                InkWell(
+                                  splashColor: Colors.grey,
+                                  highlightColor: Colors.grey,
+                                  onTap: () {
+                                    setState(() {
+                                      if (isShowComment == -1) {
+                                        isShowComment = index;
+                                      } else {
+                                        FocusScope.of(context).unfocus();
+                                        isShowComment = -1;
+                                      }
+                                    });
+                                    // SVCommentScreen(
+                                    //         id: widget
+                                    //                 .homeBloc
+                                    //                 .postList[index]
+                                    //                 .id ??
+                                    //             0)
+                                    //     .launch(context);
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                        'images/socialv/icons/ic_Chat.png',
+                                        height: 22,
+                                        width: 22,
+                                        fit: BoxFit.cover,
+                                        color: context.iconColor,
+                                      ),
+                                      Text('Comment',
+                                          style: secondaryTextStyle(
+                                              color: svGetBodyColor())),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
+                                InkWell(
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () {
+                                    // _showBottomSheet(context,widget
+                                    //     .homeBloc
+                                    //     .postList[index]);
+                                    String mediaLink;
+                                    if (widget.homeBloc.postList[index].media!
+                                        .isNotEmpty) {
+                                      mediaLink = widget
+                                              .homeBloc
+                                              .postList[index]
+                                              .media
+                                              ?.first
+                                              .mediaPath ??
+                                          "";
+                                    } else {
+                                      mediaLink = '';
+                                    }
+                                    createDynamicLink(
+                                        removeHtmlTags(widget.homeBloc
+                                                .postList[index].title ??
+                                            ''),
+                                        'https://doctak.net/post/${widget.homeBloc.postList[index].id}',
+                                        mediaLink);
+                                    // _handleIncomingLinks();
+                                    //   Share.share('${removeHtmlTags(widget
+                                    //     .homeBloc
+                                    //     .postList[index].title??'')}\n https://doctak.net/post/${widget
+                                    //       .homeBloc
+                                    //       .postList[index].id} \n'
+                                    //       '${AppData.imageUrl}$mediaLink');
+                                    // // shareImageWithText('${AppData.imageUrl}$mediaLink',removeHtmlTags(widget
+                                    //     .homeBloc
+                                    //     .postList[index].title??''));
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.share_sharp,
+                                        size: 22,
+                                        // 'images/socialv/icons/ic_share.png',
+                                        // height: 22,
+                                        // width: 22,
+                                        // fit: BoxFit.cover,
+                                        color: context.iconColor,
+                                      ),
+                                      Text('share',
+                                          style: secondaryTextStyle(
+                                              color: svGetBodyColor())),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ).paddingSymmetric(horizontal: 16, vertical: 10),
+                            if (isShowComment == index)
+                              SVCommentReplyComponent(CommentBloc(),
+                                  widget.homeBloc.postList[index].id ?? 0,
+                                  (value) {
+                                if (value.isNotEmpty) {
+                                  var comments = CommentBloc();
+                                  comments.add(PostCommentEvent(
+                                      postId:
+                                          widget.homeBloc.postList[index].id ??
+                                              0,
+                                      comment: value));
+
+                                  widget.homeBloc.postList[index].comments!
+                                      .add(Comments());
+                                  setState(() {
+                                    isShowComment = -1;
+                                  });
+                                }
+                              })
+                            // const Divider(indent: 16, endIndent: 16, height: 20),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: [
+                            //     SizedBox(
+                            //       width: 56,
+                            //       child: Stack(
+                            //         alignment: Alignment.centerLeft,
+                            //         children: [
+                            //           Positioned(
+                            //             right: 0,
+                            //             child: Container(
+                            //               decoration: BoxDecoration(
+                            //                   border: Border.all(
+                            //                       color: Colors.white, width: 2),
+                            //                   borderRadius: radius(100)),
+                            //               child: Image.asset(
+                            //                   'images/socialv/faces/face_1.png',
+                            //                   height: 24,
+                            //                   width: 24,
+                            //                   fit: BoxFit.cover)
+                            //                   .cornerRadiusWithClipRRect(100),
+                            //             ),
+                            //           ),
+                            //           Positioned(
+                            //             left: 14,
+                            //             child: Container(
+                            //               decoration: BoxDecoration(
+                            //                   border: Border.all(
+                            //                       color: Colors.white, width: 2),
+                            //                   borderRadius: radius(100)),
+                            //               child: Image.asset(
+                            //                   'images/socialv/faces/face_2.png',
+                            //                   height: 24,
+                            //                   width: 24,
+                            //                   fit: BoxFit.cover)
+                            //                   .cornerRadiusWithClipRRect(100),
+                            //             ),
+                            //           ),
+                            //           Positioned(
+                            //             child: Container(
+                            //               decoration: BoxDecoration(
+                            //                   border: Border.all(
+                            //                       color: Colors.white, width: 2),
+                            //                   borderRadius: radius(100)),
+                            //               child: Image.asset(
+                            //                   'images/socialv/faces/face_3.png',
+                            //                   height: 24,
+                            //                   width: 24,
+                            //                   fit: BoxFit.cover)
+                            //                   .cornerRadiusWithClipRRect(100),
+                            //             ),
+                            //           ),
+                            //         ],
+                            //       ),
+                            //     ),
+                            //     10.width,
+                            // //     RichText(
+                            // //       text: TextSpan(
+                            // //         text: 'Liked By ',
+                            // //         style: secondaryTextStyle(
+                            // //             color: svGetBodyColor(), size: 12),
+                            // //         children: <TextSpan>[
+                            // //           TextSpan(text: 'Ms.Mountain ',
+                            // //               style: boldTextStyle(size: 12)),
+                            // //           TextSpan(text: 'And ',
+                            // //               style: secondaryTextStyle(
+                            // //                   color: svGetBodyColor(), size: 12)),
+                            // //           TextSpan(text: '${widget.homeBloc.postList[index].likes?.length??0} Others ',
+                            // //               style: boldTextStyle(size: 12)),
+                            // //         ],
+                            // //       ),
+                            // //     )
+                            //   ],
+                            // )
+                          ],
+                        ),
+                      );
+                    }
                   },
                   shrinkWrap: true,
                   // physics: const NeverScrollableScrollPhysics(),
                 );
         } else if (state is PostDataError) {
-          return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
-                      try {
-                        widget.homeBloc.add(PostLoadPageEvent(page: 1));
+          return RetryWidget(
+              errorMessage: "Something went wrong please try again",
+              onRetry: () {
+                try {
+                  widget.homeBloc.add(PostLoadPageEvent(page: 1));
 
-                        // Session newSession = await createNewChatSession();
-                        // setState(() {
-                        //   futureSessions = Future(() =>
-                        //       [newSession, ...(snapshot.data ?? [])]);
-                        // });
-                      } catch (e) {
-                        debugPrint(e.toString());
-                      }
-
-          });
+                  // Session newSession = await createNewChatSession();
+                  // setState(() {
+                  //   futureSessions = Future(() =>
+                  //       [newSession, ...(snapshot.data ?? [])]);
+                  // });
+                } catch (e) {
+                  debugPrint(e.toString());
+                }
+              });
           //       return Container(
           //   padding: const EdgeInsets.all(10),
           //   child: Column(

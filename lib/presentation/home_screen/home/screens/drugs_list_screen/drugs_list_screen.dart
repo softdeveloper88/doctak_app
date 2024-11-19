@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
@@ -10,7 +10,6 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -177,7 +176,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             padding: const EdgeInsets.all(10.0),
                             child: Container(
                               padding: const EdgeInsets.only(left: 8.0),
-
                               decoration: BoxDecoration(
                                   color: context.dividerColor.withOpacity(0.4),
                                   borderRadius: radius(5),
@@ -188,8 +186,8 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                 onChanged: (searchTxt) async {
                                   if (_debounce?.isActive ?? false)
                                     _debounce?.cancel();
-                                  _debounce =
-                                      Timer(const Duration(milliseconds: 500), () {
+                                  _debounce = Timer(
+                                      const Duration(milliseconds: 500), () {
                                     // BlocProvider.of<DrugsBloc>(context).add(
                                     //   GetPost(
                                     //       page: '1',
@@ -198,8 +196,11 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                     //       type: state.typeValue),
                                     // );
                                     BlocProvider.of<SplashBloc>(context).add(
-                                        LoadDropdownData(state.countryFlag,
-                                            state.typeValue, searchTxt ?? '', ''));
+                                        LoadDropdownData(
+                                            state.countryFlag,
+                                            state.typeValue,
+                                            searchTxt ?? '',
+                                            ''));
                                     drugsBloc.add(LoadPageEvent(
                                         page: 1,
                                         countryId: state.countryFlag != ''
@@ -213,8 +214,8 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Search ',
-                                  hintStyle:
-                                      secondaryTextStyle(color: svGetBodyColor()),
+                                  hintStyle: secondaryTextStyle(
+                                      color: svGetBodyColor()),
                                   suffixIcon: Image.asset(
                                           'images/socialv/icons/ic_Search.png',
                                           height: 16,
@@ -262,7 +263,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                         //   ),
                         // ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -438,146 +439,145 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                     bloc.add(CheckIfNeedMoreDataEvent(index: index));
                   }
                 }
-                return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                        index >= bloc.drugsData.length - 1
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: svGetBodyColor(),
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return _buildDialog(context,
-                                  bloc.drugsData[index].genericName ?? '');
-                            },
-                          );
+                if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+                    index >= bloc.drugsData.length - 1) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: svGetBodyColor(),
+                    ),
+                  );
+                } else if ((index % 5 == 0 && index != 0) &&
+                    AppData.isShowGoogleNativeAds) {
+                  return NativeAdWidget();
+                } else {
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return _buildDialog(
+                              context, bloc.drugsData[index].genericName ?? '');
                         },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: svGetBodyColor().withOpacity(0.10),
-                                spreadRadius: 0,
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 10),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: svGetBodyColor().withOpacity(0.10),
+                            spreadRadius: 0,
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                        color: context.cardColor,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  bloc.drugsData[index].genericName ?? "",
+                                  style: GoogleFonts.poppins(
+                                      color: SVAppColorPrimary,
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                              Image.asset(
+                                'assets/images/docktak_ai_light.png',
+                                height: 35,
+                                width: 35,
                               ),
                             ],
-                            color: context.cardColor,
-                            borderRadius: BorderRadius.circular(5),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 5),
+                          Row(
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      bloc.drugsData[index].genericName ?? "",
-                                      style: GoogleFonts.poppins(
-                                          color: SVAppColorPrimary,
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ),
-                                  Image.asset(
-                                    'assets/images/docktak_ai_light.png',
-                                    height: 35,
-                                    width: 35,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  Text(bloc.drugsData[index].strength ?? '',
-                                      style: GoogleFonts.poppins(
-                                          color: svGetBodyColor(),
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.w400)),
-                                  Text(' - ',
-                                      style: GoogleFonts.poppins(
-                                          color: svGetBodyColor(),
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.w400)),
-                                  Text(bloc.drugsData[index].packageSize ?? '',
-                                      style: GoogleFonts.poppins(
-                                          color: svGetBodyColor(),
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.w400)),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              Text(bloc.drugsData[index].tradeName ?? 'N/A',
+                              Text(bloc.drugsData[index].strength ?? '',
                                   style: GoogleFonts.poppins(
                                       color: svGetBodyColor(),
-                                      fontSize: 10.sp)),
-                              const SizedBox(height: 5),
-                              const SizedBox(height: 10),
-                              Divider(
-                                color: Colors.grey[300],
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w400)),
+                              Text(' - ',
+                                  style: GoogleFonts.poppins(
+                                      color: svGetBodyColor(),
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w400)),
+                              Text(bloc.drugsData[index].packageSize ?? '',
+                                  style: GoogleFonts.poppins(
+                                      color: svGetBodyColor(),
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w400)),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Text(bloc.drugsData[index].tradeName ?? 'N/A',
+                              style: GoogleFonts.poppins(
+                                  color: svGetBodyColor(), fontSize: 10.sp)),
+                          const SizedBox(height: 5),
+                          const SizedBox(height: 10),
+                          Divider(
+                            color: Colors.grey[300],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                flex: 6,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Manufacturer Name',
+                                      style: GoogleFonts.poppins(
+                                          color: Colors.grey, fontSize: 12.sp),
+                                    ),
+                                    Text(
+                                      bloc.drugsData[index].manufacturerName ??
+                                          '',
+                                      style: GoogleFonts.poppins(
+                                          color: svGetBodyColor(),
+                                          fontSize: 12.sp),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    flex: 6,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Manufacturer Name',
+                              Expanded(
+                                flex: 4,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Price',
                                           style: GoogleFonts.poppins(
                                               color: Colors.grey,
-                                              fontSize: 12.sp),
-                                        ),
-                                        Text(
-                                          bloc.drugsData[index]
-                                                  .manufacturerName ??
-                                              '',
+                                              fontSize: 12.sp)),
+                                      Text(bloc.drugsData[index].mrp ?? '0',
                                           style: GoogleFonts.poppins(
                                               color: svGetBodyColor(),
-                                              fontSize: 12.sp),
-                                        ),
-                                      ],
-                                    ),
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w500)),
+                                    ],
                                   ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Price',
-                                              style: GoogleFonts.poppins(
-                                                  color: Colors.grey,
-                                                  fontSize: 12.sp)),
-                                          Text(bloc.drugsData[index].mrp ?? '0',
-                                              style: GoogleFonts.poppins(
-                                                  color: svGetBodyColor(),
-                                                  fontSize: 12.sp,
-                                                  fontWeight: FontWeight.w500)),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      );
+                        ],
+                      ),
+                    ),
+                  );
+                }
                 // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
               },
             ),
@@ -589,9 +589,16 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(child: Text(genericName,style: GoogleFonts.poppins(color: Colors.black,fontSize: 15),)),
+          Expanded(
+              child: Text(
+            genericName,
+            style: GoogleFonts.poppins(color: Colors.black, fontSize: 15),
+          )),
           IconButton(
-            icon: const Icon(Icons.close,size: 15,),
+            icon: const Icon(
+              Icons.close,
+              size: 15,
+            ),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -742,35 +749,35 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
     );
   }
 
-  // Widget _buildQuestion(BuildContext context, String question, String genericName, {bool clickable = false}) {
-  //   return InkWell(
-  //     onTap: clickable
-  //         ? () {
-  //       // Handle onTap action here
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('You clicked: $question')),
-  //       );
-  //     }
-  //         : null,
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(8.0),
-  //       child: Container(
-  //         padding: const EdgeInsets.all(12.0),
-  //         decoration: BoxDecoration(
-  //           color: Colors.blue[50],
-  //           borderRadius: BorderRadius.circular(8.0),
-  //           border: Border.all(color: Colors.blue),
-  //         ),
-  //         child: Text(
-  //           question,
-  //           style: TextStyle(
-  //             fontSize: 16.0,
-  //             color: Colors.blue[900],
-  //             fontWeight: FontWeight.bold,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+// Widget _buildQuestion(BuildContext context, String question, String genericName, {bool clickable = false}) {
+//   return InkWell(
+//     onTap: clickable
+//         ? () {
+//       // Handle onTap action here
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('You clicked: $question')),
+//       );
+//     }
+//         : null,
+//     child: Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Container(
+//         padding: const EdgeInsets.all(12.0),
+//         decoration: BoxDecoration(
+//           color: Colors.blue[50],
+//           borderRadius: BorderRadius.circular(8.0),
+//           border: Border.all(color: Colors.blue),
+//         ),
+//         child: Text(
+//           question,
+//           style: TextStyle(
+//             fontSize: 16.0,
+//             color: Colors.blue[900],
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//       ),
+//     ),
+//   );
+// }
 }

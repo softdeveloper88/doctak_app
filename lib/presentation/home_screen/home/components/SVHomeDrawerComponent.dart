@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
@@ -162,7 +163,6 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 ],
               ).paddingOnly(left: 16, right: 8, bottom: 20, top: 0),
               20.height,
-              // if(AppData.isShowGoogleBannerAds??false)bannerAdLoaded(),
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: options.map((e) {

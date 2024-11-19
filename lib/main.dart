@@ -41,6 +41,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
+import 'ads_setting/ad_setting.dart';
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
 import 'core/utils/get_shared_value.dart';
@@ -89,11 +90,13 @@ void checkNotificationPermission() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
+
   initializeAsync();
   // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
   //   systemNavigationBarColor: Colors.white, // navigation bar color
   //   statusBarColor: Colors.white, // status bar color
   // ));
+  AdmobSetting.initialization();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

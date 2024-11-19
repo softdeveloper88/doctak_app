@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
@@ -92,7 +93,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
             Container(
               color: svGetScaffoldColor(),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Container(
                   padding: const EdgeInsets.only(left: 8.0),
 
@@ -169,15 +170,22 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                           bloc.add(CheckIfNeedMoreDataEvent(index: index));
                         }
                       }
-                      return bloc.numberOfPage != bloc.pageNumber - 1 &&
+                      if( bloc.numberOfPage != bloc.pageNumber - 1 &&
                               index >= bloc.guidelinesList.length - 1
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: svGetBodyColor(),
-                              ),
-                            )
-                          : _buildDiseaseAndGuidelinesItem(
-                              bloc.guidelinesList[index]);
+                      ) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: svGetBodyColor(),
+                          ),
+                        );
+                      }
+                      else if ((index % 5 == 0 && index != 0) &&
+                          AppData.isShowGoogleNativeAds) {
+                        return NativeAdWidget();
+                      }else {
+                        return _buildDiseaseAndGuidelinesItem(
+                            bloc.guidelinesList[index]);
+                      }
 
                       // SVProfileFragment().launch(context);
                     },

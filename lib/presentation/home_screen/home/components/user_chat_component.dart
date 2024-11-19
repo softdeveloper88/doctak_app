@@ -80,8 +80,8 @@ class _UserChatComponentState extends State<UserChatComponent> {
                         children: [
                           Container(
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: SVAppColorPrimary, width: 2),
+                              // border: Border.all(
+                              //     color: SVAppColorPrimary, width: 2),
                               borderRadius: radius(14),
                             ),
                             child: chatBloc.contactsList[index].profilePic

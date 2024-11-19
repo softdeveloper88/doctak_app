@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/case_model/case_discuss_model.dart';
@@ -387,7 +388,11 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                       color: svGetBodyColor(),
                     ),
                   );
-                } else {
+                }  else if ((index % 5 == 0 && index != 0) &&
+                    AppData.isShowGoogleNativeAds) {
+                  return NativeAdWidget();
+                }
+                else {
                   return InkWell(
                     onTap: () {
                       // JobsDetailsScreen(

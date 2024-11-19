@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -11,15 +11,14 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../../../widgets/custom_dropdown_field.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
 import '../../../../splash_screen/bloc/splash_state.dart';
@@ -208,12 +207,14 @@ class _JobsScreenState extends State<JobsScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     decoration: BoxDecoration(
-                                        color: context.dividerColor.withOpacity(0.4),
+                                        color: context.dividerColor
+                                            .withOpacity(0.4),
                                         borderRadius: radius(5),
                                         border: Border.all(
-                                            color: svGetBodyColor(), width: 0.5)),
+                                            color: svGetBodyColor(),
+                                            width: 0.5)),
                                     child:
-                                    // CustomDropdownSearch(
+                                        // CustomDropdownSearch(
                                         //   onChanged: (searchTxt) {
                                         //     if (_debounce?.isActive ?? false)
                                         //       _debounce?.cancel();
@@ -351,7 +352,8 @@ class _JobsScreenState extends State<JobsScreen> {
                                     return Container(
                                       color: Colors.white,
                                       child: ListTile(
-                                        title: Text(_filteredSuggestions[index]),
+                                        title:
+                                            Text(_filteredSuggestions[index]),
                                         onTap: () {
                                           setState(() {});
                                           isShownSuggestion = false;
@@ -381,7 +383,8 @@ class _JobsScreenState extends State<JobsScreen> {
                             ],
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(left: 8.0,top: 8.0,right: 8.0),
+                            padding: const EdgeInsets.only(
+                                left: 8.0, top: 8.0, right: 8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
@@ -390,8 +393,8 @@ class _JobsScreenState extends State<JobsScreen> {
                                     TextButton(
                                       onPressed: () {
                                         selectedIndex = 0;
-                                        BlocProvider.of<SplashBloc>(context).add(
-                                            LoadDropdownData(
+                                        BlocProvider.of<SplashBloc>(context)
+                                            .add(LoadDropdownData(
                                                 state.countryFlag,
                                                 "New",
                                                 state.searchTerms ?? '',
@@ -435,8 +438,8 @@ class _JobsScreenState extends State<JobsScreen> {
                                     TextButton(
                                       onPressed: () {
                                         selectedIndex = 1;
-                                        BlocProvider.of<SplashBloc>(context).add(
-                                            LoadDropdownData(
+                                        BlocProvider.of<SplashBloc>(context)
+                                            .add(LoadDropdownData(
                                                 state.countryFlag,
                                                 "Expired",
                                                 state.searchTerms ?? '',
@@ -564,7 +567,6 @@ class _JobsScreenState extends State<JobsScreen> {
                 }
               },
             ),
-            // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
           ],
         ),
       ),
@@ -593,6 +595,9 @@ class _JobsScreenState extends State<JobsScreen> {
                       color: svGetBodyColor(),
                     ),
                   );
+                } else if ((index % 5 == 0 && index != 0) &&
+                    AppData.isShowGoogleNativeAds) {
+                  return NativeAdWidget();
                 } else {
                   return InkWell(
                     onTap: () {
@@ -601,7 +606,8 @@ class _JobsScreenState extends State<JobsScreen> {
                           .launch(context);
                     },
                     child: Container(
-                      margin: const EdgeInsets.only(left: 10,right: 10,bottom: 16),
+                      margin: const EdgeInsets.only(
+                          left: 10, right: 10, bottom: 16),
                       decoration: BoxDecoration(
                         color: context.cardColor,
                         borderRadius: BorderRadius.circular(10),
@@ -629,41 +635,55 @@ class _JobsScreenState extends State<JobsScreen> {
                                   ),
                                   Row(
                                     children: [
-                                     if(bloc.drugsData[index].promoted !=0) Container(
-                                        padding: const EdgeInsets.all(5),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: Colors.orangeAccent
+                                      if (bloc.drugsData[index].promoted != 0)
+                                        Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              color: Colors.orangeAccent),
+                                          child: const Text(
+                                            'Sponsored',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ),
-                                        child: const Text('Sponsored',style: TextStyle(color: Colors.white),),
+                                      const SizedBox(
+                                        width: 10,
                                       ),
-                                      const SizedBox(width: 10,),
-                                      if(bloc.drugsData[index].user!.id != AppData.logInUserId) MaterialButton(
-                                        shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(10)
+                                      if (bloc.drugsData[index].user!.id !=
+                                          AppData.logInUserId)
+                                        MaterialButton(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          color: Colors.blue,
+                                          splashColor: Colors.blue,
+                                          highlightColor: Colors.green,
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return DocumentUploadDialog(bloc
+                                                    .drugsData[index].id
+                                                    .toString()); // Call the dialog from here
+                                              },
+                                            );
+                                          },
+                                          child: const Text(
+                                            "Apply",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w400),
+                                            // 'images/socialv/icons/ic_share.png',
+                                            // height: 22,
+                                            // width: 22,
+                                            // fit: BoxFit.cover,
+                                          ),
                                         ),
-                                        color: Colors.blue,
-                                        splashColor: Colors.blue,
-                                        highlightColor: Colors.green,
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return DocumentUploadDialog(bloc.drugsData[index].id.toString());  // Call the dialog from here
-                                            },
-                                          );
-
-                                        },
-                                        child: const Text(
-                                          "Apply",
-                                          style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
-                                          // 'images/socialv/icons/ic_share.png',
-                                          // height: 22,
-                                          // width: 22,
-                                          // fit: BoxFit.cover,
-
-                                        ),
+                                      const SizedBox(
+                                        width: 20,
                                       ),
-                                      const SizedBox(width: 20,),
                                       InkWell(
                                         splashColor: Colors.transparent,
                                         highlightColor: Colors.transparent,

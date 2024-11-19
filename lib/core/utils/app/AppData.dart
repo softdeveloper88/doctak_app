@@ -41,7 +41,7 @@ class AppData {
   static String? iosBannerAdsId;
 
   /// Native Ads Setting
-  static bool? isShowGoogleNativeAds;
+  static bool isShowGoogleNativeAds=false;
   static String? androidNativeAdsId;
   static String? iosNativeAdsId;
   // LocalInvitation? _localInvitation;

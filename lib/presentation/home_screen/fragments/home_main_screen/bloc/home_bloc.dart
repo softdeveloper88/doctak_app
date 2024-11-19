@@ -20,6 +20,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(DataInitial()) {
     on<PostLoadPageEvent>(_onGetPosts);
     on<LoadSearchPageEvent>(_onGetSearchPosts);
+    on<AdsSettingEvent>(_adsSettingApi);
     on<PostLikeEvent>(_onPostLike);
     on<DeletePostEvent>(_onDeletePost);
     on<DetailsPostEvent>(_onGetDetailsPosts);
@@ -94,6 +95,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         '$pageNumber',
         event.search ?? '',
       );
+      print(response.toJson());
       numberOfPage = response.posts?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
@@ -104,10 +106,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // emit(DataLoaded(postList));
     } catch (e) {
       print(e);
+      // emit(PostPaginationLoadedState());
 
-      emit(PostPaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
+      emit(PostDataError('An error occurred $e'));
     }
   }
 
@@ -205,6 +206,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _adsSettingApi(
       AdsSettingEvent event, Emitter<HomeState> emit) async {
+    print('call ads api');
     // try {
     AppData.adsSettingModel =
         await postService.advertisementSetting('Bearer ${AppData.userToken}');

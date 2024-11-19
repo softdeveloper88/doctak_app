@@ -52,9 +52,9 @@
 <!--        <meta-data-->
 <!--            android:name="com.google.firebase.messaging.default_notification_channel_id"-->
 <!--            android:value="high_importance_channel" />-->
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-3940256099942544~3347511713" />-->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
         <service
             android:name="io.flutter.plugins.firebasemessaging.FlutterFirebaseMessagingService"
             android:exported="false">
