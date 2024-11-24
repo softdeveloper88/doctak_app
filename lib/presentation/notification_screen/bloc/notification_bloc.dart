@@ -128,6 +128,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       }),
     );
     totalNotifications=response.data['unread_count'].toInt();
+    print('totalNotifications  $totalNotifications');
+
    // notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
 
     emit(PaginationLoadedState());
