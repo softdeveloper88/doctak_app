@@ -28,6 +28,7 @@ class NotificationService {
       FirebaseMessaging.instance;
   static const String _payloadKey = 'type';
   static const String _payloadId = 'id';
+
   @pragma('vm:entry-point')
   static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
@@ -85,6 +86,7 @@ class NotificationService {
     // }
     // showNotification(message.data);
   }
+
   // Initialize the notification services (both local and FCM)
   static Future<void> initialize() async {
     // Initialize local notifications
@@ -97,7 +99,7 @@ class NotificationService {
       defaultPresentAlert: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-          defaultPresentBadge: true,
+      defaultPresentBadge: true,
     );
     const InitializationSettings initializationSettings =
         InitializationSettings(
@@ -211,28 +213,43 @@ class NotificationService {
     //
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_stat_name');
-    //
+    const DarwinInitializationSettings initializationSettingsIOS =
+    DarwinInitializationSettings(
+      requestAlertPermission: true,
+      defaultPresentSound: true,
+      defaultPresentAlert: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      defaultPresentBadge: true,
+    );
     const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS);
     //
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: null);
+        onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) async {
+      print('notificationResponse  $notificationResponse');
+        });
     var channel = const AndroidNotificationChannel(
-      'high_importance_channel', // id
-      'High Importance Notifications', // title // description
-      importance: Importance.max,
-      showBadge: true
-    );
+        'high_importance_channel', // id
+        'High Importance Notifications', // title // description
+        importance: Importance.max,
+        showBadge: true);
+
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
     AndroidNotificationDetails(
       channelShowBadge: true,
       icon: initializationSettingsAndroid.defaultIcon,
-      'high_importance_channel', // Channel ID
-      'High Importance Notifications', // Channel name
-      channelDescription: 'your_channel_description', // Channel description
+      'high_importance_channel',
+      // Channel ID
+      'High Importance Notifications',
+      // Channel name
+      channelDescription: 'your_channel_description',
+      // Channel description
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
@@ -250,12 +267,19 @@ class NotificationService {
         body,
         payload: data['type'],
         NotificationDetails(
+          iOS: const DarwinNotificationDetails(
+            badgeNumber: 1,
+            presentBadge: true,
+            presentSound: true,
+            presentAlert: true,
+          ),
           android: AndroidNotificationDetails(
             channel.id,
             channel.name,
             channelShowBadge: true,
             icon: initializationSettingsAndroid.defaultIcon,
-            channelDescription: channel.name, // Channel description
+            channelDescription: channel.name,
+            // Channel description
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,
@@ -268,7 +292,7 @@ class NotificationService {
                     summaryText: notification.body,
                   )
                 : null,
-             // icon: 'ic_stat_name',
+            // icon: 'ic_stat_name',
           ),
         ));
   }
@@ -309,11 +333,11 @@ class NotificationService {
         MaterialPageRoute(builder: (context) {
           if (payload == 'message_received') {
             return ChatRoomScreen(
-              id: id,
-              roomId: '',
-              username: username,
-              profilePic: profilePic.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')
-            );
+                id: id,
+                roomId: '',
+                username: username,
+                profilePic: profilePic.replaceAll(
+                    'https://doctak-file.s3.ap-south-1.amazonaws.com/', ''));
           } else if (payload == 'follow_request' ||
               payload == 'follower_notification' ||
               payload == 'un_follower_notification' ||
@@ -351,18 +375,18 @@ class NotificationService {
 
   static int notificationCount = 0;
 
-static  Future<void> incrementBadgeCount() async {
+  static Future<void> incrementBadgeCount() async {
     notificationCount++;
     await AppBadgePlus.updateBadge(notificationCount);
     await FlutterAppBadger.updateBadgeCount(notificationCount);
   }
 
-  static  Future<void> clearBadgeCount() async {
-  print('notification ');
+  static Future<void> clearBadgeCount() async {
+    print('notification ');
     notificationCount = 0;
-  await AppBadgePlus.updateBadge(notificationCount);
-  await FlutterAppBadger.removeBadge();
-  await FlutterAppBadger.updateBadgeCount(0);
+    await AppBadgePlus.updateBadge(notificationCount);
+    await FlutterAppBadger.removeBadge();
+    await FlutterAppBadger.updateBadgeCount(0);
     await ClearAllNotifications.clear();
   }
 }
