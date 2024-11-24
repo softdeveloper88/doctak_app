@@ -81,14 +81,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Timer? _ampTimer;
   final FlutterSoundRecord _audioRecorder = FlutterSoundRecord();
   Amplitude? _amplitude;
-
+  bool? isBottom=true;
   @override
   void dispose() {
     _timer?.cancel();
     _ampTimer?.cancel();
     _timerChat?.cancel();
     _audioRecorder.dispose();
-
+    _scrollController.removeListener(_checkScrollPosition);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -96,6 +97,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void initState() {
     super.initState();
     setStatusBarColor(svGetScaffoldColor());
+    _scrollController.addListener(_checkScrollPosition);
     // Handle completion
     // seenSenderMessage(1);
     _isRecording = false;
@@ -115,6 +117,31 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
     // fetchMessages();
     // _createClient();
+  }
+
+
+  void _checkScrollPosition() {
+    if (_scrollController.position.pixels == 0) {
+      setState(() {
+        isBottom=true;
+        print('top');
+      });
+    } else if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      setState(() {
+        isBottom=false;
+        print('bottom');
+
+
+      });
+    } else {
+      setState(() {
+        print('middle');
+
+        isBottom=false;
+
+      });
+    }
   }
 
   Future<void> _start() async {
@@ -176,7 +203,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       setState(() {});
     });
   }
-
 //   void _createClient() async {
 //     _client =
 //         await AgoraRtmClient.createInstance('f2cf99f1193a40e69546157883b2159f');
@@ -624,12 +650,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
     });
   }
-
   @override
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-        backgroundColor: Colors.grey[200],
+        backgroundColor: svGetBgColor(),
         appBar: AppBar(
           surfaceTintColor: context.cardColor,
           backgroundColor: context.cardColor,
@@ -780,15 +805,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             ));
                           }
                         }
-                        return bloc.messageNumberOfPage !=
+                         if(bloc.messageNumberOfPage !=
                                     bloc.messagePageNumber - 1 &&
                                 index >= bloc.messagesList.length - 1
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                  color: svGetBodyColor(),
-                                ),
-                              )
-                            : InkWell(
+                        ) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: svGetBodyColor(),
+                            ),
+                          );
+                        }else{
+                           final isLastOfOwnMessage = index == bloc.messagesList.length - 1 ||
+                               bloc.messagesList[index].userId != bloc.messagesList[index + 1].userId;
+
+                           return InkWell(
                                 onLongPress: () {
                                   if (bloc.messagesList[index].userId !=
                                       widget.id) {
@@ -808,22 +838,28 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                         });
                                   }
                                 },
-                                child: ChatBubble(
-                                  profile: bloc.messagesList[index].userId !=
-                                          widget.id
-                                      ? widget.profilePic
-                                      : "${AppData.imageUrl}${widget.profilePic}",
-                                  message: bloc.messagesList[index].body ?? '',
-                                  isMe: bloc.messagesList[index].userId ==
-                                          widget.id
-                                      ? false
-                                      : true,
-                                  attachmentJson:
-                                      bloc.messagesList[index].attachment,
-                                  createAt: bloc.messagesList[index].createdAt,
-                                  seen: bloc.messagesList[index].seen,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    top: isLastOfOwnMessage ? 20 : 0, // Extra space after own last message
+                                  ),
+                                  child: ChatBubble(
+                                    profile: bloc.messagesList[index].userId !=
+                                            widget.id
+                                        ? widget.profilePic
+                                        : "${AppData.imageUrl}${widget.profilePic}",
+                                    message: bloc.messagesList[index].body ?? '',
+                                    isMe: bloc.messagesList[index].userId ==
+                                            widget.id
+                                        ? false
+                                        : true,
+                                    attachmentJson:
+                                        bloc.messagesList[index].attachment,
+                                    createAt: bloc.messagesList[index].createdAt,
+                                    seen: bloc.messagesList[index].seen,
+                                  ),
                                 ),
                               );
+                           }
                       },
                       itemCount: bloc.messagesList.length,
                     ),
@@ -1443,8 +1479,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void _startTimerForChat() {
     _timerChat = Timer.periodic(const Duration(seconds: 10), (timer) {
       if(!isDataLoaded) {
-        chatBloc.add(LoadRoomMessageEvent(
-            page: 0, userId: widget.id, roomId: widget.roomId));
+        if (isBottom??true) {
+          print('bottom');
+          chatBloc.add(LoadRoomMessageEvent(
+              page: 0, userId: widget.id, roomId: widget.roomId));
+        }
       }
     });
 
@@ -1573,6 +1612,7 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
   @override
   void dispose() {
     _chewieController.dispose();
+
     super.dispose();
   }
 }

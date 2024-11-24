@@ -251,7 +251,6 @@ class _MyAppState extends State<MyApp> {
   setLocale(Locale locale) {
     setState(() {
       _locale = locale;
-        NotificationService.clearBadgeCount(); // Clears badge when app resumes
 
     });
   }
@@ -277,7 +276,7 @@ class _MyAppState extends State<MyApp> {
       if (kDebugMode) {
         print('User granted provisional permission');
       }
-    } else {
+    }else {
       if (kDebugMode) {
         print('User declined or has not accepted permission');
       }

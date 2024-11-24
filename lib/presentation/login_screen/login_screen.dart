@@ -642,7 +642,7 @@ class LoginScreenState extends State<LoginScreen> {
                                   const SizedBox(height: 29),
                                   _buildSocial(context),
                                   const SizedBox(height: 5),
-                                  NativeAdWidget()
+
 
                                 ]))),
                       ))))),

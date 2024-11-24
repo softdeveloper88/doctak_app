@@ -1,14 +1,7 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/models/SVStoryModel.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
-import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -79,28 +72,34 @@ class _UserChatComponentState extends State<UserChatComponent> {
                       return Column(
                         children: [
                           Container(
+                            width: 50,
+                            height: 50,
                             decoration: BoxDecoration(
-                              // border: Border.all(
-                              //     color: SVAppColorPrimary, width: 2),
-                              borderRadius: radius(14),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
-                            child: chatBloc.contactsList[index].profilePic
-                                        ?.isEmpty ??
-                                    true
-                                ? Image.asset(
-                                    'images/socialv/faces/face_2.png',
-                                    height: 58,
-                                    width: 58,
-                                    fit: BoxFit.cover,
-                                  ).cornerRadiusWithClipRRect(SVAppCommonRadius)
+                            child: chatBloc
+                                    .contactsList[index].profilePic!.isEmpty
+                                ? Image.asset('images/socialv/faces/face_5.png',
+                                        height: 56,
+                                        width: 56,
+                                        fit: BoxFit.cover)
+                                    .cornerRadiusWithClipRRect(8)
+                                    .cornerRadiusWithClipRRect(8)
                                 : CachedNetworkImage(
-                                    imageUrl:
-                                        '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
-                                    height: 58,
-                                    width: 58,
-                                    fit: BoxFit.cover,
-                                  ).cornerRadiusWithClipRRect(
-                                    SVAppCommonRadius),
+                                        imageUrl:
+                                            '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
+                                        height: 56,
+                                        width: 56,
+                                        fit: BoxFit.cover)
+                                    .cornerRadiusWithClipRRect(30),
                           ).onTap(() {
                             print(chatBloc.contactsList[index].id);
                             // ChatRoomScreen(username: '${chatBloc.contactsList[index].firstName} ${chatBloc.contactsList[index].lastName}',profilePic: '${chatBloc.contactsList[index].profilePic}',id: '',roomId: '${chatBloc.contactsList[index].roomId}',).launch(context);
@@ -111,12 +110,47 @@ class _UserChatComponentState extends State<UserChatComponent> {
                             // SVStoryScreen(story: storyList[index])
                             //     .launch(context);
                           }),
+                          // ),
+                          // Container(
+                          //   decoration: BoxDecoration(
+                          //     // border: Border.all(
+                          //     //     color: SVAppColorPrimary, width: 2),
+                          //     borderRadius: radius(100),
+                          //   ),
+                          //   child: chatBloc.contactsList[index].profilePic
+                          //               ?.isEmpty ??
+                          //           true
+                          //       ? Image.asset(
+                          //           'images/socialv/faces/face_2.png',
+                          //           height: 58,
+                          //           width: 58,
+                          //           fit: BoxFit.cover,
+                          //         ).cornerRadiusWithClipRRect(SVAppCommonRadius)
+                          //       : CircleAvatar(
+                          //         child: CachedNetworkImage(
+                          //             imageUrl:
+                          //                 '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
+                          //             height: 58,
+                          //             width: 58,
+                          //             fit: BoxFit.cover,
+                          //           ).cornerRadiusWithClipRRect(
+                          //             SVAppCommonRadius),
+                          //       ),
+                          // ).onTap(() {
+                          //   print(chatBloc.contactsList[index].id);
+                          //   // ChatRoomScreen(username: '${chatBloc.contactsList[index].firstName} ${chatBloc.contactsList[index].lastName}',profilePic: '${chatBloc.contactsList[index].profilePic}',id: '',roomId: '${chatBloc.contactsList[index].roomId}',).launch(context);
+                          //   SVProfileFragment(
+                          //           userId: chatBloc.contactsList[index].id)
+                          //       .launch(context);
+                          //
+                          //   // SVStoryScreen(story: storyList[index])
+                          //   //     .launch(context);
+                          // }),
                           10.height,
                           SizedBox(
                             width: 60,
                             child: Text(
-                              overflow: TextOverflow.ellipsis,
-
+                                overflow: TextOverflow.ellipsis,
                                 '${chatBloc.contactsList[index].firstName.validate()} ${chatBloc.contactsList[index].lastName.validate()}',
                                 style: secondaryTextStyle(
                                     size: 12,
