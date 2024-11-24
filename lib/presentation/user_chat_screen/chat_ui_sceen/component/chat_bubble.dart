@@ -1,21 +1,15 @@
-import 'dart:io';
-
-// import 'package:audioplayers/audioplayers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
+import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:voice_message_package/voice_message_package.dart';
 
 import '../../../home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
-import 'video_view.dart';
-import 'voice_message_view1.dart';
+
 class ChatBubble extends StatelessWidget {
   final String message;
   final bool isMe;
@@ -37,92 +31,180 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment:
+            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!isMe)
-            CircleAvatar(
-              backgroundImage: CachedNetworkImageProvider(profile),
-              radius: 16.0,
-            )
-          else
-            const SizedBox(width: 24.0),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: Align(
-              alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment:
-                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                children: [
-                  IntrinsicWidth(
-                    child: Container(
-                      constraints:  BoxConstraints(
-                        maxWidth: 60.w,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 1.0, horizontal: 8.0),
-                      decoration: BoxDecoration(
-                        color: isMe ? Colors.blue[300] : Colors.grey[300],
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(isMe ? 0.0 : 12.0),
-                          bottomRight: Radius.circular(isMe ? 0.0 : 12.0),
-                          topRight: Radius.circular(isMe ? 12.0 : 0.0),
-                          bottomLeft: Radius.circular(isMe ? 12.0 : 0.0),
+          if (isMe)
+            chatItem.ChatBubble(
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 8),
+              clipper: ChatBubbleClipper9(type: BubbleType.sendBubble),
+              alignment: Alignment.topRight,
+              backGroundColor: Colors.blueAccent,
+              child: Align(
+                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment:
+                      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  children: [
+                    IntrinsicWidth(
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: 60.w,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                             horizontal: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              message,
+                              style: TextStyle(
+                                  color: isMe ? Colors.white : Colors.black,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            if (attachmentJson != null)
+                              _buildAttachment(context),
+                            // const SizedBox(height: 4.0),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    timeAgo.format(
+                                        DateTime.parse(createAt.toString())),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 8.0,
+                                      fontWeight: FontWeight.w500,
+                                      color: isMe
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  if (isMe)
+                                    if (seen == 1)
+                                      Image.asset(
+                                        color: Colors.lightBlueAccent.shade100,
+                                        'assets/icon/ic_seen.png',
+                                        height: 15,
+                                        width: 15,
+                                      )
+                                    else
+                                      Image.asset(
+                                        color: Colors.grey[400],
+
+                                        'assets/icon/ic_unseen.png',
+                                        height: 15,
+                                        width: 15,
+                                      )
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            message,
-                            style: TextStyle(
-                              color: isMe ? Colors.white : Colors.black,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w400
-                            ),
-                          ),
-                          if (attachmentJson != null) _buildAttachment(context),
-                          // const SizedBox(height: 4.0),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  timeAgo.format(DateTime.parse(createAt.toString())),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 8.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: isMe ? Colors.white70 : Colors.black54,
-                                  ),
-
-                                ),
-                                const SizedBox(width: 5,),
-                               if(isMe)
-                                 if(seen==1)Image.asset('assets/icon/ic_seen.png',height: 15,width: 15,) else Image.asset('assets/icon/ic_unseen.png',height: 15,width: 15,)
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 8.0),
-          if (isMe)
-            CircleAvatar(
-              backgroundImage: CachedNetworkImageProvider('${AppData.imageUrl}${AppData.profile_pic}'),
-              radius: 16.0,
+              // ),
             )
           else
-            const SizedBox(width: 24.0),
+            chatItem.ChatBubble(
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 8),
+              clipper: ChatBubbleClipper9(type: BubbleType.receiverBubble),
+              backGroundColor: const Color(0xffE7E7ED),
+              // margin: EdgeInsets.only(top: 20),
+              child: Align(
+                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment:
+                      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  children: [
+                    IntrinsicWidth(
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: 60.w,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                             horizontal: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              message,
+                              style: TextStyle(
+                                  color: isMe ? Colors.white : Colors.black,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            if (attachmentJson != null)
+                              _buildAttachment(context),
+                            // const SizedBox(height: 4.0),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    timeAgo.format(
+                                        DateTime.parse(createAt.toString())),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 8.0,
+                                      fontWeight: FontWeight.w500,
+                                      color: isMe
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  if (isMe)
+                                    if (seen == 1)
+                                      Image.asset(
+                                        'assets/icon/ic_seen.png',
+                                        height: 15,
+                                        width: 15,
+                                      )
+                                    else
+                                      Image.asset(
+                                        'assets/icon/ic_unseen.png',
+                                        height: 15,
+                                        width: 15,
+                                      )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // const SizedBox(width: 8.0),
+          // if (isMe)
+          //   CircleAvatar(
+          //     backgroundImage: CachedNetworkImageProvider('${AppData.imageUrl}${AppData.profile_pic}'),
+          //     radius: 16.0,
+          //   )
+          // else
+          //   const SizedBox(width: 24.0),
         ],
       ),
     );
@@ -133,13 +215,16 @@ class ChatBubble extends StatelessWidget {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
         child: Container(
-          constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width - 1),
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 1),
           child: VoiceMessageView(
             controller: VoiceController(
               audioSrc: "${AppData.imageUrl}$attachmentJson",
               maxDuration: const Duration(seconds: 10),
-              isFile: false, onComplete: () {  }, onPause: () {  }, onPlaying: () {  },
+              isFile: false,
+              onComplete: () {},
+              onPause: () {},
+              onPlaying: () {},
             ),
             innerPadding: 12,
             cornerRadius: 20,
@@ -147,8 +232,7 @@ class ChatBubble extends StatelessWidget {
         ),
       );
     } else if (attachmentJson!.endsWith('mp4')) {
-      return VideoPlayerWidget(
-          videoUrl: '${AppData.imageUrl}$attachmentJson');
+      return VideoPlayerWidget(videoUrl: '${AppData.imageUrl}$attachmentJson');
     } else {
       return Padding(
         padding: const EdgeInsets.only(top: 8.0),
@@ -161,4 +245,3 @@ class ChatBubble extends StatelessWidget {
     }
   }
 }
-
