@@ -33,13 +33,13 @@ class NotificationService {
     await Firebase.initializeApp();
     debugPrint('PUSH RECEIVED');
     await NotificationService.incrementBadgeCount();
-    await showNotificationWithCustomIcon(
-        message.notification,
-        message.data,
-        message.notification?.title ?? '',
-        message.notification?.body ?? '',
-        message.data['image'] ?? '',
-        message.data['banner'] ?? '');
+    // await showNotificationWithCustomIcon(
+    //     message.notification,
+    //     message.data,
+    //     'hiiiiiiii',
+    //     message.notification?.body ?? '',
+    //     message.data['image'] ?? '',
+    //     message.data['banner'] ?? '');
     // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     // FlutterLocalNotificationsPlugin();
     // const AndroidInitializationSettings initializationSettingsAndroid =
@@ -353,15 +353,16 @@ class NotificationService {
 
 static  Future<void> incrementBadgeCount() async {
     notificationCount++;
-    AppBadgePlus.updateBadge(notificationCount);
-    FlutterAppBadger.updateBadgeCount(notificationCount);
+    await AppBadgePlus.updateBadge(notificationCount);
+    await FlutterAppBadger.updateBadgeCount(notificationCount);
   }
 
   static  Future<void> clearBadgeCount() async {
+  print('notification ');
     notificationCount = 0;
-    AppBadgePlus.updateBadge(notificationCount);
-    FlutterAppBadger.removeBadge();
-    FlutterAppBadger.updateBadgeCount(0);
+  await AppBadgePlus.updateBadge(notificationCount);
+  await FlutterAppBadger.removeBadge();
+  await FlutterAppBadger.updateBadgeCount(0);
     await ClearAllNotifications.clear();
   }
 }

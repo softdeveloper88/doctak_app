@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -20,15 +21,35 @@ class SVDashboardScreen extends StatefulWidget {
   State<SVDashboardScreen> createState() => _SVDashboardScreenState();
 }
 
-class _SVDashboardScreenState extends State<SVDashboardScreen> {
+class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindingObserver{
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedIndex = 0;
   final HomeBloc homeBloc = HomeBloc();
   late final List<Widget> _fragments;
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('state change ');
+    if (state == AppLifecycleState.resumed) {
+      NotificationService.clearBadgeCount(); // Clears badge when app resumes
+
+      //TODO: set status to online here in firestore
+    } else {
+      NotificationService.clearBadgeCount(); // Clears badge when app resumes
+      //TODO: set status to offline here in firestore
+    }
+
+  }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // TODO: implement dispose
+    super.dispose();
+  }
+  @override
   void initState() {
     setStatusBarColor(Colors.transparent);
+    WidgetsBinding.instance.addObserver(this);
     _fragments = [
       SVHomeFragment(
         homeBloc: homeBloc,

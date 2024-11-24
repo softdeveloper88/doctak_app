@@ -13,6 +13,9 @@ import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dar
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bubble/bubble_type.dart';
+import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
+import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_9.dart';
 import 'package:flutter_sound_record/flutter_sound_record.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:html/parser.dart' as htmlParser;
@@ -68,7 +71,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   late PusherChannel clientListenChannel;
   late PusherChannel clientSendChannel;
   bool isSomeoneTyping = false;
-  bool isDataLoaded=true;
+  bool isDataLoaded = true;
+
   // List<SelectedByte> selectedFiles = [];
   bool isMessageLoaded = false; // Initialize it as per your logic
   File? _selectedFile;
@@ -81,7 +85,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Timer? _ampTimer;
   final FlutterSoundRecord _audioRecorder = FlutterSoundRecord();
   Amplitude? _amplitude;
-  bool? isBottom=true;
+  bool? isBottom = true;
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -108,7 +113,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         isFirstLoading: isDataLoaded));
     chatBloc.add(ChatReadStatusEvent(
       userId: widget.id,
-      roomId: widget.roomId,));
+      roomId: widget.roomId,
+    ));
     ConnectPusher();
     print("my id ${AppData.logInUserId}");
     print("sender id ${widget.id}");
@@ -119,27 +125,23 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // _createClient();
   }
 
-
   void _checkScrollPosition() {
     if (_scrollController.position.pixels == 0) {
       setState(() {
-        isBottom=true;
+        isBottom = true;
         print('top');
       });
     } else if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
       setState(() {
-        isBottom=false;
+        isBottom = false;
         print('bottom');
-
-
       });
     } else {
       setState(() {
         print('middle');
 
-        isBottom=false;
-
+        isBottom = false;
       });
     }
   }
@@ -162,6 +164,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       // }
     }
   }
+
   Future<void> _stop() async {
     _timer?.cancel();
     _ampTimer?.cancel();
@@ -177,6 +180,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         message: ''));
     scrollToBottom();
   }
+
   Future<void> _pause() async {
     _timer?.cancel();
     _ampTimer?.cancel();
@@ -184,6 +188,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
     setState(() => _isPaused = true);
   }
+
   Future<void> _resume() async {
     _startTimer();
     await _audioRecorder.resume();
@@ -203,6 +208,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       setState(() {});
     });
   }
+
 //   void _createClient() async {
 //     _client =
 //         await AgoraRtmClient.createInstance('f2cf99f1193a40e69546157883b2159f');
@@ -377,7 +383,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   final parts = textMessageWithTime.split('1 second ago');
                   textMessage =
                       parts.first.trim(); // Take the first part (the message)
-
                 }
                 if (status == "api") {
                   var message = messageData['message'];
@@ -405,9 +410,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
                 break;
 
-            // case 'client-seen':
-            // var textMessage = "";
-            // var messageData = event.data;
+              // case 'client-seen':
+              // var textMessage = "";
+              // var messageData = event.data;
 //                 messageData = json.decode(messageData);
 //                 var status = messageData['status'];
 //                 if (status == "web") {
@@ -439,23 +444,23 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 //                   chatBloc.add(ChatReadStatusEvent(
 //                       userId: widget.id,
 //                       roomId: widget.roomId,));
-            // chatBloc.add(LoadRoomMessageEvent(
-            //     page: 0, userId: widget.id, roomId: widget.roomId));
-            // });
-            // messagesList.insert(
-            //   0,
-            //   Message(
-            //     body: textMessage, // Use the extracted text content
-            //     toId: AppData.logInUserId,
-            //     fromId: widget.id,
-            //   ),
-            // );
-            // isLoading = false;
-            // });
-            // break;
-            // Add more cases for other event types as needed
+              // chatBloc.add(LoadRoomMessageEvent(
+              //     page: 0, userId: widget.id, roomId: widget.roomId));
+              // });
+              // messagesList.insert(
+              //   0,
+              //   Message(
+              //     body: textMessage, // Use the extracted text content
+              //     toId: AppData.logInUserId,
+              //     fromId: widget.id,
+              //   ),
+              // );
+              // isLoading = false;
+              // });
+              // break;
+              // Add more cases for other event types as needed
               default:
-              // Handle unknown event types or ignore them
+                // Handle unknown event types or ignore them
                 break;
             }
           },
@@ -479,7 +484,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         // Handle the case where Pusher connection failed
         // print("Failed to connect to Pusher");
       }
-    }catch(e){
+    } catch (e) {
       print(e);
     }
   }
@@ -616,6 +621,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
+
   void seenSenderMessage(int seenStatus) async {
     String eventName = "client-seen"; // Replace with your event name
 // String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
@@ -632,13 +638,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       eventName: eventName,
       data: data, // Pass the eventData map
     );
-   print("e");
+    print("e");
     try {
       await clientSendChannel.trigger(event);
     } catch (e) {
       print(e);
     }
   }
+
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -650,6 +657,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
@@ -662,7 +670,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           leadingWidth: 30,
           leading: IconButton(
             iconSize: 20,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+            icon:
+                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
             onPressed: () => Navigator.of(context).pop(),
           ),
           centerTitle: false,
@@ -685,11 +694,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     ),
                     child: widget.profilePic == ''
                         ? InkWell(
-                      onTap: () {
-                        SVProfileFragment(userId: widget.id)
-                            .launch(context);
-                      },
-                          child: CircleAvatar(
+                            onTap: () {
+                              SVProfileFragment(userId: widget.id)
+                                  .launch(context);
+                            },
+                            child: CircleAvatar(
                               child: Image.asset(
                                       'images/socialv/faces/face_5.png',
                                       height: 56,
@@ -698,7 +707,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                   .cornerRadiusWithClipRRect(8)
                                   .cornerRadiusWithClipRRect(8),
                             ),
-                        )
+                          )
                         : InkWell(
                             onTap: () {
                               SVProfileFragment(userId: widget.id)
@@ -723,8 +732,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    SVProfileFragment(userId: widget.id)
-                        .launch(context);
+                    SVProfileFragment(userId: widget.id).launch(context);
                   },
                   child: Text(
                     widget.username,
@@ -779,7 +787,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 ),
               );
             } else if (state is PaginationLoadedState) {
-              isDataLoaded=false;
+              isDataLoaded = false;
               var bloc = chatBloc;
               return Column(
                 children: [
@@ -805,73 +813,85 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             ));
                           }
                         }
-                         if(bloc.messageNumberOfPage !=
-                                    bloc.messagePageNumber - 1 &&
-                                index >= bloc.messagesList.length - 1
-                        ) {
+                        if (bloc.messageNumberOfPage !=
+                                bloc.messagePageNumber - 1 &&
+                            index >= bloc.messagesList.length - 1) {
                           return Center(
                             child: CircularProgressIndicator(
                               color: svGetBodyColor(),
                             ),
                           );
-                        }else{
-                           final isLastOfOwnMessage = index == bloc.messagesList.length - 1 ||
-                               bloc.messagesList[index].userId != bloc.messagesList[index + 1].userId;
+                        } else {
+                          final isLastOfOwnMessage =
+                              index == bloc.messagesList.length - 1 ||
+                                  bloc.messagesList[index].userId !=
+                                      bloc.messagesList[index + 1].userId;
 
-                           return InkWell(
-                                onLongPress: () {
-                                  if (bloc.messagesList[index].userId !=
-                                      widget.id) {
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return CustomAlertDialog(
-                                              title:
-                                                  'Are you sure want to delete message ?',
-                                              callback: () {
-                                                bloc.add(DeleteMessageEvent(
-                                                    id: bloc
-                                                        .messagesList[index].id
-                                                        .toString()));
-                                                Navigator.of(context).pop();
-                                              });
-                                        });
-                                  }
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                    top: isLastOfOwnMessage ? 20 : 0, // Extra space after own last message
-                                  ),
-                                  child: ChatBubble(
-                                    profile: bloc.messagesList[index].userId !=
-                                            widget.id
-                                        ? widget.profilePic
-                                        : "${AppData.imageUrl}${widget.profilePic}",
-                                    message: bloc.messagesList[index].body ?? '',
-                                    isMe: bloc.messagesList[index].userId ==
-                                            widget.id
+                          return InkWell(
+                            onLongPress: () {
+                              if (bloc.messagesList[index].userId !=
+                                  widget.id) {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return CustomAlertDialog(
+                                          title:
+                                              'Are you sure want to delete message ?',
+                                          callback: () {
+                                            bloc.add(DeleteMessageEvent(
+                                                id: bloc.messagesList[index].id
+                                                    .toString()));
+                                            Navigator.of(context).pop();
+                                          });
+                                    });
+                              }
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: isLastOfOwnMessage
+                                    ? 20
+                                    : 0, // Extra space after own last message
+                              ),
+                              child: ChatBubble(
+                                profile: bloc.messagesList[index].userId !=
+                                        widget.id
+                                    ? widget.profilePic
+                                    : "${AppData.imageUrl}${widget.profilePic}",
+                                message: bloc.messagesList[index].body ?? '',
+                                isMe:
+                                    bloc.messagesList[index].userId == widget.id
                                         ? false
                                         : true,
-                                    attachmentJson:
-                                        bloc.messagesList[index].attachment,
-                                    createAt: bloc.messagesList[index].createdAt,
-                                    seen: bloc.messagesList[index].seen,
-                                  ),
-                                ),
-                              );
-                           }
+                                attachmentJson:
+                                    bloc.messagesList[index].attachment,
+                                createAt: bloc.messagesList[index].createdAt,
+                                seen: bloc.messagesList[index].seen,
+                              ),
+                            ),
+                          );
+                        }
                       },
                       itemCount: bloc.messagesList.length,
                     ),
                   ),
                   isSomeoneTyping
-                      ? TypingIndicator(profilePic: widget.profilePic)
+                      ? const Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: ChatBubble(
+                            profile: '',
+                            isMe: false,
+                            attachmentJson: null,
+                            createAt: null,
+                            seen: 0,
+                            message: 'Typing. . .',
+                          ),
+                        )
                       : Container(),
                   if (_selectedFile != null)
                     if (_isImageFile(_selectedFile!))
                       _buildImagePreview(_selectedFile ?? File('')),
                   if (_isVideoFile(_selectedFile))
-                    _buildVideoPreview(_selectedFile?? File('')),
+                    _buildVideoPreview(_selectedFile ?? File('')),
                   if (_isDocumentFile(_selectedFile))
                     _buildDocumentPreview(_selectedFile!),
                   Container(
@@ -911,7 +931,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                           if (await permission1.isGranted) {
                                             _showFileOptions();
                                             // _selectFiles(context);
-                                          } else if (await permission1.isDenied) {
+                                          } else if (await permission1
+                                              .isDenied) {
                                             final result =
                                                 await permission1.request();
                                             if (status.isGranted) {
@@ -968,7 +989,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                                   TextInputAction.newline,
                                               onChanged: (Text) {
                                                 onTextFieldFocused(true);
-
                                               },
                                               onTapOutside: (text) {
                                                 onTextFieldFocused(false);
@@ -1004,7 +1024,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                             setState(() {});
                                             _selectedFile = null;
                                             scrollToBottom();
-                                          } else if(textController.text.isEmpty &&  _selectedFile != null ){
+                                          } else if (textController
+                                                  .text.isEmpty &&
+                                              _selectedFile != null) {
                                             String message =
                                                 textController.text;
                                             _isFileUploading = true;
@@ -1193,22 +1215,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Widget _buildImagePreview(File file) {
     return Card(
       margin: const EdgeInsets.all(8.0),
-      child:  Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
+            height: 100,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.all(8.0),
+            child: Image.file(
+              file,
+              width: 150,
               height: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10)
-              ),
-              padding: const EdgeInsets.all(8.0),
-              child: Image.file(
-                file,
-                width: 150,
-                height: 100,
-                fit: BoxFit.contain,
-              ),
+              fit: BoxFit.contain,
             ),
+          ),
           IconButton(
             icon: const Icon(Icons.clear),
             onPressed: () {
@@ -1226,17 +1246,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // Implement video preview widget
     return Card(
       margin: const EdgeInsets.all(8.0),
-      child:  Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             height: 100,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10)
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             padding: const EdgeInsets.all(8.0),
             child: Image.file(
-              file??File(''),
+              file ?? File(''),
               width: 150,
               height: 100,
               fit: BoxFit.contain,
@@ -1259,14 +1277,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // Implement document preview widget
     return Card(
       margin: const EdgeInsets.all(8.0),
-      child:  Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             height: 100,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10)
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             padding: const EdgeInsets.all(8.0),
             child: Image.file(
               file,
@@ -1287,6 +1303,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       ),
     );
   }
+
   void _showFileOptions() {
     showModalBottomSheet(
       context: context,
@@ -1478,16 +1495,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   void _startTimerForChat() {
     _timerChat = Timer.periodic(const Duration(seconds: 10), (timer) {
-      if(!isDataLoaded) {
-        if (isBottom??true) {
+      if (!isDataLoaded) {
+        if (isBottom ?? true) {
           print('bottom');
           chatBloc.add(LoadRoomMessageEvent(
               page: 0, userId: widget.id, roomId: widget.roomId));
         }
       }
     });
-
-
   }
 
 // List<RtmAttribute> convertToRtmAttributes(Map<String, dynamic> attributes) {
@@ -1515,49 +1530,34 @@ class TypingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // CircleAvatar(
-          //   backgroundImage: CachedNetworkImageProvider(profilePic),
-          //   // Use a placeholder image
-          //   radius: 16.0,
-          // ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              // Adjust alignment for typing indicator
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8.0,
-                  horizontal: 16.0,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(0.0),
-                    bottomRight: Radius.circular(16.0),
-                    topRight: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(16.0),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: svGetBodyColor().withOpacity(0.05),
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  "typing...",
-                  style: TextStyle(color: svGetBodyColor()),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: chatItem.ChatBubble(
+        alignment: Alignment.centerLeft,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        clipper: ChatBubbleClipper9(type: BubbleType.receiverBubble),
+        backGroundColor: const Color(0xffE7E7ED),
+        // margin: EdgeInsets.only(top: 20),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                color: Colors.blue,
+                child: const Text(
+                  'Typing...',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1696,6 +1696,7 @@ class VoiceRecordingPainter extends CustomPainter {
 
     canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

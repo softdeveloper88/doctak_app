@@ -40,7 +40,7 @@ class ChatBubble extends StatelessWidget {
           if (isMe)
             chatItem.ChatBubble(
               elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
               clipper: ChatBubbleClipper9(type: BubbleType.sendBubble),
               alignment: Alignment.topRight,
               backGroundColor: Colors.blueAccent,
@@ -56,8 +56,7 @@ class ChatBubble extends StatelessWidget {
                         constraints: BoxConstraints(
                           maxWidth: 60.w,
                         ),
-                        padding: const EdgeInsets.symmetric(
-                             horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -102,7 +101,6 @@ class ChatBubble extends StatelessWidget {
                                     else
                                       Image.asset(
                                         color: Colors.grey[400],
-
                                         'assets/icon/ic_unseen.png',
                                         height: 15,
                                         width: 15,
@@ -122,7 +120,7 @@ class ChatBubble extends StatelessWidget {
           else
             chatItem.ChatBubble(
               elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               clipper: ChatBubbleClipper9(type: BubbleType.receiverBubble),
               backGroundColor: const Color(0xffE7E7ED),
               // margin: EdgeInsets.only(top: 20),
@@ -138,8 +136,7 @@ class ChatBubble extends StatelessWidget {
                         constraints: BoxConstraints(
                           maxWidth: 60.w,
                         ),
-                        padding: const EdgeInsets.symmetric(
-                             horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -160,8 +157,10 @@ class ChatBubble extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Text(
-                                    timeAgo.format(
-                                        DateTime.parse(createAt.toString())),
+                                    createAt != null
+                                        ? timeAgo.format(
+                                            DateTime.parse(createAt.toString()))
+                                        : '',
                                     style: GoogleFonts.poppins(
                                       fontSize: 8.0,
                                       fontWeight: FontWeight.w500,

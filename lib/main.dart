@@ -137,6 +137,7 @@ Future<void> main() async {
     }
     return true;
   };
+  NotificationService.clearBadgeCount(); // Clears badge when app resumes
   checkNotificationPermission();
   NotificationService.initialize();
   RemoteMessage? initialRoute =
@@ -241,7 +242,7 @@ class MyApp extends StatefulWidget {
   }
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -254,7 +255,25 @@ class _MyAppState extends State<MyApp> {
 
     });
   }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('state change ');
+    if (state == AppLifecycleState.resumed) {
+      NotificationService.clearBadgeCount(); // Clears badge when app resumes
+
+      //TODO: set status to online here in firestore
+    } else {
+      NotificationService.clearBadgeCount(); // Clears badge when app resumes
+
+      //TODO: set status to offline here in firestore
+    }
+  }
   // final _navigatorKey = GlobalKey<NavigatorState>();
   void setFCMSetting() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -304,6 +323,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void didChangeDependencies() {
     getLocale().then((locale) => {setLocale(locale)});
+    NotificationService.clearBadgeCount(); // Clears badge when app resumes
 
     super.didChangeDependencies();
   }
@@ -358,8 +378,10 @@ class _MyAppState extends State<MyApp> {
 
 
   }
+
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
     // setToken();

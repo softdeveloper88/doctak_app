@@ -207,6 +207,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                 child: InkWell(
                                   onTap: () {
                                     bloc.contactsList[index].unreadCount=0;
+                                    setState(() {});
                                     ChatRoomScreen(
                                       username:
                                           '${bloc.contactsList[index].firstName ?? ''} ${bloc.contactsList[index].lastName ?? ''}',
