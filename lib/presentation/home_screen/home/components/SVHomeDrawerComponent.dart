@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
@@ -390,9 +391,22 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 // color: Colors.red,
               ),
               onPressed: () async {
+                DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+                String deviceId='';
+                String deviceType='';
+                if(isAndroid){
+                  AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+                  print('Running on ${androidInfo.model}');
+                  deviceType="android";
+                  deviceId=androidInfo.id;
+                }else{
+                  IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+                  print('Running on ${iosInfo.utsname.machine}');  // e.g. "iPod7,1"
+                  deviceType="ios";
+                  deviceId=iosInfo.identifierForVendor.toString();
+                }
                 SharedPreferences prefs = await SharedPreferences.getInstance();
-                var result =
-                await logoutUserAccount(prefs.getString('device_token'));
+                var result = await logoutUserAccount(deviceId);
                 if (result) {
                   AppSharedPreferences().clearSharedPreferencesData(context);
                   Navigator.pushAndRemoveUntil(
@@ -480,12 +494,12 @@ Since this is a security-sensitive operation, you eventually are asked to login 
     return false;
   }
 
-  Future<bool> logoutUserAccount(deviceToken) async {
+  Future<bool> logoutUserAccount(deviceId) async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/logout');
     try {
       print(AppData.userToken);
       final response = await http.post(
-        // body: {'device_token':deviceToken},
+        body: {'device_id':deviceId},
         apiUrl,
         headers: <String, String>{
           'Authorization': 'Bearer ${AppData.userToken!}',

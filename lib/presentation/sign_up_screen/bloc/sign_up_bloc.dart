@@ -79,7 +79,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       }else{
         IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
         print('Running on ${iosInfo.utsname.machine}');  // e.g. "iPod7,1"
-        deviceType="android";
+        deviceType="ios";
         deviceId=iosInfo.identifierForVendor.toString();
       }
       print(event.firstName);
