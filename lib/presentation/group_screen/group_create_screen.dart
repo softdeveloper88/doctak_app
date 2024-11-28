@@ -96,7 +96,7 @@ class StepProgress extends StatelessWidget {
         children: [
           // Text(
           //   "Step $step: ${_stepTitles[step - 1]} 1 - 4",
-          //   style: GoogleFonts.poppins(color: svGetBodyColor()),
+          //   style: TextStyle(color: svGetBodyColor()),
           // ),
           // Padding(
           //   padding: const EdgeInsets.all(8.0),
@@ -122,7 +122,7 @@ class StepProgress extends StatelessWidget {
                 children: [
                   Text(
                     "Step 1: Basic Information 1 - 4",
-                    style: GoogleFonts.poppins(color: svGetBodyColor()),
+                    style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -236,7 +236,7 @@ class StepProgress extends StatelessWidget {
                 children: [
                   Text(
                     "Step 2: Privacy Setting 1 - 4",
-                    style: GoogleFonts.poppins(color: svGetBodyColor()),
+                    style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -351,7 +351,7 @@ class StepProgress extends StatelessWidget {
                 children: [
                   Text(
                     "Step 3: Privacy Setting 1 - 4",
-                    style: GoogleFonts.poppins(color: svGetBodyColor()),
+                    style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -472,7 +472,7 @@ class StepProgress extends StatelessWidget {
                 children: [
                   Text(
                     "Step 3: Privacy Setting 1 - 4",
-                    style: GoogleFonts.poppins(color: svGetBodyColor()),
+                    style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -730,7 +730,7 @@ class _Step1State extends State<Step1> {
                           ),
                           Text(
                             'Speciality: ',
-                            style: GoogleFonts.poppins(
+                            style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w500),
                           ),
                           CustomDropdownButtonFormField(
@@ -963,7 +963,7 @@ class _Step2State extends State<Step2> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Status:',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -987,7 +987,7 @@ class _Step2State extends State<Step2> {
             //   padding: const EdgeInsets.only(top: 8.0),
             //   child: Text(
             //     'Post Permission:',
-            //     style: GoogleFonts.poppins(
+            //     style: TextStyle(
             //       fontSize: 16,
             //       fontWeight: FontWeight.w500,
             //     ),
@@ -1012,7 +1012,7 @@ class _Step2State extends State<Step2> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Who can post :',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1043,7 +1043,7 @@ class _Step2State extends State<Step2> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Allow in Search :',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1068,7 +1068,7 @@ class _Step2State extends State<Step2> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Visibility:',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1096,7 +1096,7 @@ class _Step2State extends State<Step2> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Joined Request:',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1456,7 +1456,7 @@ class Step4 extends StatelessWidget {
                 children: [
                   Text(
                     'Successfully',
-                    style: GoogleFonts.poppins(
+                    style:  TextStyle(fontFamily: 'Poppins-Light',
                         color: Colors.blue,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500),
@@ -1476,7 +1476,7 @@ class Step4 extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       'Group Created Successfully',
-                      style: GoogleFonts.poppins(
+                      style:  TextStyle(fontFamily: 'Poppins-Light',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w400),
@@ -1514,7 +1514,7 @@ class Step4 extends StatelessWidget {
                   ),
                   Text(
                     'Error !',
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(fontFamily: 'Poppins-Light',
                         color: Colors.red,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500),
@@ -1526,7 +1526,7 @@ class Step4 extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       'An Error Occurred While Creating The Group. Please Go To The Basic Info And Provide The Correct Details',
-                      style: GoogleFonts.poppins(
+                      style:  TextStyle(fontFamily: 'Poppins-Light',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w400),

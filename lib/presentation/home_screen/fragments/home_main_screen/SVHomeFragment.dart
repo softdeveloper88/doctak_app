@@ -97,7 +97,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 FocusManager.instance.primaryFocus?.unfocus();
               }),
           title: Text(translation(context).lbl_home,
-              style: boldTextStyle(size: 18)),
+              style: boldTextStyle(size: 18,fontFamily: 'Poppins-Light',)),
           actions: [
             // IconButton(
             //   icon: Image.asset(
@@ -134,7 +134,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             //   padding: const EdgeInsets.all(0),
             //   child: Text(
             //     " Artificial Intelligence ",
-            //     style: GoogleFonts.poppins(
+            //     style: TextStyle(
             //       color: Colors.black,
             //       fontSize: 10.sp,
             //       fontWeight: FontWeight.w500,
@@ -189,6 +189,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                                         child: Text(
                                           '${notificationBloc.totalNotifications ?? ''}',
                                           style: const TextStyle(
+                                            fontFamily: 'Poppins-Light',
                                             color: Colors.white,
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -225,25 +226,20 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           child: RefreshIndicator(
               onRefresh: _refresh,
               child: CustomScrollView(
-                  shrinkWrap: true,
-                  controller: _mainScrollController,
-                  physics: const BouncingScrollPhysics(),
-                  slivers: <Widget>[
-                    // SliverList(delegate: SliverChildListDelegate([
-                    //
-                    //   // SVStoryComponent(),
-                    //   // 10.height,
-                    // ])),
-                    SliverList(
-                        delegate: SliverChildListDelegate([
-                      UserChatComponent(),
-                      // 10.height,
-                    ])),
-                    SliverList(
-                        delegate: SliverChildListDelegate([
-                      SVPostComponent(widget.homeBloc),
-                    ])),
-                  ])),
+                shrinkWrap: false,
+                controller: _mainScrollController,
+                physics: const BouncingScrollPhysics(),
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      [
+                        RepaintBoundary(child: UserChatComponent()),
+                        RepaintBoundary(child: SVPostComponent(widget.homeBloc)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),),
         ));
   }
 }

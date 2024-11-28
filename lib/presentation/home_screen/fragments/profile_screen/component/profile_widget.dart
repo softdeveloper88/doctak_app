@@ -49,7 +49,7 @@ class TextFieldEditWidget extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               label ?? '',
-              style: GoogleFonts.poppins(
+              style:  TextStyle(fontFamily: 'Poppins-Light',
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -93,7 +93,7 @@ class TextFieldEditWidget extends StatelessWidget {
               flex: 4,
               child: Text(
                 capitalizeWords(label ?? ''),
-                style: GoogleFonts.poppins(
+                style:  TextStyle(fontFamily: 'Poppins-Light',
                     color: svGetBodyColor(),
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w500),
@@ -104,7 +104,7 @@ class TextFieldEditWidget extends StatelessWidget {
               child: Text(
                 textAlign: TextAlign.end,
                 capitalizeWords(value ?? ''),
-                style: GoogleFonts.poppins(
+                style:  TextStyle(fontFamily: 'Poppins-Light',
                     color: svGetBodyColor(),
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w500),

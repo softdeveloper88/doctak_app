@@ -76,7 +76,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           appBar: AppBar(
             backgroundColor: context.cardColor,
             iconTheme: IconThemeData(color: context.iconColor),
-            title: Text('Notifications', style: boldTextStyle(size: 20)),
+            title: Text('Notifications', style: boldTextStyle(size: 20,fontFamily: 'Poppins-Light',)),
             elevation: 0,
             centerTitle: false,
             leading: IconButton(
@@ -144,7 +144,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 color: Colors.blue,
                 child: Text(
                   'Mark All Read',
-                  style: GoogleFonts.poppins(color: Colors.white),
+                  style: TextStyle(color: Colors.white,fontFamily: 'Poppins-Light',),
                 ),
               ),
               if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
@@ -253,6 +253,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             text: TextSpan(
                                 text:'${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''} ' , // Default style for the initial part
                                 style: const TextStyle(
+                                  fontFamily: 'Poppins-Light',
                                   color: Colors.black, // Default color
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,// Default font size
@@ -261,6 +262,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               TextSpan(
                                 text: bloc.notificationsList[index].text??"",
                                 style: const TextStyle(
+                                  fontFamily: 'Poppins-Light',
                                   fontSize: 16,
                                   fontWeight: FontWeight.normal,
                                   color: Colors.black, // Change color to blue
@@ -272,6 +274,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             timeAgo.format(DateTime.parse(
                                 bloc.notificationsList[index].createdAt ?? "")),
                             style: TextStyle(
+                              fontFamily: 'Poppins-Light',
                               color: Colors.grey[600],
                               fontSize: 14.0,
                             ),

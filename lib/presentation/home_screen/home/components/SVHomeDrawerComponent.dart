@@ -136,7 +136,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                           AppData.userType == 'doctor'
                               ? "Dr. ${capitalizeWords(AppData.name)}"
                               : capitalizeWords(AppData.name), // User's name
-                          style: boldTextStyle(size: 18, color: Colors.white),
+                          style: boldTextStyle(size: 18, color: Colors.white,fontFamily: 'Poppins-Light',),
                         ),
                         2.height,
                         Text(
@@ -147,7 +147,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                                 ? "${AppData.university}\n Student"
                                 : AppData.specialty,
                             // User's specialty
-                            style: secondaryTextStyle(color: Colors.white)),
+                            style: secondaryTextStyle(color: Colors.white,fontFamily: 'Poppins-Light',)),
                       ],
                     ),
                   ),
@@ -180,7 +180,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                             : SVAppColorPrimary),
                     title: e.title.validate(),
                     titleTextStyle:
-                    boldTextStyle(size: 14, color: Colors.white),
+                    boldTextStyle(size: 14, color: Colors.white,fontFamily: 'Poppins-Light',),
                     leading: (e.title=="Post a poll"|| e.title=='Groups Formation'||e.title=='Privacy Policy')?Image.asset(e.image ?? "",
                         height: 22,
                         width: 22,
@@ -329,7 +329,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 child: SnapHelperWidget<PackageInfo>(
                   future: PackageInfo.fromPlatform(),
                   onSuccess: (data) => Text(data.version,
-                      style: boldTextStyle(color: Colors.white)),
+                      style: boldTextStyle(color: Colors.white,fontFamily: 'Poppins-Light',)),
                 ),
               ),
               20.height,
@@ -387,7 +387,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
             TextButton(
               child: const Text(
                 'Yes',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red,fontFamily: 'Poppins-Light',),
                 // color: Colors.red,
               ),
               onPressed: () async {
@@ -448,7 +448,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
             TextButton(
               child: const Text(
                 'Delete',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red,fontFamily: 'Poppins-Light',),
                 // color: Colors.red,
               ),
               onPressed: () async {

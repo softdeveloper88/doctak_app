@@ -115,7 +115,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text('${profileBloc.userProfile?.user?.firstName ?? ''} ${profileBloc.userProfile?.user?.lastName ?? ''}',
-                          style: GoogleFonts.poppins(
+                          style:  TextStyle(fontFamily: 'Poppins-Light',
                               color: svGetBodyColor(), fontSize: 12.sp,fontWeight: FontWeight.w500)),
                       4.width,
                       Image.asset('images/socialv/icons/ic_TickSquare.png',
@@ -126,21 +126,21 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                     width: 80.w,
                     child: Text(profileBloc.userProfile?.user?.country ?? '',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(color: Colors.blue,fontSize: 12,fontWeight: FontWeight.bold,)),
+                        style:  TextStyle(fontFamily: 'Poppins-Light',color: Colors.blue,fontSize: 12,fontWeight: FontWeight.bold,)),
 
                   ),
                   SizedBox(
                     width: 80.w,
                     child: Text(profileBloc.userProfile?.user?.specialty ?? '',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 16,fontWeight: FontWeight.w500,)),
+                        style:  TextStyle(fontFamily: 'Poppins-Light',color: svGetBodyColor(),fontSize: 16,fontWeight: FontWeight.w500,)),
 
                   ),
                   SizedBox(
                     width: 80.w,
                     child: Text(profileBloc.userProfile?.profile?.aboutMe ?? '',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(color: svGetBodyColor(),fontSize: 14,fontWeight: FontWeight.w400,)),
+                        style:  TextStyle(fontFamily: 'Poppins-Light',color: svGetBodyColor(),fontSize: 14,fontWeight: FontWeight.w400,)),
                   ),
                   // 24.height,
                   if (widget.userId == null) _buildPointsCard(),

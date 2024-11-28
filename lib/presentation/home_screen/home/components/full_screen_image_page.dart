@@ -17,7 +17,7 @@ import 'SVPostComponent.dart';
 
 class FullScreenImagePage extends StatefulWidget {
   String? imageUrl;
-  final Post post;
+  final Post? post;
   int listCount;
   List<Map<String, String>>? mediaUrls = [];
 
@@ -25,7 +25,7 @@ class FullScreenImagePage extends StatefulWidget {
       {super.key,
       required this.listCount,
       this.imageUrl,
-      required this.post,
+       this.post,
       this.mediaUrls});
 
   @override
@@ -249,7 +249,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
                 alignment: Alignment.center,
                 child: InkWell(
                     onTap: () {
-                      bottomSheetDialog();
+                    if(widget.post !=null)  bottomSheetDialog();
                     },
                     child: const Icon(
                       Icons.keyboard_arrow_down_rounded,
@@ -301,7 +301,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
 
   bool _isExpanded = false;
   Future<void> bottomSheetDialog() {
-    String fullText = widget.post.title ?? '' ?? '';
+    String fullText = widget.post?.title ?? '' ?? '';
     List<String> words = fullText.split(' ');
     String textToShow = _isExpanded || words.length <= 25
         ? fullText
@@ -424,11 +424,11 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text(
-                                "${widget.post.likes?.length ?? 0} likes",
+                                "${widget.post?.likes?.length ?? 0} likes",
                                 style: const TextStyle(color: Colors.white),
                               ),
                               Text(
-                                "${widget.post.comments?.length ?? 0} comments",
+                                "${widget.post?.comments?.length ?? 0} comments",
                                 style: const TextStyle(color: Colors.white),
                               ),
                             ],

@@ -137,7 +137,7 @@ class _SearchScreenState extends State<SearchScreen>
           child: Tab(
             child: Text(
               tabName,
-              style: GoogleFonts.poppins(color: svGetBodyColor()),
+              style: TextStyle(color: svGetBodyColor()),
             ),
           ),
         ),

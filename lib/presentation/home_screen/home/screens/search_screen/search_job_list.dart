@@ -67,7 +67,7 @@ class SearchJobList extends StatelessWidget {
                     //   children: [
                     //     // Text(
                     //     //   selectedIndex == 0 ? "New" : "Expired",
-                    //     //   style: GoogleFonts.poppins(
+                    //     //   style: TextStyle(
                     //     //       color: Colors.red,
                     //     //       fontWeight: FontWeight.w500,
                     //     //       fontSize: kDefaultFontSize),
@@ -77,7 +77,7 @@ class SearchJobList extends StatelessWidget {
                     // ),
                     Text(
                       drugsBloc.drugsData[index].jobTitle ?? "",
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(fontFamily: 'Poppins-Light',
                           color: svGetBodyColor(),
                           fontWeight: FontWeight.bold,
                           fontSize: 18),
@@ -108,7 +108,7 @@ class SearchJobList extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     Text('Apply Date',
-                        style: GoogleFonts.poppins(
+                        style: TextStyle(fontFamily: 'Poppins-Light',
                             color: svGetBodyColor(),
                             fontWeight: FontWeight.w400,
                             fontSize: 14)),

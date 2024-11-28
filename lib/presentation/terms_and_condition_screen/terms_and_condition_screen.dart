@@ -98,7 +98,7 @@ These Terms shall be governed by and construed in accordance with the laws of [Y
 If you have any questions about these Terms, please contact us at info@DocTak.net.
 
 By using the App, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service''',
-                  style: GoogleFonts.poppins(
+                  style: TextStyle(
                     fontSize: 16.0,
                   ),
                 ),

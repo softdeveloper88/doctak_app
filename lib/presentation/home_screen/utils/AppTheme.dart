@@ -13,76 +13,77 @@ class AppTheme {
     primaryColorDark: SVAppColorPrimary,
     hoverColor: Colors.white54,
     dividerColor: viewLineColor,
-    fontFamily: GoogleFonts.inter().fontFamily,
-    appBarTheme: AppBarTheme(
+    fontFamily: 'Poppins-Light',
+    appBarTheme: const AppBarTheme(
       color: SVAppLayoutBackground,
       iconTheme: IconThemeData(color: textPrimaryColor),
       systemOverlayStyle:
           SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
     ),
-    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.black),
-    cardTheme: CardTheme(color: Colors.white),
+    textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+    cardTheme: const CardTheme(color: Colors.white),
     cardColor: SVAppSectionBackground,
-    iconTheme: IconThemeData(color: textPrimaryColor),
-    bottomSheetTheme: BottomSheetThemeData(backgroundColor: whiteColor),
-    textTheme: TextTheme(
-      labelLarge: TextStyle(color: SVAppColorPrimary),
-      titleLarge: TextStyle(color: textPrimaryColor),
-      titleSmall: TextStyle(color: textSecondaryColor),
+    iconTheme: const IconThemeData(color: textPrimaryColor),
+    bottomSheetTheme: const BottomSheetThemeData(backgroundColor: whiteColor),
+    textTheme: const TextTheme(
+      labelLarge: TextStyle(color: SVAppColorPrimary,fontFamily:  'Poppins-Light',),
+      titleLarge: TextStyle(color: textPrimaryColor,fontFamily:  'Poppins-Light',),
+      titleSmall: TextStyle(color: textSecondaryColor,fontFamily:  'Poppins-Light',),
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    colorScheme: ColorScheme.light(primary: SVAppColorPrimary)
+    colorScheme: const ColorScheme.light(primary: SVAppColorPrimary)
         .copyWith(error: Colors.red),
   ).copyWith(
     pageTransitionsTheme:
-        PageTransitionsTheme(builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: OpenUpwardsPageTransitionsBuilder(),
+        const PageTransitionsTheme(builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: const OpenUpwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.linux: const OpenUpwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: const OpenUpwardsPageTransitionsBuilder(),
     }),
   );
 
   static final ThemeData darkTheme = ThemeData(
     scaffoldBackgroundColor: appBackgroundColorDark,
     highlightColor: appBackgroundColorDark,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       color: appBackgroundColorDark,
       iconTheme: IconThemeData(color: blackColor),
       systemOverlayStyle:
           SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),
     ),
     primaryColor: color_primary_black,
-    dividerColor: Color(0xFFDADADA).withOpacity(0.3),
+    dividerColor: const Color(0xFFDADADA).withOpacity(0.3),
     primaryColorDark: color_primary_black,
-    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.white),
+    textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
     hoverColor: Colors.black12,
     fontFamily: GoogleFonts.inter().fontFamily,
     bottomSheetTheme:
-        BottomSheetThemeData(backgroundColor: appBackgroundColorDark),
+        const BottomSheetThemeData(backgroundColor: appBackgroundColorDark),
     primaryTextTheme: TextTheme(
+
         titleLarge: primaryTextStyle(color: Colors.white),
         labelSmall: primaryTextStyle(color: Colors.white)),
-    cardTheme: CardTheme(color: cardBackgroundBlackDark),
+    cardTheme: const CardTheme(color: cardBackgroundBlackDark),
     cardColor: cardBackgroundBlackDark,
-    iconTheme: IconThemeData(color: whiteColor),
-    textTheme: TextTheme(
-      labelLarge: TextStyle(color: color_primary_black),
-      titleLarge: TextStyle(color: whiteColor),
-      titleSmall: TextStyle(color: Colors.white54),
+    iconTheme: const IconThemeData(color: whiteColor),
+    textTheme: const TextTheme(
+      labelLarge: TextStyle(color: color_primary_black,fontFamily:  'Poppins-Light',),
+      titleLarge: TextStyle(color: whiteColor,fontFamily:  'Poppins-Light',),
+      titleSmall: TextStyle(color: Colors.white54,fontFamily:  'Poppins-Light',),
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
             primary: appBackgroundColorDark, onPrimary: cardBackgroundBlackDark)
         .copyWith(secondary: whiteColor)
         .copyWith(error: Color(0xFFCF6676)),
   ).copyWith(
     pageTransitionsTheme:
-        PageTransitionsTheme(builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: OpenUpwardsPageTransitionsBuilder(),
+        const PageTransitionsTheme(builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: const OpenUpwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.linux: const OpenUpwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: const OpenUpwardsPageTransitionsBuilder(),
     }),
   );
 }

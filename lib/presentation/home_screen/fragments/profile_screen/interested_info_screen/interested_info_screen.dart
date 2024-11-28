@@ -84,7 +84,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     ),
                     Text(
                       "Edit",
-                      style: GoogleFonts.poppins(
+                      style:  TextStyle(fontFamily: 'Poppins-Light',
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         color: Colors.blue,

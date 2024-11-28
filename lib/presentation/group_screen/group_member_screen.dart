@@ -204,7 +204,7 @@ class MemberItem extends StatelessWidget {
           Expanded(
             child: Text(
               '$role  •  $joined',
-              style: GoogleFonts.poppins(fontSize: 12),
+              style: TextStyle(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),

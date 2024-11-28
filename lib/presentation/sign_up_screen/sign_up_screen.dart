@@ -483,7 +483,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
                                                 Center(child: CircularProgressIndicator(),),
-                                                Text('Wait a moment more field Loading...',style: TextStyle(color: Colors.blue,fontWeight: FontWeight.bold,fontFamily: "Robotic"),),
+                                                Text('Wait a moment more field Loading...',style: TextStyle(fontFamily: 'Poppins-Light',color: Colors.blue,fontWeight: FontWeight.bold,),),
                                               ],
                                             ),
                                           );
@@ -502,12 +502,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       Expanded(
                                         child: RichText(
                                           text: TextSpan(
-                                            style: const TextStyle(fontSize: 14.0, color: Colors.black),
+                                            style: const TextStyle(fontSize: 14.0, color: Colors.black,fontFamily: 'Poppins-Light',),
                                             children: <TextSpan>[
                                               const TextSpan(text: 'I agree to the '),
                                               TextSpan(
                                                 text: 'Terms and Conditions',
-                                                style: const TextStyle(color: Colors.blue),
+                                                style: const TextStyle(color: Colors.blue,fontFamily: 'Poppins-Light',),
                                                 recognizer: TapGestureRecognizer()
                                                   ..onTap = () {
                                                     // Handle the click event for Terms and Conditions

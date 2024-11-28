@@ -62,7 +62,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
         centerTitle: false,
         title: Text(
           'Search Contacts',
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500,fontFamily: 'Poppins-Light',),
         ),
       ),
       body: Column(
@@ -84,7 +84,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Search ',
-                    hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                    hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins-Light',),
                     suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
                             height: 16,
                             width: 16,
@@ -252,7 +252,8 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                               child: Text(
                                                   "${bloc.searchContactsList[index].firstName.validate()} ${bloc.searchContactsList[index].lastName.validate()}",
                                                   overflow: TextOverflow.clip,
-                                                  style: GoogleFonts.poppins(
+                                                  style: TextStyle(
+                                                      fontFamily: 'Poppins-Light',
                                                       color: svGetBodyColor(),
                                                       fontWeight:
                                                           FontWeight.w600,

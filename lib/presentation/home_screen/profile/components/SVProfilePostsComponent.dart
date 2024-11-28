@@ -223,7 +223,7 @@ Widget _buildRowinterested(
             ),
             child: Text(
               interested,
-              style: GoogleFonts.poppins(
+              style:  TextStyle(fontFamily: 'Poppins-Light',
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
                 color: svGetBodyColor(),

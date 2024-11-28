@@ -46,7 +46,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
         centerTitle: false,
         title: Text(
           'Applicants',
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         actions: [],
       ),
@@ -148,7 +148,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                             child: Text(
                                                 "${widget.jobBloc.jobApplicantsModel?.applicants?[index].user?.name.validate()}",
                                                 overflow: TextOverflow.clip,
-                                                style: GoogleFonts.poppins(
+                                                style: TextStyle(
                                                     color: svGetBodyColor(),
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 16))),

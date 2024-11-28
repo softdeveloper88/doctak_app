@@ -84,7 +84,7 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                                     }
                                   },
                                   child: Text('Post',
-                                      style: secondaryTextStyle(color: SVAppColorPrimary))),
+                                      style: secondaryTextStyle(color: SVAppColorPrimary,fontFamily: 'Poppins-Light',))),
                               focus: focusNode,
                               minLines: 1,
                               // textInputAction: TextInputAction.done,
@@ -92,7 +92,7 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                               textFieldType: TextFieldType.MULTILINE,
                               decoration: InputDecoration(
                                 hintText: ' Write a comment',
-                                hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+                                hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins-Light',),
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,
                                 enabledBorder: InputBorder.none,

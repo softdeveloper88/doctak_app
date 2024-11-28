@@ -206,6 +206,7 @@ class LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Saved Logins',
                     style: TextStyle(
+                      fontFamily: 'Poppins-Light',
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.headlineSmall?.color,
@@ -241,6 +242,7 @@ class LoginScreenState extends State<LoginScreen> {
                     title: Text(
                       username,
                       style: TextStyle(
+                        fontFamily: 'Poppins-Light',
                         fontSize: 16,
                         fontWeight: isSelected
                             ? FontWeight.bold
@@ -270,6 +272,7 @@ class LoginScreenState extends State<LoginScreen> {
                 child: Text(
                   'No saved logins available',
                   style: TextStyle(
+                    fontFamily: 'Poppins-Light',
                     fontSize: 16,
                     color: Colors.grey,
                   ),

@@ -64,7 +64,7 @@ class ChatHistoryScreen extends StatelessWidget {
         backgroundColor: context.cardColor,
         title: Text(
           'History Artificial Intelligence',
-          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w400),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
         ),
       ),
       body: BlocConsumer<ChatGPTBloc, ChatGPTState>(
@@ -156,7 +156,7 @@ class ChatHistoryScreen extends StatelessWidget {
                                             Text(
                                               session.name ?? "",
                                               overflow: TextOverflow.clip,
-                                              style: GoogleFonts.poppins(
+                                              style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w400,
                                                   color: svGetBodyColor()),
@@ -176,7 +176,7 @@ class ChatHistoryScreen extends StatelessWidget {
                                                           session.createdAt!)),
                                                   // timeAgo.format(DateTime.parse(
                                                   //     session.createdAt!)),
-                                                  style: GoogleFonts.poppins(
+                                                  style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.w400,

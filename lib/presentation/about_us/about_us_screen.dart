@@ -91,7 +91,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('Contact/Follow us here',style: GoogleFonts.poppins(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),),
+                      child: Text('Contact/Follow us here',style: TextStyle(  fontFamily:  'Poppins-Light',color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,

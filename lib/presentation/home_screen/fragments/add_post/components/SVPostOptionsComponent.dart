@@ -175,7 +175,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                     ),
                     Text(
                       'From Gallery',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),
@@ -202,7 +202,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                     ),
                     Text(
                       'Take Video',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),
@@ -230,7 +230,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                     ),
                     Text(
                       'Take Picture',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),

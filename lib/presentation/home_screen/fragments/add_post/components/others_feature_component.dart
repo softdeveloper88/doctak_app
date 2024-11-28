@@ -109,6 +109,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                       Text(
                         'Tag Friends:',
                         style: TextStyle(
+                            fontFamily: 'Poppins-Light',
                             color: cardBackgroundBlackDark,
                             fontWeight: FontWeight.bold),
                       ),

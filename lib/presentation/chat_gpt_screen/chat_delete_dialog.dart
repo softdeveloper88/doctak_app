@@ -56,7 +56,7 @@ confirmationAlertDialog(
                                 padding: const EdgeInsets.only(right: 8.0),
                                 child: Text("Delete chat?",
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
                                         fontSize: 10.sp,
                                         color: svGetBodyColor(),
                                         fontWeight: FontWeight.w500)),
@@ -71,7 +71,7 @@ confirmationAlertDialog(
                       child: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
-                            style: GoogleFonts.poppins(
+                            style: TextStyle(
                                 fontSize: 8.sp, color: svGetBodyColor()),
                             children: <TextSpan>[
                               const TextSpan(
@@ -79,7 +79,7 @@ confirmationAlertDialog(
                                       'Are you sure that you want to delete this chat'),
                               TextSpan(
                                   text: title,
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       fontWeight: FontWeight.w900)),
                             ],
                           )),
@@ -107,7 +107,7 @@ confirmationAlertDialog(
                               child: Text(
                                 "CANCEL",
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w400,
                                   color: Colors.black,
                                   fontSize: 12.sp,
@@ -137,7 +137,7 @@ confirmationAlertDialog(
                                 child: Text(
                                   "DELETE",
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w400,
                                     color: Colors.red,
                                     fontSize: 12.sp,

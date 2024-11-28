@@ -733,7 +733,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                         minHeight: textToShow.length < 25 ? 200 : 0),
                     child: Center(
                       child: HtmlWidget(
-                        textStyle: GoogleFonts.poppins(),
+                        textStyle :TextStyle(fontFamily: 'Poppins-Light',),
                         enableCaching: true,
                         '<div style="text-align: center;">$textToShow</div>',
                         onTapUrl: (link) async {

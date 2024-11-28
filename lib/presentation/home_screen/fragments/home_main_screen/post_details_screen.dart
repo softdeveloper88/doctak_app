@@ -504,7 +504,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                               Text(
                                   homeBloc.postData?.specificComment?.comment ??
                                       '',
-                                  style: GoogleFonts.poppins(
+                                  style:  TextStyle(fontFamily: 'Poppins-Light',
                                       color: svGetBodyColor(), fontSize: 16)
                                   // TextStyle(color: Colors.grey[800], fontSize: 16),
                                   ),
@@ -529,7 +529,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                               },
                               child: Text(
                                 "More Comments",
-                                style: GoogleFonts.poppins(
+                                style:  TextStyle(fontFamily: 'Poppins-Light',
                                     fontSize: 16, fontWeight: FontWeight.w500),
                               )),
                         ),
@@ -724,7 +724,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                           minHeight: textToShow.length < 25 ? 200 : 0),
                       child: Center(
                         child: HtmlWidget(
-                          textStyle: GoogleFonts.poppins(),
+                          textStyle: TextStyle(fontFamily: 'Poppins-Light',),
                           enableCaching: true,
                           '<div style="text-align: center;">$textToShow</div>',
                           onTapUrl: (link) async {

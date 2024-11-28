@@ -128,10 +128,50 @@ class _SVPostComponentState extends State<SVPostComponent>
                     if (widget.homeBloc.numberOfPage !=
                             widget.homeBloc.pageNumber - 1 &&
                         index >= widget.homeBloc.postList.length - 1) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: svGetBodyColor(),
-                        ),
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 3, // Display 3 shimmering tiles when loading
+                        itemBuilder: (context, index) {
+                          return Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            // Base color of the shimmer
+                            highlightColor: Colors.grey[100]!,
+                            // Highlight color of the shimmer
+                            child: Padding(
+                              padding: const EdgeInsets.all(0.0),
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    leading: const CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: Colors.white,
+                                    ),
+                                    title: Container(
+                                      width: double.infinity,
+                                      height: 10.0,
+                                      color: Colors.white,
+                                    ),
+                                    subtitle: Container(
+                                      width: double.infinity,
+                                      height: 10.0,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: double.infinity,
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      // Shimmer effect color
+                                      borderRadius: BorderRadius.circular(4.0),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     } else if ((index % 5 == 0 && index != 0) && AppData.isShowGoogleNativeAds) {
                       return NativeAdWidget();
@@ -184,7 +224,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                                     height: 14,
                                                     width: 14,
                                                     fit: BoxFit.cover),
-                                                textStyle: boldTextStyle()),
+                                                textStyle: boldTextStyle(fontFamily: 'Poppins-Light',)),
                                             Row(
                                               children: [
                                                 Text(
@@ -193,7 +233,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                                             .homeBloc
                                                             .postList[index]
                                                             .createdAt!)),
-                                                    style: secondaryTextStyle(
+                                                    style: secondaryTextStyle(fontFamily: 'Poppins-Light',
                                                         color: svGetBodyColor(),
                                                         size: 12)),
                                                 const Padding(
@@ -312,6 +352,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                     child: Text(
                                         '${widget.homeBloc.postList[index].likes?.length ?? 0.validate()} Likes',
                                         style: secondaryTextStyle(
+                                            fontFamily: 'Poppins-Light',
                                             color: svGetBodyColor())),
                                   ),
                                   InkWell(
@@ -326,6 +367,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                     child: Text(
                                         '${widget.homeBloc.postList[index].comments?.length ?? 0.validate()} comments',
                                         style: secondaryTextStyle(
+                                            fontFamily: 'Poppins-Light',
                                             color: svGetBodyColor())),
                                   ),
                                 ],
@@ -584,7 +626,7 @@ class _SVPostComponentState extends State<SVPostComponent>
           //     children: [
           //       Text(
           //         "Error!",
-          //         style: GoogleFonts.poppins(
+          //         style: TextStyle(
           //             color: Colors.red,
           //             fontSize: 24,
           //             fontWeight: FontWeight.bold),
@@ -779,7 +821,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                           minHeight: textToShow.length < 25 ? 200 : 0),
                       child: Center(
                         child: HtmlWidget(
-                          textStyle: GoogleFonts.poppins(),
+                          textStyle: TextStyle(),
                           enableCaching: true,
                           '<div style="text-align: center;">$textToShow</div>',
                           onTapUrl: (link) async {

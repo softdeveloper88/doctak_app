@@ -42,7 +42,7 @@ class ProfileDateWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     label ?? '',
-                    style: GoogleFonts.poppins(
+                    style:  TextStyle(fontFamily: 'Poppins-Light',
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -108,7 +108,7 @@ class ProfileDateWidget extends StatelessWidget {
               children: [
                 Text(
                   capitalizeWords(label ?? ''),
-                  style: GoogleFonts.poppins(
+                  style:  TextStyle(fontFamily: 'Poppins-Light',
                     color: svGetBodyColor(),
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
@@ -116,7 +116,7 @@ class ProfileDateWidget extends StatelessWidget {
                 ),
                 Text(
                   capitalizeWords(value ?? ''),
-                  style: GoogleFonts.poppins(
+                  style:  TextStyle(fontFamily: 'Poppins-Light',
                       color: svGetBodyColor(),
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w500),

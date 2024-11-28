@@ -278,7 +278,7 @@ bool isError=false;
                                       child: Text(
                                         'Next Image',
                                         style:
-                                            GoogleFonts.poppins(color: white),
+                                            TextStyle(color: white,fontFamily: 'Poppins-Light',),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -336,6 +336,7 @@ bool isError=false;
                                 const Text(
                                   'Welcome, Doctor!',
                                   style: TextStyle(
+                                    fontFamily: 'Poppins-Light',
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -344,7 +345,7 @@ bool isError=false;
                                 const Text(
                                   'Your personal & medical assistant powered by Artificial Intelligence',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 16,fontFamily: 'Poppins-Light',),
                                 ),
                                 const SizedBox(height: 30),
                                 Row(
@@ -404,7 +405,7 @@ bool isError=false;
                                 const Text(
                                   'Please upload the medical images for potential diagnoses and analysis',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 14),
+                                  style: TextStyle(fontSize: 14,fontFamily: 'Poppins-Light',),
                                 ),
                                 const SizedBox(height: 10),
                               ],
@@ -569,7 +570,7 @@ bool isError=false;
                                 maxLines: null,
                                 // Allows for unlimited lines
                                 decoration: const InputDecoration(
-                                  hintStyle: TextStyle(color: Colors.grey),
+                                  hintStyle: TextStyle(color: Colors.grey,fontFamily: 'Poppins-Light',),
                                   hintText:
                                       'Clinical Summary e.g age, gender, medical history',
                                   border: InputBorder.none,
@@ -732,7 +733,8 @@ bool isError=false;
                   children: [
                     Text(
                       "Error!",
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
+                          fontFamily: 'Poppins-Light',
                           color: Colors.red,
                           fontSize: 24,
                           fontWeight: FontWeight.bold),
@@ -740,7 +742,7 @@ bool isError=false;
                     const SizedBox(height: 10),
                     Text(
                       state1.errorMessage.toString(),
-                      style: const TextStyle(color: black),
+                      style: const TextStyle(color: black,fontFamily: 'Poppins-Light',),
                     ),
                     MaterialButton(
                       onPressed: () {
@@ -935,7 +937,7 @@ bool isError=false;
               children: <Widget>[
                 Text(
                   "Select Option",
-                  style: GoogleFonts.poppins(fontSize: 18),
+                  style: TextStyle(fontSize: 18),
                 ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
@@ -1051,7 +1053,7 @@ bool isError=false;
           title: Text(
             'You want to enable permission?',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: 14.sp),
+            style: TextStyle(fontSize: 14.sp),
           ),
           // content: const SingleChildScrollView(
           //   child: ListBody(

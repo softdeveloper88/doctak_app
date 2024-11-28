@@ -485,7 +485,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                               Expanded(
                                 child: Text(
                                   bloc.drugsData[index].genericName ?? "",
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       color: SVAppColorPrimary,
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w500),
@@ -502,17 +502,17 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                           Row(
                             children: [
                               Text(bloc.drugsData[index].strength ?? '',
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       color: svGetBodyColor(),
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400)),
                               Text(' - ',
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       color: svGetBodyColor(),
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400)),
                               Text(bloc.drugsData[index].packageSize ?? '',
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       color: svGetBodyColor(),
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400)),
@@ -520,7 +520,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                           ),
                           const SizedBox(height: 5),
                           Text(bloc.drugsData[index].tradeName ?? 'N/A',
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
                                   color: svGetBodyColor(), fontSize: 10.sp)),
                           const SizedBox(height: 5),
                           const SizedBox(height: 10),
@@ -537,13 +537,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                   children: [
                                     Text(
                                       'Manufacturer Name',
-                                      style: GoogleFonts.poppins(
+                                      style: TextStyle(
                                           color: Colors.grey, fontSize: 12.sp),
                                     ),
                                     Text(
                                       bloc.drugsData[index].manufacturerName ??
                                           '',
-                                      style: GoogleFonts.poppins(
+                                      style: TextStyle(
                                           color: svGetBodyColor(),
                                           fontSize: 12.sp),
                                     ),
@@ -559,11 +559,11 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text('Price',
-                                          style: GoogleFonts.poppins(
+                                          style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 12.sp)),
                                       Text(bloc.drugsData[index].mrp ?? '0',
-                                          style: GoogleFonts.poppins(
+                                          style: TextStyle(
                                               color: svGetBodyColor(),
                                               fontSize: 12.sp,
                                               fontWeight: FontWeight.w500)),
@@ -592,7 +592,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
           Expanded(
               child: Text(
             genericName,
-            style: GoogleFonts.poppins(color: Colors.black, fontSize: 15),
+            style: TextStyle(color: Colors.black, fontSize: 15),
           )),
           IconButton(
             icon: const Icon(

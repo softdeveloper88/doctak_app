@@ -5,7 +5,6 @@ import 'package:doctak_app/data/models/followers_model/follower_data_model.dart'
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/presentation/followers_screen/bloc/followers_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/models/SVSearchModel.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/cupertino.dart';

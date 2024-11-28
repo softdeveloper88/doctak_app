@@ -58,7 +58,7 @@ confirmationCustomAlertDialog(
                                 padding: const EdgeInsets.only(right: 8.0),
                                 child: Text(mainTitle,
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
                                         fontSize: 10.sp,
                                         color: svGetBodyColor(),
                                         fontWeight: FontWeight.w500)),
@@ -73,13 +73,13 @@ confirmationCustomAlertDialog(
                       child: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
-                            style: GoogleFonts.poppins(
+                            style: TextStyle(
                                 fontSize: 8.sp, color: svGetBodyColor()),
                             children: <TextSpan>[
                               // TextSpan(text: title),
                               TextSpan(
                                   text: title,
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       fontWeight: FontWeight.w900)),
                             ],
                           )),
@@ -107,7 +107,7 @@ confirmationCustomAlertDialog(
                               child: Text(
                                 "CANCEL",
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w400,
                                   color: Colors.black,
                                   fontSize: 10.sp,
@@ -137,7 +137,7 @@ confirmationCustomAlertDialog(
                                 child: Text(
                                   yesButtonText,
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w400,
                                     color: Colors.red,
                                     fontSize: 10.sp,

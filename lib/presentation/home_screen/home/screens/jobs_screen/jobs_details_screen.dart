@@ -109,7 +109,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           children: [
                             Text(
                               "New",
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
                                   color: Colors.red,
                                   fontWeight: FontWeight.w500,
                                   fontSize: kDefaultFontSize),
@@ -245,7 +245,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 },
                                 child: Text(
                                   "Applicants",
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       color: Colors.blue),
                                 ),
                               ),
@@ -254,7 +254,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         ),
                         Text(
                           jobsBloc.jobDetailModel.job?.jobTitle ?? "",
-                          style: GoogleFonts.poppins(
+                          style: TextStyle(
                               color: svGetBodyColor(),
                               fontWeight: FontWeight.bold,
                               fontSize: 18),
@@ -284,7 +284,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         ),
                         const SizedBox(height: 20),
                         Text('Apply Date',
-                            style: GoogleFonts.poppins(
+                            style: TextStyle(fontFamily: 'Poppins-Light',
                                 color: svGetBodyColor(),
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14)),
@@ -368,7 +368,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           child: Container(
                             color: Colors.white,
                             child: HtmlWidget(
-                              textStyle: GoogleFonts.poppins(
+                              textStyle:  TextStyle(fontFamily: 'Poppins-Light',
                                 color: svGetBodyColor(),
                               ),
                               '<p>${jobsBloc.jobDetailModel.job?.description}</p>',

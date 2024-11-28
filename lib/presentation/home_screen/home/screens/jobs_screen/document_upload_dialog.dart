@@ -185,7 +185,7 @@ class _DocumentUploadDialogState extends State<DocumentUploadDialog> {
       ),
     );
     //   AlertDialog(
-    //   title:  Text('Upload Resume',style: GoogleFonts.poppins(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 16),),
+    //   title:  Text('Upload Resume',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 16),),
     //   content: Column(
     //     mainAxisSize: MainAxisSize.min,
     //     children: [

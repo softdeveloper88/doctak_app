@@ -215,7 +215,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                               padding: const EdgeInsets.only(left: 16.0),
                               child: Text(
                                 groupBloc.groupDetailsModel?.group?.name ?? "",
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w500),
@@ -231,7 +231,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                   ),
                                   Text(
                                     " ${groupBloc.groupDetailsModel?.group?.privacySetting ?? ''} Group . ${groupBloc.groupDetailsModel?.totalMembers ?? '0'} members",
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
                                         color: Colors.black45,
                                         fontSize: 10.sp,
                                         fontWeight: FontWeight.w400),
@@ -265,7 +265,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                             ),
                                             Text(
                                               " Invite",
-                                              style: GoogleFonts.poppins(
+                                              style: TextStyle(
                                                   color: Colors.white),
                                             )
                                           ],
@@ -336,7 +336,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                       onPressed: () {},
                                       child: Text(
                                         'Posts',
-                                        style: GoogleFonts.poppins(
+                                        style: TextStyle(
                                             fontWeight: FontWeight.w500,
                                             color: Colors.black),
                                       ),
@@ -355,7 +355,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                       },
                                       child: Text(
                                         'Members',
-                                        style: GoogleFonts.poppins(
+                                        style: TextStyle(
                                             fontWeight: FontWeight.w500,
                                             color: Colors.black45),
                                       ),
@@ -374,7 +374,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                       },
                                       child: Text(
                                         'Events',
-                                        style: GoogleFonts.poppins(
+                                        style: TextStyle(
                                             fontWeight: FontWeight.w500,
                                             color: Colors.black45),
                                       ),
@@ -390,7 +390,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                       onPressed: () {},
                                       child: Text(
                                         'Media',
-                                        style: GoogleFonts.poppins(
+                                        style: TextStyle(
                                             fontWeight: FontWeight.w500,
                                             color: Colors.black45),
                                       ),
@@ -485,7 +485,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                             color: Colors.black,
                                           ),
                                           Text(" Photo/Videos",
-                                              style: GoogleFonts.poppins(
+                                              style: TextStyle(
                                                   fontWeight: FontWeight.w500,
                                                   color: Colors.black)),
                                         ],
@@ -510,7 +510,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                             color: Colors.black,
                                           ),
                                           Text(" Camera",
-                                              style: GoogleFonts.poppins(
+                                              style: TextStyle(
                                                   fontWeight: FontWeight.w500,
                                                   color: Colors.black)),
                                         ],
@@ -536,7 +536,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                                             color: Colors.black,
                                           ),
                                           Text(" Live",
-                                              style: GoogleFonts.poppins(
+                                              style: TextStyle(
                                                   fontWeight: FontWeight.w500,
                                                   color: Colors.black)),
                                         ],

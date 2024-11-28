@@ -43,7 +43,7 @@ class _LikesListScreenState extends State<LikesListScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('People who likes', style: boldTextStyle(size: 20)),
+        title: Text('People who likes', style: boldTextStyle(size: 20,fontFamily: 'Poppins-Light',)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -167,7 +167,7 @@ class _LikesListScreenState extends State<LikesListScreen> {
                                                             .validate(),
                                                         overflow:
                                                             TextOverflow.clip,
-                                                        style: GoogleFonts.poppins(
+                                                        style: TextStyle(
                                                             color:
                                                                 svGetBodyColor(),
                                                             fontWeight:

@@ -251,7 +251,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
                                       'Next Session',
-                                      style: GoogleFonts.poppins(color: white),
+                                      style: TextStyle(  fontFamily:  'Poppins-Light',color: white),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -403,7 +403,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                                         textAlign:
                                                             TextAlign.center,
                                                         style:
-                                                            GoogleFonts.poppins(
+                                                            TextStyle(
                                                                 color: Colors
                                                                     .black,
                                                                 fontSize: 12.sp,
@@ -416,7 +416,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                                         textAlign:
                                                             TextAlign.center,
                                                         style:
-                                                            GoogleFonts.poppins(
+                                                            TextStyle(
                                                                 color: Colors
                                                                     .black,
                                                                 fontSize: 8.sp,
@@ -867,7 +867,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 children: [
                   Text(
                     "Error!",
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                         color: Colors.red,
                         fontSize: 24,
                         fontWeight: FontWeight.bold),

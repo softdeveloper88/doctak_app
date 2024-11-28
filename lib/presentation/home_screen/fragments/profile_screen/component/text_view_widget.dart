@@ -23,7 +23,7 @@ class TextViewWidget extends StatelessWidget {
             child: Text(
               textAlign: TextAlign.start,
               capitalizeWords(label ?? ''),
-              style: GoogleFonts.poppins(
+              style:  TextStyle(fontFamily: 'Poppins-Light',
                   color: svGetBodyColor(),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500),
@@ -34,7 +34,7 @@ class TextViewWidget extends StatelessWidget {
             child: Text(
               textAlign: TextAlign.end,
               capitalizeWords(value ?? ''),
-              style: GoogleFonts.poppins(
+              style:  TextStyle(fontFamily: 'Poppins-Light',
                   color: svGetBodyColor(),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500),

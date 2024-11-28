@@ -42,7 +42,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
-        title: Text('Personal Information', style: boldTextStyle(size: 20)),
+        title: Text('Personal Information', style: boldTextStyle(size: 20,fontFamily: 'Poppins-Light',)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -94,7 +94,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     ),
                     Text(
                       "Edit",
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         color: Colors.blue,
@@ -231,7 +231,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               const SizedBox(height: 10),
                               Text(
                                 'Country',
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -257,7 +257,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               const SizedBox(height: 10),
                               Text(
                                 'State',
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -286,7 +286,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               if (AppData.userType == "doctor")
                                 Text(
                                   'Specialty',
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -316,7 +316,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   padding: const EdgeInsets.only(top: 8.0),
                                   child: Text(
                                     'University',
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),

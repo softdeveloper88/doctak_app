@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -8,8 +11,10 @@ import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_co
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
-
+import 'package:http/http.dart' as http;
+import '../Pusher/PusherConfig.dart';
 import 'chat_room_screen.dart';
 
 class UserChatScreen extends StatefulWidget {
@@ -17,13 +22,14 @@ class UserChatScreen extends StatefulWidget {
   State<UserChatScreen> createState() => _UserChatScreenState();
 }
 
-class _UserChatScreenState extends State<UserChatScreen> {
+class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObserver{
   ChatBloc chatBloc = ChatBloc();
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     setStatusBarColor(svGetScaffoldColor());
-
+    ConnectPusher();
     chatBloc.add(LoadPageEvent(page: 1));
     super.initState();
   }
@@ -32,6 +38,231 @@ class _UserChatScreenState extends State<UserChatScreen> {
       return String.fromCharCodes(input.codeUnits);
     } catch (e) {
       return "Invalid String";
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+print('state life');
+    if (state == AppLifecycleState.resumed) {
+      print("state life $state");
+      ConnectPusher();
+    }
+  }
+  void onEvent(PusherEvent event) {
+    print("onEvent data: $event");
+    Map<String, dynamic> jsonMap = jsonDecode(event.data.toString());
+    // var data=json.encode(event);
+    // print(jsonDecode(event.eventName));
+    // print('onEventName ${jsonDecode(event.eventName)}');
+    // if(event.eventName=='client-typing'){
+    //   onTypingStarted();
+    // }
+    print('data click ${jsonMap['from_id']}');
+    FromId=jsonMap['from_id'];
+    setState(() {
+
+    });
+
+  }
+  void onSubscriptionSucceeded(String channelName, dynamic data) {
+    print("onSubscriptionSucceeded: $channelName data: $data");
+  }
+  void onSubscriptionError(String message, dynamic e) {
+    print("onSubscriptionError: $message Exception: $e");
+  }
+  void onDecryptionFailure(String event, String reason) {
+    print("onDecryptionFailure: $event reason: $reason");
+  }
+  void onMemberAdded(String channelName, PusherMember member) {
+    print("onMemberAdded: $channelName member: $member");
+  }
+  void onMemberRemoved(String channelName, PusherMember member) {
+    print("onMemberRemoved: $channelName member: $member");
+  }
+  void onError(String message, int? code, dynamic e) {
+    print("onError: $message code: $code exception: $e");
+  }
+  PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
+  late PusherChannel clientListenChannel;
+  late PusherChannel clientSendChannel;
+  bool isSomeoneTyping = false;
+  String? FromId;
+  Future<dynamic> onAuthorizer(
+      String channelName, String socketId, dynamic options) async {
+    final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
+
+    // Build query parameters
+    final Map<String, String> queryParams = {
+      'socket_id': socketId,
+      'channel_name': channelName,
+    };
+
+    final response = await http.post(
+      uri.replace(queryParameters: queryParams),
+      headers: {
+        'Authorization': 'Bearer ${AppData.userToken!}',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final String data = response.body;
+
+      return jsonDecode(data);
+    } else {
+      throw Exception('Failed to fetch Pusher auth data');
+    }
+  }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.addObserver(this);
+    _timer?.cancel();
+    _ampTimer?.cancel();
+    _timerChat?.cancel();
+    super.dispose();
+  }
+  void onTypingStarted() {
+    setState(() {
+      print('FromId $FromId');
+      isSomeoneTyping = true;
+    });
+  }
+
+  void onTypingStopped() {
+    print('FromId $FromId');
+    setState(() {
+      isSomeoneTyping = false;
+    });
+      }
+  onSubscriptionCount(String channelName, int subscriptionCount) {}
+  Timer? _timer;
+  Timer? _timerChat;
+  Timer? _ampTimer;
+  Timer? typingTimer;
+
+  void ConnectPusher() async {
+    // Create the Pusher client
+    try {
+      await pusher.init(
+          apiKey: PusherConfig.key,
+          cluster: PusherConfig.cluster,
+          useTLS: false,
+          onSubscriptionSucceeded: onSubscriptionSucceeded,
+          onSubscriptionError: onSubscriptionError,
+          onMemberAdded: onMemberAdded,
+          onMemberRemoved: onMemberRemoved,
+          onEvent: onEvent,
+          onDecryptionFailure: onDecryptionFailure,
+          onError: onError,
+          onSubscriptionCount: onSubscriptionCount,
+          onAuthorizer: onAuthorizer);
+
+      pusher.connect();
+
+      if (pusher != null) {
+        // Successfully created and connected to Pusher
+        clientListenChannel = await pusher.subscribe(
+          channelName: 'private-chatify.${AppData.logInUserId}',
+          onMemberAdded: (member) {
+            print("Member added: $member");
+          },
+          onMemberRemoved: (member) {
+            // print("Member removed: $member");
+          },
+          onEvent: (event) {
+            String eventName = event.eventName;
+            print(eventName);
+
+            switch (eventName) {
+              case 'client-typing':
+                onTypingStarted();
+                // If the timer is already running, cancel it
+                if (typingTimer != null && typingTimer!.isActive) {
+                  typingTimer!.cancel();
+                }
+                // Set a timer to stop typing indicator after 2 seconds
+                typingTimer = Timer(const Duration(seconds: 2), () {
+                  onTypingStopped();
+                  // chatBloc.add(LoadRoomMessageEvent(
+                  //     page: 0, userId: widget.id, roomId: widget.roomId));
+                });
+                break;
+            // case 'client-seen':
+            // var textMessage = "";
+            // var messageData = event.data;
+//                 messageData = json.decode(messageData);
+//                 var status = messageData['status'];
+//                 if (status == "web") {
+//                   final htmlMessage = event.data;
+//                   var message = json.decode(htmlMessage);
+//
+//                   // Use the html package to parse the HTML and extract text content
+//                   final document = htmlParser.parse(message['message']);
+//
+//                   final messageDiv = document.querySelector('.message');
+//                   final textMessageWithTime = messageDiv?.text.trim() ?? "";
+//
+// // Split the textMessageWithTime by the "time ago" portion
+//                   final parts = textMessageWithTime.split('1 second ago');
+//                   textMessage =
+//                       parts.first.trim(); // Take the first part (the message)
+//
+//                 }
+//                 if (status == "api") {
+//                   var message = messageData['message'];
+//
+//                   textMessage = message['message'];
+//                   print(textMessage);
+//
+//                 }
+//                 print(textMessage);
+//                 // setState(() {
+//                 typingTimer = Timer(const Duration(seconds: 2), () {
+//                   chatBloc.add(ChatReadStatusEvent(
+//                       userId: widget.id,
+//                       roomId: widget.roomId,));
+            // chatBloc.add(LoadRoomMessageEvent(
+            //     page: 0, userId: widget.id, roomId: widget.roomId));
+            // });
+            // messagesList.insert(
+            //   0,
+            //   Message(
+            //     body: textMessage, // Use the extracted text content
+            //     toId: AppData.logInUserId,
+            //     fromId: widget.id,
+            //   ),
+            // );
+            // isLoading = false;
+            // });
+            // break;
+            // Add more cases for other event types as needed
+              default:
+              // Handle unknown event types or ignore them
+                break;
+            }
+          },
+        );
+        // clientSendChannel = await pusher.subscribe(
+        //   channelName: "private-chatify.${widget.id}",
+        //   onMemberAdded: (member) {
+        //     // print("Member added: $member");
+        //   },
+        //   onMemberRemoved: (member) {
+        //     // print("Member removed: $member");
+        //   },
+        //   onEvent: (event) {
+        //     // print("Received Event (Listen Channel): $event");
+        //   },
+        // );
+
+        // Attach an event listener to the channel
+      } else {
+        // Handle the case where Pusher connection failed
+        // print("Failed to connect to Pusher");
+      }
+    } catch (e) {
+      print(e);
     }
   }
   @override
@@ -48,7 +279,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
         centerTitle: false,
         title: Text(
           'Chats',
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500,fontFamily: 'Poppins-Light',),
         ),
         actions: [
           IconButton(
@@ -98,7 +329,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                     child: Text(
                       'Groups',
                       style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold,fontFamily: 'Poppins-Light',),
                     ),
                   ),
                 if (chatBloc.groupList.isNotEmpty)
@@ -149,6 +380,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                         bloc.groupList[index].groupName ??
                                             'Unknown',
                                         style: TextStyle(
+                                          fontFamily: 'Poppins-Light',
                                           color: svGetBodyColor(),
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -158,6 +390,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                         bloc.groupList[index].latestMessage ??
                                             '',
                                         style: TextStyle(
+                                          fontFamily: 'Poppins-Light',
                                           color: svGetBodyColor(),
                                           fontSize: 14,
                                         ),
@@ -250,24 +483,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                       ),
                                                     ],
                                                   ),
-                                                  child:
-                                                      // bloc
-                                                      //             .contactsList[
-                                                      //                 index]
-                                                      //             .profilePic ==
-                                                      //         ''
-                                                      //     ? Image.asset(
-                                                      //             'images/socialv/faces/face_5.png',
-                                                      //             height: 56,
-                                                      //             width: 56,
-                                                      //             fit: BoxFit
-                                                      //                 .cover)
-                                                      //         .cornerRadiusWithClipRRect(
-                                                      //             8)
-                                                      //         .cornerRadiusWithClipRRect(
-                                                      //             8)
-                                                      //     :
-                                                      CustomImageView(
+                                                  child: CustomImageView(
                                                               placeHolder:
                                                                   'images/socialv/faces/face_5.png',
                                                               imagePath:
@@ -295,7 +511,8 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                               overflow:
                                                                   TextOverflow
                                                                       .clip,
-                                                              style: GoogleFonts.poppins(
+                                                              style: TextStyle(
+                                                                  fontFamily: 'Poppins-Light',
                                                                   color:
                                                                       svGetBodyColor(),
                                                                   fontWeight:
@@ -309,12 +526,18 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                       //     : const Offstage(),
                                                     ],
                                                   ),
-                                                  Text(
-                                                      (bloc.contactsList[index].latestMessage?.length ?? 0) > 20
+                                                  (isSomeoneTyping && FromId==bloc.contactsList[index].id) ? const Text(
+                                                      "Typing...",
+                                                      style: TextStyle(
+                                                        fontFamily: 'Poppins-Light',
+                                                        fontWeight: FontWeight.bold,fontSize: 14,
+                                                          color: Colors.blueAccent,)):  Text(
+                                                    (bloc.contactsList[index].latestMessage?.length ?? 0) > 20
                                                           ? '${bloc.contactsList[index].latestMessage?.substring(0, 15)}....'
                                                           : bloc.contactsList[index].latestMessage ??
                                                               "",
                                                       style: secondaryTextStyle(
+                                                          fontFamily: 'Poppins-Light',
                                                           color:
                                                               svGetBodyColor())),
                                                 ],
@@ -339,6 +562,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                 child: Text(
                                                   '${bloc.contactsList[index].unreadCount??0}',
                                                   style: const TextStyle(
+                                                    fontFamily: 'Poppins-Light',
                                                     color: Colors.white,
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.bold,
@@ -350,6 +574,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                                                         .contactsList[index]
                                                         .latestMessageTime ?? '2024-01-01 00:00:00')),
                                                 style: secondaryTextStyle(
+                                                    fontFamily: 'Poppins-Light',
                                                     color: svGetBodyColor(),
                                                     size: 12)),
                                           ],
@@ -407,7 +632,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
                   Expanded(
                       child: Center(
                     child:
-                        Text("No chat found", style: boldTextStyle(size: 16)),
+                        Text("No chat found", style: boldTextStyle(size: 16,fontFamily: 'Poppins-Light',)),
                   )),
                 if (AppData.isShowGoogleBannerAds ?? false)BannerAdWidget(),
 

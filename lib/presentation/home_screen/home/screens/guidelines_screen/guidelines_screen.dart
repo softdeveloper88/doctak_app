@@ -311,7 +311,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
               },
               child: Text(
                 expandedMap[item.diseaseName]! ? 'Download PDF' : 'See More',
-                style: GoogleFonts.poppins(color: svGetBodyColor()),
+                style:  TextStyle(fontFamily: 'Poppins-Light',color: svGetBodyColor()),
               ),
             ),
           ),

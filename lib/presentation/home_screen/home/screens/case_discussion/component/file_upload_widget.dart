@@ -180,7 +180,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     ),
                     Text(
                       'From Gallery',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),
@@ -207,7 +207,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     ),
                     Text(
                       'Take Video',
-                      style: GoogleFonts.poppins(
+                      style:  TextStyle(fontFamily: 'Poppins-Light',
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),
@@ -235,7 +235,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     ),
                     Text(
                       'Take Picture',
-                      style: GoogleFonts.poppins(
+                      style:  TextStyle(fontFamily: 'Poppins-Light',
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),

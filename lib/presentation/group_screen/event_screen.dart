@@ -40,7 +40,7 @@ class _EventsScreenState extends State<EventsScreen>
           child: Tab(
             child: Text(
               tabName,
-              style: GoogleFonts.poppins(color: svGetBodyColor()),
+              style: TextStyle(color: svGetBodyColor()),
             ),
           ),
         ),
@@ -72,7 +72,7 @@ class _EventsScreenState extends State<EventsScreen>
         centerTitle: false,
         title: Text(
           'Events',
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
       body: Column(

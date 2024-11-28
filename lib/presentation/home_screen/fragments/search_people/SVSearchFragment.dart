@@ -68,7 +68,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Search Peoples', style: boldTextStyle(size: 18)),
+        title: Text('Search Peoples', style: boldTextStyle(size: 18,fontFamily: 'Poppins-Light',)),
         leading: IconButton(
             icon:
                 Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
@@ -137,7 +137,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: 'Search People ',
-              hintStyle: secondaryTextStyle(color: svGetBodyColor()),
+              hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins-Light',),
               suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
                       height: 16,
                       width: 16,

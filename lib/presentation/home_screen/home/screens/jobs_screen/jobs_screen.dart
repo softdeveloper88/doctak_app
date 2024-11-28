@@ -628,7 +628,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                 children: [
                                   Text(
                                     selectedIndex == 0 ? "New" : "Expired",
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
                                         color: Colors.red,
                                         fontWeight: FontWeight.w500,
                                         fontSize: kDefaultFontSize),
@@ -727,7 +727,7 @@ class _JobsScreenState extends State<JobsScreen> {
                               ),
                               Text(
                                 bloc.drugsData[index].jobTitle ?? "",
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                     color: svGetBodyColor(),
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18),
@@ -757,7 +757,7 @@ class _JobsScreenState extends State<JobsScreen> {
                               ),
                               const SizedBox(height: 20),
                               Text('Apply Date',
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
                                       color: svGetBodyColor(),
                                       fontWeight: FontWeight.w400,
                                       fontSize: 14)),

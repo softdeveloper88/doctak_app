@@ -47,6 +47,7 @@ class AboutGroupScreen extends StatelessWidget {
                     Text(
                       groupBloc?.groupAboutModel?.group?.name ?? '',
                       style: const TextStyle(
+                        fontFamily: 'Poppins-Light',
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),

@@ -120,7 +120,7 @@ class ForgotPassword extends StatelessWidget {
                                         top: 18, right: 30, bottom: 18)),
                                 Text(
                                   message,
-                                  style: GoogleFonts.poppins(color: Colors.red),
+                                  style: TextStyle(color: Colors.red),
                                 ),
                                 const SizedBox(height: 32),
                                 svAppButton(

@@ -1,5 +1,8 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/main.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/full_screen_image_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
 import 'package:flutter_chat_bubble/chat_bubble.dart';
@@ -31,7 +34,7 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment:
@@ -65,7 +68,8 @@ class ChatBubble extends StatelessWidget {
                               message,
                               style: TextStyle(
                                   color: isMe ? Colors.white : Colors.black,
-                                  fontSize: 14.0,
+                                  fontSize: 16.0,
+                                  fontFamily: 'Poppins-Bold',
                                   fontWeight: FontWeight.w400),
                             ),
                             if (attachmentJson != null)
@@ -79,7 +83,8 @@ class ChatBubble extends StatelessWidget {
                                   Text(
                                     timeAgo.format(
                                         DateTime.parse(createAt.toString())),
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins-Light',
                                       fontSize: 8.0,
                                       fontWeight: FontWeight.w500,
                                       color: isMe
@@ -144,8 +149,10 @@ class ChatBubble extends StatelessWidget {
                             Text(
                               message,
                               style: TextStyle(
-                                  color: isMe ? Colors.white : Colors.black,
-                                  fontSize: 14.0,
+
+                                  color: isMe ? Colors.white : Colors.black87,
+                                  fontSize: 16.0,
+                                  fontFamily: 'Poppins-Bold',
                                   fontWeight: FontWeight.w400),
                             ),
                             if (attachmentJson != null)
@@ -161,7 +168,8 @@ class ChatBubble extends StatelessWidget {
                                         ? timeAgo.format(
                                             DateTime.parse(createAt.toString()))
                                         : '',
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins-Light',
                                       fontSize: 8.0,
                                       fontWeight: FontWeight.w500,
                                       color: isMe
@@ -233,12 +241,29 @@ class ChatBubble extends StatelessWidget {
     } else if (attachmentJson!.endsWith('mp4')) {
       return VideoPlayerWidget(videoUrl: '${AppData.imageUrl}$attachmentJson');
     } else {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: CustomImageView(
-          imagePath: "${AppData.imageUrl}$attachmentJson",
-          fit: BoxFit.cover,
-          width: MediaQuery.of(context).size.width * 0.6,
+      return InkWell(
+        onTap: (){
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FullScreenImagePage(
+                listCount: 1,
+                imageUrl:  "${AppData.imageUrl}$attachmentJson",
+                post: null,
+                mediaUrls: [],
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: CustomImageView(
+            imagePath:
+            "${AppData.imageUrl}$attachmentJson",
+            fit: BoxFit.cover,
+            width: MediaQuery.of(context).size.width * 0.6,
+          ),
         ),
       );
     }

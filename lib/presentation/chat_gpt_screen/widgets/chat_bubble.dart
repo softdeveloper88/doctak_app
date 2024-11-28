@@ -93,7 +93,7 @@ class ChatBubble extends StatelessWidget {
                                   //   text
                                   //       .replaceAll("*", '')
                                   //       .replaceAll('#', ''),
-                                  //   style: GoogleFonts.poppins(
+                                  //   style:  TextStyle(fontFamily: 'Poppins-Light',
                                   //       color: Colors.black,
                                   //       fontSize: 12.sp),
                                   // ),

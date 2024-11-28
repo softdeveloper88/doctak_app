@@ -67,7 +67,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
         surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
         title: Text(widget.isFollowersScreen ? 'Followers' : 'Following',
-            style: boldTextStyle(size: 18)),
+            style: boldTextStyle(size: 18,fontFamily: 'Poppins-Light',)),
         leading: IconButton(
             icon:
                 Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),

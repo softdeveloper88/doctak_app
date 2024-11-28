@@ -57,18 +57,21 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                         child: RichText(
                             textAlign: TextAlign.left,
                             text: TextSpan(
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
+                                  fontFamily:  'Poppins-Light',
                                   fontSize: 12.sp, color: svGetBodyColor()),
                               children: <TextSpan>[
                                 // TextSpan(text: title),
                                 TextSpan(
                                     text: widget.comment.name??"",
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
+                                        fontFamily:  'Poppins-Light',
                                         fontWeight: FontWeight.w500)),
                                 TextSpan(
                                     text: ' ${timeAgo.format(DateTime.parse(widget.comment.createdAt!))}',
 
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
+                                    fontFamily:  'Poppins-Light',
                                     fontSize: 12.0,
                                     color: Colors.grey[600],
                                   ))
@@ -122,7 +125,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 const SizedBox(height: 4.0),
                 Text(
                   widget.comment.comment ?? 'No Name',
-                  style: GoogleFonts.poppins(fontSize: 14.0),
+                  style: TextStyle(fontSize: 14.0, fontFamily:  'Poppins-Light',),
                 ),
                 const SizedBox(height: 8.0),
                 const Divider(
@@ -142,7 +145,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 //       },
                 //       child: Text(
                 //         'Reply',
-                //         style: GoogleFonts.poppins(
+                //         style: TextStyle(
                 //           fontSize: 13.0,
                 //           color: Colors.grey[600],
                 //         ),
@@ -159,7 +162,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 //       },
                 //       child: Text(
                 //         'Like',
-                //         style: GoogleFonts.poppins(
+                //         style: TextStyle(
                 //           fontSize: 13.0,
                 //           color: Colors.grey[600],
                 //         ),
@@ -170,7 +173,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 //     //   children: [
                 //     //     Text(
                 //     //       '1',
-                //     //       style: GoogleFonts.poppins(
+                //     //       style: TextStyle(
                 //     //         fontSize: 13.0,
                 //     //         color: Colors.red[400],
                 //     //       ),
@@ -278,7 +281,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
     //       ),
     //       const SizedBox(height: 8),
     //       Text(widget.comment.comment ?? '',
-    //           style: GoogleFonts.poppins(color: svGetBodyColor(), fontSize: 16)
+    //           style: TextStyle(color: svGetBodyColor(), fontSize: 16)
     //           // TextStyle(color: Colors.grey[800], fontSize: 16),
     //           ),
     //       Text(

@@ -201,7 +201,7 @@
 //                   //         children: [
 //                   //           Text(
 //                   //             "New" ,
-//                   //             style: GoogleFonts.poppins(
+//                   //             style:  TextStyle(fontFamily: 'Poppins-Light',
 //                   //                 color: Colors.red,
 //                   //                 fontWeight: FontWeight.w500,
 //                   //                 fontSize: kDefaultFontSize),
@@ -244,7 +244,7 @@
 //                   //       ),
 //                   //       Text(
 //                   //         conferenceBloc.jobDetailModel.job?.jobTitle ?? "",
-//                   //         style: GoogleFonts.poppins(
+//                   //         style:  TextStyle(fontFamily: 'Poppins-Light',
 //                   //             color: svGetBodyColor(),
 //                   //             fontWeight: FontWeight.bold,
 //                   //             fontSize: 18),
@@ -275,7 +275,7 @@
 //                   //       ),
 //                   //       const SizedBox(height: 20),
 //                   //       Text('Apply Date',
-//                   //           style: GoogleFonts.poppins(
+//                   //           style:  TextStyle(fontFamily: 'Poppins-Light',
 //                   //               color: svGetBodyColor(),
 //                   //               fontWeight: FontWeight.w400,
 //                   //               fontSize: 14)),
@@ -357,7 +357,7 @@
 //                   //         child: Container(
 //                   //           color: Colors.white,
 //                   //           child: HtmlWidget(
-//                   //             textStyle: GoogleFonts.poppins(color: svGetBodyColor(),),
+//                   //             textStyle: TextStyle(fontFamily: 'Poppins-Light',color: svGetBodyColor(),),
 //                   //             '<p>${conferenceBloc.jobDetailModel.job?.description}</p>',
 //                   //           ),
 //                   //         ),
