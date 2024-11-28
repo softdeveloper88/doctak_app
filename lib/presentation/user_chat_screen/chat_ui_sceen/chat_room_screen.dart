@@ -70,7 +70,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   // LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
   bool _isLogin = false;
-  bool _isInChannel = false;
   PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
   late PusherChannel clientListenChannel;
   late PusherChannel clientSendChannel;
