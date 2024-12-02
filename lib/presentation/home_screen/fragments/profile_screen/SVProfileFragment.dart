@@ -96,7 +96,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
         bloc: profileBloc,
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return Expanded(child: Center(child: ProfileShimmer()));
+            return Center(child: ProfileShimmer());
           } else if (state is PaginationLoadedState) {
             return SingleChildScrollView(
               child: Column(
