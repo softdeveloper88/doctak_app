@@ -246,11 +246,11 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     }
                                     // }
                                   },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
                                     child: Text(
                                       'Next Session',
-                                      style: TextStyle(  fontFamily:  'Poppins-Light',color: white),
+                                      style: TextStyle(  fontFamily: 'Poppins-Light',color: white),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -367,7 +367,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
-
                                     children: [
                                       InkWell(
                                         onTap: () {
@@ -864,7 +863,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 crossAxisAlignment:CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     "Error!",
                     style: TextStyle(
                         color: Colors.red,

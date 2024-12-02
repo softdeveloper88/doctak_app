@@ -16,6 +16,7 @@ import '../../widgets/app_bar/appbar_title.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import '../home_screen/utils/SVCommon.dart';
+import '../wellcome_screen/wellcome_screen.dart';
 import 'bloc/sign_up_bloc.dart';
 import 'component/error_dialog.dart';
 
@@ -157,7 +158,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                                   Radius
                                                                       .circular(
                                                                       15))),
-                                                          child: Center(
+                                                          child: const Center(
                                                               child: Text(
                                                                 "Doctor",
                                                                 style: TextStyle(
@@ -207,7 +208,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                                   Radius
                                                                       .circular(
                                                                       15))),
-                                                          child: Center(
+                                                          child: const Center(
                                                               child: Text(
                                                                 "Medical student",
                                                                 style: TextStyle(
@@ -538,8 +539,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               Navigator.pushAndRemoveUntil(
                                                   context,
                                                   MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const LoginScreen()),
+                                                      builder: (context) => WelcomeScreen(emailController.text.validate())),
                                                       (route) => false);
                                             } else {
                                               ScaffoldMessenger.of(context)

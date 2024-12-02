@@ -3,13 +3,13 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/forgot_password/forgot_password.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_event.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_state.dart';
+import 'package:doctak_app/presentation/login_screen/verification_link.dart';
 import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
 import 'package:doctak_app/widgets/app_bar/appbar_title.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
@@ -21,7 +21,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
@@ -29,7 +28,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/utils/app/AppData.dart';
-import '../../main.dart';
+import '../../widgets/show_loading_dialog.dart';
 import '../home_screen/utils/SVCommon.dart';
 import 'bloc/login_bloc.dart';
 
@@ -48,26 +47,25 @@ class LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   LoginBloc loginBloc = LoginBloc();
-
   Future<void> sendVerificationLink(String email, BuildContext context) async {
+    showLoadingDialog(context);
     // Show the loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Disallow dismissing while loading
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: const Text('Sending Verification Link'),
-          children: [
-            Center(
-              child: CircularProgressIndicator(
-                color: svGetBodyColor(),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false, // Disallow dismissing while loading
+    //   builder: (BuildContext context) {
+    //     return SimpleDialog(
+    //       title: const Text('Sending Verification Link'),
+    //       children: [
+    //         Center(
+    //           child: CircularProgressIndicator(
+    //             color: svGetBodyColor(),
+    //           ),
+    //         ),
+    //       ],
+    //     );
+    //   },
+    // );
     try {
       final response = await http.post(
         Uri.parse('${AppData.remoteUrl}/send-verification-link'),
@@ -134,40 +132,116 @@ class LoginScreenState extends State<LoginScreen> {
 
   FocusNode focusNode2 = FocusNode();
 
-  void showVerifyMessage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Verify Account'),
-          content: const Text('Please verify your account.'),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                // Add your logic for resending the verification link here
-                String email = emailController.text;
-                sendVerificationLink(email, context);
-              },
-              child: const Text('Resend Link'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void showVerifyMessage(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Verify Account'),
+  //         content: const Text('Please verify your account.'),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () async {
+  //               // Add your logic for resending the verification link here
+  //               String email = emailController.text;
+  //               sendVerificationLink(email, context);
+  //             },
+  //             child: const Text('Resend Link'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop(); // Close the dialog
+  //             },
+  //             child: const Text('Close'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+  // void showVerifyMessage(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16.0),
+  //         ),
+  //         title: const Row(
+  //           children: [
+  //             Icon(
+  //               Icons.verified_outlined,
+  //               color: Colors.blue,
+  //               size: 28,
+  //             ),
+  //             SizedBox(width: 8.0),
+  //             Text(
+  //               'Verify Account',
+  //               style: TextStyle(
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             const Text(
+  //               'Your account is not verified yet. Please verify your account to access all features.',
+  //               textAlign: TextAlign.center,
+  //               style: TextStyle(fontSize: 16.0),
+  //             ),
+  //             const SizedBox(height: 16.0),
+  //             Icon(
+  //               Icons.mail_outline,
+  //               color: Colors.grey.shade400,
+  //               size: 64.0,
+  //             ),
+  //           ],
+  //         ),
+  //         actionsAlignment: MainAxisAlignment.spaceAround,
+  //         actions: [
+  //           ElevatedButton.icon(
+  //             onPressed: () async {
+  //               String email = emailController.text;
+  //               sendVerificationLink(email, context);
+  //             },
+  //             icon: const Icon(Icons.send),
+  //             label: const Text('Resend Link'),
+  //             style: ElevatedButton.styleFrom(
+  //               backgroundColor: Colors.blue,
+  //               foregroundColor: Colors.white,
+  //               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+  //               shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(8.0),
+  //               ),
+  //             ),
+  //           ),
+  //           OutlinedButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop(); // Close the dialog
+  //             },
+  //             style: OutlinedButton.styleFrom(
+  //               foregroundColor: Colors.blue,
+  //               side: const BorderSide(color: Colors.blue),
+  //               shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(8.0),
+  //               ),
+  //             ),
+  //             child: const Text('Close'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   List<String> _savedUsernames = [];
 
   Future<void> _loadSavedUsernames() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _savedUsernames = prefs.getStringList('saved_usernames') ?? [];
-
     });
     if (_savedUsernames.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -185,7 +259,9 @@ class LoginScreenState extends State<LoginScreen> {
     await prefs.setStringList('saved_usernames', usernames);
     await prefs.setString('password_$username', password);
   }
+
   String? selectedUsername;
+
   Future<void> _showSavedLogins(BuildContext context1) async {
     showModalBottomSheet(
       context: context1,
@@ -219,67 +295,67 @@ class LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16.0),
               _savedUsernames.isNotEmpty
                   ? ListView.separated(
-                shrinkWrap: true,
-                itemCount: _savedUsernames.length,
-                separatorBuilder: (context, index) => Divider(
-                  color: Colors.grey.shade300,
-                  thickness: 1,
-                  height: 1,
-                ),
-                itemBuilder: (context, index) {
-                  final username = _savedUsernames[index];
-                  final isSelected = selectedUsername == username;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: isSelected
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey.shade200,
-                      child: Icon(
-                        CupertinoIcons.profile_circled,
-                        color: isSelected
-                            ? Colors.white
-                            : Theme.of(context).primaryColor,
+                      shrinkWrap: true,
+                      itemCount: _savedUsernames.length,
+                      separatorBuilder: (context, index) => Divider(
+                        color: Colors.grey.shade300,
+                        thickness: 1,
+                        height: 1,
                       ),
-                    ),
-                    title: Text(
-                      username,
-                      style: TextStyle(
-                        fontFamily: 'Poppins-Light',
-                        fontSize: 16,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: isSelected
-                            ? Theme.of(context).primaryColor
-                            : Colors.black,
-                      ),
-                    ),
-                    trailing: isSelected
-                        ? Icon(
-                      Icons.check_circle,
-                      color: Theme.of(context).primaryColor,
+                      itemBuilder: (context, index) {
+                        final username = _savedUsernames[index];
+                        final isSelected = selectedUsername == username;
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: isSelected
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.shade200,
+                            child: Icon(
+                              CupertinoIcons.profile_circled,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          title: Text(
+                            username,
+                            style: TextStyle(
+                              fontFamily: 'Poppins-Light',
+                              fontSize: 16,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.black,
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? Icon(
+                                  Icons.check_circle,
+                                  color: Theme.of(context).primaryColor,
+                                )
+                              : null,
+                          onTap: () {
+                            setState(() {
+                              selectedUsername = username;
+                            });
+                            _onUsernameSelected(username);
+                            // Navigator.pop(context1); // Close the sheet after selection
+                          },
+                        );
+                      },
                     )
-                        : null,
-                    onTap: () {
-                      setState(() {
-                        selectedUsername = username;
-                      });
-                      _onUsernameSelected(username);
-                      // Navigator.pop(context1); // Close the sheet after selection
-                    },
-                  );
-                },
-              )
                   : const Center(
-                child: Text(
-                  'No saved logins available',
-                  style: TextStyle(
-                    fontFamily: 'Poppins-Light',
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
+                      child: Text(
+                        'No saved logins available',
+                        style: TextStyle(
+                          fontFamily: 'Poppins-Light',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
             ],
           ),
         );
@@ -302,8 +378,7 @@ class LoginScreenState extends State<LoginScreen> {
     }
     print('object');
     if (Platform.isAndroid) {
-      await FirebaseMessaging.instance
-          .getToken().then((token){
+      await FirebaseMessaging.instance.getToken().then((token) {
         print("token $token");
         loginBloc.add(
           LoginButtonPressed(
@@ -312,33 +387,33 @@ class LoginScreenState extends State<LoginScreen> {
               password: passwordController.text,
               rememberMe: true,
               deviceToken: token ?? ""
-            // replace with real input
-          ),
+              // replace with real input
+              ),
         );
       });
     } else {
-      String? token= await FirebaseMessaging.instance.getToken();
-        loginBloc.add(
-          LoginButtonPressed(
-              username: emailController.text,
-              // replace with real input
-              password: passwordController.text,
-              rememberMe: true,
-              deviceToken: token ?? ""
+      String? token = await FirebaseMessaging.instance.getToken();
+      loginBloc.add(
+        LoginButtonPressed(
+            username: emailController.text,
             // replace with real input
-          ),
-        );
+            password: passwordController.text,
+            rememberMe: true,
+            deviceToken: token ?? ""
+            // replace with real input
+            ),
+      );
     }
   }
+
   @override
   void initState() {
     _loadSavedUsernames();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
-
-
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -351,7 +426,10 @@ class LoginScreenState extends State<LoginScreen> {
               listener: (context, state) {
                 if (state is LoginSuccess) {
                   if (state.isEmailVerified == '') {
-                    showVerifyMessage(context);
+                    showVerifyMessage(context, () {
+                      String email = emailController.text;
+                      sendVerificationLink(email, context);
+                    });
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -366,7 +444,8 @@ class LoginScreenState extends State<LoginScreen> {
                   loginApp(context);
                 } else if (state is SocialLoginSuccess) {
                   if (mounted) {
-                    toasty(context, 'Social Login successfully', bgColor: Colors.green, textColor: Colors.white);
+                    toasty(context, 'Social Login successfully',
+                        bgColor: Colors.green, textColor: Colors.white);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Social Login successfully'),
@@ -380,7 +459,8 @@ class LoginScreenState extends State<LoginScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (BuildContext context) => const SVDashboardScreen(),
+                            builder: (BuildContext context) =>
+                                const SVDashboardScreen(),
                           ),
                         );
                       }
@@ -410,7 +490,6 @@ class LoginScreenState extends State<LoginScreen> {
                             firstName: state.response.user?.firstName ?? '',
                             lastName: state.response.user?.lastName ?? '',
                             email: state.response.user?.email ?? '',
-
                             token: state.response.token ?? '',
                           ),
                         ),
@@ -420,7 +499,8 @@ class LoginScreenState extends State<LoginScreen> {
                 } else if (state is LoginFailure) {
                   if (mounted) {
                     TextInput.finishAutofillContext(shouldSave: false);
-                    toasty(context, 'Login failed please try again', bgColor: Colors.red, textColor: Colors.white);
+                    toasty(context, 'Login failed please try again',
+                        bgColor: Colors.red, textColor: Colors.white);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(state.error),
@@ -434,10 +514,7 @@ class LoginScreenState extends State<LoginScreen> {
                   width: 100.w,
                   child: SingleChildScrollView(
                       padding: EdgeInsets.only(
-                          bottom: MediaQuery
-                              .of(context)
-                              .viewInsets
-                              .bottom),
+                          bottom: MediaQuery.of(context).viewInsets.bottom),
                       child: AutofillGroup(
                         child: Form(
                             key: _formKey,
@@ -447,7 +524,9 @@ class LoginScreenState extends State<LoginScreen> {
                                     horizontal: 24, vertical: 39),
                                 child: Column(children: [
                                   CustomTextFormField(
-                                      autofillHint: const [AutofillHints.username],
+                                      autofillHint: const [
+                                        AutofillHints.username
+                                      ],
                                       focusNode: focusNode1,
                                       controller: emailController,
                                       hintText: translation(context)
@@ -459,11 +538,11 @@ class LoginScreenState extends State<LoginScreen> {
                                           child: CustomImageView(
                                               color: Colors.blueGrey,
                                               imagePath:
-                                              ImageConstant.imgCheckmark,
+                                                  ImageConstant.imgCheckmark,
                                               height: 24,
                                               width: 24)),
                                       prefixConstraints:
-                                      const BoxConstraints(maxHeight: 56),
+                                          const BoxConstraints(maxHeight: 56),
                                       validator: (value) {
                                         if (value == null ||
                                             (!isValidEmail(value,
@@ -473,36 +552,38 @@ class LoginScreenState extends State<LoginScreen> {
                                         }
                                         return null;
                                       },
-                                      contentPadding: const EdgeInsets.only(top: 18, right: 30, bottom: 18)),
+                                      contentPadding: const EdgeInsets.only(
+                                          top: 18, right: 30, bottom: 18)),
                                   const SizedBox(height: 16),
                                   BlocBuilder<LoginBloc, LoginState>(
                                       bloc: loginBloc,
                                       builder: (context, state) {
                                         print(state.isShowPassword);
                                         return CustomTextFormField(
-                                            autofillHint: const [AutofillHints
-                                                .password],
+                                            autofillHint: const [
+                                              AutofillHints.password
+                                            ],
                                             focusNode: focusNode2,
                                             controller: passwordController,
                                             hintText: translation(context)
                                                 .msg_enter_new_password,
-                                            textInputAction: TextInputAction
-                                                .done,
+                                            textInputAction:
+                                                TextInputAction.done,
                                             textInputType:
-                                            TextInputType.visiblePassword,
+                                                TextInputType.visiblePassword,
                                             prefix: Container(
-                                                margin: const EdgeInsets
-                                                    .fromLTRB(
-                                                    24, 16, 16, 16),
+                                                margin:
+                                                    const EdgeInsets.fromLTRB(
+                                                        24, 16, 16, 16),
                                                 child: CustomImageView(
                                                     color: Colors.blueGrey,
-                                                    imagePath:
-                                                    ImageConstant.imgLocation,
+                                                    imagePath: ImageConstant
+                                                        .imgLocation,
                                                     height: 24,
                                                     width: 24)),
                                             prefixConstraints:
-                                            const BoxConstraints(
-                                                maxHeight: 56),
+                                                const BoxConstraints(
+                                                    maxHeight: 56),
                                             suffix: InkWell(
                                                 onTap: () {
                                                   loginBloc.add(
@@ -511,32 +592,34 @@ class LoginScreenState extends State<LoginScreen> {
                                                               .isShowPassword));
                                                 },
                                                 child: Container(
-                                                    margin:
-                                                    const EdgeInsets.fromLTRB(
+                                                    margin: const EdgeInsets
+                                                        .fromLTRB(
                                                         30, 16, 24, 16),
                                                     child: state.isShowPassword
                                                         ? const Icon(
-                                                      Icons.visibility_off,
-                                                      color: Colors.black54,
-                                                      size: 24,
-                                                    )
+                                                            Icons
+                                                                .visibility_off,
+                                                            color:
+                                                                Colors.black54,
+                                                            size: 24,
+                                                          )
                                                         : const Icon(
-                                                      Icons.visibility,
-                                                      color: Colors.black54,
-                                                      size: 24,
-                                                    ))),
+                                                            Icons.visibility,
+                                                            color:
+                                                                Colors.black54,
+                                                            size: 24,
+                                                          ))),
                                             suffixConstraints:
-                                            const BoxConstraints(
-                                                maxHeight: 56),
-                                            validator: (value) {
-                                              if (value == null ||
-                                                  (isValidPassword(value,
-                                                      isRequired: true))) {
-                                                return translation(context)
-                                                    .err_msg_please_enter_valid_password;
-                                              }
-                                              return null;
-                                            },
+                                                const BoxConstraints(
+                                                    maxHeight: 56),
+                                            // validator: (value) {
+                                            //   if (value == null ||
+                                            //       (isValidPassword(value, isRequired: true))) {
+                                            //     return translation(context)
+                                            //         .err_msg_please_enter_valid_password;
+                                            //   }
+                                            //   return null;
+                                            // },
                                             obscureText: state.isShowPassword);
                                       }),
                                   const SizedBox(height: 10),
@@ -570,7 +653,7 @@ class LoginScreenState extends State<LoginScreen> {
                                     text: 'LOGIN',
                                     onTap: () async {
                                       SharedPreferences prefs =
-                                      await SharedPreferences.getInstance();
+                                          await SharedPreferences.getInstance();
                                       await prefs.setBool('acceptTerms', true);
                                       if (_formKey.currentState!.validate()) {
                                         _formKey.currentState!.save();
@@ -578,37 +661,39 @@ class LoginScreenState extends State<LoginScreen> {
                                       // TermsAndConditionScreen(accept: () async {
                                       print('object');
                                       if (Platform.isAndroid) {
-                                     await FirebaseMessaging.instance
-                                            .getToken().then((token){
-                                              print("token $token");
-                                       loginBloc.add(
-                                         LoginButtonPressed(
-                                             username: emailController.text,
-                                             // replace with real input
-                                             password: passwordController.text,
-                                             rememberMe: _rememberMe,
-                                             deviceToken: token ?? ""
-                                           // replace with real input
-                                         ),
-                                       );
-                                     });
-                                      } else {
-                                         await FirebaseMessaging.instance
-                                            .getToken().then((token){
+                                        await FirebaseMessaging.instance
+                                            .getToken()
+                                            .then((token) {
+                                          print("token $token");
                                           loginBloc.add(
                                             LoginButtonPressed(
                                                 username: emailController.text,
                                                 // replace with real input
-                                                password: passwordController.text,
+                                                password:
+                                                    passwordController.text,
                                                 rememberMe: _rememberMe,
                                                 deviceToken: token ?? ""
-                                              // replace with real input
-                                            ),
+                                                // replace with real input
+                                                ),
+                                          );
+                                        });
+                                      } else {
+                                        await FirebaseMessaging.instance
+                                            .getToken()
+                                            .then((token) {
+                                          loginBloc.add(
+                                            LoginButtonPressed(
+                                                username: emailController.text,
+                                                // replace with real input
+                                                password:
+                                                    passwordController.text,
+                                                rememberMe: _rememberMe,
+                                                deviceToken: token ?? ""
+                                                // replace with real input
+                                                ),
                                           );
                                         });
                                       }
-
-
 
                                       // },).launch(context, isNewTask: true);
                                     },
@@ -618,7 +703,7 @@ class LoginScreenState extends State<LoginScreen> {
                                       alignment: Alignment.centerLeft,
                                       child: Padding(
                                           padding:
-                                          const EdgeInsets.only(left: 48),
+                                              const EdgeInsets.only(left: 48),
                                           child: Row(children: [
                                             Padding(
                                                 padding: const EdgeInsets.only(
@@ -634,8 +719,8 @@ class LoginScreenState extends State<LoginScreen> {
                                                 },
                                                 child: Padding(
                                                     padding:
-                                                    const EdgeInsets.only(
-                                                        left: 4),
+                                                        const EdgeInsets.only(
+                                                            left: 4),
                                                     child: Text(
                                                         translation(context)
                                                             .lbl_sign_up,
@@ -647,8 +732,6 @@ class LoginScreenState extends State<LoginScreen> {
                                   const SizedBox(height: 29),
                                   _buildSocial(context),
                                   const SizedBox(height: 5),
-
-
                                 ]))),
                       ))))),
     );
@@ -745,7 +828,7 @@ class LoginScreenState extends State<LoginScreen> {
           print(googleUser.toString());
 
           GoogleSignInAuthentication googleSignInAuthentication =
-          await googleUser!.authentication;
+              await googleUser!.authentication;
           String accessToken = googleSignInAuthentication.accessToken!;
           // await FirebaseMessaging.instance.getToken().then((token) async {
           //   print('token$googleUser');
@@ -761,30 +844,28 @@ class LoginScreenState extends State<LoginScreen> {
           GoogleSignIn().disconnect();
         });
       } else {
-        String? token= await FirebaseMessaging.instance.getToken();
+        String? token = await FirebaseMessaging.instance.getToken();
 
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-           print(googleUser.toString());
+        print(googleUser.toString());
 
-           GoogleSignInAuthentication googleSignInAuthentication =
-               await googleUser!.authentication;
-           String accessToken = googleSignInAuthentication.accessToken!;
-           // await FirebaseMessaging.instance.getToken().then((token) async {
-           //   print('token$googleUser');
-           loginBloc.add(SocialLoginButtonPressed(
-             email: googleUser.email,
-             firstName: googleUser.displayName!.split(' ').first,
-             lastName: googleUser.displayName!.split(' ').last,
-             isSocialLogin: true,
-             provider: 'google',
-             token: 'accessToken',
-             deviceToken: token ?? '',
-           ));
-           GoogleSignIn().disconnect();
-
+        GoogleSignInAuthentication googleSignInAuthentication =
+            await googleUser!.authentication;
+        String accessToken = googleSignInAuthentication.accessToken!;
+        // await FirebaseMessaging.instance.getToken().then((token) async {
+        //   print('token$googleUser');
+        loginBloc.add(SocialLoginButtonPressed(
+          email: googleUser.email,
+          firstName: googleUser.displayName!.split(' ').first,
+          lastName: googleUser.displayName!.split(' ').last,
+          isSocialLogin: true,
+          provider: 'google',
+          token: 'accessToken',
+          deviceToken: token ?? '',
+        ));
+        GoogleSignIn().disconnect();
       }
-
     } on Exception catch (e) {
       print('error is ....... $e');
       // TODO
@@ -832,7 +913,7 @@ class LoginScreenState extends State<LoginScreen> {
       token = await FirebaseMessaging.instance.getToken();
     }
     var response =
-    await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
     loginBloc.add(SocialLoginButtonPressed(
       email: response.user?.email ?? ' ',
       firstName: response.user?.displayName!.split(' ').first ?? ' ',
@@ -848,10 +929,10 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> loginApp(BuildContext context) async {
-   print(emailController.text);
-   if(Platform.isIOS) {
-     _saveLoginDetails(emailController.text, passwordController.text);
-   }
+    print(emailController.text);
+    if (Platform.isIOS) {
+      _saveLoginDetails(emailController.text, passwordController.text);
+    }
     // if (mounted) {
     // // toasty(context, 'Login successfully', bgColor: Colors.green, textColor: Colors.white);
     // //   ScaffoldMessenger.of(context).showSnackBar(
@@ -863,7 +944,8 @@ class LoginScreenState extends State<LoginScreen> {
     // }
     TextInput.finishAutofillContext(shouldSave: true);
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      toasty(context, 'Login successfully', bgColor: Colors.green, textColor: Colors.white);
+      toasty(context, 'Login successfully',
+          bgColor: Colors.green, textColor: Colors.white);
       if (mounted) {
         // Navigator.pushReplacement(
         //   context,
@@ -871,7 +953,7 @@ class LoginScreenState extends State<LoginScreen> {
         //     builder: (BuildContext context) => const SVDashboardScreen(),
         //   ),
         // );
-        const SVDashboardScreen().launch(context,isNewTask: true);
+        const SVDashboardScreen().launch(context, isNewTask: true);
       }
     });
   }

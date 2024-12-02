@@ -45,8 +45,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         //
         //   return;
         // }
-        if (response.user?.emailVerifiedAt != '') {
-
+        if (response.user?.emailVerifiedAt != '' && response.user!.emailVerifiedAt != null) {
         if(event.rememberMe) {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.setString('token', response.token ?? '');
