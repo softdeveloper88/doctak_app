@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
+import 'package:doctak_app/presentation/NoInternetScreen.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
@@ -25,6 +26,7 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:doctak_app/theme/bloc/theme_bloc.dart';
+import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -39,11 +41,14 @@ import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import 'ads_setting/ad_setting.dart';
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
+import 'core/utils/app_comman_data.dart';
+import 'core/utils/connectivity_service.dart';
 import 'core/utils/get_shared_value.dart';
 import 'core/utils/navigator_service.dart';
 import 'core/utils/pref_utils.dart';
@@ -56,7 +61,7 @@ var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 // Toggle this to cause an async error to be thrown during initialization
 // and to test that runZonedGuarded() catches the error
 const _kShouldTestAsyncErrorOnInit = false;
-
+bool isCurrentlyOnNoInternet = false;
 // Toggle this for testing Crashlytics in your app locally.
 const _kTestingCrashlytics = true;
 /// Create a [AndroidNotificationChannel] for heads up notifications
@@ -220,7 +225,7 @@ Future<void> main() async {
     ]),
     PrefUtils().init()
   ]).then((value) {
-    runApp(MyApp(
+    runApp( MyApp(
         message: initialRoute,
         initialRoute: initialRoute?.data['type'] ?? '',
         id: initialRoute?.data['id'] ?? ''));
@@ -241,6 +246,9 @@ class MyApp extends StatefulWidget {
     state?.setLocale(newLocale);
   }
 }
+List<ConnectivityResult> _connectionStatus = [ConnectivityResult.none];
+final Connectivity _connectivity = Connectivity();
+late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
@@ -258,6 +266,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 
@@ -378,10 +387,54 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 
   }
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late List<ConnectivityResult> result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      // developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
 
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) {
+      return Future.value(null);
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
+   
+    if (_connectionStatus.first == ConnectivityResult.none) {
+      isCurrentlyOnNoInternet = true;
+      launchScreen(NavigatorService.navigatorKey.currentState!.overlay!.context, NoInternetScreen());
+    } else {
+      if (isCurrentlyOnNoInternet) {
+        Navigator.pop(NavigatorService.navigatorKey.currentState!.overlay!.context);
+        isCurrentlyOnNoInternet = false;
+
+      }
+    }
+
+    // ignore: avoid_print
+    // if(_connectionStatus.single==ConnectionState.none) {
+
+      print('Connectivity changed: $_connectionStatus');
+    // }
+  }
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    initConnectivity();
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
     // setToken();
@@ -571,6 +624,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       builder: (context, orientation, deviceType) {
         return MultiBlocProvider(
           providers: [
+            // ChangeNotifierProvider(create: (_) => ConnectivityService()),
             BlocProvider(create: (context) => LoginBloc()),
             // BlocProvider(create: (context) => DropdownBloc()),
             BlocProvider(create: (context) => HomeBloc()),
@@ -592,9 +646,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       ),
                     )),
           ],
-          child: BlocBuilder<ThemeBloc, ThemeState>(
+          child:  BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
-
               return Observer(
                   builder: (_) => MaterialApp(
                         scaffoldMessengerKey: globalMessengerKey,

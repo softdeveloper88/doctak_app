@@ -1,4 +1,3 @@
-import 'package:google_fonts/google_fonts.dart';
 
 const double SVAppContainerRadius = 32;
 const double SVAppCommonRadius = 12;
@@ -19,4 +18,4 @@ class SVPostType {
   static String text = 'text';
 }
 
-var svFontRoboto = GoogleFonts.roboto().fontFamily;
+var svFontRoboto =  'Poppins-Light';

@@ -1,6 +1,5 @@
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class TermsAndConditionScreen extends StatefulWidget {
@@ -24,7 +23,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Expanded(
+            const Expanded(
               child: SingleChildScrollView(
                 child: Text(
                   ''''

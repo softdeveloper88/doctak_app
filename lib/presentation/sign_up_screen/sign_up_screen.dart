@@ -10,7 +10,6 @@ import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 import '../../widgets/app_bar/appbar_title.dart';
@@ -161,8 +160,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                           child: Center(
                                                               child: Text(
                                                                 "Doctor",
-                                                                style: GoogleFonts
-                                                                    .poppins(
+                                                                style: TextStyle(
+                                                                   fontFamily: 'Poppins-Light',
                                                                     color: Colors
                                                                         .white,
                                                                     fontSize:
@@ -211,8 +210,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                           child: Center(
                                                               child: Text(
                                                                 "Medical student",
-                                                                style: GoogleFonts
-                                                                    .poppins(
+                                                                style: TextStyle(
+                                                                    fontFamily: 'Poppins-Light',
                                                                     color: Colors
                                                                         .white,
                                                                     fontSize:

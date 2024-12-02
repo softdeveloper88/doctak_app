@@ -10,6 +10,7 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -291,11 +292,8 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
               },
               builder: (context, state) {
                 if (state is PaginationLoadingState) {
-                  return const Expanded(
-                      child: Center(
-                          child: CircularProgressIndicator(
-                    color: Colors.blue,
-                  )));
+                  return  Expanded(
+                      child: ShimmerCardList());
                 } else if (state is PaginationLoadedState) {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
@@ -341,11 +339,10 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 }
                 if (bloc.numberOfPage != bloc.pageNumber - 1 &&
                     index >= bloc.conferenceList.length - 1) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: svGetBodyColor(),
-                    ),
-                  );
+                  return SizedBox(
+                      height: 400,
+                      child: ShimmerCardList());
+
                 } else if ((index % 5 == 0 && index != 0) &&
                     AppData.isShowGoogleNativeAds) {
                   return NativeAdWidget();

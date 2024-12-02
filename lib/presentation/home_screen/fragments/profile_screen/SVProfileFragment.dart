@@ -5,10 +5,9 @@ import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
+import 'package:doctak_app/widgets/shimmer_widget/profile_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -97,10 +96,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
         bloc: profileBloc,
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return Center(
-                child: CircularProgressIndicator(
-              color: svGetBodyColor(),
-            ));
+            return Expanded(child: Center(child: ProfileShimmer()));
           } else if (state is PaginationLoadedState) {
             return SingleChildScrollView(
               child: Column(
@@ -126,7 +122,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                     width: 80.w,
                     child: Text(profileBloc.userProfile?.user?.country ?? '',
                         textAlign: TextAlign.center,
-                        style:  TextStyle(fontFamily: 'Poppins-Light',color: Colors.blue,fontSize: 12,fontWeight: FontWeight.bold,)),
+                        style:  const TextStyle(fontFamily: 'Poppins-Light',color: Colors.blue,fontSize: 12,fontWeight: FontWeight.bold,)),
 
                   ),
                   SizedBox(

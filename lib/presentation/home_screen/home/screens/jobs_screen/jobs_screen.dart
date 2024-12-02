@@ -14,12 +14,12 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../widgets/custom_dropdown_field.dart';
+import '../../../../../widgets/shimmer_widget/shimmer_card_list.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
 import '../../../../splash_screen/bloc/splash_state.dart';
 import 'bloc/jobs_event.dart';
@@ -95,15 +95,12 @@ class _JobsScreenState extends State<JobsScreen> {
           children: [
             BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
               if (state is CountriesDataInitial) {
-                return Column(
+                return const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Center(
-                        child: CircularProgressIndicator(
-                      color: context.iconColor,
-                    )),
+                    Text('Loading...'),
                   ],
                 );
               } else if (state is CountriesDataLoaded) {
@@ -213,72 +210,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                         border: Border.all(
                                             color: svGetBodyColor(),
                                             width: 0.5)),
-                                    child:
-                                        // CustomDropdownSearch(
-                                        //   onChanged: (searchTxt) {
-                                        //     if (_debounce?.isActive ?? false)
-                                        //       _debounce?.cancel();
-                                        //
-                                        //     _debounce = Timer(
-                                        //         const Duration(milliseconds: 500), () {
-                                        //       // jobsBloc.add(
-                                        //       //   GetPost(
-                                        //       //     page: '1',
-                                        //       //     countryId: AppData.countryName,
-                                        //       //     searchTerm: searchTxt,
-                                        //       //   ),
-                                        //       // );
-                                        //       BlocProvider.of<SplashBloc>(context).add(
-                                        //           LoadDropdownData(
-                                        //               state.countryFlag,
-                                        //               state.typeValue,
-                                        //               searchTxt ?? '',
-                                        //               state.isExpired));
-                                        //       jobsBloc.add(JobLoadPageEvent(
-                                        //         page: 1,
-                                        //         countryId: state.countryFlag != ''
-                                        //             ? state.countryFlag
-                                        //             : '${state.countriesModel.countries?.first.id ?? 1}',
-                                        //         searchTerm: searchTxt,
-                                        //       ));
-                                        //     });
-                                        //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                        //   },
-                                        //   hintText: 'Search speciality',
-                                        //   textController: _controller,
-                                        //   items: profileBloc.specialtyList ?? [],
-                                        //   dropdownHeight: 300,
-                                        //   onSelect: (searchTxt) {
-                                        //     if (_debounce?.isActive ?? false)
-                                        //       _debounce?.cancel();
-                                        //
-                                        //     _debounce = Timer(
-                                        //         const Duration(milliseconds: 500), () {
-                                        //       // jobsBloc.add(
-                                        //       //   GetPost(
-                                        //       //     page: '1',
-                                        //       //     countryId: AppData.countryName,
-                                        //       //     searchTerm: searchTxt,
-                                        //       //   ),
-                                        //       // );
-                                        //       BlocProvider.of<SplashBloc>(context).add(
-                                        //           LoadDropdownData(
-                                        //               state.countryFlag,
-                                        //               state.typeValue,
-                                        //               searchTxt ?? '',
-                                        //               state.isExpired));
-                                        //       jobsBloc.add(JobLoadPageEvent(
-                                        //         page: 1,
-                                        //         countryId: state.countryFlag != ''
-                                        //             ? state.countryFlag
-                                        //             : '${state.countriesModel.countries?.first.id ?? 1}',
-                                        //         searchTerm: searchTxt,
-                                        //       ));
-                                        //     });
-                                        //     // BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue,state.typeValue));
-                                        //   },
-                                        // )
-                                        AppTextField(
+                                    child: AppTextField(
                                       controller: _controller,
                                       textFieldType: TextFieldType.NAME,
                                       onChanged: (searchTxt) async {
@@ -322,7 +254,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                                 .add(LoadDropdownData(
                                                     state.countryFlag,
                                                     state.typeValue,
-                                                    _controller.text ?? '',
+                                                    _controller.text,
                                                     state.isExpired));
                                             jobsBloc.add(JobLoadPageEvent(
                                               page: 1,
@@ -363,8 +295,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                               .add(LoadDropdownData(
                                                   state.countryFlag,
                                                   state.typeValue,
-                                                  _filteredSuggestions[index] ??
-                                                      '',
+                                                  _filteredSuggestions[index],
                                                   state.isExpired));
                                           jobsBloc.add(JobLoadPageEvent(
                                             page: 1,
@@ -547,11 +478,7 @@ class _JobsScreenState extends State<JobsScreen> {
               builder: (context, state) {
                 isShownSuggestion = false;
                 if (state is PaginationLoadingState) {
-                  return Expanded(
-                      child: Center(
-                          child: CircularProgressIndicator(
-                    color: svGetBodyColor(),
-                  )));
+                  return Expanded(child: ShimmerCardList());
                 } else if (state is PaginationLoadedState) {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
@@ -590,11 +517,7 @@ class _JobsScreenState extends State<JobsScreen> {
                 }
                 if (bloc.numberOfPage != bloc.pageNumber - 1 &&
                     index >= bloc.drugsData.length - 1) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: svGetBodyColor(),
-                    ),
-                  );
+                  return SizedBox(height: 400, child: ShimmerCardList());
                 } else if ((index % 5 == 0 && index != 0) &&
                     AppData.isShowGoogleNativeAds) {
                   return NativeAdWidget();
@@ -628,7 +551,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                 children: [
                                   Text(
                                     selectedIndex == 0 ? "New" : "Expired",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.red,
                                         fontWeight: FontWeight.w500,
                                         fontSize: kDefaultFontSize),

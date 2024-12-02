@@ -7,7 +7,6 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/wor
 import 'package:doctak_app/presentation/home_screen/profile/components/my_post_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 

@@ -1,11 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:sizer/sizer.dart';
-
-import '../../ads_setting/ads_widget/banner_ads_widget.dart';
-import '../../core/utils/app/AppData.dart';
 import '../home_screen/utils/SVColors.dart';
 
 class EventsScreen extends StatefulWidget {

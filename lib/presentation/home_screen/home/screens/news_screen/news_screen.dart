@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/news_model/news_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
@@ -31,8 +33,8 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Future<void> fetchData() async {
-    final bbcUrl = Uri.parse(AppData.remoteUrl + "/bbc-news");
-    final cnnUrl = Uri.parse(AppData.remoteUrl + "/cnn-news");
+    final bbcUrl = Uri.parse("${AppData.remoteUrl}/bbc-news");
+    final cnnUrl = Uri.parse("${AppData.remoteUrl}/cnn-news");
 
     final headers = <String, String>{
       'Authorization': 'Bearer ${AppData.userToken}',
@@ -112,7 +114,7 @@ class _NewsScreenState extends State<NewsScreen> {
                         builder: (context, state) {
                           print("state $state");
                           if (state is PaginationLoadingState) {
-                            return Expanded(child: ShimmerLoading());
+                            return Expanded(child: ShimmerCardList());
                           } else if (state is PaginationLoadedState) {
                             // print(state.drugsModel.length);
                             print(state.bbcNews.toList());
@@ -163,21 +165,21 @@ class _NewsScreenState extends State<NewsScreen> {
               if (hasDescription) {
                 return Card(
                   elevation: 4.0,
-                  margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                   child: Column(
                     children: [
                       ListTile(
-                        contentPadding: EdgeInsets.all(10.0),
+                        contentPadding: const EdgeInsets.all(10.0),
                         leading: article.link != null
-                            ? Image.network(
-                                article.link ?? '',
+                            ? CustomImageView(
+                                imagePath:article.link ?? '',
                                 width: 100.0,
                                 fit: BoxFit.cover,
                               )
                             : null,
                         title: Text(
                           article.title ?? '',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(article.description ?? ''),
                       ),
@@ -185,10 +187,10 @@ class _NewsScreenState extends State<NewsScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
-                            child: Text('Read More'),
+                            child: const Text('Read More'),
                             onPressed: () => _launchURL(article.link ?? ''),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                         ],
                       ),
                     ],
@@ -210,18 +212,18 @@ class _NewsScreenState extends State<NewsScreen> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Open Link'),
+              title: const Text('Open Link'),
               content: Text('Would you like to open this link? \n$urlString'),
               actions: <Widget>[
                 TextButton(
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                   onPressed: () {
                     Navigator.of(context)
                         .pop(false); // Return false to shouldLaunch
                   },
                 ),
                 TextButton(
-                  child: Text('Open'),
+                  child: const Text('Open'),
                   onPressed: () {
                     Navigator.of(context)
                         .pop(true); // Return true to shouldLaunch
@@ -237,7 +239,7 @@ class _NewsScreenState extends State<NewsScreen> {
       await launchUrl(url);
     } else if (!shouldLaunch) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Leaving the app canceled.'),
           backgroundColor: Colors.blue,
         ),
@@ -253,33 +255,3 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 }
 
-class ShimmerLoading extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: ListView.builder(
-        itemCount: 10, // You can adjust the number of shimmer items
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: SizedBox(
-              height: 20,
-              width: 100,
-              child: Container(
-                color: Colors.white,
-              ),
-            ),
-            subtitle: SizedBox(
-              height: 10,
-              width: 200,
-              child: Container(
-                color: Colors.white,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}

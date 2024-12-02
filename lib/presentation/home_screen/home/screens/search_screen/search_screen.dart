@@ -7,11 +7,11 @@ import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -339,10 +339,7 @@ class _SearchScreenState extends State<SearchScreen>
             print("state $state");
             if (state is PaginationLoadingState) {
               return Expanded(
-                  child: Center(
-                      child: CircularProgressIndicator(
-                        color: svGetBodyColor(),
-                      )));
+                  child: ShimmerCardList());
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
               return SearchJobList(drugsBloc);

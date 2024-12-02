@@ -69,6 +69,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     setState(() {
       widget.homeBloc.add(PostLoadPageEvent(page: 1));
       widget.homeBloc.add(AdsSettingEvent());
+      notificationBloc.add(NotificationCounter());
     });
   }
 

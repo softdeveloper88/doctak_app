@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -151,11 +152,8 @@ class _FollowerScreenState extends State<FollowerScreen> {
             builder: (context, state) {
               print("state $state");
               if (state is FollowersPaginationLoadingState) {
-                return Expanded(
-                    child: Center(
-                        child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                )));
+                return const Expanded(
+                    child: UserShimmer());
               } else if (state is FollowersPaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -251,11 +249,8 @@ class _FollowerScreenState extends State<FollowerScreen> {
                   ),
                 );
               } else {
-                return Expanded(
-                    child: Center(
-                        child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                )));
+                return const Expanded(
+                    child: UserShimmer());
               }
             },
           ),

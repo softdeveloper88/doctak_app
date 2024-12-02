@@ -9,9 +9,10 @@ import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../../widgets/shimmer_widget/shimmer_card_list.dart';
 
 class CaseDiscussDetailsScreen extends StatefulWidget {
   CaseDiscussDetailsScreen(this.caseDiscussList, this.caseDiscussionBloc,
@@ -68,11 +69,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: svGetBodyColor(),
-              ),
-            );
+            return ShimmerCardList();
           } else if (state is PaginationLoadedState) {
             print(state);
             return Column(
@@ -101,7 +98,8 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                               children: [
                                 Text(
                                   '${widget.caseDiscussList.name}',
-                                  style: GoogleFonts.roboto(
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins-Light',
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -109,7 +107,8 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                 Text(
                                   widget.caseDiscussList.createdAt
                                       .toString(),
-                                  style: GoogleFonts.roboto(
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins-Light',
                                     color: Colors.grey,
                                   ),
                                 ),
@@ -120,7 +119,8 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                         const SizedBox(height: 16),
                         Text(
                           '${widget.caseDiscussList.title}',
-                          style: GoogleFonts.roboto(),
+                          style: const TextStyle(
+                          fontFamily: 'Poppins-Light',),
                         ),
                         const SizedBox(height: 16),
                         Column(

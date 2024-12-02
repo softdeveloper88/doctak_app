@@ -11,9 +11,9 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/add_case_discuss_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -333,14 +333,13 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                 isShownSuggestion = false;
                 if (state is PaginationLoadingState) {
                   return Expanded(
-                      child: Center(
-                          child: CircularProgressIndicator(
-                    color: svGetBodyColor(),
-                  )));
+                      child: ShimmerCardList(),);
                 } else if (state is PaginationLoadedState) {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
+
                 } else if (state is DataError) {
+
                   return Expanded(
                     child: Center(
                       child: Text(state.errorMessage),
@@ -355,7 +354,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
           onPressed: () {
             AddCaseDiscussScreen().launch(context);
           },
@@ -377,17 +376,14 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                 if (bloc.pageNumber <= bloc.numberOfPage) {
                   if (index ==
                       bloc.caseDiscussList.length - bloc.nextPageTrigger) {
-                    bloc.add(
-                        CaseDiscussionCheckIfNeedMoreDataEvent(index: index));
+                    bloc.add(CaseDiscussionCheckIfNeedMoreDataEvent(index: index));
                   }
                 }
                 if (bloc.numberOfPage != bloc.pageNumber - 1 &&
                     index >= bloc.caseDiscussList.length - 1) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: svGetBodyColor(),
-                    ),
-                  );
+                  return SizedBox(
+                      height: 400,
+                      child: ShimmerCardList());
                 }  else if ((index % 5 == 0 && index != 0) &&
                     AppData.isShowGoogleNativeAds) {
                   return NativeAdWidget();
@@ -694,14 +690,16 @@ class PostCard extends StatelessWidget {
                     children: [
                       Text(
                         '${caseDiscussList.name}',
-                        style: GoogleFonts.roboto(
+                        style: const TextStyle(
+                          fontFamily: 'Poppins-Light',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         caseDiscussList.createdAt.toString(),
-                        style: GoogleFonts.roboto(
+                        style: const TextStyle(
+                          fontFamily: 'Poppins-Light',
                           color: Colors.grey,
                         ),
                       ),
@@ -712,8 +710,9 @@ class PostCard extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 '${caseDiscussList.title}',
-                style: GoogleFonts.roboto(),
-              ),
+                style: const TextStyle(
+    fontFamily: 'Poppins-Light',
+              )),
               const SizedBox(height: 16),
               Column(
                 // mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -740,14 +739,14 @@ class PostCard extends StatelessWidget {
                       IconButton(onPressed: (){
                         caseDiscussionBloc.add(CaseDiscussEvent(caseId: caseDiscussList.caseId.toString(),type: 'case',actionType: 'like'));
 
-                      },icon:Icon(Icons.thumb_up_alt_outlined)),
-                      SizedBox(width: 4),
+                      },icon:const Icon(Icons.thumb_up_alt_outlined)),
+                      const SizedBox(width: 4),
                       Text('${caseDiscussList.likes} Likes'),
-                      SizedBox(width: 16),
-                      Icon(Icons.comment_outlined),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 16),
+                      const Icon(Icons.comment_outlined),
+                      const SizedBox(width: 4),
                       Text('${caseDiscussList.comments} Comments'),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Text('${caseDiscussList.views} Views'),
                     ],
                   ),

@@ -7,7 +7,6 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/widgets/custom_elevated_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -246,11 +245,11 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Error', style: GoogleFonts.acme()),
-          content: Text(message, style: GoogleFonts.acme()),
+          title: const Text('Error', style: TextStyle(fontFamily: 'Poppins-Light')),
+          content: Text(message, style:const TextStyle(fontFamily: 'Poppins-Light')),
           actions: <Widget>[
             TextButton(
-              child: Text('OK', style: GoogleFonts.acme()),
+              child: const Text('OK', style:TextStyle(fontFamily: 'Poppins-Light')),
               onPressed: () {
                 Navigator.of(context).pop(); // Dismiss the dialog
               },

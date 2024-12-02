@@ -8,17 +8,15 @@ import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../main.dart';
-import '../../../utils/SVColors.dart';
-import '../../../utils/SVColors.dart';
 import 'bloc/guideline_event.dart';
 
 class GuidelinesScreen extends StatefulWidget {
@@ -150,10 +148,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
               print("state $state");
               if (state is PaginationLoadingState) {
                 return Expanded(
-                    child: Center(
-                        child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                )));
+                    child:ShimmerCardList());
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
@@ -173,11 +168,9 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       if( bloc.numberOfPage != bloc.pageNumber - 1 &&
                               index >= bloc.guidelinesList.length - 1
                       ) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: svGetBodyColor(),
-                          ),
-                        );
+                        return SizedBox(
+                            height: 300,
+                            child: ShimmerCardList());
                       }
                       else if ((index % 5 == 0 && index != 0) &&
                           AppData.isShowGoogleNativeAds) {

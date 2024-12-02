@@ -10,7 +10,6 @@ import 'package:doctak_app/widgets/app_bar/appbar_title.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
 import '../home_screen/utils/SVCommon.dart';

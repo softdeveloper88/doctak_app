@@ -8,7 +8,6 @@ import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../core/utils/app/AppData.dart';

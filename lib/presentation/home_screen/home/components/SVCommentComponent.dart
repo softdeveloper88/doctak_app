@@ -4,7 +4,6 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVP
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
@@ -64,7 +63,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                                 // TextSpan(text: title),
                                 TextSpan(
                                     text: widget.comment.name??"",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontFamily:  'Poppins-Light',
                                         fontWeight: FontWeight.w500)),
                                 TextSpan(
@@ -80,7 +79,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                       ),
 
                     ),
-                    Spacer(),
+                    const Spacer(),
                     if (widget.comment.userId == AppData.logInUserId)
                       Expanded(
                         child: PopupMenuButton(
@@ -125,7 +124,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 const SizedBox(height: 4.0),
                 Text(
                   widget.comment.comment ?? 'No Name',
-                  style: TextStyle(fontSize: 14.0, fontFamily:  'Poppins-Light',),
+                  style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins-Light',),
                 ),
                 const SizedBox(height: 8.0),
                 const Divider(

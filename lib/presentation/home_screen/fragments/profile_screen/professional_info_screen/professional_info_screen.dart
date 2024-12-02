@@ -5,10 +5,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
-
 import '../../../../../core/app_export.dart';
 import '../../../utils/SVColors.dart';
 import '../../../utils/SVCommon.dart';

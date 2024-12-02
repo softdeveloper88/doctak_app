@@ -2,7 +2,6 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../utils/SVCommon.dart';

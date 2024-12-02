@@ -6,14 +6,16 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
-import 'package:http/http.dart' as http;
+
 import '../Pusher/PusherConfig.dart';
 import 'chat_room_screen.dart';
 
@@ -22,7 +24,8 @@ class UserChatScreen extends StatefulWidget {
   State<UserChatScreen> createState() => _UserChatScreenState();
 }
 
-class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObserver{
+class _UserChatScreenState extends State<UserChatScreen>
+    with WidgetsBindingObserver {
   ChatBloc chatBloc = ChatBloc();
 
   @override
@@ -33,6 +36,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
     chatBloc.add(LoadPageEvent(page: 1));
     super.initState();
   }
+
   String sanitizeString(String input) {
     try {
       return String.fromCharCodes(input.codeUnits);
@@ -44,12 +48,13 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-print('state life');
+    print('state life');
     if (state == AppLifecycleState.resumed) {
       print("state life $state");
       ConnectPusher();
     }
   }
+
   void onEvent(PusherEvent event) {
     print("onEvent data: $event");
     Map<String, dynamic> jsonMap = jsonDecode(event.data.toString());
@@ -60,35 +65,40 @@ print('state life');
     //   onTypingStarted();
     // }
     print('data click ${jsonMap['from_id']}');
-    FromId=jsonMap['from_id'];
-    setState(() {
-
-    });
-
+    FromId = jsonMap['from_id'];
+    setState(() {});
   }
+
   void onSubscriptionSucceeded(String channelName, dynamic data) {
     print("onSubscriptionSucceeded: $channelName data: $data");
   }
+
   void onSubscriptionError(String message, dynamic e) {
     print("onSubscriptionError: $message Exception: $e");
   }
+
   void onDecryptionFailure(String event, String reason) {
     print("onDecryptionFailure: $event reason: $reason");
   }
+
   void onMemberAdded(String channelName, PusherMember member) {
     print("onMemberAdded: $channelName member: $member");
   }
+
   void onMemberRemoved(String channelName, PusherMember member) {
     print("onMemberRemoved: $channelName member: $member");
   }
+
   void onError(String message, int? code, dynamic e) {
     print("onError: $message code: $code exception: $e");
   }
+
   PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
   late PusherChannel clientListenChannel;
   late PusherChannel clientSendChannel;
   bool isSomeoneTyping = false;
   String? FromId;
+
   Future<dynamic> onAuthorizer(
       String channelName, String socketId, dynamic options) async {
     final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
@@ -114,6 +124,7 @@ print('state life');
       throw Exception('Failed to fetch Pusher auth data');
     }
   }
+
   @override
   void dispose() {
     WidgetsBinding.instance.addObserver(this);
@@ -122,10 +133,19 @@ print('state life');
     _timerChat?.cancel();
     super.dispose();
   }
+
   void onTypingStarted() {
     setState(() {
       print('FromId $FromId');
       isSomeoneTyping = true;
+    });
+  }
+
+  Future<void> _refresh() async {
+    // Simulate network request
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() {
+      chatBloc.add(LoadPageEvent(page: 1));
     });
   }
 
@@ -134,7 +154,8 @@ print('state life');
     setState(() {
       isSomeoneTyping = false;
     });
-      }
+  }
+
   onSubscriptionCount(String channelName, int subscriptionCount) {}
   Timer? _timer;
   Timer? _timerChat;
@@ -188,9 +209,9 @@ print('state life');
                   //     page: 0, userId: widget.id, roomId: widget.roomId));
                 });
                 break;
-            // case 'client-seen':
-            // var textMessage = "";
-            // var messageData = event.data;
+              // case 'client-seen':
+              // var textMessage = "";
+              // var messageData = event.data;
 //                 messageData = json.decode(messageData);
 //                 var status = messageData['status'];
 //                 if (status == "web") {
@@ -222,23 +243,23 @@ print('state life');
 //                   chatBloc.add(ChatReadStatusEvent(
 //                       userId: widget.id,
 //                       roomId: widget.roomId,));
-            // chatBloc.add(LoadRoomMessageEvent(
-            //     page: 0, userId: widget.id, roomId: widget.roomId));
-            // });
-            // messagesList.insert(
-            //   0,
-            //   Message(
-            //     body: textMessage, // Use the extracted text content
-            //     toId: AppData.logInUserId,
-            //     fromId: widget.id,
-            //   ),
-            // );
-            // isLoading = false;
-            // });
-            // break;
-            // Add more cases for other event types as needed
+              // chatBloc.add(LoadRoomMessageEvent(
+              //     page: 0, userId: widget.id, roomId: widget.roomId));
+              // });
+              // messagesList.insert(
+              //   0,
+              //   Message(
+              //     body: textMessage, // Use the extracted text content
+              //     toId: AppData.logInUserId,
+              //     fromId: widget.id,
+              //   ),
+              // );
+              // isLoading = false;
+              // });
+              // break;
+              // Add more cases for other event types as needed
               default:
-              // Handle unknown event types or ignore them
+                // Handle unknown event types or ignore them
                 break;
             }
           },
@@ -265,6 +286,7 @@ print('state life');
       print(e);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -277,9 +299,13 @@ print('state life');
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: false,
-        title: Text(
+        title: const Text(
           'Chats',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500,fontFamily: 'Poppins-Light',),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Poppins-Light',
+          ),
         ),
         actions: [
           IconButton(
@@ -301,60 +327,61 @@ print('state life');
           // ),
         ],
       ),
-      body: BlocConsumer<ChatBloc, ChatState>(
-        bloc: chatBloc,
-        listener: (BuildContext context, ChatState state) {
-          if (state is DataError) {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                content: Text(state.errorMessage),
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is PaginationLoadingState) {
-            return Center(
-                child: CircularProgressIndicator(
-              color: svGetBodyColor(),
-            ));
-          } else if (state is PaginationLoadedState) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (chatBloc.groupList.isNotEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Groups',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold,fontFamily: 'Poppins-Light',),
-                    ),
+      body: RefreshIndicator(
+          onRefresh: _refresh,
+          child: BlocConsumer<ChatBloc, ChatState>(
+            bloc: chatBloc,
+            listener: (BuildContext context, ChatState state) {
+              if (state is DataError) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    content: Text(state.errorMessage),
                   ),
-                if (chatBloc.groupList.isNotEmpty)
-                  SizedBox(
-                    height: 100.0,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: chatBloc.groupList.length,
-                      itemBuilder: (context, index) {
-                        final bloc = chatBloc;
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is PaginationLoadingState) {
+                return const UserShimmer();
+              } else if (state is PaginationLoadedState) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (chatBloc.groupList.isNotEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                          'Groups',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins-Light',
+                          ),
+                        ),
+                      ),
+                    if (chatBloc.groupList.isNotEmpty)
+                      SizedBox(
+                        height: 100.0,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: chatBloc.groupList.length,
+                          itemBuilder: (context, index) {
+                            final bloc = chatBloc;
 
-                        if (bloc.pageNumber <= bloc.numberOfPage) {
-                          if (index ==
-                              bloc.groupList.length - bloc.nextPageTrigger) {
-                            bloc.add(CheckIfNeedMoreDataEvent(index: index));
-                          }
-                        }
-                        return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                                index >= bloc.groupList.length - 1
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                  color: svGetBodyColor(),
-                                ),
-                              )
-                            : GestureDetector(
+                            if (bloc.pageNumber <= bloc.numberOfPage) {
+                              if (index ==
+                                  bloc.groupList.length -
+                                      bloc.nextPageTrigger) {
+                                bloc.add(
+                                    CheckIfNeedMoreDataEvent(index: index));
+                              }
+                            }
+                            if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+                                index >= bloc.groupList.length - 1) {
+                              return const UserShimmer();
+                            } else {
+                              return GestureDetector(
                                 onTap: () {
                                   ChatRoomScreen(
                                     username:
@@ -399,47 +426,46 @@ print('state life');
                                   ),
                                 ),
                               );
-                      },
-                    ),
-                  ),
-                // if (chatBloc.contactsList.isNotEmpty)
-                //   const Padding(
-                //     padding: EdgeInsets.all(16.0),
-                //     child: Text(
-                //       'Contacts',
-                //       style:
-                //           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                //     ),
-                //   ),
-                if (chatBloc.contactsList.isNotEmpty)
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: chatBloc.contactsList.length,
-                      itemBuilder: (context, index) {
-                        var bloc = chatBloc;
-                        if (bloc.pageNumber <= bloc.numberOfPage) {
-                          if (index ==
-                              bloc.contactsList.length - bloc.nextPageTrigger) {
-                            bloc.add(CheckIfNeedMoreDataEvent(index: index));
-                          }
-                        }
-                        return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                                index >= bloc.contactsList.length - 1
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                  color: svGetBodyColor(),
-                                ),
-                              )
-                            : Container(
-                          
-                                margin: const EdgeInsets.only(top: 8.0,left: 8.0,right: 8.0),
+                            }
+                          },
+                        ),
+                      ),
+                    // if (chatBloc.contactsList.isNotEmpty)
+                    //   const Padding(
+                    //     padding: EdgeInsets.all(16.0),
+                    //     child: Text(
+                    //       'Contacts',
+                    //       style:
+                    //           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    //     ),
+                    //   ),
+                    if (chatBloc.contactsList.isNotEmpty)
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: chatBloc.contactsList.length,
+                          itemBuilder: (context, index) {
+                            var bloc = chatBloc;
+                            if (bloc.pageNumber <= bloc.numberOfPage) {
+                              if (index ==
+                                  bloc.contactsList.length -
+                                      bloc.nextPageTrigger) {
+                                bloc.add(
+                                    CheckIfNeedMoreDataEvent(index: index));
+                              }
+                            }
+                            if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+                                index >= bloc.contactsList.length - 1) {
+                              return const UserShimmer();
+                            } else {
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                    top: 8.0, left: 8.0, right: 8.0),
                                 decoration: BoxDecoration(
-                                  color: svGetScaffoldColor(),
-                                  borderRadius: BorderRadius.circular(10)
-                                ),
+                                    color: svGetScaffoldColor(),
+                                    borderRadius: BorderRadius.circular(10)),
                                 child: InkWell(
                                   onTap: () {
-                                    bloc.contactsList[index].unreadCount=0;
+                                    bloc.contactsList[index].unreadCount = 0;
                                     setState(() {});
                                     ChatRoomScreen(
                                       username:
@@ -464,7 +490,11 @@ print('state life');
                                             children: [
                                               InkWell(
                                                 onTap: () {
-                                                  SVProfileFragment(userId: bloc.contactsList[index].id)
+                                                  SVProfileFragment(
+                                                          userId: bloc
+                                                              .contactsList[
+                                                                  index]
+                                                              .id)
                                                       .launch(context);
                                                 },
                                                 child: Container(
@@ -476,7 +506,7 @@ print('state life');
                                                       BoxShadow(
                                                         color: Colors.grey
                                                             .withOpacity(0.3),
-                                                        spreadRadius:1,
+                                                        spreadRadius: 1,
                                                         blurRadius: 3,
                                                         offset:
                                                             const Offset(0, 3),
@@ -484,15 +514,15 @@ print('state life');
                                                     ],
                                                   ),
                                                   child: CustomImageView(
-                                                              placeHolder:
-                                                                  'images/socialv/faces/face_5.png',
-                                                              imagePath:
-                                                                  '${AppData.imageUrl}${bloc.contactsList[index].profilePic??''}',
-                                                              height: 56,
-                                                              width: 56,
-                                                              fit: BoxFit.cover)
-                                                          .cornerRadiusWithClipRRect(
-                                                              30),
+                                                          placeHolder:
+                                                              'images/socialv/faces/face_5.png',
+                                                          imagePath:
+                                                              '${AppData.imageUrl}${bloc.contactsList[index].profilePic ?? ''}',
+                                                          height: 56,
+                                                          width: 56,
+                                                          fit: BoxFit.cover)
+                                                      .cornerRadiusWithClipRRect(
+                                                          30),
                                                 ),
                                               ),
                                               10.width,
@@ -507,12 +537,14 @@ print('state life');
                                                       SizedBox(
                                                           width: 150,
                                                           child: Text(
-                                                              sanitizeString("${bloc.contactsList[index].firstName??""} ${bloc.contactsList[index].lastName??''}"),
+                                                              sanitizeString(
+                                                                  "${bloc.contactsList[index].firstName ?? ""} ${bloc.contactsList[index].lastName ?? ''}"),
                                                               overflow:
                                                                   TextOverflow
                                                                       .clip,
                                                               style: TextStyle(
-                                                                  fontFamily: 'Poppins-Light',
+                                                                  fontFamily:
+                                                                      'Poppins-Light',
                                                                   color:
                                                                       svGetBodyColor(),
                                                                   fontWeight:
@@ -526,20 +558,41 @@ print('state life');
                                                       //     : const Offstage(),
                                                     ],
                                                   ),
-                                                  (isSomeoneTyping && FromId==bloc.contactsList[index].id) ? const Text(
-                                                      "Typing...",
-                                                      style: TextStyle(
-                                                        fontFamily: 'Poppins-Light',
-                                                        fontWeight: FontWeight.bold,fontSize: 14,
-                                                          color: Colors.blueAccent,)):  Text(
-                                                    (bloc.contactsList[index].latestMessage?.length ?? 0) > 20
-                                                          ? '${bloc.contactsList[index].latestMessage?.substring(0, 15)}....'
-                                                          : bloc.contactsList[index].latestMessage ??
-                                                              "",
-                                                      style: secondaryTextStyle(
-                                                          fontFamily: 'Poppins-Light',
-                                                          color:
-                                                              svGetBodyColor())),
+                                                  (isSomeoneTyping &&
+                                                          FromId ==
+                                                              bloc
+                                                                  .contactsList[
+                                                                      index]
+                                                                  .id)
+                                                      ? const Text("Typing...",
+                                                          style: TextStyle(
+                                                            fontFamily:
+                                                                'Poppins-Light',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 14,
+                                                            color: Colors
+                                                                .blueAccent,
+                                                          ))
+                                                      : Text(
+                                                          (bloc
+                                                                          .contactsList[
+                                                                              index]
+                                                                          .latestMessage
+                                                                          ?.length ??
+                                                                      0) >
+                                                                  20
+                                                              ? '${bloc.contactsList[index].latestMessage?.substring(0, 15)}....'
+                                                              : bloc
+                                                                      .contactsList[
+                                                                          index]
+                                                                      .latestMessage ??
+                                                                  "",
+                                                          style: secondaryTextStyle(
+                                                              fontFamily:
+                                                                  'Poppins-Light',
+                                                              color:
+                                                                  svGetBodyColor())),
                                                 ],
                                               ),
                                             ],
@@ -547,32 +600,39 @@ print('state life');
                                         ),
                                         Column(
                                           children: [
-                                            if((bloc.contactsList[index].unreadCount??0) > 0)
-                                                 Container(
-                                              height: 20,
-                                              width: 20,
-                                              decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                border: Border.all(
+                                            if ((bloc.contactsList[index]
+                                                        .unreadCount ??
+                                                    0) >
+                                                0)
+                                              Container(
+                                                height: 20,
+                                                width: 20,
+                                                decoration: BoxDecoration(
                                                   color: Colors.red,
+                                                  border: Border.all(
+                                                    color: Colors.red,
+                                                  ),
+                                                  shape: BoxShape.circle,
                                                 ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  '${bloc.contactsList[index].unreadCount??0}',
-                                                  style: const TextStyle(
-                                                    fontFamily: 'Poppins-Light',
-                                                    color: Colors.white,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
+                                                child: Center(
+                                                  child: Text(
+                                                    '${bloc.contactsList[index].unreadCount ?? 0}',
+                                                    style: const TextStyle(
+                                                      fontFamily:
+                                                          'Poppins-Light',
+                                                      color: Colors.white,
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                            Text(timeAgo.format(DateTime.parse(bloc
-                                                        .contactsList[index]
-                                                        .latestMessageTime ?? '2024-01-01 00:00:00')),
+                                            Text(
+                                                timeAgo.format(DateTime.parse(
+                                                    bloc.contactsList[index]
+                                                            .latestMessageTime ??
+                                                        '2024-01-01 00:00:00')),
                                                 style: secondaryTextStyle(
                                                     fontFamily: 'Poppins-Light',
                                                     color: svGetBodyColor(),
@@ -625,30 +685,38 @@ print('state life');
                                   ),
                                 ),
                               );
-                      },
-                    ),
-                  )
-                else
-                  Expanded(
-                      child: Center(
-                    child:
-                        Text("No chat found", style: boldTextStyle(size: 16,fontFamily: 'Poppins-Light',)),
-                  )),
-                if (AppData.isShowGoogleBannerAds ?? false)BannerAdWidget(),
-
-              ],
-            );
-          } else if (state is DataError) {
-            return Expanded(
-              child: Center(
-                child: Text(state.errorMessage),
-              ),
-            );
-          } else {
-            return const Center(child: Text('Something went wrong'));
-          }
-        },
-      ),
+                            }
+                          },
+                        ),
+                      )
+                    else
+                      Expanded(
+                          child: Center(
+                        child: Text("No chat found",
+                            style: boldTextStyle(
+                              size: 16,
+                              fontFamily: 'Poppins-Light',
+                            )),
+                      )),
+                    if (AppData.isShowGoogleBannerAds ?? false)
+                      BannerAdWidget(),
+                  ],
+                );
+              } else if (state is DataError) {
+                return RetryWidget(
+                    errorMessage: "Something went wrong please try again",
+                    onRetry: () {
+                      try {
+                        chatBloc.add(LoadPageEvent(page: 1));
+                      } catch (e) {
+                        debugPrint(e.toString());
+                      }
+                    });
+              } else {
+                return const Center(child: Text('Something went wrong'));
+              }
+            },
+          )),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
       //     GroupViewScreen().launch(context);

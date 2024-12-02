@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/home_screen/home/components/SVCommentRep
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/models/SVCommentModel.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
+import 'package:doctak_app/widgets/shimmer_widget/comment_list_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -75,10 +76,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
           },
           builder: (context, state) {
             if (state is PaginationLoadingState) {
-              return Center(
-                  child: CircularProgressIndicator(
-                color: svGetBodyColor(),
-              ));
+              return CommentListShimmer();
             } else if (state is PaginationLoadedState) {
 
               // print(state.drugsModel.length);
@@ -103,16 +101,19 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                             //         .add(CheckIfNeedMoreDataEvent(index: index));
                             //   }
                             // }
-                            // return commentBloc.numberOfPage !=
-                            //     commentBloc.pageNumber - 1 &&
-                            //     index >= commentBloc.postList.length - 1
-                            //     ? const Center(
-                            //   child: CircularProgressIndicator(color: svGetBodyColor(),),
-                            // ) :
-                            return SVCommentComponent(
-                                commentBloc: commentBloc,
-                                comment: commentBloc.postList[index]);
-                          }),
+                            // if( commentBloc.numberOfPage != commentBloc.pageNumber - 1 && index >= commentBloc.postList.length - 1) {
+                            //
+                            //   return Center(
+                            //     child: CircularProgressIndicator(
+                            //       color: svGetBodyColor(),),
+                            //   );
+                            // }else {
+                              return SVCommentComponent(
+                                  commentBloc: commentBloc,
+                                  comment: commentBloc.postList[index]);
+                            }
+            // }
+            ),
                     );
             } else if(state is DataError){
               return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
@@ -142,8 +143,8 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       // ),
       bottomSheet: Container(
         color: svGetBgColor(),
-        margin: EdgeInsets.only(bottom: 20),
-        padding: EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.only(bottom: 16),
         child: SVCommentReplyComponent(commentBloc, widget.id, (value) {
           if (value.isNotEmpty) {
             commentBloc.add(PostCommentEvent(postId: widget.id, comment: value));

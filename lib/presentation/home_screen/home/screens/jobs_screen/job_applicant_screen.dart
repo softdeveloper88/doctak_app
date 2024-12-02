@@ -4,8 +4,8 @@ import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -44,7 +44,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: false,
-        title: Text(
+        title: const Text(
           'Applicants',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
@@ -64,17 +64,13 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return Center(
-                child: CircularProgressIndicator(
-              color: svGetBodyColor(),
-            ));
+            return ShimmerCardList();
           } else if (state is PaginationLoadedState) {
             return ListView.builder(
               itemCount:
                   widget.jobBloc.jobApplicantsModel?.applicants?.length ?? 0,
               itemBuilder: (context, index) {
                 var bloc = widget.jobBloc;
-
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(

@@ -3,11 +3,8 @@ import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 

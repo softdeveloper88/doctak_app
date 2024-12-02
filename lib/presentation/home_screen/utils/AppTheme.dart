@@ -1,7 +1,6 @@
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class AppTheme {
@@ -57,7 +56,7 @@ class AppTheme {
     primaryColorDark: color_primary_black,
     textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
     hoverColor: Colors.black12,
-    fontFamily: GoogleFonts.inter().fontFamily,
+    fontFamily: 'Poppins-Light',
     bottomSheetTheme:
         const BottomSheetThemeData(backgroundColor: appBackgroundColorDark),
     primaryTextTheme: TextTheme(

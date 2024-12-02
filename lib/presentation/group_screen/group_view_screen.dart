@@ -5,12 +5,8 @@ import 'package:doctak_app/presentation/group_screen/about_group_screen.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_state.dart';
-import 'package:doctak_app/presentation/group_screen/event_screen.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 

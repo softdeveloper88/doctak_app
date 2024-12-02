@@ -12,10 +12,10 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../../../widgets/shimmer_widget/shimmer_card_list.dart';
 import 'bloc/drugs_event.dart';
 import 'bloc/drugs_state.dart';
 
@@ -60,14 +60,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         children: [
           BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
             if (state is CountriesDataInitial) {
-              return Column(
+              return const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Center(
-                      child: CircularProgressIndicator(
-                    color: svGetBodyColor(),
+                      child: Text('Loading...',
                   )),
                 ],
               );
@@ -398,10 +397,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
             builder: (context, state) {
               if (state is PaginationLoadingState) {
                 return Expanded(
-                    child: Center(
-                        child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                )));
+                    child: ShimmerCardList());
               } else if (state is PaginationLoadedState) {
                 // print(state.drugsModel.length);
                 return _buildPostList(context);
@@ -441,11 +437,9 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 }
                 if (bloc.numberOfPage != bloc.pageNumber - 1 &&
                     index >= bloc.drugsData.length - 1) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: svGetBodyColor(),
-                    ),
-                  );
+                  return SizedBox(
+                      height: 400,
+                      child: ShimmerCardList());
                 } else if ((index % 5 == 0 && index != 0) &&
                     AppData.isShowGoogleNativeAds) {
                   return NativeAdWidget();
@@ -592,7 +586,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
           Expanded(
               child: Text(
             genericName,
-            style: TextStyle(color: Colors.black, fontSize: 15),
+            style: const TextStyle(color: Colors.black, fontSize: 15),
           )),
           IconButton(
             icon: const Icon(
@@ -646,7 +640,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               }
             : null,
         child: Container(
-          padding: EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
             color: Colors.grey[200], // Adjust color to match your theme
             borderRadius: BorderRadius.circular(8.0),
@@ -656,7 +650,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 color: Colors.grey.withOpacity(0.5),
                 spreadRadius: 1,
                 blurRadius: 3,
-                offset: Offset(0, 2), // changes position of shadow
+                offset: const Offset(0, 2), // changes position of shadow
               ),
             ],
           ),

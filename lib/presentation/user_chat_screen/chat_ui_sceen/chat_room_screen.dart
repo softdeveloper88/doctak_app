@@ -2,27 +2,24 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart' as foundation;
 
 import 'package:chewie/chewie.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/models/chat_model/message_model.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
+import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
-import 'package:doctak_app/widgets/shimmer_loader.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_9.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_sound_record/flutter_sound_record.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -135,7 +132,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         isBottom = true;
         print('top');
       });
-    } else if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    } else if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       setState(() {
         isBottom = false;
         print('bottom');
@@ -328,32 +326,41 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     //   _infoStrings.insert(0, info);
     // });
   }
+
   String? FromId;
+
   void onEvent(PusherEvent event) {
     print("onEvent data: $event");
     Map<String, dynamic> jsonMap = jsonDecode(event.data.toString());
     // var data=json.encode(event);
     print('data click ${jsonMap['from_id']}');
-    FromId=jsonMap['from_id'];
+    FromId = jsonMap['from_id'];
   }
+
   void onSubscriptionSucceeded(String channelName, dynamic data) {
     print("onSubscriptionSucceeded: $channelName data: $data");
   }
+
   void onSubscriptionError(String message, dynamic e) {
     print("onSubscriptionError: $message Exception: $e");
   }
+
   void onDecryptionFailure(String event, String reason) {
     print("onDecryptionFailure: $event reason: $reason");
   }
+
   void onMemberAdded(String channelName, PusherMember member) {
     print("onMemberAdded: $channelName member: $member");
   }
+
   void onMemberRemoved(String channelName, PusherMember member) {
     print("onMemberRemoved: $channelName member: $member");
   }
+
   void onError(String message, int? code, dynamic e) {
     print("onError: $message code: $code exception: $e");
   }
+
   void ConnectPusher() async {
     // Create the Pusher client
     try {
@@ -657,7 +664,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
+
   bool _emojiShowing = false;
+
   void seenSenderMessage(int seenStatus) async {
     String eventName = "client-seen"; // Replace with your event name
 // String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
@@ -684,13 +693,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   void scrollToBottom() {
     // Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          0.0, // Scroll to the start of the list
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-        );
-      }
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0.0, // Scroll to the start of the list
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+    }
     // });
   }
 
@@ -774,7 +783,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     widget.username,
                     style: const TextStyle(
                         fontFamily: 'Poppins-Light',
-                        fontSize: 18, fontWeight: FontWeight.w500),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
@@ -818,11 +828,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           },
           builder: (context, state) {
             if (state is PaginationLoadingState) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                ),
-              );
+              return ChatShimmerLoader();
             } else if (state is PaginationLoadedState) {
               isDataLoaded = false;
               var bloc = chatBloc;
@@ -853,7 +859,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                         if (bloc.messageNumberOfPage !=
                                 bloc.messagePageNumber - 1 &&
                             index >= bloc.messagesList.length - 1) {
-                          return const ShimmerLoader();
+                          return SizedBox(
+                              height: 100, child: ChatShimmerLoader());
                         } else {
                           final isLastOfOwnMessage =
                               index == bloc.messagesList.length - 1 ||
@@ -907,7 +914,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                       itemCount: bloc.messagesList.length,
                     ),
                   ),
-                  (isSomeoneTyping && FromId==widget.id)
+                  (isSomeoneTyping && FromId == widget.id)
                       ? const Padding(
                           padding: EdgeInsets.only(left: 8.0),
                           child: ChatBubble(
@@ -1012,7 +1019,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                     : Flexible(
                                         child: Container(
                                           constraints: const BoxConstraints(
-                                            minHeight: 40,),
+                                            minHeight: 40,
+                                          ),
                                           padding: const EdgeInsets.only(
                                               left: 8, right: 8),
                                           decoration: BoxDecoration(
@@ -1024,14 +1032,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                           ),
                                           child: Center(
                                             child: TextField(
-                                              style: const TextStyle(fontSize: 16,fontFamily: 'Poppins-Light'),
-                                               minLines: 1,
-                                               maxLines: 8,
-
+                                              style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: 'Poppins-Light'),
+                                              minLines: 1,
+                                              maxLines: 8,
                                               controller: textController,
                                               decoration: const InputDecoration
-                                                  .collapsed(hintText: 'Type your message...',
-                                                hintStyle: TextStyle(fontSize: 14,fontFamily: 'Poppins-Light'),
+                                                  .collapsed(
+                                                hintText:
+                                                    'Type your message...',
+                                                hintStyle: TextStyle(
+                                                    fontSize: 14,
+                                                    fontFamily:
+                                                        'Poppins-Light'),
                                               ),
                                               keyboardType:
                                                   TextInputType.multiline,
@@ -1155,7 +1169,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           // Issue: https://github.com/flutter/flutter/issues/28894
                           emojiSizeMax: 28 *
                               (foundation.defaultTargetPlatform ==
-                                  TargetPlatform.iOS
+                                      TargetPlatform.iOS
                                   ? 1.2
                                   : 1.0),
                         ),
@@ -1485,8 +1499,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           title: Text(
             'You want to enable permission?',
             textAlign: TextAlign.center,
-
-            style: TextStyle(fontSize: 14.sp,fontFamily: 'Poppins-Light',),
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontFamily: 'Poppins-Light',
+            ),
           ),
           // content: const SingleChildScrollView(
           //   child: ListBody(
@@ -1688,7 +1704,6 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
   @override
   void dispose() {
     _chewieController.dispose();
-
 
     super.dispose();
   }

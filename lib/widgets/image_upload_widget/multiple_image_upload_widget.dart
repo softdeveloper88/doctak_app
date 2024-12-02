@@ -7,7 +7,6 @@ import 'package:doctak_app/widgets/display_video.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_bloc.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_state.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';

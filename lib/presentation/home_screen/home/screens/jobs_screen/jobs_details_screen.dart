@@ -5,10 +5,10 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/doc
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job_applicant_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -57,7 +57,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             ),
             onPressed: () {
               if (widget.isFromSplash) {
-                SVDashboardScreen().launch(context, isNewTask: true);
+                const SVDashboardScreen().launch(context, isNewTask: true);
               } else {
                 Navigator.pop(context);
               }
@@ -82,10 +82,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return Center(
-                child: CircularProgressIndicator(
-              color: svGetBodyColor(),
-            ));
+            return ShimmerCardList();
           } else if (state is PaginationLoadedState) {
             // print(state.drugsModel.length);
             return SingleChildScrollView(
@@ -107,7 +104,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            const Text(
                               "New",
                               style: TextStyle(
                                   color: Colors.red,
@@ -199,7 +196,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
                           ],
                         ),
-                        SizedBox(height: 10,),
+                        const SizedBox(height: 10,),
                         Container(
                           padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
@@ -243,7 +240,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                 onPressed: () {
                                   JobApplicantScreen(widget.jobId,jobsBloc).launch(context);
                                 },
-                                child: Text(
+                                child: const Text(
                                   "Applicants",
                                   style: TextStyle(
                                       color: Colors.blue),
