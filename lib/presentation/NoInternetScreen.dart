@@ -12,36 +12,41 @@ class NoInternetScreen extends StatefulWidget {
 class _NoInternetScreenState extends State<NoInternetScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: SvgPicture.string(
-                    noCoonectionIllistration,
-                    fit: BoxFit.scaleDown,
+    return WillPopScope(
+      onWillPop: () async{
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const Spacer(flex: 2),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: SvgPicture.string(
+                      noCoonectionIllistration,
+                      fit: BoxFit.scaleDown,
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(flex: 2),
-              ErrorInfo(
-                title: "Opps!....",
-                description:
-                "No Internet connection,Please connect to internet",
-                // button: you can pass your custom button,
-                // btnText: default is retry, you can pass your custom text,
-                press: () {
+                const Spacer(flex: 2),
+                ErrorInfo(
+                  title: "Opps!....",
+                  description:
+                  "No Internet connection,Please connect to internet",
+                  // button: you can pass your custom button,
+                  // btnText: default is retry, you can pass your custom text,
+                  press: () {
 
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
