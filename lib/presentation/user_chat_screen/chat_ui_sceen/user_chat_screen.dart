@@ -416,8 +416,8 @@ class _UserChatScreenState extends State<UserChatScreen>
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           color: svGetBodyColor(),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16,
                                         ),
                                       ),
                                       subtitle: Text(
@@ -558,7 +558,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                                                       FontWeight
                                                                           .w600,
                                                                   fontSize:
-                                                                      16))),
+                                                                      15))),
                                                       6.width,
                                                       // bloc.contactsList[index].isCurrentUser.validate()
                                                       //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
