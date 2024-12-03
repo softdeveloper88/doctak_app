@@ -134,7 +134,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
               //   padding: const EdgeInsets.only(top: 8.0),
               //   child: Text(
               //     'Work Type',
-              //     style:  TextStyle(fontFamily: 'Poppins-Light',
+              //     style:  TextStyle(fontFamily: 'Poppins',
               //       fontSize: 14,
               //       fontWeight: FontWeight.w500,
               //     ),
@@ -169,7 +169,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                             if (AppData.userType == "doctor")
                               Text(
                                 'Speciality/Area of practice',
-                                style:  TextStyle(fontFamily: 'Poppins-Light',
+                                style:  TextStyle(fontFamily: 'Poppins',
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -221,7 +221,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   'Position/Role',
-                  style:  TextStyle(fontFamily: 'Poppins-Light',
+                  style:  TextStyle(fontFamily: 'Poppins',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -308,7 +308,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   'Privacy',
-                  style:  TextStyle(fontFamily: 'Poppins-Light',
+                  style:  TextStyle(fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),

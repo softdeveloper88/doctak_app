@@ -481,7 +481,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                     //                 //     ),
                     //                 //     const SizedBox(height: 20),
                     //                 //     Text('Apply Date',
-                    //                 //         style:  TextStyle(fontFamily: 'Poppins-Light',
+                    //                 //         style:  TextStyle(fontFamily: 'Poppins',
                     //                 //             color: svGetBodyColor(),
                     //                 //             fontWeight: FontWeight.w400,
                     //                 //             fontSize: 14)),
@@ -691,7 +691,7 @@ class PostCard extends StatelessWidget {
                       Text(
                         '${caseDiscussList.name}',
                         style: const TextStyle(
-                          fontFamily: 'Poppins-Light',
+                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -699,7 +699,7 @@ class PostCard extends StatelessWidget {
                       Text(
                         caseDiscussList.createdAt.toString(),
                         style: const TextStyle(
-                          fontFamily: 'Poppins-Light',
+                          fontFamily: 'Poppins',
                           color: Colors.grey,
                         ),
                       ),
@@ -711,7 +711,7 @@ class PostCard extends StatelessWidget {
               Text(
                 '${caseDiscussList.title}',
                 style: const TextStyle(
-    fontFamily: 'Poppins-Light',
+    fontFamily: 'Poppins',
               )),
               const SizedBox(height: 16),
               Column(

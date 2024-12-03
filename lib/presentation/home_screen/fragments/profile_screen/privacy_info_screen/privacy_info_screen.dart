@@ -105,7 +105,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                     ),
                     Text(
                       "Edit",
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         color: Colors.blue,
@@ -231,7 +231,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     capitalizeWords(label.replaceAll('_', ' ') ?? ''),
-                    style:  TextStyle(fontFamily: 'Poppins-Light',
+                    style:  TextStyle(fontFamily: 'Poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: svGetBodyColor()),
@@ -279,14 +279,14 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                   children: [
                     Text(
                       capitalizeWords(label),
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w500),
                     ),
                     Text(
                       capitalizeWords(value),
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w500),

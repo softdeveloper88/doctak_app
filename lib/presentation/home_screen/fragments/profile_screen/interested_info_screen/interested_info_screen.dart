@@ -83,7 +83,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     ),
                     Text(
                       "Edit",
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         color: Colors.blue,

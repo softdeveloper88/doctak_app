@@ -92,7 +92,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                     ),
                     Text(
                       "Edit",
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         color: Colors.blue,
@@ -125,7 +125,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                               if (AppData.userType == "doctor")
                                 Text(
                                   'Title and Specialization',
-                                  style:  TextStyle(fontFamily: 'Poppins-Light',
+                                  style:  TextStyle(fontFamily: 'Poppins',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),

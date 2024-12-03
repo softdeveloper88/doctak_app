@@ -108,7 +108,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                   widget.caseDiscussList.createdAt
                                       .toString(),
                                   style: const TextStyle(
-                                    fontFamily: 'Poppins-Light',
+                                    fontFamily: 'Poppins',
                                     color: Colors.grey,
                                   ),
                                 ),
@@ -120,7 +120,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                         Text(
                           '${widget.caseDiscussList.title}',
                           style: const TextStyle(
-                          fontFamily: 'Poppins-Light',),
+                          fontFamily: 'Poppins',),
                         ),
                         const SizedBox(height: 16),
                         Column(

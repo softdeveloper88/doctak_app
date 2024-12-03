@@ -244,7 +244,7 @@
 //                   //       ),
 //                   //       Text(
 //                   //         conferenceBloc.jobDetailModel.job?.jobTitle ?? "",
-//                   //         style:  TextStyle(fontFamily: 'Poppins-Light',
+//                   //         style:  TextStyle(fontFamily: 'Poppins',
 //                   //             color: svGetBodyColor(),
 //                   //             fontWeight: FontWeight.bold,
 //                   //             fontSize: 18),
@@ -275,7 +275,7 @@
 //                   //       ),
 //                   //       const SizedBox(height: 20),
 //                   //       Text('Apply Date',
-//                   //           style:  TextStyle(fontFamily: 'Poppins-Light',
+//                   //           style:  TextStyle(fontFamily: 'Poppins',
 //                   //               color: svGetBodyColor(),
 //                   //               fontWeight: FontWeight.w400,
 //                   //               fontSize: 14)),
@@ -357,7 +357,7 @@
 //                   //         child: Container(
 //                   //           color: Colors.white,
 //                   //           child: HtmlWidget(
-//                   //             textStyle: TextStyle(fontFamily: 'Poppins-Light',color: svGetBodyColor(),),
+//                   //             textStyle: TextStyle(fontFamily: 'Poppins',color: svGetBodyColor(),),
 //                   //             '<p>${conferenceBloc.jobDetailModel.job?.description}</p>',
 //                   //           ),
 //                   //         ),

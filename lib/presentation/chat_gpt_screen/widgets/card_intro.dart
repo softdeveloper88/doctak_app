@@ -19,7 +19,7 @@ cardIntro(title, subTitle, onTap,{double? width}) {
                   Text(
                     title,
                     textAlign: TextAlign.center,
-                    style:  TextStyle(fontFamily: 'Poppins-Light',
+                    style:  TextStyle(fontFamily: 'Poppins',
                         color: Colors.black,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500),
@@ -27,7 +27,7 @@ cardIntro(title, subTitle, onTap,{double? width}) {
                   Text(
                     subTitle,
                     textAlign: TextAlign.center,
-                    style:  TextStyle(fontFamily: 'Poppins-Light',
+                    style:  TextStyle(fontFamily: 'Poppins',
                         color: Colors.black,
                         fontSize: 8.sp,
                         fontWeight: FontWeight.normal),

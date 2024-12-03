@@ -222,7 +222,7 @@ Widget _buildRowinterested(
             ),
             child: Text(
               interested,
-              style:  TextStyle(fontFamily: 'Poppins-Light',
+              style:  TextStyle(fontFamily: 'Poppins',
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
                 color: svGetBodyColor(),

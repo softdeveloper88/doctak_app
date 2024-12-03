@@ -1525,7 +1525,7 @@ class Step4 extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       'An Error Occurred While Creating The Group. Please Go To The Basic Info And Provide The Correct Details',
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w400),

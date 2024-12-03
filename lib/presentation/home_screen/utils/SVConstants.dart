@@ -18,4 +18,4 @@ class SVPostType {
   static String text = 'text';
 }
 
-var svFontRoboto =  'Poppins-Light';
+var svFontRoboto =  'Poppins';
