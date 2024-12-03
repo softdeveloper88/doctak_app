@@ -206,7 +206,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     ),
                     Text(
                       'Take Video',
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),
@@ -234,7 +234,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     ),
                     Text(
                       'Take Picture',
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
                           fontSize: kDefaultFontSize),

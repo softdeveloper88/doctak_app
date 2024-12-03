@@ -98,7 +98,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 FocusManager.instance.primaryFocus?.unfocus();
               }),
           title: Text(translation(context).lbl_home,
-              style: boldTextStyle(size: 18,fontFamily: 'Poppins-Light',)),
+              style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
           actions: [
             // IconButton(
             //   icon: Image.asset(
@@ -190,7 +190,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                                         child: Text(
                                           '${notificationBloc.totalNotifications ?? ''}',
                                           style: const TextStyle(
-                                            fontFamily: 'Poppins-Light',
+                                            fontFamily: 'Poppins',
                                             color: Colors.white,
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,

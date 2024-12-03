@@ -11,6 +11,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
+import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
@@ -114,10 +115,13 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Center(
-                        child: CircularProgressIndicator(
-                      color: svGetBodyColor(),
-                    )),
+                    SizedBox(
+                        height: 80.h,
+                        child: ChatShimmerLoader())
+                    // Center(
+                    //     child: CircularProgressIndicator(
+                    //   color: svGetBodyColor(),
+                    // )),
                   ],
                 ),
               ),
@@ -250,7 +254,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     padding: EdgeInsets.all(8.0),
                                     child: Text(
                                       'Next Session',
-                                      style: TextStyle(  fontFamily: 'Poppins-Light',color: white),
+                                      style: TextStyle(  fontFamily:  'Poppins',color: white),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -367,6 +371,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
+
                                     children: [
                                       InkWell(
                                         onTap: () {
@@ -863,7 +868,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 crossAxisAlignment:CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     "Error!",
                     style: TextStyle(
                         color: Colors.red,

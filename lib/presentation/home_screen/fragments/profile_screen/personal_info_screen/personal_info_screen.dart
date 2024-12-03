@@ -41,7 +41,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
-        title: Text('Personal Information', style: boldTextStyle(size: 20,fontFamily: 'Poppins-Light',)),
+        title: Text('Personal Information', style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(

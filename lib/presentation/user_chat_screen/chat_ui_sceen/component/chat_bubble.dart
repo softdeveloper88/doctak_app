@@ -66,7 +66,7 @@ class ChatBubble extends StatelessWidget {
                               style: TextStyle(
                                   color: isMe ? Colors.white : Colors.black,
                                   fontSize: 16.0,
-                                  fontFamily: 'Poppins-Bold',
+                                  fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w400),
                             ),
                             if (attachmentJson != null)
@@ -81,7 +81,7 @@ class ChatBubble extends StatelessWidget {
                                     timeAgo.format(
                                         DateTime.parse(createAt.toString())),
                                     style: TextStyle(
-                                      fontFamily: 'Poppins-Light',
+                                      fontFamily: 'Poppins',
                                       fontSize: 8.0,
                                       fontWeight: FontWeight.w500,
                                       color: isMe
@@ -149,7 +149,7 @@ class ChatBubble extends StatelessWidget {
 
                                   color: isMe ? Colors.white : Colors.black87,
                                   fontSize: 16.0,
-                                  fontFamily: 'Poppins-Bold',
+                                  fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w400),
                             ),
                             if (attachmentJson != null)
@@ -166,7 +166,7 @@ class ChatBubble extends StatelessWidget {
                                             DateTime.parse(createAt.toString()))
                                         : '',
                                     style: TextStyle(
-                                      fontFamily: 'Poppins-Light',
+                                      fontFamily: 'Poppins',
                                       fontSize: 8.0,
                                       fontWeight: FontWeight.w500,
                                       color: isMe

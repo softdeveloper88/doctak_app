@@ -32,7 +32,7 @@ class RetryWidget extends StatelessWidget {
             Text(
               errorMessage,
               style: const TextStyle(
-                fontFamily: 'Poppins-Light',
+                fontFamily: 'Poppins',
                 color: Colors.redAccent,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -54,7 +54,7 @@ class RetryWidget extends StatelessWidget {
               child: const Text(
                 "Retry",
                 style: TextStyle(
-                  fontFamily: 'Poppins-Light',
+                  fontFamily: 'Poppins',
                   fontSize: 16,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

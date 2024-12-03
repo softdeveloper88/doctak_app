@@ -99,7 +99,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                 Text(
                                   '${widget.caseDiscussList.name}',
                                   style: const TextStyle(
-                                    fontFamily: 'Poppins-Light',
+                                    fontFamily: 'Poppins',
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

@@ -12,7 +12,7 @@ class AppTheme {
     primaryColorDark: SVAppColorPrimary,
     hoverColor: Colors.white54,
     dividerColor: viewLineColor,
-    fontFamily: 'Poppins-Light',
+    fontFamily: 'Poppins',
     appBarTheme: const AppBarTheme(
       color: SVAppLayoutBackground,
       iconTheme: IconThemeData(color: textPrimaryColor),
@@ -25,9 +25,9 @@ class AppTheme {
     iconTheme: const IconThemeData(color: textPrimaryColor),
     bottomSheetTheme: const BottomSheetThemeData(backgroundColor: whiteColor),
     textTheme: const TextTheme(
-      labelLarge: TextStyle(color: SVAppColorPrimary,fontFamily:  'Poppins-Light',),
-      titleLarge: TextStyle(color: textPrimaryColor,fontFamily:  'Poppins-Light',),
-      titleSmall: TextStyle(color: textSecondaryColor,fontFamily:  'Poppins-Light',),
+      labelLarge: TextStyle(color: SVAppColorPrimary,fontFamily:  'Poppins',),
+      titleLarge: TextStyle(color: textPrimaryColor,fontFamily:  'Poppins',),
+      titleSmall: TextStyle(color: textSecondaryColor,fontFamily:  'Poppins',),
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     colorScheme: const ColorScheme.light(primary: SVAppColorPrimary)
@@ -56,20 +56,19 @@ class AppTheme {
     primaryColorDark: color_primary_black,
     textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
     hoverColor: Colors.black12,
-    fontFamily: 'Poppins-Light',
+    fontFamily: 'Poppins',
     bottomSheetTheme:
         const BottomSheetThemeData(backgroundColor: appBackgroundColorDark),
     primaryTextTheme: TextTheme(
-
         titleLarge: primaryTextStyle(color: Colors.white),
         labelSmall: primaryTextStyle(color: Colors.white)),
     cardTheme: const CardTheme(color: cardBackgroundBlackDark),
     cardColor: cardBackgroundBlackDark,
     iconTheme: const IconThemeData(color: whiteColor),
     textTheme: const TextTheme(
-      labelLarge: TextStyle(color: color_primary_black,fontFamily:  'Poppins-Light',),
-      titleLarge: TextStyle(color: whiteColor,fontFamily:  'Poppins-Light',),
-      titleSmall: TextStyle(color: Colors.white54,fontFamily:  'Poppins-Light',),
+      labelLarge: TextStyle(color: color_primary_black,fontFamily:  'Poppins',fontWeight:FontWeight.w400),
+      titleLarge: TextStyle(color: whiteColor,fontFamily:  'Poppins',fontWeight: FontWeight.w400),
+      titleSmall: TextStyle(color: Colors.white54,fontFamily:  'Poppins',fontWeight:FontWeight.w300),
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     colorScheme: const ColorScheme.dark(

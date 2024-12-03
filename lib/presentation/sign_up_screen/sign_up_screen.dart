@@ -162,7 +162,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                               child: Text(
                                                                 "Doctor",
                                                                 style: TextStyle(
-                                                                   fontFamily: 'Poppins-Light',
+                                                                   fontFamily: 'Poppins',
                                                                     color: Colors
                                                                         .white,
                                                                     fontSize:
@@ -212,7 +212,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                               child: Text(
                                                                 "Medical student",
                                                                 style: TextStyle(
-                                                                    fontFamily: 'Poppins-Light',
+                                                                    fontFamily: 'Poppins',
                                                                     color: Colors
                                                                         .white,
                                                                     fontSize:
@@ -483,7 +483,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
                                                 Center(child: CircularProgressIndicator(),),
-                                                Text('Wait a moment more field Loading...',style: TextStyle(fontFamily: 'Poppins-Light',color: Colors.blue,fontWeight: FontWeight.bold,),),
+                                                Text('Wait a moment more field Loading...',style: TextStyle(fontFamily: 'Poppins',color: Colors.blue,fontWeight: FontWeight.bold,),),
                                               ],
                                             ),
                                           );
@@ -502,12 +502,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       Expanded(
                                         child: RichText(
                                           text: TextSpan(
-                                            style: const TextStyle(fontSize: 14.0, color: Colors.black,fontFamily: 'Poppins-Light',),
+                                            style: const TextStyle(fontSize: 14.0, color: Colors.black,fontFamily: 'Poppins',),
                                             children: <TextSpan>[
                                               const TextSpan(text: 'I agree to the '),
                                               TextSpan(
                                                 text: 'Terms and Conditions',
-                                                style: const TextStyle(color: Colors.blue,fontFamily: 'Poppins-Light',),
+                                                style: const TextStyle(color: Colors.blue,fontFamily: 'Poppins',),
                                                 recognizer: TapGestureRecognizer()
                                                   ..onTap = () {
                                                     // Handle the click event for Terms and Conditions

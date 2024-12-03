@@ -75,7 +75,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         title: Text('Notifications',
             style: boldTextStyle(
               size: 20,
-              fontFamily: 'Poppins-Light',
+              fontFamily: 'Poppins',
             )),
         elevation: 0,
         centerTitle: false,
@@ -142,7 +142,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 'Mark All Read',
                 style: TextStyle(
                   color: Colors.white,
-                  fontFamily: 'Poppins-Light',
+                  fontFamily: 'Poppins',
                 ),
               ),
             ),
@@ -246,7 +246,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               text:
                                   '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''} ', // Default style for the initial part
                               style: const TextStyle(
-                                fontFamily: 'Poppins-Light',
+                                fontFamily: 'Poppins',
                                 color: Colors.black, // Default color
                                 fontSize: 16,
                                 fontWeight:
@@ -256,7 +256,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             TextSpan(
                               text: bloc.notificationsList[index].text ?? "",
                               style: const TextStyle(
-                                fontFamily: 'Poppins-Light',
+                                fontFamily: 'Poppins',
                                 fontSize: 16,
                                 fontWeight: FontWeight.normal,
                                 color: Colors.black, // Change color to blue
@@ -267,7 +267,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         timeAgo.format(DateTime.parse(
                             bloc.notificationsList[index].createdAt ?? "")),
                         style: TextStyle(
-                          fontFamily: 'Poppins-Light',
+                          fontFamily: 'Poppins',
                           color: Colors.grey[600],
                           fontSize: 14.0,
                         ),

@@ -223,7 +223,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                                     height: 14,
                                                     width: 14,
                                                     fit: BoxFit.cover),
-                                                textStyle: boldTextStyle(fontFamily: 'Poppins-Light',)),
+                                                textStyle: boldTextStyle(fontFamily: 'Poppins',)),
                                             Row(
                                               children: [
                                                 Text(
@@ -232,7 +232,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                                             .homeBloc
                                                             .postList[index]
                                                             .createdAt!)),
-                                                    style: secondaryTextStyle(fontFamily: 'Poppins-Light',
+                                                    style: secondaryTextStyle(fontFamily: 'Poppins',
                                                         color: svGetBodyColor(),
                                                         size: 12)),
                                                 const Padding(
@@ -351,7 +351,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                     child: Text(
                                         '${widget.homeBloc.postList[index].likes?.length ?? 0.validate()} Likes',
                                         style: secondaryTextStyle(
-                                            fontFamily: 'Poppins-Light',
+                                            fontFamily: 'Poppins',
                                             color: svGetBodyColor())),
                                   ),
                                   InkWell(
@@ -366,7 +366,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                     child: Text(
                                         '${widget.homeBloc.postList[index].comments?.length ?? 0.validate()} comments',
                                         style: secondaryTextStyle(
-                                            fontFamily: 'Poppins-Light',
+                                            fontFamily: 'Poppins',
                                             color: svGetBodyColor())),
                                   ),
                                 ],
@@ -406,6 +406,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                               ),
                                         Text('Like',
                                             style: secondaryTextStyle(
+                                                fontFamily: 'Poppins',
                                                 color: svGetBodyColor())),
                                       ],
                                     )),
@@ -440,6 +441,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                       ),
                                       Text('Comment',
                                           style: secondaryTextStyle(
+                                              fontFamily: 'Poppins',
                                               color: svGetBodyColor())),
                                     ],
                                   ),
@@ -494,6 +496,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                                       ),
                                       Text('share',
                                           style: secondaryTextStyle(
+                                              fontFamily: 'Poppins',
                                               color: svGetBodyColor())),
                                     ],
                                   ),
@@ -774,7 +777,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                   if (image?.isNotEmpty == true || media?.isNotEmpty == true)
                     if (_isHtml(textToShow))
                       Center(
-                        child: HtmlWidget(textToShow, onTapUrl: (link) async {
+                        child: HtmlWidget(textStyle: const TextStyle(fontFamily: 'Poppins',), textToShow, onTapUrl: (link) async {
                           print('link $link');
                           if (link.contains('doctak/jobs-detail')) {
                             String jobID = Uri.parse(link).pathSegments.last;
@@ -789,6 +792,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                       )
                     else
                       Linkify(
+
                         onOpen: (link) {
                           if (link.url.contains('doctak/jobs-detail')) {
                             String jobID =
@@ -802,6 +806,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                         },
                         text: textToShow,
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 14.0,
                           color: (image?.isNotEmpty == true ||
                                   media?.isNotEmpty == true)
@@ -820,7 +825,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                           minHeight: textToShow.length < 25 ? 200 : 0),
                       child: Center(
                         child: HtmlWidget(
-                          textStyle: TextStyle(),
+                          textStyle: const TextStyle(fontFamily: 'Poppins',),
                           enableCaching: true,
                           '<div style="text-align: center;">$textToShow</div>',
                           onTapUrl: (link) async {
@@ -857,6 +862,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                           },
                           text: textToShow,
                           style: TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 14.0,
                             color: textColor,
                             fontWeight: FontWeight.bold,
@@ -880,6 +886,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                       child: Text(
                         isExpanded ? 'Show Less' : 'Show More',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           color: svGetBodyColor(),
                           shadows: const [
                             Shadow(

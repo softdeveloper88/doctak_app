@@ -44,7 +44,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
               title: const Text(
                 'Theme Appearance',
                 style: TextStyle(
-               fontFamily: 'Poppins-Light',
+               fontFamily: 'Poppins',
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -64,7 +64,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
               title: const Text(
                 'App Language',
                 style: TextStyle(
-                  fontFamily: 'Poppins-Light',
+                  fontFamily: 'Poppins',
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -113,7 +113,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
               title: const Text(
                 'Delete Account',
                 style: TextStyle(
-                  fontFamily: 'Poppins-Light',
+                  fontFamily: 'Poppins',
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -153,7 +153,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
             TextButton(
               child: const Text(
                 'Delete',
-                style: TextStyle(color: Colors.red,fontFamily: 'Poppins-Light',),
+                style: TextStyle(color: Colors.red,fontFamily: 'Poppins',),
                 // color: Colors.red,
               ),
               onPressed: () async {

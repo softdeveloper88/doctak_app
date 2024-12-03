@@ -33,7 +33,6 @@ class SVHomeDrawerComponent extends StatefulWidget {
 
 class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
   int selectedIndex = -1;
-
   // @override
   // void dispose() {
   //   _bannerAd!.dispose();
@@ -136,7 +135,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                           AppData.userType == 'doctor'
                               ? "Dr. ${capitalizeWords(AppData.name)}"
                               : capitalizeWords(AppData.name), // User's name
-                          style: boldTextStyle(size: 18, color: Colors.white,fontFamily: 'Poppins-Light',),
+                          style: boldTextStyle(size: 18, color: Colors.white,fontFamily: 'Poppins',),
                         ),
                         2.height,
                         Text(
@@ -147,7 +146,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                                 ? "${AppData.university}\n Student"
                                 : AppData.specialty,
                             // User's specialty
-                            style: secondaryTextStyle(color: Colors.white,fontFamily: 'Poppins-Light',)),
+                            style: secondaryTextStyle(color: Colors.white,fontFamily: 'Poppins',)),
                       ],
                     ),
                   ),
@@ -180,7 +179,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                             : SVAppColorPrimary),
                     title: e.title.validate(),
                     titleTextStyle:
-                    boldTextStyle(size: 14, color: Colors.white,fontFamily: 'Poppins-Light',),
+                    boldTextStyle(size: 14, color: Colors.white,fontFamily: 'Poppins',),
                     leading: (e.title=="Post a poll"|| e.title=='Groups Formation'||e.title=='Privacy Policy')?Image.asset(e.image ?? "",
                         height: 22,
                         width: 22,
@@ -329,7 +328,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 child: SnapHelperWidget<PackageInfo>(
                   future: PackageInfo.fromPlatform(),
                   onSuccess: (data) => Text(data.version,
-                      style: boldTextStyle(color: Colors.white,fontFamily: 'Poppins-Light',)),
+                      style: boldTextStyle(color: Colors.white,fontFamily: 'Poppins',)),
                 ),
               ),
               20.height,
@@ -387,7 +386,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
             TextButton(
               child: const Text(
                 'Yes',
-                style: TextStyle(color: Colors.red,fontFamily: 'Poppins-Light',),
+                style: TextStyle(color: Colors.red,fontFamily: 'Poppins',),
                 // color: Colors.red,
               ),
               onPressed: () async {
@@ -448,7 +447,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
             TextButton(
               child: const Text(
                 'Delete',
-                style: TextStyle(color: Colors.red,fontFamily: 'Poppins-Light',),
+                style: TextStyle(color: Colors.red,fontFamily: 'Poppins',),
                 // color: Colors.red,
               ),
               onPressed: () async {

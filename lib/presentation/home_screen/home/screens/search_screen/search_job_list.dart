@@ -67,7 +67,7 @@ class SearchJobList extends StatelessWidget {
                         // ),
                         Text(
                           drugsBloc.drugsData[index].jobTitle ?? "",
-                          style: TextStyle(fontFamily: 'Poppins-Light',
+                          style: TextStyle(fontFamily: 'Poppins',
                               color: svGetBodyColor(),
                               fontWeight: FontWeight.bold,
                               fontSize: 18),
@@ -98,7 +98,7 @@ class SearchJobList extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Text('Apply Date',
-                            style: TextStyle(fontFamily: 'Poppins-Light',
+                            style: TextStyle(fontFamily: 'Poppins',
                                 color: svGetBodyColor(),
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14)),

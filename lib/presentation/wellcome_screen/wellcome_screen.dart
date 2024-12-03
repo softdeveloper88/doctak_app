@@ -3,10 +3,7 @@ import 'package:doctak_app/widgets/show_loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
-import 'package:nb_utils/nb_utils.dart';
-
 import '../../core/utils/app/AppData.dart';
-import '../home_screen/utils/SVCommon.dart';
 class WelcomeScreen extends StatelessWidget {
    WelcomeScreen(this.email,{super.key});
  String email;

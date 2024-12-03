@@ -2,6 +2,9 @@ import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart'
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
+import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
+import 'package:doctak_app/widgets/shimmer_widget/comment_list_shimmer.dart';
+import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +13,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 // import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../data/models/chat_gpt_model/ChatGPTResponse.dart';
 import '../../data/models/chat_gpt_model/ChatGPTSessionModel.dart';
@@ -61,9 +65,9 @@ class ChatHistoryScreen extends StatelessWidget {
         centerTitle: false,
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
-        title: Text(
+        title: const Text(
           'History Artificial Intelligence',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+          style: TextStyle(fontSize: 18,fontFamily:"Poppins",fontWeight: FontWeight.w400),
         ),
       ),
       body: BlocConsumer<ChatGPTBloc, ChatGPTState>(
@@ -84,10 +88,9 @@ class ChatHistoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Center(
-                          child: CircularProgressIndicator(
-                        color: svGetBodyColor(),
-                      )),
+                      SizedBox(
+                          height: 90.h,
+                          child: ShimmerCardList())
                     ],
                   ),
                 ),

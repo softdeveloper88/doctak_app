@@ -782,7 +782,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   child: Text(
                     widget.username,
                     style: const TextStyle(
-                        fontFamily: 'Poppins-Light',
+                        fontFamily: 'Poppins',
                         fontSize: 18,
                         fontWeight: FontWeight.w500),
                   ),
@@ -1034,7 +1034,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                             child: TextField(
                                               style: const TextStyle(
                                                   fontSize: 16,
-                                                  fontFamily: 'Poppins-Light'),
+                                                  fontFamily: 'Poppins'),
                                               minLines: 1,
                                               maxLines: 8,
                                               controller: textController,
@@ -1045,7 +1045,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                                 hintStyle: TextStyle(
                                                     fontSize: 14,
                                                     fontFamily:
-                                                        'Poppins-Light'),
+                                                        'Poppins'),
                                               ),
                                               keyboardType:
                                                   TextInputType.multiline,
@@ -1501,7 +1501,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14.sp,
-              fontFamily: 'Poppins-Light',
+              fontFamily: 'Poppins',
             ),
           ),
           // content: const SingleChildScrollView(

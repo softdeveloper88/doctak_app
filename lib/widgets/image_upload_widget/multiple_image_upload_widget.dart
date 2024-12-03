@@ -77,7 +77,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
           title: Text(
             'You want to enable permission?',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.sp,fontFamily: 'Poppins-Light',),
+            style: TextStyle(fontSize: 14.sp,fontFamily: 'Poppins',),
           ),
           // content: const SingleChildScrollView(
           //   child: ListBody(
@@ -221,7 +221,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if(widget.imageType=="CT Scan" || widget.imageType=="MRI Scan" || widget.imageType=="Mammography")  Text("Please upload one or two of the most relevant images for analysis.",style: TextStyle(fontFamily: 'Poppins-Light',color: Colors.black87,fontWeight: FontWeight.bold),),
+                if(widget.imageType=="CT Scan" || widget.imageType=="MRI Scan" || widget.imageType=="Mammography")  Text("Please upload one or two of the most relevant images for analysis.",style: TextStyle(fontFamily: 'Poppins',color: Colors.black87,fontWeight: FontWeight.bold),),
                 const SizedBox(height: 8),
                 Divider(color: Colors.grey[300]),
                 MaterialButton(
@@ -255,7 +255,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                             'From Gallery',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontFamily: 'Poppins-Light',
+                              fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                               color: Colors.white,
                               fontSize: kDefaultFontSize,

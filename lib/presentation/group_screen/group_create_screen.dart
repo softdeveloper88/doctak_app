@@ -1455,7 +1455,7 @@ class Step4 extends StatelessWidget {
                 children: [
                   Text(
                     'Successfully',
-                    style:  TextStyle(fontFamily: 'Poppins-Light',
+                    style:  TextStyle(fontFamily: 'Poppins',
                         color: Colors.blue,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500),
@@ -1475,7 +1475,7 @@ class Step4 extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       'Group Created Successfully',
-                      style:  TextStyle(fontFamily: 'Poppins-Light',
+                      style:  TextStyle(fontFamily: 'Poppins',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w400),
@@ -1513,7 +1513,7 @@ class Step4 extends StatelessWidget {
                   ),
                   Text(
                     'Error !',
-                    style: TextStyle(fontFamily: 'Poppins-Light',
+                    style: TextStyle(fontFamily: 'Poppins',
                         color: Colors.red,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500),

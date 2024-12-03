@@ -420,7 +420,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       if (isCurrentlyOnNoInternet) {
         Navigator.pop(NavigatorService.navigatorKey.currentState!.overlay!.context);
         isCurrentlyOnNoInternet = false;
-
       }
     }
 
@@ -649,6 +648,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           child:  BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               return Observer(
+
                   builder: (_) => MaterialApp(
                         scaffoldMessengerKey: globalMessengerKey,
                         // theme: theme,

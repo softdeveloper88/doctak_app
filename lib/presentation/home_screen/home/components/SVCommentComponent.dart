@@ -57,20 +57,20 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                             textAlign: TextAlign.left,
                             text: TextSpan(
                               style: TextStyle(
-                                  fontFamily:  'Poppins-Light',
+                                  fontFamily:  'Poppins',
                                   fontSize: 12.sp, color: svGetBodyColor()),
                               children: <TextSpan>[
                                 // TextSpan(text: title),
                                 TextSpan(
                                     text: widget.comment.name??"",
                                     style: const TextStyle(
-                                        fontFamily:  'Poppins-Light',
+                                        fontFamily:  'Poppins',
                                         fontWeight: FontWeight.w500)),
                                 TextSpan(
                                     text: ' ${timeAgo.format(DateTime.parse(widget.comment.createdAt!))}',
 
                                   style: TextStyle(
-                                    fontFamily:  'Poppins-Light',
+                                    fontFamily:  'Poppins',
                                     fontSize: 12.0,
                                     color: Colors.grey[600],
                                   ))
@@ -124,7 +124,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 const SizedBox(height: 4.0),
                 Text(
                   widget.comment.comment ?? 'No Name',
-                  style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins-Light',),
+                  style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins',),
                 ),
                 const SizedBox(height: 8.0),
                 const Divider(

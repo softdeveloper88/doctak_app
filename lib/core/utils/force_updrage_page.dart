@@ -150,7 +150,7 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
                   const Text(
                     'New version available',
                     style: TextStyle(
-                      fontFamily: 'Poppins-Light',
+                      fontFamily: 'Poppins',
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -159,7 +159,7 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
                   const SizedBox(height: 20),
                   const Text(
                     'Please update to the latest version of the app to continue using it.',
-                    style: TextStyle(fontSize: 18,fontFamily: 'Poppins-Light',),
+                    style: TextStyle(fontSize: 18,fontFamily: 'Poppins',),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),

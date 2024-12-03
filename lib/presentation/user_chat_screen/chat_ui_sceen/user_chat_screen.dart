@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
@@ -11,6 +12,7 @@ import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
@@ -304,7 +306,7 @@ class _UserChatScreenState extends State<UserChatScreen>
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins-Light',
+            fontFamily: 'Poppins',
           ),
         ),
         actions: [
@@ -348,6 +350,11 @@ class _UserChatScreenState extends State<UserChatScreen>
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Observer(builder: (context){
+                      return isCurrentlyOnNoInternet?Container(
+                        padding: const EdgeInsets.all(10),
+                          color: Colors.red,
+                          child: const Text('No Internet connection, please check internet connection',style: TextStyle(color: Colors.white,fontSize: 14,fontFamily: 'Poppins',fontWeight: FontWeight.w500),)):SizedBox();},),
                     if (chatBloc.groupList.isNotEmpty)
                       const Padding(
                         padding: EdgeInsets.all(16.0),
@@ -356,7 +363,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins-Light',
+                            fontFamily: 'Poppins',
                           ),
                         ),
                       ),
@@ -407,7 +414,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                         bloc.groupList[index].groupName ??
                                             'Unknown',
                                         style: TextStyle(
-                                          fontFamily: 'Poppins-Light',
+                                          fontFamily: 'Poppins',
                                           color: svGetBodyColor(),
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -417,7 +424,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                         bloc.groupList[index].latestMessage ??
                                             '',
                                         style: TextStyle(
-                                          fontFamily: 'Poppins-Light',
+                                          fontFamily: 'Poppins',
                                           color: svGetBodyColor(),
                                           fontSize: 14,
                                         ),
@@ -544,7 +551,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                                                       .clip,
                                                               style: TextStyle(
                                                                   fontFamily:
-                                                                      'Poppins-Light',
+                                                                      'Poppins',
                                                                   color:
                                                                       svGetBodyColor(),
                                                                   fontWeight:
@@ -567,7 +574,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                                       ? const Text("Typing...",
                                                           style: TextStyle(
                                                             fontFamily:
-                                                                'Poppins-Light',
+                                                                'Poppins',
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             fontSize: 14,
@@ -590,7 +597,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                                                   "",
                                                           style: secondaryTextStyle(
                                                               fontFamily:
-                                                                  'Poppins-Light',
+                                                                  'Poppins',
                                                               color:
                                                                   svGetBodyColor())),
                                                 ],
@@ -619,7 +626,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                                     '${bloc.contactsList[index].unreadCount ?? 0}',
                                                     style: const TextStyle(
                                                       fontFamily:
-                                                          'Poppins-Light',
+                                                          'Poppins',
                                                       color: Colors.white,
                                                       fontSize: 12,
                                                       fontWeight:
@@ -634,7 +641,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                                             .latestMessageTime ??
                                                         '2024-01-01 00:00:00')),
                                                 style: secondaryTextStyle(
-                                                    fontFamily: 'Poppins-Light',
+                                                    fontFamily: 'Poppins',
                                                     color: svGetBodyColor(),
                                                     size: 12)),
                                           ],
@@ -695,7 +702,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                         child: Text("No chat found",
                             style: boldTextStyle(
                               size: 16,
-                              fontFamily: 'Poppins-Light',
+                              fontFamily: 'Poppins',
                             )),
                       )),
                     if (AppData.isShowGoogleBannerAds ?? false)

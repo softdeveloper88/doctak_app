@@ -21,7 +21,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('About Us', style: boldTextStyle(size: 18,)),
+        title: Text('About Us', style: boldTextStyle(size: 18,fontFamily: 'Poppins')),
         elevation: 0,
         centerTitle: false,
         actions: const [
@@ -43,7 +43,9 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const HtmlWidget('''
+                    const HtmlWidget(
+                        textStyle: TextStyle(fontFamily: 'Poppins')
+,                        '''
   <h1>Welcome to DocTak.net</h1>
 
   <h2>Our Mission</h2>
@@ -88,9 +90,9 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('Contact/Follow us here',style: TextStyle(  fontFamily:  'Poppins-Light',color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Contact/Follow us here',style: TextStyle(  fontFamily:  'Poppins',color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,

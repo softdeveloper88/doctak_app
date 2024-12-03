@@ -451,7 +451,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                     //                 //     ),
                     //                 //     Text(
                     //                 //       bloc.caseDiscussList[index].jobTitle ?? "",
-                    //                 //       style: TextStyle(fontFamily: 'Poppins-Light',
+                    //                 //       style: TextStyle(fontFamily: 'Poppins',
                     //                 //           color: svGetBodyColor(),
                     //                 //           fontWeight: FontWeight.bold,
                     //                 //           fontSize: 18),

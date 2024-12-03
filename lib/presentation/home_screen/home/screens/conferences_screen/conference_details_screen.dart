@@ -201,7 +201,7 @@
 //                   //         children: [
 //                   //           Text(
 //                   //             "New" ,
-//                   //             style:  TextStyle(fontFamily: 'Poppins-Light',
+//                   //             style:  TextStyle(fontFamily: 'Poppins',
 //                   //                 color: Colors.red,
 //                   //                 fontWeight: FontWeight.w500,
 //                   //                 fontSize: kDefaultFontSize),

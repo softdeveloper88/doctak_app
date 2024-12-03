@@ -47,7 +47,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Comments', style: boldTextStyle(size: 18,fontFamily: 'Poppins-Light',)),
+        title: Text('Comments', style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(

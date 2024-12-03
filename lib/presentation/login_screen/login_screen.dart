@@ -132,110 +132,6 @@ class LoginScreenState extends State<LoginScreen> {
 
   FocusNode focusNode2 = FocusNode();
 
-  // void showVerifyMessage(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Verify Account'),
-  //         content: const Text('Please verify your account.'),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () async {
-  //               // Add your logic for resending the verification link here
-  //               String email = emailController.text;
-  //               sendVerificationLink(email, context);
-  //             },
-  //             child: const Text('Resend Link'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // Close the dialog
-  //             },
-  //             child: const Text('Close'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-  // void showVerifyMessage(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(16.0),
-  //         ),
-  //         title: const Row(
-  //           children: [
-  //             Icon(
-  //               Icons.verified_outlined,
-  //               color: Colors.blue,
-  //               size: 28,
-  //             ),
-  //             SizedBox(width: 8.0),
-  //             Text(
-  //               'Verify Account',
-  //               style: TextStyle(
-  //                 fontWeight: FontWeight.bold,
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //         content: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             const Text(
-  //               'Your account is not verified yet. Please verify your account to access all features.',
-  //               textAlign: TextAlign.center,
-  //               style: TextStyle(fontSize: 16.0),
-  //             ),
-  //             const SizedBox(height: 16.0),
-  //             Icon(
-  //               Icons.mail_outline,
-  //               color: Colors.grey.shade400,
-  //               size: 64.0,
-  //             ),
-  //           ],
-  //         ),
-  //         actionsAlignment: MainAxisAlignment.spaceAround,
-  //         actions: [
-  //           ElevatedButton.icon(
-  //             onPressed: () async {
-  //               String email = emailController.text;
-  //               sendVerificationLink(email, context);
-  //             },
-  //             icon: const Icon(Icons.send),
-  //             label: const Text('Resend Link'),
-  //             style: ElevatedButton.styleFrom(
-  //               backgroundColor: Colors.blue,
-  //               foregroundColor: Colors.white,
-  //               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-  //               shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(8.0),
-  //               ),
-  //             ),
-  //           ),
-  //           OutlinedButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // Close the dialog
-  //             },
-  //             style: OutlinedButton.styleFrom(
-  //               foregroundColor: Colors.blue,
-  //               side: const BorderSide(color: Colors.blue),
-  //               shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(8.0),
-  //               ),
-  //             ),
-  //             child: const Text('Close'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
   List<String> _savedUsernames = [];
 
   Future<void> _loadSavedUsernames() async {
@@ -284,7 +180,7 @@ class LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Saved Logins',
                     style: TextStyle(
-                      fontFamily: 'Poppins-Light',
+                      fontFamily: 'Poppins',
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.headlineSmall?.color,
@@ -320,7 +216,7 @@ class LoginScreenState extends State<LoginScreen> {
                           title: Text(
                             username,
                             style: TextStyle(
-                              fontFamily: 'Poppins-Light',
+                              fontFamily: 'Poppins',
                               fontSize: 16,
                               fontWeight: isSelected
                                   ? FontWeight.bold
@@ -350,7 +246,7 @@ class LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'No saved logins available',
                         style: TextStyle(
-                          fontFamily: 'Poppins-Light',
+                          fontFamily: 'Poppins',
                           fontSize: 16,
                           color: Colors.grey,
                         ),

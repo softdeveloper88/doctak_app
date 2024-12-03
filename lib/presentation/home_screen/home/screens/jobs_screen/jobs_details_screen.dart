@@ -281,7 +281,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         ),
                         const SizedBox(height: 20),
                         Text('Apply Date',
-                            style: TextStyle(fontFamily: 'Poppins-Light',
+                            style: TextStyle(fontFamily: 'Poppins',
                                 color: svGetBodyColor(),
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14)),
@@ -365,7 +365,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           child: Container(
                             color: Colors.white,
                             child: HtmlWidget(
-                              textStyle:  TextStyle(fontFamily: 'Poppins-Light',
+                              textStyle:  TextStyle(fontFamily: 'Poppins',
                                 color: svGetBodyColor(),
                               ),
                               '<p>${jobsBloc.jobDetailModel.job?.description}</p>',

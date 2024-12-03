@@ -25,6 +25,7 @@ import '../../widgets/image_upload_widget/bloc/image_upload_bloc.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_event.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_state.dart';
 import '../../widgets/image_upload_widget/multiple_image_upload_widget.dart';
+import '../../widgets/shimmer_widget/chat_shimmer_loader.dart';
 
 @immutable
 class ChatGptWithImageScreen extends StatefulWidget {
@@ -145,10 +146,9 @@ bool isError=false;
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Center(
-                      child: CircularProgressIndicator(
-                    color: svGetBodyColor(),
-                  )),
+                  SizedBox(
+                      height: 80.h,
+                      child: ChatShimmerLoader())
                 ],
               ));
             } else if (state1 is DataLoaded) {
@@ -277,7 +277,7 @@ bool isError=false;
                                       child: Text(
                                         'Next Image',
                                         style:
-                                            TextStyle(color: white,fontFamily: 'Poppins-Light',),
+                                            TextStyle(color: white,fontFamily: 'Poppins',),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -335,7 +335,7 @@ bool isError=false;
                                 const Text(
                                   'Welcome, Doctor!',
                                   style: TextStyle(
-                                    fontFamily: 'Poppins-Light',
+                                    fontFamily: 'Poppins',
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -344,7 +344,7 @@ bool isError=false;
                                 const Text(
                                   'Your personal & medical assistant powered by Artificial Intelligence',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 16,fontFamily: 'Poppins-Light',),
+                                  style: TextStyle(fontSize: 16,fontFamily: 'Poppins',),
                                 ),
                                 const SizedBox(height: 30),
                                 Row(
@@ -404,7 +404,7 @@ bool isError=false;
                                 const Text(
                                   'Please upload the medical images for potential diagnoses and analysis',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 14,fontFamily: 'Poppins-Light',),
+                                  style: TextStyle(fontSize: 14,fontFamily: 'Poppins',),
                                 ),
                                 const SizedBox(height: 10),
                               ],
@@ -569,7 +569,7 @@ bool isError=false;
                                 maxLines: null,
                                 // Allows for unlimited lines
                                 decoration: const InputDecoration(
-                                  hintStyle: TextStyle(color: Colors.grey,fontFamily: 'Poppins-Light',),
+                                  hintStyle: TextStyle(color: Colors.grey,fontFamily: 'Poppins',),
                                   hintText:
                                       'Clinical Summary e.g age, gender, medical history',
                                   border: InputBorder.none,
@@ -733,7 +733,7 @@ bool isError=false;
                     Text(
                       "Error!",
                       style: TextStyle(
-                          fontFamily: 'Poppins-Light',
+                          fontFamily: 'Poppins',
                           color: Colors.red,
                           fontSize: 24,
                           fontWeight: FontWeight.bold),
@@ -741,7 +741,7 @@ bool isError=false;
                     const SizedBox(height: 10),
                     Text(
                       state1.errorMessage.toString(),
-                      style: const TextStyle(color: black,fontFamily: 'Poppins-Light',),
+                      style: const TextStyle(color: black,fontFamily: 'Poppins',),
                     ),
                     MaterialButton(
                       onPressed: () {

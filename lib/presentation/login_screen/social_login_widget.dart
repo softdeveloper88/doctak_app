@@ -245,11 +245,11 @@ class _SocialLoginWidgetState extends State<SocialLoginWidget> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Error', style: TextStyle(fontFamily: 'Poppins-Light')),
-          content: Text(message, style:const TextStyle(fontFamily: 'Poppins-Light')),
+          title: const Text('Error', style: TextStyle(fontFamily: 'Poppins')),
+          content: Text(message, style:const TextStyle(fontFamily: 'Poppins')),
           actions: <Widget>[
             TextButton(
-              child: const Text('OK', style:TextStyle(fontFamily: 'Poppins-Light')),
+              child: const Text('OK', style:TextStyle(fontFamily: 'Poppins')),
               onPressed: () {
                 Navigator.of(context).pop(); // Dismiss the dialog
               },

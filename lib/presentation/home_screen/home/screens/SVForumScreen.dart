@@ -40,7 +40,7 @@ class _SVForumScreenState extends State<SVForumScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Forum', style: boldTextStyle(size: 20,fontFamily: 'Poppins-Light',)),
+        title: Text('Forum', style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -60,7 +60,7 @@ class _SVForumScreenState extends State<SVForumScreen> {
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Search',
-                  hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins-Light',),
+                  hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins',),
                   prefixIcon: Image.asset('images/socialv/icons/ic_Search.png',
                           height: 16,
                           width: 16,
@@ -79,7 +79,7 @@ class _SVForumScreenState extends State<SVForumScreen> {
                   shapeBorder: RoundedRectangleBorder(borderRadius: radius(8)),
                   text: tabList[index],
                   textStyle: boldTextStyle(
-                      fontFamily: 'Poppins-Light',
+                      fontFamily: 'Poppins',
                       color: selectedTab == index
                           ? Colors.white
                           : svGetBodyColor(),

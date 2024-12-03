@@ -66,7 +66,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins-Light',
+            fontFamily: 'Poppins',
           ),
         ),
       ),
@@ -91,7 +91,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                     hintText: 'Search ',
                     hintStyle: secondaryTextStyle(
                       color: svGetBodyColor(),
-                      fontFamily: 'Poppins-Light',
+                      fontFamily: 'Poppins',
                     ),
                     suffixIcon: Image.asset(
                             'images/socialv/icons/ic_Search.png',
@@ -267,7 +267,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                                     .lastName.validate()}",
                                                 overflow: TextOverflow.clip,
                                                 style: TextStyle(
-                                                    fontFamily: 'Poppins-Light',
+                                                    fontFamily: 'Poppins',
                                                     color: svGetBodyColor(),
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 16)),
@@ -328,7 +328,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                     ),
                   );
                 }else{
-                  return const Expanded(child: Center(child: Text('No user found',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,fontFamily: 'Poppins-Light'),)));
+                  return const Expanded(child: Center(child: Text('No user found',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,fontFamily: 'Poppins'),)));
 
                 }
               } else if (state is DataError) {
