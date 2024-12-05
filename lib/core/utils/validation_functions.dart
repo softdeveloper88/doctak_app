@@ -62,8 +62,8 @@ bool isText(
   }
 
   if (inputString != null && inputString.isNotEmpty) {
-    const pattern = r'^[a-zA-Z]+$';
-
+    // const pattern = r'^[a-zA-Z]+$';
+    const pattern = r'^[a-zA-Z]+( +[a-zA-Z]+)* *$';
     final regExp = RegExp(pattern);
 
     isInputStringValid = regExp.hasMatch(inputString);

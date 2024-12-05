@@ -129,6 +129,7 @@ class _SplashScreenState extends State<SplashScreen> {
         initDeepLinks(context);
         // const SVDashboardScreen().launch(context,isNewTask: true);
         // });
+
       } else {
         // Future.delayed(const Duration(seconds: 1), () {
         LoginScreen().launch(context, isNewTask: true);

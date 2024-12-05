@@ -407,7 +407,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     return _updateConnectionStatus(result);
   }
-
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
     setState(() {
       _connectionStatus = result;

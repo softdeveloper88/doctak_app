@@ -1,10 +1,13 @@
 import 'package:bloc/bloc.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:nb_utils/nb_utils.dart';
 import '../../../data/models/countries_model/countries_model.dart';
 import 'splash_event.dart';
 
@@ -23,12 +26,64 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       LoadDropdownData event, Emitter<SplashState> emit) async {
     var firstDropdownValues = await _onGetCountries();
     // print("DD ${firstDropdownValues!.countries!}");
+    getNewDeviceToken();
     emit(CountriesDataLoaded(
         countriesModel: firstDropdownValues!,
         countryFlag: event.countryFlag,
         typeValue: event.typeValue,
         searchTerms: event.searchTerms));
     // add(LoadDropdownData(event.newValue,event.typeValue));
+  }
+  getNewDeviceToken() async {
+    await FirebaseMessaging.instance.getToken().then((token) async {
+      DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+      String deviceId = '';
+      String deviceType = '';
+      if (isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+        print('Running on ${androidInfo.model}');
+        deviceType = "android";
+        deviceId = androidInfo.id;
+      } else {
+
+        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+        print('Running on ${iosInfo.utsname.machine}'); // e.g. "iPod7,1"
+        deviceType = "ios";
+        deviceId = iosInfo.identifierForVendor.toString();
+      }
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String deviceToken = await prefs.getString('device_token') ?? '';
+
+      if (deviceToken.isNotEmpty && deviceToken != token) {
+        try {
+          print("new Token $token");
+          Dio dio = Dio();
+          try {
+            Response response = await dio.post(
+              '${AppData.remoteUrl}/update-token', // Add query parameters
+              data: FormData.fromMap({
+                'device_id':deviceId,
+                'device_type':deviceType,
+                'user_id':AppData.logInUserId,
+                'device_token':token,
+              }),
+              options: Options(headers: {
+                'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+              }),
+            );
+
+            print("response ${response.data}");
+          } catch (e) {
+            print('Error: $e');
+          }
+          // emit(DataLoaded(drugsData));
+        } catch (e) {
+          // ProgressDialogUtils.hideProgressDialog();
+          print(e);
+
+        }
+      }
+    });
   }
 
   Future<CountriesModel?> _onGetCountries() async {
