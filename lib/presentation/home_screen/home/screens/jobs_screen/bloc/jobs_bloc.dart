@@ -38,7 +38,6 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
 
   _onGetJobs(JobLoadPageEvent event, Emitter<JobsState> emit) async {
     // emit(DrugsDataInitial());
-    print('33 ${event.page}');
     print('search text ${event.searchTerm}');
     print('country id ${event.countryId}');
     print('isExpired ${event.isExpired}');
@@ -54,7 +53,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     // try {
     JobsModel response = await postService.getJobsList(
         'Bearer ${AppData.userToken}',
-        '${pageNumber}',
+        '$pageNumber',
         event.countryId ?? "1",
         event.searchTerm ?? '',
         event.isExpired == 'New' ? "false" : 'true');
@@ -64,7 +63,6 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       drugsData.addAll(response.jobs?.data ?? []);
     }
     emit(PaginationLoadedState());
-
     // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   print(e);

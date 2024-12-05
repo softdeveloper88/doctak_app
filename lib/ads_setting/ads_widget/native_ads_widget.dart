@@ -101,12 +101,12 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
             // mainBackgroundColor: Colors.purple,
             cornerRadius: 10.0,
             callToActionTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.cyan,
-                // backgroundColor: Colors.red,
+                textColor: Colors.black,
+                backgroundColor: Colors.yellow,
                 style: NativeTemplateFontStyle.monospace,
                 size: 16.0),
             primaryTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.red,
+                textColor: Colors.black,
                 // backgroundColor: Colors.cyan,
                 style: NativeTemplateFontStyle.italic,
                 size: 16.0),

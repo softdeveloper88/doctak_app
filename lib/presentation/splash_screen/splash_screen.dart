@@ -102,6 +102,7 @@ class _SplashScreenState extends State<SplashScreen> {
     String? userType = prefs.getString('user_type') ?? '';
     String? university = prefs.getString('university') ?? '';
     String? countryName = prefs.getString('country') ?? '';
+    String? city = prefs.getString('city') ?? '';
     String? currency = prefs.getString('currency') ?? '';
 
     if (userToken != null) {
@@ -115,6 +116,7 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.specialty = specialty ?? '';
       AppData.university = university;
       AppData.userType = userType;
+      AppData.city = city;
       AppData.countryName = countryName;
       AppData.currency = currency;
     }
@@ -129,6 +131,7 @@ class _SplashScreenState extends State<SplashScreen> {
         initDeepLinks(context);
         // const SVDashboardScreen().launch(context,isNewTask: true);
         // });
+
       } else {
         // Future.delayed(const Duration(seconds: 1), () {
         LoginScreen().launch(context, isNewTask: true);

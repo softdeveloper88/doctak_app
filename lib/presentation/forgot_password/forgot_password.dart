@@ -9,7 +9,9 @@ import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
 import 'package:doctak_app/widgets/app_bar/appbar_title.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:sizer/sizer.dart';
 
 import '../home_screen/utils/SVCommon.dart';
@@ -24,8 +26,8 @@ class ForgotPassword extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetScaffoldColor(),
         resizeToAvoidBottomInset: false,
-        appBar: _buildAppBar(context),
         body: BlocConsumer<ForgotBloc, ForgotState>(
             bloc: forgotBloc,
             listener: (context, state) {
@@ -42,7 +44,7 @@ class ForgotPassword extends StatelessWidget {
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (BuildContext context) => LoginScreen(),
+                        builder: (BuildContext context) => const LoginScreen(),
                       ),
                       (route) => false);
                   // Navigate to the home screen or perform desired action
@@ -85,126 +87,138 @@ class ForgotPassword extends StatelessWidget {
                           bottom: MediaQuery.of(context).viewInsets.bottom),
                       child: Form(
                           key: _formKey,
-                          child: Container(
-                              width: double.maxFinite,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 39),
-                              child: Column(children: [
-                                CustomTextFormField(
-                                    controller: emailController,
-                                    hintText: translation(context)
-                                        .msg_enter_your_email,
-                                    textInputType: TextInputType.emailAddress,
-                                    prefix: Container(
-                                        margin: const EdgeInsets.fromLTRB(
-                                            24, 16, 16, 16),
-                                        child: CustomImageView(
-                                            color: Colors.blueGrey,
-                                            imagePath:
-                                                ImageConstant.imgCheckmark,
-                                            height: 24,
-                                            width: 24)),
-                                    prefixConstraints:
-                                        const BoxConstraints(maxHeight: 56),
-                                    validator: (value) {
-                                      if (value == null ||
-                                          (!isValidEmail(value,
-                                              isRequired: true))) {
-                                        return translation(context)
-                                            .err_msg_please_enter_valid_email;
-                                      }
-                                      return null;
-                                    },
-                                    contentPadding: const EdgeInsets.only(
-                                        top: 18, right: 30, bottom: 18)),
-                                Text(
-                                  message,
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                const SizedBox(height: 32),
-                                svAppButton(
-                                  context: context,
-                                  text: 'SEND',
-                                  onTap: () {
-                                    if (emailController.text.isEmpty) {
-                                      return;
-                                    }
-                                    if (_formKey.currentState!.validate()) {
-                                      _formKey.currentState!.save();
-                                    }
+                          child: Column(
+                            children: [
+                              Padding(padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 10),
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          icon: const Icon(Icons.arrow_back_ios),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 50),
+                                    Image.asset(
+                                      'assets/logo/logo.png',
+                                      width: MediaQuery.of(context).size.width * 0.8,
+                                      height: 100,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    const Text('Forgot Password', style: TextStyle(
+                                      fontSize: 24, fontWeight: FontWeight.w500,),),
+                                    const SizedBox(height: 8),
+                                    const Text('Enter your email to reset password',
+                                      overflow: TextOverflow.visible,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 16),),
+                                    const SizedBox(height: 16),
+                                  ],),),
+                              Container(
+                                  width: double.maxFinite,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 39),
+                                  child: Column(children: [
+                                    CustomTextFormField(
+                                        fillColor: CupertinoColors
+                                            .systemGrey5.withOpacity(
+                                            0.4),
+                                        filled: true,
+                                        controller: emailController,
+                                        hintText: translation(context)
+                                            .msg_enter_your_email,
+                                        textInputType: TextInputType.emailAddress,
+                                        prefix: Container(
+                                            margin: const EdgeInsets.fromLTRB(
+                                                24, 16, 16, 16),
+                                            child: CustomImageView(
+                                                color: Colors.blueGrey,
+                                                imagePath:
+                                                    ImageConstant.imgCheckmark,
+                                                height: 24,
+                                                width: 24)),
+                                        prefixConstraints:
+                                            const BoxConstraints(maxHeight: 56),
+                                        validator: (value) {
+                                          if (value == null ||
+                                              (!isValidEmail(value,
+                                                  isRequired: true))) {
+                                            return translation(context)
+                                                .err_msg_please_enter_valid_email;
+                                          }
+                                          return null;
+                                        },
+                                        contentPadding: const EdgeInsets.only(
+                                            top: 18, right: 30, bottom: 18)),
+                                    Text(
+                                      message,
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                    const SizedBox(height: 32),
+                                    svAppButton(
+                                      context: context,
+                                      text: 'SEND',
+                                      onTap: () {
+                                        if (emailController.text.isEmpty) {
+                                          return;
+                                        }
+                                        if (_formKey.currentState!.validate()) {
+                                          _formKey.currentState!.save();
+                                        }
 
-                                    forgotBloc.add(
-                                      ForgotPasswordEvent(
-                                        username: emailController.text,
-                                        // replace with real input
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 25),
-                                Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 48),
-                                        child: Row(children: [
-                                          Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 1),
-                                              child: Text(
-                                                  translation(context)
-                                                      .msg_don_t_have_an_account,
-                                                  style: CustomTextStyles
-                                                      .bodyMediumGray600)),
-                                          GestureDetector(
-                                              onTap: () {
-                                                FocusScope.of(context)
-                                                    .unfocus();
-                                                Navigator.pushAndRemoveUntil(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            SignUpScreen()),
-                                                    (route) => false);
-                                              },
-                                              child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 4),
+                                        forgotBloc.add(
+                                          ForgotPasswordEvent(
+                                            username: emailController.text,
+                                            // replace with real input
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(height: 25),
+                                    Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(left: 48),
+                                            child: Row(children: [
+                                              Padding(
+                                                  padding: const EdgeInsets.only(
+                                                      bottom: 1),
                                                   child: Text(
                                                       translation(context)
-                                                          .lbl_sign_up,
+                                                          .msg_don_t_have_an_account,
                                                       style: CustomTextStyles
-                                                          .titleSmallPrimarySemiBold)))
-                                        ]))),
-                                const SizedBox(height: 5)
-                              ])))));
+                                                          .bodyMediumGray600)),
+                                              GestureDetector(
+                                                  onTap: () {
+                                                    FocusScope.of(context)
+                                                        .unfocus();
+                                                    Navigator.pushAndRemoveUntil(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                SignUpScreen()),
+                                                        (route) => false);
+                                                  },
+                                                  child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 4),
+                                                      child: Text(
+                                                          translation(context)
+                                                              .lbl_sign_up,
+                                                          style: CustomTextStyles
+                                                              .titleSmallPrimarySemiBold)))
+                                            ]))),
+                                    const SizedBox(height: 5)
+                                  ])),
+                            ],
+                          ))));
             }));
-  }
-
-  /// Section Widget
-  _buildAppBar(BuildContext context) {
-    return CustomAppBar(
-      height: 140,
-      leadingWidth: 30,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-      centerTitle: true,
-      title: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            'assets/logo/logo.png',
-            width: 400,
-            height: 100,
-          ),
-          AppbarTitle(text: 'Forgot Password'),
-        ],
-      ),
-    );
   }
 }

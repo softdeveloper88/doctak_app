@@ -5,6 +5,7 @@ import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
 import 'package:doctak_app/presentation/notification_screen/notifications_provider.dart';
 import 'package:equatable/equatable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/app/AppData.dart';
 import '../../../data/models/notification_model/notification_model.dart';
 import 'notification_event.dart';
@@ -18,7 +19,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   int totalNotifications=0;
   NotificationModel? notificationsModel;
   final int nextPageTrigger = 1;
-
+  String emailVerified='';
   NotificationBloc() : super(PaginationInitialState()) {
     on<NotificationLoadPageEvent>(_onGetNotification);
     on<GetPost>(_onGetNotification1);
@@ -120,6 +121,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
     Dio dio = Dio();
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var response = await dio.get(
       '${AppData.remoteUrl}/notifications/unread/count', // Add query parameters
@@ -127,6 +129,22 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
       }),
     );
+    if((prefs.getString('email_verified_at')??'')=='') {
+      var response2 = await dio.post(
+        '${AppData.remoteUrl2}/check-email-verified', // Add query parameters
+        options: Options(headers: {
+          'Authorization': 'Bearer ${AppData.userToken}', // Set headers
+        }),
+      );
+      if (response2.statusCode == 200) {
+        print("check email verified");
+        emailVerified= response2.data['email_verified_at'];
+        prefs.setString('email_verified_at', response2.data['email_verified_at']??'');
+      }else{
+        print("check email verified not");
+
+      }
+    }
     totalNotifications=response.data['unread_count'].toInt();
     print('totalNotifications  $totalNotifications');
 

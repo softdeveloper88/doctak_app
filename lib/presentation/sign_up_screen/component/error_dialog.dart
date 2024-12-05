@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 
 class ErrorDialog extends StatelessWidget {
   final Map<String, dynamic> errors;
-
   ErrorDialog({required this.errors});
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(

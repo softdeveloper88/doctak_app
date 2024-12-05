@@ -1,31 +1,29 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/common_navigator.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
-import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sizer/sizer.dart';
+
+import '../../core/utils/app_comman_data.dart';
 import '../../widgets/app_bar/appbar_title.dart';
-import '../home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import '../home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import '../home_screen/utils/SVCommon.dart';
-import '../wellcome_screen/wellcome_screen.dart';
 import 'bloc/sign_up_bloc.dart';
 import 'component/error_dialog.dart';
-
 // ignore_for_file: must_be_immutable
 class SignUpScreen extends StatefulWidget {
-
-  SignUpScreen(
-      {this.isSocialLogin=false, this.firstName, this.lastName,this.email, this.token, Key? key})
-      : super(key: key);
+  SignUpScreen({this.isSocialLogin = false, this.firstName, this.lastName, this.email, this.token, Key? key}) : super(key: key);
   bool? isSocialLogin;
   String? firstName = '';
   String? lastName = '';
@@ -48,11 +46,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     print(widget.isSocialLogin);
     dropdownBloc.add(LoadDropdownValues());
     profileBloc.add(UpdateFirstDropdownValue(''));
-
     firstnameController = TextEditingController(text: widget.firstName);
     lastNameController = TextEditingController(text: widget.lastName);
 
-    emailController = TextEditingController(text:  widget.email);
+    emailController = TextEditingController(text: widget.email);
     print('object');
     super.initState();
   }
@@ -64,11 +61,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   TextEditingController? lastNameController;
 
-   TextEditingController emailController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
 
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-  TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   final TextEditingController phoneController = TextEditingController();
   FocusNode focusNode1 = FocusNode();
@@ -80,567 +76,456 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(backgroundColor: svGetScaffoldColor(),
         resizeToAvoidBottomInset: false,
-        appBar: _buildAppBar(context),
-        body: SizedBox(
-            width: 100.w,
+        body: SizedBox(width: 100.w,
             child: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery
-                        .of(context)
-                        .viewInsets
-                        .bottom),
-                child: Form(
-                    key: _formKey,
-                    child: Container(
-                        width: double.maxFinite,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 39),
+                padding: EdgeInsets.only(bottom: MediaQuery
+                    .of(context)
+                    .viewInsets
+                    .bottom),
+                child: Form(key: _formKey,
+                    child: Column(children: [
+                      Padding(padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 10),
                         child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 16),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  BlocBuilder<DropdownBloc, DropdownState>(
-                                      bloc: dropdownBloc,
-                                      builder: (context, state) {
-                                        if (state is DataLoaded) {
-                                          return Column(
-                                            children: [
-                                              Container(
-                                                width: 500,
-                                                // height: 15.w,
-                                                decoration: BoxDecoration(
-                                                    color: Colors
-                                                        .blueGrey[300],
-                                                    borderRadius:
-                                                    const BorderRadius
-                                                        .all(
-                                                        Radius.circular(
-                                                            15))),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          state
-                                                              .isDoctorRole =
-                                                          true;
-                                                          dropdownBloc
-                                                              .isDoctorRole =
-                                                          true;
-                                                          dropdownBloc.add(
-                                                              ChangeDoctorRole());
-                                                          setState(() {
+                          children: [
+                            const SizedBox(height: 30),
+                            Image.asset(
+                              'assets/logo/logo.png',
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              height: 100,
+                            ),
+                            const Text('Sign Up', style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.w500,),),
+                            const SizedBox(height: 8),
+                            const Text('Please Register your account to continue',
+                              overflow: TextOverflow.visible,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 16),),
+                          ],),),
+                        Container(width: double.maxFinite,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 0),
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                BlocBuilder<DropdownBloc, DropdownState>(
+                                    bloc: dropdownBloc,
+                                    builder: (context, state) {
+                                      if (state is DataLoaded) {
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment
+                                              .start,
+                                          children: [
+                                            // Container(width: 500,
+                                            //   decoration: BoxDecoration(
+                                            //       border: Border.all(
+                                            //           color: Colors.blue,
+                                            //           width: 2),
+                                            //       color: Colors.white,
+                                            //       borderRadius: const BorderRadius
+                                            //           .all(Radius.circular(8))),
+                                            //   child: Row(children: [
+                                            //     Expanded(
+                                            //       child: InkWell(onTap: () {
+                                            //         state.isDoctorRole = true;
+                                            //         dropdownBloc.isDoctorRole =
+                                            //         true;
+                                            //         dropdownBloc.add(
+                                            //             ChangeDoctorRole());
+                                            //         setState(() {
+                                            //
+                                            //         });
+                                            //       },
+                                            //         child: Container(
+                                            //           padding: const EdgeInsets
+                                            //               .all(10),
+                                            //           // width: 210,
+                                            //           height: 50,
+                                            //           decoration: BoxDecoration(
+                                            //               color: !state
+                                            //                   .isDoctorRole
+                                            //                   ? Colors.white
+                                            //                   : Colors.blue,
+                                            //               borderRadius: const BorderRadius
+                                            //                   .all(
+                                            //                   Radius.circular(
+                                            //                       6))),
+                                            //           child: Center(child: Text(
+                                            //             "Doctor",
+                                            //             style: TextStyle(
+                                            //                 fontFamily: 'Poppins',
+                                            //                 color: state
+                                            //                     .isDoctorRole
+                                            //                     ? Colors.white
+                                            //                     : Colors.blue,
+                                            //                 fontWeight: FontWeight
+                                            //                     .bold,
+                                            //                 fontSize: 14),
+                                            //             // style: CustomTextStyles
+                                            //             //     .titleMediumOnPrimaryContainer,
+                                            //           )),),),),
+                                            //     Expanded(
+                                            //       child: InkWell(onTap: () {
+                                            //         state.isDoctorRole = false;
+                                            //         dropdownBloc.add(
+                                            //             ChangeDoctorRole());
+                                            //         dropdownBloc.isDoctorRole =
+                                            //         false;
+                                            //         setState(() {
+                                            //
+                                            //         });
+                                            //       },
+                                            //         child: Container(
+                                            //           padding: const EdgeInsets
+                                            //               .all(10),
+                                            //           // width: 200,
+                                            //           height: 50,
+                                            //           decoration: BoxDecoration(
+                                            //               color: state
+                                            //                   .isDoctorRole
+                                            //                   ? Colors.white
+                                            //                   : Colors.blue,
+                                            //               borderRadius: const BorderRadius
+                                            //                   .all(
+                                            //                   Radius.circular(
+                                            //                       6))),
+                                            //           child: Center(child: Text(
+                                            //             "Medical student",
+                                            //             style: TextStyle(
+                                            //                 fontFamily: 'Poppins',
+                                            //                 color: !state
+                                            //                     .isDoctorRole
+                                            //                     ? Colors.white
+                                            //                     : Colors.blue,
+                                            //                 fontWeight: FontWeight
+                                            //                     .bold,
+                                            //                 fontSize: 14),
+                                            //             // style: CustomTextStyles
+                                            //             //     .titleMediumOnPrimaryContainer,
+                                            //           )),),),),
+                                            //   ],),),
+                                            const SizedBox(height: 10),
+                                            const Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Text(
+                                                'Enter Your First Name:',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight
+                                                      .w500,),),),
+                                            _buildName(context),
+                                            const SizedBox(height: 16),
+                                            const Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Text(
+                                                'Enter Your Last Name:',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight
+                                                      .w500,),),),
+                                            _buildName1(context),
+                                            const SizedBox(height: 16),
+                                            if (widget.isSocialLogin ==
+                                                false)const Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Text('Enter Your Email:',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight
+                                                      .w500,),),),
+                                            _buildEmail(context),
+                                            if (widget.isSocialLogin ==
+                                                false)const SizedBox(
+                                                height: 16),
+                                            if (widget.isSocialLogin ==
+                                                false)const Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Text('Create Password:',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight
+                                                      .w500,),),),
+                                            CustomTextFormField(
+                                                fillColor: CupertinoColors
+                                                    .systemGrey5.withOpacity(
+                                                    0.4),
+                                                filled: true,
 
-                                                          });
-                                                        },
-                                                        child: Container(
-                                                          padding:
-                                                          const EdgeInsets
-                                                              .all(10),
-                                                          // width: 210,
-                                                          height: 50,
-                                                          decoration: BoxDecoration(
-                                                              color: !state
-                                                                  .isDoctorRole
-                                                                  ? Colors
-                                                                  .blueGrey[
-                                                              300]
-                                                                  : Colors
-                                                                  .blue,
-                                                              borderRadius:
-                                                              const BorderRadius
-                                                                  .all(
-                                                                  Radius
-                                                                      .circular(
-                                                                      15))),
-                                                          child: const Center(
-                                                              child: Text(
-                                                                "Doctor",
-                                                                style: TextStyle(
-                                                                   fontFamily: 'Poppins',
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                    12),
-                                                                // style: CustomTextStyles
-                                                                //     .titleMediumOnPrimaryContainer,
-                                                              )),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          state
-                                                              .isDoctorRole =
-                                                          false;
-                                                          dropdownBloc.add(
-                                                              ChangeDoctorRole());
-                                                          dropdownBloc
-                                                              .isDoctorRole =
-                                                          false;
-                                                          setState(() {
-
-                                                          });
-                                                        },
-                                                        child: Container(
-                                                          padding:
-                                                          const EdgeInsets
-                                                              .all(10),
-                                                          // width: 200,
-                                                          height: 50,
-                                                          decoration: BoxDecoration(
-                                                              color: state
-                                                                  .isDoctorRole
-                                                                  ? Colors
-                                                                  .blueGrey[
-                                                              300]
-                                                                  : Colors
-                                                                  .blue,
-                                                              borderRadius:
-                                                              const BorderRadius
-                                                                  .all(
-                                                                  Radius
-                                                                      .circular(
-                                                                      15))),
-                                                          child: const Center(
-                                                              child: Text(
-                                                                "Medical student",
-                                                                style: TextStyle(
-                                                                    fontFamily: 'Poppins',
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                    12),
-                                                                // style: CustomTextStyles
-                                                                //     .titleMediumOnPrimaryContainer,
-                                                              )),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(height: 16),
-                                              _buildName(context),
-                                              const SizedBox(height: 16),
-                                              _buildName1(context),
-                                              const SizedBox(height: 16),
-                                              if(widget.isSocialLogin == false) _buildEmail(
-                                                  context),
-                                              if(widget.isSocialLogin  == false) const SizedBox(
-                                                  height: 16),
-                                              if(widget.isSocialLogin == false) CustomTextFormField(
-                                                  focusNode: focusNode4,
-                                                  controller:
-                                                  passwordController,
-                                                  hintText: translation(
-                                                      context)
-                                                      .lbl_create_password,
-                                                  textInputAction:
-                                                  TextInputAction.done,
-                                                  textInputType:
-                                                  TextInputType
-                                                      .visiblePassword,
-                                                  prefix: Container(
-                                                      margin:
-                                                      const EdgeInsets.fromLTRB(
-                                                          24,
-                                                          16,
-                                                          16,
-                                                          16),
-                                                      child: CustomImageView(
-                                                          color: Colors
-                                                              .black54,
-                                                          imagePath:
-                                                          ImageConstant
-                                                              .imgLocation,
-                                                          height:
-                                                          24,
-                                                          width: 24
-                                                              )),
-                                                  prefixConstraints:
-                                                  const BoxConstraints(
-                                                      maxHeight: 56),
-                                                  suffix: InkWell(
-                                                      onTap: () {
-                                                        dropdownBloc.add(
-                                                            TogglePasswordVisibility());
-                                                      },
-                                                      child: Container(
-                                                          margin: const EdgeInsets
-                                                              .fromLTRB(
-                                                              30,
-                                                              16,
-                                                              24,
-                                                              16),
-                                                          child:
-                                                          state
-                                                              .isPasswordVisible
-                                                              ? const Icon(
-                                                            Icons
-                                                                .visibility_off,
-                                                            color:
-                                                            Colors.black54,
-                                                            size:
-                                                            24,
-                                                          )
-                                                              : const Icon(
-                                                            Icons
-                                                                .visibility,
-                                                            color:
-                                                            Colors.black54,
-                                                            size:
-                                                            24,
-                                                          ))),
-                                                  suffixConstraints: const BoxConstraints(
-                                                      maxHeight: 56),
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        (!isValidPassword(
-                                                            value,
-                                                            isRequired:
-                                                            true))) {
-                                                      return translation(
-                                                          context)
-                                                          .err_msg_please_enter_valid_password;
-                                                    }
-                                                    return null;
-                                                  },
-                                                  obscureText: state
-                                                      .isPasswordVisible),
-                                              if(widget.isSocialLogin == false) const SizedBox(
-                                                  height: 28),
-                                              if(widget.isSocialLogin == false) CustomTextFormField(
-
-                                                  focusNode: focusNode5,
-                                                  controller:
-                                                  confirmPasswordController,
-                                                  hintText: translation(
-                                                      context)
-                                                      .msg_confirm_password,
-                                                  textInputAction:
-                                                  TextInputAction.done,
-                                                  textInputType:
-                                                  TextInputType.text,
-                                                  prefix: Container(
-                                                      margin: const EdgeInsets
-                                                          .fromLTRB(
-                                                          24,
-                                                          16,
-                                                          16,
-                                                          16),
-                                                      child: CustomImageView(
-                                                          color: Colors
-                                                              .black54,
-                                                          imagePath: ImageConstant
-                                                              .imgLocation,
-                                                          height:
-                                                          24,
-                                                          width: 24
-                                                              )),
-                                                  prefixConstraints:
-                                                  const BoxConstraints(
-                                                      maxHeight: 56),
-                                                  suffix: InkWell(
-                                                      onTap: () {
-                                                        dropdownBloc.add(
-                                                            TogglePasswordVisibility());
-                                                      },
-                                                      child: Container(
-                                                          margin: const EdgeInsets
-                                                              .fromLTRB(
-                                                              30,
-                                                              16,
-                                                              24,
-                                                              16),
-                                                          child:
-                                                          state
-                                                              .isPasswordVisible
-                                                              ? const Icon(
-                                                            Icons
-                                                                .visibility_off,
-                                                            color:
-                                                            Colors.black54,
-                                                            size:
-                                                            24,
-                                                          )
-                                                              : const Icon(
-                                                            Icons
-                                                                .visibility,
-                                                            color:
-                                                            Colors.black54,
-                                                            size:
-                                                            24,
-                                                          ))),
-                                                  // child: CustomImageView(color: Colors.black54, imagePath: ImageConstant.imgEye, height: 24, width: 24))),
-                                                  suffixConstraints:
-                                                  const BoxConstraints(
-                                                      maxHeight: 56),
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        (!isValidPassword(
-                                                            value,
-                                                            isRequired:
-                                                            true))) {
-                                                      return translation(
-                                                          context)
-                                                          .err_msg_please_enter_valid_password;
-                                                    }
-                                                    return null;
-                                                  },
-                                                  obscureText: state
-                                                      .isPasswordVisible),
-                                              if(widget.isSocialLogin == true)_buildPhone(
-                                                  context),
-                                              if(widget.isSocialLogin == false) const SizedBox(
-                                                  height: 28),
-
-                                            ],
-                                          );
-                                        } else {
-                                          return Container();
-                                        }
-                                      }),
-                                  // if(widget.isSocialLogin==true)
-                                    BlocBuilder<ProfileBloc, ProfileState>(
-                                      bloc: profileBloc,
-                                      builder: (context, state) {
-
-                                        if (state is PaginationLoadedState) {
-
-                                          return Column(
-                                              children: [
-                                                const SizedBox(height: 10),
-                                                CustomDropdownButtonFormField(
-                                                  items: state.firstDropdownValues,
-                                                  value: state
-                                                      .selectedFirstDropdownValue,
-                                                  width: double.infinity,
-                                                  contentPadding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 0,
-                                                  ),
-                                                  onChanged: (
-                                                      String? newValue) {
-                                                    profileBloc
-                                                        .country =
-                                                    newValue!;
-                                                    profileBloc.add(UpdateSecondDropdownValues(newValue));
-
-                                                  },
-                                                ),
-                                                const SizedBox(height: 10),
-                                                CustomDropdownButtonFormField(
-                                                  items: state
-                                                      .secondDropdownValues,
-                                                  value: state
-                                                      .selectedSecondDropdownValue,
-                                                  width: double.infinity,
-                                                  contentPadding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 0,
-                                                  ),
-                                                  onChanged: (
-                                                      String? newValue) {
-                                                    profileBloc.stateName =
-                                                    newValue!;
-
-                                                    profileBloc.add(
-                                                        UpdateSpecialtyDropdownValue(
-                                                            newValue));
-                                                  },
-                                                ),
-                                                const SizedBox(height: 10),
-                                               if(dropdownBloc.isDoctorRole) CustomDropdownButtonFormField(
-                                                  items: state.specialtyDropdownValue,
-                                                  value: state.selectedSpecialtyDropdownValue,
-                                                  width: double.infinity,
-                                                  contentPadding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 0,
-                                                  ),
-                                                  onChanged: (
-                                                      String? newValue) {
-                                                    profileBloc.specialtyName = newValue!;
-
-                                                  },
-                                                ),
-                                                const SizedBox(height: 10),
-                                              ]);
-                                        }else{
-                                          return const Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Center(child: CircularProgressIndicator(),),
-                                                Text('Wait a moment more field Loading...',style: TextStyle(fontFamily: 'Poppins',color: Colors.blue,fontWeight: FontWeight.bold,),),
-                                              ],
-                                            ),
-                                          );
-                                        }
-                                      }),
-                                  Row(
-                                    children: <Widget>[
-                                      Checkbox(
-                                        value: _isChecked,
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            _isChecked = value!;
-                                          });
-                                        },
-                                      ),
-                                      Expanded(
-                                        child: RichText(
-                                          text: TextSpan(
-                                            style: const TextStyle(fontSize: 14.0, color: Colors.black,fontFamily: 'Poppins',),
-                                            children: <TextSpan>[
-                                              const TextSpan(text: 'I agree to the '),
-                                              TextSpan(
-                                                text: 'Terms and Conditions',
-                                                style: const TextStyle(color: Colors.blue,fontFamily: 'Poppins',),
-                                                recognizer: TapGestureRecognizer()
-                                                  ..onTap = () {
-                                                    // Handle the click event for Terms and Conditions
-                                                    TermsAndConditionScreen().launch(context, isNewTask: false);
-
-                                                    // You can navigate to the Terms and Conditions page here
-                                                  },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8,),
-                                  BlocListener<DropdownBloc, DropdownState>(
-                                      listener: (context, state) {
-                                        if (state is DataLoaded) {
-                                          if (state.isSubmit) {
-                                            print(state.response  );
-                                            if (state.response['success']) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                    content: Text(
-                                                        state.response[
-                                                        'message'])),
-                                              );
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => WelcomeScreen(emailController.text.validate())),
-                                                      (route) => false);
-                                            } else {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                    content: Text(
-                                                        state.response['message']??"Something went wrong.Please make sure no field left empty")),
-                                              );
-                                              print("errors ${state.response}");
-
-                                              _showErrorDialog(
-                                                  state.response['errors']);
-                                            }
-                                          }
-                                        }else if (state is SocialLoginSuccess) {
-
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const SVDashboardScreen()),
-                                                      (route) => false);
-                                            } else {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                       'Something went wrong')),
-                                              );
-
-                                        }
-                                      },
-                                      bloc: dropdownBloc,
-                                      child: _buildSignUp(context)),
-                                  const SizedBox(height: 26),
-                                  Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Padding(
-                                          padding:
-                                          const EdgeInsets.only(left: 44),
-                                          child: Row(children: [
-                                            Text("Already have an account",
-                                                style: CustomTextStyles
-                                                    .bodyMediumGray600),
-                                            GestureDetector(
-                                                onTap: () {
-                                                  onTapTxtLogIn(context);
+                                                focusNode: focusNode4,
+                                                controller: passwordController,
+                                                hintText: translation(context)
+                                                    .lbl_create_password,
+                                                textInputAction: TextInputAction
+                                                    .done,
+                                                textInputType: TextInputType
+                                                    .visiblePassword,
+                                                prefix: Container(
+                                                    margin: const EdgeInsets
+                                                        .fromLTRB(
+                                                        24, 16, 16, 16),
+                                                    child: CustomImageView(
+                                                        color: Colors.black54,
+                                                        imagePath: ImageConstant
+                                                            .imgLocation,
+                                                        height: 24,
+                                                        width: 24)),
+                                                prefixConstraints: const BoxConstraints(
+                                                    maxHeight: 56),
+                                                suffix: InkWell(onTap: () {
+                                                  dropdownBloc.add(
+                                                      TogglePasswordVisibility());
                                                 },
-                                                child: Padding(
-                                                    padding:
-                                                    const EdgeInsets.only(
-                                                        left: 4),
-                                                    child: Text(
-                                                        translation(context)
-                                                            .lbl_log_in2,
-                                                        style: CustomTextStyles
-                                                            .titleSmallPrimarySemiBold)))
-                                          ]))),
-                                  const SizedBox(height: 5)
-                                ],
-                              ),
-                            ]))))));
+                                                    child: Container(
+                                                        margin: const EdgeInsets
+                                                            .fromLTRB(
+                                                            30, 16, 24, 16),
+                                                        child: state
+                                                            .isPasswordVisible
+                                                            ? const Icon(
+                                                          Icons.visibility_off,
+                                                          color: Colors.black54,
+                                                          size: 24,)
+                                                            : const Icon(
+                                                          Icons.visibility,
+                                                          color: Colors.black54,
+                                                          size: 24,))),
+                                                suffixConstraints: const BoxConstraints(
+                                                    maxHeight: 56),
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      (!isValidPassword(value,
+                                                          isRequired: true))) {
+                                                    return translation(context)
+                                                        .err_msg_please_enter_valid_password;
+                                                  }
+                                                  return null;
+                                                },
+                                                obscureText: state
+                                                    .isPasswordVisible),
+                                            if (widget.isSocialLogin ==
+                                                false)const SizedBox(
+                                                height: 16),
+                                            if (widget.isSocialLogin ==
+                                                false)const Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Text('Confirm Password:',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight
+                                                      .w500,),),),
+                                            CustomTextFormField(
+                                                fillColor: CupertinoColors
+                                                    .systemGrey5.withOpacity(
+                                                    0.4),
+                                                filled: true,
+                                                focusNode: focusNode5,
+                                                controller: confirmPasswordController,
+                                                hintText: translation(context)
+                                                    .msg_confirm_password,
+                                                textInputAction: TextInputAction
+                                                    .done,
+                                                textInputType: TextInputType
+                                                    .text,
+                                                prefix: Container(
+                                                    margin: const EdgeInsets
+                                                        .fromLTRB(
+                                                        24, 16, 16, 16),
+                                                    child: CustomImageView(
+                                                        color: Colors.black54,
+                                                        imagePath: ImageConstant
+                                                            .imgLocation,
+                                                        height: 24,
+                                                        width: 24)),
+                                                prefixConstraints: const BoxConstraints(
+                                                    maxHeight: 56),
+                                                suffix: InkWell(onTap: () {
+                                                  dropdownBloc.add(
+                                                      TogglePasswordVisibility());
+                                                },
+                                                    child: Container(
+                                                        margin: const EdgeInsets
+                                                            .fromLTRB(
+                                                            30, 16, 24, 16),
+                                                        child: state
+                                                            .isPasswordVisible
+                                                            ? const Icon(
+                                                          Icons.visibility_off,
+                                                          color: Colors.black54,
+                                                          size: 24,)
+                                                            : const Icon(
+                                                          Icons.visibility,
+                                                          color: Colors.black54,
+                                                          size: 24,))),
+                                                // child: CustomImageView(color: Colors.black54, imagePath: ImageConstant.imgEye, height: 24, width: 24))),
+                                                suffixConstraints: const BoxConstraints(
+                                                    maxHeight: 56),
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      (!isValidPassword(value,
+                                                          isRequired: true))) {
+                                                    return translation(context)
+                                                        .err_msg_please_enter_valid_password;
+                                                  }
+                                                  return null;
+                                                },
+                                                obscureText: state
+                                                    .isPasswordVisible),
+                                            // if(widget.isSocialLogin == true)_buildPhone(
+                                            //     context),
+                                            // if(widget.isSocialLogin == false) const SizedBox(
+                                            //     height: 28),
+                                          ],);
+                                      } else {
+                                        return Container();
+                                      }
+                                    }),
+                                Row(children: <Widget>[
+                                  Checkbox(value: _isChecked, onChanged: (
+                                      bool? value) {
+                                    setState(() {
+                                      _isChecked = value!;
+                                    });
+                                  },),
+                                  Expanded(child: RichText(text: TextSpan(
+                                    style: const TextStyle(fontSize: 14.0,
+                                      color: Colors.black,
+                                      fontFamily: 'Poppins',),
+                                    children: <TextSpan>[
+                                      const TextSpan(text: 'I agree to the '),
+                                      TextSpan(text: 'Terms and Conditions',
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          fontFamily: 'Poppins',),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            // Handle the click event for Terms and Conditions
+                                            launchScreen(context,
+                                                TermsAndConditionScreen(),
+                                                isNewTask: false,
+                                                pageRouteAnimation: PageRouteAnimation
+                                                    .Slide,
+                                                duration: const Duration(
+                                                    microseconds: 500));
+
+                                            // You can navigate to the Terms and Conditions page here
+                                          },),
+                                    ],),),),
+                                ],),
+                                const SizedBox(height: 8,),
+                                BlocListener<DropdownBloc, DropdownState>(
+                                    listener: (context, state) {
+                                      if (state is DataLoaded) {
+                                        if (state.isSubmit) {
+                                          print(state.response);
+                                          if (state.response['success']) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(const SnackBar(
+                                                content: Text('Account create successfully')),);
+                                            launchScreen(context,
+                                                const SVDashboardScreen(),
+                                                isNewTask: true,
+                                                pageRouteAnimation: PageRouteAnimation
+                                                    .Slide);
+                                            // Navigator.pushAndRemoveUntil(
+                                            //     context,
+                                            //     MaterialPageRoute(
+                                            //         builder: (context) => WelcomeScreen(emailController.text)),
+                                            //         (route) => false);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                content: Text(state.response['message'] ??
+                                                    "Something went wrong.Please make sure no field left empty")),);
+                                            print("errors ${state.response}");
+                                            _showErrorDialog(
+                                                state.response['errors']);
+                                          }
+                                        }
+                                      } else if (state is SocialLoginSuccess) {
+                                        Navigator.pushAndRemoveUntil(context,
+                                            MaterialPageRoute(builder: (
+                                                context) => const SVDashboardScreen()), (
+                                                route) => false);
+                                      } else if (state is DataError) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                            content: Text(
+                                                'Something went wrong')),);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                            content: Text(
+                                                'Something went wrong')),);
+                                      }
+                                    },
+                                    bloc: dropdownBloc,
+                                    child: _buildSignUp(context)),
+                                const SizedBox(height: 26),
+                                Align(alignment: Alignment.centerLeft,
+                                    child: Padding(padding: const EdgeInsets
+                                        .only(left: 44), child: Row(children: [
+                                      Text("Already have an account",
+                                          style: CustomTextStyles
+                                              .bodyMediumGray600),
+                                      GestureDetector(onTap: () {
+                                        onTapTxtLogIn(context);
+                                      },
+                                          child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 4),
+                                              child: Text(translation(context)
+                                                  .lbl_log_in2,
+                                                  style: CustomTextStyles
+                                                      .titleSmallPrimarySemiBold)))
+                                    ]))),
+                                const SizedBox(height: 5),
+                              ])),
+                    ],)))));
   }
 
   void _showErrorDialog(Map<String, dynamic> errors) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return ErrorDialog(errors: errors);
-      },
-    );
+    showDialog(context: context, builder: (BuildContext context) {
+      return ErrorDialog(errors: errors);
+    },);
   }
 
   /// Section Widget
   _buildAppBar(BuildContext context) {
-    return CustomAppBar(
-      height: 150,
+    return CustomAppBar(height: 150,
       leadingWidth: 56,
       centerTitle: true,
-      title: Column(
-        children: [
-          Image.asset(
-            'assets/logo/logo.png',
-            width: 400,
-            height: 100,
-          ),
-          AppbarTitle(text: widget.isSocialLogin ?? false
-              ? "Complete Profile"
-              : translation(context).lbl_sign_up),
-        ],
-      ),
-    );
+      title: Column(children: [
+        Image.asset('assets/logo/logo.png', width: 400, height: 100,),
+        AppbarTitle(text: widget.isSocialLogin ?? false
+            ? "Complete Profile"
+            : translation(context).lbl_sign_up),
+      ],),);
   }
 
   /// Section Widget
   Widget _buildName(BuildContext context) {
     return CustomTextFormField(
+        fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
+        filled: true,
         focusNode: focusNode1,
         controller: firstnameController,
         hintText: translation(context).lbl_enter_your_name1,
-    prefix: const SizedBox(width: 10,),
+        prefix: Container(margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+            child: CustomImageView(color: Colors.black54,
+                imagePath: ImageConstant.imgPerson,
+                height: 24,
+                width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
@@ -654,18 +539,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Section Widget
   Widget _buildName1(BuildContext context) {
     return CustomTextFormField(
+        fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
+        filled: true,
         focusNode: focusNode2,
         controller: lastNameController,
         hintText: translation(context).lbl_enter_your_name2,
-        prefix: const SizedBox(width: 10,),
-
-        // prefix: Container(
-        //     margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-        //     child: CustomImageView(
-        //         color: Colors.black54,
-        //         imagePath: ImageConstant.imgLock,
-        //         height: 24,
-        //         width: 24)),
+        prefix: Container(margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+            child: CustomImageView(color: Colors.black54,
+                imagePath: ImageConstant.imgPerson,
+                height: 24,
+                width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (!isText(value)) {
@@ -679,7 +562,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Section Widget
   Widget _buildPhone(BuildContext context) {
     return CustomTextFormField(
-      focusNode: focusNode6,
+        fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
+        filled: true,
+        focusNode: focusNode6,
         textInputType: TextInputType.phone,
         controller: phoneController,
         hintText: translation(context).lbl_enter_your_phone,
@@ -704,19 +589,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Section Widget
   Widget _buildEmail(BuildContext context) {
     return CustomTextFormField(
+        fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
+        filled: true,
         focusNode: focusNode3,
         controller: emailController,
         hintText: translation(context).msg_enter_your_email2,
         textInputType: TextInputType.emailAddress,
-        prefix: const SizedBox(width: 10,),
-
-        // prefix: Container(
-        //     margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-        //     child: CustomImageView(
-        //         color: Colors.black54,
-        //         imagePath: ImageConstant.imgCheckmark,
-        //         height: 24,
-        //         width: 24)),
+        prefix: Container(margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+            child: CustomImageView(color: Colors.black54,
+                imagePath: ImageConstant.imgCheckmark,
+                height: 30,
+                width: 30)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
         validator: (value) {
           if (value == null || (!isValidEmail(value, isRequired: true))) {
@@ -729,123 +612,54 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   /// Section Widget
   Widget _buildSignUp(BuildContext context) {
-    return svAppButton(
-      context: context,
-      text: 'Sign Up',
-      onTap: () async {
-        // SharedPreferences prefs =
-        //     await SharedPreferences.getInstance();
-        // await prefs.setBool('acceptTerms', true);
-        // TermsAndConditionScreen(accept: (){
-        // },).launch(context, isNewTask: true);
-        onTapSignUp(context);
-
-      },
-    );
+    return svAppButton(context: context, text: 'Sign Up', onTap: () async {
+      onTapSignUp(context);
+    },);
   }
 
   /// Displays a dialog with the [SignUpSuccessDialog] content.
   onTapSignUp(BuildContext context) async {
-
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Field must be filled'),
-      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Field must be filled'),));
       return;
-
     }
 
-      await FirebaseMessaging.instance.getToken().then((token) async {
-        if (widget.isSocialLogin == false) {
-          if (passwordController.text != confirmPasswordController.text) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Password should be match'),
-            ));
-          } else {
-            if(_isChecked) {
-            dropdownBloc.add(SignUpButtonPressed(
-                username: emailController.text.toString(),
-                password: passwordController.text.toString(),
-                firstName: firstnameController!.text.toString(),
-                lastName: lastNameController!.text.toString(),
-                country: profileBloc.country ?? 'United Arab Emirates',
-                state: profileBloc.stateName ?? "DUBAI",
-                specialty: profileBloc.specialtyName ?? "",
-                userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
-                deviceToken: token ?? ''
-              // replace with real input
-            ));
-            }else{
-              toasty(context, "Please accept terms and conditions before proceeds");
-            }
-          }
+    await FirebaseMessaging.instance.getToken().then((token) async {
+      // if (widget.isSocialLogin == false) {
+      if (passwordController.text != confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Password should be match'),));
+      } else {
+        if (_isChecked) {
+          dropdownBloc.add(SignUpButtonPressed(
+              username: emailController.text.toString(),
+              password: passwordController.text.toString(),
+              firstName: firstnameController!.text.toString(),
+              lastName: lastNameController!.text.toString(),
+              country: profileBloc.country ?? 'United Arab Emirates',
+              state: profileBloc.stateName ?? "DUBAI",
+              specialty: profileBloc.specialtyName ?? "",
+              userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
+              deviceToken: token ?? ''
+            // replace with real input
+          ));
         } else {
-          print('social');
-          if (firstnameController!.text.isEmpty) {
-            toasty(context, "Please enter first name", bgColor: Colors.red,
-                textColor: Colors.white);
-            return;
-          } else if (lastNameController!.text.isEmpty) {
-            toasty(context, "Please enter last name", bgColor: Colors.red,
-                textColor: Colors.white);
-
-            return;
-          } else if (phoneController.text.isEmpty) {
-            toasty(context, "Please enter phone number", bgColor: Colors.red,
-                textColor: Colors.white);
-
-            return;
-          } else if (profileBloc.country == '') {
-            toasty(context, "Please select country", bgColor: Colors.red,
-                textColor: Colors.white);
-
-            return;
-          } else if (profileBloc.stateName == '') {
-            toasty(context, "Please select state", bgColor: Colors.red,
-                textColor: Colors.white);
-            return;
-          } else if (dropdownBloc.isDoctorRole &&(profileBloc.specialtyName == null ||
-                profileBloc.specialtyName == '' ||
-                profileBloc.specialtyName == 'Select Specialty')) {
-              toasty(context, "Please select specialty", bgColor: Colors.red,
-                  textColor: Colors.white);
-              return;
-
-
-          } else if (!_isChecked) {
-
-            toasty(context, "Please accept terms and conditions before proceeds");
-
-          } else {
-            print('valid');
-            dropdownBloc.add(SocialButtonPressed(
-                token: widget.token ?? '',
-                firstName: firstnameController!.text.toString(),
-                lastName: lastNameController!.text.toString(),
-                phone: phoneController.text.toString(),
-                country: profileBloc.country ?? 'United Arab Emirates',
-                state: profileBloc.stateName ?? "DUBAI",
-                specialty: profileBloc.specialtyName ?? "",
-                userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
-                deviceToken: token ?? ''
-              // replace with real input
-            ));
-          }
+          toast("Please accept terms and conditions before proceeds");
         }
-      });
-
+      }
+    }).catchError((e){
+      toast("Something went wrong please try again");
+    });
   }
 
   /// Navigates to the loginScreen when the action is triggered.
   onTapTxtLogIn(BuildContext context) {
     Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (route) => false);
+        context, MaterialPageRoute(builder: (context) => const LoginScreen()), (
+        route) => false);
   }
 }
 
-// }

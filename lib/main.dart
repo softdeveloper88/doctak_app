@@ -48,6 +48,7 @@ import 'ads_setting/ad_setting.dart';
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
 import 'core/utils/app_comman_data.dart';
+import 'core/utils/common_navigator.dart';
 import 'core/utils/connectivity_service.dart';
 import 'core/utils/get_shared_value.dart';
 import 'core/utils/navigator_service.dart';
@@ -407,7 +408,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     return _updateConnectionStatus(result);
   }
-
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
     setState(() {
       _connectionStatus = result;
@@ -705,6 +705,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           '/comments_on_posts': (context) => PostDetailsScreen(
                                 commentId: int.parse(widget.id ?? '0'),
                               ),
+                          '/reply_to_comment': (context) => PostDetailsScreen(
+                                commentId: int.parse(widget.id ?? '0'),
+                              ),
                           '/like_comment_on_post': (context) =>
                               PostDetailsScreen(
                                 commentId: int.parse(widget.id ?? '0'),
@@ -737,6 +740,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         },
                         debugShowCheckedModeBanner: false,
                         scrollBehavior: SBehavior(),
+                        themeAnimationDuration: Duration(microseconds: 500),
                         theme: AppTheme.lightTheme,
                         darkTheme: AppTheme.darkTheme,
                         themeMode: appStore.isDarkMode

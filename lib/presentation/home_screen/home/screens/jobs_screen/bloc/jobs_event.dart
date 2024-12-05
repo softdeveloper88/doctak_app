@@ -49,7 +49,6 @@ class JobLoadPageEvent extends JobsEvent {
 
 class JobDetailPageEvent extends JobsEvent {
   String? jobId;
-
   JobDetailPageEvent({this.jobId});
   @override
   List<Object?> get props => [jobId];

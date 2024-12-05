@@ -7,9 +7,10 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_req.dart';
+import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_resp.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +31,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     on<LoadDropdownValues>(_loadDropdownValues);
     on<TogglePasswordVisibility>(_changePasswordVisibility);
     on<ChangeDoctorRole>(_changeDoctorRole);
+    on<CompleteButtonPressed>(_onCompleteButtonPressed);
     on<SignUpButtonPressed>(_onSignUpButtonPressed);
     on<SocialButtonPressed>(_onSocialLoginProfileCompletePressed);
   }
@@ -82,36 +84,157 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         deviceType="ios";
         deviceId=iosInfo.identifierForVendor.toString();
       }
-      print(event.firstName);
-      final response = await apiService.register(
-          event.firstName,
-          event.lastName,
-          event.username,
-          event.password,
-          event.country,
-          event.state,
-          event.specialty,
-          event.userType,event.deviceToken??"",deviceType,deviceId);
-      if (response.response.statusCode == 200) {
-        ProgressDialogUtils.hideProgressDialog();
-        emit(DataLoaded(!(state as DataLoaded).isPasswordVisible,
-            (state as DataLoaded).isDoctorRole, true, response.response.data));
+      // final response1 = await apiService.register(
+      //     event.firstName,
+      //     event.lastName,
+      //     event.username,
+      //     event.password,
+      //     event.userType,event.deviceToken??"",deviceType,deviceId);
+      Dio dio = Dio();
 
-        // emit(DropdownLoaded1(response: response.response.data));
-      } else {
-        emit(DataLoaded(!(state as DataLoaded).isPasswordVisible,
-            (state as DataLoaded).isDoctorRole, true, response.response.data));
-        print('rese ${response.response.data}');
+      Response response1 = await dio.post(
+          '${AppData.remoteUrl2}/register',
+          // Add query parameters
+          data: FormData.fromMap({
+            'first_name': event.firstName,
+            'last_name': event.lastName,
+            'email': event.username,
+            'password': event.password,
+            'user_type': event.userType,
+            'device_token': event.deviceToken,
+            'device_type': deviceType,
+            'device_id': deviceId,
+          })
+      );
+      PostLoginDeviceAuthResp response=PostLoginDeviceAuthResp.fromJson(response1.data);
         ProgressDialogUtils.hideProgressDialog();
-        // emit(LoginFailure(error: 'Invalid credentials'));
-      }
+        print('response ${response1.data}');
+        if(response1.statusCode==200) {
+          if (response.success == true) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('device_token', event.deviceToken ?? '');
+            await prefs.setString('token', response.token ?? '');
+            await prefs.setString(
+                'email_verified_at', response.user?.emailVerifiedAt ?? '');
+            await prefs.setString('userId', response.user?.id ?? '');
+            await prefs.setString('name',
+                '${response.user?.firstName ?? ''} ${response.user?.lastName ??
+                    ''}');
+            await prefs.setString(
+                'profile_pic', response.user?.profilePic ?? '');
+            await prefs.setString('email', response.user?.email ?? '');
+            await prefs.setString('phone', response.user?.phone ?? '');
+            await prefs.setString(
+                'background', response.user?.background ?? '');
+            await prefs.setString('specialty', response.user?.specialty ?? '');
+            await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
+            await prefs.setString('title', response.user?.title ?? '');
+            await prefs.setString('city', response.user?.state ?? '');
+            await prefs.setString(
+                'countryOrigin', response.user?.countryOrigin ?? '');
+            await prefs.setString('college', response.user?.college ?? '');
+            await prefs.setString(
+                'clinicName', response.user?.clinicName ?? '');
+            await prefs.setString('dob', response.user?.dob ?? '');
+            await prefs.setString('user_type', response.user?.userType ?? '');
+            await prefs.setString(
+                'countryName', response.country?.countryName ?? '');
+            await prefs.setString('currency', response.country?.currency ?? '');
+            if (response.university != null) {
+              await prefs.setString(
+                  'university', response.university?.name ?? '');
+            }
+            await prefs.setString(
+                'practicingCountry', response.user?.practicingCountry ?? '');
+            await prefs.setString('gender', response.user?.gender ?? '');
+            await prefs.setString(
+                'country', response.user?.country.toString() ?? '');
+            String? userToken = prefs.getString('token') ?? '';
+            String? userId = prefs.getString('userId') ?? '';
+            String? name = prefs.getString('name') ?? '';
+            String? profile_pic = prefs.getString('profile_pic') ?? '';
+            String? background = prefs.getString('background') ?? '';
+            String? email = prefs.getString('email') ?? '';
+            String? specialty = prefs.getString('specialty') ?? '';
+            String? userType = prefs.getString('user_type') ?? '';
+            String? university = prefs.getString('university') ?? '';
+            String? countryName = prefs.getString('country') ?? '';
+            String? city = prefs.getString('city') ?? '';
+            String? currency = prefs.getString('currency') ?? '';
+
+            if (userToken != '') {
+              AppData.userToken = userToken;
+              AppData.logInUserId = userId;
+              AppData.name = name;
+              AppData.profile_pic = profile_pic;
+              AppData.university = university;
+              AppData.userType = userType;
+              AppData.background = background;
+              AppData.email = email;
+              AppData.specialty = specialty;
+              AppData.countryName = countryName;
+              AppData.city = city;
+              AppData.currency = currency;
+            }
+            emit(DataLoaded(!(state as DataLoaded).isPasswordVisible,
+                (state as DataLoaded).isDoctorRole, true, response1.data));
+            ProgressDialogUtils.hideProgressDialog();
+          } else {
+            emit(DataLoaded(!(state as DataLoaded).isPasswordVisible,
+                (state as DataLoaded).isDoctorRole, true, response1.data));
+          }
+        }else{
+          emit(DropdownError( 'An error occurred'));
+        }
     } catch (e) {
       print(e);
       // emit(DropdownLoaded1(response: ));
 
       ProgressDialogUtils.hideProgressDialog();
 
-      // emit(LoginFailure(error: 'An error occurred'));
+      emit(DropdownError( 'An error occurred'));
+    }
+  }
+  void _onCompleteButtonPressed(
+      CompleteButtonPressed event, Emitter<DropdownState> emit) async {
+    ProgressDialogUtils.showProgressDialog();
+    print(event.country);
+    print(event.state);
+    print(event.specialty);
+    try {
+      Dio dio = Dio();
+      Response response1 = await dio.post(
+          '${AppData.remoteUrl2}/update-profile',
+          options: Options(headers: {
+            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+          }),// Add query parameters
+          data: FormData.fromMap({
+            'country': event.country,
+            'state': event.state,
+            'specialty': event.specialty,
+          })
+      );
+      if (response1.statusCode == 200) {
+        AppData.countryName=event.country;
+        AppData.city=event.state;
+        AppData.specialty=event.specialty;
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('specialty',event.specialty) ;
+        prefs.setString('country',event.country) ?? '';
+        prefs.setString('city',event.state) ?? '';
+        ProgressDialogUtils.hideProgressDialog();
+        emit(DataCompleteLoaded(response1.data));
+        // emit(DropdownLoaded1(response: response.response.data));
+      } else {
+        emit(DropdownError(response1.data));
+        ProgressDialogUtils.hideProgressDialog();
+        // emit(LoginFailure(error: 'Invalid credentials'));
+      }
+    } catch (e) {
+      toast('Something went wrong please try again');
+
+      ProgressDialogUtils.hideProgressDialog();
+      emit(DropdownError(e.toString()));
     }
   }
 
@@ -124,9 +247,9 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           'Bearer ${event.token}',
           event.firstName,
           event.lastName,
-          event.country,
-          event.state,
-          event.specialty,
+          '',
+          '',
+          '',
           event.phone,
           event.userType,
       );
@@ -147,7 +270,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         await prefs.setString('specialty', response.user?.specialty ?? '');
         await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
         await prefs.setString('title', response.user?.title ?? '');
-        await prefs.setString('city', response.user?.city ?? '');
+        await prefs.setString('city', response.user?.state ?? '');
         await prefs.setString(
             'countryOrigin', response.user?.countryOrigin ?? '');
         await prefs.setString('college', response.user?.college ?? '');

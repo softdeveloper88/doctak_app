@@ -88,6 +88,10 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: CustomDropdownButtonFormField(
+                              itemBuilder: (item) => Text(
+                                item??'',
+                                style: TextStyle(color: Colors.black),
+                              ),
                               items: list,
                               value: list.first,
                               width: 100,

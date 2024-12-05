@@ -112,6 +112,21 @@ class SocialButtonPressed extends DropdownEvent {
   List<Object> get props =>
       [token, firstName, lastName, phone, country, state, specialty, userType,deviceToken];
 }
+class CompleteButtonPressed extends DropdownEvent {
+  final String country;
+  final String state;
+  final String specialty;
+
+  CompleteButtonPressed(
+      {
+      required this.country,
+      required this.state,
+      required this.specialty,
+      });
+
+  @override
+  List<Object> get props => [ country, state, specialty];
+}
 // class GetCountries extends SignUpEvent {
 //   GetCountries();
 //   @override

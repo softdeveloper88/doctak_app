@@ -148,7 +148,9 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                                         ?.specialty = newValue;
                                     widget.profileBloc.add(
                                         UpdateSpecialtyDropdownValue(newValue));
-                                  },
+                                  },  itemBuilder: (item) => Text(
+                                  item, style: TextStyle(color: Colors.black),
+                                ),
                                 ),
                               if (AppData.userType != "doctor")
                                 const SizedBox(height: 10),

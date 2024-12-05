@@ -1,15 +1,15 @@
-import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/theme/app_decoration.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-class CustomDropdownButtonFormField extends StatelessWidget {
+class CustomDropdownButtonFormField<T> extends StatelessWidget {
   CustomDropdownButtonFormField({
     required this.items,
     required this.value,
-    this.hint,
     required this.onChanged,
+    required this.itemBuilder,
+    this.hint,
     this.width,
     this.height,
     this.textSizedBoxwidth,
@@ -20,28 +20,29 @@ class CustomDropdownButtonFormField extends StatelessWidget {
     this.isTextBold = true,
     Key? key,
   }) : super(key: key);
-  List<String> items;
-  String? value;
-  String? hint;
-  double? width;
-  double? height;
-  double? textSizedBoxwidth;
-  double? borderRadius;
-  bool isTextBold;
-  EdgeInsets? contentPadding;
 
-  Function onChanged;
+  final List<T> items;
+  final T? value;
+  final String? hint;
+  final double? width;
+  final double? height;
+  final double? textSizedBoxwidth;
+  final double? borderRadius;
+  final bool isTextBold;
+  final EdgeInsets? contentPadding;
 
-  bool? isTimeDropDown;
-  bool? isEnableDropDown;
+  final Function(T?) onChanged;
+  final Widget Function(T) itemBuilder;
+
+  final bool? isTimeDropDown;
+  final bool? isEnableDropDown;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? 90.w,
       height: height ?? 50,
-      // width: getProportionateScreenWidth(0.5),
-      child: DropdownButtonFormField<String>(
+      child: DropdownButtonFormField<T>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
         value: value,
         dropdownColor: svGetScaffoldColor(),
@@ -56,40 +57,17 @@ class CustomDropdownButtonFormField extends StatelessWidget {
         ),
         icon: isTimeDropDown!
             ? Icon(
-                Icons.arrow_drop_down,
-                size: 12.sp,
-                color: svGetBodyColor(),
-              )
+          Icons.arrow_drop_down,
+          size: 12.sp,
+          color: svGetBodyColor(),
+        )
             : null,
-        // decoration: InputDecoration(
-        //   filled: true,
-        //   hintText: hint,
-        //   fillColor: Colors.white,
-        //   border: _outLinedInputBorder(),
-        //   enabledBorder: _outLinedInputBorder(),
-        //   focusedBorder: _outLinedInputBorder(),
-        //   contentPadding: contentPadding ??
-        //       const EdgeInsets.symmetric(
-        //         horizontal: 6,
-        //         // vertical: 13,
-        //       ),
-        // ),
-        items: [
-          ...List.generate(
-            items.length,
-            (index) => DropdownMenuItem<String>(
-              value: items[index],
-              child: Text(
-                items[index],
-                overflow: TextOverflow.visible,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: svGetBodyColor(),
-                ),
-              ),
-            ),
-          ),
-        ],
+        items: items.map((item) {
+          return DropdownMenuItem<T>(
+            value: item,
+            child: itemBuilder(item),
+          );
+        }).toList(),
       ),
     );
   }
@@ -103,15 +81,13 @@ class CustomDropdownButtonFormField extends StatelessWidget {
     );
   }
 
-  _buildDecoration() {
+  InputDecoration _buildDecoration() {
     return InputDecoration(
       hintText: hint ?? '',
       hintStyle: _setFontStyle(),
       border: _outLinedInputBorder(),
       enabledBorder: _outLinedInputBorder(),
       focusedBorder: _outLinedInputBorder(),
-      // prefixIcon: prefix,
-      // prefixIconConstraints: prefixConstraints,
       fillColor: AppDecoration.fillGray.color,
       filled: true,
       isDense: true,
@@ -123,7 +99,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
     );
   }
 
-  _setFontStyle() {
+  TextStyle _setFontStyle() {
     return const TextStyle(
       color: Colors.grey,
       fontSize: 14,

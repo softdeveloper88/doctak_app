@@ -103,7 +103,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                       width: 15,
                       // margin: const EdgeInsets.only(bottom: 4),
                     ),
-                    Text(
+                    const Text(
                       "Edit",
                       style:  TextStyle(fontFamily: 'Poppins',
                         fontSize: 10,
@@ -244,6 +244,10 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 0,
+                  ),
+                  itemBuilder: (item) => Text(
+                    item,
+                    style: const TextStyle(color: Colors.black),
                   ),
                   onChanged: (String? selectedValue) {
                     if (selectedValue != value) {

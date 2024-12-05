@@ -13,9 +13,11 @@ import '../screens/comment_screen/bloc/comment_bloc.dart';
 class SVCommentReplyComponent extends StatefulWidget {
   CommentBloc commentBloc;
   Function(String) onPostComment;
-  int id;
-  SVCommentReplyComponent(this.commentBloc, this.id, this.onPostComment,
-      {Key? key})
+  String? commentValue;
+   double? width;
+   int id;
+  SVCommentReplyComponent(this.commentBloc, this.id, this.onPostComment,{this.commentValue,this.width,
+      Key? key})
       : super(key: key);
 
   @override
@@ -29,8 +31,12 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
   @override
   void dispose() {
     focusNode.unfocus();
-
     super.dispose();
+  }
+  @override
+  void initState() {
+   commentController=TextEditingController(text: widget.commentValue??'');
+    super.initState();
   }
   @override
   Widget build(BuildContext context) {
@@ -72,7 +78,7 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                       child: Row(
                         children: [
                           SizedBox(
-                            width:78.w,
+                            width:widget.width??78.w,
                             child: AppTextField(
                               suffix:  TextButton(
                                   onPressed: () {
@@ -80,7 +86,6 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                                       focusNode.unfocus();
                                       widget.onPostComment(commentController.text);
                                       commentController.text = '';
-
                                     }
                                   },
                                   child: Text('Post',
@@ -101,7 +106,6 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                                 // Handle done action here if needed
                                 if (commentController.text.isNotEmpty) {
                                   focusNode.unfocus();
-
                                   widget.onPostComment(commentController.text);
                                   commentController.text = '';
                                 }// Unfocus the text field to dismiss the keyboard

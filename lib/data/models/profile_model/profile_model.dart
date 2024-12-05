@@ -212,6 +212,7 @@ class User {
     this.phone,
     this.college,
     this.city,
+    this.state,
     this.dob,
     this.id,
   });
@@ -227,6 +228,7 @@ class User {
     phone = json['phone'];
     college = json['college'];
     city = json['city'];
+    state = json['state'];
     dob = json['dob'];
     id = json['id'];
   }
@@ -240,6 +242,7 @@ class User {
   String? phone;
   String? college;
   String? city;
+  String? state;
   String? dob;
   String? id;
 
@@ -255,6 +258,7 @@ class User {
     map['phone'] = phone;
     map['college'] = college;
     map['city'] = city;
+    map['state'] = state;
     map['dob'] = dob;
     map['id'] = id;
     return map;

@@ -176,6 +176,10 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                               ),
                             if (AppData.userType == "doctor")
                               CustomDropdownButtonFormField(
+                                itemBuilder: (item) => Text(
+                                  item,
+                                  style: TextStyle(color: Colors.black),
+                                ),
                                 items: state.specialtyDropdownValue,
                                 value: state.selectedSpecialtyDropdownValue,
                                 width: double.infinity,
@@ -228,6 +232,10 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                 ),
               ),
               CustomDropdownButtonFormField(
+                itemBuilder: (item) => Text(
+                  item,
+                  style: TextStyle(color: Colors.black),
+                ),
                 items: positionList,
                 value: positionList.first,
                 width: double.infinity,
@@ -315,6 +323,10 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                 ),
               ),
               CustomDropdownButtonFormField(
+                itemBuilder: (item) => Text(
+                  item,
+                  style: TextStyle(color: Colors.black),
+                ),
                 items: privacyList,
                 value: privacyList.first,
                 width: double.infinity,

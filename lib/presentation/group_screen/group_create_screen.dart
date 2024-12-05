@@ -727,12 +727,16 @@ class _Step1State extends State<Step1> {
                                   .toList(),
                             ),
                           ),
-                          Text(
+                          const Text(
                             'Speciality: ',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w500),
                           ),
                           CustomDropdownButtonFormField(
+                            itemBuilder: (item) => Text(
+                              item??'',
+                              style: const TextStyle(color: Colors.black),
+                            ),
                             items: state.specialtyDropdownValue,
                             value: state.selectedSpecialtyDropdownValue,
                             width: double.infinity,
@@ -958,8 +962,8 @@ class _Step2State extends State<Step2> {
             //   value:  widget.groupBloc.addAdmin,
             //   onSave: (value)=> widget.groupBloc.addAdmin = value,
             // ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
               child: Text(
                 'Status:',
                 style: TextStyle(
@@ -969,6 +973,10 @@ class _Step2State extends State<Step2> {
               ),
             ),
             CustomDropdownButtonFormField(
+              itemBuilder: (item) => Text(
+                item??'',
+                style: const TextStyle(color: Colors.black),
+              ),
               items: listStatus,
               value: listStatus.first,
               width: double.infinity,
@@ -1007,8 +1015,8 @@ class _Step2State extends State<Step2> {
             //     });
             //   },
             // ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
               child: Text(
                 'Who can post :',
                 style: TextStyle(
@@ -1018,6 +1026,10 @@ class _Step2State extends State<Step2> {
               ),
             ),
             CustomDropdownButtonFormField(
+              itemBuilder: (item) => Text(
+                item??'',
+                style: const TextStyle(color: Colors.black),
+              ),
               items: listWhoCanPostStatus,
               value: listWhoCanPostStatus.first,
               width: double.infinity,
@@ -1038,8 +1050,8 @@ class _Step2State extends State<Step2> {
                 });
               },
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
               child: Text(
                 'Allow in Search :',
                 style: TextStyle(
@@ -1049,6 +1061,10 @@ class _Step2State extends State<Step2> {
               ),
             ),
             CustomDropdownButtonFormField(
+              itemBuilder: (item) => Text(
+                item??'',
+                style: const TextStyle(color: Colors.black),
+              ),
               items: listAllowSearch,
               value: listAllowSearch.first,
               width: double.infinity,
@@ -1063,8 +1079,8 @@ class _Step2State extends State<Step2> {
                 });
               },
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
               child: Text(
                 'Visibility:',
                 style: TextStyle(
@@ -1074,6 +1090,10 @@ class _Step2State extends State<Step2> {
               ),
             ),
             CustomDropdownButtonFormField(
+              itemBuilder: (item) => Text(
+                item??'',
+                style: const TextStyle(color: Colors.black),
+              ),
               items: listVisibility,
               value: listVisibility.first,
               width: double.infinity,
@@ -1091,8 +1111,8 @@ class _Step2State extends State<Step2> {
                 });
               },
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
               child: Text(
                 'Joined Request:',
                 style: TextStyle(
@@ -1102,6 +1122,10 @@ class _Step2State extends State<Step2> {
               ),
             ),
             CustomDropdownButtonFormField(
+              itemBuilder: (item) => Text(
+                item??'',
+                style: const TextStyle(color: Colors.black),
+              ),
               items: listJointRequest,
               value: listJointRequest.first,
               width: double.infinity,

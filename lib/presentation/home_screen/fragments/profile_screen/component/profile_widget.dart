@@ -48,7 +48,7 @@ class TextFieldEditWidget extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               label ?? '',
-              style:  TextStyle(fontFamily: 'Poppins',
+              style:  const TextStyle(fontFamily: 'Poppins',
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),

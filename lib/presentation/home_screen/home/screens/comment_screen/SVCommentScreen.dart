@@ -26,7 +26,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
 
   @override
   void initState() {
-    commentBloc.add(LoadPageEvent(postId: widget.id ?? 0));
+    commentBloc.add(LoadPageEvent(postId: widget.id ?? 0,page: 1));
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(context.cardColor);
@@ -39,9 +39,11 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
     // setStatusBarColor(appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground);
     super.dispose();
   }
+  int? selectedCommentId; // To track which comment is selected for reply
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: context.cardColor,
       appBar: AppBar(
@@ -66,12 +68,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
           // buildWhen: (previous, current) => current is! DrugsState,
           listener: (BuildContext context, CommentState state) {
             if (state is DataError) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  content: Text(state.errorMessage),
-                ),
-              );
+
             }
           },
           builder: (context, state) {
@@ -80,45 +77,57 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
             } else if (state is PaginationLoadedState) {
 
               // print(state.drugsModel.length);
-              return commentBloc.postList.isEmpty
-                  ? const Center(
-                      child: Text('No comments'),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(bottom: 60.0),
-                      child: ListView.builder(
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: commentBloc.postList.length,
-                          itemBuilder: (context, index) {
-                            // if (commentBloc.pageNumber <=
-                            //     commentBloc.numberOfPage) {
-                            //   if (index ==
-                            //       commentBloc.postList.length -
-                            //           commentBloc.nextPageTrigger) {
-                            //     commentBloc
-                            //         .add(CheckIfNeedMoreDataEvent(index: index));
-                            //   }
-                            // }
-                            // if( commentBloc.numberOfPage != commentBloc.pageNumber - 1 && index >= commentBloc.postList.length - 1) {
-                            //
-                            //   return Center(
-                            //     child: CircularProgressIndicator(
-                            //       color: svGetBodyColor(),),
-                            //   );
-                            // }else {
-                              return SVCommentComponent(
-                                  commentBloc: commentBloc,
-                                  comment: commentBloc.postList[index]);
-                            }
-            // }
-            ),
-                    );
+              if( commentBloc.postList.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 60.0),
+                  child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: commentBloc.postList.length,
+                      itemBuilder: (context, index) {
+                        if (commentBloc.pageNumber <=
+                            commentBloc.numberOfPage) {
+                          if (index == commentBloc.postList.length -
+                              commentBloc.nextPageTrigger) {
+                            commentBloc.add(CheckIfNeedMoreDataEvent(
+                              postId: widget.id,
+                                index: index));
+                          }
+                        }
+                        if (commentBloc.numberOfPage !=
+                            commentBloc.pageNumber - 1 &&
+                            index >= commentBloc.postList.length - 1) {
+                          return SizedBox(
+                              height: 200,
+                              child: CommentListShimmer());
+                        } else {
+                          return SVCommentComponent(
+                              postId: widget.id.toString(),
+                              onReplySelected: (commentId) {
+                                setState(() {
+                                  selectedCommentId = (selectedCommentId ==
+                                      commentBloc.postList[index].id)
+                                      ? null
+                                      : commentId;
+                                });
+                              },
+                              selectedCommentId: selectedCommentId,
+                              commentBloc: commentBloc,
+                              comment: commentBloc.postList[index]);
+                        }
+                      }
+                  ),
+                );
+              }else {
+                return const Center(
+                  child: Text('No comments'),
+                );
+              }
             } else if(state is DataError){
               return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
                 try {
-                  commentBloc.add(LoadPageEvent(postId: widget.id ?? 0));
+                  commentBloc.add(LoadPageEvent(postId: widget.id ?? 0,page: 1));
 
                 } catch (e) {
                   debugPrint(e.toString());

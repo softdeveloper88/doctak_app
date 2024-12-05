@@ -4,23 +4,32 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVP
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_reaction_button/flutter_reaction_button.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../utils/SVCommon.dart';
+import '../screens/comment_screen/reply_comment_list_widget.dart';
+import 'SVCommentReplyComponent.dart';
 
 class SVCommentComponent extends StatefulWidget {
   final PostComments comment;
   CommentBloc commentBloc;
+  String postId;
+  final int? selectedCommentId; // ID of the currently selected comment for reply
+  final Function(int) onReplySelected; // Callback when Reply button is clicked
 
-  SVCommentComponent({required this.comment, required this.commentBloc});
+
+
+  SVCommentComponent({required this.postId,required this.comment, required this.commentBloc,this.selectedCommentId,required this.onReplySelected});
 
   @override
   State<SVCommentComponent> createState() => _SVCommentComponentState();
 }
 
 class _SVCommentComponentState extends State<SVCommentComponent> {
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -30,12 +39,12 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
         children: [
           InkWell(
             onTap: () {
-              SVProfileFragment(userId: widget.comment.userId)
+              SVProfileFragment(userId: widget.comment.commenter?.id??'')
                   .launch(context);
             },
             child: CircleAvatar(
               backgroundImage:
-                  NetworkImage('${AppData.imageUrl}${widget.comment.profilePic}'),
+                  NetworkImage(widget.comment.commenter?.profilePic??''),
               radius: 24.0,
             ),
           ),
@@ -50,7 +59,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                       flex: 5,
                       child: InkWell(
                         onTap: () {
-                          SVProfileFragment(userId: widget.comment.userId)
+                          SVProfileFragment(userId: widget.comment.commenter?.id??"")
                               .launch(context);
                         },
                         child: RichText(
@@ -62,7 +71,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                               children: <TextSpan>[
                                 // TextSpan(text: title),
                                 TextSpan(
-                                    text: widget.comment.name??"",
+                                    text: '${widget.comment.commenter?.firstName??''} ${widget.comment.commenter?.lastName??''}',
                                     style: const TextStyle(
                                         fontFamily:  'Poppins',
                                         fontWeight: FontWeight.w500)),
@@ -80,7 +89,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
 
                     ),
                     const Spacer(),
-                    if (widget.comment.userId == AppData.logInUserId)
+                    if (widget.comment.commenter?.id == AppData.logInUserId)
                       Expanded(
                         child: PopupMenuButton(
                           itemBuilder: (context) {
@@ -127,66 +136,96 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                   style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins',),
                 ),
                 const SizedBox(height: 8.0),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        widget.onReplySelected(widget.comment.id ?? 0);
+                      },
+                      child: Text(
+                        '${widget.comment.replyCount} Reply',
+                        style: TextStyle(
+                          fontSize: 13.0,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        widget.commentBloc.add(LikeReplyComment(commentId:widget.comment.id.toString()));
+                        // widget.comment.userHasLiked=true;
+                            print(widget.comment.id);
+                        if(!(widget.comment.userHasLiked??true)){
+                          widget.comment.reactionCount= (widget.comment.reactionCount??0)+1;
+                          widget.comment.userHasLiked=true;
+
+                        }else{
+                          if((widget.comment.reactionCount??0)>0) {
+                            widget.comment.reactionCount = (widget.comment
+                                .reactionCount ?? 0) - 1;
+                          }
+                          widget.comment.userHasLiked=false;
+
+                        }
+                        print(widget.comment.userHasLiked);
+                      },
+                      child:
+                      // ReactionButton<String>(
+                      //   onReactionChanged: (Reaction<String>? reaction) {
+                      //     debugPrint('Selected value: ${reaction?.value}');
+                      //   },
+                      //   reactions: <Reaction<String>>[
+                      //     Reaction<String>(
+                      //       value: 'like',
+                      //       icon: widget,
+                      //     ),
+                      //     Reaction<String>(
+                      //       value: 'love',
+                      //       icon: widget,
+                      //     ),
+                      //   ],
+                        // initialReaction: Reaction<String>(
+                        //   value: 'like',
+                        //   icon: widget,
+                        // ),
+                      //   selectedReaction: Reaction<String>(
+                      //     value: 'like_fill',
+                      //     icon: widget,
+                      //   ), itemSize: Size.infinite,
+                      // )
+                      Text(
+                        widget.comment.userHasLiked??false ? '${widget.comment.reactionCount}Liked':'${widget.comment.reactionCount}Like',
+                        style: TextStyle(
+                          fontSize: 13.0,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    // Row(
+                    //   children: [
+                    //     Text(
+                    //       '1',
+                    //       style: TextStyle(
+                    //         fontSize: 13.0,
+                    //         color: Colors.red[400],
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 4.0),
+                    //     const Icon(
+                    //       Icons.favorite,
+                    //       size: 16.0,
+                    //       color: Colors.red,
+                    //     ),
+                    //   ],
+                    // ),
+                  ],
+                ),
+                if(widget.selectedCommentId==widget.comment.id)ReplyCommentListWidget(commentBloc:widget.commentBloc,postId:int.parse(widget.postId),commentId:widget.selectedCommentId??0 ),
                 const Divider(
                   color: Colors.grey,
                   thickness: 1,
                 )
-                // Row(
-                //   children: [
-                //     TextButton(
-                //       onPressed: () {
-                //         ScaffoldMessenger.of(context).showSnackBar(
-                //           const SnackBar(
-                //             content: Text('comment reply not functional '),
-                //             backgroundColor: Colors.blue,
-                //           ),
-                //         );
-                //       },
-                //       child: Text(
-                //         'Reply',
-                //         style: TextStyle(
-                //           fontSize: 13.0,
-                //           color: Colors.grey[600],
-                //         ),
-                //       ),
-                //     ),
-                //     TextButton(
-                //       onPressed: () {
-                //         ScaffoldMessenger.of(context).showSnackBar(
-                //           const SnackBar(
-                //             content: Text('Like not functional '),
-                //             backgroundColor: Colors.blue,
-                //           ),
-                //         );
-                //       },
-                //       child: Text(
-                //         'Like',
-                //         style: TextStyle(
-                //           fontSize: 13.0,
-                //           color: Colors.grey[600],
-                //         ),
-                //       ),
-                //     ),
-                //     const Spacer(),
-                //     // Row(
-                //     //   children: [
-                //     //     Text(
-                //     //       '1',
-                //     //       style: TextStyle(
-                //     //         fontSize: 13.0,
-                //     //         color: Colors.red[400],
-                //     //       ),
-                //     //     ),
-                //     //     const SizedBox(width: 4.0),
-                //     //     const Icon(
-                //     //       Icons.favorite,
-                //     //       size: 16.0,
-                //     //       color: Colors.red,
-                //     //     ),
-                //     //   ],
-                //     // ),
-                //   ],
-                // ),
               ],
             ),
           ),

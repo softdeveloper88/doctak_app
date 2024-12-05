@@ -45,9 +45,7 @@ import '../models/post_model/post_likes_model.dart';
 
 part 'api_service.g.dart';
 
-@RestApi(
-    // baseUrl: "http://pharmadoc.net/api/v1") // replace with your API base URL
-    baseUrl: "https://doctak.net/api/v1") // replace with your API base URL
+@RestApi(baseUrl: "https://doctak.net/api/v1") // replace with your API base URL
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
@@ -82,9 +80,6 @@ abstract class ApiService {
       @Field("last_name") String lastName,
       @Field("email") String email,
       @Field("password") String password,
-      @Field("country") String country,
-      @Field("state") String state,
-      @Field("specialty") String specialty,
       @Field("user_type") String userType,
       @Field("device_token") String deviceToken,
       @Field("device_type") String deviceType,
@@ -127,8 +122,7 @@ abstract class ApiService {
 
   @FormUrlEncoded()
   @GET("/posts")
-  Future<PostDataModel> getPosts(
-      @Header('Authorization') String token, @Query('page') String page);
+  Future<HttpResponse> getPosts(@Header('Authorization') String token, @Query('page') String page);
 
   @FormUrlEncoded()
   @GET("/post-by-comment/{postId}")

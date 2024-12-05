@@ -20,6 +20,12 @@ class DataLoaded extends DropdownState {
     this.response,
   );
 }
+class DataCompleteLoaded extends DropdownState {
+  Map<String, dynamic> response;
+  DataCompleteLoaded(
+    this.response,
+  );
+}
 
 class DropdownError extends DropdownState {
   final String errorMessage;

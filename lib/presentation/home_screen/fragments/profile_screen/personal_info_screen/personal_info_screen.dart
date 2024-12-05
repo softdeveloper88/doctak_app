@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
@@ -33,9 +34,19 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     // TODO: implement initState
     super.initState();
   }
-
+  Countries findModelByNameOrDefault(
+      List<Countries> countries,
+      String name,
+      Countries defaultCountry,
+      ) {
+    return countries.firstWhere(
+          (country) => country.countryName?.toLowerCase() == name.toLowerCase(), // Case-insensitive match
+      orElse: () => defaultCountry, // Return defaultCountry if not found
+    );
+  }
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
@@ -91,7 +102,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       width: 15,
                       // margin: const EdgeInsets.only(bottom: 4),
                     ),
-                    Text(
+                    const Text(
                       "Edit",
                       style: TextStyle(
                         fontSize: 10,
@@ -207,10 +218,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 if (!isEditModeMap)
                   TextFieldEditWidget(
                     index: 0,
-                    label: 'City',
-                    value: widget.profileBloc.userProfile?.user?.city ?? '',
-                    onSave: (value) =>
-                        widget.profileBloc.userProfile?.user?.city = value,
+                    label: 'State',
+                    value: widget.profileBloc.userProfile?.user?.state ?? '',
+                    onSave: (value) => widget.profileBloc.userProfile?.user?.state = value,
                   ),
                 if (!isEditModeMap)
                   Divider(
@@ -228,7 +238,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 10),
-                              Text(
+                              const Text(
                                 'Country',
                                 style: TextStyle(
                                   fontSize: 16,
@@ -236,25 +246,35 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                               ),
                               CustomDropdownButtonFormField(
+                                itemBuilder: (item) => Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      item.countryName??'',
+                                      style: const TextStyle(color: Colors.black),
+                                    ),
+                                    Text(item.flag??'')
+                                  ],
+                                ),
                                 items: state.firstDropdownValues,
-                                value: state.selectedFirstDropdownValue,
+                                value: findModelByNameOrDefault(state.firstDropdownValues,state.selectedFirstDropdownValue??'',state.firstDropdownValues.first),
                                 width: double.infinity,
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 10,
                                   vertical: 0,
                                 ),
-                                onChanged: (String? newValue) {
-                                  widget.profileBloc.country = newValue!;
+                                onChanged: (newValue) {
+                                  widget.profileBloc.country = newValue?.countryName??'';
                                   widget.profileBloc.userProfile?.user
-                                      ?.country = newValue;
+                                      ?.country = newValue?.countryName??'';
                                   // widget.profileBloc
                                   //     .add(UpdateFirstDropdownValue(newValue));
                                   widget.profileBloc.add(
-                                      UpdateSecondDropdownValues(newValue));
+                                      UpdateSecondDropdownValues(newValue?.countryName??""));
                                 },
                               ),
                               const SizedBox(height: 10),
-                              Text(
+                              const Text(
                                 'State',
                                 style: TextStyle(
                                   fontSize: 16,
@@ -262,6 +282,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                               ),
                               CustomDropdownButtonFormField(
+                                itemBuilder: (item) => Text(
+                                  item??'',
+                                  style: const TextStyle(color: Colors.black),
+                                ),
                                 items: state.secondDropdownValues,
                                 value: state.selectedSecondDropdownValue,
                                 width: double.infinity,
@@ -271,7 +295,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                                 onChanged: (String? newValue) {
                                   widget.profileBloc.stateName = newValue!;
-                                  widget.profileBloc.userProfile?.user?.city =
+                                  widget.profileBloc.userProfile?.user?.state =
                                       newValue;
                                   widget.profileBloc.add(
                                       UpdateSpecialtyDropdownValue(
@@ -283,7 +307,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               if (AppData.userType == "doctor")
                                 const SizedBox(height: 10),
                               if (AppData.userType == "doctor")
-                                Text(
+                                const Text(
                                   'Specialty',
                                   style: TextStyle(
                                     fontSize: 16,
@@ -292,6 +316,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                               if (AppData.userType == "doctor")
                                 CustomDropdownButtonFormField(
+                                  itemBuilder: (item) => Text(
+                                    item??'',
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
                                   items: state.specialtyDropdownValue,
                                   value: state.selectedSpecialtyDropdownValue,
                                   width: double.infinity,
@@ -302,17 +330,15 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   onChanged: (String? newValue) {
                                     print(newValue);
                                     print("Specialty $newValue");
-                                    widget.profileBloc.specialtyName =
-                                        newValue!;
-                                    widget.profileBloc.add(
-                                        UpdateSpecialtyDropdownValue(newValue));
+                                    widget.profileBloc.specialtyName = newValue!;
+                                    widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
                                   },
                                 ),
                               if (AppData.userType != "doctor")
                                 const SizedBox(height: 10),
                               if (AppData.userType != "doctor")
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 8.0),
                                   child: Text(
                                     'University',
                                     style: TextStyle(
@@ -323,9 +349,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                               if (AppData.userType != "doctor")
                                 CustomDropdownButtonFormField(
+                                  itemBuilder: (item) => Text(
+                                    item??'',
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
                                   items: state.universityDropdownValue,
-                                  value:
-                                      state.selectedUniversityDropdownValue ==
+                                  value: state.selectedUniversityDropdownValue ==
                                               ''
                                           ? null
                                           : state

@@ -29,8 +29,8 @@ class ProgressDialogUtils {
   ///common method for hiding progress dialog
   static void hideProgressDialog() {
     if (isProgressVisible) {
-      Navigator.pop(
-          NavigatorService.navigatorKey.currentState!.overlay!.context);
+
+      Navigator.pop(NavigatorService.navigatorKey.currentState!.overlay!.context);
     }
     isProgressVisible = false;
   }

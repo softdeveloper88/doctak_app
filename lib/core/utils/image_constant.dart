@@ -2,17 +2,10 @@ class ImageConstant {
   // Image folder path
   static String imagePath = 'assets/images';
   static String imageIcon = 'assets/icon';
-
   // Splash Screen images
   static String imgVector = '$imagePath/ic_vector.svg';
 
   // Onboarding One images
-  static String img7xm1 = '$imagePath/img_7xm_1.png';
-
-  static String img7xm5 = '$imagePath/img_7xm_5.png';
-
-  static String img7xm2 = '$imagePath/img_7xm_2.png';
-
   static String imgThumbsUp = '$imagePath/img_thumbs_up.svg';
 
   // Login images
@@ -21,7 +14,7 @@ class ImageConstant {
   static String imgApple = '$imagePath/img_apple.svg';
 
   // Sign Up images
-  static String imgLock = '$imagePath/ic_lock.svg';
+  static String imgPerson = '$imagePath/img_lock.svg';
 
   // Sign Up - Success images
   static String imgCheckmarkPrimary = '$imagePath/img_checkmark_primary.svg';
@@ -52,12 +45,6 @@ class ImageConstant {
   static String imgLinkedinErrorcontainer =
       '$imagePath/img_linkedin_errorcontainer.svg';
 
-  static String imgEllipse8864x64 = '$imagePath/img_ellipse_88_64x64.png';
-
-  static String imgEllipse881 = '$imagePath/img_ellipse_88_1.png';
-
-  static String imgEllipse882 = '$imagePath/img_ellipse_88_2.png';
-
   static String imgRectangle961 = '$imagePath/img_rectangle_961.png';
 
   // Doctor Detail images
@@ -80,7 +67,6 @@ class ImageConstant {
   static String imgAttach = '$imagePath/img_attach.svg';
 
   // Audio Call images
-  static String imgGroup195 = '$imagePath/img_group_195.png';
 
   static String imgImage10 = '$imagePath/img_image_10.png';
 
@@ -120,32 +106,14 @@ class ImageConstant {
   static String imgRectangle46087x113 =
       '$imagePath/img_rectangle_460_87x113.png';
 
-  static String imgUnsplash86rvjm9zowy =
-      '$imagePath/img_unsplash_86rvjm9zowy.png';
-
   static String imgBookmark12x10 = '$imagePath/img_bookmark_12x10.svg';
-
-  static String imgUnsplashFepfs43yipe =
-      '$imagePath/img_unsplash_fepfs43yipe.png';
 
   static String imgBookmarkPrimary = '$imagePath/img_bookmark_primary.svg';
 
-  static String imgUnsplash5tymgag0wro =
-      '$imagePath/img_unsplash_5tymgag0wro.png';
 
-  // Pharmacy images
-  static String imgEf58faa9a71e47e = '$imagePath/img_ef58faa9a71e47e.png';
-
-  static String imgHealthvitLLys = '$imagePath/img_healthvit_l_lys.png';
-
-  static String img4260006585123 = '$imagePath/img_4260006585123.png';
 
   static String imgClose = '$imagePath/img_close.svg';
 
-  static String imgCalciumLLysin = '$imagePath/img_calcium_l_lysin.png';
-
-  static String img426000658512366x66 =
-      '$imagePath/img_4260006585123_66x66.png';
 
   // Drugs Detail images
   static String imgHealthvitLLys163x163 = '$imagePath/img_event.png';
@@ -155,19 +123,10 @@ class ImageConstant {
   static String imgCartPrimary = '$imagePath/img_cart_primary.svg';
 
   // My Cart images
-  static String imgHealthvitLLys50x50 =
-      '$imagePath/img_healthvit_l_lys_50x50.png';
 
   static String imgThumbsUpGray500 = '$imagePath/img_thumbs_up_gray_500.svg';
 
-  static String imgCalciumLLysin50x50 =
-      '$imagePath/img_calcium_l_lysin_50x50.png';
-
-  // Location images
-  static String imgMap = '$imagePath/img_map.png';
-
   // Profile images
-  static String imgEllipse27 = '$imagePath/img_ellipse_27.png';
 
   static String imgCamera = '$imagePath/img_camera.svg';
 
@@ -216,9 +175,6 @@ class ImageConstant {
 
   static String imgIconHospital = '$imagePath/img_icon_hospital.svg';
 
-  static String img7xm6 = '$imagePath/img_7xm_6.png';
-
-  static String imgEllipse88 = '$imagePath/img_ellipse_88.png';
 
   static String imgSignal = '$imagePath/img_signal.svg';
 
@@ -234,8 +190,7 @@ class ImageConstant {
 
   static String imgLockGray500 = '$imagePath/img_lock_gray_500.svg';
 
-  static String imgIconChevronLeftOnprimary24x24 =
-      '$imagePath/img_icon_chevron_left_onprimary_24x24.svg';
+  static String imgIconChevronLeftOnprimary24x24 = '$imagePath/img_icon_chevron_left_onprimary_24x24.svg';
 
   static String imgRectangle959 = '$imagePath/img_rectangle_959.png';
 

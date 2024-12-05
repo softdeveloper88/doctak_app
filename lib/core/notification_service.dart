@@ -345,7 +345,7 @@ class NotificationService {
             return SVProfileFragment(
               userId: id,
             );
-          } else if (payload == 'comments_on_posts' ||
+          } else if (payload == 'comments_on_posts' || payload == 'reply_to_comment' ||
               payload == 'like_comment_on_post' ||
               payload == 'like_comments') {
             return PostDetailsScreen(

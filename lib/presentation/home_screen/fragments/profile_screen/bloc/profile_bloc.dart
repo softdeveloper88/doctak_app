@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/data/models/profile_model/interest_model.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
@@ -102,6 +103,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       print('repsones$postDataModelResponse');
       UserProfile response = await postService.getProfile(
           'Bearer ${AppData.userToken}', event.userId!);
+      print(response.toJson());
       List<InterestModel> response1 = await postService.getInterests(
           'Bearer ${AppData.userToken}', event.userId!);
       add(UpdateSecondDropdownValues(''));
@@ -128,15 +130,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       workEducationList!.addAll(response2);
       userProfile = response;
     }
-    List<String>? countriesList = await _onGetCountries();
+    List<Countries>? countriesList = await _onGetCountries();
     List<String>? stateList = await _onGetStates(
-        userProfile?.user?.country ?? countriesList?.first ?? '');
+        userProfile?.user?.country ?? countriesList?.first.countryName ?? '');
     print('countriesList $countriesList');
     print('user country ${userProfile?.user?.country}');
     List<String>? specialtyList = await _onGetSpecialty();
     emit(PaginationLoadedState(
         countriesList ?? [],
-        userProfile?.user?.country ?? countriesList?.first ?? '',
+        userProfile?.user?.country ?? countriesList?.first.countryName ?? '',
         stateList ?? [],
         userProfile?.user?.city ?? stateList?.first ?? '',
         specialtyList!,
@@ -170,13 +172,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _updateFirstDropdownValue(
       UpdateFirstDropdownValue event, Emitter<ProfileState> emit) async {
-    List<String>? countriesList = await _onGetCountries();
+    List<Countries>? countriesList = await _onGetCountries();
       print(countriesList);
-    emit(PaginationLoadedState(countriesList ?? [], countriesList?.first ?? '',
+    emit(PaginationLoadedState(countriesList ?? [], countriesList?.first.countryName ?? '',
         [], 'Select State', [], 'Select Specialty', [], ''));
 
-    add(UpdateSecondDropdownValues(countriesList?.first ?? 'United Arab Emirates'));
-    add(UpdateSpecialtyDropdownValue(countriesList?.first ?? 'United Arab Emirates'));
+    add(UpdateSecondDropdownValues(countriesList?.first.countryName ?? 'United Arab Emirates'));
+    add(UpdateSpecialtyDropdownValue(countriesList?.first.countryName ?? 'United Arab Emirates'));
   }
 
   Future<void> _updateProfilePicture(
@@ -464,8 +466,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
     List<String> secondDropdownValues = [];
     print('${event.selectedFirstDropdownValue}');
-    secondDropdownValues =
-        await _onGetStates(event.selectedFirstDropdownValue) ?? [];
+    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? [];
     print(secondDropdownValues.toList());
     if (secondDropdownValues.isNotEmpty) {
       List<String>? universityDropdownValues =
@@ -638,19 +639,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     specialtyList = secondDropdownValues ?? [];
   }
 
-  Future<List<String>?> _onGetCountries() async {
+  Future<List<Countries>?> _onGetCountries() async {
     // emit(DataLoading());
     try {
       final response = await postService.getCountries();
       print(response.countries!.length.toString());
       if (response.countries!.isNotEmpty) {
         // emit(DataSuccess(countriesModel: response));
-        List<String> list = [];
-        // list.add('Select Country');
-        for (var element in response.countries!) {
-          list.add(element.countryName!);
-        }
-        return list;
+        // List<String> list = [];
+        // // list.add('Select Country');
+        // for (var element in response.countries!) {
+        //   list.add(element.countryName!);
+        // }
+        return response.countries;
       } else {
         return [];
         // emit(DataFailure(error: 'Failed to load data'));

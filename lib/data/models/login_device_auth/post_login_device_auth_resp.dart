@@ -257,6 +257,7 @@ class User {
     this.emailVerifiedAt,
     this.background,
     this.userType,
+    this.state,
   });
 
   User.fromJson(dynamic json) {
@@ -293,6 +294,7 @@ class User {
     emailVerifiedAt = json['email_verified_at'];
     background = json['background'];
     userType = json['user_type'];
+    state = json['state'];
   }
 
   String? id;
@@ -328,6 +330,7 @@ class User {
   String? emailVerifiedAt;
   String? background;
   String? userType;
+  String? state;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -364,6 +367,7 @@ class User {
     map['email_verified_at'] = emailVerifiedAt;
     map['background'] = background;
     map['user_type'] = userType;
+    map['state'] = state;
     return map;
   }
 }

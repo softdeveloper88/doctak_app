@@ -1,5 +1,7 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+
 abstract class ProfileState {}
 
 class DataInitial extends ProfileState {}
@@ -9,7 +11,7 @@ class PaginationInitialState extends ProfileState {
 }
 
 class PaginationLoadedState extends ProfileState {
-  List<String> firstDropdownValues = [];
+  List<Countries> firstDropdownValues = [];
   final String selectedFirstDropdownValue;
   List<String> secondDropdownValues = [];
   final String selectedSecondDropdownValue;

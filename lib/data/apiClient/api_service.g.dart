@@ -160,9 +160,6 @@ class _ApiService implements ApiService {
     String lastName,
     String email,
     String password,
-    String country,
-    String state,
-    String specialty,
     String userType,
     String deviceToken,
       String deviceType,
@@ -176,9 +173,6 @@ class _ApiService implements ApiService {
       'last_name': lastName,
       'email': email,
       'password': password,
-      'country': country,
-      'state': state,
-      'specialty': specialty,
       'user_type': userType,
       'device_token': deviceToken,
       'device_type': deviceType,
@@ -385,7 +379,7 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<PostDataModel> getPosts(
+  Future<HttpResponse<dynamic>> getPosts(
     String token,
     String page,
   ) async {
@@ -400,8 +394,7 @@ class _ApiService implements ApiService {
       headers: _headers,
       extra: _extra,
       contentType: 'application/x-www-form-urlencoded',
-    )
-            .compose(
+    ).compose(
               _dio.options,
               '/posts',
               queryParameters: queryParameters,
@@ -412,8 +405,11 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = PostDataModel.fromJson(_result.data!);
-    return value;
+    final value = _result.data;
+    final httpResponse = HttpResponse(value, _result);
+    return httpResponse;
+    // final value = PostDataModel.fromJson(_result.data!);
+    // return value;
   }
  @override
   Future<PostDetailsDataModel> getDetailsPosts(

@@ -1,11 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-
 import '../../../utils/SVCommon.dart';
 import 'bloc/likes_bloc.dart';
 

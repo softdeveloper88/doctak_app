@@ -1,6 +1,10 @@
 import 'dart:async';
 
+import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/common_navigator.dart';
+import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/incomplete_profile_card.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
@@ -13,7 +17,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../localization/app_localization.dart';
+import '../../../../widgets/show_loading_dialog.dart';
 import '../../../notification_screen/bloc/notification_state.dart';
+import '../../home/components/email_verification_widget.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
@@ -32,14 +38,23 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   // HomeBloc widget.homeBloc = HomeBloc();
   final ScrollController _mainScrollController = ScrollController();
   NotificationBloc notificationBloc = NotificationBloc();
-
+  String? emailVerified='';
+  bool isInCompleteProfile=false;
+  getSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    emailVerified=prefs.getString('email_verified_at')??'';
+    String? specialty = prefs.getString('specialty') ?? '';
+    String? countryName = prefs.getString('country') ?? '';
+    String? city = prefs.getString('city') ?? '';
+    isInCompleteProfile=specialty=='' || countryName =='' || city=='';
+    setState(() {});
+  }
   @override
   void initState() {
     _startTimer();
-
+    getSharedPreferences();
     // PusherService(AppData.logInUserId);
     widget.homeBloc.add(PostLoadPageEvent(page: 1));
-
     widget.homeBloc.add(AdsSettingEvent());
     super.initState();
   }
@@ -55,6 +70,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   void notificationCounter() {
     // Add your Bloc event here
     notificationBloc.add(NotificationCounter());
+
   }
 
   @override
@@ -67,6 +83,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     // Simulate network request
     await Future.delayed(const Duration(seconds: 2));
     setState(() {
+      getSharedPreferences();
       widget.homeBloc.add(PostLoadPageEvent(page: 1));
       widget.homeBloc.add(AdsSettingEvent());
       notificationBloc.add(NotificationCounter());
@@ -235,6 +252,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                     delegate: SliverChildListDelegate(
                       [
                         RepaintBoundary(child: UserChatComponent()),
+                        // if(emailVerified==null)const RepaintBoundary(child: VerifyEmailCard()),
+                        // if(AppData.specialty=='' && AppData.countryName=='' && AppData.city=='')
+                          RepaintBoundary(child: IncompleteProfileCard(emailVerified=='',isInCompleteProfile)),
                         RepaintBoundary(child: SVPostComponent(widget.homeBloc)),
                       ],
                     ),

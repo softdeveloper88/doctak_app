@@ -4,6 +4,8 @@ import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discuss_details_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
@@ -321,6 +323,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             id: '${bloc.notificationsList[index].fromUserId}',
                             roomId: '',
                           ).launch(context);
+                        } else if (typeNotification == 'discuss_case_comment_like') {
+                          CaseDiscussionScreen().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
                         } else if (typeNotification == 'follow_request' ||
                             typeNotification == 'friend_request' ||
                             typeNotification == 'follower_notification' ||
@@ -329,7 +333,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   userId:
                                       bloc.notificationsList[index].fromUserId)
                               .launch(context);
-                        } else if (typeNotification == 'comments_on_posts' ||
+                        } else if (typeNotification == 'comments_on_posts' || typeNotification == 'reply_to_comment' ||
                             typeNotification == 'like_comment_on_post' ||
                             typeNotification == 'like_comments') {
                           PostDetailsScreen(

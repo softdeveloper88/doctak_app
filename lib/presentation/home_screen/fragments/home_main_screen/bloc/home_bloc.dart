@@ -1,13 +1,14 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
-import 'package:doctak_app/data/models/post_model/post_details_data_model.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 part 'home_event.dart';
-
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -17,6 +18,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   List<Post> postList = [];
   final int nextPageTrigger = 1;
   var postData;
+
   HomeBloc() : super(DataInitial()) {
     on<PostLoadPageEvent>(_onGetPosts);
     on<LoadSearchPageEvent>(_onGetSearchPosts);
@@ -38,17 +40,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(PostPaginationLoadingState());
     }
     try {
-      PostDataModel response = await postService.getPosts(
+      var response1 = await postService.getPosts(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
       );
+    final response = PostDataModel.fromJson(response1.response.data!);
+   if(response1.response.statusCode==302){
+     print(' Error 302 ${response1.response.data}');
+       emit(PostDataError('An error occurred'));
+   }
+    print(response1);
       numberOfPage = response.posts?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
         postList.addAll(response.posts?.data ?? []);
       }
       emit(PostPaginationLoadedState());
-
     } catch (e) {
       print(e);
 
@@ -56,25 +63,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(PostDataError('An error occurred $e'));
     }
   }
-  _onGetDetailsPosts(DetailsPostEvent event, Emitter<HomeState> emit) async {
 
-      emit(PostPaginationLoadingState());
+  _onGetDetailsPosts(DetailsPostEvent event, Emitter<HomeState> emit) async {
+    emit(PostPaginationLoadingState());
 
     try {
-      if(event.commentId !=0) {
-       print(event.commentId);
+      if (event.commentId != 0) {
+        print(event.commentId);
         postData = await postService.getDetailsPosts(
-            'Bearer ${AppData.userToken}',
-            event.commentId.toString()
-        );
-      }else{
+            'Bearer ${AppData.userToken}', event.commentId.toString());
+      } else {
         postData = await postService.getDetailsLikesPosts(
-            'Bearer ${AppData.userToken}',
-            event.postId.toString());
+            'Bearer ${AppData.userToken}', event.postId.toString());
       }
       print('post $postData');
       emit(PostPaginationLoadedState());
-
     } catch (e) {
       print(e);
 
@@ -207,7 +210,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   Future<void> _adsSettingApi(
       AdsSettingEvent event, Emitter<HomeState> emit) async {
     print('call ads api');
-    // try {
+    try {
     AppData.adsSettingModel =
         await postService.advertisementSetting('Bearer ${AppData.userToken}');
     print("ads data  ${AppData.adsSettingModel.toJson()}");
@@ -271,9 +274,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         .isNotEmpty);
     print("dot1 ${AppData.isShowGoogleBannerAds}");
     print("dot ${AppData.isShowGoogleNativeAds}");
-    // } catch (e) {
-    //   // emit(CountriesDataError('$e'));
-    // }
+    print("dot ${AppData.androidBannerAdsId}");
+    } catch (e) {
+      // emit(CountriesDataError('$e'));
+    }
   }
 //  _onGetPosts1(GetPost event, Emitter<HomeState> emit) async {
 //   emit(DataInitial());

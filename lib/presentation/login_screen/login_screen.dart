@@ -9,7 +9,6 @@ import 'package:doctak_app/presentation/forgot_password/forgot_password.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_event.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_state.dart';
-import 'package:doctak_app/presentation/login_screen/verification_link.dart';
 import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
 import 'package:doctak_app/widgets/app_bar/appbar_title.dart';
 import 'package:doctak_app/widgets/app_bar/custom_app_bar.dart';
@@ -21,6 +20,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
@@ -316,82 +316,76 @@ class LoginScreenState extends State<LoginScreen> {
       },
       child: Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: _buildAppBar(context),
+          backgroundColor: svGetScaffoldColor(),
+          // appBar: _buildAppBar(context),
           body: BlocListener<LoginBloc, LoginState>(
               bloc: loginBloc,
               listener: (context, state) {
                 if (state is LoginSuccess) {
-                  if (state.isEmailVerified == '') {
-                    showVerifyMessage(context, () {
-                      String email = emailController.text;
-                      sendVerificationLink(email, context);
-                    });
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(''),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                    return;
-                  }
-
+                  // if (state.isEmailVerified == '') {
+                  //   showVerifyMessage(context, () {
+                  //     String email = emailController.text;
+                  //     sendVerificationLink(email, context);
+                  //   });
+                  //   if (mounted) {
+                  //     ScaffoldMessenger.of(context).showSnackBar(
+                  //       const SnackBar(
+                  //         content: Text(''),
+                  //         backgroundColor: Colors.green,
+                  //       ),
+                  //     );
+                  //   }
+                  //   return;
+                  // }
                   loginApp(context);
                 } else if (state is SocialLoginSuccess) {
                   if (mounted) {
                     toasty(context, 'Social Login successfully',
                         bgColor: Colors.green, textColor: Colors.white);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Social Login successfully'),
-                        backgroundColor: Colors.green,
+                  }
+                  // if (state.response.user?.userType != null) {
+                  //   if (state.response.recentCreated == false) {
+                  if (mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const SVDashboardScreen(),
                       ),
                     );
                   }
-                  if (state.response.user?.userType != null) {
-                    if (state.response.recentCreated == false) {
-                      if (mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const SVDashboardScreen(),
-                          ),
-                        );
-                      }
-                    } else {
-                      if (mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (BuildContext context) => SignUpScreen(
-                              isSocialLogin: true,
-                              firstName: state.response.user?.firstName ?? '',
-                              lastName: state.response.user?.lastName ?? '',
-                              email: state.response.user?.email ?? '',
-                              token: state.response.token ?? '',
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  } else {
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => SignUpScreen(
-                            isSocialLogin: true,
-                            firstName: state.response.user?.firstName ?? '',
-                            lastName: state.response.user?.lastName ?? '',
-                            email: state.response.user?.email ?? '',
-                            token: state.response.token ?? '',
-                          ),
-                        ),
-                      );
-                    }
-                  }
+                  //   } else {
+                  //     if (mounted) {
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //           builder: (BuildContext context) => SignUpScreen(
+                  //             isSocialLogin: true,
+                  //             firstName: state.response.user?.firstName ?? '',
+                  //             lastName: state.response.user?.lastName ?? '',
+                  //             email: state.response.user?.email ?? '',
+                  //             token: state.response.token ?? '',
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }
+                  //   }
+                  // } else {
+                  //   if (mounted) {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (BuildContext context) => SignUpScreen(
+                  //           isSocialLogin: true,
+                  //           firstName: state.response.user?.firstName ?? '',
+                  //           lastName: state.response.user?.lastName ?? '',
+                  //           email: state.response.user?.email ?? '',
+                  //           token: state.response.token ?? '',
+                  //         ),
+                  //       ),
+                  //     );
+                  //   }
+                  // }
                 } else if (state is LoginFailure) {
                   if (mounted) {
                     TextInput.finishAutofillContext(shouldSave: false);
@@ -407,276 +401,243 @@ class LoginScreenState extends State<LoginScreen> {
                 }
               },
               child: SizedBox(
-                  width: 100.w,
-                  child: SingleChildScrollView(
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: AutofillGroup(
-                        child: Form(
-                            key: _formKey,
-                            child: Container(
-                                width: double.maxFinite,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 39),
-                                child: Column(children: [
-                                  CustomTextFormField(
-                                      autofillHint: const [
-                                        AutofillHints.username
-                                      ],
-                                      focusNode: focusNode1,
-                                      controller: emailController,
-                                      hintText: translation(context)
-                                          .msg_enter_your_email,
-                                      textInputType: TextInputType.emailAddress,
-                                      prefix: Container(
-                                          margin: const EdgeInsets.fromLTRB(
-                                              24, 16, 16, 16),
-                                          child: CustomImageView(
-                                              color: Colors.blueGrey,
-                                              imagePath:
-                                                  ImageConstant.imgCheckmark,
-                                              height: 24,
-                                              width: 24)),
-                                      prefixConstraints:
-                                          const BoxConstraints(maxHeight: 56),
-                                      validator: (value) {
-                                        if (value == null ||
-                                            (!isValidEmail(value,
-                                                isRequired: true))) {
-                                          return translation(context)
-                                              .err_msg_please_enter_valid_email;
-                                        }
-                                        return null;
-                                      },
-                                      contentPadding: const EdgeInsets.only(
-                                          top: 18, right: 30, bottom: 18)),
-                                  const SizedBox(height: 16),
-                                  BlocBuilder<LoginBloc, LoginState>(
-                                      bloc: loginBloc,
-                                      builder: (context, state) {
-                                        print(state.isShowPassword);
-                                        return CustomTextFormField(
-                                            autofillHint: const [
-                                              AutofillHints.password
-                                            ],
-                                            focusNode: focusNode2,
-                                            controller: passwordController,
-                                            hintText: translation(context)
-                                                .msg_enter_new_password,
-                                            textInputAction:
-                                                TextInputAction.done,
-                                            textInputType:
-                                                TextInputType.visiblePassword,
-                                            prefix: Container(
-                                                margin:
-                                                    const EdgeInsets.fromLTRB(
-                                                        24, 16, 16, 16),
-                                                child: CustomImageView(
-                                                    color: Colors.blueGrey,
-                                                    imagePath: ImageConstant
-                                                        .imgLocation,
-                                                    height: 24,
-                                                    width: 24)),
-                                            prefixConstraints:
-                                                const BoxConstraints(
-                                                    maxHeight: 56),
-                                            suffix: InkWell(
-                                                onTap: () {
-                                                  loginBloc.add(
-                                                      ChangePasswordVisibilityEvent(
-                                                          value: !state
-                                                              .isShowPassword));
-                                                },
-                                                child: Container(
-                                                    margin: const EdgeInsets
-                                                        .fromLTRB(
-                                                        30, 16, 24, 16),
-                                                    child: state.isShowPassword
-                                                        ? const Icon(
-                                                            Icons
-                                                                .visibility_off,
-                                                            color:
-                                                                Colors.black54,
-                                                            size: 24,
-                                                          )
-                                                        : const Icon(
-                                                            Icons.visibility,
-                                                            color:
-                                                                Colors.black54,
-                                                            size: 24,
-                                                          ))),
-                                            suffixConstraints:
-                                                const BoxConstraints(
-                                                    maxHeight: 56),
-                                            // validator: (value) {
-                                            //   if (value == null ||
-                                            //       (isValidPassword(value, isRequired: true))) {
-                                            //     return translation(context)
-                                            //         .err_msg_please_enter_valid_password;
-                                            //   }
-                                            //   return null;
-                                            // },
-                                            obscureText: state.isShowPassword);
-                                      }),
-                                  const SizedBox(height: 10),
-                                  Row(
-                                    children: [
-                                      Checkbox(
-                                        value: _rememberMe,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _rememberMe = value!;
-                                          });
-                                        },
-                                      ),
-                                      const Text('Remember Me')
-                                    ],
-                                  ),
-                                  Align(
-                                      alignment: Alignment.centerRight,
-                                      child: GestureDetector(
-                                          onTap: () {
-                                            onTapTxtForgotPassword(context);
-                                          },
-                                          child: Text(
-                                              translation(context)
-                                                  .msg_forgot_password,
-                                              style: CustomTextStyles
-                                                  .titleSmallPrimary))),
-                                  const SizedBox(height: 32),
-                                  svAppButton(
-                                    context: context,
-                                    text: 'LOGIN',
-                                    onTap: () async {
-                                      SharedPreferences prefs =
-                                          await SharedPreferences.getInstance();
-                                      await prefs.setBool('acceptTerms', true);
-                                      if (_formKey.currentState!.validate()) {
-                                        _formKey.currentState!.save();
-                                      }
-                                      // TermsAndConditionScreen(accept: () async {
-                                      print('object');
-                                      if (Platform.isAndroid) {
-                                        await FirebaseMessaging.instance
-                                            .getToken()
-                                            .then((token) {
-                                          print("token $token");
-                                          loginBloc.add(
-                                            LoginButtonPressed(
-                                                username: emailController.text,
-                                                // replace with real input
-                                                password:
-                                                    passwordController.text,
-                                                rememberMe: _rememberMe,
-                                                deviceToken: token ?? ""
-                                                // replace with real input
-                                                ),
-                                          );
-                                        });
-                                      } else {
-                                        await FirebaseMessaging.instance
-                                            .getToken()
-                                            .then((token) {
-                                          loginBloc.add(
-                                            LoginButtonPressed(
-                                                username: emailController.text,
-                                                // replace with real input
-                                                password:
-                                                    passwordController.text,
-                                                rememberMe: _rememberMe,
-                                                deviceToken: token ?? ""
-                                                // replace with real input
-                                                ),
-                                          );
-                                        });
-                                      }
+                width: MediaQuery.of(context).size.width,
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: AutofillGroup(
+                    child: Form(
+                      key: _formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Logo and Welcome Text Section
+                            const SizedBox(height: 50),
+                            Image.asset(
+                              'assets/logo/logo.png',
+                              width: MediaQuery.of(context).size.width * 0.7,
+                              height: 100,
+                            ),
+                            const Text(
+                              'Welcome Back',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Please login to continue',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height:20),
 
-                                      // },).launch(context, isNewTask: true);
+                            // Email Field
+                            const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Enter your Email:',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            CustomTextFormField(
+                              fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
+                              filled: true,
+                              autofillHint: const [AutofillHints.username],
+                              focusNode: focusNode1,
+                              controller: emailController,
+                              hintText: translation(context).msg_enter_your_email,
+                              textInputType: TextInputType.emailAddress,
+                              prefix: Container(
+                                margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+                                child: CustomImageView(
+                                  color: Colors.blueGrey,
+                                  imagePath: ImageConstant.imgCheckmark,
+                                  height: 24,
+                                  width: 24,
+                                ),
+                              ),
+                              prefixConstraints: const BoxConstraints(maxHeight: 56),
+                              validator: (value) {
+                                if (value == null || !isValidEmail(value, isRequired: true)) {
+                                  return translation(context)
+                                      .err_msg_please_enter_valid_email;
+                                }
+                                return null;
+                              },
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 18, horizontal: 16),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Password Field
+                            const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Enter your Password:',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            BlocBuilder<LoginBloc, LoginState>(
+                              bloc: loginBloc,
+                              builder: (context, state) {
+                                return CustomTextFormField(
+                                  fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
+                                  filled: true,
+                                  autofillHint: const [AutofillHints.password],
+                                  focusNode: focusNode2,
+                                  controller: passwordController,
+                                  hintText: translation(context).msg_enter_new_password,
+                                  textInputType: TextInputType.visiblePassword,
+                                  textInputAction: TextInputAction.done,
+                                  prefix: Container(
+                                    margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
+                                    child: CustomImageView(
+                                      color: Colors.blueGrey,
+                                      imagePath: ImageConstant.imgLocation,
+                                      height: 24,
+                                      width: 24,
+                                    ),
+                                  ),
+                                  prefixConstraints: const BoxConstraints(maxHeight: 56),
+                                  suffix: InkWell(
+                                    onTap: () {
+                                      loginBloc.add(
+                                        ChangePasswordVisibilityEvent(
+                                            value: !state.isShowPassword),
+                                      );
                                     },
+                                    child: Container(
+                                      margin:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Icon(
+                                        state.isShowPassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: Colors.black54,
+                                        size: 24,
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(height: 25),
-                                  Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 48),
-                                          child: Row(children: [
-                                            Padding(
-                                                padding: const EdgeInsets.only(
-                                                    bottom: 1),
-                                                child: Text(
-                                                    translation(context)
-                                                        .msg_don_t_have_an_account,
-                                                    style: CustomTextStyles
-                                                        .bodyMediumGray600)),
-                                            GestureDetector(
-                                                onTap: () {
-                                                  onTapTxtSignUp(context);
-                                                },
-                                                child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 4),
-                                                    child: Text(
-                                                        translation(context)
-                                                            .lbl_sign_up,
-                                                        style: CustomTextStyles
-                                                            .titleSmallPrimarySemiBold)))
-                                          ]))),
-                                  const SizedBox(height: 34),
-                                  _buildORDivider(context),
-                                  const SizedBox(height: 29),
-                                  _buildSocial(context),
-                                  const SizedBox(height: 5),
-                                ]))),
-                      ))))),
+                                  suffixConstraints: const BoxConstraints(maxHeight: 56),
+                                  obscureText: !state.isShowPassword,
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Remember Me Checkbox and Forgot Password
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: _rememberMe,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _rememberMe = value!;
+                                    });
+                                  },
+                                ),
+                                const Text('Remember Me'),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: () => onTapTxtForgotPassword(context),
+                                  child: Text(
+                                    translation(context).msg_forgot_password,
+                                    style: CustomTextStyles.titleSmallPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Login Button
+                            svAppButton(
+                              context: context,
+                              text: 'LOGIN',
+                              onTap: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  _formKey.currentState!.save();
+                                  final token = await FirebaseMessaging.instance.getToken();
+                                  loginBloc.add(
+                                    LoginButtonPressed(
+                                      username: emailController.text,
+                                      password: passwordController.text,
+                                      rememberMe: _rememberMe,
+                                      deviceToken: token ?? "",
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Signup and Social Login
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  translation(context).msg_don_t_have_an_account,
+                                  style: CustomTextStyles.bodyMediumGray600,
+                                ),
+                                GestureDetector(
+                                  onTap: () => onTapTxtSignUp(context),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: Text(
+                                      translation(context).lbl_sign_up,
+                                      style: CustomTextStyles.titleSmallPrimarySemiBold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              translation(context).lbl_or,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildSocial(context),
+                            const SizedBox(height: 10),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+          )),
     );
   }
-
-  /// Section Widget
-  _buildAppBar(BuildContext context) {
-    return CustomAppBar(
-      height: 140,
-      leadingWidth: 56,
-      centerTitle: true,
-      title: Column(
-        children: [
-          Image.asset(
-            'assets/logo/logo.png',
-            width: 400,
-            height: 100,
-          ),
-          AppbarTitle(text: translation(context).lbl_login),
-        ],
-      ),
-    );
-  }
-
-  /// Section Widget
-  Widget _buildORDivider(BuildContext context) {
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-              padding: EdgeInsets.only(top: 8, bottom: 9),
-              child: SizedBox(width: 137, child: Divider())),
-          Text(translation(context).lbl_or, style: theme.textTheme.bodyLarge),
-          const Padding(
-              padding: EdgeInsets.only(top: 8, bottom: 9),
-              child: SizedBox(width: 137, child: Divider()))
-        ]);
-  }
-
   /// Section Widget
   Widget _buildSocial(BuildContext context) {
     return Column(children: [
       CustomOutlinedButton(
+          buttonStyle: ElevatedButton.styleFrom(
+              side: const BorderSide(color: Colors.blue,),
+              foregroundColor: Colors.white,
+              // Button text color
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0), // Rounded corners
+              )),
+          buttonTextStyle: const TextStyle(color: Colors.blue,fontWeight: FontWeight.bold),
           text: translation(context).msg_sign_in_with_google,
           leftIcon: Container(
               margin: const EdgeInsets.only(right: 20),
               child: CustomImageView(
-                  color: Colors.red,
+                  color: Colors.blue,
                   imagePath: ImageConstant.imgGoogle,
                   height: 20,
                   width: 19)),
@@ -687,6 +648,14 @@ class LoginScreenState extends State<LoginScreen> {
       const SizedBox(height: 16),
       if (Platform.isIOS)
         CustomOutlinedButton(
+            buttonStyle: ElevatedButton.styleFrom(
+                side: const BorderSide(color: Colors.blue,),
+                foregroundColor: Colors.white,
+                // Button text color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0), // Rounded corners
+                )),
+            buttonTextStyle: const TextStyle(color: Colors.blue,fontWeight: FontWeight.bold),
             onPressed: () {
               signInWithApple();
             },
@@ -694,7 +663,7 @@ class LoginScreenState extends State<LoginScreen> {
             leftIcon: Container(
                 margin: const EdgeInsets.only(right: 30),
                 child: CustomImageView(
-                    color: Colors.blueGrey,
+                    color: Colors.blue,
                     imagePath: ImageConstant.imgApple,
                     height: 20,
                     width: 16))),
@@ -734,13 +703,15 @@ class LoginScreenState extends State<LoginScreen> {
             lastName: googleUser.displayName!.split(' ').last,
             isSocialLogin: true,
             provider: 'google',
-            token: 'accessToken',
+            token: googleUser.id,
             deviceToken: token ?? '',
           ));
           GoogleSignIn().disconnect();
+        }).catchError((onError){
+          toast('Something went wrong please try again');
         });
       } else {
-        String? token = await FirebaseMessaging.instance.getToken();
+        // String? token = await FirebaseMessaging.instance.getToken();
 
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
@@ -749,20 +720,25 @@ class LoginScreenState extends State<LoginScreen> {
         GoogleSignInAuthentication googleSignInAuthentication =
             await googleUser!.authentication;
         String accessToken = googleSignInAuthentication.accessToken!;
-        // await FirebaseMessaging.instance.getToken().then((token) async {
-        //   print('token$googleUser');
-        loginBloc.add(SocialLoginButtonPressed(
-          email: googleUser.email,
-          firstName: googleUser.displayName!.split(' ').first,
-          lastName: googleUser.displayName!.split(' ').last,
-          isSocialLogin: true,
-          provider: 'google',
-          token: 'accessToken',
-          deviceToken: token ?? '',
-        ));
-        GoogleSignIn().disconnect();
-      }
+        await FirebaseMessaging.instance.getToken().then((token) async {
+          //   print('token$googleUser');
+
+          loginBloc.add(SocialLoginButtonPressed(
+            email: googleUser.email,
+            firstName: googleUser.displayName!.split(' ').first,
+            lastName: googleUser.displayName!.split(' ').last,
+            isSocialLogin: true,
+            provider: 'google',
+            token: googleUser.id,
+            deviceToken: token ?? '',
+          ));
+          GoogleSignIn().disconnect();
+        }).catchError((onError){
+          toast('Something went wrong please try again');
+        });}
+
     } on Exception catch (e) {
+      toast('Something went wrong please try again');
       print('error is ....... $e');
       // TODO
     }
@@ -808,17 +784,20 @@ class LoginScreenState extends State<LoginScreen> {
     } else {
       token = await FirebaseMessaging.instance.getToken();
     }
-    var response =
-        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-    loginBloc.add(SocialLoginButtonPressed(
-      email: response.user?.email ?? ' ',
-      firstName: response.user?.displayName!.split(' ').first ?? ' ',
-      lastName: response.user?.displayName!.split(' ').last ?? ' ',
-      isSocialLogin: true,
-      provider: 'apple',
-      token: response.user!.uid ?? '',
-      deviceToken: token ?? '',
-    ));
+    var response = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+     if(token !="") {
+       loginBloc.add(SocialLoginButtonPressed(
+         email: response.user?.email ?? ' ',
+         firstName: response.user?.displayName!.split(' ').first ?? ' ',
+         lastName: response.user?.displayName!.split(' ').last ?? ' ',
+         isSocialLogin: true,
+         provider: 'apple',
+         token: response.user!.uid ?? '',
+         deviceToken: token ?? '',
+       ));
+     }else{
+       toast('Something went wrong please try again');
+     }
     print("${appleCredential.givenName} ${appleCredential.familyName}");
 
     GoogleSignIn().disconnect();
@@ -826,9 +805,9 @@ class LoginScreenState extends State<LoginScreen> {
 
   Future<void> loginApp(BuildContext context) async {
     print(emailController.text);
-    if (Platform.isIOS) {
-      _saveLoginDetails(emailController.text, passwordController.text);
-    }
+    // if (Platform.isIOS) {
+    _saveLoginDetails(emailController.text, passwordController.text);
+    // }
     // if (mounted) {
     // // toasty(context, 'Login successfully', bgColor: Colors.green, textColor: Colors.white);
     // //   ScaffoldMessenger.of(context).showSnackBar(
@@ -849,7 +828,8 @@ class LoginScreenState extends State<LoginScreen> {
         //     builder: (BuildContext context) => const SVDashboardScreen(),
         //   ),
         // );
-        const SVDashboardScreen().launch(context, isNewTask: true);
+        const SVDashboardScreen().launch(context,
+            isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
       }
     });
   }
