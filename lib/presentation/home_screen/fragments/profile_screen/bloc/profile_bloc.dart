@@ -693,7 +693,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // emit(DataSuccess(countriesModel: response));
       List<String> list = [];
       print(response.data);
-      response.data.forEach((element) {
+
+      response.data?.forEach((element) {
         list.add(element['state_name']);
       });
       print("states : ${list.toString()}");

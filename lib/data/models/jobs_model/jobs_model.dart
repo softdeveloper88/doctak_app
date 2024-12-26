@@ -31,7 +31,8 @@ class Jobs {
       this.lastPage, 
       this.lastPageUrl, 
       this.links, 
-      this.nextPageUrl, 
+
+      this.nextPageUrl,
       this.path, 
       this.perPage, 
       this.prevPageUrl, 
@@ -140,7 +141,8 @@ class Data {
       this.description, 
       this.link, 
       this.createdAt, 
-      this.updatedAt, 
+      this.preferredLanguage,
+      this.updatedAt,
       this.userId, 
       this.jobImage, 
       this.countryId, 
@@ -165,6 +167,7 @@ class Data {
     location = json['location'];
     description = json['description'];
     link = json['link'];
+    preferredLanguage = json['preferred_language'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     userId = json['user_id'];
@@ -200,6 +203,7 @@ class Data {
   String? location;
   String? description;
   String? link;
+  String? preferredLanguage;
   String? createdAt;
   String? updatedAt;
   String? userId;
@@ -227,6 +231,7 @@ class Data {
     map['location'] = location;
     map['description'] = description;
     map['link'] = link;
+    map['preferred_language'] = preferredLanguage;
     map['created_at'] = createdAt;
     map['updated_at'] = updatedAt;
     map['user_id'] = userId;

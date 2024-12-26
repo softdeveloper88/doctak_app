@@ -25,7 +25,6 @@ class ProgressDialogUtils {
       isProgressVisible = true;
     }
   }
-
   ///common method for hiding progress dialog
   static void hideProgressDialog() {
     if (isProgressVisible) {

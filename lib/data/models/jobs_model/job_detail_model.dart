@@ -44,7 +44,8 @@ class Job {
       this.description, 
       this.link, 
       this.createdAt, 
-      this.updatedAt, 
+      this.preferredLanguage,
+      this.updatedAt,
       this.userId, 
       this.jobImage, 
       this.countryId, 
@@ -78,6 +79,7 @@ class Job {
     specialty = json['specialty'];
     noOfJobs = json['no_of_jobs'];
     postedAt = json['posted_at'];
+    preferredLanguage = json['preferred_language'];
     salaryRange = json['salary_range'];
     promoted = json['promoted'];
     views = json['views'];
@@ -98,6 +100,7 @@ class Job {
   String? description;
   String? link;
   String? createdAt;
+  String? preferredLanguage;
   String? updatedAt;
   String? userId;
   dynamic jobImage;
@@ -124,6 +127,7 @@ class Job {
     map['description'] = description;
     map['link'] = link;
     map['created_at'] = createdAt;
+    map['preferred_language'] = preferredLanguage;
     map['updated_at'] = updatedAt;
     map['user_id'] = userId;
     map['job_image'] = jobImage;

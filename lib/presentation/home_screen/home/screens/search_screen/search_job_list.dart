@@ -177,6 +177,13 @@ class SearchJobList extends StatelessWidget {
                                 'N/A'}',
                             style: secondaryTextStyle(
                                 color: svGetBodyColor())),
+                        Text(
+                            'Preferred Languages: ${drugsBloc.drugsData[index]
+                                .preferredLanguage ??
+                                'N/A'}',
+                            style: secondaryTextStyle(
+                                color: svGetBodyColor())),
+
                         const SizedBox(height: 5),
                         Row(
                           children: [

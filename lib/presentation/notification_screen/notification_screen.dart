@@ -170,208 +170,147 @@ class _NotificationScreenState extends State<NotificationScreen> {
               index >= bloc.notificationsList.length - 1) {
             return const SizedBox(height: 200, child: UserShimmer());
           } else {
-            return InkWell(
-              // onTap: () {
-              //   bloc.add(ReadNotificationEvent(
-              //       notificationId: bloc.notificationsList[index].id
-              //           .toString()));
-              //   bloc.notificationsList[index].isRead=1;
-              //   var typeNotification = bloc.notificationsList[index].type;
-              //   print(typeNotification);
-              //   if (typeNotification == 'simple') {
-              //     print( bloc.notificationsList[index].postId);
-              //   } else if (typeNotification == 'follow') {
-              //     SVProfileFragment(
-              //             userId: bloc.notificationsList[index].userId)
-              //         .launch(context);
-              //   } else if (typeNotification == 'message') {
-              //     print('object');
-              //     ChatRoomScreen(
-              //       username:
-              //           '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
-              //       profilePic:
-              //           '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-              //       id: '${bloc.notificationsList[index].userId}',
-              //       roomId: '',
-              //     ).launch(context);
-              //   } else if (typeNotification == 'post_liked' ||
-              //       typeNotification == 'like_on_posts') {
-              //     PostDetailsScreen(
-              //         postId: bloc.notificationsList[index].postId.toInt())
-              //         .launch(context);
-              //   } else if (typeNotification == 'comments_on_posts') {
-              //     PostDetailsScreen(
-              //         postId: bloc.notificationsList[index].postId.toInt())
-              //         .launch(context);
-              //   } else if (typeNotification == 'follow_request' ||
-              //       typeNotification == 'friend_request' ||
-              //       typeNotification == 'message_received') {
-              //     SVProfileFragment(
-              //             userId: bloc.notificationsList[index].userId)
-              //         .launch(context);
-              //   } else if (typeNotification == 'comments_on_posts' ||
-              //       typeNotification == 'like_comment_on_post' ||
-              //       typeNotification == 'like_comments') {
-              //     PostDetailsScreen(
-              //         postId: bloc.notificationsList[index].postId.toInt())
-              //         .launch(context);
-              //   } else if (typeNotification == 'new_like' ||
-              //       typeNotification == 'likes_on_posts') {
-              //     PostDetailsScreen(
-              //             postId: bloc.notificationsList[index].postId.toInt())
-              //         .launch(context);
-              //   } else if (typeNotification == 'new_job_posted' ||
-              //       typeNotification == 'job_update') {
-              //     JobsDetailsScreen(
-              //             jobId: bloc.notificationsList[index].postId ?? '')
-              //         .launch(context);
-              //   }
-              //   // JobsDetailsScreen(
-              //   //         jobId: '${bloc.notificationsList[index].id ?? ''}')
-              //   //     .launch(context);
-              // },
-              child: Column(
-                children: [
-                  Material(
-                    color: bloc.notificationsList[index].isRead == 1
-                        ? Colors.white
-                        : Colors.blue[50],
-                    // color: Theme.of(context).cardColor,
-                    elevation: 0,
-                    borderRadius: BorderRadius.circular(10),
-                    child: ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 10.0, horizontal: 16.0),
-                      title: RichText(
-                          text: TextSpan(
-                              text:
-                                  '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''} ', // Default style for the initial part
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                color: Colors.black, // Default color
-                                fontSize: 16,
-                                fontWeight:
-                                    FontWeight.bold, // Default font size
-                              ),
-                              children: [
-                            TextSpan(
-                              text: bloc.notificationsList[index].text ?? "",
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black, // Change color to blue
-                              ),
+            return Column(
+              children: [
+                Material(
+                  color: bloc.notificationsList[index].isRead == 1
+                      ? Colors.white
+                      : Colors.blue[50],
+                  // color: Theme.of(context).cardColor,
+                  elevation: 0,
+                  borderRadius: BorderRadius.circular(10),
+                  child: ListTile(
+                    dense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 16.0),
+                    title: RichText(
+                        text: TextSpan(
+                            text:
+                                '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''} ', // Default style for the initial part
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              color: Colors.black, // Default color
+                              fontSize: 16,
+                              fontWeight:
+                                  FontWeight.bold, // Default font size
                             ),
-                          ])),
-                      subtitle: Text(
-                        timeAgo.format(DateTime.parse(
-                            bloc.notificationsList[index].createdAt ?? "")),
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: Colors.grey[600],
-                          fontSize: 14.0,
-                        ),
-                      ),
-                      leading: InkWell(
-                        onTap: () {
-                          SVProfileFragment(
-                                  userId:
-                                      bloc.notificationsList[index].fromUserId)
-                              .launch(context);
-                        },
-                        child: CircleAvatar(
-                          child: CustomImageView(
-                            fit: BoxFit.cover,
-                            width: 40,
-                            height: 40,
-                            radius: BorderRadius.circular(20),
-                            imagePath:
-                                '${AppData.imageUrl}${bloc.notificationsList[index].senderProfilePic ?? ''}',
+                            children: [
+                          TextSpan(
+                            text: bloc.notificationsList[index].text ?? "",
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black, // Change color to blue
+                            ),
                           ),
+                        ])),
+                    subtitle: Text(
+                      timeAgo.format(DateTime.parse(
+                          bloc.notificationsList[index].createdAt ?? "")),
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.grey[600],
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    leading: InkWell(
+                      onTap: () {
+                        SVProfileFragment(
+                                userId:
+                                    bloc.notificationsList[index].fromUserId)
+                            .launch(context);
+                      },
+                      child: CircleAvatar(
+                        child: CustomImageView(
+                          fit: BoxFit.cover,
+                          width: 40,
+                          height: 40,
+                          radius: BorderRadius.circular(20),
+                          imagePath:
+                              '${AppData.imageUrl}${bloc.notificationsList[index].senderProfilePic ?? ''}',
                         ),
                       ),
-                      trailing: Icon(
-                        Icons.arrow_forward_ios_outlined,
-                        color: Colors.grey[600],
-                        size: 16.0,
-                      ),
-                      onTap: () {
-                        bloc.add(ReadNotificationEvent(
-                            notificationId:
-                                bloc.notificationsList[index].id.toString()));
-                        bloc.notificationsList[index].isRead = 1;
-                        var typeNotification =
-                            bloc.notificationsList[index].type;
-                        print(typeNotification);
-                        if (typeNotification == 'message') {
-                          ChatRoomScreen(
-                            username:
-                                '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
-                            profilePic:
-                                '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                            id: '${bloc.notificationsList[index].userId}',
-                            roomId: '',
-                          ).launch(context);
-                        } else if (typeNotification == 'message_received') {
-                          ChatRoomScreen(
-                            username:
-                                '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
-                            profilePic:
-                                '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                            id: '${bloc.notificationsList[index].fromUserId}',
-                            roomId: '',
-                          ).launch(context);
-                        } else if (typeNotification == 'discuss_case_comment_like') {
-                          CaseDiscussionScreen().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
-                        } else if (typeNotification == 'follow_request' ||
-                            typeNotification == 'friend_request' ||
-                            typeNotification == 'follower_notification' ||
-                            typeNotification == 'un_follower_notification') {
-                          SVProfileFragment(
-                                  userId:
-                                      bloc.notificationsList[index].fromUserId)
-                              .launch(context);
-                        } else if (typeNotification == 'comments_on_posts' || typeNotification == 'reply_to_comment' ||
-                            typeNotification == 'like_comment_on_post' ||
-                            typeNotification == 'like_comments') {
-                          PostDetailsScreen(
-                                  commentId: bloc
-                                      .notificationsList[index].postId
-                                      .toInt())
-                              .launch(context);
-                          // SVCommentScreen(
-                          //   id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
-                          //     .launch(context);
-                        } else if (typeNotification == 'new_like' ||
-                            typeNotification == 'like_on_posts' ||
-                            typeNotification == 'likes_on_posts' ||
-                            typeNotification == 'post_liked') {
-                          PostDetailsScreen(
-                                  postId: bloc.notificationsList[index].postId
-                                      .toInt())
-                              .launch(context);
-                        } else if (typeNotification == 'new_job_posted' ||
-                            typeNotification == 'job_post_notification' ||
-                            typeNotification == 'job_update') {
-                          JobsDetailsScreen(
-                                  jobId: bloc.notificationsList[index].postId ??
-                                      '')
-                              .launch(context);
-                        }
-                        // Add your onTap functionality here
-                      },
                     ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_outlined,
+                      color: Colors.grey[600],
+                      size: 16.0,
+                    ),
+                    onTap: () {
+                      bloc.add(ReadNotificationEvent(
+                          notificationId:
+                              bloc.notificationsList[index].id.toString()));
+                      bloc.notificationsList[index].isRead = 1;
+                      var typeNotification =
+                          bloc.notificationsList[index].type;
+                      print(typeNotification);
+                      if (typeNotification == 'message') {
+                        ChatRoomScreen(
+                          username:
+                              '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
+                          profilePic:
+                              '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                          id: '${bloc.notificationsList[index].userId}',
+                          roomId: '',
+                        ).launch(context);
+                      } else if (typeNotification == 'message_received') {
+                        ChatRoomScreen(
+                          username:
+                              '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
+                          profilePic:
+                              '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                          id: '${bloc.notificationsList[index].fromUserId}',
+                          roomId: '',
+                        ).launch(context);
+                      } else if (typeNotification == 'discuss_case_comment_like') {
+                        CaseDiscussionScreen().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
+                      } else if (typeNotification == 'follow_request' ||
+                          typeNotification == 'friend_request' ||
+                          typeNotification == 'follower_notification' ||
+                          typeNotification == 'un_follower_notification') {
+                        SVProfileFragment(
+                                userId:
+                                    bloc.notificationsList[index].fromUserId)
+                            .launch(context);
+                      } else if (typeNotification == 'comments_on_posts' || typeNotification == 'reply_to_comment' ||
+                          typeNotification == 'like_comment_on_post' ||
+                          typeNotification == 'like_comments') {
+                        PostDetailsScreen(
+                                commentId: bloc
+                                    .notificationsList[index].postId
+                                    .toInt())
+                            .launch(context);
+                        // SVCommentScreen(
+                        //   id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
+                        //     .launch(context);
+                      } else if (typeNotification == 'new_like' ||
+                          typeNotification == 'like_on_posts' ||
+                          typeNotification == 'likes_on_posts' ||
+                          typeNotification == 'post_liked') {
+                        PostDetailsScreen(
+                                postId: bloc.notificationsList[index].postId
+                                    .toInt())
+                            .launch(context);
+                      } else if (typeNotification == 'new_job_posted' ||
+                          typeNotification == 'job_post_notification' ||
+                          typeNotification == 'job_update') {
+                        JobsDetailsScreen(
+                                jobId: bloc.notificationsList[index].postId ??
+                                    '')
+                            .launch(context);
+                      }
+                      // Add your onTap functionality here
+                    },
                   ),
-                  const Divider(
-                    thickness: 0.2,
-                    endIndent: 16,
-                    indent: 16,
-                    color: Colors.grey,
-                  )
-                ],
-              ),
+                ),
+                const Divider(
+                  thickness: 0.2,
+                  endIndent: 16,
+                  indent: 16,
+                  color: Colors.grey,
+                )
+              ],
             );
           }
         },

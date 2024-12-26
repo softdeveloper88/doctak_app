@@ -758,6 +758,12 @@ class _JobsScreenState extends State<JobsScreen> {
                                     color: svGetBodyColor(),
                                   )),
                               const SizedBox(height: 5),
+                              Text(
+                                  'Preferred Language: ${bloc.drugsData[index].preferredLanguage ?? 'N/A'}',
+                                  style: secondaryTextStyle(
+                                    color: svGetBodyColor(),
+                                  )),
+                              const SizedBox(height: 5),
                               SingleChildScrollView(
                                 clipBehavior: Clip.hardEdge,
                                 scrollDirection: Axis.horizontal,
