@@ -7,6 +7,7 @@ class AppTheme {
   AppTheme._();
 
   static final ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
     scaffoldBackgroundColor: SVAppLayoutBackground,
     primaryColor: SVAppColorPrimary,
     primaryColorDark: SVAppColorPrimary,
@@ -43,6 +44,7 @@ class AppTheme {
   );
 
   static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
     scaffoldBackgroundColor: appBackgroundColorDark,
     highlightColor: appBackgroundColorDark,
     appBarTheme: const AppBarTheme(

@@ -1,8 +1,4 @@
-import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:flutter/material.dart';
-import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
-import 'package:doctak_app/presentation/login_screen/login_screen.dart';
-import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
 
 class AppRoutes {
   static const String splashScreen = '/splash_screen';

@@ -650,6 +650,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               return Observer(
 
                   builder: (_) => MaterialApp(
+
                         scaffoldMessengerKey: globalMessengerKey,
                         // theme: theme,
                         title: 'doctak_app',
