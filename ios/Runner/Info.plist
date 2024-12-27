@@ -94,6 +94,8 @@
 	<string>Microphone access required that can share voice message with your friends</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Phone Photo access required that you can share images and video with your friends</string>
+	<key>GADApplicationIdentifier</key>
+    <string>ca-app-pub-9354893692913823~4368543936</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
