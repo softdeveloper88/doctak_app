@@ -275,6 +275,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     print("dot1 ${AppData.isShowGoogleBannerAds}");
     print("dot ${AppData.isShowGoogleNativeAds}");
     print("dot ${AppData.androidBannerAdsId}");
+    print("native Ads ${AppData.androidNativeAdsId}");
     } catch (e) {
       // emit(CountriesDataError('$e'));
     }

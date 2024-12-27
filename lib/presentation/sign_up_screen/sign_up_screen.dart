@@ -275,8 +275,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         24, 16, 16, 16),
                                                     child: CustomImageView(
                                                         color: Colors.black54,
-                                                        imagePath: ImageConstant
-                                                            .imgLocation,
+                                                        imagePath: imgLocation,
                                                         height: 24,
                                                         width: 24)),
                                                 prefixConstraints: const BoxConstraints(
@@ -344,8 +343,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         24, 16, 16, 16),
                                                     child: CustomImageView(
                                                         color: Colors.black54,
-                                                        imagePath: ImageConstant
-                                                            .imgLocation,
+                                                        imagePath: imgLocation,
                                                         height: 24,
                                                         width: 24)),
                                                 prefixConstraints: const BoxConstraints(
@@ -368,7 +366,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                           Icons.visibility,
                                                           color: Colors.black54,
                                                           size: 24,))),
-                                                // child: CustomImageView(color: Colors.black54, imagePath: ImageConstant.imgEye, height: 24, width: 24))),
+                                                // child: CustomImageView(color: Colors.black54, imagePath: imgEye, height: 24, width: 24))),
                                                 suffixConstraints: const BoxConstraints(
                                                     maxHeight: 56),
                                                 validator: (value) {
@@ -523,7 +521,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         hintText: translation(context).lbl_enter_your_name1,
         prefix: Container(margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: CustomImageView(color: Colors.black54,
-                imagePath: ImageConstant.imgPerson,
+                imagePath: imgPerson,
                 height: 24,
                 width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
@@ -546,7 +544,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         hintText: translation(context).lbl_enter_your_name2,
         prefix: Container(margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: CustomImageView(color: Colors.black54,
-                imagePath: ImageConstant.imgPerson,
+                imagePath: imgPerson,
                 height: 24,
                 width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
@@ -573,7 +571,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         //     margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
         //     child: CustomImageView(
         //         color: Colors.black54,
-        //         imagePath: ImageConstant.imgLock,
+        //         imagePath: imgLock,
         //         height: 24,
         //         width: 24)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),
@@ -597,7 +595,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         textInputType: TextInputType.emailAddress,
         prefix: Container(margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
             child: CustomImageView(color: Colors.black54,
-                imagePath: ImageConstant.imgCheckmark,
+                imagePath: imgCheckmark,
                 height: 30,
                 width: 30)),
         prefixConstraints: const BoxConstraints(maxHeight: 56),

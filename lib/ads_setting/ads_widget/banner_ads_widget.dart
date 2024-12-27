@@ -13,10 +13,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   void initState() {
+    String adsId=AdmobSetting.bannerUnit;
     super.initState();
     _bannerAd = BannerAd(
       size: AdSize.banner,
-      adUnitId: AdmobSetting.bannerUnit,
+      adUnitId: adsId,
       listener: BannerAdListener(
         onAdClosed: (Ad ad) {
           debugPrint("Ad Closed");

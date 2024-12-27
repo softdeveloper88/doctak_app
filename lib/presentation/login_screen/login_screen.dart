@@ -460,7 +460,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
                                 child: CustomImageView(
                                   color: Colors.blueGrey,
-                                  imagePath: ImageConstant.imgCheckmark,
+                                  imagePath: imgCheckmark,
                                   height: 24,
                                   width: 24,
                                 ),
@@ -506,7 +506,7 @@ class LoginScreenState extends State<LoginScreen> {
                                     margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
                                     child: CustomImageView(
                                       color: Colors.blueGrey,
-                                      imagePath: ImageConstant.imgLocation,
+                                      imagePath: imgLocation,
                                       height: 24,
                                       width: 24,
                                     ),
@@ -638,7 +638,7 @@ class LoginScreenState extends State<LoginScreen> {
               margin: const EdgeInsets.only(right: 20),
               child: CustomImageView(
                   color: Colors.blue,
-                  imagePath: ImageConstant.imgGoogle,
+                  imagePath: imgGoogle,
                   height: 20,
                   width: 19)),
           onPressed: () {
@@ -664,7 +664,7 @@ class LoginScreenState extends State<LoginScreen> {
                 margin: const EdgeInsets.only(right: 30),
                 child: CustomImageView(
                     color: Colors.blue,
-                    imagePath: ImageConstant.imgApple,
+                    imagePath: imgApple,
                     height: 20,
                     width: 16))),
       const SizedBox(height: 16),

@@ -139,7 +139,7 @@ class ForgotPassword extends StatelessWidget {
                                             child: CustomImageView(
                                                 color: Colors.blueGrey,
                                                 imagePath:
-                                                    ImageConstant.imgCheckmark,
+                                                    imgCheckmark,
                                                 height: 24,
                                                 width: 24)),
                                         prefixConstraints:

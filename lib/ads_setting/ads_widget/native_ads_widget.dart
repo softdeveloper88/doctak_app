@@ -12,10 +12,13 @@ class NativeAdWidget extends StatefulWidget {
 class _NativeAdWidgetState extends State<NativeAdWidget> {
   late NativeAd _ad;
   bool _isAdLoaded = false;
-
+ String? adsId;
   @override
   void initState() {
-    loadAd();
+  adsId=  AdmobSetting.nativeAdUnitId;
+  print('adsId $adsId');
+    loadAd(adsId);
+
     super.initState();
   }
 
@@ -46,8 +49,9 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
       listener: NativeAdListener(
         onAdLoaded: (ad) {
           // ignore: avoid_print
-          print('$NativeAd loaded.');
+          print('$NativeAd loaded.${AdmobSetting.nativeAdUnitId}');
           setState(() {
+            print('Native ads constant ${AdmobSetting.nativeAdUnitId}');
             _isAdLoaded = true;
           });
         },
@@ -70,15 +74,11 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   NativeAd? nativeAd;
   bool _nativeAdIsLoaded = false;
 
-  // TODO: replace this test ad unit with your own ad unit.
-  final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/2247696110'
-      : 'ca-app-pub-3940256099942544/3986624511';
 
   /// Loads a native ad.
-  void loadAd() {
+  void loadAd(String? adsId) {
     _ad = NativeAd(
-        adUnitId: _adUnitId,
+        adUnitId: adsId??'',
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             debugPrint('$NativeAd loaded.');
