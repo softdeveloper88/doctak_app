@@ -93,8 +93,8 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
                     .paddingLeft(4)
                 : Image.asset(
                     'assets/images/search.png',
-                    height: 20,
-                    width: 20,
+                    height: 17,
+                    width: 17,
                     color: svGetBodyColor(),
                   ),
           ).paddingRight(16)
@@ -139,8 +139,8 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
               hintText: 'Search People ',
               hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins',),
               suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                      height: 16,
-                      width: 16,
+                      height: 17,
+                      width: 17,
                       fit: BoxFit.cover,
                       color: svGetBodyColor())
                   .paddingAll(16),

@@ -115,7 +115,6 @@
 
 
   // Drugs Detail images
-   const imgHealthvitLLys163x163 = '$imagePath/img_event.png';
 
    const imgFavorite = '$imagePath/ic_favorite.svg';
 

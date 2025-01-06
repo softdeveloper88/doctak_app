@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void log(Object? value) {
   if (!kReleaseMode) print(value);
@@ -70,4 +71,12 @@ class DefaultValues {
   final String defaultLanguage = "en";
 }
 
+Future<void> launchInBrowser(Uri url) async {
+  if (!await launchUrl(
+    url,
+    mode: LaunchMode.externalApplication,
+  )) {
+    throw Exception('Could not launch $url');
+  }
+}
 DefaultValues defaultValues = DefaultValues();

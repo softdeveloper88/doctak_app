@@ -3,7 +3,6 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/b
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/models/SVCommentModel.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/comment_list_shimmer.dart';
 import 'package:flutter/material.dart';

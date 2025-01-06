@@ -137,7 +137,7 @@ class _SearchScreenState extends State<SearchScreen>
           child: Tab(
             child: Text(
               tabName,
-              style: TextStyle(color: svGetBodyColor()),
+              // style:  TextStyle(color: svGetBodyColor(),fontSize:15,fontWeight:FontWeight.w500,),
             ),
           ),
         ),
@@ -165,7 +165,7 @@ class _SearchScreenState extends State<SearchScreen>
           backgroundColor: svGetScaffoldColor(),
           surfaceTintColor: svGetScaffoldColor(),
           iconTheme: IconThemeData(color: context.iconColor),
-          title: Text('Search', style: boldTextStyle(size: 18)),
+          title: Text('Search', style: boldTextStyle(size: 17,weight: FontWeight.w500)),
           leading: IconButton(
               icon: Icon(Icons.arrow_back_ios_new_rounded,
                   color: svGetBodyColor()),
@@ -190,8 +190,8 @@ class _SearchScreenState extends State<SearchScreen>
                       .paddingLeft(4)
                   : Image.asset(
                       'assets/images/search.png',
-                      height: 20,
-                      width: 20,
+                      height: 17,
+                      width: 17,
                       color: svGetBodyColor(),
                     ),
             ).paddingRight(16)
@@ -407,8 +407,8 @@ class _SearchScreenState extends State<SearchScreen>
             hintStyle: secondaryTextStyle(color: svGetBodyColor()),
             suffixIcon: Image.asset(
                 'images/socialv/icons/ic_Search.png',
-                height: 16,
-                width: 16,
+                height: 17,
+                width: 17,
                 fit: BoxFit.cover,
                 color: svGetBodyColor())
                 .paddingAll(16),
@@ -434,6 +434,7 @@ class _SearchScreenState extends State<SearchScreen>
               indicatorWeight: 4,
               unselectedLabelColor: Colors.grey,
               indicatorSize: TabBarIndicatorSize.tab,
+              unselectedLabelStyle: const TextStyle(color: Colors.grey,fontSize: 15,fontWeight: FontWeight.w500),
               labelPadding: const EdgeInsets.all(4),
               indicatorColor: SVAppColorPrimary,
               tabs: [

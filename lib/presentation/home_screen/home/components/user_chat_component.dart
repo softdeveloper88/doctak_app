@@ -22,18 +22,8 @@ class _UserChatComponentState extends State<UserChatComponent> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ChatBloc, ChatState>(
+    return BlocBuilder<ChatBloc, ChatState>(
         bloc: chatBloc,
-        listener: (BuildContext context, ChatState state) {
-          if (state is DataError) {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                content: Text(state.errorMessage),
-              ),
-            );
-          }
-        },
         builder: (context, state) {
           print("state $state");
           if (state is PaginationLoadedState) {

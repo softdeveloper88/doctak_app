@@ -1,8 +1,6 @@
 import 'dart:async';
+import 'dart:isolate';
 
-import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/common_navigator.dart';
-import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/incomplete_profile_card.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
@@ -17,9 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../localization/app_localization.dart';
-import '../../../../widgets/show_loading_dialog.dart';
 import '../../../notification_screen/bloc/notification_state.dart';
-import '../../home/components/email_verification_widget.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
@@ -38,20 +34,21 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   // HomeBloc widget.homeBloc = HomeBloc();
   final ScrollController _mainScrollController = ScrollController();
   NotificationBloc notificationBloc = NotificationBloc();
-  String? emailVerified='';
-  bool isInCompleteProfile=false;
+  String? emailVerified = '';
+  bool isInCompleteProfile = false;
   getSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    emailVerified=prefs.getString('email_verified_at')??'';
+    emailVerified = prefs.getString('email_verified_at') ?? '';
     String? specialty = prefs.getString('specialty') ?? '';
     String? countryName = prefs.getString('country') ?? '';
     String? city = prefs.getString('city') ?? '';
-    isInCompleteProfile=specialty=='' || countryName =='' || city=='';
+    isInCompleteProfile = specialty == '' || countryName == '' || city == '';
     setState(() {});
   }
+
   @override
   void initState() {
-    _startTimer();
+    startIsolate();
     getSharedPreferences();
     // PusherService(AppData.logInUserId);
     widget.homeBloc.add(PostLoadPageEvent(page: 1));
@@ -59,23 +56,52 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     super.initState();
   }
 
-  Timer? _timer;
+  Isolate? _isolate;
+  ReceivePort? _receivePort;
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 20), (timer) {
-      notificationCounter();
+  /// Start the isolate and listen for messages
+  void startIsolate() async {
+    _receivePort = ReceivePort();
+
+    // Spawn the isolate and pass the SendPort of the ReceivePort
+    _isolate = await Isolate.spawn(
+      isolateEntry,
+      _receivePort!.sendPort,
+    );
+
+    // Listen to messages from the isolate
+    _receivePort!.listen((message) {
+      if (message == 'notificationCounter') {
+        // Call your Bloc event here
+        notificationCounter();
+      }
     });
   }
 
-  void notificationCounter() {
-    // Add your Bloc event here
-    notificationBloc.add(NotificationCounter());
-
+  /// The entry point for the isolate
+  static void isolateEntry(SendPort sendPort) {
+    // Start a periodic timer in the isolate
+    Timer.periodic(const Duration(seconds: 20), (timer) {
+      sendPort.send('notificationCounter');
+    });
   }
 
+  /// Your notificationCounter function
+  void notificationCounter() {
+    print("Notification counter triggered!");
+    // Add your Bloc event logic here
+    notificationBloc.add(NotificationCounter());
+  }
+
+  /// Dispose the isolate and ports
   @override
   void dispose() {
-    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    // Kill the isolate
+    _isolate?.kill(priority: Isolate.immediate);
+
+    // Close the ReceivePort
+    _receivePort?.close();
+
     super.dispose();
   }
 
@@ -92,9 +118,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
 
   @override
   Widget build(BuildContext context) {
-    afterBuildCreated(() {
-      setStatusBarColor(svGetScaffoldColor());
-    });
+    final bool showIncompleteProfile =
+        emailVerified == '' || isInCompleteProfile;
+
     return Scaffold(
         // resizeToAvoidBottomInset: false,
         key: scaffoldKey,
@@ -115,50 +141,11 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 FocusManager.instance.primaryFocus?.unfocus();
               }),
           title: Text(translation(context).lbl_home,
-              style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
+              style: boldTextStyle(
+                size: 18,
+                fontFamily: 'Poppins',
+              )),
           actions: [
-            // IconButton(
-            //   icon: Image.asset(
-            //     'assets/images/docktak_ai_light.png',
-            //     width: 30,
-            //     height: 30,
-            //     fit: BoxFit.contain,
-            //     // color: context.iconColor,
-            //   ),
-            //   onPressed: () {
-            //     ChatDetailScreen(isFromMainScreen: true).launch(context);
-            //
-            //   },
-            // ),
-            // MaterialButton(
-            //   textColor: Colors.black,
-            //   // shapeBorder: RoundedRectangleBorder(borderRadius: radius(4),side: BorderSide()),
-            //   // text: ' Artificial Intelligence ',
-            //   // textStyle: secondaryTextStyle(color: Colors.white, size: 10),
-            //   onPressed: () {
-            //     ChatDetailScreen(isFromMainScreen: true).launch(context);
-            //   },
-            //   elevation: 6,
-            //   color: Colors.white,
-            //   minWidth: 80,
-            //   shape: RoundedRectangleBorder(
-            //       borderRadius: radius(4),
-            //       side: const BorderSide(color: Colors.blue)),
-            //   animationDuration: const Duration(milliseconds: 300),
-            //   focusColor: SVAppColorPrimary,
-            //   hoverColor: SVAppColorPrimary,
-            //   splashColor: SVAppColorPrimary,
-            //   height: 25,
-            //   padding: const EdgeInsets.all(0),
-            //   child: Text(
-            //     " Artificial Intelligence ",
-            //     style: TextStyle(
-            //       color: Colors.black,
-            //       fontSize: 10.sp,
-            //       fontWeight: FontWeight.w500,
-            //     ),
-            //   ),
-            // ),
             IconButton(
               onPressed: () {
                 FocusManager.instance.primaryFocus?.unfocus();
@@ -242,25 +229,21 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             FocusManager.instance.primaryFocus?.unfocus();
           },
           child: RefreshIndicator(
-              onRefresh: _refresh,
-              child: CustomScrollView(
-                shrinkWrap: false,
+            onRefresh: _refresh,
+            child: ListView(
                 controller: _mainScrollController,
-                physics: const BouncingScrollPhysics(),
-                slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildListDelegate(
-                      [
-                        RepaintBoundary(child: UserChatComponent()),
-                        // if(emailVerified==null)const RepaintBoundary(child: VerifyEmailCard()),
-                        // if(AppData.specialty=='' && AppData.countryName=='' && AppData.city=='')
-                          RepaintBoundary(child: IncompleteProfileCard(emailVerified=='',isInCompleteProfile)),
-                        RepaintBoundary(child: SVPostComponent(widget.homeBloc)),
-                      ],
+                physics: const ClampingScrollPhysics(),
+                // More controlled scrolling
+                children: [
+                  UserChatComponent(),
+                  if (showIncompleteProfile)
+                    IncompleteProfileCard(
+                      emailVerified == '',
+                      isInCompleteProfile,
                     ),
-                  ),
-                ],
-              ),),
+                  SVPostComponent(widget.homeBloc)
+                ]),
+          ),
         ));
   }
 }

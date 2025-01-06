@@ -1,6 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/models/SVSearchModel.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -20,7 +19,6 @@ class TagFriendsListBottomSheet extends StatefulWidget {
 }
 
 class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
-  List<SVSearchModel> list = getSharePostList();
 
   // AddPostBloc widget.searchPeopleBloc =AddPostBloc();
 

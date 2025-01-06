@@ -58,6 +58,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
               child: AdWidget(ad: _bannerAd),
             ),
           )
-        : const SizedBox(height: 8);
+        : const SizedBox.shrink();
   }
 }

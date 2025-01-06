@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/app_comman_data.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -18,6 +19,7 @@ import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../../data/models/conference_model/search_conference_model.dart';
+import '../../../../../core/utils/post_utils.dart';
 import 'bloc/conference_bloc.dart';
 import 'bloc/conference_event.dart';
 import 'bloc/conference_state.dart';
@@ -497,7 +499,7 @@ class ConferenceWidget extends StatelessWidget {
                 // color: svGetBodyColor(),
                 onTap: () {
                   Uri registrationUri = Uri.parse(conference.registrationLink!);
-                  _launchInBrowser(registrationUri);
+                  PostUtils.launchURL(context, registrationUri.toString());
                 },
                 text: 'Register Now', context: context,
               ),
@@ -576,12 +578,5 @@ class ConferenceWidget extends StatelessWidget {
     }
   }
 
-  Future<void> _launchInBrowser(Uri url) async {
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
-      throw Exception('Could not launch $url');
-    }
-  }
+
 }

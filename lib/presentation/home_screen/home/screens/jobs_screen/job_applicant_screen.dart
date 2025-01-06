@@ -70,7 +70,6 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
               itemCount:
                   widget.jobBloc.jobApplicantsModel?.applicants?.length ?? 0,
               itemBuilder: (context, index) {
-                var bloc = widget.jobBloc;
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
