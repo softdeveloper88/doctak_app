@@ -53,7 +53,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: Icon(Icons.arrow_back_ios, color: svGetBodyColor())),
+            child: Icon(Icons.arrow_back_ios, color: svGetBodyColor(),size: 17,)),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           if (widget.profileBloc.isMe)
@@ -66,13 +66,13 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                     isEditModeMap = !isEditModeMap;
                   });
                 },
-                elevation: 6,
+                elevation: 0,
                 color: Colors.white,
                 minWidth: 20,
-                shape: RoundedRectangleBorder(
-                  borderRadius: radius(200),
-                  side: const BorderSide(color: Colors.blue),
-                ),
+                // shape: RoundedRectangleBorder(
+                //   borderRadius: radius(200),
+                //   side: const BorderSide(color: Colors.blue),
+                // ),
                 animationDuration: const Duration(milliseconds: 300),
                 focusColor: SVAppColorPrimary,
                 hoverColor: SVAppColorPrimary,
@@ -88,7 +88,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                   },
                   child: const Icon(
                     Icons.add_circle_outline_sharp,
-                    color: Colors.blue,
+                    color: Colors.black,
                     size: 25,
                     // color: Colors.black,
                     // imagePath: 'assets/icon/ic_vector.svg',

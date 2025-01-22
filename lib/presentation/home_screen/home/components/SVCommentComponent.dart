@@ -33,201 +33,230 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
         children: [
-          InkWell(
-            onTap: () {
-              SVProfileFragment(userId: widget.comment.commenter?.id??'')
-                  .launch(context);
-            },
-            child: CircleAvatar(
-              backgroundImage:
-                  NetworkImage(widget.comment.commenter?.profilePic??''),
-              radius: 24.0,
-            ),
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: () {
+                  SVProfileFragment(userId: widget.comment.commenter?.id??'')
+                      .launch(context);
+                },
+                child: CircleAvatar(
+                  backgroundImage:
+                      NetworkImage(widget.comment.commenter?.profilePic??''),
+                  radius: 24.0,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 5,
-                      child: InkWell(
-                        onTap: () {
-                          SVProfileFragment(userId: widget.comment.commenter?.id??"")
-                              .launch(context);
-                        },
-                        child: RichText(
-                            textAlign: TextAlign.left,
-                            text: TextSpan(
-                              style: TextStyle(
-                                  fontFamily:  'Poppins',
-                                  fontSize: 12.sp, color: svGetBodyColor()),
-                              children: <TextSpan>[
-                                // TextSpan(text: title),
-                                TextSpan(
-                                    text: '${widget.comment.commenter?.firstName??''} ${widget.comment.commenter?.lastName??''}',
-                                    style: const TextStyle(
-                                        fontFamily:  'Poppins',
-                                        fontWeight: FontWeight.w500)),
-                                TextSpan(
-                                    text: ' ${timeAgo.format(DateTime.parse(widget.comment.createdAt!))}',
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: InkWell(
+                            onTap: () {
+                              SVProfileFragment(userId: widget.comment.commenter?.id??"")
+                                  .launch(context);
+                            },
+                            child:  Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  '${widget.comment.commenter?.firstName??''} ${widget.comment.commenter?.lastName??''}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16
 
+                                  ),
+                                ),
+                                const Text(
+                                  ' · ',
                                   style: TextStyle(
-                                    fontFamily:  'Poppins',
-                                    fontSize: 12.0,
-                                    color: Colors.grey[600],
-                                  ))
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold
+                                  ),
+                                ),
+                                Image.asset(
+                                  'images/socialv/icons/ic_TickSquare.png',
+                                  height: 14,
+                                  width: 14,
+                                  fit: BoxFit.cover,
+                                ),
                               ],
-                            )),
-                      ),
+                            ),
+                            // RichText(
+                            //     textAlign: TextAlign.left,
+                            //     text: TextSpan(
+                            //       style: TextStyle(
+                            //           fontSize: 12.sp, color: svGetBodyColor()),
+                            //       children: <TextSpan>[
+                            //         // TextSpan(text: title),
+                            //         TextSpan(
+                            //             text: '${widget.comment.commenter?.firstName??''} ${widget.comment.commenter?.lastName??''}',
+                            //             style: const TextStyle(fontWeight: FontWeight.w500)),
+                            //         TextSpan(
+                            //             text:' ${timeAgo.format(DateTime.parse(widget.comment.createdAt!))}',
+                            //
+                            //           style: TextStyle(
+                            //             fontSize: 12.0,
+                            //             color: Colors.grey[600],
+                            //           ))
+                            //       ],
+                            //     )),
+                          ),
 
-                    ),
-                    const Spacer(),
-                    if (widget.comment.commenter?.id == AppData.logInUserId)
-                      Expanded(
-                        child: PopupMenuButton(
-                          itemBuilder: (context) {
-                            return [
-                              PopupMenuItem(
-                                child: Builder(builder: (context) {
-                                  return Column(
-                                    children: ["Delete"].map((String item) {
-                                      return PopupMenuItem(
-                                        value: item,
-                                        child: Text(item),
+                        ),
+                        const Spacer(),
+                        if (widget.comment.commenter?.id == AppData.logInUserId)
+                          Expanded(
+                            child: PopupMenuButton(
+                              itemBuilder: (context) {
+                                return [
+                                  PopupMenuItem(
+                                    child: Builder(builder: (context) {
+                                      return Column(
+                                        children: ["Delete"].map((String item) {
+                                          return PopupMenuItem(
+                                            value: item,
+                                            child: Text(item),
+                                          );
+                                        }).toList(),
                                       );
-                                    }).toList(),
-                                  );
-                                }),
-                              ),
-                            ];
+                                    }),
+                                  ),
+                                ];
+                              },
+                              onSelected: (value) {
+                                if (value == 'Delete') {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return CustomAlertDialog(
+                                            title:
+                                                'Are you sure want to delete comment ?',
+                                            callback: () {
+                                              widget.commentBloc.add(
+                                                  DeleteCommentEvent(
+                                                      commentId: widget.comment.id
+                                                          .toString()));
+                                              Navigator.of(context).pop();
+                                            });
+                                      });
+                                }
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      widget.comment.comment ?? 'No Name',
+                      style: const TextStyle(fontSize: 14.0,),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Text(timeAgo.format(DateTime.parse(widget.comment.createdAt!)),style: const TextStyle(fontSize: 14,color: Colors.black38,fontWeight: FontWeight.w400),),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            widget.onReplySelected(widget.comment.id ?? 0);
                           },
-                          onSelected: (value) {
-                            if (value == 'Delete') {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return CustomAlertDialog(
-                                        title:
-                                            'Are you sure want to delete comment ?',
-                                        callback: () {
-                                          widget.commentBloc.add(
-                                              DeleteCommentEvent(
-                                                  commentId: widget.comment.id
-                                                      .toString()));
-                                          Navigator.of(context).pop();
-                                        });
-                                  });
+                          child: Text(
+                            '${widget.comment.replyCount} Reply',
+                            style: TextStyle(
+                              fontSize: 13.0,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            widget.commentBloc.add(LikeReplyComment(commentId:widget.comment.id.toString()));
+                            // widget.comment.userHasLiked=true;
+                                print(widget.comment.id);
+                            if(!(widget.comment.userHasLiked??true)){
+                              widget.comment.reactionCount= (widget.comment.reactionCount??0)+1;
+                              widget.comment.userHasLiked=true;
+
+                            }else{
+                              if((widget.comment.reactionCount??0)>0) {
+                                widget.comment.reactionCount = (widget.comment
+                                    .reactionCount ?? 0) - 1;
+                              }
+                              widget.comment.userHasLiked=false;
+
                             }
+                            print(widget.comment.userHasLiked);
                           },
+                          child:
+                          // ReactionButton<String>(
+                          //   onReactionChanged: (Reaction<String>? reaction) {
+                          //     debugPrint('Selected value: ${reaction?.value}');
+                          //   },
+                          //   reactions: <Reaction<String>>[
+                          //     Reaction<String>(
+                          //       value: 'like',
+                          //       icon: widget,
+                          //     ),
+                          //     Reaction<String>(
+                          //       value: 'love',
+                          //       icon: widget,
+                          //     ),
+                          //   ],
+                            // initialReaction: Reaction<String>(
+                            //   value: 'like',
+                            //   icon: widget,
+                            // ),
+                          //   selectedReaction: Reaction<String>(
+                          //     value: 'like_fill',
+                          //     icon: widget,
+                          //   ), itemSize: Size.infinite,
+                          // )
+                          Text(
+                            widget.comment.userHasLiked??false ? '${widget.comment.reactionCount}Liked':'${widget.comment.reactionCount}Like',
+                            style: TextStyle(
+                              fontSize: 13.0,
+                              color: Colors.grey[600],
+                            ),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  widget.comment.comment ?? 'No Name',
-                  style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins',),
-                ),
-                const SizedBox(height: 8.0),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        widget.onReplySelected(widget.comment.id ?? 0);
-                      },
-                      child: Text(
-                        '${widget.comment.replyCount} Reply',
-                        style: TextStyle(
-                          fontSize: 13.0,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        widget.commentBloc.add(LikeReplyComment(commentId:widget.comment.id.toString()));
-                        // widget.comment.userHasLiked=true;
-                            print(widget.comment.id);
-                        if(!(widget.comment.userHasLiked??true)){
-                          widget.comment.reactionCount= (widget.comment.reactionCount??0)+1;
-                          widget.comment.userHasLiked=true;
-
-                        }else{
-                          if((widget.comment.reactionCount??0)>0) {
-                            widget.comment.reactionCount = (widget.comment
-                                .reactionCount ?? 0) - 1;
-                          }
-                          widget.comment.userHasLiked=false;
-
-                        }
-                        print(widget.comment.userHasLiked);
-                      },
-                      child:
-                      // ReactionButton<String>(
-                      //   onReactionChanged: (Reaction<String>? reaction) {
-                      //     debugPrint('Selected value: ${reaction?.value}');
-                      //   },
-                      //   reactions: <Reaction<String>>[
-                      //     Reaction<String>(
-                      //       value: 'like',
-                      //       icon: widget,
-                      //     ),
-                      //     Reaction<String>(
-                      //       value: 'love',
-                      //       icon: widget,
-                      //     ),
-                      //   ],
-                        // initialReaction: Reaction<String>(
-                        //   value: 'like',
-                        //   icon: widget,
+                        const Spacer(),
+                        // Row(
+                        //   children: [
+                        //     Text(
+                        //       '1',
+                        //       style: TextStyle(
+                        //         fontSize: 13.0,
+                        //         color: Colors.red[400],
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 4.0),
+                        //     const Icon(
+                        //       Icons.favorite,
+                        //       size: 16.0,
+                        //       color: Colors.red,
+                        //     ),
+                        //   ],
                         // ),
-                      //   selectedReaction: Reaction<String>(
-                      //     value: 'like_fill',
-                      //     icon: widget,
-                      //   ), itemSize: Size.infinite,
-                      // )
-                      Text(
-                        widget.comment.userHasLiked??false ? '${widget.comment.reactionCount}Liked':'${widget.comment.reactionCount}Like',
-                        style: TextStyle(
-                          fontSize: 13.0,
-                          color: Colors.grey[600],
-                        ),
-                      ),
+                      ],
                     ),
-                    const Spacer(),
-                    // Row(
-                    //   children: [
-                    //     Text(
-                    //       '1',
-                    //       style: TextStyle(
-                    //         fontSize: 13.0,
-                    //         color: Colors.red[400],
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 4.0),
-                    //     const Icon(
-                    //       Icons.favorite,
-                    //       size: 16.0,
-                    //       color: Colors.red,
-                    //     ),
-                    //   ],
-                    // ),
+                    if(widget.selectedCommentId==widget.comment.id)ReplyCommentListWidget(commentBloc:widget.commentBloc,postId:int.parse(widget.postId),commentId:widget.selectedCommentId??0 ),
+
                   ],
                 ),
-                if(widget.selectedCommentId==widget.comment.id)ReplyCommentListWidget(commentBloc:widget.commentBloc,postId:int.parse(widget.postId),commentId:widget.selectedCommentId??0 ),
-                const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                )
-              ],
-            ),
+              ),
+            ],
           ),
+          const Divider(
+            color: Colors.black12,
+            thickness: 1,
+          )
         ],
       ),
     );

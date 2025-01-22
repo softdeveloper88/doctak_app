@@ -148,7 +148,6 @@ class _FollowerScreenState extends State<FollowerScreen> {
                 // );
               }
             },
-
             builder: (context, state) {
               print("state $state");
               if (state is FollowersPaginationLoadingState) {

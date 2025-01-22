@@ -118,7 +118,7 @@ Widget svAppButton(
   return AppButton(
     shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
     text: text,
-    textStyle: boldTextStyle(color: Colors.white),
+    textStyle: boldTextStyle(color: Colors.white,weight: FontWeight.w500),
     onTap: onTap,
     elevation: 0,
     color: color ?? SVAppColorPrimary,

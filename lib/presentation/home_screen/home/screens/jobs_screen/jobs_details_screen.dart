@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job_applicant_screen.dart';
@@ -39,7 +40,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     );
     super.initState();
   }
-
+  Countries findModelByNameOrDefault(
+      List<Countries> countries,
+      String name,
+      Countries defaultCountry,
+      ) {
+    return countries.firstWhere(
+          (country) => country.countryName?.toLowerCase() == name.toLowerCase(), // Case-insensitive match
+      orElse: () => defaultCountry, // Return defaultCountry if not found
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,18 +112,8 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text(
-                              "New",
-                              style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: kDefaultFontSize),
-                            ),
-
-                            Row(
-                              children: [
                             if(jobsBloc.jobDetailModel.job?.promoted !=0 )   Container(
                                   padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
@@ -128,7 +128,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   width: 10,
                                 ),
                               //&& jobsBloc.jobDetailModel.job?.user!.id != AppData.logInUserId
-                              if(jobsBloc.jobDetailModel.hasApplied == null )  MaterialButton(
+                              if((jobsBloc.jobDetailModel.hasApplied??false)==false)  MaterialButton(
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10)),
                                   color: Colors.blue,
@@ -191,8 +191,6 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                     color: context.iconColor,
                                   ),
                                 ),
-                              ],
-                            ),
 
                           ],
                         ),
@@ -202,11 +200,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               color: Colors.white,
-                              border: Border.all(color: Colors.grey)),
+                              // border: Border.all(color: Colors.grey)
+                            ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if(jobsBloc.jobDetailModel.job?.user?.id != AppData.logInUserId)  GestureDetector(
+                              if(jobsBloc.jobDetailModel.hasApplied??false)  GestureDetector(
                                 onTap: (){
                                   showDialog(
                                       context: context,

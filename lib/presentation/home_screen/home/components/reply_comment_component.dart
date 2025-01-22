@@ -20,6 +20,7 @@ class ReplyCommentComponent extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           InkWell(
             onTap: () {
@@ -29,13 +30,14 @@ class ReplyCommentComponent extends StatelessWidget {
             child: CircleAvatar(
               backgroundImage:
               NetworkImage(replyCommentList.commenter?.profilePic??'',),
-              radius: 15.0,
+              radius: 20.0,
             ),
           ),
-          const SizedBox(width: 12.0),
+          const SizedBox(width: 8.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
                   children: [
@@ -46,29 +48,53 @@ class ReplyCommentComponent extends StatelessWidget {
                           SVProfileFragment(userId: replyCommentList.commenterId??"")
                               .launch(context);
                         },
-                        child: RichText(
-                            textAlign: TextAlign.left,
-                            text: TextSpan(
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(replyCommentList.commenter?.name??'',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16),
+                            ),
+                            const Text(
+                              ' · ',
                               style: TextStyle(
-                                  fontFamily:  'Poppins',
-                                  fontSize: 12.sp, color: svGetBodyColor()),
-                              children: <TextSpan>[
-                                // TextSpan(text: title),
-                                TextSpan(
-                                    text: replyCommentList.commenter?.name??'',
-                                    style: const TextStyle(
-                                        fontFamily:  'Poppins',
-                                        fontWeight: FontWeight.w500)),
-                                TextSpan(
-                                    text: ' ${timeAgo.format(DateTime.parse(replyCommentList.createdAt!))}',
-
-                                    style: TextStyle(
-                                      fontFamily:  'Poppins',
-                                      fontSize: 12.0,
-                                      color: Colors.grey[600],
-                                    ))
-                              ],
-                            )),
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                            Image.asset(
+                              'images/socialv/icons/ic_TickSquare.png',
+                              height: 14,
+                              width: 14,
+                              fit: BoxFit.cover,
+                            ),
+                          ],
+                        ),
+                        // RichText(
+                        //     textAlign: TextAlign.left,
+                        //     text: TextSpan(
+                        //       style: TextStyle(
+                        //           fontFamily:  'Poppins',
+                        //           fontSize: 12.sp, color: svGetBodyColor()),
+                        //       children: <TextSpan>[
+                        //         // TextSpan(text: title),
+                        //         TextSpan(
+                        //             text: replyCommentList.commenter?.name??'',
+                        //             style: const TextStyle(
+                        //                 fontFamily:  'Poppins',
+                        //                 fontWeight: FontWeight.w500)),
+                        //         TextSpan(
+                        //             text: ' ${timeAgo.format(DateTime.parse(replyCommentList.createdAt!))}',
+                        //
+                        //             style: TextStyle(
+                        //               fontFamily:  'Poppins',
+                        //               fontSize: 12.0,
+                        //               color: Colors.grey[600],
+                        //             ))
+                        //       ],
+                        //     )),
                       ),
 
                     ),
@@ -119,8 +145,9 @@ class ReplyCommentComponent extends StatelessWidget {
                   style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins',),
                 ),
                 const SizedBox(height: 8.0),
+                Text(timeAgo.format(DateTime.parse(replyCommentList.createdAt!)),style: const TextStyle(fontSize: 14,color: Colors.black38,fontWeight: FontWeight.w400),),
                 const Divider(
-                  color: Colors.grey,
+                  color: Colors.black12,
                   thickness: 1,
                 )
               ],

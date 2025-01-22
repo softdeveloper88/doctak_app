@@ -11,6 +11,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
+import 'package:doctak_app/presentation/notification_screen/user_announcement_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -77,7 +78,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         title: Text('Notifications',
             style: boldTextStyle(
               size: 20,
-              fontFamily: 'Poppins',
             )),
         elevation: 0,
         centerTitle: false,
@@ -238,6 +238,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       size: 16.0,
                     ),
                     onTap: () {
+
                       bloc.add(ReadNotificationEvent(
                           notificationId:
                               bloc.notificationsList[index].id.toString()));

@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/image_constant.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:intl/intl.dart';
@@ -59,7 +61,7 @@ class ChatHistoryScreen extends StatelessWidget {
       backgroundColor: svGetBgColor(),
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor(),size: 17,),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: false,
@@ -67,7 +69,7 @@ class ChatHistoryScreen extends StatelessWidget {
         backgroundColor: context.cardColor,
         title: const Text(
           'History Artificial Intelligence',
-          style: TextStyle(fontSize: 18,fontFamily:"Poppins",fontWeight: FontWeight.w400),
+          style: TextStyle(fontSize: 17,fontWeight: FontWeight.w400),
         ),
       ),
       body: BlocConsumer<ChatGPTBloc, ChatGPTState>(
@@ -140,9 +142,9 @@ class ChatHistoryScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(10)),
                                 padding: const EdgeInsets.all(16),
                                 margin: const EdgeInsets.only(
-                                  top: 16,
-                                  left: 16,
-                                  right: 16,
+                                  top: 8,
+                                  left: 8,
+                                  right: 8,
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
@@ -165,15 +167,15 @@ class ChatHistoryScreen extends StatelessWidget {
                                             ),
                                             Row(
                                               children: <Widget>[
-                                                Icon(Icons.calendar_month,
-                                                    size: 15,
+                                               SvgPicture.asset(icTimeDate,
+                                                    height: 16,
+                                                    width: 16,
                                                     color: svGetBodyColor()),
                                                 const SizedBox(
                                                   width: 2,
                                                 ),
                                                 Text(
-                                                  DateFormat(
-                                                          'MM dd, yyyy, h:mm a')
+                                                  DateFormat('MM dd, yyyy, h:mm a')
                                                       .format(DateTime.parse(
                                                           session.createdAt!)),
                                                   // timeAgo.format(DateTime.parse(
@@ -209,12 +211,12 @@ class ChatHistoryScreen extends StatelessWidget {
                                       child: Container(
                                           decoration: BoxDecoration(
                                               color:
-                                                  Colors.red.withOpacity(0.3),
+                                                  Colors.red.withOpacity(0.2),
                                               borderRadius:
                                                   BorderRadius.circular(6)),
                                           padding: const EdgeInsets.all(4),
                                           child: const Icon(
-                                            Icons.delete,
+                                            CupertinoIcons.delete,
                                             color: Colors.red,
                                           )),
                                     )
@@ -235,9 +237,8 @@ class ChatHistoryScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: svAppButton(
                       context: context,
-                      // style: svAppButton(text: text, onTap: onTap, context: context),
                       onTap: () => onNewSessionTap(),
-                      text: 'New Chat',
+                      text: '+ NEW CHAT',
                     ),
                   ),
                 ],

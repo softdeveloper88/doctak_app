@@ -100,7 +100,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                           return SizedBox(
                               height: 200,
                               child: CommentListShimmer());
-                        } else {
+                        }
                           return SVCommentComponent(
                               postId: widget.id.toString(),
                               onReplySelected: (commentId) {
@@ -114,7 +114,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                               selectedCommentId: selectedCommentId,
                               commentBloc: commentBloc,
                               comment: commentBloc.postList[index]);
-                        }
+
                       }
                   ),
                 );

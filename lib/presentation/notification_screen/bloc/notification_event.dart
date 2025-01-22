@@ -47,6 +47,19 @@ class ReadNotificationEvent extends NotificationEvent {
   @override
   List<Object?> get props => [notificationId];
 }
+class AnnouncementDetailEvent extends NotificationEvent {
+  int? announcementId;
+
+  AnnouncementDetailEvent({this.announcementId});
+  @override
+  List<Object?> get props => [announcementId];
+}
+
+class AnnouncementEvent extends NotificationEvent {
+
+  @override
+  List<Object?> get props => [];
+}
 
 class NotificationCheckIfNeedMoreDataEvent extends NotificationEvent {
   final int index;

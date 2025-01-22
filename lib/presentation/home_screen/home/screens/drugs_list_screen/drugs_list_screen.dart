@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
@@ -12,6 +14,7 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -85,26 +88,46 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       children: [
                         Expanded(
                             child: Center(
-                                child: Text('Drug List',
+                                child: Text('Drugs List',
                                     style: boldTextStyle(size: 20)))),
                         Expanded(
                           child: CustomDropdownField(
+                            selectedItemBuilder: (context) {
+                              return [
+                                for (Countries item in state.countriesModel.countries ?? [])
+                                  Text(
+                                    item.flag ?? '', // The flag or emoji
+                                    style: const TextStyle(fontSize: 18), // Adjust font size for the flag
+                                  ),
+                              ];
+                            },
+                            itemBuilder: (item) => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  item.countryName??'',
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                                Text(item.flag??'')
+                              ],
+                            ),
                             isTextBold: true,
                             items: state.countriesModel.countries ?? [],
                             value: state
-                                .countriesModel.countries!.first.countryName,
+                                .countriesModel.countries!.first,
                             width: 50,
+                            height:50,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 10,
                               vertical: 0,
                             ),
-                            onChanged: (String? newValue) {
+                            onChanged: ( newValue) {
                               print("ddd ${state.countryFlag}");
-                              var index = state.countriesModel.countries!
-                                  .indexWhere((element) =>
-                                      newValue == element.countryName);
-                              var countryId =
-                                  state.countriesModel.countries![index].id;
+                              // var index = state.countriesModel.countries!
+                              //     .indexWhere((element) =>
+                              //         newValue == element.countryName);
+                              // var countryId =
+                              //     state.countriesModel.countries![index].id;
                               // BlocProvider.of<DrugsBloc>(context).add(
                               //   GetPost(
                               //       page: '1',
@@ -115,13 +138,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                               // countryId = countryIds.toString();
                               BlocProvider.of<SplashBloc>(context).add(
                                   LoadDropdownData(
-                                      countryId.toString(),
+                                      newValue.id.toString(),
                                       state.typeValue,
                                       state.searchTerms ?? '',
                                       ''));
                               drugsBloc.add(LoadPageEvent(
                                   page: 1,
-                                  countryId: countryId.toString(),
+                                  countryId: newValue.id.toString(),
                                   searchTerm: state.searchTerms ?? "",
                                   type: state.typeValue));
 
@@ -427,6 +450,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               child: Text("No Drugs Found"),
             )
           : ListView.builder(
+              padding: const EdgeInsets.only(top: 10),
               itemCount: bloc.drugsData.length,
               itemBuilder: (context, index) {
                 if (bloc.pageNumber <= bloc.numberOfPage) {
@@ -454,18 +478,10 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       );
                     },
                     child: Container(
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 5, horizontal: 10),
-                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.only(
+                          bottom: 10, left: 10,right: 10.0),
+                      padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: svGetBodyColor().withOpacity(0.10),
-                            spreadRadius: 0,
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                         color: context.cardColor,
                         borderRadius: BorderRadius.circular(5),
                       ),
@@ -579,42 +595,75 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
 
   Widget _buildDialog(BuildContext context, String genericName) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
               child: Text(
             genericName,
-            style: const TextStyle(color: Colors.black, fontSize: 15),
+            style:  const TextStyle(color: Colors.black, fontSize: 17,fontWeight: FontWeight.w500),
           )),
-          IconButton(
-            icon: const Icon(
-              Icons.close,
-              size: 15,
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(
+          //     Icons.close,
+          //     size: 15,
+          //   ),
+          //   onPressed: () {
+          //     Navigator.of(context).pop();
+          //   },
+          // ),
         ],
       ),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-            _buildQuestion(context, ' All information', genericName,
+            _buildQuestion(context, '1. All information', genericName,
+                icInfo,
                 clickable: true),
-            _buildQuestion(context, ' Mechanism of action', genericName,
+            _buildQuestion(context, '2. Mechanism of action', genericName,icMechanisam,
                 clickable: true),
-            _buildQuestion(context, ' Indications', genericName,
+            _buildQuestion(context, '3. Indications', genericName,icIndication,
                 clickable: true),
-            _buildQuestion(context, ' Dosage and administration', genericName,
+            _buildQuestion(context, '4. Dosage and administration', genericName,icDosage,
                 clickable: true),
-            _buildQuestion(context, ' Drug interactions', genericName,
+            _buildQuestion(context, '5. Drug interactions', genericName,icDrug,
                 clickable: true),
-            _buildQuestion(context, ' Special populations', genericName,
+            _buildQuestion(context, '6. Special populations', genericName,icSpecial,
                 clickable: true),
-            _buildQuestion(context, ' Side effects', genericName,
+            _buildQuestion(context, '7. Side effects', genericName,icSideEffect,
                 clickable: true),
+            SizedBox(height: 10,),
+            Expanded(
+              child: Container(
+                width: 30.w,
+                height: 10.w,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: MaterialButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context, rootNavigator: true)
+                        .pop('dialog');
+                  },
+                  child: Center(
+                    child: Text(
+                      "CLOSE",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 10.sp,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -622,7 +671,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
   }
 
   Widget _buildQuestion(
-      BuildContext context, String question, String genericName,
+      BuildContext context, String question, String genericName,String icon,
       {bool clickable = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -641,33 +690,34 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         child: Container(
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: Colors.grey[200], // Adjust color to match your theme
+            color: Colors.grey.withOpacity(0.2), // Adjust color to match your theme
             borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(color: Colors.blue),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2), // changes position of shadow
-              ),
-            ],
+            // border: Border.all(color: Colors.blue),
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.grey.withOpacity(0.5),
+            //     spreadRadius: 1,
+            //     blurRadius: 3,
+            //     offset: const Offset(0, 2), // changes position of shadow
+            //   ),
+            // ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 15,
             children: [
-              Image.asset(
-                'assets/images/docktak_ai_light.png',
-                height: 25,
-                width: 25,
+              SvgPicture.asset(
+                icon,
+                height: 20,
+                width: 20,
               ),
               Expanded(
                 child: Text(
                   question,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14.0,
-                    color: Colors.blue[900],
-                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

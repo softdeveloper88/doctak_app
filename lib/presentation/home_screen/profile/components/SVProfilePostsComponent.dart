@@ -12,12 +12,11 @@ import 'package:sizer/sizer.dart';
 
 import '../../../../theme/app_decoration.dart';
 import '../../../../widgets/custom_image_view.dart';
-import '../../utils/SVColors.dart';
 
 class SVProfilePostsComponent extends StatefulWidget {
   ProfileBloc profileBloc;
 
-    SVProfilePostsComponent(this.profileBloc, {Key? key}) : super(key: key);
+  SVProfilePostsComponent(this.profileBloc, {Key? key}) : super(key: key);
 
   @override
   State<SVProfilePostsComponent> createState() =>
@@ -36,70 +35,83 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
+          Container(
+            color: svGetScaffoldColor(),
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+              width: 500,
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue, width: 2),
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.all(Radius.circular(8))),
+              child: Row(
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      selectedIndex = 0;
-                      setState(() {});
-                    },
-                    child: Text(
-                      'All Post',
-                      style: TextStyle(
-                        color: SVAppColorPrimary,
-                        fontSize: 14,
-                        fontWeight: selectedIndex == 0
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        selectedIndex = 0;
+                        setState(() {});
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        // width: 210,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: selectedIndex == 1
+                                ? Colors.white
+                                : Colors.blue,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(6))),
+                        child: Center(
+                            child: Text(
+                          "All Post",
+                          style: TextStyle(
+                              fontFamily: 'Poppins',
+                              color:
+                                  selectedIndex == 0 ? Colors.white : Colors.blue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14),
+                          // style: CustomTextStyles
+                          //     .titleMediumOnPrimaryContainer,
+                        )),
                       ),
                     ),
                   ),
-                  Container(
-                    height: 2,
-                    width: context.width() / 2 - 32,
-                    color: selectedIndex == 0
-                        ? SVAppColorPrimary
-                        : SVAppColorPrimary.withOpacity(0.5),
-                  ),
-                ],
-              ),
-              Container(
-                color: Colors.grey,
-                width: 1,
-                height: 20,
-              ),
-              Column(
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      selectedIndex = 1;
-                      setState(() {});
-                    },
-                    child: Text(
-                      'About',
-                      style: TextStyle(
-                        color: SVAppColorPrimary,
-                        fontSize: 14,
-                        fontWeight: selectedIndex == 1
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        selectedIndex = 1;
+                        setState(() {});
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        // width: 200,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color:
+                                selectedIndex == 0 ? Colors.white : Colors.blue,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(6))),
+                        child: Center(
+                            child: Text(
+                          "About",
+                          style: TextStyle(
+                              fontFamily: 'Poppins',
+                              color:selectedIndex == 1
+                                  ? Colors.white
+                                  : Colors.blue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14),
+                          // style: CustomTextStyles
+                          //     .titleMediumOnPrimaryContainer,
+                        )),
                       ),
                     ),
                   ),
-                  Container(
-                    height: 2,
-                    width: context.width() / 2 - 32,
-                    color: selectedIndex == 1
-                        ? SVAppColorPrimary
-                        : SVAppColorPrimary.withOpacity(0.5),
-                  ),
                 ],
               ),
-              16.height,
-            ],
+            ),
           ),
           selectedIndex == 0
               ? MyPostComponent(widget.profileBloc)
@@ -197,7 +209,7 @@ Widget _buildRowinterested(
   return GestureDetector(
     onTap: () => onTap(),
     child: Container(
-      margin: const EdgeInsets.only(left: 10,right: 10),
+      margin: const EdgeInsets.only(left: 10, right: 10),
       padding: const EdgeInsets.symmetric(
         horizontal: 15,
         vertical: 18,
@@ -222,7 +234,8 @@ Widget _buildRowinterested(
             ),
             child: Text(
               interested,
-              style:  TextStyle(fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: 'Poppins',
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
                 color: svGetBodyColor(),

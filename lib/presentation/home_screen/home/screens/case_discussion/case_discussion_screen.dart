@@ -6,6 +6,7 @@ import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/case_model/case_discuss_model.dart';
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/add_case_discuss_screen.dart';
@@ -108,7 +109,6 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                   child: Column(
                     children: [
                       AppBar(
-
                         surfaceTintColor: svGetScaffoldColor(),
                         backgroundColor: svGetScaffoldColor(),
                         iconTheme: IconThemeData(color: context.iconColor),
@@ -121,30 +121,48 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                                     style: boldTextStyle(size: 18))),
                             Expanded(
                               child: CustomDropdownField(
+                                selectedItemBuilder: (context) {
+                                  return [
+                                    for (Countries item in state.countriesModel.countries ?? [])
+                                      Text(
+                                        item.flag ?? '', // The flag or emoji
+                                        style: const TextStyle(fontSize: 18), // Adjust font size for the flag
+                                      ),
+                                  ];
+                                },
+                                itemBuilder: (item) => Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      item.countryName??'',
+                                      style: const TextStyle(color: Colors.black),
+                                    ),
+                                    Text(item.flag??'')
+                                  ],
+                                ),
+                                height: 50,
                                 items: state.countriesModel.countries ?? [],
-                                value: state.countriesModel.countries?.first
-                                        .countryName ??
-                                    '',
+                                value: state.countriesModel.countries?.first,
                                 width: 50,
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 10,
                                   vertical: 0,
                                 ),
-                                onChanged: (String? newValue) {
-                                  var index = state.countriesModel.countries!
-                                      .indexWhere((element) =>
-                                          newValue == element.countryName);
-                                  var countryId =
-                                      state.countriesModel.countries![index].id;
+                                onChanged: (newValue) {
+                                  // var index = state.countriesModel.countries!
+                                  //     .indexWhere((element) =>
+                                  //         newValue == element.countryName);
+                                  // var countryId =
+                                  //     state.countriesModel.countries![index].id;
                                   BlocProvider.of<SplashBloc>(context).add(
                                       LoadDropdownData(
-                                          countryId.toString(),
+                                          newValue.id.toString(),
                                           state.typeValue,
                                           state.searchTerms ?? '',
                                           state.isExpired ?? 'New'));
                                   caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
                                     page: 1,
-                                    countryId: countryId.toString(),
+                                    countryId: newValue.id.toString(),
                                     searchTerm: state.searchTerms ?? "",
                                   ));
 
@@ -371,6 +389,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
               child: Text("No Case Found"),
             )
           : ListView.builder(
+        padding: const EdgeInsets.all(10),
               itemCount: bloc.caseDiscussList.length,
               itemBuilder: (context, index) {
                 if (bloc.pageNumber <= bloc.numberOfPage) {
@@ -668,6 +687,7 @@ class PostCard extends StatelessWidget {
         );
       },
       child: Card(
+        elevation: 0,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

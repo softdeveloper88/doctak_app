@@ -2,6 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/models/anousment_model/announcement_detail_model.dart';
+import 'package:doctak_app/data/models/anousment_model/announcement_model.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
 import 'package:doctak_app/presentation/notification_screen/notifications_provider.dart';
 import 'package:equatable/equatable.dart';
@@ -16,6 +18,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> notificationsList = [];
+  AnnouncementModel? announcementModel;
+  AnnouncementDetailModel? announcementDetailModel;
   int totalNotifications=0;
   NotificationModel? notificationsModel;
   final int nextPageTrigger = 1;
@@ -24,6 +28,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationLoadPageEvent>(_onGetNotification);
     on<GetPost>(_onGetNotification1);
     on<NotificationDetailPageEvent>(_onGetJobDetail);
+    on<AnnouncementEvent>(_getAnnouncement);
+    on<AnnouncementDetailEvent>(_getAnnouncementDetail);
     on<NotificationCounter>(_counterNotification);
     on<ReadNotificationEvent>(_readNotification);
     on<NotificationCheckIfNeedMoreDataEvent>((event, emit) async {
@@ -151,6 +157,70 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
    // notificationsModel.notifications?.data?[notificationsList.indexWhere((e)=>e.id.toString()==event.notificationId)].isRead=1;
 
     emit(PaginationLoadedState());
+
+    // emit(DataLoaded(notificationsList));
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState());
+
+      emit(DataError('No Data Found'));
+    }
+  }
+ _getAnnouncement(AnnouncementEvent event, Emitter<NotificationState> emit) async {
+    // emit(DrugsDataInitial());
+   emit(PaginationLoadingState());
+
+    // ProgressDialogUtils.showProgressDialog();
+    try {
+
+    Dio dio = Dio();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Response response = await dio.get(
+      '${AppData.remoteUrl2}/announcement', // Add query parameters
+      options: Options(headers: {
+        'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+      }),
+    );
+
+     announcementModel=AnnouncementModel.fromJson(response.data);
+
+    print('${announcementModel?.toJson()}');
+
+     emit(PaginationLoadedState());
+
+    // emit(DataLoaded(notificationsList));
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState());
+
+      emit(DataError('No Data Found'));
+    }
+  }
+  _getAnnouncementDetail(AnnouncementDetailEvent event, Emitter<NotificationState> emit) async {
+    // emit(DrugsDataInitial());
+    emit(PaginationLoadingState());
+
+    // ProgressDialogUtils.showProgressDialog();
+    try {
+
+    Dio dio = Dio();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Response response = await dio.get(
+      '${AppData.remoteUrl2}/announcements/${event.announcementId}', // Add query parameters
+      options: Options(headers: {
+        'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+      }),
+    );
+
+    announcementDetailModel=AnnouncementDetailModel.fromJson(response.data);
+
+     emit(PaginationLoadedState());
 
     // emit(DataLoaded(notificationsList));
     } catch (e) {

@@ -4,6 +4,7 @@ import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/followers_model/follower_data_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/presentation/followers_screen/bloc/followers_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/profile_header_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -103,112 +104,115 @@ class _FollowerWidgetState extends State<FollowerWidget> {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Material(
-        elevation: 2,
+        elevation: 0,
         color: context.cardColor,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // SVProfileFragment(userId:widget.element.id).launch(context);
-                      },
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: widget.element.profilePic == ''
-                            ? Image.asset('images/socialv/faces/face_5.png',
-                                    height: 56, width: 56, fit: BoxFit.cover)
-                                .cornerRadiusWithClipRRect(8)
-                                .cornerRadiusWithClipRRect(8)
-                            : CachedNetworkImage(
-                                    imageUrl: widget.element.profilePic ?? '',
-                                    height: 56,
-                                    width: 56,
-                                    fit: BoxFit.cover)
-                                .cornerRadiusWithClipRRect(30),
-                      ),
-                    ),
-                    10.width,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                                width: 50.w,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Wrap(
-                                          children:  [
-                                            Text(
-                                                "${widget.element.name??''}",
-                                                overflow: TextOverflow.clip,
-                                                maxLines: 2,
-                                                style: boldTextStyle()),
-                                            6.width,
-                                            Image.asset(
-                                                'images/socialv/icons/ic_TickSquare.png',
-                                                height: 14,
-                                                width: 14,
-                                                fit: BoxFit.cover)
-                                          ]),
-                                    ),
-
-                                  ],
-                                ))
-
-                            ,
-                          ],
-                        ),
-                        SizedBox(
-                          width: 50.w,
-                          child: Text(capitalizeWords(widget.element.specialty??"Doctor"),
-                              overflow: TextOverflow.clip,
-                              style:
-                              secondaryTextStyle(color: svGetBodyColor())),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              // Expanded(
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.start,
+              //     children: [
+              //       GestureDetector(
+              //         onTap: () {
+              //           // SVProfileFragment(userId:widget.element.id).launch(context);
+              //         },
+              //         child: Container(
+              //           width: 50,
+              //           height: 50,
+              //           decoration: BoxDecoration(
+              //             shape: BoxShape.circle,
+              //             boxShadow: [
+              //               BoxShadow(
+              //                 color: Colors.grey.withOpacity(0.5),
+              //                 spreadRadius: 2,
+              //                 blurRadius: 5,
+              //                 offset: const Offset(0, 3),
+              //               ),
+              //             ],
+              //           ),
+              //           child: widget.element.profilePic == ''
+              //               ? Image.asset('images/socialv/faces/face_5.png',
+              //                       height: 56, width: 56, fit: BoxFit.cover)
+              //                   .cornerRadiusWithClipRRect(8)
+              //                   .cornerRadiusWithClipRRect(8)
+              //               : CachedNetworkImage(
+              //                       imageUrl: widget.element.profilePic ?? '',
+              //                       height: 56,
+              //                       width: 56,
+              //                       fit: BoxFit.cover)
+              //                   .cornerRadiusWithClipRRect(30),
+              //         ),
+              //       ),
+              //       10.width,
+              //       Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         children: [
+              //           Row(
+              //             mainAxisSize: MainAxisSize.min,
+              //             children: [
+              //               SizedBox(
+              //                   width: 50.w,
+              //                   child: Row(
+              //                     children: [
+              //                       Expanded(
+              //                         child: Wrap(
+              //                             children:  [
+              //                               Text(
+              //                                   "${widget.element.name??''}",
+              //                                   overflow: TextOverflow.clip,
+              //                                   maxLines: 2,
+              //                                   style: boldTextStyle()),
+              //                               6.width,
+              //                               Image.asset(
+              //                                   'images/socialv/icons/ic_TickSquare.png',
+              //                                   height: 14,
+              //                                   width: 14,
+              //                                   fit: BoxFit.cover)
+              //                             ]),
+              //                       ),
+              //
+              //                     ],
+              //                   ))
+              //
+              //               ,
+              //             ],
+              //           ),
+              //           SizedBox(
+              //             width: 50.w,
+              //             child: Text(capitalizeWords(widget.element.specialty??"Doctor"),
+              //                 overflow: TextOverflow.clip,
+              //                 style:
+              //                 secondaryTextStyle(color: svGetBodyColor())),
+              //           ),
+              //         ],
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              ProfileHeaderWidget(
+                profilePicUrl: widget.element.profilePic ?? '',
+                userName:  "${widget.element.name??''}",
+                specialty: capitalizeWords(widget.element.specialty??"Doctor"),
+                onProfileTap: (){
+                  SVProfileFragment(userId:widget.element.id).launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
+                  },
+                onDeleteTap:()=>(){},
+                isCurrentUser:false, // Adjust based on your logic
               ),
               if (widget.userId == AppData.logInUserId)
                 isLoading
                     ? CircularProgressIndicator(
                         color: svGetBodyColor(),
                       )
-                    : AppButton(
-                        shapeBorder:
+                    : MaterialButton(
+                      minWidth: 20.w,
+                        shape:
                             RoundedRectangleBorder(borderRadius: radius(10)),
-                        text: widget.element.isCurrentlyFollow
-                            ? 'Unfollow'
-                            : 'Follow',
-                        textStyle: boldTextStyle(
-                            color: widget.element.isCurrentlyFollow != true
-                                ? SVAppColorPrimary
-                                : buttonUnSelectColor,
-                            size: 10),
-                        onTap: () async {
+                        onPressed: () async {
                           setState(() {
                             isLoading =
                                 true; // Set loading state to true when button is clicked
@@ -226,6 +230,14 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                         color: widget.element.isCurrentlyFollow == true
                             ? SVAppColorPrimary
                             : buttonUnSelectColor,
+                        child:Text( widget.element.isCurrentlyFollow
+                            ? 'Unfollow'
+                            : 'Follow',
+                        style: boldTextStyle(
+                            color: widget.element.isCurrentlyFollow != true
+                                ? SVAppColorPrimary
+                                : buttonUnSelectColor,
+                            size: 10)),
                       ),
               // ElevatedButton(
               //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),

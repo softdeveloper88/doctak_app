@@ -1,13 +1,16 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/image_constant.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_comman_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/parser.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -16,7 +19,8 @@ import '../../../home/components/SVCommentReplyComponent.dart';
 import 'full_screen_image_widget.dart';
 
 // import 'post_utils.dart'; // Import your PostUtils or helper methods
-import 'post_media_widget.dart'; // Import your PostMediaWidget
+import 'post_media_widget.dart';
+import 'profile_header_widget.dart'; // Import your PostMediaWidget
 // import 'jobs_details_screen.dart'; // Import your JobsDetailsScreen
 
 class PostItemWidget extends StatefulWidget {
@@ -118,7 +122,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                       Center(
                         child: HtmlWidget(
                             textStyle: const TextStyle(
-                              fontFamily: 'Poppins',
+
                             ),
                             textToShow, onTapUrl: (link) async {
                           print('link $link');
@@ -148,7 +152,6 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                         },
                         text: textToShow,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
                           fontSize: 14.0,
                           color: (widget.image?.isNotEmpty == true ||
                                   widget.media?.isNotEmpty == true)
@@ -168,7 +171,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                       child: Center(
                         child: HtmlWidget(
                           textStyle: const TextStyle(
-                            fontFamily: 'Poppins',
+
                           ),
                           enableCaching: true,
                           '<div style="text-align: center;">$textToShow</div>',
@@ -206,7 +209,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                           },
                           text: textToShow,
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+
                             fontSize: 14.0,
                             color: textColor,
                             fontWeight: FontWeight.bold,
@@ -234,7 +237,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                       child: Text(
                         isExpanded ? 'Show Less' : 'Show More',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+
                           color: svGetBodyColor(),
                           shadows: const [
                             Shadow(
@@ -286,7 +289,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(top: 8),
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: Theme.of(context).cardColor,
@@ -302,108 +305,9 @@ class _PostItemWidgetState extends State<PostItemWidget> {
             onDeleteTap:()=>widget.onDeleteTap(),
             isCurrentUser:widget.isCurrentUser, // Adjust based on your logic
           ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Expanded(
-          //       child: InkWell(
-          //         onTap: widget.onProfileTap,
-          //         child: Row(
-          //           children: [
-          //             CircleAvatar(
-          //               backgroundImage: NetworkImage(widget.profilePicUrl),
-          //               radius: 25,
-          //             ),
-          //             const SizedBox(width: 12),
-          //             Column(
-          //               crossAxisAlignment: CrossAxisAlignment.start,
-          //               children: [
-          //                 Row(
-          //                   children: [
-          //                     Text(
-          //                       widget.userName,
-          //                       style: const TextStyle(
-          //                         fontWeight: FontWeight.bold,
-          //                         fontFamily: 'Poppins',
-          //                       ),
-          //                     ),
-          //                     const SizedBox(width: 8),
-          //                     Image.asset(
-          //                       'images/socialv/icons/ic_TickSquare.png',
-          //                       height: 14,
-          //                       width: 14,
-          //                       fit: BoxFit.cover,
-          //                     ),
-          //                   ],
-          //                 ),
-          //                 Row(
-          //                   children: [
-          //                     Text(
-          //                       widget.createdAt,
-          //                       style: const TextStyle(
-          //                         fontSize: 12,
-          //                         color: Colors.grey,
-          //                         fontFamily: 'Poppins',
-          //                       ),
-          //                     ),
-          //                     const SizedBox(width: 8),
-          //                     const Icon(Icons.access_time, size: 16),
-          //                   ],
-          //                 ),
-          //               ],
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //     ),
-          //     if (widget.isCurrentUser)
-          //       PopupMenuButton<String>(
-          //         itemBuilder: (context) => [
-          //           const PopupMenuItem(value: 'Delete', child: Text('Delete')),
-          //         ],
-          //         onSelected: (value) {
-          //           if (value == 'Delete') {
-          //             widget.onDeleteTap();
-          //           }
-          //         },
-          //       ),
-          //   ],
-          // ),
-          // const SizedBox(height: 16),
-          // Placeholder Content
           _buildPlaceholderWithoutFile(context),
           // Media Content
           _buildMediaContent(context),
-          //           // Likes and Comments Row
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //     children: [
-          //       GestureDetector(
-          //         onTap: widget.onViewLikesTap,
-          //         child: Text(
-          //           '${widget.likes?.length ?? 0} Likes',
-          //           style: TextStyle(
-          //             fontFamily: 'Poppins',
-          //             color: Theme.of(context).textTheme.bodyMedium!.color,
-          //           ),
-          //         ),
-          //       ),
-          //       InkWell(
-          //         onTap: widget.onViewCommentsTap,
-          //         child: Text(
-          //           '${widget.comments?.length ?? 0} Comments',
-          //           style: TextStyle(
-          //             fontFamily: 'Poppins',
-          //             color: Theme.of(context).textTheme.bodyMedium!.color,
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          // Divider and Action Buttons
           InteractionRowWidget(isLiked:widget.isLiked,onLikeTap:widget.onLikeTap,onToggleComment:widget.onToggleComment, onShareTap: widget.onShareTap,onViewLikesTap: widget.onViewLikesTap,onViewCommentsTap: widget.onViewCommentsTap,likes: widget.likes?.length??0,comments: widget.comments?.length??0,),
           // const Divider(color: Colors.grey, thickness: 0.2),
           //
@@ -433,7 +337,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
           //           Text(
           //             'Like',
           //             style: TextStyle(
-          //               fontFamily: 'Poppins',
+          //
           //               color: Theme.of(context).textTheme.bodyMedium!.color,
           //             ),
           //           ),
@@ -456,7 +360,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
           //           Text(
           //             'Comment',
           //             style: TextStyle(
-          //               fontFamily: 'Poppins',
+          //
           //               color: Theme.of(context).textTheme.bodyMedium!.color,
           //             ),
           //           ),
@@ -477,7 +381,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
           //           Text(
           //             'Share',
           //             style: TextStyle(
-          //               fontFamily: 'Poppins',
+          //
           //               color: Theme.of(context).textTheme.bodyMedium!.color,
           //             ),
           //           ),
@@ -539,7 +443,7 @@ class InteractionRowWidget extends StatelessWidget {
                 child: Text(
                   '${likes ?? 0} Likes',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+
                     color: Theme.of(context).textTheme.bodyMedium!.color,
                   ),
                 ),
@@ -549,7 +453,7 @@ class InteractionRowWidget extends StatelessWidget {
                 child: Text(
                   '${comments ?? 0} Comments',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+
                     color: Theme.of(context).textTheme.bodyMedium!.color,
                   ),
                 ),
@@ -584,7 +488,7 @@ class InteractionRowWidget extends StatelessWidget {
                   Text(
                     'Like',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+
                       color: Theme.of(context).textTheme.bodyMedium!.color,
                     ),
                   ),
@@ -607,7 +511,7 @@ class InteractionRowWidget extends StatelessWidget {
                   Text(
                     'Comment',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+
                       color: Theme.of(context).textTheme.bodyMedium!.color,
                     ),
                   ),
@@ -620,15 +524,17 @@ class InteractionRowWidget extends StatelessWidget {
               onTap: onShareTap,
               child: Column(
                 children: [
-                  Icon(
-                    Icons.share,
-                    size: 22,
+                  Image.asset(
+                    'images/socialv/icons/ic_Send.png',
+                    height: 22,
+                    width: 22,
+                    fit: BoxFit.cover,
                     color: context.iconColor,
                   ),
                   Text(
-                    'Share',
+                    'Send',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+
                       color: Theme.of(context).textTheme.bodyMedium!.color,
                     ),
                   ),
@@ -641,99 +547,5 @@ class InteractionRowWidget extends StatelessWidget {
     );
   }
 }
-class ProfileHeaderWidget extends StatelessWidget {
-  final String profilePicUrl;
-  final String userName;
-  final String createdAt;
-  final VoidCallback onProfileTap;
-  final VoidCallback onDeleteTap;
-  final bool isCurrentUser;
 
-  const ProfileHeaderWidget({
-    Key? key,
-    required this.profilePicUrl,
-    required this.userName,
-    required this.createdAt,
-    required this.onProfileTap,
-    required this.onDeleteTap,
-    required this.isCurrentUser,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: onProfileTap,
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(profilePicUrl),
-                      radius: 25,
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              userName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Image.asset(
-                              'images/socialv/icons/ic_TickSquare.png',
-                              height: 14,
-                              width: 14,
-                              fit: BoxFit.cover,
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              createdAt,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.access_time, size: 16),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (isCurrentUser)
-              PopupMenuButton<String>(
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'Delete', child: Text('Delete')),
-                ],
-                onSelected: (value) {
-                  if (value == 'Delete') {
-                    onDeleteTap();
-                  }
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-}
 

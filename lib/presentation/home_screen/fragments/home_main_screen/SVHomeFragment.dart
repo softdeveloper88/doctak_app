@@ -8,12 +8,15 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
+import 'package:doctak_app/presentation/notification_screen/user_announcement_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../../core/utils/image_constant.dart';
 import '../../../../localization/app_localization.dart';
 import '../../../notification_screen/bloc/notification_state.dart';
 import 'bloc/home_bloc.dart';
@@ -98,10 +101,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   void dispose() {
     // Kill the isolate
     _isolate?.kill(priority: Isolate.immediate);
-
     // Close the ReceivePort
     _receivePort?.close();
-
     super.dispose();
   }
 
@@ -113,6 +114,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       widget.homeBloc.add(PostLoadPageEvent(page: 1));
       widget.homeBloc.add(AdsSettingEvent());
       notificationBloc.add(NotificationCounter());
+      notificationBloc.add(AnnouncementEvent(),);
     });
   }
 
@@ -212,9 +214,12 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             ),
             IconButton(
               color: context.cardColor,
-              icon: Icon(
-                CupertinoIcons.chat_bubble_2,
-                size: 30,
+              icon: SvgPicture.asset(
+                height: 25,
+                width:25,
+                icChat,
+                // CupertinoIcons.chat_bubble_2,
+                // size: 30,
                 color: context.iconColor,
               ),
               onPressed: () async {
@@ -222,6 +227,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 UserChatScreen().launch(context);
               },
             ),
+            const SizedBox(height: 16,)
           ],
         ),
         body: GestureDetector(
@@ -236,6 +242,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 // More controlled scrolling
                 children: [
                   UserChatComponent(),
+                  const UserAnnouncementScreen(),
                   if (showIncompleteProfile)
                     IncompleteProfileCard(
                       emailVerified == '',

@@ -210,6 +210,20 @@
 
    const imgCloseWhiteA700 = '$imagePath/img_close_white_a700.svg';
 
+   const icTimeDate = '$imageIcon/ic_date_time.svg';
+   const icChat = '$imageIcon/ic_chat.svg';
+   const icGlob = '$imageIcon/ic_glob.svg';
+   const icSpecialty = '$imageIcon/ic_specialty.svg';
+   const icInfo = '$imageIcon/ic_info.svg';
+   const icMechanisam = '$imageIcon/ic_mechanism.svg';
+   const icIndication = '$imageIcon/ic_indications.svg';
+   const icDosage = '$imageIcon/ic_dosage.svg';
+   const icDrug = '$imageIcon/ic_drug.svg';
+   const icSideEffect = '$imageIcon/ic_side_effect.svg';
+   const icSpecial = '$imageIcon/ic_special.svg';
+   const icCall = '$imageIcon/ic_call.svg';
+   const icVideo = '$imageIcon/ic_video.svg';
+
    const imgSettingsGray500 = '$imagePath/img_settings_gray_500.svg';
 
    const imageNotFound = 'assets/images/ic_not_found_img.png';

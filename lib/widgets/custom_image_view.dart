@@ -118,8 +118,8 @@ class CustomImageView extends StatelessWidget {
             color: color,
             placeholder: (context, url) => Center(
                 child: SizedBox(
-              height: 300,
-              width: 60,
+               height: height??300,
+               width: 60,
               child: Center(
                 child: CircularProgressIndicator(
                   color: Colors.grey[300],

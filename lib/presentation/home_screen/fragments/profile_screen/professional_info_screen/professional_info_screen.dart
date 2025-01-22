@@ -50,56 +50,53 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: const Icon(Icons.arrow_back_ios)),
+            child: const Icon(Icons.arrow_back_ios,size: 17,)),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           if (widget.profileBloc.isMe)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: MaterialButton(
-                textColor: Colors.black,
-                onPressed: () {
-                  setState(() {
-                    isEditModeMap = !isEditModeMap;
-                  });
-                },
-                elevation: 6,
-                color: Colors.white,
-                minWidth: 40,
-                shape: RoundedRectangleBorder(
-                  borderRadius: radius(100),
-                  side: const BorderSide(color: Colors.blue),
-                ),
-                animationDuration: const Duration(milliseconds: 300),
-                focusColor: SVAppColorPrimary,
-                hoverColor: SVAppColorPrimary,
-                splashColor: SVAppColorPrimary,
-                padding: const EdgeInsets.all(4),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CustomImageView(
-                      onTap: () {
-                        setState(() {
-                          isEditModeMap = !isEditModeMap;
-                        });
-                      },
-                      color: Colors.blue,
-                      imagePath: 'assets/icon/ic_vector.svg',
-                      height: 15,
-                      width: 15,
-                      // margin: const EdgeInsets.only(bottom: 4),
-                    ),
-                    Text(
-                      "Edit",
-                      style:  TextStyle(fontFamily: 'Poppins',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ],
-                ),
+            MaterialButton(
+              textColor: Colors.black,
+              onPressed: () {
+                setState(() {
+                  isEditModeMap = !isEditModeMap;
+                });
+              },
+              elevation: 1,
+              // color: Colors.white,
+              minWidth: 50,
+              // shape: RoundedRectangleBorder(
+              //   borderRadius: radius(100),
+              //   side: const BorderSide(color: Colors.blue),
+              // ),
+              animationDuration: const Duration(milliseconds: 300),
+              focusColor: SVAppColorPrimary,
+              hoverColor: SVAppColorPrimary,
+              splashColor: SVAppColorPrimary,
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomImageView(
+                    onTap: () {
+                      setState(() {
+                        isEditModeMap = !isEditModeMap;
+                      });
+                    },
+                    color: Colors.black,
+                    imagePath: 'assets/icon/ic_vector.svg',
+                    height: 15,
+                    width: 15,
+                    // margin: const EdgeInsets.only(bottom: 4),
+                  ),
+                  // Text(
+                  //   "Edit",
+                  //   style:  TextStyle(fontFamily: 'Poppins',
+                  //     fontSize: 10,
+                  //     fontWeight: FontWeight.w400,
+                  //     color: Colors.blue,
+                  //   ),
+                  // ),
+                ],
               ),
             ),
         ],

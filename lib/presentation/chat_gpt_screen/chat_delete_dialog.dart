@@ -56,9 +56,10 @@ confirmationAlertDialog(
                                 child: Text("Delete chat?",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
+
                                         fontSize: 10.sp,
                                         color: svGetBodyColor(),
-                                        fontWeight: FontWeight.w500)),
+                                        fontWeight: FontWeight.w600)),
                               ),
                             )
                           ],
@@ -71,82 +72,85 @@ confirmationAlertDialog(
                           textAlign: TextAlign.center,
                           text: TextSpan(
                             style: TextStyle(
-                                fontSize: 8.sp, color: svGetBodyColor()),
+                                fontSize: 10.sp, color: svGetBodyColor()),
                             children: <TextSpan>[
                               const TextSpan(
                                   text:
                                       'Are you sure that you want to delete this chat'),
                               TextSpan(
                                   text: title,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.w900)),
                             ],
                           )),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(20),
-                          width: 25.w,
-                          height: 8.w,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: MaterialButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true)
-                                  .pop('dialog');
-                            },
-                            child: Center(
-                              child: Text(
-                                "CANCEL",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black,
-                                  fontSize: 12.sp,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        spacing: 10,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              // margin: const EdgeInsets.all(20),
+                              width: 30.w,
+                              height: 10.w,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(6.0),
+                              ),
+                              child: MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
                                 ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 5.w,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            width: 25.w,
-                            height: 8.w,
-                            decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: MaterialButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              onPressed: callBack,
-                              child: Center(
-                                child: Text(
-                                  "DELETE",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.red,
-                                    fontSize: 12.sp,
+                                onPressed: () {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop('dialog');
+                                },
+                                child: Center(
+                                  child: Text(
+                                    "CANCEL",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black,
+                                      fontSize: 12.sp,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        )
-                      ],
+
+                          Expanded(
+                            child: Container(
+                              width: 30.w,
+                              height: 10.w,
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                onPressed: callBack,
+                                child: Center(
+                                  child: Text(
+                                    "DELETE",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.red,
+                                      fontSize: 12.sp,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     )
                   ],
                 ),

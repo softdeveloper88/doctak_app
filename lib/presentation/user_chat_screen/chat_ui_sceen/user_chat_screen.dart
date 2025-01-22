@@ -297,10 +297,10 @@ class _UserChatScreenState extends State<UserChatScreen>
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor(),size: 17,),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        centerTitle: false,
+        centerTitle: true,
         title: const Text(
           'Chats',
           style: TextStyle(

@@ -40,16 +40,16 @@ class JobCardWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      selectedIndex == 0 ? "New" : "Expired",
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),
-                    ),
+                    // Text(
+                    //   selectedIndex == 0 ? "New" : "Expired",
+                    //   style: const TextStyle(
+                    //     color: Colors.red,
+                    //     fontWeight: FontWeight.w500,
+                    //     fontSize: 16,
+                    //   ),
+                    // ),
                     Row(
                       children: [
                         if (jobData.promoted != 0)

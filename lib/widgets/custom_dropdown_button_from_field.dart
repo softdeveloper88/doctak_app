@@ -9,6 +9,7 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.itemBuilder,
+    this.selectedItemBuilder,
     this.hint,
     this.width,
     this.height,
@@ -18,6 +19,7 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
     this.isTimeDropDown = false,
     this.isEnableDropDown = true,
     this.isTextBold = true,
+
     Key? key,
   }) : super(key: key);
 
@@ -33,6 +35,7 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
 
   final Function(T?) onChanged;
   final Widget Function(T) itemBuilder;
+  final List<Widget> Function(BuildContext)? selectedItemBuilder;
 
   final bool? isTimeDropDown;
   final bool? isEnableDropDown;
@@ -54,7 +57,18 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
           fontSize: 12,
           fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
           overflow: TextOverflow.clip,
+
         ),
+        selectedItemBuilder: selectedItemBuilder != null
+            ? (context) => selectedItemBuilder!(context)
+            : null,
+        // selectedItemBuilder:(context){
+        //   return items.map((item) {
+        //     // You can set any custom value here for the selected item
+        //     return Text(style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+        //     );
+        //   }).toList();
+        // },
         icon: isTimeDropDown!
             ? Icon(
           Icons.arrow_drop_down,
@@ -71,12 +85,11 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
       ),
     );
   }
-
   OutlineInputBorder _outLinedInputBorder() {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius ?? 8),
-      borderSide: BorderSide(
-        color: svGetBodyColor(),
+      borderSide: const BorderSide(
+        color: Colors.black38,
       ),
     );
   }

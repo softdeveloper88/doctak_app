@@ -41,7 +41,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: Icon(Icons.arrow_back_ios, color: svGetBodyColor())),
+            child: Icon(Icons.arrow_back_ios, color: svGetBodyColor(),size: 17,)),
         iconTheme: IconThemeData(color: context.iconColor),
         actions: [
           if (widget.profileBloc.isMe)
@@ -54,13 +54,13 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     isEditModeMap = !isEditModeMap;
                   });
                 },
-                elevation: 6,
+                elevation: 0,
                 color: Colors.white,
                 minWidth: 40,
-                shape: RoundedRectangleBorder(
-                  borderRadius: radius(100),
-                  side: const BorderSide(color: Colors.blue),
-                ),
+                // shape: RoundedRectangleBorder(
+                //   borderRadius: radius(100),
+                //   side: const BorderSide(color: Colors.blue),
+                // ),
                 animationDuration: const Duration(milliseconds: 300),
                 focusColor: SVAppColorPrimary,
                 hoverColor: SVAppColorPrimary,
@@ -75,20 +75,20 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                           isEditModeMap = !isEditModeMap;
                         });
                       },
-                      color: Colors.blue,
+                      color: Colors.black,
                       imagePath: 'assets/icon/ic_vector.svg',
                       height: 15,
                       width: 15,
                       // margin: const EdgeInsets.only(bottom: 4),
                     ),
-                    Text(
-                      "Edit",
-                      style:  TextStyle(fontFamily: 'Poppins',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.blue,
-                      ),
-                    ),
+                    // Text(
+                    //   "Edit",
+                    //   style:  TextStyle(fontFamily: 'Poppins',
+                    //     fontSize: 10,
+                    //     fontWeight: FontWeight.w400,
+                    //     color: Colors.blue,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

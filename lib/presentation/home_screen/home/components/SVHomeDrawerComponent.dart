@@ -199,7 +199,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       }
                       if (selectedIndex == 0) {//about us
                         finish(context);
-                        const AboutUsScreen().launch(context);
+                         AboutUsScreen().launch(context);
                       } else if (selectedIndex == 1) {//AI
                         finish(context);
                         ChatDetailScreen(isFromMainScreen: true).launch(context);

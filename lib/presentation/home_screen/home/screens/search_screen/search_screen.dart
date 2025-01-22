@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/SVSearchFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_job_list.dart';
@@ -253,27 +254,46 @@ class _SearchScreenState extends State<SearchScreen>
                       child: Padding(
                         padding:  const EdgeInsets.only(left: 8.0,right: 8.0),
                         child: CustomDropdownField(
+                          selectedItemBuilder: (context) {
+                            return [
+                              for (Countries item in state.countriesModel.countries ?? [])
+                                Text(
+                                  item.flag ?? '', // The flag or emoji
+                                  style: const TextStyle(fontSize: 18), // Adjust font size for the flag
+                                ),
+                            ];
+                          },
+                          itemBuilder: (item) => Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                item.countryName??'',
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                              Text(item.flag??'')
+                            ],
+                          ),
                           items: state.countriesModel
                               .countries ??
                               [],
                           value: state.countriesModel
-                              .countries!.first.countryName,
+                              .countries!.first,
                           width: 30,
                           contentPadding:
                           const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 0,
                           ),
-                          onChanged: (String? newValue) {
-                            var index = state
-                                .countriesModel.countries!
-                                .indexWhere((element) =>
-                            newValue ==
-                                element.countryName);
-                            var countryId = state
-                                .countriesModel
-                                .countries![index]
-                                .id;
+                          onChanged: (newValue) {
+                            // var index = state
+                            //     .countriesModel.countries!
+                            //     .indexWhere((element) =>
+                            // newValue ==
+                            //     element.countryName);
+                            // var countryId = state
+                            //     .countriesModel
+                            //     .countries![index]
+                            //     .id;
                             // BlocProvider.of<SearchBloc>(context).add(
                             //   GetPost(
                             //       page: '1',
@@ -285,14 +305,14 @@ class _SearchScreenState extends State<SearchScreen>
                             BlocProvider.of<SplashBloc>(
                                 context)
                                 .add(LoadDropdownData(
-                                countryId.toString(),
+                                newValue.id.toString(),
                                 state.typeValue,
                                 state.searchTerms ?? '',
                                 ''));
                             drugsBloc.add(LoadPageEvent(
                                 page: 1,
                                 countryId:
-                                countryId.toString(),
+                                newValue.id.toString(),
                                 searchTerm:
                                 state.searchTerms ?? "",
                                 type: state.typeValue));

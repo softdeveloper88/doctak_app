@@ -41,7 +41,7 @@ class ChatBubble extends StatelessWidget {
             chatItem.ChatBubble(
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-              clipper: ChatBubbleClipper9(type: BubbleType.sendBubble),
+              clipper: ChatBubbleClipper5(type: BubbleType.sendBubble),
               alignment: Alignment.topRight,
               backGroundColor: Colors.blueAccent,
               child: Align(
@@ -114,6 +114,7 @@ class ChatBubble extends StatelessWidget {
                         ),
                       ),
                     ),
+
                   ],
                 ),
               ),
@@ -123,7 +124,7 @@ class ChatBubble extends StatelessWidget {
             chatItem.ChatBubble(
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              clipper: ChatBubbleClipper9(type: BubbleType.receiverBubble),
+              clipper: ChatBubbleClipper5(type: BubbleType.receiverBubble),
               backGroundColor: const Color(0xffE7E7ED),
               // margin: EdgeInsets.only(top: 20),
               child: Align(

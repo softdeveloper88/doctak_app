@@ -26,6 +26,17 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       LoadDropdownData event, Emitter<SplashState> emit) async {
     var firstDropdownValues = await _onGetCountries();
     // print("DD ${firstDropdownValues!.countries!}");
+    firstDropdownValues?.countries?.add(Countries(
+      id: -1,
+      countryName:'Select Country',
+      createdAt:'',
+      updatedAt:'',
+      isRegistered:'',
+      countryCode:'',
+      countryMask:'',
+      currency:'',
+      flag:'Select Country',
+    ));
     getNewDeviceToken();
     emit(CountriesDataLoaded(
         countriesModel: firstDropdownValues!,
@@ -108,22 +119,21 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       emit(CountriesDataError('An error occurred'));
     }
   }
-
   Future<void> _listCountryList1(
       LoadDropdownData1 event, Emitter<SplashState> emit) async {
-    try {
+    // try {
       final response = await postService.getConferenceCountries(
         'Bearer ${AppData.userToken}',
       );
-      print('333s${response.data['countries']}');
-
+      print('data get ${response.data['countries']}');
+     List<dynamic> data= response.data['countries'];
       emit(CountriesDataLoaded1(
-          countriesModelList: response.data['countries'],
+          countriesModelList:data,
           countryName: event.countryName,
           searchTerms: event.searchTerms));
       // add(LoadDropdownData(event.newValue,event.typeValue));
-    } catch (e) {
-      // emit(CountriesDataError('$e'));
-    }
+    // } catch (e) {
+    //   emit(CountriesDataError('$e'));
+    // }
   }
 }

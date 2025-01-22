@@ -4,6 +4,7 @@ import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
@@ -13,6 +14,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/wid
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
+import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -119,32 +121,48 @@ class _JobsScreenState extends State<JobsScreen> {
                                   style: boldTextStyle(size: 18))),
                           Expanded(
                             child: CustomDropdownField(
+                              selectedItemBuilder: (context) {
+                                return [
+                                  for (Countries item in state.countriesModel.countries ?? [])
+                                    Text(
+                                      item.flag ?? '', // The flag or emoji
+                                      style: const TextStyle(fontSize: 18), // Adjust font size for the flag
+                                    ),
+                                ];
+                              },
+                              itemBuilder: (item) => Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    item.countryName??'',
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                  Text(item.flag??'')
+                                ],
+                              ),
                               height: 50,
                               items: state.countriesModel.countries ?? [],
-                              value: state.countriesModel.countries?.first
-                                      .countryName ??
-                                  '',
+                              value: state.countriesModel.countries?.first,
 
                               // width: 50,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 5,
                               ),
-                              onChanged: (String? newValue) {
-                                var index = state.countriesModel.countries!
-                                    .indexWhere((element) =>
-                                        newValue == element.countryName);
-                                var countryId =
-                                    state.countriesModel.countries![index].id;
+                              onChanged: (newValue) {
+                                // var index = state.countriesModel.countries!
+                                //     .indexWhere((element) =>
+                                //         newValue == element.countryName);
+                                // var countryId = state.countriesModel.countries![index].id;
                                 BlocProvider.of<SplashBloc>(context).add(
                                     LoadDropdownData(
-                                        countryId.toString(),
+                                        newValue.id.toString(),
                                         state.typeValue,
                                         state.searchTerms ?? '',
                                         state.isExpired ?? 'New'));
                                 jobsBloc.add(JobLoadPageEvent(
                                     page: 1,
-                                    countryId: countryId.toString(),
+                                    countryId: newValue.id.toString(),
                                     searchTerm: state.searchTerms ?? "",
                                     isExpired: state.isExpired ?? 'New'));
 
@@ -303,100 +321,100 @@ class _JobsScreenState extends State<JobsScreen> {
                                 ),
                             ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8.0, top: 8.0, right: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Column(
-                                  children: [
-                                    TextButton(
-                                      onPressed: () {
-                                        selectedIndex = 0;
-                                        BlocProvider.of<SplashBloc>(context)
-                                            .add(LoadDropdownData(
-                                                state.countryFlag,
-                                                "New",
-                                                state.searchTerms ?? '',
-                                                'New'));
-                                        jobsBloc.add(JobLoadPageEvent(
-                                            page: 1,
-                                            countryId: state.countryFlag != ''
-                                                ? state.countryFlag
-                                                : '${state.countriesModel.countries?.first.id ?? 1}',
-                                            searchTerm: state.searchTerms ?? '',
-                                            isExpired: 'New'));
-                                      },
-                                      child: Text(
-                                        'New',
-                                        style: TextStyle(
-                                          color: SVAppColorPrimary,
-                                          fontSize: 14,
-                                          fontWeight: selectedIndex == 0
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 2,
-                                      width: context.width() / 2 - 10,
-                                      color: selectedIndex == 0
-                                          ? SVAppColorPrimary
-                                          : SVAppColorPrimary.withOpacity(0.2),
-                                    ),
-                                  ],
-                                ),
-                                Center(
-                                    child: Container(
-                                  color: Colors.grey,
-                                  height: 30,
-                                  width: 1,
-                                )),
-                                Column(
-                                  children: [
-                                    TextButton(
-                                      onPressed: () {
-                                        selectedIndex = 1;
-                                        BlocProvider.of<SplashBloc>(context)
-                                            .add(LoadDropdownData(
-                                                state.countryFlag,
-                                                "Expired",
-                                                state.searchTerms ?? '',
-                                                'Expired'));
-                                        jobsBloc.add(JobLoadPageEvent(
-                                            page: 1,
-                                            countryId: state.countryFlag != ''
-                                                ? state.countryFlag
-                                                : '${state.countriesModel.countries?.first.id ?? 1}',
-                                            searchTerm: state.searchTerms ?? '',
-                                            isExpired: 'Expired'));
-                                      },
-                                      child: Text(
-                                        'Expired',
-                                        style: TextStyle(
-                                          color: SVAppColorPrimary,
-                                          fontSize: 14,
-                                          fontWeight: selectedIndex == 1
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 2,
-                                      width: context.width() / 2 - 10,
-                                      color: selectedIndex == 1
-                                          ? SVAppColorPrimary
-                                          : SVAppColorPrimary.withOpacity(0.2),
-                                    ),
-                                  ],
-                                ),
-                                16.height,
-                              ],
-                            ),
-                          ),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(
+                          //       left: 8.0, top: 8.0, right: 8.0),
+                          //   child: Row(
+                          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          //     children: [
+                          //       Column(
+                          //         children: [
+                          //           TextButton(
+                          //             onPressed: () {
+                          //               selectedIndex = 0;
+                          //               BlocProvider.of<SplashBloc>(context)
+                          //                   .add(LoadDropdownData(
+                          //                       state.countryFlag,
+                          //                       "New",
+                          //                       state.searchTerms ?? '',
+                          //                       'New'));
+                          //               jobsBloc.add(JobLoadPageEvent(
+                          //                   page: 1,
+                          //                   countryId: state.countryFlag != ''
+                          //                       ? state.countryFlag
+                          //                       : '${state.countriesModel.countries?.first.id ?? 1}',
+                          //                   searchTerm: state.searchTerms ?? '',
+                          //                   isExpired: 'New'));
+                          //             },
+                          //             child: Text(
+                          //               'New',
+                          //               style: TextStyle(
+                          //                 color: SVAppColorPrimary,
+                          //                 fontSize: 14,
+                          //                 fontWeight: selectedIndex == 0
+                          //                     ? FontWeight.bold
+                          //                     : FontWeight.normal,
+                          //               ),
+                          //             ),
+                          //           ),
+                          //           Container(
+                          //             height: 2,
+                          //             width: context.width() / 2 - 10,
+                          //             color: selectedIndex == 0
+                          //                 ? SVAppColorPrimary
+                          //                 : SVAppColorPrimary.withOpacity(0.2),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //       Center(
+                          //           child: Container(
+                          //         color: Colors.grey,
+                          //         height: 30,
+                          //         width: 1,
+                          //       )),
+                          //       Column(
+                          //         children: [
+                          //           TextButton(
+                          //             onPressed: () {
+                          //               selectedIndex = 1;
+                          //               BlocProvider.of<SplashBloc>(context)
+                          //                   .add(LoadDropdownData(
+                          //                       state.countryFlag,
+                          //                       "Expired",
+                          //                       state.searchTerms ?? '',
+                          //                       'Expired'));
+                          //               jobsBloc.add(JobLoadPageEvent(
+                          //                   page: 1,
+                          //                   countryId: state.countryFlag != ''
+                          //                       ? state.countryFlag
+                          //                       : '${state.countriesModel.countries?.first.id ?? 1}',
+                          //                   searchTerm: state.searchTerms ?? '',
+                          //                   isExpired: 'Expired'));
+                          //             },
+                          //             child: Text(
+                          //               'Expired',
+                          //               style: TextStyle(
+                          //                 color: SVAppColorPrimary,
+                          //                 fontSize: 14,
+                          //                 fontWeight: selectedIndex == 1
+                          //                     ? FontWeight.bold
+                          //                     : FontWeight.normal,
+                          //               ),
+                          //             ),
+                          //           ),
+                          //           Container(
+                          //             height: 2,
+                          //             width: context.width() / 2 - 10,
+                          //             color: selectedIndex == 1
+                          //                 ? SVAppColorPrimary
+                          //                 : SVAppColorPrimary.withOpacity(0.2),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //       16.height,
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -452,387 +470,385 @@ class _JobsScreenState extends State<JobsScreen> {
           ? const Center(
               child: Text("No Jobs Found"),
             )
-          : Padding(
-              padding: const EdgeInsets.only(top: 5.0),
-              child: ListView.builder(
-                itemCount: bloc.drugsData.length,
-                itemBuilder: (context, index) {
-                  // if (bloc.pageNumber <= bloc.numberOfPage) {
-                  //   if (index == bloc.drugsData.length - bloc.nextPageTrigger) {
-                  //     bloc.add(JobCheckIfNeedMoreDataEvent(index: index));
-                  //   }
-                  // }
-                  // if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-                  //     index >= bloc.drugsData.length - 1) {
-                  //   return SizedBox(height: 400, child: ShimmerCardList());
-                  // } else if ((index % 5 == 0 && index != 0) &&
-                  //     AppData.isShowGoogleNativeAds) {
-                  //   return NativeAdWidget();
-                  // } else {
-                  //   // return InkWell(
-                  //   //   onTap: () {
-                  //   //     JobsDetailsScreen(
-                  //   //             jobId: '${bloc.drugsData[index].id ?? ''}')
-                  //   //         .launch(context);
-                  //   //   },
-                  //   //   child: Container(
-                  //   //     margin: const EdgeInsets.only(
-                  //   //         left: 10, right: 10, bottom: 16),
-                  //   //     decoration: BoxDecoration(
-                  //   //       color: context.cardColor,
-                  //   //       borderRadius: BorderRadius.circular(10),
-                  //   //     ),
-                  //   //     child: Material(
-                  //   //       color: context.cardColor,
-                  //   //       elevation: 2,
-                  //   //       borderRadius:
-                  //   //           const BorderRadius.all(Radius.circular(10)),
-                  //   //       child: Container(
-                  //   //         padding: const EdgeInsets.all(10),
-                  //   //         child: Column(
-                  //   //           crossAxisAlignment: CrossAxisAlignment.start,
-                  //   //           children: [
-                  //   //             Row(
-                  //   //               mainAxisAlignment:
-                  //   //                   MainAxisAlignment.spaceBetween,
-                  //   //               children: [
-                  //   //                 Text(
-                  //   //                   selectedIndex == 0 ? "New" : "Expired",
-                  //   //                   style: const TextStyle(
-                  //   //                       color: Colors.red,
-                  //   //                       fontWeight: FontWeight.w500,
-                  //   //                       fontSize: kDefaultFontSize),
-                  //   //                 ),
-                  //   //                 Row(
-                  //   //                   children: [
-                  //   //                     if (bloc.drugsData[index].promoted != 0)
-                  //   //                       Container(
-                  //   //                         padding: const EdgeInsets.all(5),
-                  //   //                         decoration: BoxDecoration(
-                  //   //                             borderRadius:
-                  //   //                                 BorderRadius.circular(10),
-                  //   //                             color: Colors.orangeAccent),
-                  //   //                         child: const Text(
-                  //   //                           'Sponsored',
-                  //   //                           style:
-                  //   //                               TextStyle(color: Colors.white),
-                  //   //                         ),
-                  //   //                       ),
-                  //   //                     const SizedBox(
-                  //   //                       width: 10,
-                  //   //                     ),
-                  //   //                     if (bloc.drugsData[index].user!.id !=
-                  //   //                         AppData.logInUserId)
-                  //   //                       MaterialButton(
-                  //   //                         shape: RoundedRectangleBorder(
-                  //   //                             borderRadius:
-                  //   //                                 BorderRadius.circular(10)),
-                  //   //                         color: Colors.blue,
-                  //   //                         splashColor: Colors.blue,
-                  //   //                         highlightColor: Colors.green,
-                  //   //                         onPressed: () {
-                  //   //                           showDialog(
-                  //   //                             context: context,
-                  //   //                             builder: (BuildContext context) {
-                  //   //                               return DocumentUploadDialog(bloc
-                  //   //                                   .drugsData[index].id
-                  //   //                                   .toString()); // Call the dialog from here
-                  //   //                             },
-                  //   //                           );
-                  //   //                         },
-                  //   //                         child: const Text(
-                  //   //                           "Apply",
-                  //   //                           style: TextStyle(
-                  //   //                               color: Colors.white,
-                  //   //                               fontWeight: FontWeight.w400),
-                  //   //                           // 'images/socialv/icons/ic_share.png',
-                  //   //                           // height: 22,
-                  //   //                           // width: 22,
-                  //   //                           // fit: BoxFit.cover,
-                  //   //                         ),
-                  //   //                       ),
-                  //   //                     const SizedBox(
-                  //   //                       width: 20,
-                  //   //                     ),
-                  //   //                     InkWell(
-                  //   //                       splashColor: Colors.transparent,
-                  //   //                       highlightColor: Colors.transparent,
-                  //   //                       onTap: () {
-                  //   //                         // _showBottomSheet(context,widget
-                  //   //                         //     .homeBloc
-                  //   //                         //     .postList[index]);
-                  //   //                         createDynamicLink(
-                  //   //                             '${bloc.drugsData[index].jobTitle ?? ""} \n  Apply Link: ${bloc.drugsData[index].link ?? ''}',
-                  //   //                             'https://doctak.net/job/${bloc.drugsData[index].id}',
-                  //   //                             bloc.drugsData[index].link ?? '');
-                  //   //                       },
-                  //   //                       child: Icon(
-                  //   //                         Icons.share_sharp,
-                  //   //                         size: 22,
-                  //   //                         // 'images/socialv/icons/ic_share.png',
-                  //   //                         // height: 22,
-                  //   //                         // width: 22,
-                  //   //                         // fit: BoxFit.cover,
-                  //   //                         color: context.iconColor,
-                  //   //                       ),
-                  //   //                     ),
-                  //   //                   ],
-                  //   //                 ),
-                  //   //               ],
-                  //   //             ),
-                  //   //             Text(
-                  //   //               bloc.drugsData[index].jobTitle ?? "",
-                  //   //               style: TextStyle(
-                  //   //                   color: svGetBodyColor(),
-                  //   //                   fontWeight: FontWeight.bold,
-                  //   //                   fontSize: 18),
-                  //   //             ),
-                  //   //             const SizedBox(height: 5),
-                  //   //             Text(bloc.drugsData[index].companyName ?? 'N/A',
-                  //   //                 style: secondaryTextStyle(
-                  //   //                     color: svGetBodyColor())),
-                  //   //             const SizedBox(height: 10),
-                  //   //             Row(
-                  //   //               children: <Widget>[
-                  //   //                 const Icon(
-                  //   //                   Icons.location_on,
-                  //   //                   size: 20,
-                  //   //                   color: Colors.grey,
-                  //   //                 ),
-                  //   //                 const SizedBox(
-                  //   //                   width: 5,
-                  //   //                 ),
-                  //   //                 Expanded(
-                  //   //                   child: Text(
-                  //   //                       bloc.drugsData[index].location ?? 'N/A',
-                  //   //                       style: secondaryTextStyle(
-                  //   //                           color: svGetBodyColor())),
-                  //   //                 ),
-                  //   //               ],
-                  //   //             ),
-                  //   //             const SizedBox(height: 20),
-                  //   //             Text('Apply Date',
-                  //   //                 style: TextStyle(
-                  //   //                     color: svGetBodyColor(),
-                  //   //                     fontWeight: FontWeight.w400,
-                  //   //                     fontSize: 14)),
-                  //   //             Row(
-                  //   //               children: [
-                  //   //                 Column(
-                  //   //                   mainAxisAlignment: MainAxisAlignment.start,
-                  //   //                   crossAxisAlignment:
-                  //   //                       CrossAxisAlignment.start,
-                  //   //                   children: [
-                  //   //                     Text('Date From',
-                  //   //                         style: secondaryTextStyle(
-                  //   //                             color: svGetBodyColor())),
-                  //   //                     Row(
-                  //   //                       children: <Widget>[
-                  //   //                         Icon(
-                  //   //                           Icons.date_range_outlined,
-                  //   //                           size: 20,
-                  //   //                           color: svGetBodyColor(),
-                  //   //                         ),
-                  //   //                         const SizedBox(
-                  //   //                           width: 5,
-                  //   //                         ),
-                  //   //                         Text(
-                  //   //                             DateFormat('MMM dd, yyyy').format(
-                  //   //                                 DateTime.parse(bloc
-                  //   //                                         .drugsData[index]
-                  //   //                                         .createdAt ??
-                  //   //                                     'N/A'.toString())),
-                  //   //                             style: secondaryTextStyle(
-                  //   //                                 color: svGetBodyColor())),
-                  //   //                       ],
-                  //   //                     ),
-                  //   //                   ],
-                  //   //                 ),
-                  //   //                 const SizedBox(
-                  //   //                   width: 20,
-                  //   //                 ),
-                  //   //                 Column(
-                  //   //                   crossAxisAlignment:
-                  //   //                       CrossAxisAlignment.start,
-                  //   //                   mainAxisAlignment: MainAxisAlignment.start,
-                  //   //                   children: [
-                  //   //                     Text('Date To',
-                  //   //                         style: secondaryTextStyle(
-                  //   //                           color: svGetBodyColor(),
-                  //   //                         )),
-                  //   //                     Row(
-                  //   //                       children: <Widget>[
-                  //   //                         Icon(
-                  //   //                           Icons.date_range_outlined,
-                  //   //                           size: 20,
-                  //   //                           color: svGetBodyColor(),
-                  //   //                         ),
-                  //   //                         const SizedBox(
-                  //   //                           width: 5,
-                  //   //                         ),
-                  //   //                         Text(
-                  //   //                             DateFormat('MMM dd, yyyy').format(
-                  //   //                                 DateTime.parse(bloc
-                  //   //                                         .drugsData[index]
-                  //   //                                         .lastDate ??
-                  //   //                                     'N/A'.toString())),
-                  //   //                             style: secondaryTextStyle(
-                  //   //                                 color: svGetBodyColor())),
-                  //   //                       ],
-                  //   //                     ),
-                  //   //                   ],
-                  //   //                 ),
-                  //   //               ],
-                  //   //             ),
-                  //   //             Text(
-                  //   //                 'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
-                  //   //                 style: secondaryTextStyle(
-                  //   //                   color: svGetBodyColor(),
-                  //   //                 )),
-                  //   //             const SizedBox(height: 5),
-                  //   //             Text(
-                  //   //                 'Preferred Language: ${bloc.drugsData[index].preferredLanguage ?? 'N/A'}',
-                  //   //                 style: secondaryTextStyle(
-                  //   //                   color: svGetBodyColor(),
-                  //   //                 )),
-                  //   //             const SizedBox(height: 5),
-                  //   //             SingleChildScrollView(
-                  //   //               clipBehavior: Clip.hardEdge,
-                  //   //               scrollDirection: Axis.horizontal,
-                  //   //               child: Container(
-                  //   //                 color: Colors.white,
-                  //   //                 child: HtmlWidget(
-                  //   //                   '<p>${bloc.drugsData[index].description}</p>',
-                  //   //                 ),
-                  //   //               ),
-                  //   //             ),
-                  //   //             const SizedBox(height: 5),
-                  //   //             Padding(
-                  //   //               padding: const EdgeInsets.only(top: 16),
-                  //   //               child: Column(
-                  //   //                 crossAxisAlignment: CrossAxisAlignment.start,
-                  //   //                 children: [
-                  //   //                   TextButton(
-                  //   //                     onPressed: () async {
-                  //   //                       // final Uri url = Uri.parse(bloc
-                  //   //                       //     .drugsData[index]
-                  //   //                       //     .link!); // Assuming job.link is a non-null String
-                  //   //                       // Show dialog asking the user to confirm navigation
-                  //   //                       final shouldLeave =
-                  //   //                           await showDialog<bool>(
-                  //   //                         context: context,
-                  //   //                         builder: (context) => AlertDialog(
-                  //   //                           title: const Text('Leave App'),
-                  //   //                           content: const Text(
-                  //   //                               'Would you like to leave the app to view this content?'),
-                  //   //                           actions: <Widget>[
-                  //   //                             TextButton(
-                  //   //                               onPressed: () =>
-                  //   //                                   Navigator.of(context)
-                  //   //                                       .pop(false),
-                  //   //                               child: const Text('No'),
-                  //   //                             ),
-                  //   //                             TextButton(
-                  //   //                               onPressed: () {
-                  //   //                                 Navigator.of(context)
-                  //   //                                     .pop(true);
-                  //   //                                 final Uri url = Uri.parse(bloc
-                  //   //                                     .drugsData[index].link!);
-                  //   //                                 _launchInBrowser(url);
-                  //   //                               },
-                  //   //                               child: const Text('Yes'),
-                  //   //                             ),
-                  //   //                           ],
-                  //   //                         ),
-                  //   //                       );
-                  //   //                       // If the user confirmed, launch the URL
-                  //   //                       if (shouldLeave == true) {
-                  //   //                         // await launchUrl(url);
-                  //   //                       } else if (shouldLeave == false) {
-                  //   //                         ScaffoldMessenger.of(context)
-                  //   //                             .showSnackBar(
-                  //   //                           const SnackBar(
-                  //   //                               content: Text(
-                  //   //                                   'Leaving the app canceled.')),
-                  //   //                         );
-                  //   //                       } else {
-                  //   //                         ScaffoldMessenger.of(context)
-                  //   //                             .showSnackBar(
-                  //   //                           const SnackBar(
-                  //   //                               content: Text(
-                  //   //                                   'Leaving the app canceled.')),
-                  //   //                         );
-                  //   //                       }
-                  //   //                     },
-                  //   //                     child: const Text(
-                  //   //                       'Visit Site ',
-                  //   //                       style: TextStyle(
-                  //   //                         color: Colors.blue,
-                  //   //                         decoration: TextDecoration.underline,
-                  //   //                       ),
-                  //   //                     ),
-                  //   //                   ),
-                  //   //                 ],
-                  //   //               ),
-                  //   //             ),
-                  //   //           ],
-                  //   //         ),
-                  //   //       ),
-                  //   //     ),
-                  //   //   ),
-                  //   // );
-                  // return JobCardWidget(
-                  //     jobData: bloc.drugsData[index],
-                  //     selectedIndex: selectedIndex,
-                  //     onJobTap: () {
-                  //       JobsDetailsScreen(jobId: '${bloc.drugsData[index].id}').launch(context);
-                  //     },
-                  //     onShareTap: () {
-                  //       createDynamicLink(
-                  //         '${bloc.drugsData[index].jobTitle ?? ""} \n Apply Link: ${bloc.drugsData[index].link ?? ''}',
-                  //         'https://doctak.net/job/${bloc.drugsData[index].id}',
-                  //         bloc.drugsData[index].link ?? '',
-                  //       );
-                  //     },
-                  //     onApplyTap: (id) {
-                  //       showDialog(
-                  //         context: context,
-                  //         builder: (BuildContext context) {
-                  //           return DocumentUploadDialog(id);
-                  //         },
-                  //       );
-                  //     },
-                  //     onLaunchLink: (url) {
-                  //       PostUtils.launchURL(context, url.toString());
-                  //
-                  //     },
-                  //   );
-                  // }
-                  // Trigger pagination logic.
-                  _triggerPaginationIfNeeded(bloc, index);
+          : ListView.builder(
+        padding: const EdgeInsets.only(top: 10),
+            itemCount: bloc.drugsData.length,
+            itemBuilder: (context, index) {
+              // if (bloc.pageNumber <= bloc.numberOfPage) {
+              //   if (index == bloc.drugsData.length - bloc.nextPageTrigger) {
+              //     bloc.add(JobCheckIfNeedMoreDataEvent(index: index));
+              //   }
+              // }
+              // if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+              //     index >= bloc.drugsData.length - 1) {
+              //   return SizedBox(height: 400, child: ShimmerCardList());
+              // } else if ((index % 5 == 0 && index != 0) &&
+              //     AppData.isShowGoogleNativeAds) {
+              //   return NativeAdWidget();
+              // } else {
+              //   // return InkWell(
+              //   //   onTap: () {
+              //   //     JobsDetailsScreen(
+              //   //             jobId: '${bloc.drugsData[index].id ?? ''}')
+              //   //         .launch(context);
+              //   //   },
+              //   //   child: Container(
+              //   //     margin: const EdgeInsets.only(
+              //   //         left: 10, right: 10, bottom: 16),
+              //   //     decoration: BoxDecoration(
+              //   //       color: context.cardColor,
+              //   //       borderRadius: BorderRadius.circular(10),
+              //   //     ),
+              //   //     child: Material(
+              //   //       color: context.cardColor,
+              //   //       elevation: 2,
+              //   //       borderRadius:
+              //   //           const BorderRadius.all(Radius.circular(10)),
+              //   //       child: Container(
+              //   //         padding: const EdgeInsets.all(10),
+              //   //         child: Column(
+              //   //           crossAxisAlignment: CrossAxisAlignment.start,
+              //   //           children: [
+              //   //             Row(
+              //   //               mainAxisAlignment:
+              //   //                   MainAxisAlignment.spaceBetween,
+              //   //               children: [
+              //   //                 Text(
+              //   //                   selectedIndex == 0 ? "New" : "Expired",
+              //   //                   style: const TextStyle(
+              //   //                       color: Colors.red,
+              //   //                       fontWeight: FontWeight.w500,
+              //   //                       fontSize: kDefaultFontSize),
+              //   //                 ),
+              //   //                 Row(
+              //   //                   children: [
+              //   //                     if (bloc.drugsData[index].promoted != 0)
+              //   //                       Container(
+              //   //                         padding: const EdgeInsets.all(5),
+              //   //                         decoration: BoxDecoration(
+              //   //                             borderRadius:
+              //   //                                 BorderRadius.circular(10),
+              //   //                             color: Colors.orangeAccent),
+              //   //                         child: const Text(
+              //   //                           'Sponsored',
+              //   //                           style:
+              //   //                               TextStyle(color: Colors.white),
+              //   //                         ),
+              //   //                       ),
+              //   //                     const SizedBox(
+              //   //                       width: 10,
+              //   //                     ),
+              //   //                     if (bloc.drugsData[index].user!.id !=
+              //   //                         AppData.logInUserId)
+              //   //                       MaterialButton(
+              //   //                         shape: RoundedRectangleBorder(
+              //   //                             borderRadius:
+              //   //                                 BorderRadius.circular(10)),
+              //   //                         color: Colors.blue,
+              //   //                         splashColor: Colors.blue,
+              //   //                         highlightColor: Colors.green,
+              //   //                         onPressed: () {
+              //   //                           showDialog(
+              //   //                             context: context,
+              //   //                             builder: (BuildContext context) {
+              //   //                               return DocumentUploadDialog(bloc
+              //   //                                   .drugsData[index].id
+              //   //                                   .toString()); // Call the dialog from here
+              //   //                             },
+              //   //                           );
+              //   //                         },
+              //   //                         child: const Text(
+              //   //                           "Apply",
+              //   //                           style: TextStyle(
+              //   //                               color: Colors.white,
+              //   //                               fontWeight: FontWeight.w400),
+              //   //                           // 'images/socialv/icons/ic_share.png',
+              //   //                           // height: 22,
+              //   //                           // width: 22,
+              //   //                           // fit: BoxFit.cover,
+              //   //                         ),
+              //   //                       ),
+              //   //                     const SizedBox(
+              //   //                       width: 20,
+              //   //                     ),
+              //   //                     InkWell(
+              //   //                       splashColor: Colors.transparent,
+              //   //                       highlightColor: Colors.transparent,
+              //   //                       onTap: () {
+              //   //                         // _showBottomSheet(context,widget
+              //   //                         //     .homeBloc
+              //   //                         //     .postList[index]);
+              //   //                         createDynamicLink(
+              //   //                             '${bloc.drugsData[index].jobTitle ?? ""} \n  Apply Link: ${bloc.drugsData[index].link ?? ''}',
+              //   //                             'https://doctak.net/job/${bloc.drugsData[index].id}',
+              //   //                             bloc.drugsData[index].link ?? '');
+              //   //                       },
+              //   //                       child: Icon(
+              //   //                         Icons.share_sharp,
+              //   //                         size: 22,
+              //   //                         // 'images/socialv/icons/ic_share.png',
+              //   //                         // height: 22,
+              //   //                         // width: 22,
+              //   //                         // fit: BoxFit.cover,
+              //   //                         color: context.iconColor,
+              //   //                       ),
+              //   //                     ),
+              //   //                   ],
+              //   //                 ),
+              //   //               ],
+              //   //             ),
+              //   //             Text(
+              //   //               bloc.drugsData[index].jobTitle ?? "",
+              //   //               style: TextStyle(
+              //   //                   color: svGetBodyColor(),
+              //   //                   fontWeight: FontWeight.bold,
+              //   //                   fontSize: 18),
+              //   //             ),
+              //   //             const SizedBox(height: 5),
+              //   //             Text(bloc.drugsData[index].companyName ?? 'N/A',
+              //   //                 style: secondaryTextStyle(
+              //   //                     color: svGetBodyColor())),
+              //   //             const SizedBox(height: 10),
+              //   //             Row(
+              //   //               children: <Widget>[
+              //   //                 const Icon(
+              //   //                   Icons.location_on,
+              //   //                   size: 20,
+              //   //                   color: Colors.grey,
+              //   //                 ),
+              //   //                 const SizedBox(
+              //   //                   width: 5,
+              //   //                 ),
+              //   //                 Expanded(
+              //   //                   child: Text(
+              //   //                       bloc.drugsData[index].location ?? 'N/A',
+              //   //                       style: secondaryTextStyle(
+              //   //                           color: svGetBodyColor())),
+              //   //                 ),
+              //   //               ],
+              //   //             ),
+              //   //             const SizedBox(height: 20),
+              //   //             Text('Apply Date',
+              //   //                 style: TextStyle(
+              //   //                     color: svGetBodyColor(),
+              //   //                     fontWeight: FontWeight.w400,
+              //   //                     fontSize: 14)),
+              //   //             Row(
+              //   //               children: [
+              //   //                 Column(
+              //   //                   mainAxisAlignment: MainAxisAlignment.start,
+              //   //                   crossAxisAlignment:
+              //   //                       CrossAxisAlignment.start,
+              //   //                   children: [
+              //   //                     Text('Date From',
+              //   //                         style: secondaryTextStyle(
+              //   //                             color: svGetBodyColor())),
+              //   //                     Row(
+              //   //                       children: <Widget>[
+              //   //                         Icon(
+              //   //                           Icons.date_range_outlined,
+              //   //                           size: 20,
+              //   //                           color: svGetBodyColor(),
+              //   //                         ),
+              //   //                         const SizedBox(
+              //   //                           width: 5,
+              //   //                         ),
+              //   //                         Text(
+              //   //                             DateFormat('MMM dd, yyyy').format(
+              //   //                                 DateTime.parse(bloc
+              //   //                                         .drugsData[index]
+              //   //                                         .createdAt ??
+              //   //                                     'N/A'.toString())),
+              //   //                             style: secondaryTextStyle(
+              //   //                                 color: svGetBodyColor())),
+              //   //                       ],
+              //   //                     ),
+              //   //                   ],
+              //   //                 ),
+              //   //                 const SizedBox(
+              //   //                   width: 20,
+              //   //                 ),
+              //   //                 Column(
+              //   //                   crossAxisAlignment:
+              //   //                       CrossAxisAlignment.start,
+              //   //                   mainAxisAlignment: MainAxisAlignment.start,
+              //   //                   children: [
+              //   //                     Text('Date To',
+              //   //                         style: secondaryTextStyle(
+              //   //                           color: svGetBodyColor(),
+              //   //                         )),
+              //   //                     Row(
+              //   //                       children: <Widget>[
+              //   //                         Icon(
+              //   //                           Icons.date_range_outlined,
+              //   //                           size: 20,
+              //   //                           color: svGetBodyColor(),
+              //   //                         ),
+              //   //                         const SizedBox(
+              //   //                           width: 5,
+              //   //                         ),
+              //   //                         Text(
+              //   //                             DateFormat('MMM dd, yyyy').format(
+              //   //                                 DateTime.parse(bloc
+              //   //                                         .drugsData[index]
+              //   //                                         .lastDate ??
+              //   //                                     'N/A'.toString())),
+              //   //                             style: secondaryTextStyle(
+              //   //                                 color: svGetBodyColor())),
+              //   //                       ],
+              //   //                     ),
+              //   //                   ],
+              //   //                 ),
+              //   //               ],
+              //   //             ),
+              //   //             Text(
+              //   //                 'Experience: ${bloc.drugsData[index].experience ?? 'N/A'}',
+              //   //                 style: secondaryTextStyle(
+              //   //                   color: svGetBodyColor(),
+              //   //                 )),
+              //   //             const SizedBox(height: 5),
+              //   //             Text(
+              //   //                 'Preferred Language: ${bloc.drugsData[index].preferredLanguage ?? 'N/A'}',
+              //   //                 style: secondaryTextStyle(
+              //   //                   color: svGetBodyColor(),
+              //   //                 )),
+              //   //             const SizedBox(height: 5),
+              //   //             SingleChildScrollView(
+              //   //               clipBehavior: Clip.hardEdge,
+              //   //               scrollDirection: Axis.horizontal,
+              //   //               child: Container(
+              //   //                 color: Colors.white,
+              //   //                 child: HtmlWidget(
+              //   //                   '<p>${bloc.drugsData[index].description}</p>',
+              //   //                 ),
+              //   //               ),
+              //   //             ),
+              //   //             const SizedBox(height: 5),
+              //   //             Padding(
+              //   //               padding: const EdgeInsets.only(top: 16),
+              //   //               child: Column(
+              //   //                 crossAxisAlignment: CrossAxisAlignment.start,
+              //   //                 children: [
+              //   //                   TextButton(
+              //   //                     onPressed: () async {
+              //   //                       // final Uri url = Uri.parse(bloc
+              //   //                       //     .drugsData[index]
+              //   //                       //     .link!); // Assuming job.link is a non-null String
+              //   //                       // Show dialog asking the user to confirm navigation
+              //   //                       final shouldLeave =
+              //   //                           await showDialog<bool>(
+              //   //                         context: context,
+              //   //                         builder: (context) => AlertDialog(
+              //   //                           title: const Text('Leave App'),
+              //   //                           content: const Text(
+              //   //                               'Would you like to leave the app to view this content?'),
+              //   //                           actions: <Widget>[
+              //   //                             TextButton(
+              //   //                               onPressed: () =>
+              //   //                                   Navigator.of(context)
+              //   //                                       .pop(false),
+              //   //                               child: const Text('No'),
+              //   //                             ),
+              //   //                             TextButton(
+              //   //                               onPressed: () {
+              //   //                                 Navigator.of(context)
+              //   //                                     .pop(true);
+              //   //                                 final Uri url = Uri.parse(bloc
+              //   //                                     .drugsData[index].link!);
+              //   //                                 _launchInBrowser(url);
+              //   //                               },
+              //   //                               child: const Text('Yes'),
+              //   //                             ),
+              //   //                           ],
+              //   //                         ),
+              //   //                       );
+              //   //                       // If the user confirmed, launch the URL
+              //   //                       if (shouldLeave == true) {
+              //   //                         // await launchUrl(url);
+              //   //                       } else if (shouldLeave == false) {
+              //   //                         ScaffoldMessenger.of(context)
+              //   //                             .showSnackBar(
+              //   //                           const SnackBar(
+              //   //                               content: Text(
+              //   //                                   'Leaving the app canceled.')),
+              //   //                         );
+              //   //                       } else {
+              //   //                         ScaffoldMessenger.of(context)
+              //   //                             .showSnackBar(
+              //   //                           const SnackBar(
+              //   //                               content: Text(
+              //   //                                   'Leaving the app canceled.')),
+              //   //                         );
+              //   //                       }
+              //   //                     },
+              //   //                     child: const Text(
+              //   //                       'Visit Site ',
+              //   //                       style: TextStyle(
+              //   //                         color: Colors.blue,
+              //   //                         decoration: TextDecoration.underline,
+              //   //                       ),
+              //   //                     ),
+              //   //                   ),
+              //   //                 ],
+              //   //               ),
+              //   //             ),
+              //   //           ],
+              //   //         ),
+              //   //       ),
+              //   //     ),
+              //   //   ),
+              //   // );
+              // return JobCardWidget(
+              //     jobData: bloc.drugsData[index],
+              //     selectedIndex: selectedIndex,
+              //     onJobTap: () {
+              //       JobsDetailsScreen(jobId: '${bloc.drugsData[index].id}').launch(context);
+              //     },
+              //     onShareTap: () {
+              //       createDynamicLink(
+              //         '${bloc.drugsData[index].jobTitle ?? ""} \n Apply Link: ${bloc.drugsData[index].link ?? ''}',
+              //         'https://doctak.net/job/${bloc.drugsData[index].id}',
+              //         bloc.drugsData[index].link ?? '',
+              //       );
+              //     },
+              //     onApplyTap: (id) {
+              //       showDialog(
+              //         context: context,
+              //         builder: (BuildContext context) {
+              //           return DocumentUploadDialog(id);
+              //         },
+              //       );
+              //     },
+              //     onLaunchLink: (url) {
+              //       PostUtils.launchURL(context, url.toString());
+              //
+              //     },
+              //   );
+              // }
+              // Trigger pagination logic.
+              _triggerPaginationIfNeeded(bloc, index);
 
-                  // Return widgets based on conditions.
-                  if (_shouldShowShimmer(bloc, index)) {
-                    return SizedBox(height: 400, child: ShimmerCardList());
-                  } else if (_shouldShowNativeAd(index)) {
-                    return NativeAdWidget();
-                  } else {
-                    return JobCardWidget(
-                      jobData: bloc.drugsData[index],
-                      selectedIndex: selectedIndex,
-                      onJobTap: () => _openJobDetails(
-                          context, bloc.drugsData[index].id.toString() ?? '0'),
-                      onShareTap: () => _shareJob(bloc.drugsData[index]),
-                      onApplyTap: (id) => _showApplyDialog(context, id),
-                      onLaunchLink: (url) =>
-                          PostUtils.launchURL(context, url.toString()),
-                    );
-                  }
+              // Return widgets based on conditions.
+              if (_shouldShowShimmer(bloc, index)) {
+                return SizedBox(height: 400, child: ShimmerCardList());
+              } else if (_shouldShowNativeAd(index)) {
+                return NativeAdWidget();
+              } else {
+                return JobCardWidget(
+                  jobData: bloc.drugsData[index],
+                  selectedIndex: selectedIndex,
+                  onJobTap: () => _openJobDetails(
+                      context, bloc.drugsData[index].id.toString() ?? '0'),
+                  onShareTap: () => _shareJob(bloc.drugsData[index]),
+                  onApplyTap: (id) => _showApplyDialog(context, id),
+                  onLaunchLink: (url) =>
+                      PostUtils.launchURL(context, url.toString()),
+                );
+              }
 
-                  // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
-                },
-              ),
-            ),
+              // return PostItem(bloc.drugsData[index].title, bloc.posts[index].body);
+            },
+          ),
     );
   }
 

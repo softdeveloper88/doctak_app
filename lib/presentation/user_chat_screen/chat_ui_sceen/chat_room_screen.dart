@@ -11,15 +11,17 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVP
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
-import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
+import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/component/audio_recorder_widget.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
+import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
-import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_9.dart';
+import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_5.dart';
 import 'package:flutter_sound_record/flutter_sound_record.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -72,6 +74,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   late PusherChannel clientSendChannel;
   bool isSomeoneTyping = false;
   bool isDataLoaded = true;
+  bool isTextTyping = false;
 
   // List<SelectedByte> selectedFiles = [];
   bool isMessageLoaded = false; // Initialize it as per your logic
@@ -210,116 +213,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     });
   }
 
-//   void _createClient() async {
-//     _client =
-//         await AgoraRtmClient.createInstance('f2cf99f1193a40e69546157883b2159f');
-//     _client.login(null, AppData.logInUserId);
-//
-//     _client.onConnectionStateChanged2 =
-//         (RtmConnectionState state, RtmConnectionChangeReason reason) {
-//       _log('Connection state changed: $state, reason: $reason');
-//       if (state == RtmConnectionState.aborted) {
-//         _client.logout();
-//         _log('Logout');
-//       }
-//     };
-//     _client.onMessageReceived = (RtmMessage message, String peerId) {
-//       _log("Peer msg: $peerId, msg: ${message.messageType} ${message.text}");
-//     };
-//     _client.onTokenExpired = () {
-//       _log("Token expired");
-//     };
-//     _client.onTokenPrivilegeWillExpire = () {
-//       _log("Token privilege will expire");
-//     };
-//     _client.onPeersOnlineStatusChanged =
-//         (Map<String, RtmPeerOnlineState> peersStatus) {
-//       _log("Peers online status changed ${peersStatus.toString()}");
-//     };
-//
-//     var callManager = _client.getRtmCallManager();
-//     callManager.onError = (error) {
-//       _log('Call manager error: $error');
-//     };
-//     callManager.onLocalInvitationReceivedByPeer =
-//         (LocalInvitation localInvitation) {
-//       _log(
-//           'Local invitation received by peer: ${localInvitation.calleeId}, content: ${localInvitation.content}');
-//     };
-//     callManager.onRemoteInvitationAccepted =
-//         (RemoteInvitation remoteInvitation) async {
-//       dynamic content = remoteInvitation.content;
-//       String? channelId;
-//       if (remoteInvitation.content is String) {
-//         // Attempt to parse the content from a JSON string.
-//         try {
-//           final Map<String, dynamic> content =
-//               json.decode(remoteInvitation.content!);
-//           if (content.containsKey('channelId')) {
-//             channelId = content['channelId'];
-//           }
-//         } catch (e) {
-//           // Handle the parsing error.
-//         }
-//       }
-// // Create channel
-//       var channel = await _client.createChannel(channelId!);
-//       String name, id, profilePic;
-//       name = AppData.name;
-//       id = AppData.logInUserId;
-//       profilePic = AppData.profile_pic;
-// // User attributes map
-//       // User attributes map
-//       var attributes = {'name': name, 'userId': id, 'userAvatar': profilePic};
-//
-//       List<RtmAttribute> rtmAttributes =
-//           await convertToRtmAttributes(attributes);
-//       await _client.addOrUpdateLocalUserAttributes2(rtmAttributes);
-//       channel?.join();
-//       print(channel);
-//
-//       Navigator.of(context).push(
-//         MaterialPageRoute(
-//           builder: (context) => AgoraScreen(channelName: channelId!),
-//         ),
-//       );
-//     };
-//     callManager.onRemoteInvitationReceived =
-//         (RemoteInvitation remoteInvitation) {
-//       _log(
-//           'Remote invitation received by peer: ${remoteInvitation.callerId}, content: ${remoteInvitation.content}');
-//       setState(() {
-//         _showIncomingCallDialog();
-//         _remoteInvitation = remoteInvitation;
-//       });
-//     };
-//   }
-
-  // void _toggleLogin() async {
-  //   if (_isLogin) {
-  //     try {
-  //       await _client.logout();
-  //       _log('Logout success');
-  //
-  //       setState(() {
-  //         _isLogin = false;
-  //         _isInChannel = false;
-  //       });
-  //     } catch (errorCode) {
-  //       _log('Logout error: $errorCode');
-  //     }
-  //   } else {
-  //     try {
-  //       await _client.login(null, AppData.logInUserId);
-  //       _log('Login success: $AppData.logInUserId');
-  //       setState(() {
-  //         _isLogin = true;
-  //       });
-  //     } catch (errorCode) {
-  //       _log('Login error: $errorCode');
-  //     }
-  //   }
-  // }
   void _log(String info) {
     debugPrint(info);
     // setState(() {
@@ -696,8 +589,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         0.0, // Scroll to the start of the list
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 500), curve: Curves.easeOut,
       );
     }
     // });
@@ -791,6 +683,31 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             ],
           ),
           actions: [
+            InkWell(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SvgPicture.asset(icCall),
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            InkWell(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SvgPicture.asset(icVideo),
+              ),
+            ),
             PopupMenuButton(
               itemBuilder: (context) {
                 return [
@@ -890,7 +807,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                               padding: EdgeInsets.only(
                                 top: isLastOfOwnMessage
                                     ? 16
-                                    : 0, // Extra space after own last message
+                                    : 8, // Extra space after own last message
                               ),
                               child: ChatBubble(
                                 profile: bloc.messagesList[index].userId !=
@@ -952,20 +869,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             ),
                             child: Row(
                               children: [
-                                Material(
-                                  color: Colors.transparent,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _emojiShowing = !_emojiShowing;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.emoji_emotions,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
                                 isLoading
                                     ? Container(
                                         width: 25,
@@ -976,7 +879,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                         ),
                                       )
                                     : IconButton(
-                                        icon: const Icon(Icons.attach_file),
+                                        icon: const Icon(Icons.add),
                                         onPressed: () async {
                                           const permission = Permission.storage;
                                           const permission1 = Permission.photos;
@@ -1044,14 +947,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                                     'Type your message...',
                                                 hintStyle: TextStyle(
                                                     fontSize: 14,
-                                                    fontFamily:
-                                                        'Poppins'),
+                                                    fontFamily: 'Poppins'),
                                               ),
                                               keyboardType:
                                                   TextInputType.multiline,
                                               textInputAction:
                                                   TextInputAction.newline,
-                                              onChanged: (Text) {
+                                              onChanged: (text) {
+                                                if (text.isNotEmpty) {
+                                                  isTextTyping = true;
+                                                } else {
+                                                  isTextTyping = false;
+                                                }
+
                                                 onTextFieldFocused(true);
                                               },
                                               onTapOutside: (text) {
@@ -1062,63 +970,103 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                         ),
                                       ),
                                 const SizedBox(width: 8.0),
-                                _isFileUploading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 3),
-                                      )
-                                    : IconButton(
-                                        onPressed: () async {
-                                          if (textController.text.isNotEmpty) {
-                                            String message =
-                                                textController.text;
-                                            _isFileUploading = true;
-
-                                            chatBloc.add(SendMessageEvent(
-                                                userId: AppData.logInUserId,
-                                                roomId: widget.roomId == ''
-                                                    ? chatBloc.roomId
-                                                    : widget.roomId,
-                                                receiverId: widget.id,
-                                                attachmentType: 'file',
-                                                file: _selectedFile?.path ?? '',
-                                                message: message));
-                                            textController.clear();
-                                            // setState(() {});
-                                            _selectedFile = null;
-                                            scrollToBottom();
-                                          } else if (textController
-                                                  .text.isEmpty &&
-                                              _selectedFile != null) {
-                                            String message =
-                                                textController.text;
-                                            _isFileUploading = true;
-                                            chatBloc.add(SendMessageEvent(
-                                                userId: AppData.logInUserId,
-                                                roomId: widget.roomId == ''
-                                                    ? chatBloc.roomId
-                                                    : widget.roomId,
-                                                receiverId: widget.id,
-                                                attachmentType: 'file',
-                                                file: _selectedFile?.path ?? '',
-                                                message: message == ''
-                                                    ? ' '
-                                                    : message));
-                                            textController.clear();
-                                            // setState(() {});
-                                            _selectedFile = null;
-                                            scrollToBottom();
-                                          }
-                                        },
-                                        icon: const Icon(Icons.send),
-                                      ),
+                                Material(
+                                  color: Colors.transparent,
+                                  child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _emojiShowing = !_emojiShowing;
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.emoji_emotions_outlined,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ),
-                        // GestureDetector(
+                        // (isTextTyping || _selectedFile!=null)?
+                        _isFileUploading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 3),
+                              )
+                            : IconButton(
+                                onPressed: () async {
+                                  if (textController.text.isNotEmpty) {
+                                    String message = textController.text;
+                                    _isFileUploading = true;
+                                    isTextTyping = false;
+                                    chatBloc.add(SendMessageEvent(
+                                        userId: AppData.logInUserId,
+                                        roomId: widget.roomId == ''
+                                            ? chatBloc.roomId
+                                            : widget.roomId,
+                                        receiverId: widget.id,
+                                        attachmentType: 'file',
+                                        file: _selectedFile?.path ?? '',
+                                        message: message));
+                                    textController.clear();
+                                    // setState(() {});
+                                    _selectedFile = null;
+                                    scrollToBottom();
+                                  } else if (textController.text.isEmpty &&
+                                      _selectedFile != null) {
+                                    String message = textController.text;
+                                    _isFileUploading = true;
+                                    chatBloc.add(SendMessageEvent(
+                                        userId: AppData.logInUserId,
+                                        roomId: widget.roomId == ''
+                                            ? chatBloc.roomId
+                                            : widget.roomId,
+                                        receiverId: widget.id,
+                                        attachmentType: 'file',
+                                        file: _selectedFile?.path ?? '',
+                                        message:
+                                            message == '' ? ' ' : message));
+                                    textController.clear();
+                                    // setState(() {});
+                                    _selectedFile = null;
+                                    scrollToBottom();
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.send,
+                                  color: Colors.blue,
+                                  size: 30,
+                                ),
+                              ),
+                        AudioRecorderWidget(
+                          onPause: () {},
+                          onResume: () {},
+                          onStart: () {
+                            setState(() {
+                              isRecording = true;
+                            });
+                          },
+                          onStop: (path) {
+                            chatBloc.add(SendMessageEvent(
+                              userId: AppData.logInUserId,
+                              roomId: chatBloc.roomId,
+                              receiverId: widget.id,
+                              // Replace with your logic
+                              attachmentType: 'voice',
+                              file: path,
+                              message: '',
+                            ));
+                            setState(() {
+                              _isFileUploading = true;
+                              isRecording = false;
+                            });
+                            scrollToBottom();
+                          },
+                        ),
+                        // :GestureDetector(
                         //   onLongPress: () {
                         //     _start();
                         //     setState(() {
@@ -1133,22 +1081,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                         //     });
                         //   },
                         //   child: Container(
-                        //     height: 40,
+                        //     height: 50,
                         //     margin: const EdgeInsets.fromLTRB(16, 5, 5, 5),
                         //     decoration: BoxDecoration(
-                        //         boxShadow: [
-                        //           BoxShadow(
-                        //               color: isRecording ? Colors.white : svGetBodyColor(),
-                        //               spreadRadius: 4)
-                        //         ],
-                        //         color: isRecording ? Colors.red : Colors.grey,
+                        //
+                        //         color: isRecording ? Colors.red :  appStore.isDarkMode
+                        //             ? svGetScaffoldColor()
+                        //             : cardLightColor,
                         //         shape: BoxShape.circle),
                         //     child: Container(
                         //       padding: const EdgeInsets.all(10),
-                        //       child: const Icon(
-                        //         Icons.mic,
-                        //         color: Colors.white,
-                        //         size: 20,
+                        //       child:  Icon(
+                        //         CupertinoIcons.mic,
+                        //         color: svGetBodyColor(),
+                        //         size: 25,
                         //       ),
                         //     ),
                         //   ),
@@ -1491,8 +1437,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   Future<void> _permissionDialog(context) async {
     return showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
+      context: context, barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           // <-- SEE HERE
@@ -1627,7 +1572,7 @@ class TypingIndicator extends StatelessWidget {
         alignment: Alignment.centerLeft,
         elevation: 0,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        clipper: ChatBubbleClipper9(type: BubbleType.receiverBubble),
+        clipper: ChatBubbleClipper5(type: BubbleType.receiverBubble),
         backGroundColor: const Color(0xffE7E7ED),
         // margin: EdgeInsets.only(top: 20),
         child: Align(

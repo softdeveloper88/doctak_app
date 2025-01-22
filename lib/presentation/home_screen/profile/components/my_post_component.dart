@@ -126,6 +126,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
               : Container(
                   color: svGetBgColor(),
                   child: ListView.builder(
+                    padding: const EdgeInsets.only(top: 10),
                     physics: const NeverScrollableScrollPhysics(),
                     scrollDirection: Axis.vertical,
                     itemCount: widget.profileBloc.postList.length,

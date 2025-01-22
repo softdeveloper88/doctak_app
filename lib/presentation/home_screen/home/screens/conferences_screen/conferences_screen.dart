@@ -4,6 +4,7 @@ import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app_comman_data.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
+import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
@@ -54,6 +55,9 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
       countryName: 'all',
       searchTerm: '',
     ));
+    BlocProvider.of<SplashBloc>(context).add(
+      LoadDropdownData1('', ''),
+    );
     super.initState();
   }
 
@@ -77,10 +81,13 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
           iconTheme: IconThemeData(color: context.iconColor),
 
           title: BlocConsumer<SplashBloc, SplashState>(
+              bloc: SplashBloc()..add(
+                LoadDropdownData1('', ''),
+              ),
               listener: (e, state) {},
               builder: (context, state) {
                 if (state is CountriesDataLoaded1) {
-                  List<String>? list = state.countriesModelList.cast<String>();
+                  List<dynamic> list= state.countriesModelList;
                   return Column(
                     children: [
                       Row(
@@ -92,7 +99,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                             child: CustomDropdownButtonFormField(
                               itemBuilder: (item) => Text(
                                 item??'',
-                                style: TextStyle(color: Colors.black),
+                                style: const TextStyle(color: Colors.black),
                               ),
                               items: list,
                               value: list.first,
@@ -101,7 +108,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                 horizontal: 10,
                                 vertical: 0,
                               ),
-                              onChanged: (String? newValue) {
+                              onChanged: (newValue) {
                                 conferenceBloc.add(
                                   LoadPageEvent(
                                     page: 1,
@@ -111,7 +118,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                 );
                                 BlocProvider.of<SplashBloc>(context).add(
                                     LoadDropdownData1(
-                                        newValue, state.searchTerms ?? ''));
+                                        newValue??'', state.searchTerms ?? ''));
 
                                 // BlocProvider.of<ConferenceBloc>(context).add(LoadPageEvent(
                                 //     page: 1,
@@ -183,7 +190,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                       // ),
                     ],
                   );
-                } else if (state is DataError) {
+                } else if (state is CountriesDataError) {
                   return Center(child: Text('Error: $state'));
                 } else {
                   return const Center(child: Text(''));
@@ -276,9 +283,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                           }
                         });
                   } else {
-                    BlocProvider.of<SplashBloc>(context).add(
-                      LoadDropdownData1('', ''),
-                    );
+
                     return const Center();
                   }
                 }),
@@ -409,125 +414,257 @@ class ConferenceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(10.0),
       child: Material(
-        elevation: 2,
+        elevation: 0,
         color: context.cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
-        // margin: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildConferenceImageOrPlaceholder(),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      conference.title ?? 'No Title Available',
-                      style: const TextStyle(
-                        fontFamily: 'Robotic',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildConferenceImageOrPlaceholder(),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: const Icon(Icons.apartment_sharp,color: Colors.grey,),
+                    ),
+                    const SizedBox(width: 10,),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            conference.title ?? 'No Title Available',
+                            style: const TextStyle(
+                              // fontFamily: 'Robotic',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              '${conference.startDate ?? ''} - ${conference.endDate ?? ''}',
+                              style: const TextStyle(fontSize: 14,color: Colors.black87),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        // _showBottomSheet(context,widget
-                        //     .homeBloc
-                        //     .postList[index]);
-                        createDynamicLink(
-                            '${conference.title ?? ""} \n  Register Link: ${conference.conferenceAgendaLink ?? ''}',
-                            'https://doctak.net/conference/${conference.id}',
-                            conference.thumbnail ?? '');
-                        // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
-                        //     "Company : ${bloc.drugsData[index].companyName}\n"
-                        //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
-                        //     "Date From: ${ bloc.drugsData[index]
-                        //     .createdAt ??
-                        //     'N/A'}\n"
-                        //     "Date To: ${ bloc.drugsData[index]
-                        //     .lastDate ??
-                        //     'N/A'}\n"
-                        //     "Experience: ${ bloc.drugsData[index]
-                        //     .experience ??
-                        //     'N/A'}\n"
-                        //     "Job Apply Link: ${ bloc.drugsData[index]
-                        //     .link ??
-                        //     'N/A'}\n" );
-                      },
-                      child: Icon(
-                        Icons.share_sharp,
-                        size: 22,
-                        // 'images/socialv/icons/ic_share.png',
-                        // height: 22,
-                        // width: 22,
-                        // fit: BoxFit.cover,
-                        color: context.iconColor,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () {
+                          // _showBottomSheet(context,widget
+                          //     .homeBloc
+                          //     .postList[index]);
+                          createDynamicLink(
+                              '${conference.title ?? ""} \n  Register Link: ${conference.conferenceAgendaLink ?? ''}',
+                              'https://doctak.net/conference/${conference.id}',
+                              conference.thumbnail ?? '');
+                          // Share.share("Job Title: ${bloc.drugsData[index].jobTitle ?? ""}\n"
+                          //     "Company : ${bloc.drugsData[index].companyName}\n"
+                          //     "Location: ${bloc.drugsData[index].location ?? 'N/A'}\n"
+                          //     "Date From: ${ bloc.drugsData[index]
+                          //     .createdAt ??
+                          //     'N/A'}\n"
+                          //     "Date To: ${ bloc.drugsData[index]
+                          //     .lastDate ??
+                          //     'N/A'}\n"
+                          //     "Experience: ${ bloc.drugsData[index]
+                          //     .experience ??
+                          //     'N/A'}\n"
+                          //     "Job Apply Link: ${ bloc.drugsData[index]
+                          //     .link ??
+                          //     'N/A'}\n" );
+                        },
+                        child: Icon(
+                          Icons.share_sharp,
+                          size: 22,
+                          // 'images/socialv/icons/ic_share.png',
+                          // height: 22,
+                          // width: 22,
+                          // fit: BoxFit.cover,
+                          color: context.iconColor,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            // Conference Dates
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                '${conference.startDate ?? ''} - ${conference.endDate ?? ''}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              // Conference Dates
+
+
+              const SizedBox(height: 4),
+
+              // Action button (Register Now)
+
+              const SizedBox(height: 8),
+
+              // Conference Description
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(conference.description ?? 'No Description Available'),
               ),
-            ),
 
-            const SizedBox(height: 4),
-
-            // Action button (Register Now)
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: svAppButton(
-                width: 30.w,
-                // color: svGetBodyColor(),
-                onTap: () {
-                  Uri registrationUri = Uri.parse(conference.registrationLink!);
-                  PostUtils.launchURL(context, registrationUri.toString());
-                },
-                text: 'Register Now', context: context,
+              const SizedBox(height: 8),
+              //
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 8),
+              //   child: Text('City: ${conference.city ?? 'N/A'}\n'
+              //       'Venue: ${conference.venue ?? 'N/A'}\n'
+              //       'Organizer: ${conference.organizer ?? 'N/A'}\n'
+              //       'Country: ${conference.country ?? 'N/A'}\n'
+              //       'CME Credits: ${conference.cmeCredits ?? 'N/A'}\n'
+              //       'MOC Credits: ${conference.mocCredits ?? 'N/A'}\n'
+              //       // 'Specialties Targeted: ${conference.specialties_targeted ?? 'N/A'}',
+              //       ),
+              // ),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100, // Light background color
+                  borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.location_city, color: Colors.blue),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'City: ${conference.city ?? 'N/A'}',
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.fade, // Truncate text if needed
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.location_on, color: Colors.green),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'Venue: ${conference.venue ?? 'N/A'}',
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.person, color: Colors.orange),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'Organizer: ${conference.organizer ?? 'N/A'}',
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.flag, color: Colors.red),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'Country: ${conference.country ?? 'N/A'}',
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.school, color: Colors.purple),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'CME Credits: ${conference.cmeCredits ?? 'N/A'}',
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.star, color: Colors.teal),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'MOC Credits: ${conference.mocCredits ?? 'N/A'}',
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.medical_services, color: Colors.pink),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            'Specialties Targeted: ${conference.specialtiesTargeted ?? 'N/A'}',
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 8),
-
-            // Conference Description
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(conference.description ?? 'No Description Available'),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Other Conference Information (City, Venue, Organizer, etc.)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text('City: ${conference.city ?? 'N/A'}\n'
-                  'Venue: ${conference.venue ?? 'N/A'}\n'
-                  'Organizer: ${conference.organizer ?? 'N/A'}\n'
-                  'Country: ${conference.country ?? 'N/A'}\n'
-                  'CME Credits: ${conference.cmeCredits ?? 'N/A'}\n'
-                  'MOC Credits: ${conference.mocCredits ?? 'N/A'}\n'
-                  // 'Specialties Targeted: ${conference.specialties_targeted ?? 'N/A'}',
-                  ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: svAppButton(
+                  width: 30.w,
+                  // color: svGetBodyColor(),
+                  onTap: () {
+                    Uri registrationUri = Uri.parse(conference.registrationLink!);
+                    PostUtils.launchURL(context, registrationUri.toString());
+                  },
+                  text: 'Register Now', context: context,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

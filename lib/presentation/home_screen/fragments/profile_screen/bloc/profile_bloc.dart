@@ -465,8 +465,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   void _updateSecondDropdownValues(
       UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
     List<String> secondDropdownValues = [];
-    print('${event.selectedFirstDropdownValue}');
-    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? [];
+    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? 'United Arab Emirates';
     print(secondDropdownValues.toList());
     if (secondDropdownValues.isNotEmpty) {
       List<String>? universityDropdownValues =
@@ -686,7 +685,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   _onGetStates(String value) async {
     // emit(DataLoading());
-    // try {
+    try {
       final response = await postService.getStates(value);
 
       // if (response.data!.isNotEmpty) {
@@ -699,10 +698,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       });
       print("states : ${list.toString()}");
       return list;
-    // } catch (e) {
-    //   print(e);
-    //   // emit(DataFailure(error: 'An error occurred'));
-    // }
+    } catch (e) {
+      print(e);
+      // emit(DataFailure(error: 'An error occurred'));
+    }
   }
 
   Future<List<String>>? _onGetUniversities(String value) async {

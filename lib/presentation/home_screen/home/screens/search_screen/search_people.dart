@@ -40,8 +40,6 @@ class SearchPeopleList extends StatelessWidget {
           final bloc = searchPeopleBloc;
           if (bloc.searchPeopleData.isNotEmpty) {
             return ListView.builder(
-              padding: const EdgeInsets.only(
-                  left: 16, top: 8, right: 16, bottom: 16),
               shrinkWrap: true,
               // physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
@@ -55,8 +53,8 @@ class SearchPeopleList extends StatelessWidget {
                  if(bloc.numberOfPage != bloc.pageNumber - 1 &&
                         index >= bloc.searchPeopleData.length - 1
                 ) {
-                   return UserShimmer();
-                }else {
+                   return const UserShimmer();
+                }
                    return SVSearchCardComponent(
                        bloc: bloc,
                        element: bloc.searchPeopleData[index],
@@ -79,7 +77,7 @@ class SearchPeopleList extends StatelessWidget {
                                .isFollowedByCurrentUser = true;
                          }
                        });
-                 }
+
                 // SVProfileFragment().launch(context);
               },
               // separatorBuilder: (BuildContext context, int index) {

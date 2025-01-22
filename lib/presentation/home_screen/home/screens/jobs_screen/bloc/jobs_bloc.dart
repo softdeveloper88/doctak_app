@@ -76,11 +76,35 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
     emit(PaginationLoadingState());
     // try {
-    JobDetailModel response = await postService.getJobsDetails(
-        'Bearer ${AppData.userToken}', event.jobId.toString());
-    jobDetailModel = response;
-    log(jobDetailModel.toJson().toString());
-    emit(PaginationLoadedState());
+    print('jobId ${event.jobId}');
+    try {
+
+      Dio dio = Dio();
+
+        Response response = await dio.post(
+          '${AppData.remoteUrl2}/job_detail?job_id=${event.jobId}', // Add query parameters
+          options: Options(headers: {
+            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+          }),
+        );
+        log(response.data.toString());
+        jobDetailModel=JobDetailModel.fromJson(response.data);
+        emit(PaginationLoadedState());
+
+
+      // emit(DataLoaded(drugsData));
+    } catch (e) {
+      emit(DataError('No Data Found'));
+
+      // ProgressDialogUtils.hideProgressDialog();
+      print(e);
+      emit(DataError('No Data Found'));
+    }
+    // JobDetailModel response = await postService.getJobsDetails(
+    //     'Bearer ${AppData.userToken}', event.jobId.toString());
+    // jobDetailModel = response;
+    // log(jobDetailModel.toJson().toString());
+    // emit(PaginationLoadedState());
     // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   print(e);
