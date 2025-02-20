@@ -13,6 +13,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/conferences_scr
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drugs_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/guidelines_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/news_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/suggestion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/models/SVCommonModels.dart';
@@ -247,38 +248,45 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                         ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 10) { //cme
+                      }else if (selectedIndex == 10) {  // meeting
+                        finish(context);
+                        print(selectedIndex);
+                        // MyGroupsScreen().launch(context);
+                        MeetingScreen().launch(context);
+
+                        // SVGroupProfileScreen().launch(context);
+                      } else if (selectedIndex == 11) { //cme
                         finish(context);
                         print(selectedIndex);
                         ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 11) { // world news
+                      } else if (selectedIndex == 12) { // world news
                         finish(context);
                         print(selectedIndex);
                         NewsScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 12) {  // discount
+                      } else if (selectedIndex == 13) {  // discount
                         finish(context);
                         print(selectedIndex);
                          ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 13) {  // suggestions
+                      } else if (selectedIndex == 14) {  // suggestions
                         finish(context);
                         print(selectedIndex);
                         const SuggestionScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 14) { // app setting
+                      } else if (selectedIndex == 15) { // app setting
                         finish(context);
 
                         const AppSettingScreen().launch(context);
 
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 15) {  // privacy
+                      } else if (selectedIndex == 16) {  // privacy
                         finish(context);
                         Navigator.push(
                             context,
@@ -289,7 +297,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
 
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 16) {  //logout
+                      } else if (selectedIndex == 17) {  //logout
                         finish(context);
                         print(selectedIndex);
                         // ComingSoonScreen().launch(context);

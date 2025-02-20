@@ -465,7 +465,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   void _updateSecondDropdownValues(
       UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
     List<String> secondDropdownValues = [];
-    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? 'United Arab Emirates';
+    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? ['United Arab Emirates'];
     print(secondDropdownValues.toList());
     if (secondDropdownValues.isNotEmpty) {
       List<String>? universityDropdownValues =

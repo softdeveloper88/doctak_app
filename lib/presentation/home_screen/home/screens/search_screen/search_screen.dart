@@ -62,11 +62,11 @@ class _SearchScreenState extends State<SearchScreen>
     super.initState();
   }
 
-  // @override
-  // void dispose() {
-  //   _bannerAd!.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _debounce!.cancel();
+    super.dispose();
+  }
   //
   // @override
   // void initState() {
