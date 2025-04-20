@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/skapple/Documents/development/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/skapple/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/skapple/Documents/MyProjects/doctak_app/android/app/.cxx/Debug/121xi334/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/skapple/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/skapple/Documents/MyProjects/doctak_app/android/app/.cxx/Debug/121xi334/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
