@@ -5,12 +5,14 @@ import 'package:sizer/sizer.dart';
 
 class CustomAlertDialog extends StatelessWidget {
   final VoidCallback callback;
+  final VoidCallback? callbackNegative;
   final String title;
+  final String? noButtonText;
   final String? yesButtonText;
   final String? mainTitle;
 
-  const CustomAlertDialog(
-      {Key? key, required this.title, required this.callback,this.yesButtonText,this.mainTitle})
+   CustomAlertDialog(
+      {Key? key, required this.title, required this.callback,this.callbackNegative,this.yesButtonText,this.noButtonText,this.mainTitle})
       : super(key: key);
 
   @override
@@ -21,13 +23,13 @@ class CustomAlertDialog extends StatelessWidget {
       ),
       elevation: 0,
       backgroundColor: Colors.transparent,
-      child: confirmationCustomAlertDialog(context, title, callback,yesButtonText??"DELETE",mainTitle??"Delete ?"),
+      child: confirmationCustomAlertDialog(context, title, callback,yesButtonText??"DELETE",mainTitle??"Delete ?",callbackNegative,noButtonText),
     );
   }
 }
 
 confirmationCustomAlertDialog(
-    BuildContext context, String title, VoidCallback callBack,String yesButtonText,String mainTitle) {
+    BuildContext context, String title, VoidCallback callBack,String yesButtonText,String mainTitle,VoidCallback? callbackNegative,noButtonText) {
   return Center(
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -101,13 +103,13 @@ confirmationCustomAlertDialog(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
-                                onPressed: () {
+                                onPressed: ()=>callbackNegative!=null?(){
                                   Navigator.of(context, rootNavigator: true)
-                                      .pop('dialog');
-                                },
+                                      .pop('dialog');}:callbackNegative
+                                ,
                                 child: Center(
                                   child: Text(
-                                    "CANCEL",
+                                    noButtonText??"CANCEL",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,

@@ -40,7 +40,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<UpdateSecondDropdownValues>(_updateSecondDropdownValues);
     on<UpdateSpecialtyDropdownValue>(_updateSpecialtyDropdownValues);
     on<UpdateSpecialtyDropdownValue1>(_specialityData);
-    on<UpdateUniversityDropdownValues>(_updateUniversityDropdownValues);
+    // on<UpdateUniversityDropdownValues>(_updateUniversityDropdownValues);
     on<LoadPageEvent>(_onGetProfile);
     on<UpdateProfileEvent>(_onUpdateProfile);
     on<UpdateProfilePicEvent>(_updateProfilePicture);
@@ -95,7 +95,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   _onGetProfile(LoadPageEvent event, Emitter<ProfileState> emit) async {
     emit(PaginationLoadingState());
-    try {
+    // try {
     if (pageNumber == 1) {
       print("data ${event.userId}");
       PostDataModel postDataModelResponse = await postService.getMyPosts(
@@ -161,13 +161,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // ));
     // emit(PaginationLoadedState());
     // emit(DataLoaded(postList));
-    } catch (e) {
-      print(e);
-
-      // emit(PaginationLoadedState(e.toString()));
-
-      emit(DataError('An error occurred $e'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //
+    //   // emit(PaginationLoadedState(e.toString()));
+    //
+    //   emit(DataError('An error occurred $e'));
+    // }
   }
 
   Future<void> _updateFirstDropdownValue(
@@ -467,10 +467,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     List<String> secondDropdownValues = [];
     secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? ['United Arab Emirates'];
     print(secondDropdownValues.toList());
-    if (secondDropdownValues.isNotEmpty) {
-      List<String>? universityDropdownValues =
-          await _onGetUniversities(secondDropdownValues.first ?? '');
-    }
+    // if (secondDropdownValues.isNotEmpty) {
+    //   List<String>? universityDropdownValues =
+    //       await _onGetUniversities(secondDropdownValues.first ?? '');
+    // }
     // add(UpdateSpecialtyDropdownValue(secondDropdownValues.first ?? ''));
 
     emit(PaginationLoadedState(
@@ -485,22 +485,24 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // add(UpdateSpecialtyDropdownValue(secondDropdownValues!.first));
   }
 
-  void _updateUniversityDropdownValues(
-      UpdateUniversityDropdownValues event, Emitter<ProfileState> emit) async {
-    // Simulate fetching second dropdown values based on the first dropdown selection
-    List<String>? secondDropdownValues =
-        await _onGetUniversities(event.selectedStateDropdownValue);
-    emit(PaginationLoadedState(
-      (state as PaginationLoadedState).firstDropdownValues,
-      (state as PaginationLoadedState).selectedFirstDropdownValue,
-      (state as PaginationLoadedState).secondDropdownValues,
-      (state as PaginationLoadedState).selectedSecondDropdownValue,
-      (state as PaginationLoadedState).specialtyDropdownValue,
-      (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
-      secondDropdownValues ?? [],
-      secondDropdownValues!.isEmpty ? '' : secondDropdownValues.first,
-    ));
-  }
+  // void _updateUniversityDropdownValues(
+  //     UpdateUniversityDropdownValues event, Emitter<ProfileState> emit) async {
+  //   // Simulate fetching second dropdown values based on the first dropdown selection
+  //   // List<String>? secondDropdownValues =
+  //   //     await _onGetUniversities(event.selectedStateDropdownValue);
+  //   emit(PaginationLoadedState(
+  //     (state as PaginationLoadedState).firstDropdownValues,
+  //     (state as PaginationLoadedState).selectedFirstDropdownValue,
+  //     (state as PaginationLoadedState).secondDropdownValues,
+  //     (state as PaginationLoadedState).selectedSecondDropdownValue,
+  //     (state as PaginationLoadedState).specialtyDropdownValue,
+  //     (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
+  //     [],
+  //     ''
+  //     // secondDropdownValues ?? [],
+  //     // secondDropdownValues!.isEmpty ? '' : secondDropdownValues.first,
+  //   ));
+  // }
 
   void _updateAddWorkEduction(
       UpdateAddWorkEductionEvent event, Emitter<ProfileState> emit) async {
@@ -704,33 +706,33 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  Future<List<String>>? _onGetUniversities(String value) async {
-    // emit(DataLoading());
-    try {
-      final response = await postService.getUniversityByStates(value);
-      print(response.data);
-      // if (response.data!.isNotEmpty) {
-      // emit(DataSuccess(countriesModel: response));
-      log('response ${response.data}');
-      List<String> list = [];
-      // list.clear();
-      // list.add('Add new University');
-      response.data?.forEach((element) {
-        if (element['name'] != null) {
-          list.add(element['name']!);
-        }
-      });
-      return list;
-      // } else {
-      //   return [];
-      //   // emit(DataFailure(error: 'Failed to load data'));
-      // }
-    } catch (e) {
-      return [];
-      print(e);
-      // emit(DataFailure(error: 'An error occurred'));
-    }
-  }
+  // Future<List<String>>? _onGetUniversities(String value) async {
+  //   // emit(DataLoading());
+  //   try {
+  //     final response = await postService.getUniversityByStates(value);
+  //     print(response.data);
+  //     // if (response.data!.isNotEmpty) {
+  //     // emit(DataSuccess(countriesModel: response));
+  //     log('response ${response.data}');
+  //     List<String> list = [];
+  //     // list.clear();
+  //     // list.add('Add new University');
+  //     response.data?.forEach((element) {
+  //       if (element['name'] != null) {
+  //         list.add(element['name']!);
+  //       }
+  //     });
+  //     return list;
+  //     // } else {
+  //     //   return [];
+  //     //   // emit(DataFailure(error: 'Failed to load data'));
+  //     // }
+  //   } catch (e) {
+  //     return [];
+  //     print(e);
+  //     // emit(DataFailure(error: 'An error occurred'));
+  //   }
+  // }
 
   _setUserFollow(SetUserFollow event, Emitter<ProfileState> emit) async {
     // emit(DrugsDataInitial());

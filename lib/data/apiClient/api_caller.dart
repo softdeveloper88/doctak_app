@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 
 enum HttpMethod { get, post, put, delete }
 
@@ -14,15 +15,15 @@ class ApiCaller {
     dynamic body,
   }) async {
     // Construct URL
-    Uri fullUri = Uri.parse(AppData.remoteUrl).resolve(endpoint);
-
+    Uri fullUri = Uri.parse('${AppData.remoteUrl2}/').resolve(endpoint);
+ print(fullUri);
     // Add query parameters
     if (params != null && params.isNotEmpty) {
       final queryParams = Map<String, String>.from(fullUri.queryParameters);
       queryParams.addAll(params.map((k, v) => MapEntry(k, v.toString())));
       fullUri = fullUri.replace(queryParameters: queryParams);
     }
-
+      print(fullUri);
     // Prepare headers
     final requestHeaders = Map<String, String>.from({'Authorization': 'Bearer ${AppData.userToken}'});
     if (headers != null) requestHeaders.addAll(headers);
@@ -79,7 +80,7 @@ class ApiCaller {
   }
 
   dynamic _handleResponse(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
+    if ((response.statusCode >= 200 && response.statusCode < 300) || response.statusCode == 403) {
       try {
         return jsonDecode(response.body);
       } catch (_) {

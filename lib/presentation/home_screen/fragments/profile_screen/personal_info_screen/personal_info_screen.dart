@@ -298,8 +298,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   widget.profileBloc.add(
                                       UpdateSpecialtyDropdownValue(
                                           state.selectedSecondDropdownValue));
-                                  widget.profileBloc.add(
-                                      UpdateUniversityDropdownValues(newValue));
+                                  // widget.profileBloc.add(
+                                  //     UpdateUniversityDropdownValues(newValue));
                                 },
                               ),
                               if (AppData.userType == "doctor")
@@ -334,43 +334,43 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 ),
                               if (AppData.userType != "doctor")
                                 const SizedBox(height: 10),
-                              if (AppData.userType != "doctor")
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    'University',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              if (AppData.userType != "doctor")
-                                CustomDropdownButtonFormField(
-                                  itemBuilder: (item) => Text(
-                                    item??'',
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
-                                  items: state.universityDropdownValue,
-                                  value: state.selectedUniversityDropdownValue ==
-                                              ''
-                                          ? null
-                                          : state
-                                              .selectedUniversityDropdownValue,
-                                  width: double.infinity,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 0,
-                                  ),
-                                  onChanged: (String? newValue) {
-                                    print(newValue);
-                                    widget.profileBloc.university = newValue!;
-                                    // selectedNewUniversity=newValue;
-                                    widget.profileBloc.add(
-                                        UpdateUniversityDropdownValues(
-                                            newValue));
-                                  },
-                                ),
+                              // if (AppData.userType != "doctor")
+                              //   const Padding(
+                              //     padding: EdgeInsets.only(top: 8.0),
+                              //     child: Text(
+                              //       'University',
+                              //       style: TextStyle(
+                              //         fontSize: 16,
+                              //         fontWeight: FontWeight.w500,
+                              //       ),
+                              //     ),
+                              //   ),
+                              // if (AppData.userType != "doctor")
+                                // CustomDropdownButtonFormField(
+                                //   itemBuilder: (item) => Text(
+                                //     item??'',
+                                //     style: const TextStyle(color: Colors.black),
+                                //   ),
+                                //   items: state.universityDropdownValue,
+                                //   value: state.selectedUniversityDropdownValue ==
+                                //               ''
+                                //           ? null
+                                //           : state
+                                //               .selectedUniversityDropdownValue,
+                                //   width: double.infinity,
+                                //   contentPadding: const EdgeInsets.symmetric(
+                                //     horizontal: 10,
+                                //     vertical: 0,
+                                //   ),
+                                //   onChanged: (String? newValue) {
+                                //     print(newValue);
+                                //     widget.profileBloc.university = newValue!;
+                                //     // selectedNewUniversity=newValue;
+                                //     // widget.profileBloc.add(
+                                //     //     UpdateUniversityDropdownValues(
+                                //     //         newValue));
+                                //   },
+                                // ),
                               // if (AppData.userType!="doctor")
                               //   const SizedBox(height: 10),
                               // if (AppData.userType != "doctor" &&

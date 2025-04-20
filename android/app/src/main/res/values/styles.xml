@@ -15,4 +15,34 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+
+        <!-- Base application theme -->
+        <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+            <item name="colorPrimary">@color/action_text</item>
+            <item name="colorPrimaryDark">@color/accept</item>
+            <item name="colorAccent">@color/accept_ripple</item>
+        </style>
+    <style name="CallScreenTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">#80000000</item>
+    </style>
+        <!-- Call Screen specific theme -->
+<!--        <style name="CallScreenTheme" parent="Theme.AppCompat.NoActionBar">-->
+<!--            &lt;!&ndash; Make it fullscreen &ndash;&gt;-->
+<!--            <item name="android:windowFullscreen">true</item>-->
+<!--            &lt;!&ndash; No title bar &ndash;&gt;-->
+<!--            <item name="android:windowNoTitle">true</item>-->
+<!--            &lt;!&ndash; Dark background &ndash;&gt;-->
+<!--            <item name="android:windowBackground">@android:color/black</item>-->
+<!--            &lt;!&ndash; Allow window to draw behind status bar &ndash;&gt;-->
+<!--            <item name="android:windowDrawsSystemBarBackgrounds">true</item>-->
+<!--            &lt;!&ndash; Transparent status bar &ndash;&gt;-->
+<!--            <item name="android:statusBarColor">@android:color/transparent</item>-->
+<!--            &lt;!&ndash; Translucent navigation bar &ndash;&gt;-->
+<!--            <item name="android:navigationBarColor">#80000000</item>-->
+<!--        </style>-->
+
 </resources>

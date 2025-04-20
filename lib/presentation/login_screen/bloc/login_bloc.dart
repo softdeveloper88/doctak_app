@@ -117,6 +117,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
           if (userToken != '') {
             AppData.userToken = userToken;
+            AppData.deviceToken = prefs.getString('device_token')??event.deviceToken;
             AppData.logInUserId = userId;
             AppData.name = name;
             AppData.profile_pic = profile_pic;
@@ -144,6 +145,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           if (response.university != null) {
             AppData.university = response.university?.name ?? '';
           }
+          AppData.deviceToken = event.deviceToken;
+
           AppData.userType = response.user?.userType ?? '';
           AppData.background = response.user?.background ?? '';
           AppData.email = response.user?.email ?? '';
@@ -269,6 +272,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           String? currency = prefs.getString('currency') ?? '';
 
           if (userToken != '') {
+            AppData.deviceToken = prefs.getString('device_token')??event.deviceToken;
             AppData.userToken = userToken;
             AppData.logInUserId = userId;
             AppData.name = name;

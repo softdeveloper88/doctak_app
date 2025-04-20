@@ -64,7 +64,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   void dispose() {
-    _debounce!.cancel();
+    _debounce?.cancel();
     super.dispose();
   }
   //

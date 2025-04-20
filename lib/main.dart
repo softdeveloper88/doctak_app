@@ -1,9 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:doctak_app/meeting_module/bloc/chat/chat_bloc.dart'
+as chatbloc2;
+import 'package:doctak_app/meeting_module/bloc/meeting/meeting_bloc.dart';
+import 'package:doctak_app/meeting_module/bloc/participants/participants_bloc.dart';
+import 'package:doctak_app/meeting_module/bloc/settings/settings_bloc.dart';
+import 'package:doctak_app/meeting_module/services/agora_service.dart';
+import 'package:doctak_app/meeting_module/services/api_service.dart';
+import 'package:doctak_app/meeting_module/utils/constants.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/NoInternetScreen.dart';
+import 'package:doctak_app/presentation/call_module/call_service.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
@@ -26,7 +35,6 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:doctak_app/theme/bloc/theme_bloc.dart';
-import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -39,22 +47,21 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import 'ads_setting/ad_setting.dart';
+import 'core/call_service/callkit_service.dart';
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
-import 'core/utils/app_comman_data.dart';
 import 'core/utils/common_navigator.dart';
-import 'core/utils/connectivity_service.dart';
 import 'core/utils/get_shared_value.dart';
 import 'core/utils/navigator_service.dart';
 import 'core/utils/pref_utils.dart';
 import 'firebase_options.dart';
 import 'localization/app_localization.dart';
+import 'presentation/call_module/ui/call_screen.dart';
 import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 
 AppStore appStore = AppStore();
@@ -65,13 +72,17 @@ const _kShouldTestAsyncErrorOnInit = false;
 bool isCurrentlyOnNoInternet = false;
 // Toggle this for testing Crashlytics in your app locally.
 const _kTestingCrashlytics = true;
+
 /// Create a [AndroidNotificationChannel] for heads up notifications
 late AndroidNotificationChannel channel;
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-final GlobalKey<NavigatorState> navigatorKey =
-    GlobalKey(debugLabel: 'Main Navigator');
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: 'Main Navigator');
+var calllRoute;
+
+// Global instance of CallService to handle lifecycle events without Provider
+final CallService globalCallService = CallService();
 
 @pragma('vm:entry-point')
 void onDidReceiveNotificationResponse(
@@ -93,32 +104,32 @@ void checkNotificationPermission() async {
     await Permission.notification.request();
   }
 }
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpsOverrides();
 
+  // Initialize Firebase FIRST, before any Firebase-dependent services
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   initializeAsync();
-  // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-  //   systemNavigationBarColor: Colors.white, // navigation bar color
-  //   statusBarColor: Colors.white, // status bar color
-  // ));
-  AdmobSetting.initialization();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+
+  // Initialize CallKit service to listen for events
+  final callKitService = CallKitService();
+  callKitService.listenToCallEvents();
+  await callKitService.resumeCallScreenIfNeeded();
+
+  // Initialize notification service after Firebase is initialized
+  await NotificationService.initialize();
+
+  // Initialize call system
+  await globalCallService.initialize(
+    baseUrl: 'https://doctak.net/api',authToken:AppData.userToken
+    // Replace with your actual API URL
   );
-  // if (Platform.isAndroid) {
-  //   await Firebase.initializeApp(
-  //     options: const FirebaseOptions(
-  //       apiKey: 'AIzaSyDERo2-Nyit1b3UTqWWKNUutkALGBauxuc',
-  //       appId: "1:975716064608:android:c1a4889c2863e014749205",
-  //       messagingSenderId: "975716064608",
-  //       projectId: "doctak-322cc",
-  //     ),
-  //   );
-  // } else {
-  //   await Firebase.initializeApp();
-  //   // await Firebase.initializeApp();
-  // }
+
+  AdmobSetting.initialization();
+
   const fatalError = true;
   // Non-async exceptions
   FlutterError.onError = (errorDetails) {
@@ -143,90 +154,26 @@ Future<void> main() async {
     }
     return true;
   };
-  NotificationService.clearBadgeCount(); // Clears badge when app resumes
-  checkNotificationPermission();
-  NotificationService.initialize();
-  RemoteMessage? initialRoute =
-      await NotificationService.getInitialNotificationRoute();
+
+  // Get initial notification if app was opened from a notification
+  RemoteMessage? initialRoute = await NotificationService.getInitialNotificationRoute();
   print(initialRoute?.data.toString());
+
   channel = const AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title // description
     importance: Importance.max,
   );
-  // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  //     FlutterLocalNotificationsPlugin();
-  // const AndroidInitializationSettings initializationSettingsAndroid =
-  //     AndroidInitializationSettings('ic_stat_name');
-  // const InitializationSettings initializationSettings =
-  //     InitializationSettings(android: initializationSettingsAndroid);
-  // await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-  //     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
-  // // flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  // FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
-  //   //App is in the foreground
-  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-  //     debugPrint('Got a message, app is in the foreground!');
-  //     debugPrint('Message data: $message');
-  //     await showNotificationWithCustomIcon(message.notification,message.notification?.title??'', message.notification!.body.toString(),message.data['image'],message.data['banner']);
-  //     // showNotification(message.data);
-  //     // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
-  //     // RemoteNotification? notification = message.notification;
-  //     // AndroidNotification? android = message.notification?.android;
-  //     // if (notification != null && android != null) {
-  //     //   flutterLocalNotificationsPlugin.show(
-  //     //       notification.hashCode,
-  //     //       notification.title,
-  //     //       notification.body,
-  //     //       NotificationDetails(
-  //     //         android: AndroidNotificationDetails(
-  //     //           channel.id,
-  //     //           channel.name,
-  //     //           largeIcon: largeIcon,
-  //     //           styleInformation: BigPictureStyleInformation(
-  //     //             largeIcon,
-  //     //             contentTitle: notification.title,
-  //     //             summaryText: notification.body,
-  //     //           ),
-  //     //           icon: 'ic_stat_name',
-  //     //         ),
-  //     //       ));
-  //     // }
-  //     if (message.notification != null) {
-  //       if (kDebugMode) {
-  //         print(
-  //             'Message also contained a notification: ${message.notification}');
-  //       }
-  //     }
-  //   });
-  //
-  //   await flutterLocalNotificationsPlugin
-  //       .resolvePlatformSpecificImplementation<
-  //           AndroidFlutterLocalNotificationsPlugin>()
-  //       ?.createNotificationChannel(channel);
-  //   await FirebaseMessaging.instance
-  //       .setForegroundNotificationPresentationOptions(
-  //     alert: true,
-  //     badge: true,
-  //     sound: true,
-  //   )
-  //       .then((value) {
-  //     debugPrint('value:print');
-  //   });
-  // }
-  // Get the notification payload if the app was terminated
-  // Initialize the notification service
-  // Get the initial notification data if the app was launched from a terminated state by tapping a notification
 
-  // Use the notification data (payload or route) to navigate to a specific screen
   appStore.toggleDarkMode(value: false);
+
   Future.wait([
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]),
     PrefUtils().init()
-  ]).then((value) {
-    runApp( MyApp(
+  ]).then((value) async {
+    runApp(MyApp(
         message: initialRoute,
         initialRoute: initialRoute?.data['type'] ?? '',
         id: initialRoute?.data['id'] ?? ''));
@@ -237,7 +184,7 @@ class MyApp extends StatefulWidget {
   final String? initialRoute;
   String? id;
   RemoteMessage? message;
-  MyApp({Key? key,this.message, this.initialRoute, this.id}) : super(key: key);
+  MyApp({Key? key, this.message, this.initialRoute, this.id}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -247,6 +194,7 @@ class MyApp extends StatefulWidget {
     state?.setLocale(newLocale);
   }
 }
+
 List<ConnectivityResult> _connectionStatus = [ConnectivityResult.none];
 final Connectivity _connectivity = Connectivity();
 late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
@@ -254,16 +202,16 @@ late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
 
   Locale? _locale;
 
   setLocale(Locale locale) {
     setState(() {
       _locale = locale;
-
     });
   }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -273,106 +221,41 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('state change ');
+    print('state change');
+
+    // Use the global instance instead of Provider
+    globalCallService.handleAppLifecycleState(state);
+
     if (state == AppLifecycleState.resumed) {
       NotificationService.clearBadgeCount(); // Clears badge when app resumes
-
-      //TODO: set status to online here in firestore
-    } else {
-      NotificationService.clearBadgeCount(); // Clears badge when app resumes
-
-      //TODO: set status to offline here in firestore
     }
   }
-  // final _navigatorKey = GlobalKey<NavigatorState>();
-  void setFCMSetting() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      if (kDebugMode) {
-        print('User granted permission');
-      }
-    } else if (settings.authorizationStatus ==
-        AuthorizationStatus.provisional) {
-      if (kDebugMode) {
-        print('User granted provisional permission');
-      }
-    }else {
-      if (kDebugMode) {
-        print('User declined or has not accepted permission');
-      }
-    }
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
 
-    /// Update the iOS foreground notification presentation options to allow
-    /// heads up notifications.
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    )
-        .then((value) {
-      if (kDebugMode) {
-        print('value:print');
-      }
-    });
+  bool _isRequestingPermission = false;
+
+  Future<void> setFCMSetting() async {
+    if (_isRequestingPermission) return;
+    _isRequestingPermission = true;
+
+    try {
+      NotificationSettings settings =
+      await FirebaseMessaging.instance.requestPermission();
+      print('User granted permission: ${settings.authorizationStatus}');
+    } catch (e) {
+      print('Error requesting permission: $e');
+    } finally {
+      _isRequestingPermission = false;
+    }
   }
 
   @override
   void didChangeDependencies() {
     getLocale().then((locale) => {setLocale(locale)});
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
-
     super.didChangeDependencies();
   }
 
-  // Future<bool> sendFcmMessage(
-  //     String title, String message, String token) async {
-  //   try {
-  //     var url = 'https://fcm.googleapis.com/fcm/send';
-  //     var header = {
-  //       'Content-Type': 'application/json',
-  //       'Authorization':
-  //           'Bearer AAAA4y01nWA:APA91bEcfbKn4ZZ-1WPyK4FFepBC4_PWOthWPwz5yoK7b2rcftt2O9_xy5tOaeoeceVaPR5eY7Y6cX_YtIBq7WL11NN8dB3mtpQ8Tq-cNYf8x_FfyG_Hpps6wsMeY1btHcdUqaWEByTd',
-  //     };
-  //     var request = {
-  //       'registration_ids': [token],
-  //       'priority': 'high',
-  //       'important': 'max',
-  //       'notification': {'body': message, 'title': title}
-  //     };
-  //     var response = await http.post(Uri.parse(url),
-  //         headers: header, body: json.encode(request));
-  //     if (kDebugMode) {
-  //       print(response.body);
-  //     }
-  //     return true;
-  //   } catch (e) {
-  //     print(e);
-  //     return false;
-  //   }
-  // }
-  // setToken() async {
-  //   await FirebaseMessaging.instance.getToken().then((token) async {
-  //     log('token ${token}');
-  //   });
-  //   var tp = await FirebaseMessaging.instance.getAPNSToken();
-  //   print(tp);
-  // }
   late Future<void> _initializeFlutterFireFuture;
-
 
   // Define an async function to initialize FlutterFire
   Future<void> _initializeFlutterFire() async {
@@ -385,10 +268,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       await FirebaseCrashlytics.instance
           .setCrashlyticsCollectionEnabled(!kDebugMode);
     }
-
-
   }
-// Platform messages are asynchronous, so we initialize in an async method.
+
+  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
     late List<ConnectivityResult> result;
     // Platform messages may fail, so we use a try/catch PlatformException.
@@ -408,17 +290,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     return _updateConnectionStatus(result);
   }
+
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
     setState(() {
       _connectionStatus = result;
     });
-   
+
     if (_connectionStatus.first == ConnectivityResult.none) {
       isCurrentlyOnNoInternet = true;
-      launchScreen(NavigatorService.navigatorKey.currentState!.overlay!.context, NoInternetScreen());
+      launchScreen(NavigatorService.navigatorKey.currentState!.overlay!.context,
+          NoInternetScreen());
     } else {
       if (isCurrentlyOnNoInternet) {
-        Navigator.pop(NavigatorService.navigatorKey.currentState!.overlay!.context);
+        Navigator.pop(
+            NavigatorService.navigatorKey.currentState!.overlay!.context);
         isCurrentlyOnNoInternet = false;
       }
     }
@@ -426,14 +311,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // ignore: avoid_print
     // if(_connectionStatus.single==ConnectionState.none) {
 
-      print('Connectivity changed: $_connectionStatus');
+    print('Connectivity changed: $_connectionStatus');
     // }
   }
+
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     initConnectivity();
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
     // setToken();
@@ -441,181 +328,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
   }
 
-  //   setToken();
-  //   FirebaseMessaging.instance
-  //       .getInitialMessage()
-  //       .then((RemoteMessage? message) {
-  //       print('message test $message');
-  //     if (message != null) {
-  //       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-  //         NavigatorService.navigatorKey.currentState?.push(
-  //           MaterialPageRoute(builder: (context) => ComingSoonScreen()),
-  //         );
-  //         await showNotificationWithCustomIcon(
-  //             message.notification,
-  //             message.notification?.title ?? '',
-  //             message.notification!.body.toString(),
-  //             message.data['image']??'',
-  //             message.data['banner']??'');
-  //         // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
-  //         //
-  //         // RemoteNotification? notification = message.notification;
-  //         // AndroidNotification? android = message.notification?.android;
-  //         // if (notification != null && android != null) {
-  //         //   flutterLocalNotificationsPlugin.show(
-  //         //       notification.hashCode,
-  //         //       notification.title,
-  //         //       notification.body,
-  //         //       NotificationDetails(
-  //         //
-  //         //         android: AndroidNotificationDetails(
-  //         //           color: Colors.transparent,
-  //         //           largeIcon: largeIcon,
-  //         //           styleInformation: BigPictureStyleInformation(
-  //         //             largeIcon,
-  //         //             contentTitle: notification.title,
-  //         //             summaryText: notification.body,
-  //         //           ),
-  //         //           channel.id,
-  //         //           channel.name,
-  //         //
-  //         //           icon: 'ic_stat_name',
-  //         //         ),
-  //         //       ));
-  //         // }
-  //         // if(user_type.$=="customer") {
-  //         //   await navigatorKey.currentState!.push(
-  //         //       MaterialPageRoute(builder: (_) =>
-  //         //           NotificationsScreen(isWorkshop:false
-  //         //           ))
-  //         //   );
-  //         // }else{
-  //         //   await navigatorKey.currentState!.push(
-  //         //       MaterialPageRoute(builder: (_) =>
-  //         //           NotificationsScreen(isWorkshop: true
-  //         //           ))
-  //         //   );
-  //         // }
-  //       });
-  //     }
-  //   });
-  //   // 2. This method only call when App in forground it mean app must be opened
-  //   FirebaseMessaging.onMessage.listen(
-  //     (message) async {
-  //       if (kDebugMode) {
-  //         print('FirebaseMessaging.onMessage.listen');
-  //       }
-  //       if (message.notification != null) {
-  //         if (kDebugMode) {
-  //           print(message.notification!.title);
-  //         }
-  //         if (kDebugMode) {
-  //           print(message.notification!.body);
-  //         }
-  //         if (kDebugMode) {
-  //           print('message.data11 ${message.data}');
-  //         }
-  //         // showNotification(message.data);
-  //         // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
-  //
-  //         RemoteNotification? notification = message.notification;
-  //         AndroidNotification? android = message.notification?.android;
-  //         // print(message.data);
-  //         NavigatorService.navigatorKey.currentState?.push(
-  //           MaterialPageRoute(builder: (context) => ComingSoonScreen()),
-  //         );
-  //         await showNotificationWithCustomIcon(
-  //             message.notification,
-  //             message.notification?.title ?? '',
-  //             message.notification!.body.toString(),
-  //             message.data['image']??'',
-  //             message.data['banner']??'');
-  //
-  //         // if (notification != null && android != null) {
-  //         //   flutterLocalNotificationsPlugin.show(
-  //         //       notification.hashCode,
-  //         //       notification.title,
-  //         //       notification.body,
-  //         //       NotificationDetails(
-  //         //         android: AndroidNotificationDetails(
-  //         //           channel.id,
-  //         //           channel.name,
-  //         //           largeIcon: largeIcon,
-  //         //           styleInformation: BigPictureStyleInformation(
-  //         //             largeIcon,
-  //         //             contentTitle: notification.title,
-  //         //             summaryText: notification.body,
-  //         //           ),
-  //         //           icon: 'ic_stat_name',
-  //         //         ),
-  //         //       ));
-  //         // }
-  //         // if(user_type.$=="customer") {
-  //         //   await navigatorKey.currentState!.push(
-  //         //       MaterialPageRoute(builder: (_) =>
-  //         //           NotificationsScreen(isWorkshop:false
-  //         //           ))
-  //         //   );
-  //         // }else{
-  //         //   await navigatorKey.currentState!.push(
-  //         //       MaterialPageRoute(builder: (_) =>
-  //         //           NotificationsScreen(isWorkshop: true
-  //         //           ))
-  //         //   );
-  //         // }
-  //       }
-  //     },
-  //   );
-  //   // 3. This method only call when App in background and not terminated(not closed)
-  //   FirebaseMessaging.onMessageOpenedApp.listen(
-  //     (message) async {
-  //       print('FirebaseMessaging.onMessageOpenedApp.listen');
-  //       if (message.notification != null) {
-  //         RemoteNotification? notification = message.notification;
-  //         AndroidNotification? android = message.notification?.android;
-  //         await showNotificationWithCustomIcon(
-  //             message.notification,
-  //             message.notification?.title ?? '',
-  //             message.notification!.body.toString(),
-  //             message.data['image']??'',
-  //             message.data['banner']??'');
-  //         // final ByteArrayAndroidBitmap largeIcon = await _getImageFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQzCFZPz1Er-39Wvzvn5QBEMy9JSP6vGl2Xg&s');
-  //         //
-  //         // if (notification != null && android != null) {
-  //         //   flutterLocalNotificationsPlugin.show(
-  //         //       notification.hashCode,
-  //         //       notification.title,
-  //         //       notification.body,
-  //         //
-  //         //       NotificationDetails(
-  //         //         android: AndroidNotificationDetails(
-  //         //           channel.id,
-  //         //           channel.name,
-  //         //           icon: 'ic_stat_name',
-  //         //           largeIcon: largeIcon,
-  //         //           styleInformation: BigPictureStyleInformation(
-  //         //             largeIcon,
-  //         //             contentTitle: notification.title,
-  //         //             summaryText: notification.body,
-  //         //           ),
-  //         //         ),
-  //         //       ));
-  //         //   // await navigatorKey.currentState!.push(
-  //         //   //     MaterialPageRoute(builder: (_) =>  NotificationsScreen(
-  //         //   //     ))
-  //         //   // );
-  //         // }
-  //
-  //         // showNotification(message.data);
-  //         print(message.notification!.title);
-  //         print(message.notification!.body);
-  //         print("message.data22 ${message}");
-  //       }
-  //     },
-  //   );
-  //   super.initState();
-  // }
-  Map<String, dynamic> userMap={};
+  Map<String, dynamic> userMap = {};
 
   @override
   Widget build(BuildContext context) {
@@ -638,140 +351,163 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             BlocProvider(create: (context) => AddPostBloc()),
             BlocProvider(create: (context) => ProfileBloc()),
             BlocProvider(create: (context) => ChatBloc()),
+
+            // We're using a global instance, so this is just for UI components that need it
+            // It won't be used for app lifecycle events
+            // Provider<CallService>.value(value: globalCallService),
+            ChangeNotifierProvider<CallService>.value(value: globalCallService),
+
             BlocProvider(
                 create: (context) => ThemeBloc(
-                      ThemeState(
-                        themeType: PrefUtils().getThemeData(),
-                      ),
-                    )),
+                  ThemeState(
+                    themeType: PrefUtils().getThemeData(),
+                  ),
+                )),
           ],
-          child:  BlocBuilder<ThemeBloc, ThemeState>(
+          child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               return Observer(
-
                   builder: (_) => MaterialApp(
-                    
-                        scaffoldMessengerKey: globalMessengerKey,
-                        // theme: theme,
-                        title: 'doctak_app',
-                        navigatorKey: NavigatorService.navigatorKey,
-                        initialRoute: '/${widget.initialRoute}',
-                        routes: {
-                          // follow_request
-                          // friend_request
-                          // message_received
-                          // comments_on_posts
-                          // new_like
-                          // new_tag
-                          // new_mention
-                          // event_invitation
-                          // new_content
-                          // group_update
-                          // account_activity
-                          // system_update
-                          // reminder
-                          // recommendation
-                          // feedback_request
-                          // new_job_posted
-                          // conference_invitation
-                          // comment_tag
-                          // job_update
-                          // new_discuss_case
-                          // discuss_case_comment
-                          // discuss_case_like
-                          // discuss_case_comment_like
-                          // like_comment_on_post
-                          // likes_on_posts
-                          // like_comments
-                          '/': (context) => ForceUpgradePage(),
-                          '/follow_request': (context) => SVProfileFragment(
-                                userId: widget.id ?? '',
-                              ),
-                          '/follower_notification': (context) => SVProfileFragment(
-                                userId: widget.id ?? '',
-                              ),
-                          '/un_follower_notification': (context) => SVProfileFragment(
-                                userId: widget.id ?? '',
-                              ),
-                          '/friend_request': (context) => SVProfileFragment(
-                                userId: widget.id ?? '',
-                              ),
-                          '/message_received': (context) => ChatRoomScreen(
-                                id:  widget.id.toString(),
-                                roomId: '',
-                               username: widget.message?.notification?.title??"",
-                               profilePic:widget.message?.data['image']??''.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '') ,
+                    scaffoldMessengerKey: globalMessengerKey,
+                    navigatorKey: NavigatorService.navigatorKey,
+                    initialRoute: '/${widget.initialRoute}',
 
-                              ),
-                          '/comments_on_posts': (context) => PostDetailsScreen(
-                                commentId: int.parse(widget.id ?? '0'),
-                              ),
-                          '/reply_to_comment': (context) => PostDetailsScreen(
-                                commentId: int.parse(widget.id ?? '0'),
-                              ),
-                          '/like_comment_on_post': (context) =>
-                              PostDetailsScreen(
-                                commentId: int.parse(widget.id ?? '0'),
-                              ),
-                          '/like_comments': (context) => PostDetailsScreen(
-                                commentId: int.parse(widget.id ?? '0'),
-                              ),
-                          '/new_like': (context) => PostDetailsScreen(
-                                postId: int.parse(widget.id ?? '0'),
-                              ),
-                          '/like_on_posts': (context) => PostDetailsScreen(
-                                postId: int.parse(widget.id ?? '0'),
-                              ),
-                          '/new_job_posted': (context) => JobsDetailsScreen(
-                                jobId: widget.id ?? '0',
-                              ),
-                          '/job_update': (context) => JobsDetailsScreen(
-                                jobId: widget.id ?? '0',
-                              ),
-                          '/conference_invitation': (context) =>
-                              ConferencesScreen(),
-                          '/new_discuss_case': (context) =>
-                              const CaseDiscussionScreen(),
-                          '/discuss_case_comment': (context) =>
-                              const CaseDiscussionScreen(),
-                          '/job_post_notification': (context) =>
-                              JobsDetailsScreen(
-                                jobId: widget.id ?? '0',
-                              ),
-                        },
-                        debugShowCheckedModeBanner: false,
-                        scrollBehavior: SBehavior(),
-                        themeAnimationDuration: Duration(microseconds: 500),
-                        theme: AppTheme.lightTheme,
-                        darkTheme: AppTheme.darkTheme,
-                        themeMode: appStore.isDarkMode
-                            ? ThemeMode.dark
-                            : ThemeMode.light,
-                        //     localizationsDelegates: const [
-                        //
-                        //   // AppLocalizationDelegate(),
-                        //   GlobalMaterialLocalizations.delegate,
-                        //   GlobalWidgetsLocalizations.delegate,
-                        //   GlobalCupertinoLocalizations.delegate,
-                        // ],
-                        // supportedLocales: const [
-                        //   Locale(
-                        //     'en',
-                        //     '',
-                        //   ),
-                        //   Locale(
-                        //     'ar',
-                        //     '',
-                        //   ),
-                        // ],
-                        localizationsDelegates:
-                            AppLocalizations.localizationsDelegates,
-                        supportedLocales: AppLocalizations.supportedLocales,
-                        locale: _locale,
-                      
-                        // home: ForceUpgradePage(widget.initialRoute??""),
-                        // initialRoute: AppRoutes.splashScreen,
-                      ));
+                    // Add or modify the onGenerateRoute method to handle call routes
+                    onGenerateRoute: (settings) {
+                      if (settings.name == '/call' || settings.name == '/incoming-call') {
+                        // Get args (either as Map or as simple String for callId)
+                        final args = settings.arguments is Map<String, dynamic>
+                            ? settings.arguments as Map<String, dynamic>
+                            : {'callId': settings.arguments ?? ''};
+
+                        return MaterialPageRoute(
+                          builder: (context) => CallScreen(
+                            callId: args['callId'] ?? '',
+                            contactId: args['contactId'] ?? '',
+                            contactName: args['contactName'] ?? 'Unknown',
+                            contactAvatar: args['contactAvatar'] ?? '',
+                            isIncoming: args['isIncoming'] ?? true,
+                            isVideoCall: args['isVideoCall'] ?? false,
+                          ),
+                        );
+                      }
+                      // Let other routes be handled normally
+                      return null;
+                    },
+
+                    routes: {
+                      '/': (context) => ForceUpgradePage(),
+
+                      // Update the audio/video call routes
+                      '/audio_call': (context) {
+                        final callId = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+                        return CallScreen(
+                          callId: callId,
+                          contactId: '',
+                          contactName: '',
+                          contactAvatar: '',
+                          isIncoming: false,
+                          isVideoCall: false,
+                        );
+                      },
+
+                      '/video_call': (context) {
+                        final callId = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+                        return CallScreen(
+                          callId: callId,
+                          contactId: '',
+                          contactName: '',
+                          contactAvatar: '',
+                          isIncoming: false,
+                          isVideoCall: true,
+                        );
+                      },
+
+                      // Keep the existing route for call for backward compatibility
+                      '/call': (context) => const CallScreen(
+                        callId: '123',
+                        contactId: '2222',
+                        contactName: 'Hassan',
+                        contactAvatar: '',
+                        isIncoming: true,
+                        isVideoCall: true,
+                      ),
+
+                      // Keep all your existing routes
+                      '/follow_request': (context) => SVProfileFragment(
+                        userId: widget.id ?? '',
+                      ),
+                      '/follower_notification': (context) =>
+                          SVProfileFragment(
+                            userId: widget.id ?? '',
+                          ),
+                      '/un_follower_notification': (context) =>
+                          SVProfileFragment(
+                            userId: widget.id ?? '',
+                          ),
+                      '/friend_request': (context) => SVProfileFragment(
+                        userId: widget.id ?? '',
+                      ),
+                      '/message_received': (context) => ChatRoomScreen(
+                        id: widget.id.toString(),
+                        roomId: '',
+                        username:
+                        widget.message?.notification?.title ?? "",
+                        profilePic: widget.message?.data['image'] ??
+                            ''.replaceAll(
+                                'https://doctak-file.s3.ap-south-1.amazonaws.com/',
+                                ''),
+                      ),
+                      '/comments_on_posts': (context) => PostDetailsScreen(
+                        commentId: int.parse(widget.id ?? '0'),
+                      ),
+                      '/reply_to_comment': (context) => PostDetailsScreen(
+                        commentId: int.parse(widget.id ?? '0'),
+                      ),
+                      '/like_comment_on_post': (context) =>
+                          PostDetailsScreen(
+                            commentId: int.parse(widget.id ?? '0'),
+                          ),
+                      '/like_comments': (context) => PostDetailsScreen(
+                        commentId: int.parse(widget.id ?? '0'),
+                      ),
+                      '/new_like': (context) => PostDetailsScreen(
+                        postId: int.parse(widget.id ?? '0'),
+                      ),
+                      '/like_on_posts': (context) => PostDetailsScreen(
+                        postId: int.parse(widget.id ?? '0'),
+                      ),
+                      '/new_job_posted': (context) => JobsDetailsScreen(
+                        jobId: widget.id ?? '0',
+                      ),
+                      '/job_update': (context) => JobsDetailsScreen(
+                        jobId: widget.id ?? '0',
+                      ),
+                      '/conference_invitation': (context) =>
+                          ConferencesScreen(),
+                      '/new_discuss_case': (context) =>
+                      const CaseDiscussionScreen(),
+                      '/discuss_case_comment': (context) =>
+                      const CaseDiscussionScreen(),
+                      '/job_post_notification': (context) =>
+                          JobsDetailsScreen(
+                            jobId: widget.id ?? '0',
+                          ),
+                    },
+
+                    debugShowCheckedModeBanner: false,
+                    scrollBehavior: SBehavior(),
+                    themeAnimationDuration: const Duration(microseconds: 500),
+                    theme: AppTheme.lightTheme,
+                    darkTheme: AppTheme.darkTheme,
+                    themeMode: appStore.isDarkMode
+                        ? ThemeMode.dark
+                        : ThemeMode.light,
+                    localizationsDelegates:
+                    AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    locale: _locale,
+                  ));
             },
           ),
         );

@@ -106,6 +106,7 @@ class _SplashScreenState extends State<SplashScreen> {
     String? currency = prefs.getString('currency') ?? '';
 
     if (userToken != null) {
+      AppData.deviceToken = prefs.getString('device_token')??'';
       AppData.userToken = userToken;
       AppData.logInUserId = userId;
       AppData.name = name ?? '';

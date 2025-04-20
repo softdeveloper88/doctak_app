@@ -121,19 +121,19 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   }
   Future<void> _listCountryList1(
       LoadDropdownData1 event, Emitter<SplashState> emit) async {
-    // try {
+    try {
       final response = await postService.getConferenceCountries(
         'Bearer ${AppData.userToken}',
       );
-      print('data get ${response.data['countries']}');
+      print(response.data);
      List<dynamic> data= response.data['countries'];
       emit(CountriesDataLoaded1(
           countriesModelList:data,
           countryName: event.countryName,
           searchTerms: event.searchTerms));
       // add(LoadDropdownData(event.newValue,event.typeValue));
-    // } catch (e) {
-    //   emit(CountriesDataError('$e'));
-    // }
+    } catch (e) {
+      emit(CountriesDataError('$e'));
+    }
   }
 }

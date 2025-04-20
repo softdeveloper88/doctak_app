@@ -144,7 +144,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       );
       if (response2.statusCode == 200) {
         print("check email verified");
-        emailVerified= response2.data['email_verified_at'];
+        emailVerified= response2.data['email_verified_at']??"";
         prefs.setString('email_verified_at', response2.data['email_verified_at']??'');
       }else{
         print("check email verified not");

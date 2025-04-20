@@ -61,7 +61,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
         centerTitle: false,
-        title: Text(
+        title: const Text(
           'Search Contacts',
           style: TextStyle(
             fontSize: 16,

@@ -1,5 +1,6 @@
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_chat_screen.dart';
 
 class AppData {
   // https://pharmadoc.net/
@@ -44,7 +45,11 @@ class AppData {
   static bool isShowGoogleNativeAds=false;
   static String? androidNativeAdsId;
   static String? iosNativeAdsId;
-  // LocalInvitation? _localInvitation;
+  static List<Message> chatMessages = [];
+
+  static String deviceToken='';
+
+// LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
   // static AgoraRtmClient? _client;
   //

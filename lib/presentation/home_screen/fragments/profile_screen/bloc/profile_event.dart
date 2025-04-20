@@ -244,12 +244,12 @@ class UpdateSpecialtyDropdownValue1 extends ProfileEvent {
   List<Object?> get props => [newValue];
 }
 
-class UpdateUniversityDropdownValues extends ProfileEvent {
-  final String selectedStateDropdownValue;
-
-  UpdateUniversityDropdownValues(this.selectedStateDropdownValue);
-
-  @override
-  // TODO: implement props
-  List<Object?> get props => [selectedStateDropdownValue];
-}
+// class UpdateUniversityDropdownValues extends ProfileEvent {
+//   final String selectedStateDropdownValue;
+//
+//   UpdateUniversityDropdownValues(this.selectedStateDropdownValue);
+//
+//   @override
+//   // TODO: implement props
+//   List<Object?> get props => [selectedStateDropdownValue];
+// }

@@ -633,32 +633,30 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 clickable: true),
             _buildQuestion(context, '7. Side effects', genericName,icSideEffect,
                 clickable: true),
-            SizedBox(height: 10,),
-            Expanded(
-              child: Container(
-                width: 30.w,
-                height: 10.w,
-                decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(6),
+            const SizedBox(height: 10,),
+            Container(
+              width: 30.w,
+              height: 10.w,
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: MaterialButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0),
                 ),
-                child: MaterialButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context, rootNavigator: true)
-                        .pop('dialog');
-                  },
-                  child: Center(
-                    child: Text(
-                      "CLOSE",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: 10.sp,
-                      ),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true)
+                      .pop('dialog');
+                },
+                child: Center(
+                  child: Text(
+                    "CLOSE",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: 10.sp,
                     ),
                   ),
                 ),
@@ -704,7 +702,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            spacing: 15,
+            //spacing: 15,
             children: [
               SvgPicture.asset(
                 icon,

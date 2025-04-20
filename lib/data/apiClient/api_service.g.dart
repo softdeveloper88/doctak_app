@@ -12,6 +12,7 @@ class _ApiService implements ApiService {
     this.baseUrl,
   }) {
     baseUrl ??= 'https://doctak.net/api/v1';
+    // baseUrl ??= 'https://doctak.net/api/v1';
   }
 
   final Dio _dio;
@@ -26,6 +27,7 @@ class _ApiService implements ApiService {
     String deviceId,
     String deviceToken
   ) async {
+
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};

@@ -73,87 +73,74 @@ class _MeetingScreenState extends State<MeetingScreen> {
               elevation: 0,
               centerTitle: false,
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Expanded(
-                child: Container(
-                  color: svGetScaffoldColor(),
-                  child: Column(
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Column(
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {});
-                                    selectedIndex = 0;
-                                  },
-                                  child: Text(
-                                    'Set Schedule',
-                                    style: TextStyle(
-                                      color: selectedIndex == 0 ? Colors.black:Colors.black38,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  height: 2,
-                                  width: context.width() / 2 - 10,
-                                  color: selectedIndex == 0
-                                      ? SVAppColorPrimary
-                                      : SVAppColorPrimary.withOpacity(0.2),
-                                ),
-                              ],
-                            ),
-                            Center(
-                                child: Container(
-                              color: Colors.grey.shade300,
-                              height: 30,
-                              width: 1,
-                            )),
-                            Column(
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() { });
-                                    selectedIndex = 1;
-                                  },
-                                  child: Text(
-                                    'Upcoming',
-                                    style: TextStyle(
-                                      color: selectedIndex == 1 ? Colors.black:Colors.black38,
-                                      fontSize: 14,
-                                      fontWeight:FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  height: 2,
-                                  width: context.width() / 2 - 10,
-                                  color: selectedIndex == 1
-                                      ? SVAppColorPrimary
-                                      : SVAppColorPrimary.withOpacity(0.2),
-                                ),
-                              ],
-                            ),
-                            16.height,
-                          ],
+                      TextButton(
+                        onPressed: () {
+                          setState(() {});
+                          selectedIndex = 0;
+                        },
+                        child: Text(
+                          'Set Schedule',
+                          style: TextStyle(
+                            color: selectedIndex == 0 ? Colors.black:Colors.black38,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10,),
-                      if(selectedIndex==0) SetScheduleScreen()
-                        else UpcomingMeetingScreen()
-
+                      Container(
+                        height: 2,
+                        width: context.width() / 2 - 10,
+                        color: selectedIndex == 0
+                            ? SVAppColorPrimary
+                            : SVAppColorPrimary.withOpacity(0.2),
+                      ),
                     ],
                   ),
-                ),
+                  Center(
+                      child: Container(
+                    color: Colors.grey.shade300,
+                    height: 30,
+                    width: 1,
+                  )),
+                  Column(
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          setState(() { });
+                          selectedIndex = 1;
+                        },
+                        child: Text(
+                          'Upcoming',
+                          style: TextStyle(
+                            color: selectedIndex == 1 ? Colors.black:Colors.black38,
+                            fontSize: 14,
+                            fontWeight:FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: 2,
+                        width: context.width() / 2 - 10,
+                        color: selectedIndex == 1
+                            ? SVAppColorPrimary
+                            : SVAppColorPrimary.withOpacity(0.2),
+                      ),
+                    ],
+                  ),
+                  16.height,
+                ],
               ),
             ),
+      const SizedBox(height: 10,),
+      if(selectedIndex==0) SetScheduleScreen()
+        else const Expanded(child: UpcomingMeetingScreen())
           ],
         ),
       ),

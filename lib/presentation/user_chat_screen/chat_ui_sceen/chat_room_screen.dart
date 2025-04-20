@@ -5,13 +5,17 @@ import 'dart:math' as math;
 
 import 'package:chewie/chewie.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/call_service/callkit_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/main.dart';
+import 'package:doctak_app/presentation/call_module/ui/call_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/component/audio_recorder_widget.dart';
+import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_call_screen.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -31,6 +35,8 @@ import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../home_screen/home/screens/meeting_screen/video_api.dart';
+import 'call_kit_screen.dart';
 import 'component/chat_bubble.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -684,7 +690,34 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           ),
           actions: [
             InkWell(
-              onTap: () {},
+              onTap: () async {
+
+                NavigatorService.navigatorKey.currentState?.push(MaterialPageRoute(
+                  builder: (context) => const CallScreen(
+                    callId: 'callId',
+                    contactId: 'userId',
+                    contactName: 'callerName',
+                    contactAvatar: 'avatar',
+                    isIncoming: false,
+                    isVideoCall: true,
+                  ),
+                ));
+                // ProgressDialogUtils.showProgressDialog();
+                // await startMeetings().then((createMeeting) async {
+                //   await joinMeetings(
+                //           createMeeting.data?.meeting?.meetingChannel ?? '')
+                //       .then((joinMeetingData) async {
+                //     await testFCMCall(widget.id);
+                //
+                //     ProgressDialogUtils.hideProgressDialog();
+                // CallKitScreen(
+                //       // meetingDetailsModel: joinMeetingData,
+                //       // isHost: true,
+                //     ).launch(context,
+                //         pageRouteAnimation: PageRouteAnimation.Slide);
+                  // });
+                // });
+              },
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(

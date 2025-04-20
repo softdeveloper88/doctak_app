@@ -4,6 +4,7 @@ import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/meeting_module/ui/join/join_meeting_page.dart';
 import 'package:doctak_app/presentation/about_us/about_us_screen.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
@@ -26,6 +27,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../screens/case_discussion/add_case_discuss_screen.dart';
+import '../screens/meeting_screen/manage_meeting_screen.dart';
 
 class SVHomeDrawerComponent extends StatefulWidget {
   @override
@@ -252,7 +254,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                         finish(context);
                         print(selectedIndex);
                         // MyGroupsScreen().launch(context);
-                        MeetingScreen().launch(context);
+                        ManageMeetingScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
                       } else if (selectedIndex == 11) { //cme

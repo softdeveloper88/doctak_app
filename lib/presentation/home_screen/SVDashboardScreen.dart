@@ -31,11 +31,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('state change ');
     if (state == AppLifecycleState.resumed) {
-      NotificationService.clearBadgeCount(); // Clears badge when app resumes
+      // NotificationService.clearBadgeCount(); // Clears badge when app resumes
 
       //TODO: set status to online here in firestore
     } else {
-      NotificationService.clearBadgeCount(); // Clears badge when app resumes
+      // NotificationService.clearBadgeCount(); // Clears badge when app resumes
       //TODO: set status to offline here in firestore
     }
 
