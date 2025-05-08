@@ -1,6 +1,8 @@
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_chat_screen.dart';
+import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
+import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 class AppData {
   // https://pharmadoc.net/
@@ -9,6 +11,7 @@ class AppData {
   static var imageUrl = "https://doctak-file.s3.ap-south-1.amazonaws.com/";
   static var remoteUrl = "https://doctak.net/api/v1";
   static var remoteUrl2 = "https://doctak.net/api/v2";
+  static var remoteUrl3 = "https://doctak.net/api/v3";
   static var userProfileUrl = "https://doctak.net/";
   static const chatifyUrl = "https://doctak.net/chatify/api/";
 
@@ -49,6 +52,63 @@ class AppData {
 
   static String deviceToken='';
 
+  static late PusherChannelsFlutter pusher;
+
+  // Initialize Pusher in your app startup:
+  static Future<void> initializePusher() async {
+    pusher = PusherChannelsFlutter.getInstance();
+
+    try {
+      await pusher.init(
+        apiKey: PusherConfig.key,
+        cluster: PusherConfig.cluster,
+        onConnectionStateChange: onConnectionStateChange,
+        onError: onError,
+        onSubscriptionSucceeded: onSubscriptionSucceeded,
+        onEvent: onEvent,
+      );
+
+      await pusher.connect();
+    } catch (e) {
+      print("Error initializing Pusher: $e");
+    }
+  }
+
+  // Callback functions
+  static void onConnectionStateChange(dynamic currentState, dynamic previousState) {
+    print("Connection: $currentState from $previousState");
+  }
+
+  static void onError(String message, int? code, dynamic e) {
+    print("Error: $message code: $code exception: $e");
+  }
+
+  static void onSubscriptionSucceeded(String channelName, dynamic data) {
+    print("Subscription succeeded: $channelName data: $data");
+  }
+
+  static void onEvent(dynamic event) {
+    print("Event received: $event");
+  }
+  static bool isPusherInitialized = false;
+
+  // Optional map to track active subscriptions
+  static final Map<String, bool> _activeChannels = {};
+
+  // Helper method to check if channel is already subscribed
+  static bool isChannelActive(String channelName) {
+    return _activeChannels[channelName] == true;
+  }
+
+  // Mark channel as active
+  static void markChannelActive(String channelName) {
+    _activeChannels[channelName] = true;
+  }
+
+  // Mark channel as inactive
+  static void markChannelInactive(String channelName) {
+    _activeChannels.remove(channelName);
+  }
 // LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
   // static AgoraRtmClient? _client;

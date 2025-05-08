@@ -56,47 +56,7 @@
         android:requestLegacyExternalStorage="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="true">
-<!--        <service-->
-<!--            android:name="com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsPlugin"-->
-<!--            android:exported="false" />-->
-<!--        <service-->
-<!--            android:name=".CallService"-->
-<!--            android:enabled="true"-->
-<!--            android:exported="false" />-->
 
-<!--        <activity-->
-<!--            android:name=".CallScreenActivity"-->
-<!--            android:screenOrientation="portrait"-->
-<!--            android:launchMode="singleTask"-->
-<!--            android:showOnLockScreen="true"-->
-<!--            android:showWhenLocked="true"-->
-<!--            android:turnScreenOn="true"-->
-<!--            android:excludeFromRecents="true"-->
-<!--            android:theme="@style/CallScreenTheme"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.VIEW" />-->
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
-
-<!--        <receiver-->
-<!--            android:name=".CallBroadcastReceiver"-->
-<!--            android:enabled="true"-->
-<!--            android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
-<!--                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />-->
-<!--                <action android:name="android.intent.action.PHONE_STATE" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
-<!--        <service-->
-<!--            android:name=".MyFirebaseMessagingService"-->
-<!--            android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
         <service
             android:name="com.hiennv.flutter_callkit_incoming.CallkitIncomingService"
             android:exported="true"
@@ -125,13 +85,6 @@
             android:enabled="true"
             android:permission="android.permission.BIND_SCREEN_SERVICE"
             />
-<!--        <service-->
-<!--            android:name=".CustomFirebaseMessagingService"-->
-<!--            android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
            <activity
             android:name=".MainActivity"
             android:exported="true"

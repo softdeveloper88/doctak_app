@@ -62,7 +62,7 @@ class PusherService {
     _reconnectAttempts = 0;
   }
 
-  void subscribeToChannel(String channelName) async {
+  Future<PusherChannel?> subscribeToChannel(String channelName) async {
     // if (_channels.containsKey(channelName)) return;
 
     final channel = await _pusher.subscribe(

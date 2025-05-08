@@ -1,42 +1,91 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CallApiService {
   // Base URL of your backend API
   final String baseUrl;
-
-  // Authentication token
-  final String? authToken;
+  String? _cachedToken;
+  bool _isTokenLoading = false;
 
   CallApiService({
     required this.baseUrl,
-    this.authToken,
-  });
+  }) {
+    // Load token when service is created
+    _loadToken();
+  }
 
-  // Create headers with authentication
+  // Load and cache the token
+  Future<void> _loadToken() async {
+    if (_isTokenLoading) return;
+
+    _isTokenLoading = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _cachedToken = prefs.getString('token');
+
+      // Fall back to AppData token if needed
+      if (_cachedToken == null || _cachedToken!.isEmpty) {
+        _cachedToken = AppData.userToken;
+      }
+
+      debugPrint('Token loaded: ${_cachedToken != null ? 'Success' : 'Not found'}');
+    } catch (e) {
+      debugPrint('Error loading token: $e');
+      _cachedToken = AppData.userToken; // Fallback
+    } finally {
+      _isTokenLoading = false;
+    }
+  }
+
+  // Get current headers - safe synchronous version
   Map<String, String> get _headers {
-    final headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
+    final headers = {'Content-Type': 'application/json'};
 
-    if (authToken != null) {
-      headers['Authorization'] = 'Bearer $authToken';
+    // Only add token if we have it
+    if (_cachedToken != null && _cachedToken!.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $_cachedToken';
     }
 
     return headers;
   }
 
-  // Initiate a call
+  // Wait for token and get headers - async version for ensuring token is loaded
+  Future<Map<String, String>> _getHeadersAsync() async {
+    // If token is not loaded yet, wait for it
+    if (_cachedToken == null && !_isTokenLoading) {
+      await _loadToken();
+    } else if (_isTokenLoading) {
+      // Wait for ongoing token loading to complete
+      while (_isTokenLoading) {
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    final headers = {'Content-Type': 'application/json'};
+
+    // Add token if available
+    if (_cachedToken != null && _cachedToken!.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $_cachedToken';
+    }
+
+    return headers;
+  }
+
+  // Initiate a call with async headers
   Future<Map<String, dynamic>> initiateCall({
     required String userId,
     required bool hasVideo,
   }) async {
     try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/initiate'),
-        headers: _headers,
+        Uri.parse('$baseUrl/calls/initiate'),
+        headers: headers,
         body: jsonEncode({
           'userId': userId,
           'hasVideo': hasVideo,
@@ -44,6 +93,7 @@ class CallApiService {
       );
 
       final responseData = jsonDecode(response.body);
+      print('Initiate call response: ${response.body}');
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         return responseData;
@@ -56,15 +106,18 @@ class CallApiService {
     }
   }
 
-  // Accept an incoming call
+  // Accept an incoming call with async headers
   Future<Map<String, dynamic>> acceptCall({
     required String callId,
     required String callerId,
   }) async {
     try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/accept'),
-        headers: _headers,
+        Uri.parse('$baseUrl/calls/accept'),
+        headers: headers,
         body: jsonEncode({
           'callId': callId,
           'callerId': callerId,
@@ -72,6 +125,7 @@ class CallApiService {
       );
 
       final responseData = jsonDecode(response.body);
+      print('Accept call response: ${response.body}');
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         return responseData;
@@ -84,15 +138,17 @@ class CallApiService {
     }
   }
 
-  // Reject an incoming call
-  Future<Map<String, dynamic>> rejectCall({
+  Future<Map<String, dynamic>> callRinging({
     required String callId,
     required String callerId,
   }) async {
     try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/reject'),
-        headers: _headers,
+        Uri.parse('$baseUrl/calls/ringing'),
+        headers: headers,
         body: jsonEncode({
           'callId': callId,
           'callerId': callerId,
@@ -100,6 +156,39 @@ class CallApiService {
       );
 
       final responseData = jsonDecode(response.body);
+      print('Ringing call response: ${response.body}');
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return responseData;
+      } else {
+        throw Exception(responseData['message'] ?? 'Failed to update ringing status');
+      }
+    } catch (e) {
+      debugPrint('Error updating ringing status: $e');
+      rethrow;
+    }
+  }
+
+  // Reject an incoming call with async headers
+  Future<Map<String, dynamic>> rejectCall({
+    required String callId,
+    required String callerId,
+  }) async {
+    try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/calls/reject'),
+        headers: headers,
+        body: jsonEncode({
+          'callId': callId,
+          'callerId': callerId,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+      print('Reject call response: ${response.body}');
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         return responseData;
@@ -112,20 +201,24 @@ class CallApiService {
     }
   }
 
-  // End an ongoing call
+  // End an ongoing call with async headers
   Future<Map<String, dynamic>> endCall({
     required String callId,
   }) async {
     try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/end'),
-        headers: _headers,
+        Uri.parse('$baseUrl/calls/end'),
+        headers: headers,
         body: jsonEncode({
           'callId': callId,
         }),
       );
 
       final responseData = jsonDecode(response.body);
+      print('End call response: ${response.body}');
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         return responseData;
@@ -138,15 +231,18 @@ class CallApiService {
     }
   }
 
-  // Send a busy signal
+  // Send a busy signal with async headers
   Future<Map<String, dynamic>> sendBusySignal({
     required String callId,
     required String callerId,
   }) async {
     try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/busy'),
-        headers: _headers,
+        Uri.parse('$baseUrl/calls/busy'),
+        headers: headers,
         body: jsonEncode({
           'callId': callId,
           'callerId': callerId,
@@ -154,6 +250,7 @@ class CallApiService {
       );
 
       final responseData = jsonDecode(response.body);
+      print('Busy signal response: ${response.body}');
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         return responseData;
@@ -166,22 +263,25 @@ class CallApiService {
     }
   }
 
-  // Mark a call as missed
+  // Mark a call as missed with async headers
   Future<Map<String, dynamic>> missCall({
     required String callId,
     required String callerId,
   }) async {
     try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/miss'),
-        headers: _headers,
+        Uri.parse('$baseUrl/calls/miss'),
+        headers: headers,
         body: jsonEncode({
           'callId': callId,
           'callerId': callerId,
         }),
       );
-
       final responseData = jsonDecode(response.body);
+      print('Miss call response: ${response.body}');
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         return responseData;
@@ -194,84 +294,53 @@ class CallApiService {
     }
   }
 
-  // Get Agora token for a call
-  Future<Map<String, dynamic>> getCallToken({
+  Future<Map<String, dynamic>> getCallStatus() async {
+    try {
+      final headers = await _getHeadersAsync();
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/calls/get-call-status'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('Error getting call status: ${response.statusCode}, ${response.body}');
+        return {'is_active': false};
+      }
+    } catch (e) {
+      print('Exception in getCallStatus: $e');
+      return {'is_active': false};
+    }
+  }
+  // Update call ringing status with async headers
+  Future<Map<String, dynamic>> updateCallRingingStatus({
     required String callId,
-    required String userId,
   }) async {
     try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/token'),
-        headers: _headers,
+        Uri.parse('$baseUrl/calls/ringing'),
+        headers: headers,
         body: jsonEncode({
           'callId': callId,
-          'userId': userId,
+          'status': 'ringing',
         }),
       );
 
       final responseData = jsonDecode(response.body);
+      print('Update call ringing status response: ${response.body}');
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         return responseData;
       } else {
-        throw Exception(responseData['message'] ?? 'Failed to get call token');
+        throw Exception(responseData['message'] ?? 'Failed to update call ringing status');
       }
     } catch (e) {
-      debugPrint('Error getting call token: $e');
-      rethrow;
-    }
-  }
-
-  // Register device token for push notifications
-  Future<Map<String, dynamic>> registerDeviceToken({
-    required String token,
-    required String deviceType,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/device-tokens/register'),
-        headers: _headers,
-        body: jsonEncode({
-          'token': token,
-          'device_type': deviceType,
-        }),
-      );
-
-      final responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && responseData['success'] == true) {
-        return responseData;
-      } else {
-        throw Exception(responseData['message'] ?? 'Failed to register device token');
-      }
-    } catch (e) {
-      debugPrint('Error registering device token: $e');
-      rethrow;
-    }
-  }
-
-  // Update user call status
-  Future<Map<String, dynamic>> updateCallStatus({
-    required String status,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/calls/status'),
-        headers: _headers,
-        body: jsonEncode({
-          'status': status,
-        }),
-      );
-
-      final responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && responseData['success'] == true) {
-        return responseData;
-      } else {
-        throw Exception(responseData['message'] ?? 'Failed to update call status');
-      }
-    } catch (e) {
-      debugPrint('Error updating call status: $e');
+      debugPrint('Error updating call ringing status: $e');
       rethrow;
     }
   }

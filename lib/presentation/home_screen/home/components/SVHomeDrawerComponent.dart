@@ -424,7 +424,15 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                         builder: (context) => LoginScreen(),
                       ),
                           (route) => false);
-                } else {}
+                } else {
+                  AppSharedPreferences().clearSharedPreferencesData(context);
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginScreen(),
+                      ),
+                          (route) => false);
+                }
 
                 // Call the delete account function
               },

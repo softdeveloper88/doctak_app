@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:doctak_app/presentation/call_module/call_service.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:doctak_app/presentation/call_module/ui/call_screen.dart';
 
 class CallWrapperGlobal extends StatefulWidget {
   final Widget child;
@@ -58,19 +56,19 @@ class _CallWrapperGlobalState extends State<CallWrapperGlobal> with WidgetsBindi
 
     if (callId != null && contactId != null) {
       // Navigate to call screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CallScreen(
-            callId: callId,
-            contactId: contactId,
-            contactName: contactName ?? 'Unknown',
-            contactAvatar: contactAvatar ?? '',
-            isIncoming: isIncoming ?? true,
-            isVideoCall: isVideoCall ?? false,
-          ),
-        ),
-      );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => CallScreen(
+      //       callId: callId,
+      //       contactId: contactId,
+      //       contactName: contactName ?? 'Unknown',
+      //       contactAvatar: contactAvatar ?? '',
+      //       isIncoming: isIncoming ?? true,
+      //       isVideoCall: isVideoCall ?? false,
+      //     ),
+      //   ),
+      // );
     }
   }
 

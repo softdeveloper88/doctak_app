@@ -56,7 +56,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         deviceType = "android";
         deviceId = androidInfo.id;
       } else {
-
         IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
         print('Running on ${iosInfo.utsname.machine}'); // e.g. "iPod7,1"
         deviceType = "ios";

@@ -2,20 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
-
 import 'package:chewie/chewie.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/call_service/callkit_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/main.dart';
-import 'package:doctak_app/presentation/call_module/ui/call_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/component/audio_recorder_widget.dart';
-import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_call_screen.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -35,8 +31,11 @@ import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../calling_module/screens/call_screen.dart';
+import '../../calling_module/utils/start_outgoing_call.dart';
 import '../../home_screen/home/screens/meeting_screen/video_api.dart';
 import 'call_kit_screen.dart';
+import 'call_loading_screen.dart';
 import 'component/chat_bubble.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -69,7 +68,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Timer? typingTimer;
   ChatBloc chatBloc = ChatBloc();
   String? _audioFilePath;
-
   // late AgoraRtmClient _client; // Remove the nullable type
   // AgoraRtmChannel? _channel;
   // LocalInvitation? _localInvitation;
@@ -589,7 +587,117 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
+// Complete implementation of the startOutgoingCall function
+//   Future<void> startOutgoingCall(String userId, String username, String profilePic, bool isVideoCall) async {
+//     // Show calling screen immediately
+//     NavigatorService.navigatorKey.currentState?.push(
+//       MaterialPageRoute(
+//         builder: (context) => CallLoadingScreen(
+//           contactName: username,
+//           contactAvatar: "${AppData.imageUrl}$profilePic",
+//           isVideoCall: isVideoCall,
+//           onCancel: () {
+//             // Pop the loading screen
+//             Navigator.of(context).pop();
+//             // Cancel any pending call setup
+//             CallKitService().endAllCalls();
+//           },
+//         ),
+//       ),
+//     );
+//
+//     try {
+//       // Initialize call in the background with proper error handling
+//       Map<String, dynamic> callData;
+//
+//       try {
+//         final response = await CallKitService().startOutgoingCall(
+//             userId: userId,
+//             calleeName: username,
+//             avatar: "${AppData.imageUrl}$profilePic",
+//             hasVideo: isVideoCall
+//         );
+//
+//         // Ensure we have proper Map<String, dynamic>
+//         if (response is Map<String, dynamic>) {
+//           callData = response;
+//         } else {
+//           // Convert to Map<String, dynamic> if needed
+//           callData = {};
+//           if (response is Map) {
+//             response.forEach((key, value) {
+//               if (key is String) {
+//                 callData[key] = value;
+//               }
+//             });
+//           } else {
+//             throw Exception('Invalid response format from CallKitService');
+//           }
+//         }
+//       } catch (e) {
+//         print('Error calling CallKitService.startOutgoingCall: $e');
+//         throw e;
+//       }
+//
+//       // Handle success - replace loading screen with call screen
+//       if (callData['success'] == true &&
+//           callData['callId'] != null &&
+//           NavigatorService.navigatorKey.currentState != null) {
+//
+//         final callId = callData['callId'].toString();
+//
+//         // Verify call was created successfully by checking with the API
+//         bool isCallActive = true;
+//         try {
+//           isCallActive = await CallKitService().checkCallIsActive(callId);
+//         } catch (e) {
+//           print('Error verifying call is active: $e');
+//           // Continue anyway since we just created it
+//         }
+//
+//         if (!isCallActive) {
+//           // This is unusual - the call we just created isn't active
+//           print('Call API reports call not active immediately after creation');
+//           NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
+//           _showCallError("Could not establish call. Please try again.");
+//           return;
+//         }
+//
+//         NavigatorService.navigatorKey.currentState!.pushReplacement(
+//           MaterialPageRoute(
+//             settings: const RouteSettings(name: '/call'),
+//             builder: (context) => CallScreen(
+//               callId: callId,
+//               contactId: userId,
+//               contactName: username,
+//               contactAvatar: "${AppData.imageUrl}$profilePic",
+//               isIncoming: false,
+//               isVideoCall: isVideoCall,
+//               token: callData['token']?.toString() ?? '',
+//             ),
+//           ),
+//         );
+//       } else {
+//         // Handle API error
+//         NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
+//         _showCallError("Failed to establish call. Please try again.");
+//       }
+//     } catch (error) {
+//       print('Error starting outgoing call: $error');
+//
+//       NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
+//       _showCallError("Error starting call. Please try again.");
+//
+//       // Make sure any partial call state is cleaned up
+//       try {
+//         await CallKitService().endAllCalls();
+//       } catch (e) {
+//         print('Error cleaning up after failed call: $e');
+//       }
+//     }
+//   }
 
+// Simple loading screen for calls
   void scrollToBottom() {
     // Future.delayed(const Duration(milliseconds: 100), () {
     if (_scrollController.hasClients) {
@@ -691,17 +799,43 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           actions: [
             InkWell(
               onTap: () async {
-
-                NavigatorService.navigatorKey.currentState?.push(MaterialPageRoute(
-                  builder: (context) => const CallScreen(
-                    callId: 'callId',
-                    contactId: 'userId',
-                    contactName: 'callerName',
-                    contactAvatar: 'avatar',
-                    isIncoming: false,
-                    isVideoCall: true,
-                  ),
-                ));
+                startOutgoingCall(
+                  widget.id,
+                  widget.username,
+                  widget.profilePic,
+                  false,
+                );
+//                 // First navigate to CallScreen with preliminary data
+//                 String tempCallId = DateTime.now().millisecondsSinceEpoch.toString();
+//                 NavigatorService.navigatorKey.currentState?.push(MaterialPageRoute(
+//                   builder: (context) => CallScreen(
+//                     callId: tempCallId, // Temporary ID
+//                     contactId: widget.id,
+//                     contactName: widget.username,
+//                     contactAvatar: "${AppData.imageUrl}${widget.profilePic}",
+//                     isIncoming: false,
+//                     isVideoCall: false,
+//                     isWaitingForCallData: true, // Add this flag to your CallScreen
+//                   ),
+//                 ));
+//
+// // Then get the call data in background
+//                 CallKitService().startOutgoingCall(
+//                     userId: widget.id,
+//                     calleeName: widget.username,
+//                     avatar: "${AppData.imageUrl}${widget.profilePic}",
+//                     hasVideo: false
+//                 ).then((callData) {
+//                   // Update call data when available
+//                   if (NavigatorService.navigatorKey.currentContext != null) {
+//                     // Find the CallScreen in the widget tree and update its data
+//                     final callScreenState = NavigatorService.navigatorKey.currentContext!
+//                         .findAncestorStateOfType<_CallScreenState>();
+//                     if (callScreenState != null) {
+//                       callScreenState.updateCallData(callData['callId']);
+//                     }
+//                   }
+//                 });
                 // ProgressDialogUtils.showProgressDialog();
                 // await startMeetings().then((createMeeting) async {
                 //   await joinMeetings(
@@ -731,7 +865,26 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               width: 10,
             ),
             InkWell(
-              onTap: () {},
+              onTap: () async {
+                startOutgoingCall(
+                  widget.id,
+                  widget.username,
+                  widget.profilePic,
+                  true,
+                );
+                // Map<String,dynamic> callData= await  CallKitService().startOutgoingCall(userId: widget.id, calleeName: widget.username, avatar: "${AppData.imageUrl}${widget.profilePic}", hasVideo: true);
+                // print('callData $callData');
+                // NavigatorService.navigatorKey.currentState?.push(MaterialPageRoute(
+                //   builder: (context) => CallScreen(
+                //     callId: callData['callId'],
+                //     contactId: widget.id,
+                //     contactName:  widget.username,
+                //     contactAvatar: "${AppData.imageUrl}${widget.profilePic}",
+                //     isIncoming: false,
+                //     isVideoCall: true,
+                //   ),
+                // ));
+              },
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -1508,7 +1661,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       },
     );
   }
-
+// Replace your current outgoing call implementation with this
   Future<dynamic> onAuthorizer(
       String channelName, String socketId, dynamic options) async {
     final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
@@ -1769,4 +1922,16 @@ class VoiceRecordingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Simple loading screen for calls
+// Helper function to show error message
+void _showCallError(String message) {
+  if (NavigatorService.navigatorKey.currentContext != null) {
+    ScaffoldMessenger
+        .of(NavigatorService.navigatorKey.currentContext!)
+        .showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 }

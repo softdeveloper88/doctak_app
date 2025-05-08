@@ -1,7 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void initializeAsync() async {
+Future initializeAsync() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
  if(prefs.containsKey('token')) {

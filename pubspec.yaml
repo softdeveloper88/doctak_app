@@ -80,7 +80,7 @@ dependencies:
   flutter_plugin_android_lifecycle: ^2.0.16
   flutter_chat_bubble: ^2.0.2
 #  agora_rtm: ^2.2.2
-  agora_rtc_engine: ^6.5.0
+  agora_rtc_engine: ^6.5.1
   flutter_widget_from_html: ^0.15.1
   flutter_quill: ^10.0.0
   quill_html_converter: ^9.4.0
