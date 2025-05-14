@@ -1,6 +1,7 @@
 // full_screen_image_page.dart
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -75,7 +76,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
                 // Hide the Snackbar when download is complete
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Downloaded to $filePath')),
+                  SnackBar(content: Text(translation(context).msg_downloaded_to + ' $filePath')),
                 );
               }
             }
@@ -84,13 +85,13 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
       } catch (e) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error occurred while downloading.')),
+          SnackBar(content: Text(translation(context).msg_error_downloading)),
         );
       }
     } else {
       // Handle the case when the user declines the permissions
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Permission denied')),
+        SnackBar(content: Text(translation(context).msg_permission_denied)),
       );
     }
   }
@@ -424,11 +425,11 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text(
-                                "${widget.post?.likes?.length ?? 0} likes",
+                                "${widget.post?.likes?.length ?? 0} ${translation(context).lbl_likes}",
                                 style: const TextStyle(color: Colors.white),
                               ),
                               Text(
-                                "${widget.post?.comments?.length ?? 0} comments",
+                                "${widget.post?.comments?.length ?? 0} ${translation(context).lbl_comments}",
                                 style: const TextStyle(color: Colors.white),
                               ),
                             ],

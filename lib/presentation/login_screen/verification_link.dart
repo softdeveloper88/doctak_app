@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -33,9 +34,9 @@ void showVerifyMessage(BuildContext context,onPress) {
               const SizedBox(height: 16.0),
 
               // Title
-              const Text(
-                'Verify Your Account',
-                style: TextStyle(
+              Text(
+                translation(context).lbl_verify_your_account,
+                style: const TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -44,10 +45,10 @@ void showVerifyMessage(BuildContext context,onPress) {
               const SizedBox(height: 8.0),
 
               // Content
-              const Text(
-                'To continue enjoying all features, please verify your email. A verification link will be sent to your inbox.',
+              Text(
+                translation(context).msg_verify_email_description,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16.0,
                   color: Colors.black54,
                 ),
@@ -70,9 +71,9 @@ void showVerifyMessage(BuildContext context,onPress) {
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                     ),
-                    child: const Text(
-                      'Resend Link',
-                      style: TextStyle(fontSize: 16.0),
+                    child: Text(
+                      translation(context).lbl_resend_link,
+                      style: const TextStyle(fontSize: 16.0),
                     ),
                   ),
                   OutlinedButton(
@@ -90,9 +91,9 @@ void showVerifyMessage(BuildContext context,onPress) {
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                     ),
-                    child: const Text(
-                      'Close',
-                      style: TextStyle(fontSize: 16.0),
+                    child: Text(
+                      translation(context).lbl_close,
+                      style: const TextStyle(fontSize: 16.0),
                     ),
                   ),
                 ],

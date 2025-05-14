@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/SVSearchFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_job_list.dart';
@@ -123,7 +124,7 @@ class _SearchScreenState extends State<SearchScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (tabName == 'Jobs')
+        if (tabName == translation(context).lbl_jobs)
           Container(
             height: 30,
             width: 1,
@@ -142,7 +143,7 @@ class _SearchScreenState extends State<SearchScreen>
             ),
           ),
         ),
-        if (tabName == 'Jobs')
+        if (tabName == translation(context).lbl_jobs)
           Container(
             height: 30,
             width: 1,
@@ -166,7 +167,7 @@ class _SearchScreenState extends State<SearchScreen>
           backgroundColor: svGetScaffoldColor(),
           surfaceTintColor: svGetScaffoldColor(),
           iconTheme: IconThemeData(color: context.iconColor),
-          title: Text('Search', style: boldTextStyle(size: 17,weight: FontWeight.w500)),
+          title: Text(translation(context).lbl_search, style: boldTextStyle(size: 17,weight: FontWeight.w500)),
           leading: IconButton(
               icon: Icon(Icons.arrow_back_ios_new_rounded,
                   color: svGetBodyColor()),
@@ -364,7 +365,7 @@ class _SearchScreenState extends State<SearchScreen>
               // print(state.drugsModel.length);
               return SearchJobList(drugsBloc);
             } else if (state is DataError) {
-              return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+              return RetryWidget(errorMessage: translation(context).msg_something_went_wrong_retry, onRetry: (){
                 try {
                   searchPeopleBloc.add(
                     SearchPeopleLoadPageEvent(
@@ -423,7 +424,7 @@ class _SearchScreenState extends State<SearchScreen>
           },
           decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: 'Search ',
+            hintText: translation(context).lbl_search,
             hintStyle: secondaryTextStyle(color: svGetBodyColor()),
             suffixIcon: Image.asset(
                 'images/socialv/icons/ic_Search.png',
@@ -458,9 +459,9 @@ class _SearchScreenState extends State<SearchScreen>
               labelPadding: const EdgeInsets.all(4),
               indicatorColor: SVAppColorPrimary,
               tabs: [
-                _individualTab('Posts'),
-                _individualTab('Jobs'),
-                _individualTab('Peoples'),
+                _individualTab(translation(context).lbl_posts),
+                _individualTab(translation(context).lbl_jobs),
+                _individualTab(translation(context).lbl_search_peoples),
               ],
             ),
           ),

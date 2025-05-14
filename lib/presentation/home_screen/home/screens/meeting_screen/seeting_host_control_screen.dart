@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:flutter/material.dart';
 
@@ -74,9 +75,9 @@ class _SettingsHostControlsScreenState
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context,true),
         ),
-        title: const Text(
-          "Settings & Host Controls",
-          style: TextStyle(
+        title: Text(
+          translation(context).lbl_settings_host_controls,
+          style: const TextStyle(
               color: Colors.black, fontWeight: FontWeight.w600, fontSize: 18),
         ),
         centerTitle: true,
@@ -84,10 +85,10 @@ class _SettingsHostControlsScreenState
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSectionTitle("Host Management"),
+          _buildSectionTitle(translation(context).lbl_host_management),
           _buildDescription(
-              "Controls for managing the meeting hosts, including adding, removing, and assigning host privileges."),
-          buildSwitchTile("Start/Stop Meeting", startStopMeeting, (val) async {
+              translation(context).desc_host_management),
+          buildSwitchTile(translation(context).lbl_start_stop_meeting, startStopMeeting, (val) async {
             startStopMeeting = val;
             await updateMeetingSetting(
                meetingId:  widget.meetingId,
@@ -104,7 +105,7 @@ class _SettingsHostControlsScreenState
               print(response);
             });
           }),
-          buildSwitchTile("Add/Remove Host", addRemoveHost, (val) async {
+          buildSwitchTile(translation(context).lbl_add_remove_host, addRemoveHost, (val) async {
             addRemoveHost = val;
             await updateMeetingSetting(
             meetingId:  widget.meetingId,
@@ -126,10 +127,10 @@ class _SettingsHostControlsScreenState
           //
           // }),
           const Divider(),
-          _buildSectionTitle("Participant Controls"),
+          _buildSectionTitle(translation(context).lbl_participant_controls),
           _buildDescription(
-              "Controls for participants to interact during the meeting, including sharing screen, sending reactions, turning on/off microphone or video, etc."),
-          buildSwitchTile("Share Screen", shareScreen, (val) async {
+              translation(context).desc_participant_controls),
+          buildSwitchTile(translation(context).lbl_share_screen, shareScreen, (val) async {
             shareScreen = val;
             await updateMeetingSetting(
             meetingId:  widget.meetingId,
@@ -147,7 +148,7 @@ class _SettingsHostControlsScreenState
               print(response);
             });
           }),
-          buildSwitchTile("Raise Hand", raiseHand, (val) async {
+          buildSwitchTile(translation(context).lbl_raise_hand, raiseHand, (val) async {
             raiseHand = val;
             await updateMeetingSetting(
             meetingId:  widget.meetingId,
@@ -165,7 +166,7 @@ class _SettingsHostControlsScreenState
               print(response);
             });
           }),
-          buildSwitchTile("Send Reactions", sendReactions, (val) async {
+          buildSwitchTile(translation(context).lbl_send_reactions, sendReactions, (val) async {
             sendReactions = val;
             await updateMeetingSetting(
             meetingId:  widget.meetingId,
@@ -183,7 +184,7 @@ class _SettingsHostControlsScreenState
               print(response);
             });
           }),
-          buildSwitchTile("Turn On/Off Microphone", turnOnOffMicrophone, (val) async {
+          buildSwitchTile(translation(context).lbl_toggle_microphone, turnOnOffMicrophone, (val) async {
             turnOnOffMicrophone = val;
             await updateMeetingSetting(
             meetingId:  widget.meetingId,
@@ -201,7 +202,7 @@ class _SettingsHostControlsScreenState
               print(response);
             });
           }),
-          buildSwitchTile("Turn On/Off Video", turnOnOffVideo, (val) async {
+          buildSwitchTile(translation(context).lbl_toggle_video, turnOnOffVideo, (val) async {
             turnOnOffVideo = val;
             await updateMeetingSetting(
             meetingId:  widget.meetingId,
@@ -220,10 +221,10 @@ class _SettingsHostControlsScreenState
             });
           }),
           const Divider(),
-          _buildSectionTitle("Meeting Privacy Settings"),
+          _buildSectionTitle(translation(context).lbl_meeting_privacy_settings),
           _buildDescription(
-              "Controls for managing meeting privacy and security, including restricting access, enabling waiting room, requiring passwords, etc."),
-          buildSwitchTile("Enable Waiting Room", enableWaitingRoom, (val) async {
+              translation(context).desc_meeting_privacy_settings),
+          buildSwitchTile(translation(context).lbl_enable_waiting_room, enableWaitingRoom, (val) async {
             enableWaitingRoom = val;
             await updateMeetingSetting(
             meetingId:  widget.meetingId,

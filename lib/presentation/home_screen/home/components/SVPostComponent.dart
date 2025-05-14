@@ -3,6 +3,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_comman_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
@@ -44,7 +45,7 @@ class _SVPostComponentState extends State<SVPostComponent>
           // return const Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
         } else if (state is PostPaginationLoadedState) {
           return widget.homeBloc.postList.isEmpty
-              ? const Center(child: Text("No result Found"))
+              ? Center(child: Text(translation(context).msg_no_posts))
               :ListView.builder(
             scrollDirection: Axis.vertical,
             physics: const BouncingScrollPhysics(),
@@ -96,7 +97,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                     context: context,
                     builder: (context) {
                       return CustomAlertDialog(
-                        title: 'Are you sure you want to delete this post?',
+                        title: translation(context).msg_confirm_delete_post,
                         callback: () {
                           widget.homeBloc.add(DeletePostEvent(postId: post.id));
                           Navigator.of(context).pop();
@@ -152,7 +153,7 @@ class _SVPostComponentState extends State<SVPostComponent>
 
         } else if (state is PostDataError) {
           return RetryWidget(
-              errorMessage: "Something went wrong please try again",
+              errorMessage: translation(context).msg_something_went_wrong_retry,
               onRetry: () {
                 try {
                   widget.homeBloc.add(PostLoadPageEvent(page: 1));
@@ -161,7 +162,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                 }
               });
         } else {
-          return const Center(child: Text('Search Post'));
+          return Center(child: Text(translation(context).lbl_search_post));
         }
       },
     );

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -43,7 +44,7 @@ class _UserChatScreenState extends State<UserChatScreen>
     try {
       return String.fromCharCodes(input.codeUnits);
     } catch (e) {
-      return "Invalid String";
+      return translation(context).msg_invalid_string;
     }
   }
 
@@ -123,7 +124,7 @@ class _UserChatScreenState extends State<UserChatScreen>
 
       return jsonDecode(data);
     } else {
-      throw Exception('Failed to fetch Pusher auth data');
+      throw Exception(translation(context).msg_pusher_auth_failed);
     }
   }
 
@@ -301,8 +302,8 @@ class _UserChatScreenState extends State<UserChatScreen>
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
-        title: const Text(
-          'Chats',
+        title: Text(
+          translation(context).lbl_chats,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -354,12 +355,12 @@ class _UserChatScreenState extends State<UserChatScreen>
                       return isCurrentlyOnNoInternet?Container(
                         padding: const EdgeInsets.all(10),
                           color: Colors.red,
-                          child: const Text('No Internet connection, please check internet connection',style: TextStyle(color: Colors.white,fontSize: 14,fontFamily: 'Poppins',fontWeight: FontWeight.w500),)):SizedBox();},),
+                          child: Text(translation(context).msg_no_internet,style: TextStyle(color: Colors.white,fontSize: 14,fontFamily: 'Poppins',fontWeight: FontWeight.w500),)):SizedBox();},),
                     if (chatBloc.groupList.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
                         child: Text(
-                          'Groups',
+                          translation(context).lbl_groups,
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -412,7 +413,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                     child: ListTile(
                                       title: Text(
                                         bloc.groupList[index].groupName ??
-                                            'Unknown',
+                                            translation(context).lbl_unknown,
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           color: svGetBodyColor(),
@@ -571,7 +572,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                                                                   .contactsList[
                                                                       index]
                                                                   .id)
-                                                      ? const Text("Typing...",
+                                                      ? Text(translation(context).lbl_typing,
                                                           style: TextStyle(
                                                             fontFamily:
                                                                 'Poppins',
@@ -699,7 +700,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                     else
                       Expanded(
                           child: Center(
-                        child: Text("No chat found",
+                        child: Text(translation(context).msg_no_chats,
                             style: boldTextStyle(
                               size: 16,
                               fontFamily: 'Poppins',
@@ -711,7 +712,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                 );
               } else if (state is DataError) {
                 return RetryWidget(
-                    errorMessage: "Something went wrong please try again",
+                    errorMessage: translation(context).msg_chat_error,
                     onRetry: () {
                       try {
                         chatBloc.add(LoadPageEvent(page: 1));
@@ -720,7 +721,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                       }
                     });
               } else {
-                return const Center(child: Text('Something went wrong'));
+                return Center(child: Text(translation(context).msg_notification_error));
               }
             },
           )),

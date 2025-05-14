@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -16,7 +17,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Terms and Conditions'),
+        title: Text(translation(context).lbl_terms_and_conditions),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -113,10 +114,10 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                     });
                   },
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'I agree to the Terms and Conditions',
-                    style: TextStyle(fontSize: 16.0),
+                    translation(context).lbl_agree_terms_conditions,
+                    style: const TextStyle(fontSize: 16.0),
                   ),
                 ),
               ],
@@ -135,7 +136,7 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                         // LoginScreen().launch(context, isNewTask: true);
                       }
                     : null,
-                child: const Text('Accept'),
+                child: Text(translation(context).lbl_accept),
               ),
             ),
           ],

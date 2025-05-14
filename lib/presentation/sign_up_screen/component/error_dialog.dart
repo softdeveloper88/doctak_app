@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 class ErrorDialog extends StatelessWidget {
   final Map<String, dynamic> errors;
@@ -6,7 +7,7 @@ class ErrorDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Validation Error'),
+      title: Text(translation(context).lbl_validation_error),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -17,7 +18,7 @@ class ErrorDialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop(); // Close the dialog
           },
-          child: const Text('OK'),
+          child: Text(translation(context).lbl_ok),
         ),
       ],
     );

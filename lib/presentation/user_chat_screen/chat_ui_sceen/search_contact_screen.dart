@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
+import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
@@ -21,7 +23,7 @@ class SearchContactScreen extends StatefulWidget {
 }
 
 class _SearchContactScreenState extends State<SearchContactScreen> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
   ChatBloc chatBloc = ChatBloc();
 
@@ -61,9 +63,9 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
         centerTitle: false,
-        title: const Text(
-          'Search Contacts',
-          style: TextStyle(
+        title: Text(
+          translation(context).lbl_search_contacts,
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             fontFamily: 'Poppins',
@@ -88,7 +90,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                   textFieldType: TextFieldType.NAME,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'Search ',
+                    hintText: translation(context).lbl_search,
                     hintStyle: secondaryTextStyle(
                       color: svGetBodyColor(),
                       fontFamily: 'Poppins',
@@ -328,12 +330,12 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                     ),
                   );
                 }else{
-                  return const Expanded(child: Center(child: Text('No user found',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,fontFamily: 'Poppins'),)));
+                  return Expanded(child: Center(child: Text(translation(context).msg_no_user_found, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'))));
 
                 }
               } else if (state is DataError) {
                 return RetryWidget(
-                    errorMessage: "Something went wrong please try again",
+                    errorMessage: translation(context).msg_something_went_wrong_retry,
                     onRetry: () {
                       try {
                         chatBloc.add(LoadPageEvent(page: 1));
@@ -342,7 +344,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                       }
                     });
               } else {
-                return const Center(child: Text('Something went wrong'));
+                return Center(child: Text(translation(context).msg_something_went_wrong));
               }
             },
           ),

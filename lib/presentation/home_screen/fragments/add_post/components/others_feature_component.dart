@@ -2,6 +2,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,15 +101,15 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                   decoration: BoxDecoration(
                       color: scaffoldLightColor, borderRadius: radius(10)),
                   padding: const EdgeInsets.all(8),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.tag_outlined,
                         color: cardBackgroundBlackDark,
                       ),
                       Text(
-                        'Tag Friends:',
-                        style: TextStyle(
+                        translation(context).lbl_tag_friends,
+                        style: const TextStyle(
                             fontFamily: 'Poppins',
                             color: cardBackgroundBlackDark,
                             fontWeight: FontWeight.bold),

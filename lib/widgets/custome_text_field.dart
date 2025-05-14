@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 import '../presentation/home_screen/utils/SVColors.dart';
 
 class CustomTextField extends StatelessWidget {
-  const CustomTextField({
+   CustomTextField({
     Key? key,
     this.alignment,
     this.width,
@@ -88,8 +89,11 @@ class CustomTextField extends StatelessWidget {
 
   final FormFieldValidator<String>? validator;
 
+  BuildContext? currentContext;
+
   @override
   Widget build(BuildContext context) {
+    currentContext = context;
     return alignment != null
         ? Align(
             alignment: alignment ?? Alignment.center,
@@ -123,7 +127,7 @@ class CustomTextField extends StatelessWidget {
       );
 
   InputDecoration get decoration => InputDecoration(
-        hintText: hintText ?? "",
+        hintText: hintText ?? translation(currentContext!).lbl_empty,
         hintStyle: hintStyle ?? theme.textTheme.bodyLarge,
         prefixIcon: prefix,
         prefixIconConstraints: prefixConstraints,

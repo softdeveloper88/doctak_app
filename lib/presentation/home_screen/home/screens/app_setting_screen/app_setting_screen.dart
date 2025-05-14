@@ -25,7 +25,8 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('App Settings', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_app_settings,
+            style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -41,10 +42,10 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             ListTile(
-              title: const Text(
-                'Theme Appearance',
-                style: TextStyle(
-               fontFamily: 'Poppins',
+              title: Text(
+                translation(context).lbl_theme_appearance,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -61,9 +62,9 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
               color: Colors.grey,
             ),
             ListTile(
-              title: const Text(
-                'App Language',
-                style: TextStyle(
+              title: Text(
+                translation(context).lbl_app_language,
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
@@ -78,47 +79,61 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                   return [
                     PopupMenuItem(
                       child: Builder(builder: (context) {
-                        return const Column(children: [
+                        return Column(children: [
                           PopupMenuItem(
-                            value: 'English',
-                            child: Text('🇺🇸 English'),
+                            value: 'en',
+                            child:
+                                Text(translation(context).lbl_english_language),
                           ),
                           PopupMenuItem(
-                            value: 'Arabic',
-                            child: Text('🇸🇦 اَلْعَرَبِيَّة '),
-                          )
+                            value: 'ar',
+                            child:
+                                Text(translation(context).lbl_arabic_language),
+                          ),
+                          PopupMenuItem(
+                            value: 'fa',
+                            child:
+                                Text(translation(context).lbl_farsi_language),
+                          ),
+                          PopupMenuItem(
+                            value: 'hi',
+                            child:
+                                Text(translation(context).lbl_hindi_language),
+                          ),
+                          PopupMenuItem(
+                            value: 'ur',
+                            child: Text(translation(context).lbl_urdu_language),
+                          ),
                         ]);
                       }),
                     )
                   ];
                 },
                 onSelected: (value) async {
-                  if (value == 'English') {
-                    if (value != null) {
-                      Locale _locale = await setLocale('en');
-                      MyApp.setLocale(context, _locale);
-                    }
-                  } else {
-                    if (value != null) {
-                      Locale _locale = await setLocale('ar');
-                      MyApp.setLocale(context, _locale);
-                    }
+                  if (value != null) {
+                    Locale _locale = await setLocale(value);
+                    MyApp.setLocale(context, _locale);
                   }
                 },
               ),
             ),
-            const Divider(color: Colors.grey,),
+            const Divider(
+              color: Colors.grey,
+            ),
             ListTile(
-              trailing: const Icon(Icons.delete,color: Colors.red,),
-              title: const Text(
-                'Delete Account',
-                style: TextStyle(
+              trailing: const Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
+              title: Text(
+                translation(context).lbl_delete_account,
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              onTap: (){
+              onTap: () {
                 deleteAccount(context);
               },
             ),
@@ -131,29 +146,28 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
       ),
     );
   }
+
   deleteAccount(BuildContext context) async {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete your Account?'),
-          content: const Text(
-              '''If you select Delete we will delete your account on our server.
-
-Your app data will also be deleted and you won't be able to retrieve it.
-
-Since this is a security-sensitive operation, you eventually are asked to login before your account can be deleted.'''),
+          title: Text(translation(context).lbl_delete_account_confirmation),
+          content: Text(translation(context).msg_delete_account_warning),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
+              child: Text(translation(context).lbl_cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Colors.red,fontFamily: 'Poppins',),
+              child: Text(
+                translation(context).lbl_delete,
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontFamily: 'Poppins',
+                ),
                 // color: Colors.red,
               ),
               onPressed: () async {
@@ -184,7 +198,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
           'Authorization': 'Bearer ${AppData.userToken!}',
         },
       );
-      print(response.body);
+      // Response received
       if (response.statusCode == 200) {
         // Handle successful account deletion
         return true;

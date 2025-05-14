@@ -4,6 +4,7 @@ import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
@@ -62,13 +63,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         children: [
           BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
             if (state is CountriesDataInitial) {
-              return const Column(
+              return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Center(
-                      child: Text('Loading...',
+                      child: Text(translation(context).lbl_loading,
                   )),
                 ],
               );
@@ -88,7 +89,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       children: [
                         Expanded(
                             child: Center(
-                                child: Text('Drugs List',
+                                child: Text(translation(context).lbl_drug_list,
                                     style: boldTextStyle(size: 20)))),
                         Expanded(
                           child: CustomDropdownField(
@@ -234,7 +235,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                 },
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: 'Search ',
+                                  hintText: translation(context).lbl_search,
                                   hintStyle: secondaryTextStyle(
                                       color: svGetBodyColor()),
                                   suffixIcon: Image.asset(
@@ -315,7 +316,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                           type: 'Brand'));
                                     },
                                     child: Text(
-                                      'Brand',
+                                      translation(context).lbl_brand,
                                       style: TextStyle(
                                         color: SVAppColorPrimary,
                                         fontSize: 14,
@@ -360,7 +361,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                           type: 'Generic'));
                                     },
                                     child: Text(
-                                      'Generic',
+                                      translation(context).lbl_generic,
                                       style: TextStyle(
                                         color: SVAppColorPrimary,
                                         fontSize: 14,
@@ -393,13 +394,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 LoadDropdownData('', '', '', ''),
               );
 
-              return Center(child: Text('Error: ${state.errorMessage}'));
+              return Center(child: Text('${translation(context).lbl_error}: ${state.errorMessage}'));
             } else {
               BlocProvider.of<SplashBloc>(context).add(
                 LoadDropdownData('', '', '', ''),
               );
 
-              return const Center(child: Text('Unknown state'));
+              return Center(child: Text(translation(context).lbl_unknown_state));
             }
           }),
           BlocConsumer<DrugsBloc, DrugsState>(
@@ -430,8 +431,8 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                   ),
                 );
               } else {
-                return const Expanded(
-                    child: Center(child: Text('Something went wrong')));
+                return Expanded(
+                    child: Center(child: Text(translation(context).msg_something_went_wrong)));
               }
             },
           ),
@@ -446,8 +447,8 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
 
     return Expanded(
       child: bloc.drugsData.isEmpty
-          ? const Center(
-              child: Text("No Drugs Found"),
+          ? Center(
+              child: Text(translation(context).msg_no_drugs_found),
             )
           : ListView.builder(
               padding: const EdgeInsets.only(top: 10),
@@ -515,7 +516,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                       color: svGetBodyColor(),
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w400)),
-                              Text(' - ',
+                               Text(' - ',
                                   style: TextStyle(
                                       color: svGetBodyColor(),
                                       fontSize: 10.sp,
@@ -528,7 +529,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             ],
                           ),
                           const SizedBox(height: 5),
-                          Text(bloc.drugsData[index].tradeName ?? 'N/A',
+                          Text(bloc.drugsData[index].tradeName ?? translation(context).lbl_not_available,
                               style: TextStyle(
                                   color: svGetBodyColor(), fontSize: 10.sp)),
                           const SizedBox(height: 5),
@@ -545,7 +546,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Manufacturer Name',
+                                      translation(context).lbl_manufacturer_name,
                                       style: TextStyle(
                                           color: Colors.grey, fontSize: 12.sp),
                                     ),
@@ -567,7 +568,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text('Price',
+                                      Text(translation(context).lbl_price,
                                           style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 12.sp)),
@@ -618,20 +619,20 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-            _buildQuestion(context, '1. All information', genericName,
+            _buildQuestion(context, '1. ${translation(context).lbl_all_information}', genericName,
                 icInfo,
                 clickable: true),
-            _buildQuestion(context, '2. Mechanism of action', genericName,icMechanisam,
+            _buildQuestion(context, '2. ${translation(context).lbl_mechanism}', genericName,icMechanisam,
                 clickable: true),
-            _buildQuestion(context, '3. Indications', genericName,icIndication,
+            _buildQuestion(context, '3. ${translation(context).lbl_indications}', genericName,icIndication,
                 clickable: true),
-            _buildQuestion(context, '4. Dosage and administration', genericName,icDosage,
+            _buildQuestion(context, '4. ${translation(context).lbl_dosage}', genericName,icDosage,
                 clickable: true),
-            _buildQuestion(context, '5. Drug interactions', genericName,icDrug,
+            _buildQuestion(context, '5. ${translation(context).lbl_drug_interactions}', genericName,icDrug,
                 clickable: true),
-            _buildQuestion(context, '6. Special populations', genericName,icSpecial,
+            _buildQuestion(context, '6. ${translation(context).lbl_special_populations}', genericName,icSpecial,
                 clickable: true),
-            _buildQuestion(context, '7. Side effects', genericName,icSideEffect,
+            _buildQuestion(context, '7. ${translation(context).lbl_side_effects}', genericName,icSideEffect,
                 clickable: true),
             const SizedBox(height: 10,),
             Container(
@@ -651,7 +652,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 },
                 child: Center(
                   child: Text(
-                    "CLOSE",
+                    translation(context).lbl_close,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.w400,

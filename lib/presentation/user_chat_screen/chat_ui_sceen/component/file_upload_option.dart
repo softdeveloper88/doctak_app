@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
@@ -37,10 +38,10 @@ class _FileUploadOptionState extends State<FileUploadOption> {
         });
         setState(() {});
       } else {
-        print("No image is selected.");
+        print(translation(context).msg_no_image_selected);
       }
     } catch (e) {
-      print("error while picking file.");
+      print(translation(context).msg_error_picking_file);
     }
   }
 
@@ -57,10 +58,10 @@ class _FileUploadOptionState extends State<FileUploadOption> {
         // setState(() {
         // });
       } else {
-        print("No image is selected.");
+        print(translation(context).msg_no_image_selected);
       }
     } catch (e) {
-      print("error while picking file.$e");
+      print("${translation(context).msg_error_picking_file} $e");
     }
   }
 
@@ -77,10 +78,10 @@ class _FileUploadOptionState extends State<FileUploadOption> {
         // setState(() {
         // });
       } else {
-        print("No image is selected.");
+        print(translation(context).msg_no_image_selected);
       }
     } catch (e) {
-      print("error while picking file. $e");
+      print("${translation(context).msg_error_picking_file} $e");
     }
   }
 
@@ -213,7 +214,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       );
     } else {
       // Handle other types of files
-      return const Text('Unsupported file type');
+      return Text(translation(context).msg_unsupported_file);
     }
   }
 }

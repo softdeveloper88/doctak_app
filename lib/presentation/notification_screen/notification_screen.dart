@@ -19,6 +19,7 @@ import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../localization/app_localization.dart';
 import '../../widgets/custom_image_view.dart';
 import '../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'bloc/notification_event.dart';
@@ -75,7 +76,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Notifications',
+        title: Text(translation(context).lbl_notifications,
             style: boldTextStyle(
               size: 20,
             )),
@@ -124,7 +125,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     child: Text(state.errorMessage),
                   );
                 } else {
-                  return const Center(child: Text('Something went wrong'));
+                  return Center(child: Text(translation(context).msg_notification_error));
                 }
               },
             ),
@@ -140,8 +141,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
               },
               minWidth: 100.w,
               color: Colors.blue,
-              child: const Text(
-                'Mark All Read',
+              child: Text(
+                translation(context).lbl_mark_all_read,
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'Poppins',
@@ -317,8 +318,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
         },
       );
     } else {
-      return const Center(
-        child: Text("No Notification Found"),
+      return Center(
+        child: Text(translation(context).msg_no_notifications),
       );
     }
   }

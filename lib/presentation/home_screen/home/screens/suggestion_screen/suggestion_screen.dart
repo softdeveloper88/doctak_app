@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_event.dart';
@@ -77,11 +78,11 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Thank you for your suggestions.'),
+          title: Text(translation(context).lbl_success),
+          content: Text(translation(context).msg_suggestion_thank_you),
           actions: <Widget>[
             TextButton(
-              child: const Text('OK'),
+              child: Text(translation(context).lbl_ok),
               onPressed: () {
                 Navigator.of(context).pop(); // Dismiss the dialog
               },
@@ -109,7 +110,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
             child: const Icon(Icons.arrow_back_ios)),
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Suggestion', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_suggestions, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
       ),
@@ -121,38 +122,54 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
             child: ListView(
               children: <Widget>[
                 const SizedBox(height: 20),
-                _buildTextField('Enter Name', _nameController, 'Name',
-                    validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                }),
-                _buildTextField('03xxxxxxxx', _phoneController, 'Phone',
-                    validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your phone number';
-                  }
-                  return null;
-                }),
-                _buildTextField('info@doctak.net', _emailController, 'Email',
-                    validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                }),
                 _buildTextField(
-                    'Type message here', _messageController, 'Message',
-                    maxLines: 4, validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your message';
+                  translation(context).lbl_enter_your_name,
+                  _nameController,
+                  translation(context).lbl_name,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return translation(context).msg_please_enter_name;
+                    }
+                    return null;
                   }
-                  return null;
-                }),
+                ),
+                _buildTextField(
+                  '03xxxxxxxx',
+                  _phoneController,
+                  translation(context).lbl_phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return translation(context).msg_please_enter_phone;
+                    }
+                    return null;
+                  }
+                ),
+                _buildTextField(
+                  'info@doctak.net',
+                  _emailController,
+                  translation(context).lbl_email,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return translation(context).msg_please_enter_email;
+                    }
+                    if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                      return translation(context).err_msg_please_enter_valid_email;
+                    }
+                    return null;
+                  }
+                ),
+                _buildTextField(
+                  translation(context).lbl_type_message_here,
+                  _messageController,
+                  translation(context).lbl_message,
+                  maxLines: 4,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return translation(context).msg_please_enter_message;
+                    }
+                    return null;
+                  }
+                ),
 
                 BlocListener<SuggestionBloc, SuggestionState>(
                   bloc: suggestionBloc,
@@ -175,7 +192,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(Colors.white),
                           )
-                        : const Text('Submit'),
+                        : Text(translation(context).lbl_submit),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -195,7 +212,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text(
-          'Need More Help? ',
+          translation(context).msg_need_more_help,
           style: TextStyle(
             color: svGetBodyColor(),
             fontSize: 16.0,
@@ -211,19 +228,18 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Open WhatsApp'),
-                    content: const Text(
-                        'Would you like to open WhatsApp to send a message?'),
+                    title: Text(translation(context).lbl_open_whatsapp),
+                    content: Text(translation(context).msg_open_whatsapp_confirm),
                     actions: <Widget>[
                       TextButton(
-                        child: const Text('Cancel'),
+                        child: Text(translation(context).lbl_cancel),
                         onPressed: () {
                           Navigator.of(context).pop(
                               false); // User does not want to leave the app
                         },
                       ),
                       TextButton(
-                        child: const Text('Yes'),
+                        child: Text(translation(context).lbl_yes),
                         onPressed: () {
                           Navigator.of(context)
                               .pop(true); // User confirms to leave the app
@@ -247,10 +263,10 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                   height: 20,
                   width: 20,
                 ),
-                const Flexible(
+                Flexible(
                   child: Text(
-                    ' Connect on WhatsApp',
-                    style: TextStyle(
+                    translation(context).msg_connect_on_whatsapp,
+                    style: const TextStyle(
                       color: Colors.green,
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
 import 'package:doctak_app/main.dart';
@@ -45,7 +46,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isEmptyPage = true;
   bool isDrawerOpen = false;
   bool isWriting = false;
-  String chatWithAi = "Preparing DocTak AI.";
+  String chatWithAi = "";
   bool isDeleteButtonClicked = false;
   bool isAlreadyAsk = true;
   bool isEmpty = false;
@@ -64,7 +65,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
         id: -1,
         gptSessionId: selectedSessionId.toString(),
         question: question,
-        response: 'Generating response...',
+        response: translation(context).lbl_generating_response,
         createdAt: DateTime.now().toString(),
         updatedAt: DateTime.now().toString());
 
@@ -89,6 +90,20 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize with default value
+    chatWithAi = "Preparing DocTak AI.";
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Safe to use context here
+    chatWithAi = translation(context).lbl_preparing_ai;
+  }
+
+  @override
   void dispose() {
     focusNode.unfocus();
     _scrollController.dispose();
@@ -105,7 +120,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             BlocBuilder<ChatGPTBloc, ChatGPTState>(builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
-            chatWithAi = state1.response.sessions?.first.name ?? 'Next Session';
+            chatWithAi = state1.response.sessions?.first.name ?? translation(context).lbl_next_session;
           }
           if (state1 is DataInitial) {
             return Scaffold(
@@ -250,11 +265,11 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     }
                                     // }
                                   },
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      'Next Session',
-                                      style: TextStyle(  fontFamily:  'Poppins',color: white),
+                                      translation(context).lbl_next_session,
+                                      style: const TextStyle(fontFamily: 'Poppins', color: white),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -311,30 +326,29 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const SizedBox(height: 20),
-                                  const Text(
-                                    'Welcome, Doctor!',
-                                    style: TextStyle(
+                                  Text(
+                                    translation(context).lbl_welcome_doctor,
+                                    style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  const Text(
-                                    'Your personal & medical assistant powered by Artificial Intelligence',
+                                  Text(
+                                    translation(context).msg_ai_assistant_intro,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 16),
+                                    style: const TextStyle(fontSize: 16),
                                   ),
                                   const SizedBox(height: 30),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       cardIntro(
-                                           width: 40.w,                                          'Code Detection',
-                                          'Identify CPT or ICD codes', () {
+                                           width: 40.w,                                          translation(context).lbl_code_detection,
+                                          translation(context).lbl_identify_cpt_icd, () {
                                         // Code Detection: Identify CPT or ICD codes
                                         isAlreadyAsk = true;
-                                        widget.question =
-                                            'Code Detection: Identify CPT or ICD codes';
+                                        widget.question = translation(context).lbl_code_detection_question;
                                         if (isAlreadyAsk) {
                                           setState(() {
                                             isEmpty = false;
@@ -350,12 +364,11 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       const SizedBox(width: 10),
                                       cardIntro(
                                           width: 40.w,
-                                          'Diagnostic \nSuggestions',
-                                          'Request suggestions based on symptoms',
+                                          translation(context).lbl_diagnostic_suggestions,
+                                          translation(context).lbl_request_suggestions,
                                           () {
                                         isAlreadyAsk = true;
-                                        widget.question =
-                                            'Diagnostic Suggestions: Request suggestions based on symptoms';
+                                        widget.question = translation(context).lbl_diagnostic_suggestions_question;
                                         if (isAlreadyAsk) {
                                           isAlreadyAsk = false;
                                           // Future.delayed(const Duration(seconds: 1),(){
@@ -375,8 +388,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     children: [
                                       InkWell(
                                         onTap: () {
-                                          widget.question =
-                                              'Medication Review: check interactions and dosage';
+                                          widget.question = translation(context).lbl_medication_review_question;
                                           // Future.delayed(const Duration(seconds: 1),(){
                                           setState(() {
                                             isEmpty = false;
@@ -402,7 +414,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                                             .center,
                                                     children: [
                                                       Text(
-                                                        'Medication Review',
+                                                        translation(context).lbl_medication_review,
                                                         textAlign:
                                                             TextAlign.center,
                                                         style:
@@ -415,7 +427,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                                                         .w500),
                                                       ),
                                                       Text(
-                                                        'Check interactions and dosage',
+                                                        translation(context).lbl_check_interactions,
                                                         textAlign:
                                                             TextAlign.center,
                                                         style:
@@ -435,10 +447,10 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 20),
-                                  const Text(
-                                    'Ready to start? Type your question below or choose a suggested topic.',
+                                  Text(
+                                    translation(context).lbl_ready_to_start,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 14),
                                   ),
                                   const SizedBox(height: 10),
                                 ],
@@ -482,7 +494,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                               selectedSessionId.toString(),
                                           question: question,
                                           imageUrl1: message.imageUrl1,
-                                          response: 'Generating response...',
+                                          response: translation(context).lbl_generating_response,
                                           createdAt: DateTime.now().toString(),
                                           updatedAt: DateTime.now().toString());
                                       state1.response1.messages!.add(myMessage);
@@ -683,9 +695,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 // Minimum lines
                                 maxLines: null,
                                 // Allows for unlimited lines
-                                decoration: const InputDecoration(
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  hintText: 'Ask Medical Ai',
+                                decoration: InputDecoration(
+                                  hintStyle: const TextStyle(color: Colors.grey),
+                                  hintText: translation(context).lbl_ask_medical_ai,
                                   border: InputBorder.none,
                                 ),
                               ),
@@ -726,7 +738,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                         gptSessionId:
                                             selectedSessionId.toString(),
                                         question: question,
-                                        response: 'Generating response...',
+                                        response: translation(context).lbl_generating_response,
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
                                         imageUrl1: '');
@@ -854,8 +866,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           direction: Axis.horizontal,
                           directionMarguee: DirectionMarguee.oneDirection,
                           textDirection: TextDirection.ltr,
-                          child: const Text(
-                              'Artificial Intelligence can make mistakes. Consider checking important information.')),
+                          child: Text(
+                              translation(context).msg_ai_disclaimer)),
                     )
                   ],
                 ));
@@ -869,16 +881,16 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Error!",
+                    translation(context).lbl_error,
                     style: TextStyle(
                         color: Colors.red,
                         fontSize: 24,
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Something went wrong.Please try again...',
-                    style: TextStyle(color: black,fontSize: 16,fontWeight: FontWeight.w500),
+                  Text(
+                    translation(context).msg_something_went_wrong_try_again,
+                    style: const TextStyle(color: black,fontSize: 16,fontWeight: FontWeight.w500),
                   ),
                   MaterialButton(
                     onPressed: () {
@@ -900,9 +912,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     color: appButtonBackgroundColorGlobal,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
-                    child: const Text(
-                      "Try Again",
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      translation(context).lbl_try_again,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   )
                 ],

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
-import 'package:doctak_app/core/call_service/callkit_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 import '../../user_chat_screen/chat_ui_sceen/call_loading_screen.dart';
 
@@ -257,14 +258,14 @@ Future<void> startOutgoingCall(String userId, String username, String profilePic
     } else {
       // Handle API error
       NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
-      _showCallError("Failed to establish call. Please try again.");
+      _showCallError(translation(NavigatorService.navigatorKey.currentState!.context).lbl_failed_to_establish_call);
       cleanupResources();
     }
   } catch (error) {
     print('Error starting outgoing call: $error');
 
     NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
-    _showCallError("Error starting call. Please try again.");
+    _showCallError(translation(NavigatorService.navigatorKey.currentState!.context).lbl_error_starting_call);
 
     // Make sure any partial call state is cleaned up
     cleanupResources();

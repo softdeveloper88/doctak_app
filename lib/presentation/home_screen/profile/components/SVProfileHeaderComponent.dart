@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
@@ -11,6 +12,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -32,20 +34,20 @@ class SVProfileHeaderComponent extends StatefulWidget {
       _SVProfileHeaderComponentState();
 }
 
-Widget _buildPointsCard() {
+Widget _buildPointsCard(BuildContext context) {
   return Card(
     elevation: 4.0,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    child: const Padding(
-      padding: EdgeInsets.all(8.0),
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           Text(
-            'Your Earned Points',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            translation(context).lbl_your_earned_points,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 4),
-          Text(
+          const SizedBox(height: 4),
+          const Text(
             '300',
             style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
@@ -389,7 +391,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
               //     ),
               //   ],
               // ),
-              if (widget.isMe ?? false) _buildPointsCard(),
+              if (widget.isMe ?? false) _buildPointsCard(context),
               if (widget.isMe != true)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -449,8 +451,8 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                       color: SVAppColorPrimary,
                       child: Text(
                           widget.userProfile?.isFollowing ?? false
-                              ? 'Following'
-                              : "Follow",
+                              ? translation(context).lbl_following
+                              : translation(context).lbl_follow,
                           style: boldTextStyle(color: Colors.white)),
                     ),
                   ],
@@ -467,7 +469,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                         Text('${widget.userProfile?.totalPosts ?? ''}',
                             style: boldTextStyle(size: 18)),
                         4.height,
-                        Text('Posts',
+                        Text(translation(context).lbl_posts,
                             style: secondaryTextStyle(
                                 color: svGetBodyColor(), size: 12)),
                       ],
@@ -495,7 +497,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                                 '',
                             style: boldTextStyle(size: 18)),
                         4.height,
-                        Text('Followers',
+                        Text(translation(context).lbl_followers,
                             style: secondaryTextStyle(
                                 color: svGetBodyColor(), size: 12)),
                       ],
@@ -523,7 +525,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                                 '',
                             style: boldTextStyle(size: 18)),
                         4.height,
-                        Text('Followings',
+                        Text(translation(context).lbl_followings,
                             style: secondaryTextStyle(
                                 color: svGetBodyColor(), size: 12)),
                       ],
@@ -560,7 +562,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.photo),
-                title: const Text('Choose from gallery'),
+                title: Text(translation(context).lbl_choose_from_gallery),
                 onTap: () async {
                   Navigator.pop(context);
                   File? file = await _pickFile(ImageSource.gallery);
@@ -576,7 +578,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a picture'),
+                title: Text(translation(context).lbl_take_a_picture),
                 onTap: () async {
                   Navigator.pop(context);
                   File? file = await _pickFile(ImageSource.camera);

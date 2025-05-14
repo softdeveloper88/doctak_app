@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';

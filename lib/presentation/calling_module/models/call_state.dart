@@ -1,4 +1,5 @@
 // lib/presentation/call_module/models/call_state.dart
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Enum representing the different call types
@@ -98,15 +99,15 @@ class CallState {
   }
 
   /// Get a string representation of the network quality
-  String getNetworkQualityText() {
+  String getNetworkQualityText({required BuildContext context}) {
     switch (networkQuality) {
-      case 1: return "Excellent";
-      case 2: return "Good";
-      case 3: return "Fair";
-      case 4: return "Poor";
+      case 1: return translation(context).lbl_network_quality_excellent;
+      case 2: return translation(context).lbl_network_quality_good;
+      case 3: return translation(context).lbl_network_quality_fair;
+      case 4: return translation(context).lbl_network_quality_poor;
       case 5:
-      case 6: return "Very poor";
-      default: return "Unknown";
+      case 6: return translation(context).lbl_network_quality_very_poor;
+      default: return translation(context).lbl_network_quality_unknown;
     }
   }
 

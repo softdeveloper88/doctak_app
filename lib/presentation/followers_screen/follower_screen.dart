@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,7 +68,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text(widget.isFollowersScreen ? 'Followers' : 'Following',
+        title: Text(widget.isFollowersScreen ? translation(context).lbl_followers : translation(context).lbl_following,
             style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
         leading: IconButton(
             icon:
@@ -120,7 +121,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                     textFieldType: TextFieldType.NAME,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Search People ',
+                      hintText: translation(context).lbl_search_people,
                       hintStyle: secondaryTextStyle(color: svGetBodyColor()),
                       suffixIcon: Image.asset(
                               'images/socialv/icons/ic_Search.png',

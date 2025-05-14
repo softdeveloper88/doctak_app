@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/components/SVSearchCardComponent.dart';
@@ -86,14 +87,14 @@ class SearchPeopleList extends StatelessWidget {
               itemCount: bloc.searchPeopleData.length,
             );
           } else {
-            const Center(
-              child: Text("No Result Found"),
+            Center(
+              child: Text(translation(context).lbl_no_search_results),
             );
           }
         }
         if (state is SearchPeopleDataError) {
           return RetryWidget(
-              errorMessage: "Something went wrong please try again",
+              errorMessage: translation(context).msg_something_went_wrong_retry,
               onRetry: () {
                 try {
                   searchPeopleBloc.add(
@@ -107,7 +108,7 @@ class SearchPeopleList extends StatelessWidget {
                 }
               });
         } else {
-          return const Center(child: Text('Search Peoples'));
+          return Center(child: Text(translation(context).lbl_search_peoples));
         }
       },
     );

@@ -4,8 +4,9 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:chewie/chewie.dart';
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/core/call_service/callkit_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -34,7 +35,6 @@ import 'package:video_player/video_player.dart';
 import '../../calling_module/screens/call_screen.dart';
 import '../../calling_module/utils/start_outgoing_call.dart';
 import '../../home_screen/home/screens/meeting_screen/video_api.dart';
-import 'call_kit_screen.dart';
 import 'call_loading_screen.dart';
 import 'component/chat_bubble.dart';
 
@@ -900,7 +900,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   PopupMenuItem(
                     child: Builder(builder: (context) {
                       return Column(
-                        children: ["Media", 'Delete Chat'].map((String item) {
+                        children: [translation(context).lbl_media, translation(context).lbl_delete_chat].map((String item) {
                           return PopupMenuItem(
                             value: item,
                             child: Text(item),
@@ -979,7 +979,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                     builder: (BuildContext context) {
                                       return CustomAlertDialog(
                                           title:
-                                              'Are you sure want to delete message ?',
+                                              translation(context).msg_confirm_delete_message,
                                           callback: () {
                                             bloc.add(DeleteMessageEvent(
                                                 id: bloc.messagesList[index].id
@@ -1018,7 +1018,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     ),
                   ),
                   (isSomeoneTyping && FromId == widget.id)
-                      ? const Padding(
+                      ?  Padding(
                           padding: EdgeInsets.only(left: 8.0),
                           child: ChatBubble(
                             profile: '',
@@ -1026,7 +1026,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             attachmentJson: null,
                             createAt: null,
                             seen: 0,
-                            message: 'Typing. . .',
+                            message: translation(context).lbl_typing,
                           ),
                         )
                       : Container(),
@@ -1104,7 +1104,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                       ),
                                 const SizedBox(width: 8.0),
                                 isRecording
-                                    ? const Text('Recording Start..')
+                                    ? Text(translation(context).lbl_recording_start)
                                     : Flexible(
                                         child: Container(
                                           constraints: const BoxConstraints(
@@ -1127,10 +1127,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                               minLines: 1,
                                               maxLines: 8,
                                               controller: textController,
-                                              decoration: const InputDecoration
+                                              decoration: InputDecoration
                                                   .collapsed(
                                                 hintText:
-                                                    'Type your message...',
+                                                    translation(context).lbl_type_message_here,
                                                 hintStyle: TextStyle(
                                                     fontSize: 14,
                                                     fontFamily: 'Poppins'),
@@ -1536,7 +1536,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.photo),
-                title: const Text('Choose from gallery'),
+                title: Text(translation(context).lbl_choose_from_gallery),
                 onTap: () async {
                   Navigator.pop(context);
                   try {
@@ -1553,7 +1553,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a picture'),
+                title: Text(translation(context).lbl_take_a_picture),
                 onTap: () async {
                   Navigator.pop(context);
                   File? file = await _pickFile(ImageSource.camera);
@@ -1566,7 +1566,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a Video'),
+                title: Text(translation(context).lbl_take_video),
                 onTap: () async {
                   Navigator.pop(context);
                   File? file = await _pickVideoFile(ImageSource.camera);
@@ -1628,7 +1628,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         return AlertDialog(
           // <-- SEE HERE
           title: Text(
-            'You want to enable permission?',
+            translation(context).lbl_want_to_join_meeting,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14.sp,
@@ -1644,13 +1644,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           // ),
           actions: <Widget>[
             TextButton(
-              child: const Text('No'),
+              child: Text(translation(context).lbl_no),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Yes'),
+              child: Text(translation(context).lbl_yes),
               onPressed: () {
                 openAppSettings();
                 Navigator.of(context).pop();
@@ -1770,9 +1770,9 @@ class TypingIndicator extends StatelessWidget {
             children: [
               Container(
                 color: Colors.blue,
-                child: const Text(
-                  'Typing...',
-                  style: TextStyle(
+                child: Text(
+                  translation(context).lbl_typing,
+                  style: const TextStyle(
                       color: Colors.black,
                       fontSize: 14.0,
                       fontWeight: FontWeight.w400),

@@ -2,6 +2,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import '../../../../../localization/app_localization.dart';
 import '../../../utils/SVCommon.dart';
 
 class AddEditInterestedScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
       appBar: AppBar(
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
-        title: Text('Add Interest', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_interest_details, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -86,7 +87,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
-              label: 'Interest Type',
+              label: translation(context).lbl_areas_of_interest,
               // value: entry.interestType ?? '',
               // onSave: (value) => entry.interestType = value,
             ),
@@ -95,7 +96,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
               isEditModeMap: true,
               icon: Icons.description,
               index: 2,
-              label: 'Interest Details',
+              label: translation(context).lbl_interest_details,
               // value: entry.interestDetails ?? "",
               // onSave: (value) => entry.interestDetails = value,
             ),
@@ -109,7 +110,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
                     context: context,
                     // style: svAppButton(text: text, onTap: onTap, context: context),
                     onTap: () async {},
-                    text: 'Remove',
+                    text: translation(context).lbl_delete,
                   ),
                 ),
                 const SizedBox(
@@ -120,7 +121,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
                     context: context,
                     // style: svAppButton(text: text, onTap: onTap, context: context),
                     onTap: () async {},
-                    text: 'Add',
+                    text: translation(context).lbl_add,
                   ),
                 ),
               ],

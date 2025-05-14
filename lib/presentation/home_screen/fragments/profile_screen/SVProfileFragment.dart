@@ -1,6 +1,7 @@
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
@@ -9,6 +10,7 @@ import 'package:doctak_app/widgets/shimmer_widget/profile_shimmer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 import '../../../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
@@ -78,7 +80,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
                 profileBoc: profileBloc,
                 isMe: widget.userId == null);
           } else if (state is DataError) {
-            return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+            return RetryWidget(errorMessage: translation(context).msg_something_went_wrong_retry, onRetry: (){
               try {
                 print(widget.userId);
                 if (widget.userId == null) {
@@ -94,7 +96,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment> {
 
             });
           } else {
-            return Center(child: Text('Unknown state${state.toString()}'));
+            return Center(child: Text('${translation(context).lbl_unknown_state}: ${state.toString()}'));
           }
         },
       ),

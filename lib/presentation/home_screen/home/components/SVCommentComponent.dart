@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
@@ -121,7 +122,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                                   PopupMenuItem(
                                     child: Builder(builder: (context) {
                                       return Column(
-                                        children: ["Delete"].map((String item) {
+                                        children: [translation(context).lbl_delete].map((String item) {
                                           return PopupMenuItem(
                                             value: item,
                                             child: Text(item),
@@ -133,13 +134,13 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                                 ];
                               },
                               onSelected: (value) {
-                                if (value == 'Delete') {
+                                if (value == translation(context).lbl_delete) {
                                   showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
                                         return CustomAlertDialog(
                                             title:
-                                                'Are you sure want to delete comment ?',
+                                                translation(context).msg_confirm_delete_comment,
                                             callback: () {
                                               widget.commentBloc.add(
                                                   DeleteCommentEvent(
@@ -168,7 +169,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                             widget.onReplySelected(widget.comment.id ?? 0);
                           },
                           child: Text(
-                            '${widget.comment.replyCount} Reply',
+                            '${widget.comment.replyCount} ${translation(context).lbl_reply}',
                             style: TextStyle(
                               fontSize: 13.0,
                               color: Colors.grey[600],
@@ -219,7 +220,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                           //   ), itemSize: Size.infinite,
                           // )
                           Text(
-                            widget.comment.userHasLiked??false ? '${widget.comment.reactionCount}Liked':'${widget.comment.reactionCount}Like',
+                            widget.comment.userHasLiked??false ? '${widget.comment.reactionCount} ${translation(context).lbl_liked}':'${widget.comment.reactionCount} ${translation(context).lbl_like}',
                             style: TextStyle(
                               fontSize: 13.0,
                               color: Colors.grey[600],

@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job_applicant_screen.dart';
@@ -57,7 +58,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Job Detail', style: boldTextStyle(size: 18)),
+        title: Text(translation(context).lbl_job_detail, style: boldTextStyle(size: 18)),
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
@@ -256,7 +257,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               fontSize: 18),
                         ),
                         const SizedBox(height: 5),
-                        Text(jobsBloc.jobDetailModel.job?.companyName ?? 'N/A',
+                        Text(jobsBloc.jobDetailModel.job?.companyName ?? translation(context).lbl_not_available,
                             style: secondaryTextStyle(color: svGetBodyColor())),
                         const SizedBox(height: 10),
                         Row(
@@ -279,7 +280,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        Text('Apply Date',
+                        Text(translation(context).lbl_apply_date,
                             style: TextStyle(fontFamily: 'Poppins',
                                 color: svGetBodyColor(),
                                 fontWeight: FontWeight.w400,
@@ -290,7 +291,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Date From',
+                                Text(translation(context).lbl_date_from,
                                     style: secondaryTextStyle(
                                         color: svGetBodyColor())),
                                 Row(
@@ -323,7 +324,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text('Date To',
+                                Text(translation(context).lbl_date_to,
                                     style: secondaryTextStyle(
                                       color: svGetBodyColor(),
                                     )),
@@ -392,14 +393,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                   final shouldLeave = await showDialog<bool>(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: const Text('Leave App'),
-                                      content: const Text(
-                                          'Would you like to leave the app to view this content?'),
+                                      title: Text(translation(context).lbl_leave_app),
+                                      content: Text(
+                                          translation(context).msg_open_link_confirm),
                                       actions: <Widget>[
                                         TextButton(
                                           onPressed: () =>
                                               Navigator.of(context).pop(false),
-                                          child: const Text('No'),
+                                          child: Text(translation(context).lbl_no_answer),
                                         ),
                                         TextButton(
                                           onPressed: () {
@@ -409,7 +410,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                                 '');
                                             _launchInBrowser(url);
                                           },
-                                          child: const Text('Yes'),
+                                          child: Text(translation(context).lbl_yes),
                                         ),
                                       ],
                                     ),
@@ -419,15 +420,15 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                                     // await launchUrl(url);
                                   } else if (shouldLeave == false) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                       SnackBar(
                                           content: Text(
-                                              'Leaving the app canceled.')),
+                                              translation(context).msg_leaving_app_canceled)),
                                     );
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                       SnackBar(
                                           content: Text(
-                                              'Leaving the app canceled.')),
+                                              translation(context).msg_leaving_app_canceled)),
                                     );
                                   }
                                 },
@@ -453,7 +454,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               child: Text(state.errorMessage),
             );
           } else {
-            return const Center(child: Text('Something went wrong'));
+            return Center(child: Text(translation(context).msg_something_went_wrong));
           }
         },
       ),

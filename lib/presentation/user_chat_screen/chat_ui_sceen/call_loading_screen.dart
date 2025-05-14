@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 enum CallStatus {
   calling,
@@ -62,19 +63,19 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
   String get statusText {
     switch (_status) {
        case CallStatus.calling:
-        return "Calling...";
+        return translation(context).lbl_calling_status;
       case CallStatus.ringing:
-        return "Ringing...";
+        return translation(context).lbl_ringing;
       case CallStatus.busy:
-        return "User is busy";
+        return translation(context).lbl_user_busy;
       case CallStatus.offline:
-        return "User is offline";
+        return translation(context).lbl_user_offline;
       case CallStatus.rejected:
-        return "Call rejected";
+        return translation(context).lbl_call_rejected;
       case CallStatus.timeout:
-        return "No answer";
+        return translation(context).lbl_no_answer;
       case CallStatus.accepted:
-        return "Call accepted";
+        return translation(context).lbl_call_accepted;
     }
   }
 

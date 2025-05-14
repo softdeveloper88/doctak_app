@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/NoInternetScreen.dart';
-import 'package:doctak_app/presentation/call_module/call_service.dart';
 import 'package:doctak_app/presentation/calling_module/providers/pusher_provider.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
 import 'package:doctak_app/presentation/calling_module/services/agora_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/call_service.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
@@ -55,7 +55,7 @@ import 'core/utils/pusher_service.dart';
 import 'firebase_options.dart';
 import 'localization/app_localization.dart';
 import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
-import 'package:doctak_app/core/call_service/callkit_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 
 // Global service instances that persist throughout app lifecycle
 final CallService globalCallService = CallService();

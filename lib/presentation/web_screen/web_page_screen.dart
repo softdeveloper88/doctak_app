@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -102,10 +103,10 @@ class _WebPageScreenState extends State<WebPageScreen> {
         ),
       );
     } else {
-      const SizedBox.expand(
+       SizedBox.expand(
         child: Center(
           child: Text(
-            'Something went wrong',
+            translation(context).msg_webview_error,
           ),
         ),
       );

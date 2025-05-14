@@ -2,13 +2,11 @@ import 'dart:io';
 
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:clear_all_notifications/clear_all_notifications.dart';
-import 'package:doctak_app/core/call_service/callkit_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/main.dart';
-import 'package:doctak_app/presentation/call_module/call_api_service.dart';
-import 'package:doctak_app/presentation/call_module/call_service.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
@@ -26,6 +24,9 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../presentation/calling_module/services/call_api_service.dart';
+import '../presentation/calling_module/services/call_service.dart';
 
 @pragma('vm:entry-point')
 class NotificationService {

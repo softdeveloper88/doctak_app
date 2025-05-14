@@ -9,6 +9,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 import '../../../../theme/app_decoration.dart';
 import '../../../../widgets/custom_image_view.dart';
@@ -65,7 +66,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
                                 const BorderRadius.all(Radius.circular(6))),
                         child: Center(
                             child: Text(
-                          "All Post",
+                          translation(context).lbl_posts,
                           style: TextStyle(
                               fontFamily: 'Poppins',
                               color:
@@ -95,7 +96,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
                                 const BorderRadius.all(Radius.circular(6))),
                         child: Center(
                             child: Text(
-                          "About",
+                          translation(context).lbl_about,
                           style: TextStyle(
                               fontFamily: 'Poppins',
                               color:selectedIndex == 1
@@ -145,7 +146,7 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         },
         context,
         imageOne: 'assets/icon/ic_lock.svg',
-        interested: "Personal Information",
+        interested: translation(context).lbl_personal_information,
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
@@ -154,7 +155,7 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         },
         context,
         imageOne: 'assets/icon/ic_frame.svg',
-        interested: "Professional Summary",
+        interested: translation(context).lbl_professional_summary,
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
@@ -163,7 +164,7 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         },
         context,
         imageOne: 'assets/icon/ic_calendar.svg',
-        interested: "Professional Experience",
+        interested: translation(context).lbl_professional_experience,
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
@@ -172,7 +173,7 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         },
         context,
         imageOne: 'assets/icon/ic_person.svg',
-        interested: "Interested Information",
+        interested: translation(context).lbl_interest_information,
       ),
       const SizedBox(height: 10),
       _buildRowinterested(
@@ -181,7 +182,7 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         },
         context,
         imageOne: 'assets/icon/ic_privacy.svg',
-        interested: "Privacy Information",
+        interested: translation(context).lbl_privacy_information,
       ),
     ],
   );

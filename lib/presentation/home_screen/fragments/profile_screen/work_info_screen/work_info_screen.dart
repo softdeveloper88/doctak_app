@@ -46,7 +46,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
-        title: Text('Professional Experience', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_professional_experience, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -120,7 +120,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    if(widget.profileBloc.workEducationList!.isEmpty)  SizedBox(height: 80.h,child: const Center(child: Text('No Experience found'))),
+                    if(widget.profileBloc.workEducationList!.isEmpty)  SizedBox(height: 80.h, child: Center(child: Text(translation(context).lbl_no_experience_found))),
                     if (workList.isNotEmpty)
                       _buildWorkInfoFields(workList, 'work'),
                     if (universityList.isNotEmpty)
@@ -153,7 +153,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
 
   Widget _buildWorkInfoFields(List<WorkEducationModel> list, String type) {
     return list.isEmpty
-        ? SizedBox(height: 500, child: Center(child: Text('No $type Add')))
+        ? SizedBox(height: 500, child: Center(child: Text(translation(context).lbl_no_experience_found)))
         : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
               capitalizeWords(type),
@@ -177,7 +177,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                             if (type == 'work')
                               TextViewWidget(
                                 icon: Icons.work,
-                                label: 'Speciality/Area of practice',
+                                label: translation(context).lbl_specialty_area,
                                 value: entry.name ?? '',
                               ),
                             Divider(
@@ -186,7 +186,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                             if (type == 'work')
                               TextViewWidget(
                                 icon: Icons.type_specimen,
-                                label: 'Position/Role',
+                                label: translation(context).lbl_position_role,
                                 value: entry.position ?? "",
                               ),
                             Divider(
@@ -194,7 +194,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                             ),
                             TextViewWidget(
                               icon: Icons.local_hospital,
-                              label: 'Hospital/Clinic Name',
+                              label: translation(context).lbl_hospital_clinic_name,
                               value: entry.address ?? "",
                             ),
                             Divider(
@@ -203,13 +203,13 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                             if (type != 'work')
                               TextViewWidget(
                                 icon: Icons.description,
-                                label: 'Degree',
+                                label: translation(context).lbl_degree,
                                 value: entry.degree ?? "",
                               ),
                             if (type != 'work')
                               TextViewWidget(
                                 icon: Icons.book,
-                                label: 'Courses',
+                                label: translation(context).lbl_courses,
                               ),
 
                             // TextViewWidget(
@@ -219,7 +219,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                             // ),
                             TextViewWidget(
                               icon: Icons.location_city,
-                              label: 'Location',
+                              label: translation(context).lbl_location,
                               value: entry.description ?? "",
                             ),
                             Divider(
@@ -227,7 +227,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                             ),
 
                             TextViewWidget(
-                              label: 'Start Date',
+                              label: translation(context).lbl_start_date,
                               value: entry.startDate ?? '',
                             ),
                             Divider(
@@ -235,7 +235,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                             ),
 
                             TextViewWidget(
-                              label: 'End Date',
+                              label: translation(context).lbl_end_date,
                               value: entry.endDate ?? '',
                             ),
                             const SizedBox(height: 10),
@@ -277,7 +277,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> {
                                           builder: (BuildContext context) {
                                             return CustomAlertDialog(
                                                 title:
-                                                    'Are you sure want to delete Info ?',
+                                                    translation(context).msg_confirm_delete_info,
                                                 callback: () {
                                                   widget.profileBloc.add(
                                                       DeleteWorkEducationEvent(

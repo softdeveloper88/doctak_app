@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/meeting_model/create_meeting_model.dart';
 import 'package:doctak_app/data/models/meeting_model/fetching_meeting_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -33,7 +34,7 @@ class _UpcomingMeetingScreenState extends State<UpcomingMeetingScreen> {
             } else if (state is MeetingsLoaded) {
               return _buildMeetingList(meetingBloc.meetings!);
             }
-            return const Center(child: Text('No meetings scheduled'));
+            return Center(child: Text(translation(context).msg_no_meetings_scheduled));
           },
 
       );
@@ -66,7 +67,7 @@ Widget _buildMeetingList(GetMeetingModel meetingsData) {
                     pageRouteAnimation: PageRouteAnimation.Slide);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Joining ${session.title}'),
+                    content: Text('${translation(context).lbl_joining} ${session.title}'),
                   ),
                 );
               },
@@ -130,7 +131,7 @@ class MeetingItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Meeting ID: $meetingId",
+                    "${translation(context).lbl_meeting_id}: $meetingId",
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.black,
@@ -146,9 +147,9 @@ class MeetingItem extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               onPressed: onJoin,
-              child: const Text(
-                'Join',
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                translation(context).lbl_join,
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ],

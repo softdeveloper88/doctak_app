@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
@@ -35,8 +36,8 @@ class MeetingJoinRejectDialog extends StatelessWidget {
           context,
           title,
           callback,
-          yesButtonText ?? "DELETE",
-          joinName ?? "Delete ?",
+          yesButtonText ?? translation(context).lbl_delete,
+          joinName ?? translation(context).msg_confirm_delete,
           callbackNegative,
           noButtonText,
           profilePic),
@@ -133,7 +134,7 @@ confirmationMeetingJoinRejectDialog(
                                     : callbackNegative,
                                 child: Center(
                                   child: Text(
-                                    noButtonText ?? "CANCEL",
+                                    noButtonText ?? translation(context).lbl_cancel,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,

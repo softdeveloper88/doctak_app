@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/calling_module/models/user_model.dart';
 import 'package:doctak_app/presentation/calling_module/services/permission_service.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:doctak_app/presentation/call_module/call_service.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
 import '../models/call_state.dart';
 import '../providers/call_provider.dart';
 import '../services/agora_service.dart';
+import '../services/call_service.dart';
 import '../widgets/audio_call_view.dart';
 import '../widgets/call_controls.dart';
 import '../widgets/connecting_view.dart';
@@ -221,9 +221,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text("Call cannot start without required permissions"),
+        content: Text(translation(context).lbl_call_permission_error),
         action: SnackBarAction(
-          label: "Try Again",
+          label: translation(context).lbl_try_again,
           onPressed: _checkPermissionsAndStartCall,
         ),
       ),
@@ -278,19 +278,19 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       context: context,
       barrierDismissible: false, // Prevent dismissing by tapping outside
       builder: (context) => AlertDialog(
-        title: const Text('End Call'),
-        content: const Text('Are you sure you want to end this call?'),
+        title: Text(translation(context).lbl_end_call),
+        content: Text(translation(context).lbl_end_call_confirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(translation(context).lbl_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
               _endCallAndCleanup();
             },
-            child: const Text('End Call', style: TextStyle(color: Colors.red)),
+            child: Text(translation(context).lbl_end_call, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -352,7 +352,7 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
                         isVideoCall: widget.isVideoCall,
                         onRetry: () {}, // No retry in this state
                         showRetry: false,
-                        customMessage: "Initializing call...",
+                        customMessage: translation(context).lbl_initializing_call,
                       ),
                       // Call Controls with end call button only
                       Positioned(
@@ -491,26 +491,26 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   Widget _buildReconnectingOverlay() {
     return Container(
       color: Colors.black54,
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              "Reconnecting...",
-              style: TextStyle(
+              translation(context).lbl_reconnecting,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              "Please wait",
-              style: TextStyle(
+              translation(context).lbl_please_wait,
+              style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
               ),
@@ -525,17 +525,17 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   Widget _buildEndingCallOverlay() {
     return Container(
       color: Colors.black,
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              "Ending Call...",
-              style: TextStyle(
+              translation(context).lbl_ending_call,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,

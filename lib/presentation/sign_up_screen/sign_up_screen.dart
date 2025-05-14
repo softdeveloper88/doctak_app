@@ -43,14 +43,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void initState() {
-    print(widget.isSocialLogin);
+    // Social login status initialized
     dropdownBloc.add(LoadDropdownValues());
     profileBloc.add(UpdateFirstDropdownValue(''));
     firstnameController = TextEditingController(text: widget.firstName);
     lastNameController = TextEditingController(text: widget.lastName);
 
     emailController = TextEditingController(text: widget.email);
-    print('object');
+    // Initialize controllers
     super.initState();
   }
 
@@ -96,13 +96,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               width: MediaQuery.of(context).size.width * 0.8,
                               height: 100,
                             ),
-                            const Text('Sign Up', style: TextStyle(
+                            Text(translation(context).lbl_signup_title, style: const TextStyle(
                               fontSize: 24, fontWeight: FontWeight.w500,),),
                             const SizedBox(height: 8),
-                            const Text('Please Register your account to continue',
+                            Text(translation(context).msg_register_account,
                               overflow: TextOverflow.visible,
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16),),
+                              style: const TextStyle(fontSize: 16),),
                           ],),),
                         Container(width: double.maxFinite,
                           padding: const EdgeInsets.symmetric(
@@ -207,24 +207,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             //           )),),),),
                                             //   ],),),
                                             const SizedBox(height: 10),
-                                            const Padding(
-                                              padding: EdgeInsets.only(
+                                            Padding(
+                                              padding: const EdgeInsets.only(
                                                   top: 8.0),
                                               child: Text(
-                                                'Enter Your First Name:',
-                                                style: TextStyle(
+                                                translation(context).lbl_enter_first_name,
+                                                style: const TextStyle(
                                                   fontFamily: 'Poppins',
                                                   fontSize: 16,
                                                   fontWeight: FontWeight
                                                       .w500,),),),
                                             _buildName(context),
                                             const SizedBox(height: 16),
-                                            const Padding(
-                                              padding: EdgeInsets.only(
+                                            Padding(
+                                              padding: const EdgeInsets.only(
                                                   top: 8.0),
                                               child: Text(
-                                                'Enter Your Last Name:',
-                                                style: TextStyle(
+                                                translation(context).lbl_enter_last_name,
+                                                style: const TextStyle(
                                                   fontFamily: 'Poppins',
                                                   fontSize: 16,
                                                   fontWeight: FontWeight
@@ -232,11 +232,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             _buildName1(context),
                                             const SizedBox(height: 16),
                                             if (widget.isSocialLogin ==
-                                                false)const Padding(
-                                              padding: EdgeInsets.only(
+                                                false) Padding(
+                                              padding: const EdgeInsets.only(
                                                   top: 8.0),
-                                              child: Text('Enter Your Email:',
-                                                style: TextStyle(
+                                              child: Text(translation(context).lbl_enter_email,
+                                                style: const TextStyle(
                                                   fontFamily: 'Poppins',
                                                   fontSize: 16,
                                                   fontWeight: FontWeight
@@ -246,11 +246,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 false)const SizedBox(
                                                 height: 16),
                                             if (widget.isSocialLogin ==
-                                                false)const Padding(
-                                              padding: EdgeInsets.only(
+                                                false) Padding(
+                                              padding: const EdgeInsets.only(
                                                   top: 8.0),
-                                              child: Text('Create Password:',
-                                                style: TextStyle(
+                                              child: Text(translation(context).lbl_create_password,
+                                                style: const TextStyle(
                                                   fontFamily: 'Poppins',
                                                   fontSize: 16,
                                                   fontWeight: FontWeight
@@ -401,8 +401,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       color: Colors.black,
                                       fontFamily: 'Poppins',),
                                     children: <TextSpan>[
-                                      const TextSpan(text: 'I agree to the '),
-                                      TextSpan(text: 'Terms and Conditions',
+                                      TextSpan(text: translation(context).msg_agree_terms + ' '),
+                                      TextSpan(text: translation(context).lbl_privacy_policy,
                                         style: const TextStyle(
                                           color: Colors.blue,
                                           fontFamily: 'Poppins',),
@@ -426,11 +426,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     listener: (context, state) {
                                       if (state is DataLoaded) {
                                         if (state.isSubmit) {
-                                          print(state.response);
+                                          // Received response
                                           if (state.response['success']) {
                                             ScaffoldMessenger.of(context)
-                                                .showSnackBar(const SnackBar(
-                                                content: Text('Account create successfully')),);
+                                                .showSnackBar( SnackBar(
+                                                content: Text(translation(context).msg_login_success)),);
                                             launchScreen(context,
                                                 const SVDashboardScreen(),
                                                 isNewTask: true,
@@ -444,8 +444,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           } else {
                                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                                 content: Text(state.response['message'] ??
-                                                    "Something went wrong.Please make sure no field left empty")),);
-                                            print("errors ${state.response}");
+                                                    translation(context).msg_something_wrong)),);
+                                            // Error in response
                                             _showErrorDialog(
                                                 state.response['errors']);
                                           }
@@ -457,14 +457,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 route) => false);
                                       } else if (state is DataError) {
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
+                                            .showSnackBar( SnackBar(
                                             content: Text(
-                                                'Something went wrong')),);
+                                                translation(context).msg_something_wrong)),);
                                       } else {
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
+                                            .showSnackBar( SnackBar(
                                             content: Text(
-                                                'Something went wrong')),);
+                                                translation(context).msg_something_wrong)),);
                                       }
                                     },
                                     bloc: dropdownBloc,
@@ -473,7 +473,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 Align(alignment: Alignment.centerLeft,
                                     child: Padding(padding: const EdgeInsets
                                         .only(left: 44), child: Row(children: [
-                                      Text("Already have an account",
+                                      Text(translation(context).msg_already_have_account,
                                           style: CustomTextStyles
                                               .bodyMediumGray600),
                                       GestureDetector(onTap: () {
@@ -621,7 +621,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _formKey.currentState!.save();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Field must be filled'),));
+          SnackBar(content: Text(translation(context).err_msg_please_enter_valid_text),));
       return;
     }
 
@@ -629,7 +629,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // if (widget.isSocialLogin == false) {
       if (passwordController.text != confirmPasswordController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Password should be match'),));
+            SnackBar(content: Text(translation(context).err_msg_please_enter_valid_password),));
       } else {
         if (_isChecked) {
           dropdownBloc.add(SignUpButtonPressed(
@@ -645,11 +645,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             // replace with real input
           ));
         } else {
-          toast("Please accept terms and conditions before proceeds");
+          toast(translation(context).msg_agree_terms);
         }
       }
     }).catchError((e){
-      toast("Something went wrong please try again");
+      toast(translation(context).msg_something_wrong);
     });
   }
 

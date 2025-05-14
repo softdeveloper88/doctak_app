@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/image_constant.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -24,13 +25,18 @@ import 'bloc/chat_gpt_event.dart';
 import 'bloc/chat_gpt_state.dart';
 import 'chat_delete_dialog.dart';
 
-class ChatHistoryScreen extends StatelessWidget {
-  ChatHistoryScreen(
+class ChatHistoryScreen extends StatefulWidget {
+  const ChatHistoryScreen(
       {required this.onTap, required this.onNewSessionTap, super.key});
 
-  Function(Sessions) onTap;
-  Function onNewSessionTap;
+  final Function(Sessions) onTap;
+  final Function onNewSessionTap;
 
+  @override
+  State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
+}
+
+class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
   // final ScrollController _scrollController = ScrollController();
 
   List<ChatGPTResponse> messages = [];
@@ -51,10 +57,17 @@ class ChatHistoryScreen extends StatelessWidget {
 
   bool isWriting = false;
 
-  String chatWithAi = "Preparing DocTak AI.";
+  String chatWithAi = "";
 
   bool isDeleteButtonClicked = false;
-  ChatGPTBloc chatGPTBloc = ChatGPTBloc()..add(LoadDataValues());
+  final ChatGPTBloc chatGPTBloc = ChatGPTBloc()..add(LoadDataValues());
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    chatWithAi = translation(context).lbl_preparing_ai;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,8 +80,8 @@ class ChatHistoryScreen extends StatelessWidget {
         centerTitle: false,
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
-        title: const Text(
-          'History Artificial Intelligence',
+        title: Text(
+          translation(context).lbl_history_ai,
           style: TextStyle(fontSize: 17,fontWeight: FontWeight.w400),
         ),
       ),
@@ -79,7 +92,7 @@ class ChatHistoryScreen extends StatelessWidget {
             if (selectedSessionId == 0 && state1 is DataLoaded) {
               selectedSessionId = state1.response.newSessionId;
               chatWithAi =
-                  state1.response.sessions?.first.name ?? 'Next Session';
+                  state1.response.sessions?.first.name ?? translation(context).lbl_next_session;
             }
             if (state1 is DataInitial) {
               return Scaffold(
@@ -152,7 +165,7 @@ class ChatHistoryScreen extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: GestureDetector(
-                                        onTap: () => onTap(session),
+                                        onTap: () => widget.onTap(session),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -237,8 +250,8 @@ class ChatHistoryScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: svAppButton(
                       context: context,
-                      onTap: () => onNewSessionTap(),
-                      text: '+ NEW CHAT',
+                      onTap: () => widget.onNewSessionTap(),
+                      text: translation(context).lbl_new_chat,
                     ),
                   ),
                 ],

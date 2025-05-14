@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 import '../presentation/home_screen/utils/SVCommon.dart';
 
@@ -30,10 +31,10 @@ void showLoadingDialog(BuildContext context) {
               const SizedBox(height: 20.0),
 
               // Title
-              const Text(
-                'Sending Verification Link',
+              Text(
+                translation(context).lbl_sending_verification_link,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
@@ -42,10 +43,10 @@ void showLoadingDialog(BuildContext context) {
               const SizedBox(height: 10.0),
 
               // Subtitle/Message
-              const Text(
-                'Please wait while we send a verification link to your email.',
+              Text(
+                translation(context).msg_verification_email_wait,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14.0,
                   color: Colors.black54,
                 ),

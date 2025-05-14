@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/models/post_comment_model/reply_comment_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
@@ -107,12 +108,16 @@ class ReplyCommentComponent extends StatelessWidget {
                               PopupMenuItem(
                                 child: Builder(builder: (context) {
                                   return Column(
-                                    children: ["Delete","Update"].map((String item) {
-                                      return PopupMenuItem(
-                                        value: item,
-                                        child: Text(item),
-                                      );
-                                    }).toList(),
+                                    children: [
+                                      PopupMenuItem(
+                                        value: "Delete",
+                                        child: Text(translation(context).lbl_delete),
+                                      ),
+                                      PopupMenuItem(
+                                        value: "Update",
+                                        child: Text(translation(context).lbl_update),
+                                      ),
+                                    ],
                                   );
                                 }),
                               ),
@@ -125,7 +130,7 @@ class ReplyCommentComponent extends StatelessWidget {
                                   builder: (BuildContext context) {
                                     return CustomAlertDialog(
                                         title:
-                                        'Are you sure want to delete comment ?',
+                                        translation(context).msg_confirm_delete_comment,
                                         callback: () {
                                           onDeleteComment!();
                                           Navigator.of(context).pop();
@@ -141,7 +146,7 @@ class ReplyCommentComponent extends StatelessWidget {
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  replyCommentList.comment ?? 'No Name',
+                  replyCommentList.comment ?? translation(context).lbl_no_name,
                   style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins',),
                 ),
                 const SizedBox(height: 8.0),

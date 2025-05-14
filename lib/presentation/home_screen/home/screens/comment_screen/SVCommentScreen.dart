@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVCommentReplyComponent.dart';
@@ -48,7 +49,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Comments', style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
+        title: Text(translation(context).lbl_comments, style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -119,12 +120,12 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                   ),
                 );
               }else {
-                return const Center(
-                  child: Text('No comments'),
+                return  Center(
+                  child: Text(translation(context).msg_no_comments),
                 );
               }
             } else if(state is DataError){
-              return RetryWidget(errorMessage: "Something went wrong please try again",onRetry: (){
+              return RetryWidget(errorMessage: translation(context).msg_something_went_wrong_retry, onRetry: (){
                 try {
                   commentBloc.add(LoadPageEvent(postId: widget.id ?? 0,page: 1));
 

@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/common_navigator.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
@@ -66,15 +67,14 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                       width: 300,
                       height: 100,
                     ),
-                    const Text(
-                      'Complete Your Profile',
+                    Text(
+                      translation(context).lbl_complete_your_profile,
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'To unlock personalized features by providing'
-                      'your country, city, and profession information',
+                    Text(
+                      translation(context).msg_unlock_personalized_features,
                       overflow: TextOverflow.visible,
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 12),
@@ -98,8 +98,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 10),
-                              const Text(
-                                'Country',
+                              Text(
+                                translation(context).lbl_country,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -135,8 +135,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                 },
                               ),
                               const SizedBox(height: 10),
-                              const Text(
-                                'State',
+                              Text(
+                                translation(context).lbl_state,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -161,8 +161,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                 },
                               ),
                               const SizedBox(height: 10),
-                              if (AppData.userType == 'doctor') const Text(
-                                'Specialty',
+                              if (AppData.userType == 'doctor') Text(
+                                translation(context).lbl_specialty,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -189,17 +189,17 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             ],
                           );
                         } else {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Center(
+                                const Center(
                                   child: CircularProgressIndicator(),
                                 ),
                                 Text(
-                                  'Wait a moment, more fields are loading...',
-                                  style: TextStyle(
+                                  translation(context).msg_wait_fields_loading,
+                                  style: const TextStyle(
                                     fontFamily: 'Poppins',
                                     color: Colors.blue,
                                     fontWeight: FontWeight.bold,
@@ -219,8 +219,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
             if (state is DataCompleteLoaded) {
                 print(state.response);
                   ScaffoldMessenger.of(context)
-                      .showSnackBar(const SnackBar(
-                      content: Text('Account Update successfully')),);
+                      .showSnackBar(SnackBar(
+                      content: Text(translation(context).msg_account_update_success)),);
                   launchScreen(context,
                       const SVDashboardScreen(),
                       isNewTask: true,
@@ -229,8 +229,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
             } else {
               ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(
-                  content: Text('Something went wrong')),);
+                  .showSnackBar(SnackBar(
+                  content: Text(translation(context).msg_something_went_wrong)),);
             }
           },
           bloc: dropdownBloc,
@@ -247,7 +247,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   Widget _buildCompleteProfile(BuildContext context) {
     return svAppButton(
       context: context,
-      text: 'Save',
+      text: translation(context).lbl_save,
       onTap: () async {
         onTapComplete(context);
       },
@@ -255,24 +255,23 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   }
   void onTapComplete(BuildContext context) async {
     if (profileBloc.country == '' || profileBloc.country == null) {
-      toast("Please select country",
+      toast(translation(context).msg_please_select_country,
           bgColor: Colors.red, textColor: Colors.white);
       return;
     } else if (profileBloc.stateName == '' || profileBloc.stateName == null) {
-      toast("Please select state",
+      toast(translation(context).msg_please_select_state,
           bgColor: Colors.red, textColor: Colors.white);
       return;
     } else if ((profileBloc.specialtyName == null ||
-        profileBloc.specialtyName == '' ||
-        profileBloc.specialtyName == 'Select Specialty') &&  AppData.userType == 'doctor') {
-      toast("Please select specialty",
+        profileBloc.specialtyName == '') &&  AppData.userType == 'doctor') {
+      toast(translation(context).msg_please_select_specialty,
           bgColor: Colors.red, textColor: Colors.white);
       return;
     } else {
       dropdownBloc.add(
         CompleteButtonPressed(
-          country: profileBloc.country ?? 'United Arab Emirates',
-          state: profileBloc.stateName ?? "DUBAI",
+          country: profileBloc.country ?? '',
+          state: profileBloc.stateName ?? "",
           specialty: profileBloc.specialtyName ?? "",
         ),
       );

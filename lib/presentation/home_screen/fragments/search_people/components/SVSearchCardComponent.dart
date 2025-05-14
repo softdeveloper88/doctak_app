@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/profile_header_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
@@ -166,8 +167,8 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                 shape: RoundedRectangleBorder(borderRadius: radius(8)),
                 // shapeBorder: RoundedRectangleBorder(borderRadius: radius(8)),
                 child:Text(widget.element.isFollowedByCurrentUser == true
-                    ? 'Unfollow'
-                    : 'Follow',
+                    ? translation(context).lbl_unfollow
+                    : translation(context).lbl_follow,
                 style: boldTextStyle(
                   color: widget.element.isFollowedByCurrentUser != true
                       ? SVAppColorPrimary

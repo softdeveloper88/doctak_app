@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
@@ -48,7 +49,7 @@ class ProfileDateWidget extends StatelessWidget {
                   ),
                 ),
                 CustomTextFormField(
-                  hintText: label,
+                  hintText: translation(context).hint_select_date,
                   isReadOnly: true,
                   filled: true,
                   fillColor: AppDecoration.fillGray.color,

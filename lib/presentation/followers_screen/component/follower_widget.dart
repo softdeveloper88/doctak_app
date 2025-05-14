@@ -3,6 +3,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/followers_model/follower_data_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/followers_screen/bloc/followers_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/profile_header_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
@@ -231,8 +232,8 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                             ? SVAppColorPrimary
                             : buttonUnSelectColor,
                         child:Text( widget.element.isCurrentlyFollow
-                            ? 'Unfollow'
-                            : 'Follow',
+                            ? translation(context).lbl_unfollow
+                            : translation(context).lbl_follow,
                         style: boldTextStyle(
                             color: widget.element.isCurrentlyFollow != true
                                 ? SVAppColorPrimary

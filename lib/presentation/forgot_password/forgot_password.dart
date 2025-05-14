@@ -37,7 +37,7 @@ class ForgotPassword extends StatelessWidget {
                 if (data['success']) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(data['message']),
+                      content: Text(translation(context).msg_verification_link_sent),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -51,7 +51,7 @@ class ForgotPassword extends StatelessWidget {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(data['errors']['email'].toString()),
+                      content: Text(translation(context).msg_validation_error),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -61,8 +61,7 @@ class ForgotPassword extends StatelessWidget {
                 print(state.error);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                        jsonDecode(state.error)['errors']['email'].toString()),
+                    content: Text(translation(context).msg_validation_error),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -75,10 +74,10 @@ class ForgotPassword extends StatelessWidget {
                 var data = jsonDecode(state.response);
                 if (!data['success']) {
                   // message = data['message'];
-                  message = data['errors']['email'].toString();
+                  message = translation(context).msg_validation_error;
                 }
               } else if (state is ForgotFailure) {
-                message = jsonDecode(state.error)['errors']['email'].toString();
+                message = translation(context).msg_validation_error;
               }
               return SizedBox(
                   width: 100.w,
@@ -110,13 +109,13 @@ class ForgotPassword extends StatelessWidget {
                                       height: 100,
                                     ),
                                     const SizedBox(height: 20),
-                                    const Text('Forgot Password', style: TextStyle(
+                                    Text(translation(context).lbl_forgot_password_title, style: const TextStyle(
                                       fontSize: 24, fontWeight: FontWeight.w500,),),
                                     const SizedBox(height: 8),
-                                    const Text('Enter your email to reset password',
+                                    Text(translation(context).msg_enter_email_to_reset,
                                       overflow: TextOverflow.visible,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 16),),
+                                      style: const TextStyle(fontSize: 16),),
                                     const SizedBox(height: 16),
                                   ],),),
                               Container(
@@ -162,7 +161,7 @@ class ForgotPassword extends StatelessWidget {
                                     const SizedBox(height: 32),
                                     svAppButton(
                                       context: context,
-                                      text: 'SEND',
+                                      text: translation(context).lbl_send_button,
                                       onTap: () {
                                         if (emailController.text.isEmpty) {
                                           return;

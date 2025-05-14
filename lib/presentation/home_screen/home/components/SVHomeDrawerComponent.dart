@@ -4,7 +4,6 @@ import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
-import 'package:doctak_app/meeting_module/ui/join/join_meeting_page.dart';
 import 'package:doctak_app/presentation/about_us/about_us_screen.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
@@ -25,7 +24,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../../localization/app_localization.dart';
 import '../screens/case_discussion/add_case_discuss_screen.dart';
 import '../screens/meeting_screen/manage_meeting_screen.dart';
 
@@ -90,16 +91,24 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
   //     );
   //   }
   // }
+  String _formatString(String template, Map<String, String> values) {
+    String result = template;
+    values.forEach((key, value) {
+      result = result.replaceAll('{$key}', value);
+    });
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     List<SVDrawerModel> options = getDrawerOptions(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          color: SVAppColorPrimary,
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return Drawer(
+        elevation: 0,
+        child: Container(
           width: 300,
+          color: SVAppColorPrimary,
           child: ListView(
             children: [
               // 10.height,
@@ -124,10 +133,10 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CachedNetworkImage(
-                      imageUrl: AppData.imageUrl + AppData.profile_pic,
-                      height: 62,
-                      width: 62,
-                      fit: BoxFit.cover)
+                          imageUrl: AppData.imageUrl + AppData.profile_pic,
+                          height: 62,
+                          width: 62,
+                          fit: BoxFit.cover)
                       .cornerRadiusWithClipRRect(8),
                   16.width,
                   Expanded(
@@ -136,9 +145,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       children: [
                         Text(
                           AppData.userType == 'doctor'
-                              ? "Dr. ${capitalizeWords(AppData.name)}"
+                              ? '${translation(context).lbl_dr_prefix}${capitalizeWords(AppData.name)}'
                               : capitalizeWords(AppData.name), // User's name
-                          style: boldTextStyle(size: 18, color: Colors.white,fontFamily: 'Poppins',),
+                          style: boldTextStyle(
+                            size: 18,
+                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                         2.height,
                         Text(
@@ -146,10 +159,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                             AppData.userType == 'doctor'
                                 ? AppData.specialty
                                 : AppData.userType == 'student'
-                                ? "${AppData.university}\n Student"
-                                : AppData.specialty,
+                                    ? '${AppData.university}${translation(context).lbl_student_suffix}'
+                                    : AppData.specialty,
                             // User's specialty
-                            style: secondaryTextStyle(color: Colors.white,fontFamily: 'Poppins',)),
+                            style: secondaryTextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                            )),
                       ],
                     ),
                   ),
@@ -181,125 +197,149 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                             ? SVAppColorPrimary.withAlpha(30)
                             : SVAppColorPrimary),
                     title: e.title.validate(),
-                    titleTextStyle:
-                    boldTextStyle(size: 14, color: Colors.white,fontFamily: 'Poppins',),
-                    leading: (e.title=="Post a poll"|| e.title=='Groups Formation'||e.title=='Privacy Policy')?Image.asset(e.image ?? "",
-                        height: 22,
-                        width: 22,
-                        fit: BoxFit.contain,
-                        color:Colors.white,
-                        ):Image.asset(e.image ?? "",
-                        height: 22,
-                        width: 22,
-                        fit: BoxFit.contain,
-
-                        ),
+                    titleTextStyle: boldTextStyle(
+                      size: 14,
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
+                    ),
+                    leading: (e.image == 'assets/images/docktak_ai_light.png' ||
+                            e.image == 'assets/icon/ic_discussion.png')
+                        ? Image.asset(
+                            e.image ?? "",
+                            height: 22,
+                            width: 22,
+                            fit: BoxFit.contain,
+                          )
+                        : Image.asset(
+                            e.image ?? "",
+                            height: 22,
+                            width: 22,
+                            color: Colors.white,
+                            fit: BoxFit.contain,
+                          ),
                     onTap: () {
                       selectedIndex = index;
                       setState(() {});
                       if (selectedIndex == options.length - 1) {
                         finish(context);
                       }
-                      if (selectedIndex == 0) {//about us
+                      if (selectedIndex == 0) {
+                        //about us
                         finish(context);
-                         AboutUsScreen().launch(context);
-                      } else if (selectedIndex == 1) {//AI
+                        AboutUsScreen().launch(context);
+                      } else if (selectedIndex == 1) {
+                        //AI
                         finish(context);
-                        ChatDetailScreen(isFromMainScreen: true).launch(context);
+                        ChatDetailScreen(isFromMainScreen: true)
+                            .launch(context);
                         print(selectedIndex);
-                      } else if (selectedIndex == 2) {//jobs
+                      } else if (selectedIndex == 2) {
+                        //jobs
                         finish(context);
                         const JobsScreen().launch(context);
                         print(selectedIndex);
-                      }  else if (selectedIndex == 3) {//drugs list
+                      } else if (selectedIndex == 3) {
+                        //drugs list
                         finish(context);
                         const DrugsListScreen().launch(context);
                         print(selectedIndex);
-                      } else if (selectedIndex == 4) {//case discussion
+                      } else if (selectedIndex == 4) {
+                        //case discussion
                         finish(context);
                         print(selectedIndex);
                         CaseDiscussionScreen().launch(context);
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 5) { //docTak poll
+                      } else if (selectedIndex == 5) {
+                        //docTak poll
                         finish(context);
                         print(selectedIndex);
                         ComingSoonScreen().launch(context);
                         // const GuidelinesScreen().launch(context);
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 6) { //groups Formation
+                      } else if (selectedIndex == 6) {
+                        //groups Formation
                         finish(context);
                         print(selectedIndex);
                         const ComingSoonScreen().launch(context);
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 7) { // guidelines
+                      } else if (selectedIndex == 7) {
+                        // guidelines
                         finish(context);
                         print(selectedIndex);
                         const GuidelinesScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 8) {  // conferences
+                      } else if (selectedIndex == 8) {
+                        // conferences
                         finish(context);
                         print(selectedIndex);
                         ConferencesScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 9) {  // moh updates
+                      } else if (selectedIndex == 9) {
+                        // moh updates
                         finish(context);
                         print(selectedIndex);
                         // MyGroupsScreen().launch(context);
                         ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      }else if (selectedIndex == 10) {  // meeting
+                      } else if (selectedIndex == 10) {
+                        // meeting
                         finish(context);
                         print(selectedIndex);
                         // MyGroupsScreen().launch(context);
                         ManageMeetingScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 11) { //cme
+                      } else if (selectedIndex == 11) {
+                        //cme
                         finish(context);
                         print(selectedIndex);
                         ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 12) { // world news
+                      } else if (selectedIndex == 12) {
+                        // world news
                         finish(context);
                         print(selectedIndex);
                         NewsScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 13) {  // discount
+                      } else if (selectedIndex == 13) {
+                        // discount
                         finish(context);
                         print(selectedIndex);
-                         ComingSoonScreen().launch(context);
+                        ComingSoonScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 14) {  // suggestions
+                      } else if (selectedIndex == 14) {
+                        // suggestions
                         finish(context);
                         print(selectedIndex);
                         const SuggestionScreen().launch(context);
 
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 15) { // app setting
+                      } else if (selectedIndex == 15) {
+                        // app setting
                         finish(context);
 
                         const AppSettingScreen().launch(context);
 
-
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 16) {  // privacy
+                      } else if (selectedIndex == 16) {
+                        // privacy
                         finish(context);
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => WebPageScreen(
-                                    page_name: 'Privacy Policy',
+                                    page_name: l10n.lbl_privacy_policy,
                                     url: 'https://doctak.net/privacy-policy')));
 
-
                         // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 17) {  //logout
+                      } else if (selectedIndex == 17) {
+                        //logout
                         finish(context);
                         print(selectedIndex);
                         // ComingSoonScreen().launch(context);
@@ -338,81 +378,76 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                 child: SnapHelperWidget<PackageInfo>(
                   future: PackageInfo.fromPlatform(),
                   onSuccess: (data) => Text(data.version,
-                      style: boldTextStyle(color: Colors.white,fontFamily: 'Poppins',)),
+                      style: boldTextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Poppins',
+                      )),
                 ),
               ),
               20.height,
+
+              TextButton.icon(
+                onPressed: () {
+                  finish(context);
+                },
+                icon: Icon(
+                  isRtl ? Icons.arrow_forward : Icons.arrow_back,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  l10n.lbl_home,
+                  style: boldTextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ).center(),
+
+              20.height,
             ],
           ),
-        ),
-        Stack(children: [
-          Container(
-            color: SVAppColorPrimary,
-            // decoration: const BoxDecoration(
-            //     color: Colors.white,
-            //     borderRadius: BorderRadius.only(topRight: Radius.circular(300),bottomRight: Radius.circular(300))
-            // ),
-            width: 20,
-          ),
-          InkWell(
-            onTap: () {
-              finish(context);
-            },
-            child: Container(
-              decoration: const BoxDecoration(
-                  color: SVAppColorPrimary,
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(300),
-                      bottomRight: Radius.circular(300))),
-              margin: const EdgeInsets.only(top: 50),
-              width: 50,
-              height: 100,
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.white,
-                size: 40,
-              ),
-            ),
-          ),
-        ])
-      ],
+        )
     );
   }
 
   logoutAccount(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Warning!'),
-          content: const Text('Are sure want to logout account?'),
+          title: Text(l10n.lbl_logout),
+          content: Text(l10n.msg_confirm_logout),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
+              child: Text(l10n.lbl_cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: const Text(
-                'Yes',
-                style: TextStyle(color: Colors.red,fontFamily: 'Poppins',),
-                // color: Colors.red,
+            TextButton(child: Text(
+                l10n.lbl_yes,
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontFamily: 'Poppins',
+                ),
               ),
               onPressed: () async {
                 DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-                String deviceId='';
-                String deviceType='';
-                if(isAndroid){
-                  AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+                String deviceId = '';
+                String deviceType = '';
+                if (isAndroid) {
+                  AndroidDeviceInfo androidInfo =
+                      await deviceInfoPlugin.androidInfo;
                   print('Running on ${androidInfo.model}');
-                  deviceType="android";
-                  deviceId=androidInfo.id;
-                }else{
+                  deviceType = "android";
+                  deviceId = androidInfo.id;
+                } else {
                   IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
-                  print('Running on ${iosInfo.utsname.machine}');  // e.g. "iPod7,1"
-                  deviceType="ios";
-                  deviceId=iosInfo.identifierForVendor.toString();
+                  print(
+                      'Running on ${iosInfo.utsname.machine}'); // e.g. "iPod7,1"
+                  deviceType = "ios";
+                  deviceId = iosInfo.identifierForVendor.toString();
                 }
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 var result = await logoutUserAccount(deviceId);
@@ -423,7 +458,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       MaterialPageRoute(
                         builder: (context) => LoginScreen(),
                       ),
-                          (route) => false);
+                      (route) => false);
                 } else {
                   AppSharedPreferences().clearSharedPreferencesData(context);
                   Navigator.pushAndRemoveUntil(
@@ -431,7 +466,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       MaterialPageRoute(
                         builder: (context) => LoginScreen(),
                       ),
-                          (route) => false);
+                      (route) => false);
                 }
 
                 // Call the delete account function
@@ -444,29 +479,27 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
   }
 
   deleteAccount(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete your Account?'),
-          content: const Text(
-              '''If you select Delete we will delete your account on our server.
-
-Your app data will also be deleted and you won't be able to retrieve it.
-
-Since this is a security-sensitive operation, you eventually are asked to login before your account can be deleted.'''),
+          title: Text(l10n.lbl_delete_account_confirmation),
+          content: Text(l10n.msg_delete_account_warning),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
+              child: Text(l10n.lbl_cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Colors.red,fontFamily: 'Poppins',),
-                // color: Colors.red,
+              child: Text(
+                l10n.lbl_delete,
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontFamily: 'Poppins',
+                ),
               ),
               onPressed: () async {
                 var result = await deleteUserAccount();
@@ -516,7 +549,7 @@ Since this is a security-sensitive operation, you eventually are asked to login 
     try {
       print(AppData.userToken);
       final response = await http.post(
-        body: {'device_id':deviceId},
+        body: {'device_id': deviceId},
         apiUrl,
         headers: <String, String>{
           'Authorization': 'Bearer ${AppData.userToken!}',

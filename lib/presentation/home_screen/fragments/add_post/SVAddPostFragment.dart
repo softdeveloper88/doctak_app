@@ -4,10 +4,12 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../core/utils/app/AppData.dart';
@@ -96,7 +98,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
         surfaceTintColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
         backgroundColor: context.cardColor,
-        title: Text('New Post', style: boldTextStyle(size: 18)),
+        title: Text(translation(context).lbl_new_post, style: boldTextStyle(size: 18)),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -127,7 +129,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
             },
             child: AppButton(
               shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
-              text: 'Post',
+              text: translation(context).lbl_post,
               textStyle: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,

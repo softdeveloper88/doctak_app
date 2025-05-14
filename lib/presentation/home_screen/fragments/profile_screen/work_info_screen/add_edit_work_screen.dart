@@ -54,7 +54,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
       appBar: AppBar(
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
-        title: Text('Add Work', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_update, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -168,7 +168,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                               const SizedBox(height: 10),
                             if (AppData.userType == "doctor")
                               Text(
-                                'Speciality/Area of practice',
+                                translation(context).lbl_specialty,
                                 style:  TextStyle(fontFamily: 'Poppins',
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -208,7 +208,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                           ],
                         );
                       } else {
-                        return Text('No widget $state');
+                        return Text(translation(context).lbl_unknown_state);
                       }
                     }),
               //   TextFieldEditWidget(
@@ -224,7 +224,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
-                  'Position/Role',
+                  translation(context).lbl_position_role,
                   style:  TextStyle(fontFamily: 'Poppins',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -262,8 +262,8 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                 isEditModeMap: true,
                 icon: Icons.location_on,
                 index: 2,
-                hints: 'Enter Hospital/clinic name',
-                label: 'Hospital/Clinic Name',
+                hints: translation(context).hint_hospital_name,
+                label: translation(context).lbl_hospital_clinic_name,
                 value: updateWork?.address ?? "",
                 onSave: (value) => updateWork?.address = value,
               ),
@@ -273,7 +273,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   isEditModeMap: true,
                   icon: Icons.description,
                   index: 2,
-                  label: 'Degree',
+                  label: translation(context).lbl_degree,
                   value: updateWork?.degree ?? "",
                   onSave: (value) => updateWork?.degree = value,
                 ),
@@ -283,7 +283,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   focusNode: focusNode4,
                   icon: Icons.book,
                   index: 2,
-                  label: 'Courses',
+                  label: translation(context).lbl_courses,
                   value: updateWork?.courses ?? "",
                   onSave: (value) => updateWork?.courses = value,
                 ),
@@ -292,22 +292,22 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                   icon: Icons.description,
                   focusNode: focusNode5,
                   index: 2,
-                  hints: 'Enter location (e.g., KSA, UAE)',
-                  label: 'Location',
+                  hints: translation(context).hint_location,
+                  label: translation(context).lbl_location,
                   value: updateWork?.description ?? "",
                   onSave: (value) => updateWork?.description = value,
                   maxLines: 3),
               ProfileDateWidget(
                 isEditModeMap: true,
                 index: 2,
-                label: 'Start Date',
+                label: translation(context).lbl_start_date,
                 value: updateWork?.startDate ?? '',
                 onSave: (value) => updateWork?.startDate = value,
               ),
               ProfileDateWidget(
                 isEditModeMap: true,
                 index: 2,
-                label: 'End Date',
+                label: translation(context).lbl_end_date,
                 value: updateWork?.endDate ?? '',
                 onSave: (value) => updateWork?.endDate = value,
               ),
@@ -315,7 +315,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
-                  'Privacy',
+                  translation(context).lbl_privacy,
                   style:  TextStyle(fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -403,7 +403,7 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> {
                         }
                         Navigator.pop(context);
                       },
-                      text: 'Add',
+                      text: translation(context).lbl_add,
                     ),
                   ),
                 ],

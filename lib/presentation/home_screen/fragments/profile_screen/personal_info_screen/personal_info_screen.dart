@@ -52,7 +52,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
-        title: Text('Personal Information', style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
+        title: Text(translation(context).lbl_personal_information, style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -125,7 +125,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   isEditModeMap: isEditModeMap,
                   index: 0,
                   icon: Icons.person,
-                  label: 'First Name',
+                  label: translation(context).lbl_first_name,
                   value: widget.profileBloc.userProfile?.user?.firstName ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.firstName = value,
@@ -140,7 +140,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   isEditModeMap: isEditModeMap,
                   index: 0,
                   icon: Icons.person,
-                  label: 'Last Name',
+                  label: translation(context).lbl_last_name,
                   value: widget.profileBloc.userProfile?.user?.lastName ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.lastName = value,
@@ -155,7 +155,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   isEditModeMap: isEditModeMap,
                   index: 0,
                   icon: Icons.person,
-                  label: 'Phone Number',
+                  label: translation(context).lbl_phone_number,
                   value: widget.profileBloc.userProfile?.user?.phone ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.phone = value,
@@ -169,11 +169,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 ProfileDateWidget(
                   isEditModeMap: isEditModeMap,
                   index: 0,
-                  label: 'Date of Birth',
+                  label: translation(context).lbl_date_of_birth,
                   value: widget.profileBloc.userProfile?.user?.dob ?? '',
                   onSave: (value) {
                     setState(() {
-                      print(value);
+                      // Value received from date picker
                       widget.profileBloc.userProfile?.user?.dob = value;
                     });
                   },
@@ -188,7 +188,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   isEditModeMap: isEditModeMap,
                   icon: Icons.numbers_rounded,
                   index: 0,
-                  label: 'License No',
+                  label: translation(context).lbl_license_no,
                   value: widget.profileBloc.userProfile?.user?.licenseNo ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.user?.licenseNo = value,
@@ -202,7 +202,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 if (!isEditModeMap)
                   TextFieldEditWidget(
                     index: 0,
-                    label: 'Country',
+                    label: translation(context).lbl_country,
                     value: widget.profileBloc.userProfile?.user?.country ?? '',
                     onSave: (value) =>
                         widget.profileBloc.userProfile?.user?.country = value,
@@ -216,7 +216,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 if (!isEditModeMap)
                   TextFieldEditWidget(
                     index: 0,
-                    label: 'State',
+                    label: translation(context).lbl_state,
                     value: widget.profileBloc.userProfile?.user?.state ?? '',
                     onSave: (value) => widget.profileBloc.userProfile?.user?.state = value,
                   ),
@@ -236,9 +236,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 10),
-                              const Text(
-                                'Country',
-                                style: TextStyle(
+                              Text(
+                                translation(context).lbl_country,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -272,9 +272,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                 },
                               ),
                               const SizedBox(height: 10),
-                              const Text(
-                                'State',
-                                style: TextStyle(
+                              Text(
+                                translation(context).lbl_state,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -305,9 +305,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               if (AppData.userType == "doctor")
                                 const SizedBox(height: 10),
                               if (AppData.userType == "doctor")
-                                const Text(
-                                  'Specialty',
-                                  style: TextStyle(
+                                Text(
+                                  translation(context).lbl_specialty,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -326,8 +326,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                     vertical: 0,
                                   ),
                                   onChanged: (String? newValue) {
-                                    print(newValue);
-                                    print("Specialty $newValue");
+                                    // Selected specialty value
+                                    // Update specialty in profile bloc
                                     widget.profileBloc.specialtyName = newValue!;
                                     widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
                                   },
@@ -335,10 +335,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               if (AppData.userType != "doctor")
                                 const SizedBox(height: 10),
                               // if (AppData.userType != "doctor")
-                              //   const Padding(
+                              //   Padding(
                               //     padding: EdgeInsets.only(top: 8.0),
                               //     child: Text(
-                              //       'University',
+                              //       translation(context).lbl_university,
                               //       style: TextStyle(
                               //         fontSize: 16,
                               //         fontWeight: FontWeight.w500,
@@ -379,7 +379,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             ],
                           );
                         } else {
-                          return Text('No widget $state');
+                          return Text(translation(context).msg_something_wrong);
                         }
                       }),
                 10.height,
@@ -400,7 +400,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         userProfilePrivacyModel: UserProfilePrivacyModel(),
                       ));
                     },
-                    text: 'Update',
+                    text: translation(context).lbl_update,
                   ),
               ],
             ),

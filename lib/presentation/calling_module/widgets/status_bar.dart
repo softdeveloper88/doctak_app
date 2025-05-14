@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/calling_module/providers/call_provider.d
 import 'package:doctak_app/presentation/calling_module/models/call_state.dart';
 import 'package:doctak_app/presentation/calling_module/models/user_model.dart';
 
+import '../../../localization/app_localization.dart';
 import '../models/user_model.dart';
 
 /// Widget that displays call status information at the top of the screen
@@ -64,7 +65,7 @@ class StatusBar extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        "${isVideoCall ? 'Video' : 'Audio'} call · ${callState.formattedCallDuration}",
+                        "${isVideoCall ? translation(context).lbl_video : translation(context).lbl_audio} ${translation(context).lbl_end_call.toLowerCase()} · ${callState.formattedCallDuration}",
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 12,
@@ -94,7 +95,7 @@ class StatusBar extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    callState.getNetworkQualityText(),
+                    callState.getNetworkQualityText(context: context),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,

@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -53,10 +54,9 @@ confirmationAlertDialog(
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 8.0),
-                                child: Text("Delete chat?",
+                                child: Text(translation(context).lbl_delete_chat,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-
                                         fontSize: 10.sp,
                                         color: svGetBodyColor(),
                                         fontWeight: FontWeight.w600)),
@@ -74,9 +74,8 @@ confirmationAlertDialog(
                             style: TextStyle(
                                 fontSize: 10.sp, color: svGetBodyColor()),
                             children: <TextSpan>[
-                              const TextSpan(
-                                  text:
-                                      'Are you sure that you want to delete this chat'),
+                              TextSpan(
+                                  text: translation(context).msg_confirm_delete_chat),
                               TextSpan(
                                   text: title,
                                   style: const TextStyle(
@@ -109,7 +108,7 @@ confirmationAlertDialog(
                                 },
                                 child: Center(
                                   child: Text(
-                                    "CANCEL",
+                                    translation(context).lbl_cancel_caps,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
@@ -137,7 +136,7 @@ confirmationAlertDialog(
                                 onPressed: callBack,
                                 child: Center(
                                   child: Text(
-                                    "DELETE",
+                                    translation(context).lbl_delete_caps,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,

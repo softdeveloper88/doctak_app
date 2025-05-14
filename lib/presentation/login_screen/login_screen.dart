@@ -79,36 +79,36 @@ class LoginScreenState extends State<LoginScreen> {
         // Successful API call, handle the response if needed
         // Show success Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification link sent successfully'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(translation(context).msg_verification_link_sent),
+            duration: const Duration(seconds: 2),
           ),
         );
       } else if (response.statusCode == 422) {
         // Validation error or user email not found
         // Show error Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Validation error or user email not found'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(translation(context).msg_validation_error),
+            duration: const Duration(seconds: 2),
           ),
         );
       } else if (response.statusCode == 404) {
         // User already verified
         // Show info Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User already verified'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(translation(context).msg_user_already_verified),
+            duration: const Duration(seconds: 2),
           ),
         );
       } else {
         // Something went wrong
         // Show error Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong.'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(translation(context).msg_something_wrong),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -118,9 +118,9 @@ class LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pop();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(translation(context).msg_something_wrong),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -178,7 +178,7 @@ class LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Saved Logins',
+                    translation(context).lbl_saved_logins,
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 20,
@@ -242,9 +242,9 @@ class LoginScreenState extends State<LoginScreen> {
                         );
                       },
                     )
-                  : const Center(
+                  : Center(
                       child: Text(
-                        'No saved logins available',
+                        translation(context).msg_no_saved_logins,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 16,
@@ -340,7 +340,7 @@ class LoginScreenState extends State<LoginScreen> {
                   loginApp(context);
                 } else if (state is SocialLoginSuccess) {
                   if (mounted) {
-                    toasty(context, 'Social Login successfully',
+                    toasty(context, translation(context).msg_login_success,
                         bgColor: Colors.green, textColor: Colors.white);
                   }
                   // if (state.response.user?.userType != null) {
@@ -389,7 +389,7 @@ class LoginScreenState extends State<LoginScreen> {
                 } else if (state is LoginFailure) {
                   if (mounted) {
                     TextInput.finishAutofillContext(shouldSave: false);
-                    toasty(context, 'Login failed please try again',
+                    toasty(context, translation(context).msg_login_failed,
                         bgColor: Colors.red, textColor: Colors.white);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -421,27 +421,27 @@ class LoginScreenState extends State<LoginScreen> {
                               width: MediaQuery.of(context).size.width * 0.7,
                               height: 100,
                             ),
-                            const Text(
-                              'Welcome Back',
-                              style: TextStyle(
+                            Text(
+                              translation(context).lbl_welcome_back,
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Please login to continue',
+                            Text(
+                              translation(context).msg_please_login_to_continue,
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16),
                             ),
                             const SizedBox(height:20),
 
                             // Email Field
-                            const Align(
+                            Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Enter your Email:',
-                                style: TextStyle(
+                                translation(context).lbl_enter_your_email_colon,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -479,11 +479,11 @@ class LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 16),
 
                             // Password Field
-                            const Align(
+                            Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Enter your Password:',
-                                style: TextStyle(
+                                translation(context).lbl_enter_your_password_colon,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -549,7 +549,7 @@ class LoginScreenState extends State<LoginScreen> {
                                     });
                                   },
                                 ),
-                                const Text('Remember Me'),
+                                Text(translation(context).lbl_remember_me),
                                 const Spacer(),
                                 GestureDetector(
                                   onTap: () => onTapTxtForgotPassword(context),
@@ -565,7 +565,7 @@ class LoginScreenState extends State<LoginScreen> {
                             // Login Button
                             svAppButton(
                               context: context,
-                              text: 'LOGIN',
+                              text: translation(context).lbl_login_button,
                               onTap: () async {
                                 if (_formKey.currentState!.validate()) {
                                   _formKey.currentState!.save();
@@ -708,7 +708,7 @@ class LoginScreenState extends State<LoginScreen> {
           ));
           GoogleSignIn().disconnect();
         }).catchError((onError){
-          toast('Something went wrong please try again');
+          toast(translation(context).msg_login_failed);
         });
       } else {
         // String? token = await FirebaseMessaging.instance.getToken();
@@ -734,11 +734,11 @@ class LoginScreenState extends State<LoginScreen> {
           ));
           GoogleSignIn().disconnect();
         }).catchError((onError){
-          toast('Something went wrong please try again');
+          toast(translation(context).msg_login_failed);
         });}
 
     } on Exception catch (e) {
-      toast('Something went wrong please try again');
+      toast(translation(context).msg_something_wrong);
       print('error is ....... $e');
       // TODO
     }
@@ -796,7 +796,7 @@ class LoginScreenState extends State<LoginScreen> {
          deviceToken: token ?? '',
        ));
      }else{
-       toast('Something went wrong please try again');
+       toast(translation(context).msg_something_wrong);
      }
     print("${appleCredential.givenName} ${appleCredential.familyName}");
 
@@ -819,7 +819,7 @@ class LoginScreenState extends State<LoginScreen> {
     // }
     TextInput.finishAutofillContext(shouldSave: true);
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      toasty(context, 'Login successfully',
+      toasty(context, translation(context).msg_login_success,
           bgColor: Colors.green, textColor: Colors.white);
       if (mounted) {
         // Navigator.pushReplacement(

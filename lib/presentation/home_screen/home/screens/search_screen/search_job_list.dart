@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/widgets/job_card_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/bloc/search_bloc.dart';
@@ -300,9 +301,9 @@ class SearchJobList extends StatelessWidget {
         ),
       );
     } else {
-      return const Expanded(
+      return Expanded(
           child: Center(
-        child: Text('No Jobs Result found'),
+        child: Text(translation(context).msg_no_jobs_found),
       ));
     }
   }

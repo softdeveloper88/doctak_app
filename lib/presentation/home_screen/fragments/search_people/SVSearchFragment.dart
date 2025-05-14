@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_state.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/components/SVSearchCardComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_people.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -68,7 +69,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Search Peoples', style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
+        title: Text(translation(context).lbl_search_peoples, style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
         leading: IconButton(
             icon:
                 Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
@@ -136,7 +137,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
             textFieldType: TextFieldType.NAME,
             decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: 'Search People ',
+              hintText: translation(context).lbl_search_people,
               hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins',),
               suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
                       height: 17,
@@ -243,7 +244,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
 //           );
 //         } else {
 //           return const Expanded(
-//               child: Center(child: Text('Something went wrong')));
+//               child: Center(child: Text(translation(context).msg_something_went_wrong)));
 //         }
 //       },
 //     );

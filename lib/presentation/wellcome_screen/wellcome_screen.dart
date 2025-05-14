@@ -1,3 +1,5 @@
+import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
 import 'package:flutter/material.dart';
@@ -39,14 +41,14 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const Spacer(flex: 1),
               ButtonInfo(
-                title: "Hello and Welcome",
+                title: translation(context).lbl_welcome_title,
                 description:
-                "Your account has been created successfully. Please check your email to verify your account.",
+                translation(context).msg_account_created,
                 button: Transform.scale(
                   scale: 1.8,
                   child: const CircularProgressIndicator.adaptive(),
                 ),
-                btnText: 'Send email again',
+                btnText: translation(context).lbl_send_email_again,
                 press: () {
                   sendVerificationLink(email,context);
                 },
@@ -74,8 +76,8 @@ class WelcomeScreen extends StatelessWidget {
         // Successful API call, handle the response if needed
         // Show success Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification link sent successfully'),
+          SnackBar(
+            content: Text(translation(context).msg_verification_link_sent),
             duration: Duration(seconds: 2),
           ),
         );
@@ -89,8 +91,8 @@ class WelcomeScreen extends StatelessWidget {
         // Validation error or user email not found
         // Show error Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Validation error or user email not found'),
+          SnackBar(
+            content: Text(translation(context).msg_validation_error),
             duration: Duration(seconds: 2),
           ),
         );
@@ -98,8 +100,8 @@ class WelcomeScreen extends StatelessWidget {
         // User already verified
         // Show info Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User already verified'),
+          SnackBar(
+            content: Text(translation(context).msg_user_already_verified),
             duration: Duration(seconds: 2),
           ),
         );
@@ -107,8 +109,8 @@ class WelcomeScreen extends StatelessWidget {
         // Something went wrong
         // Show error Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong.'),
+          SnackBar(
+            content: Text(translation(context).msg_something_wrong),
             duration: Duration(seconds: 2),
           ),
         );
@@ -119,8 +121,8 @@ class WelcomeScreen extends StatelessWidget {
       Navigator.of(context).pop();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong.'),
+        SnackBar(
+          content: Text(translation(context).msg_something_wrong),
           duration: Duration(seconds: 2),
         ),
       );
@@ -176,7 +178,7 @@ class ButtonInfo extends StatelessWidget {
                       foregroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8)))),
-                  child: Text(btnText ?? "Retry".toUpperCase()),
+                  child: Text(btnText ?? translation(context).lbl_retry.toUpperCase()),
                 ),
             const SizedBox(height: 30),
           ],

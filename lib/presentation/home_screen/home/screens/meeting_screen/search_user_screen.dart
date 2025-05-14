@@ -4,9 +4,8 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -70,8 +69,8 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
         surfaceTintColor: context.cardColor,
         backgroundColor: context.cardColor,
         centerTitle: false,
-        title: const Text(
-          'Search Friends',
+        title: Text(
+          translation(context).lbl_search_friends,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -97,7 +96,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                   textFieldType: TextFieldType.NAME,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'Search by name or email ',
+                    hintText: translation(context).lbl_search_by_name_or_email,
                     hintStyle: secondaryTextStyle(
                       color: svGetBodyColor(),
                       fontFamily: 'Poppins',
@@ -271,7 +270,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                                              toast(responseData['message']);
                                         });
                                       },
-                                      child: const Text('Send Invite',style: TextStyle(color: Colors.white,fontSize: 14),),)
+                                      child: Text(translation(context).lbl_send_invite,style: const TextStyle(color: Colors.white,fontSize: 14),),)
                                   ],
                                 ),
                               ),
@@ -284,12 +283,12 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                     ),
                   );
                 }else{
-                  return const Expanded(child: Center(child: Text('No user found',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,fontFamily: 'Poppins'),)));
+                  return Expanded(child: Center(child: Text(translation(context).msg_no_user_found,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.bold,fontFamily: 'Poppins'),)));
 
                 }
               } else if (state is MeetingsError) {
                 return RetryWidget(
-                    errorMessage: "Something went wrong please try again",
+                    errorMessage: translation(context).msg_something_went_wrong_retry,
                     onRetry: () {
                       try {
                         meetingBloc.add(LoadSearchUserEvent(page: 1, keyword: _searchController.text,));
@@ -298,7 +297,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                       }
                     });
               } else {
-                return const Center(child: Text('Something went wrong'));
+                return Center(child: Text(translation(context).msg_something_went_wrong));
               }
             },
           ),

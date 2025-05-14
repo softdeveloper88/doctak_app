@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -88,7 +89,7 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                                       commentController.text = '';
                                     }
                                   },
-                                  child: Text('Post',
+                                  child: Text(translation(context).lbl_post,
                                       style: secondaryTextStyle(color: SVAppColorPrimary,fontFamily: 'Poppins',))),
                               focus: focusNode,
                               minLines: 1,
@@ -96,7 +97,7 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                               controller: commentController,
                               textFieldType: TextFieldType.MULTILINE,
                               decoration: InputDecoration(
-                                hintText: ' Write a comment',
+                                hintText: translation(context).lbl_write_a_comment,
                                 hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins',),
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,

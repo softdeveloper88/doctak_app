@@ -1,5 +1,6 @@
 
 // lib/presentation/call_module/widgets/audio_call_view.dart
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doctak_app/presentation/calling_module/providers/call_provider.dart';
@@ -71,7 +72,7 @@ class AudioCallView extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        "In call · ${callState.formattedCallDuration}",
+                        "${translation(context).lbl_in_call} · ${callState.formattedCallDuration}",
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 16,

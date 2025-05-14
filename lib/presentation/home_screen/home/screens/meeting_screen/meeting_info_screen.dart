@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 class MeetingInfoScreen extends StatelessWidget {
-  final List<Map<String, String>> meetingOptions = [
-    {"title": "Start/Stop Meeting", "description": "Meeting owner can start or stop the meeting"},
-    {"title": "Mute All Participants", "description": "Meeting owner can not mute all participants"},
-    {"title": "Unmute All Participants", "description": "Meeting owner can not unmute all participants"},
-    {"title": "Add/Remove Host", "description": "Meeting owner can add or remove hosts"},
-    {"title": "Share Screen", "description": "Meeting owner can share their screen"},
-    {"title": "Raise Hand", "description": "Meeting participant can raise their hand"},
-    {"title": "Send Reactions", "description": "Meeting participant can send reactions"},
-    {"title": "Toggle Microphone", "description": "Meeting participant can toggle their microphone"},
-    {"title": "Toggle Video", "description": "Meeting participant can toggle their video"},
-    {"title": "Enable Waiting Room", "description": "Meeting owner can enable or disable the waiting room\nAsk to Join Meeting"},
-  ];
+  List<Map<String, String>> getMeetingOptions(BuildContext context) {
+    return [
+      {"title": translation(context).lbl_start_stop_meeting, "description": translation(context).desc_start_stop_meeting},
+      {"title": translation(context).lbl_mute_all_participants, "description": translation(context).desc_mute_all_participants},
+      {"title": translation(context).lbl_unmute_all_participants, "description": translation(context).desc_unmute_all_participants},
+      {"title": translation(context).lbl_add_remove_host, "description": translation(context).desc_add_remove_host},
+      {"title": translation(context).lbl_share_screen, "description": translation(context).desc_share_screen},
+      {"title": translation(context).lbl_raise_hand, "description": translation(context).desc_raise_hand},
+      {"title": translation(context).lbl_send_reactions, "description": translation(context).desc_send_reactions},
+      {"title": translation(context).lbl_toggle_microphone, "description": translation(context).desc_toggle_microphone},
+      {"title": translation(context).lbl_toggle_video, "description": translation(context).desc_toggle_video},
+      {"title": translation(context).lbl_enable_waiting_room, "description": translation(context).desc_enable_waiting_room},
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +28,9 @@ class MeetingInfoScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () =>Navigator.pop(context),
         ),
-        title: const Text(
-          "Meeting Information",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600,),
+        title: Text(
+          translation(context).lbl_meeting_information,
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600,),
         ),
         centerTitle: true,
       ),
@@ -35,7 +38,7 @@ class MeetingInfoScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: meetingOptions.map((option) {
+          children: getMeetingOptions(context).map((option) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Column(

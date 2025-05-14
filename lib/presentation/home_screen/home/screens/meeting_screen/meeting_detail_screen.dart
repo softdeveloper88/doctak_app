@@ -10,13 +10,20 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 import '../../../../../data/models/meeting_model/fetching_meeting_model.dart';
+import '../../../../../localization/app_localization.dart';
 
 
-class MeetingDetailScreen extends StatelessWidget {
+class MeetingDetailScreen extends StatefulWidget {
+  final Session sessions;
+  final String date;
 
-  MeetingDetailScreen({required this.sessions,required this.date, super.key});
-  Session sessions;
-  String date;
+  const MeetingDetailScreen({required this.sessions, required this.date, super.key});
+
+  @override
+  State<MeetingDetailScreen> createState() => _MeetingDetailScreenState();
+}
+
+class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
   late PusherChannel clientListenChannel;
   late PusherChannel clientSendChannel;
   PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
@@ -29,10 +36,9 @@ class MeetingDetailScreen extends StatelessWidget {
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Expanded(
-            child: Text('Meeting Detail',
-                textAlign: TextAlign.left,
-                style: boldTextStyle(size: 18))),
+        title: Text(translation(context).lbl_meeting_detail,
+                textAlign: TextAlign.center,
+                style: boldTextStyle(size: 18)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: svGetBodyColor()),
@@ -46,13 +52,13 @@ class MeetingDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildDetailRow("Date", date),
+            buildDetailRow(translation(context).lbl_date, widget.date),
             buildDivider(),
-            buildDetailRow("Time",  sessions.time),
+            buildDetailRow(translation(context).lbl_time,  widget.sessions.time),
             buildDivider(),
-            buildDetailRow("Topic", sessions.title),
+            buildDetailRow(translation(context).lbl_topic, widget.sessions.title),
             buildDivider(),
-            buildDetailRow("Meeting ID", sessions.channel),
+            buildDetailRow(translation(context).lbl_meeting_id, widget.sessions.channel),
             buildDivider(),
             const Spacer(),
             // Join Button
@@ -61,11 +67,11 @@ class MeetingDetailScreen extends StatelessWidget {
               child: svAppButton(
                 onTap: () {
                     ProgressDialogUtils.showProgressDialog();
-                    askToJoin(context, sessions.channel).then((resp) async {
+                    askToJoin(context, widget.sessions.channel).then((resp) async {
                       print("join response ${jsonEncode(resp.data)}");
                       Map<String, dynamic> responseData = json.decode(jsonEncode(resp.data));
                       if(responseData['success']=='1'){
-                        await joinMeetings(sessions.channel).then((joinMeetingData) {
+                        await joinMeetings(widget.sessions.channel).then((joinMeetingData) {
                           ProgressDialogUtils.hideProgressDialog();
                           VideoCallScreen(
                             meetingDetailsModel: joinMeetingData,
@@ -73,18 +79,18 @@ class MeetingDetailScreen extends StatelessWidget {
                           ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                         });
                       }else {
-                        ConnectPusher(context,responseData['meeting_id'], sessions.channel);
+                        ConnectPusher(context,responseData['meeting_id'], widget.sessions.channel);
                       }
                     }).catchError((error) {
                       // Stop the timer when condition is met
                       ProgressDialogUtils.hideProgressDialog();
-                      toast("Something went wrong");
+                      toast(translation(context).msg_something_wrong);
                     });
                   // const HomeScreen1().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
                   // Action for Join button
 
                 },
-                text: 'Join', context: context
+                text: translation(context).lbl_join, context: context
               ),
             ),
           ],
@@ -160,13 +166,13 @@ class MeetingDetailScreen extends StatelessWidget {
                   ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                 });
                 print("eventName $eventName");
-                toast(eventName);
+                toast(translation(context).msg_user_allowed);
                 break;
               case 'new-user-rejected':
                 ProgressDialogUtils.hideProgressDialog();
 
                 print("eventName $eventName");
-                toast(eventName);
+                toast(translation(context).msg_user_rejected);
                 break;
               default:
               // Handle unknown event types or ignore them
@@ -185,28 +191,33 @@ class MeetingDetailScreen extends StatelessWidget {
     }
   }
   Widget buildDetailRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, color: Colors.black,fontWeight: FontWeight.w500),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-                fontWeight: FontWeight.w500,
+    return Builder(
+      builder: (BuildContext context) {
+        final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 16, color: textColor, fontWeight: FontWeight.w500),
               ),
-            ),
+              Expanded(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: textColor?.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 

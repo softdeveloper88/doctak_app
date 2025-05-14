@@ -1,4 +1,5 @@
 // lib/presentation/call_module/widgets/connecting_view.dart
+import 'package:doctak_app/core/app_export.dart';
 import 'package:flutter/material.dart';
 
 import '../models/user_model.dart';
@@ -82,12 +83,13 @@ class ConnectingView extends StatelessWidget {
             Text(
               // Use custom message if provided, otherwise use default
               customMessage ?? (isIncoming
-                  ? "Connecting..."
-                  : "Calling $contactName..."), // Changed "Connecting" to "Calling" for outgoing calls
-              style: const TextStyle(
+                  ? translation(context).lbl_connecting
+                  : "${translation(context).lbl_ringing} $contactName..."),
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
               ),
               textAlign: TextAlign.center,
             ),
@@ -96,7 +98,7 @@ class ConnectingView extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text("Retry"),
+                label: Text(translation(context).lbl_try_again),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,

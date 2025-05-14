@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
@@ -96,6 +97,15 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
 
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update the chatWithAi string with the localized version if needed
+    if (chatWithAi == "Preparing DocTak AI.") {
+      chatWithAi = translation(context).lbl_preparing_ai;
+    }
+  }
+
+  @override
   void dispose() {
     focusNode.unfocus();
     _scrollController.dispose();
@@ -115,10 +125,10 @@ bool isError=false;
             if (selectedSessionId == 0 && state1 is DataLoaded) {
               selectedSessionId = state1.response.newSessionId;
               chatWithAi =
-                  state1.response.sessions?.first.name ?? 'New Session';
+                  state1.response.sessions?.first.name ?? translation(context).lbl_preparing_ai;
             } else if (state1 is DataError) {
 
-              showToast('Something went wrong please try again');
+              showToast(translation(context).msg_something_wrong);
               try {
                 if(isError) {
                   BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
@@ -135,7 +145,7 @@ bool isError=false;
                   // });
                 }
               } catch (e) {
-                debugPrint(e.toString());
+                // Error logging suppressed
               }
 
             }
@@ -153,7 +163,7 @@ bool isError=false;
               ));
             } else if (state1 is DataLoaded) {
               isEmpty = state1.response1.messages?.isEmpty ?? false;
-              debugPrint('response chat ${state1.response.toString()}');
+              // Response data received
               if (!widget.isFromMainScreen) {
                 if (isAlreadyAsk) {
                   setState(() {
@@ -188,14 +198,14 @@ bool isError=false;
                               //       [newSession, ...(snapshot.data ?? [])]);
                               // });
                             } catch (e) {
-                              debugPrint(e.toString());
+                              // Error logging suppressed
                             }
                           },
                           onTap: (session) {
                             isError=true;
                             chatWithAi = session.name!;
                             isEmptyPage = false;
-                            debugPrint(session.id.toString());
+                            // Session ID selected
                             selectedSessionId =
                                 session.id; // Update the selected session
                             isLoadingMessages = true;
@@ -269,13 +279,13 @@ bool isError=false;
                                         //       [newSession, ...(snapshot.data ?? [])]);
                                         // });
                                       } catch (e) {
-                                        debugPrint(e.toString());
+                                        // Error logging suppressed
                                       }
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        'Next Image',
+                                        translation(context).lbl_next_image,
                                         style:
                                             TextStyle(color: white,fontFamily: 'Poppins',),
                                         overflow: TextOverflow.ellipsis,
@@ -332,17 +342,17 @@ bool isError=false;
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const SizedBox(height: 20),
-                                const Text(
-                                  'Welcome, Doctor!',
-                                  style: TextStyle(
+                                Text(
+                                  translation(context).lbl_welcome_doctor,
+                                  style: const TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                const Text(
-                                  'Your personal & medical assistant powered by Artificial Intelligence',
+                                Text(
+                                  translation(context).msg_ai_assistant_intro,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(fontSize: 16,fontFamily: 'Poppins',),
                                 ),
@@ -350,15 +360,15 @@ bool isError=false;
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    cardIntro('Medical images',
-                                        'Please upload the medical images for potential diagnoses and analysis',
+                                    cardIntro(translation(context).lbl_medical_images,
+                                        translation(context).msg_upload_images_prompt,
                                         () async {
                                       // Medication Review: check interactions and dosage
                                       // widget.question = 'initial assessment';
 
                                       if (isOneTimeImageUploaded) {
                                         toasty(context,
-                                            'Only allowed one time image in one session');
+                                            translation(context).lbl_only_one_image_allowed);
                                       } else {
                                         const permission = Permission.photos;
                                         if (await permission.isGranted) {
@@ -401,10 +411,10 @@ bool isError=false;
                                   ],
                                 ),
                                 const SizedBox(height: 20),
-                                const Text(
-                                  'Please upload the medical images for potential diagnoses and analysis',
+                                Text(
+                                  translation(context).msg_upload_images_prompt,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 14,fontFamily: 'Poppins',),
+                                  style: const TextStyle(fontSize: 14,fontFamily: 'Poppins',),
                                 ),
                                 const SizedBox(height: 10),
                               ],
@@ -568,10 +578,10 @@ bool isError=false;
                                 // Minimum lines
                                 maxLines: null,
                                 // Allows for unlimited lines
-                                decoration: const InputDecoration(
-                                  hintStyle: TextStyle(color: Colors.grey,fontFamily: 'Poppins',),
+                                decoration: InputDecoration(
+                                  hintStyle: const TextStyle(color: Colors.grey,fontFamily: 'Poppins',),
                                   hintText:
-                                      'Clinical Summary e.g age, gender, medical history',
+                                      translation(context).msg_clinical_summary_hint,
                                   border: InputBorder.none,
                                 ),
                               ),
@@ -651,7 +661,7 @@ bool isError=false;
                                                 content: Text('Error: $e')));
                                       }
                                     } else {
-                                      toasty(context, 'Please ask Question');
+                                      toasty(context, translation(context).lbl_please_ask_question);
                                     }
                                   } else if (imageUploadBloc
                                           .imagefiles.isNotEmpty &&
@@ -682,7 +692,7 @@ bool isError=false;
                                             sessionId:
                                                 selectedSessionId.toString(),
                                             question: question == ""
-                                                ? 'Analyse Image'
+                                                ? translation(context).lbl_analyse_image
                                                 : question,
                                             imageUrl1: imageUploadBloc
                                                 .imagefiles.first.path,
@@ -718,8 +728,8 @@ bool isError=false;
                         direction: Axis.horizontal,
                         directionMarguee: DirectionMarguee.oneDirection,
                         textDirection: TextDirection.ltr,
-                        child: const Text(
-                            'Artificial Intelligence can make mistakes. Consider checking important information.')),
+                        child: Text(
+                            translation(context).msg_ai_disclaimer)),
                   )
                 ],
               );
@@ -731,7 +741,7 @@ bool isError=false;
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Error!",
+                      translation(context).lbl_error,
                       style: TextStyle(
                           fontFamily: 'Poppins',
                           color: Colors.red,
@@ -760,14 +770,14 @@ bool isError=false;
                           //       [newSession, ...(snapshot.data ?? [])]);
                           // });
                         } catch (e) {
-                          debugPrint(e.toString());
+                          // Error logging suppressed
                         }
                       },
                       color: appButtonBackgroundColorGlobal,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
-                      child: const Text(
-                        "Try Again",
+                      child: Text(
+                        translation(context).lbl_try_again,
                         style: TextStyle(color: Colors.white),
                       ),
                     )
@@ -776,7 +786,7 @@ bool isError=false;
               );
             }
             else {
-              return const Text('error');
+              return Text(translation(context).lbl_error);
             }
           })),
     );
@@ -935,12 +945,12 @@ bool isError=false;
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  "Select Option",
+                  translation(context).lbl_select_option,
                   style: TextStyle(fontSize: 18),
                 ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
-                  text: 'Dermatological assessment',
+                  text: translation(context).lbl_dermatological_assessment,
                   onTap: () async {
                     Navigator.pop(context);
                     imageType = 'Dermatological';
@@ -958,7 +968,7 @@ bool isError=false;
                 // ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
-                  text: 'X-ray evaluation',
+                  text: translation(context).lbl_xray_evaluation,
                   onTap: () async {
                     Navigator.pop(context);
                     imageType = 'X-ray';
@@ -967,7 +977,7 @@ bool isError=false;
                 ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
-                  text: 'CT scan evaluation',
+                  text: translation(context).lbl_ct_scan_evaluation,
                   onTap: () async {
                     Navigator.pop(context);
                     imageType = 'CT Scan';
@@ -976,7 +986,7 @@ bool isError=false;
                 ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
-                  text: 'MRI evaluation',
+                  text: translation(context).lbl_mri_evaluation,
                   onTap: () async {
                     Navigator.pop(context);
                     imageType = 'MRI Scan';
@@ -985,7 +995,7 @@ bool isError=false;
                 ),
                 _buildHorizontalOption(
                   icon: Icons.image_search,
-                  text: 'Mammography analysis',
+                  text: translation(context).lbl_mammography_analysis,
                   onTap: () async {
                     Navigator.pop(context);
                     imageType = 'Mammography';
@@ -1050,7 +1060,7 @@ bool isError=false;
         return AlertDialog(
           // <-- SEE HERE
           title: Text(
-            'You want to enable permission?',
+            translation(context).msg_something_wrong,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14.sp),
           ),
@@ -1063,13 +1073,13 @@ bool isError=false;
           // ),
           actions: <Widget>[
             TextButton(
-              child: const Text('No'),
+              child: Text(translation(context).lbl_cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Yes'),
+              child: Text(translation(context).lbl_try_again),
               onPressed: () {
                 openAppSettings();
                 Navigator.of(context).pop();

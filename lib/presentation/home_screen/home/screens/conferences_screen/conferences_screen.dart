@@ -5,6 +5,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app_comman_data.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
@@ -93,7 +94,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Conferences', style: boldTextStyle(size: 18)),
+                          Text(translation(context).lbl_conference, style: boldTextStyle(size: 18)),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: CustomDropdownButtonFormField(
@@ -191,7 +192,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                     ],
                   );
                 } else if (state is CountriesDataError) {
-                  return Center(child: Text('Error: $state'));
+                  return Center(child: Text('${translation(context).lbl_error}: $state'));
                 } else {
                   return const Center(child: Text(''));
                 }
@@ -248,7 +249,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
-                                    hintText: 'Search Conferences',
+                                    hintText: translation(context).lbl_search_conferences,
                                     hintStyle: secondaryTextStyle(
                                         color: svGetBodyColor()),
                                     suffixIcon: Image.asset(
@@ -270,7 +271,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                       LoadDropdownData1('', ''),
                     );
                     return RetryWidget(
-                        errorMessage: "Something went wrong please try again",
+                        errorMessage: translation(context).msg_something_went_wrong_retry,
                         onRetry: () {
                           try {
                             conferenceBloc.add(LoadPageEvent(
@@ -310,7 +311,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                   return _buildPostList(context);
                 } else if (state is DataError) {
                   return RetryWidget(
-                      errorMessage: "Something went wrong please try again",
+                      errorMessage: translation(context).msg_something_went_wrong_retry,
                       onRetry: () {
                         try {
                           conferenceBloc.add(LoadPageEvent(
@@ -338,8 +339,8 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
     print("len${bloc.conferenceList.length}");
     return Expanded(
       child: bloc.conferenceList.isEmpty
-          ? const Center(
-              child: Text("No Conference Found"),
+          ? Center(
+              child: Text(translation(context).msg_no_conference_found),
             )
           : ListView.builder(
               itemCount: bloc.conferenceList.length,
@@ -518,7 +519,7 @@ class ConferenceWidget extends StatelessWidget {
               // Conference Description
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(conference.description ?? 'No Description Available'),
+                child: Text(conference.description ?? translation(context).msg_no_description),
               ),
 
               const SizedBox(height: 8),
@@ -550,7 +551,7 @@ class ConferenceWidget extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
-                            'City: ${conference.city ?? 'N/A'}',
+                            '${translation(context).lbl_city}: ${conference.city ?? translation(context).lbl_not_available}',
                             style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.fade, // Truncate text if needed
                           ),
@@ -565,7 +566,7 @@ class ConferenceWidget extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
-                            'Venue: ${conference.venue ?? 'N/A'}',
+                            '${translation(context).lbl_venue}: ${conference.venue ?? translation(context).lbl_not_available}',
                             style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.fade,
                           ),
@@ -580,7 +581,7 @@ class ConferenceWidget extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
-                            'Organizer: ${conference.organizer ?? 'N/A'}',
+                            '${translation(context).lbl_organizer}: ${conference.organizer ?? translation(context).lbl_not_available}',
                             style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.fade,
                           ),
@@ -595,7 +596,7 @@ class ConferenceWidget extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
-                            'Country: ${conference.country ?? 'N/A'}',
+                            '${translation(context).lbl_country}: ${conference.country ?? translation(context).lbl_not_available}',
                             style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.fade,
                           ),
@@ -610,7 +611,7 @@ class ConferenceWidget extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
-                            'CME Credits: ${conference.cmeCredits ?? 'N/A'}',
+                            '${translation(context).lbl_cme_credits}: ${conference.cmeCredits ?? translation(context).lbl_not_available}',
                             style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.fade,
                           ),
@@ -625,7 +626,7 @@ class ConferenceWidget extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
-                            'MOC Credits: ${conference.mocCredits ?? 'N/A'}',
+                            '${translation(context).lbl_moc_credits}: ${conference.mocCredits ?? translation(context).lbl_not_available}',
                             style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.fade,
                           ),
@@ -640,7 +641,7 @@ class ConferenceWidget extends StatelessWidget {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
-                            'Specialties Targeted: ${conference.specialtiesTargeted ?? 'N/A'}',
+                            '${translation(context).lbl_specialties_targeted}: ${conference.specialtiesTargeted ?? translation(context).lbl_not_available}',
                             style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.fade,
                           ),
@@ -660,7 +661,7 @@ class ConferenceWidget extends StatelessWidget {
                     Uri registrationUri = Uri.parse(conference.registrationLink!);
                     PostUtils.launchURL(context, registrationUri.toString());
                   },
-                  text: 'Register Now', context: context,
+                  text: translation(context).lbl_register_now, context: context,
                 ),
               ),
             ],
@@ -680,7 +681,7 @@ class ConferenceWidget extends StatelessWidget {
           width: double.infinity,
           height: 300,
           errorBuilder: (context, error, stackTrace) {
-            return const Center(child: Text('Image not available'));
+            return Center(child: Text(translation(context).msg_image_not_available));
           },
         ),
       );

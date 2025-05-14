@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 class CustomSearchView extends StatelessWidget {
-  const CustomSearchView({
+   CustomSearchView({
     Key? key,
     this.alignment,
     this.width,
@@ -71,8 +72,11 @@ class CustomSearchView extends StatelessWidget {
 
   final Function(String)? onChanged;
 
+  BuildContext? currentContext;
+
   @override
   Widget build(BuildContext context) {
+    currentContext = context;
     return alignment != null
         ? Align(
             alignment: alignment ?? Alignment.center,
@@ -100,7 +104,7 @@ class CustomSearchView extends StatelessWidget {
         ),
       );
   InputDecoration get decoration => InputDecoration(
-        hintText: hintText ?? "",
+        hintText: hintText ?? translation(currentContext!).lbl_empty,
         hintStyle: hintStyle ?? theme.textTheme.labelLarge,
         prefixIcon: prefix ??
             Container(

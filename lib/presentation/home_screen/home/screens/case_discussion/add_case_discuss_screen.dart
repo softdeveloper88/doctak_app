@@ -1,8 +1,10 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'bloc/case_discussion_bloc.dart';
@@ -60,7 +62,7 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Case'),
+        title: Text(translation(context).lbl_add_case),
       ),
       body: BlocListener<CaseDiscussionBloc, CaseDiscussionState>(
     bloc: caseDiscussionBloc,
@@ -84,7 +86,7 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
                 icon: Icons.description,
                 index: 2,
                 maxLines: 3,
-                label: 'Case Title:',
+                label: translation(context).lbl_case_title,
                 value: title,
                 onSave: (value) => {
                   setState(() {
@@ -99,7 +101,7 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
                 index: 2,
                 focusNode: focusNode2,
                 maxLines: 5,
-                label: 'Case Description:',
+                label: translation(context).lbl_case_description,
                 value: description,
                 onSave: (value) => {
                   setState(() {
@@ -115,7 +117,7 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
                 index: 2,
                 focusNode: focusNode3,
                 maxLines: 3,
-                label: 'Case Keyword:',
+                label: translation(context).lbl_case_keyword,
                 value: keyword,
                 onSave: (value) => {
                   setState(() {
@@ -126,7 +128,7 @@ class _AddCaseDiscussScreenState extends State<AddCaseDiscussScreen> {
               const SizedBox(height: 4),
               FileUploadWidget(caseDiscussionBloc),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _submitForm, child: const Text('Submit'),
+              ElevatedButton(onPressed: _submitForm, child: Text(translation(context).lbl_submit),
               ),
             ],
           ),

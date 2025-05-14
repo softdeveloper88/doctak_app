@@ -1,10 +1,12 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -35,18 +37,18 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
   Widget build(BuildContext context) {
     var selectValue =
         widget.profileBloc.userProfile!.privacySetting?[1].visibility == 'lock'
-            ? 'Only me'
+            ? translation(context).lbl_only_me
             : widget.profileBloc.userProfile!.privacySetting?[1].visibility ==
                     'group'
-                ? 'Friend'
-                : 'Public';
+                ? translation(context).lbl_friends
+                : translation(context).lbl_public;
     var selectValue2 =
         widget.profileBloc.userProfile!.privacySetting?[10].visibility == 'lock'
-            ? 'Only me'
+            ? translation(context).lbl_only_me
             : widget.profileBloc.userProfile!.privacySetting?[10].visibility ==
                     'group'
-                ? 'Friend'
-                : 'Public';
+                ? translation(context).lbl_friends
+                : translation(context).lbl_public;
     print(widget.profileBloc.userProfile!.privacySetting?[1].recordType);
     print(widget.profileBloc.userProfile!.privacySetting?[1].visibility);
     print(widget.profileBloc.userProfile!.privacySetting?[10].recordType);
@@ -56,7 +58,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
       appBar: AppBar(
         surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
-        title: Text('Privacy Information', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_privacy_information, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -166,7 +168,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
                       userProfilePrivacyModel: UserProfilePrivacyModel(),
                     ));
                   },
-                  text: 'Update',
+                  text: translation(context).lbl_update,
                 ),
             ],
           ),
@@ -181,29 +183,29 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> {
         print(item.recordType);
         // if(item.visibility!='crickete update d') {
         var selectValue = item.visibility == 'lock'
-            ? 'Only me'
+            ? translation(context).lbl_only_me
             : item.visibility == 'group'
-                ? 'Friend'
-                : 'Public';
+                ? translation(context).lbl_friends
+                : translation(context).lbl_public;
 
         return _buildDropdownField(
           index: 4,
           label: item.recordType == 'dob'
-              ? "Data of birth"
+              ? translation(context).lbl_date_of_birth
               : '${item.recordType?.replaceAll('_', ' ')} ',
           value:
               item.visibility == null || item.visibility == 'crickete update d'
-                  ? 'Only me'
+                  ? translation(context).lbl_only_me
                   : selectValue,
           onSave: (value) {
-            var updateValue = value == 'Only me'
+            var updateValue = value == translation(context).lbl_only_me
                 ? 'lock'
-                : value == 'Friend'
+                : value == translation(context).lbl_friends
                     ? 'group'
                     : 'Public';
             item.visibility = updateValue;
           },
-          options: ['Only me', 'Friend', 'Public'],
+          options: [translation(context).lbl_only_me, translation(context).lbl_friends, translation(context).lbl_public],
         );
         // }else{
         //   return Container();

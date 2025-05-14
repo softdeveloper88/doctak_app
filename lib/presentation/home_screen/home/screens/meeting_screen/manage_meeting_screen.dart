@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
@@ -295,25 +296,25 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           leading: IconButton(icon: const Icon(Icons.arrow_back_ios), onPressed: () {
             Navigator.pop(context);
           },),
-          title: const Text('Meeting Management'),
+          title: Text(translation(context).lbl_meeting_management),
           bottom: TabBar(
             controller: _tabController,
-            tabs: const [
+            tabs: [
               Tab(
-                icon: Icon(Icons.videocam_outlined),
-                text: 'Join/Create',
+                icon: const Icon(Icons.videocam_outlined),
+                text: translation(context).lbl_join_create,
               ),
               Tab(
-                icon: Icon(Icons.calendar_today_outlined),
-                text: 'Scheduled',
+                icon: const Icon(Icons.calendar_today_outlined),
+                text: translation(context).lbl_scheduled,
               ),
               Tab(
-                icon: Icon(Icons.history_outlined),
-                text: 'History',
+                icon: const Icon(Icons.history_outlined),
+                text: translation(context).lbl_history,
               ),
               Tab(
-                icon: Icon(Icons.video_library_outlined),
-                text: 'Recordings',
+                icon: const Icon(Icons.video_library_outlined),
+                text: translation(context).lbl_recordings,
               ),
             ],
           ),
@@ -415,9 +416,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                 }
               },
               icon: const Icon(Icons.videocam, size: 24),
-              label: const Text(
-                'Create Instant Meeting',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              label: Text(
+                translation(context).lbl_create_instant_meeting,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -442,9 +443,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Key Features',
-                style: TextStyle(
+              Text(
+                translation(context).lbl_key_features,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -465,27 +466,27 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             children: [
               _buildFeatureCard(
                 icon: Icons.hd,
-                title: 'HD Video',
+                title: translation(context).lbl_hd_video,
                 description:
-                    'High quality video & audio for clear communication',
+                    translation(context).desc_hd_video,
                 color: AppColors.primary,
               ),
               _buildFeatureCard(
                 icon: Icons.people_alt_outlined,
-                title: 'Unlimited Participants',
-                description: 'Host meetings with any number of participants',
+                title: translation(context).lbl_unlimited_participants,
+                description: translation(context).desc_unlimited_participants,
                 color: AppColors.accent,
               ),
               _buildFeatureCard(
                 icon: Icons.screen_share_outlined,
-                title: 'Screen Sharing',
-                description: 'Share your screen with meeting participants',
+                title: translation(context).lbl_screen_sharing,
+                description: translation(context).desc_screen_sharing,
                 color: AppColors.warning,
               ),
               _buildFeatureCard(
                 icon: Icons.chat_outlined,
-                title: 'Group Chat',
-                description: 'Send messages to everyone during the meeting',
+                title: translation(context).lbl_group_chat,
+                description: translation(context).desc_group_chat,
                 color: AppColors.success,
               ),
             ],
@@ -507,9 +508,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               size: 24,
             ),
             const SizedBox(width: 12),
-            const Text(
-              'Join Meeting',
-              style: TextStyle(
+            Text(
+              translation(context).lbl_join_meeting,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -523,7 +524,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                 });
               },
               icon: const Icon(Icons.add_circle_outline, size: 16),
-              label: const Text('Create Instead'),
+              label: Text(translation(context).lbl_create_instead),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
               ),
@@ -540,16 +541,16 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               color: AppColors.primary.withOpacity(0.2),
             ),
           ),
-          child: const Text(
-            'Enter the meeting code provided by the host to join an existing meeting.',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          child: Text(
+            translation(context).msg_enter_meeting_code_description,
+            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           ),
         ),
         const SizedBox(height: 24),
         _buildCustomTextField(
           controller: _meetingCodeController,
-          labelText: 'Meeting Code',
-          hintText: 'Enter meeting code',
+          labelText: translation(context).lbl_meeting_code,
+          hintText: translation(context).hint_enter_meeting_code,
           icon: Icons.meeting_room_outlined,
         ),
         const SizedBox(height: 24),
@@ -559,27 +560,27 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             if (code.isNotEmpty) {
               _checkJoinStatus(context, code);
             } else {
-              toast('Please enter a meeting code');
+              toast(translation(context).msg_please_enter_meeting_code);
             }
           },
           icon: const Icon(Icons.login_rounded),
-          label: const Text('Join Meeting'),
+          label: Text(translation(context).lbl_join_meeting),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
           ),
         ),
         const SizedBox(height: 16),
-        const Row(
+         Row(
           children: [
-            Expanded(child: Divider()),
+            const Expanded(child: Divider()),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'or',
-                style: TextStyle(color: AppColors.textSecondary),
+                translation(context).lbl_or,
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
             ),
-            Expanded(child: Divider()),
+            const Expanded(child: Divider()),
           ],
         ),
         const SizedBox(height: 16),
@@ -587,14 +588,14 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           onPressed: () {
             // Open camera to scan QR code
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('QR code scanning would be implemented here'),
+              SnackBar(
+                content: Text(translation(context).msg_qr_code_scan_implementation),
                 backgroundColor: AppColors.primary,
               ),
             );
           },
           icon: const Icon(Icons.qr_code_scanner),
-          label: const Text('Scan QR Code'),
+          label: Text(translation(context).lbl_scan_qr_code),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
           ),
@@ -615,9 +616,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               size: 24,
             ),
             const SizedBox(width: 12),
-            const Text(
-              'Create Meeting',
-              style: TextStyle(
+            Text(
+              translation(context).lbl_create_meeting,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -631,7 +632,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                 });
               },
               icon: const Icon(Icons.login_rounded, size: 16),
-              label: const Text('Join Instead'),
+              label: Text(translation(context).lbl_join_instead),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
               ),
@@ -648,9 +649,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               color: AppColors.primary.withOpacity(0.2),
             ),
           ),
-          child: const Text(
-            'Create a new meeting and invite participants to join.',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          child: Text(
+            translation(context).msg_create_new_meeting_description,
+            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           ),
         ),
         const SizedBox(height: 24),
@@ -664,8 +665,8 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             children: [
               _buildCustomTextField(
                 controller: _meetingTitleController,
-                labelText: 'Meeting Title',
-                hintText: 'Enter meeting title',
+                labelText: translation(context).lbl_meeting_title,
+                hintText: translation(context).hint_enter_meeting_title,
                 icon: Icons.title,
               ),
               const SizedBox(height: 24),
@@ -678,7 +679,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                         // Create instant meeting
                       },
                       icon: const Icon(Icons.videocam),
-                      label: const Text('Start Meeting'),
+                      label: Text(translation(context).lbl_start_meeting),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.success,
                       ),
@@ -693,7 +694,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                         });
                       },
                       icon: const Icon(Icons.calendar_today_outlined),
-                      label: const Text('Schedule'),
+                      label: Text(translation(context).lbl_schedule),
                     ),
                   ),
                 ],
@@ -705,15 +706,15 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             children: [
               _buildCustomTextField(
                 controller: _meetingTitleController,
-                labelText: 'Meeting Title',
-                hintText: 'Enter meeting title',
+                labelText: translation(context).lbl_meeting_title,
+                hintText: translation(context).hint_enter_meeting_title,
                 icon: Icons.title,
               ),
               const SizedBox(height: 16),
               _buildCustomTextField(
                 controller: _dateController,
-                labelText: 'Date',
-                hintText: 'Select date',
+                labelText: translation(context).lbl_date,
+                hintText: translation(context).hint_select_date,
                 icon: Icons.calendar_today_outlined,
                 readOnly: true,
                 onTap: _selectDate,
@@ -721,8 +722,8 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               const SizedBox(height: 16),
               _buildCustomTextField(
                 controller: _startTimeController,
-                labelText: 'Time',
-                hintText: 'Select time',
+                labelText: translation(context).lbl_time,
+                hintText: translation(context).hint_select_time,
                 icon: Icons.access_time_outlined,
                 readOnly: true,
                 onTap: () => _selectTime(_startTimeController),
@@ -744,11 +745,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                     focusedBorder: InputBorder.none,
                     filled: false,
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 30, child: Text('30 minutes')),
-                    DropdownMenuItem(value: 60, child: Text('1 hour')),
-                    DropdownMenuItem(value: 90, child: Text('1.5 hours')),
-                    DropdownMenuItem(value: 120, child: Text('2 hours')),
+                  items: [
+                    DropdownMenuItem(value: 30, child: Text(translation(context).lbl_30_minutes)),
+                    DropdownMenuItem(value: 60, child: Text(translation(context).lbl_1_hour)),
+                    DropdownMenuItem(value: 90, child: Text(translation(context).lbl_1_5_hours)),
+                    DropdownMenuItem(value: 120, child: Text(translation(context).lbl_2_hours)),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -771,7 +772,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                         });
                       },
                       icon: const Icon(Icons.close),
-                      label: const Text('Cancel'),
+                      label: Text(translation(context).lbl_cancel),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textSecondary,
                         side: const BorderSide(color: AppColors.textSecondary),
@@ -786,7 +787,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                         if (_meetingTitleController.text.isEmpty ||
                             _dateController.text.isEmpty ||
                             _startTimeController.text.isEmpty) {
-                          toast('All fields are required');
+                          toast(translation(context).msg_all_fields_required);
                           return;
                         }
 
@@ -821,11 +822,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                           meetingBloc.add(FetchMeetings());
                         } catch (e) {
                           ProgressDialogUtils.hideProgressDialog();
-                          toast('Error scheduling meeting: ${e.toString()}');
+                          toast('${translation(context).msg_error_scheduling_meeting}: ${e.toString()}');
                         }
                       },
                       icon: const Icon(Icons.schedule),
-                      label: const Text('Schedule Meeting'),
+                      label: Text(translation(context).lbl_schedule_meeting),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                       ),
@@ -1179,7 +1180,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   OutlinedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.info_outline, size: 16),
-                    label: const Text('Details'),
+                    label: Text(translation(context).lbl_details),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textSecondary,
                       shape: RoundedRectangleBorder(
@@ -1195,7 +1196,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                     ElevatedButton.icon(
                       onPressed: () {},
                       icon: const Icon(Icons.play_circle_outline, size: 16),
-                      label: const Text('View Recording'),
+                      label: Text(translation(context).lbl_see_more),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
@@ -1613,9 +1614,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   color: AppColors.success.withOpacity(0.2),
                 ),
               ),
-              child: const Text(
-                'Your meeting has been scheduled successfully.',
-                style: TextStyle(color: AppColors.success),
+              child: Text(
+                translation(context).msg_no_internet,
+                style: const TextStyle(color: AppColors.success),
               ),
             ),
             const SizedBox(height: 20),
@@ -1686,7 +1687,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('Close'),
+            child: Text(translation(context).lbl_close),
           ),
           ElevatedButton.icon(
             onPressed: () {
@@ -1772,15 +1773,15 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               color: AppColors.danger.withOpacity(0.2),
             ),
           ),
-          child: const Text(
-            'Are you sure you want to cancel this meeting? This action cannot be undone.',
-            style: TextStyle(color: AppColors.textPrimary),
+          child: Text(
+            translation(context).msg_confirm_delete,
+            style: const TextStyle(color: AppColors.textPrimary),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('No'),
+            child: Text(translation(context).lbl_cancel),
           ),
           ElevatedButton.icon(
             onPressed: () {
@@ -1836,7 +1837,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Choose how you want to share the meeting information',
               style: TextStyle(
                 fontSize: 14,

@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -174,8 +175,8 @@ class JobCardWidget extends StatelessWidget {
                         onLaunchLink(url);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Leaving the app canceled.'),
+                           SnackBar(
+                            content: Text(translation(context).msg_leaving_app_canceled),
                           ),
                         );
                       }
@@ -225,16 +226,16 @@ class JobCardWidget extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Leave App'),
-        content: const Text('Would you like to leave the app to view this content?'),
+        title: Text(translation(context).lbl_leave_app),
+        content: Text(translation(context).msg_open_link_confirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No'),
+            child: Text(translation(context).lbl_no_answer),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Yes'),
+            child: Text(translation(context).lbl_yes),
           ),
         ],
       ),

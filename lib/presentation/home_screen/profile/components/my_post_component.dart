@@ -2,6 +2,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/full_screen_image_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_media_widget.dart';
@@ -44,9 +45,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
   showAlertDialog(ProfileBloc profileBloc, BuildContext context, int id) {
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: const Text(
-        "Cancel",
-        style: TextStyle(color: Colors.red),
+      child: Text(
+        translation(context).lbl_cancel,
+        style: const TextStyle(color: Colors.red),
       ),
       onPressed: () {
         setState(() {
@@ -55,7 +56,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
       },
     );
     Widget continueButton = TextButton(
-      child: const Text("Yes", style: TextStyle(color: Colors.black)),
+      child: Text(translation(context).lbl_yes, style: const TextStyle(color: Colors.black)),
       onPressed: () async {
         homeBloc.add(DeletePostEvent(postId: id));
         profileBloc.postList.removeWhere((post) => post.id == id);
@@ -63,9 +64,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
           Navigator.of(context).pop();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Post Delete Successfully',
+              translation(context).msg_post_deleted_successfully,
             ),
           ),
         );
@@ -87,8 +88,8 @@ class _MyPostComponentState extends State<MyPostComponent> {
 
     // set up the AlertDialog
     return AlertDialog(
-      title: const Text("Warning"),
-      content: const Text("Would you like to Delete?"),
+      title: Text(translation(context).lbl_warning),
+      content: Text(translation(context).msg_delete_confirm),
       actions: [
         cancelButton,
         continueButton,
@@ -117,10 +118,10 @@ class _MyPostComponentState extends State<MyPostComponent> {
       builder: (context, state) {
         if (state is PaginationLoadedState) {
           return widget.profileBloc.postList.isEmpty
-              ? const SizedBox(
+              ? SizedBox(
                   height: 200,
                   child: Center(
-                    child: Text("No Post Found"),
+                    child: Text(translation(context).msg_no_post_found),
                   ),
                 )
               : Container(

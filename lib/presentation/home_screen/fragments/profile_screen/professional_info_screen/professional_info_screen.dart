@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
@@ -43,7 +44,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
-        title: Text('Professional Summary', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_professional_summary, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -121,8 +122,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                                 const SizedBox(height: 10),
                               if (AppData.userType == "doctor")
                                 Text(
-                                  'Title and Specialization',
-                                  style:  TextStyle(fontFamily: 'Poppins',
+                                  translation(context).lbl_specialty,
+                                  style:  const TextStyle(fontFamily: 'Poppins',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -146,7 +147,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                                     widget.profileBloc.add(
                                         UpdateSpecialtyDropdownValue(newValue));
                                   },  itemBuilder: (item) => Text(
-                                  item, style: TextStyle(color: Colors.black),
+                                  item, style: const TextStyle(color: Colors.black),
                                 ),
                                 ),
                               if (AppData.userType != "doctor")
@@ -159,13 +160,13 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                             ],
                           );
                         } else {
-                          return Text('No widget $state');
+                          return Text(translation(context).lbl_unknown_state);
                         }
                       }),
                 if (!isEditModeMap)
                   TextFieldEditWidget(
                     index: 0,
-                    label: 'Title and Specialization',
+                    label: translation(context).lbl_title_and_specialization,
                     value:
                         widget.profileBloc.userProfile?.user?.specialty ?? '',
                     onSave: (value) =>
@@ -184,8 +185,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   textInputAction: TextInputAction.newline,
                   textInputType: TextInputType.multiline,
                   focusNode: focusNode1,
-                  hints: 'Name Hospital/Clinic/Organization/Private Practice',
-                  label: 'Current Workplace',
+                  hints: translation(context).hint_workplace,
+                  label: translation(context).lbl_current_workplace,
                   value: widget.profileBloc.userProfile?.profile?.address ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile?.profile?.address = value,
@@ -203,9 +204,9 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   index: 1,
                   textInputType: TextInputType.multiline,
                   textInputAction: TextInputAction.newline,
-                  hints: 'Years of experience',
+                  hints: translation(context).hint_years_experience,
                   focusNode: focusNode2,
-                  label: 'Years of Experience',
+                  label: translation(context).lbl_years_experience,
                   value: widget.profileBloc.userProfile?.profile?.aboutMe ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile!.profile?.aboutMe = value,
@@ -222,9 +223,9 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   icon: Icons.location_on,
                   index: 1,
                   textInputAction: TextInputAction.newline,
-                  hints: 'e.g Doctor of the year',
+                  hints: translation(context).hint_notable_achievements,
                   focusNode: focusNode3,
-                  label: 'Notable Achievements',
+                  label: translation(context).lbl_notable_achievements,
                   value:
                       widget.profileBloc.userProfile?.profile?.birthplace ?? '',
                   onSave: (value) => widget
@@ -259,8 +260,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                   textInputAction: TextInputAction.newline,
                   textInputType: TextInputType.multiline,
                   focusNode: focusNode4,
-                  hints: 'Enter location (e.g., KSA, UAE)',
-                  label: 'Location',
+                  hints: translation(context).hint_location,
+                  label: translation(context).lbl_location,
                   value: widget.profileBloc.userProfile?.profile?.hobbies ?? '',
                   onSave: (value) =>
                       widget.profileBloc.userProfile!.profile?.hobbies = value,
@@ -288,7 +289,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> {
                         userProfilePrivacyModel: UserProfilePrivacyModel(),
                       ));
                     },
-                    text: 'Update',
+                    text: translation(context).lbl_update,
                   ),
               ],
             ),

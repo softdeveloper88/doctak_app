@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/screen_utils.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
@@ -41,36 +42,36 @@ class VerifyEmailCard extends StatelessWidget {
   // Successful API call, handle the response if needed
   // Show success Snackbar
   ScaffoldMessenger.of(context).showSnackBar(
-  const SnackBar(
-  content: Text('Verification link sent successfully'),
-  duration: Duration(seconds: 2),
+  SnackBar(
+  content: Text(translation(context).msg_verification_link_sent),
+  duration: const Duration(seconds: 2),
   ),
   );
   } else if (response.statusCode == 422) {
   // Validation error or user email not found
   // Show error Snackbar
   ScaffoldMessenger.of(context).showSnackBar(
-  const SnackBar(
-  content: Text('Validation error or user email not found'),
-  duration: Duration(seconds: 2),
+  SnackBar(
+  content: Text(translation(context).msg_validation_error),
+  duration: const Duration(seconds: 2),
   ),
   );
   } else if (response.statusCode == 404) {
   // User already verified
   // Show info Snackbar
   ScaffoldMessenger.of(context).showSnackBar(
-  const SnackBar(
-  content: Text('User already verified'),
-  duration: Duration(seconds: 2),
+  SnackBar(
+  content: Text(translation(context).msg_user_already_verified),
+  duration: const Duration(seconds: 2),
   ),
   );
   } else {
   // Something went wrong
   // Show error Snackbar
   ScaffoldMessenger.of(context).showSnackBar(
-  const SnackBar(
-  content: Text('Something went wrong.'),
-  duration: Duration(seconds: 2),
+  SnackBar(
+  content: Text(translation(context).msg_something_wrong),
+  duration: const Duration(seconds: 2),
   ),
   );
   }
@@ -80,9 +81,9 @@ class VerifyEmailCard extends StatelessWidget {
   Navigator.of(context).pop();
 
   ScaffoldMessenger.of(context).showSnackBar(
-  const SnackBar(
-  content: Text('Something went wrong.'),
-  duration: Duration(seconds: 2),
+  SnackBar(
+  content: Text(translation(context).msg_something_wrong),
+  duration: const Duration(seconds: 2),
   ),
   );
   }
@@ -101,9 +102,9 @@ class VerifyEmailCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             // mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                "Please verify your email to continue.",
-                style: TextStyle(
+              Text(
+                translation(context).msg_verify_email_continue,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
@@ -123,9 +124,9 @@ class VerifyEmailCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  "Verify Email",
-                  style: TextStyle(
+                child: Text(
+                  translation(context).lbl_verify_email,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:flutter/material.dart';
@@ -182,7 +183,7 @@ class _MeetingChatScreenState extends State<MeetingChatScreen> {
        _messageController.clear();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send message: $e')),
+        SnackBar(content: Text('${translation(context).msg_something_wrong} $e')),
       );
     } finally {
       setState(() => _isSending = false);
@@ -205,7 +206,7 @@ class _MeetingChatScreenState extends State<MeetingChatScreen> {
         leading: IconButton(icon: const Icon(Icons.arrow_back_ios), onPressed: () {
           Navigator.pop(context);
         },),
-        title: const Text('Chat'),
+        title: Text(translation(context).lbl_chat),
       ),
       body: Column(
         children: [
@@ -240,7 +241,7 @@ class _MeetingChatScreenState extends State<MeetingChatScreen> {
             child: TextField(
               controller: _messageController,
               decoration: InputDecoration(
-                hintText: 'Type a message...',
+                hintText: translation(context).lbl_type_message_here,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),

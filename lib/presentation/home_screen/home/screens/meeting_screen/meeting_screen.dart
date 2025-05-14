@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/set_schedule_screen.dart';
@@ -60,7 +61,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
                 // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                      child: Text('Meeting',
+                      child: Text(translation(context).lbl_meeting,
                           textAlign: TextAlign.left,
                           style: boldTextStyle(size: 18))),
                 ],
@@ -86,7 +87,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
                           selectedIndex = 0;
                         },
                         child: Text(
-                          'Set Schedule',
+                          translation(context).lbl_set_schedule,
                           style: TextStyle(
                             color: selectedIndex == 0 ? Colors.black:Colors.black38,
                             fontSize: 14,
@@ -117,7 +118,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
                           selectedIndex = 1;
                         },
                         child: Text(
-                          'Upcoming',
+                          translation(context).lbl_upcoming,
                           style: TextStyle(
                             color: selectedIndex == 1 ? Colors.black:Colors.black38,
                             fontSize: 14,

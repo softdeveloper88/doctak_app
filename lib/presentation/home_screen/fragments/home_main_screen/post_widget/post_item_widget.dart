@@ -2,6 +2,8 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/image_constant.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_comman_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
@@ -82,6 +84,17 @@ class PostItemWidget extends StatefulWidget {
 class _PostItemWidgetState extends State<PostItemWidget> {
   int _expandedIndex = -1;
 
+  // Helper function to parse HTML to plain text
+  String parseHtmlString(String htmlString) {
+    final document = parse(htmlString);
+    return document.body?.text ?? htmlString;
+  }
+
+  // Helper function to check if string is HTML
+  bool isHtml(String text) {
+    return text.contains('<') && text.contains('>');
+  }
+
   Widget _buildPlaceholderWithoutFile(context) {
     String fullText = widget.title ?? '';
     List<String> words = fullText.split(' ');
@@ -99,8 +112,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
             Clipboard.setData(
                 ClipboardData(text: parseHtmlString(widget.title??'')));
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Text copied to clipboard")),
-            );
+              SnackBar(content: Text(translation(context).lbl_text_copied)),);
           },
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -235,7 +247,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                         });
                       },
                       child: Text(
-                        isExpanded ? 'Show Less' : 'Show More',
+                        isExpanded ? translation(context).lbl_show_less : translation(context).lbl_show_more,
                         style: TextStyle(
 
                           color: svGetBodyColor(),
@@ -441,7 +453,7 @@ class InteractionRowWidget extends StatelessWidget {
               GestureDetector(
                 onTap: onViewLikesTap,
                 child: Text(
-                  '${likes ?? 0} Likes',
+                  AppLocalizations.of(context)!.lbl_likes_count(likes),
                   style: TextStyle(
 
                     color: Theme.of(context).textTheme.bodyMedium!.color,
@@ -451,7 +463,7 @@ class InteractionRowWidget extends StatelessWidget {
               InkWell(
                 onTap: onViewCommentsTap,
                 child: Text(
-                  '${comments ?? 0} Comments',
+                  AppLocalizations.of(context)!.lbl_comments_count(comments),
                   style: TextStyle(
 
                     color: Theme.of(context).textTheme.bodyMedium!.color,
@@ -486,7 +498,7 @@ class InteractionRowWidget extends StatelessWidget {
                     color: context.iconColor,
                   ),
                   Text(
-                    'Like',
+                    translation(context).lbl_like,
                     style: TextStyle(
 
                       color: Theme.of(context).textTheme.bodyMedium!.color,
@@ -509,7 +521,7 @@ class InteractionRowWidget extends StatelessWidget {
                     color: context.iconColor,
                   ),
                   Text(
-                    'Comment',
+                    translation(context).lbl_comment,
                     style: TextStyle(
 
                       color: Theme.of(context).textTheme.bodyMedium!.color,
@@ -532,7 +544,7 @@ class InteractionRowWidget extends StatelessWidget {
                     color: context.iconColor,
                   ),
                   Text(
-                    'Send',
+                    translation(context).lbl_send,
                     style: TextStyle(
 
                       color: Theme.of(context).textTheme.bodyMedium!.color,

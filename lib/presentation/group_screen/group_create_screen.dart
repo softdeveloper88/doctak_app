@@ -33,7 +33,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Create Group Wizard', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_create_group_wizard, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -120,7 +120,7 @@ class StepProgress extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Step 1: Basic Information 1 - 4",
+                    translation(context).lbl_step1_info,
                     style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
@@ -161,7 +161,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Basic Info")
+                            Text(translation(context).lbl_basic_info)
                           ]),
                           Column(children: [
                             Container(
@@ -180,7 +180,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Privacy")
+                            Text(translation(context).lbl_privacy)
                           ]),
                           Column(children: [
                             Container(
@@ -199,7 +199,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Image")
+                            Text(translation(context).lbl_image)
                           ]),
                           Column(children: [
                             Container(
@@ -218,7 +218,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Finish")
+                            Text(translation(context).lbl_finish)
                           ]),
                         ],
                       ),
@@ -234,7 +234,7 @@ class StepProgress extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Step 2: Privacy Setting 1 - 4",
+                    translation(context).lbl_step2_info,
                     style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
@@ -275,7 +275,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Basic Info")
+                            Text(translation(context).lbl_basic_info)
                           ]),
                           Column(children: [
                             Container(
@@ -295,7 +295,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Privacy")
+                            Text(translation(context).lbl_privacy)
                           ]),
                           Column(children: [
                             Container(
@@ -314,7 +314,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Image")
+                            Text(translation(context).lbl_image)
                           ]),
                           Column(children: [
                             Container(
@@ -333,7 +333,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Finish")
+                            Text(translation(context).lbl_finish)
                           ]),
                         ],
                       ),
@@ -349,7 +349,7 @@ class StepProgress extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Step 3: Privacy Setting 1 - 4",
+                    translation(context).lbl_step3_info,
                     style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
@@ -395,7 +395,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Basic Info")
+                            Text(translation(context).lbl_basic_info)
                           ]),
                           Column(children: [
                             Container(
@@ -415,7 +415,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Privacy")
+                            Text(translation(context).lbl_privacy)
                           ]),
                           Column(children: [
                             Container(
@@ -435,7 +435,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Image")
+                            Text(translation(context).lbl_image)
                           ]),
                           Column(children: [
                             Container(
@@ -454,7 +454,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Finish")
+                            Text(translation(context).lbl_finish)
                           ]),
                         ],
                       ),
@@ -470,7 +470,7 @@ class StepProgress extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Step 3: Privacy Setting 1 - 4",
+                    translation(context).lbl_step3_info,
                     style: TextStyle(color: svGetBodyColor()),
                   ),
                   Padding(
@@ -516,7 +516,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Basic Info")
+                            Text(translation(context).lbl_basic_info)
                           ]),
                           Column(children: [
                             Container(
@@ -536,7 +536,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Privacy")
+                            Text(translation(context).lbl_privacy)
                           ]),
                           Column(children: [
                             Container(
@@ -556,7 +556,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Image")
+                            Text(translation(context).lbl_image)
                           ]),
                           Column(children: [
                             Container(
@@ -576,7 +576,7 @@ class StepProgress extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Text("Finish")
+                            Text(translation(context).lbl_finish)
                           ]),
                         ],
                       ),
@@ -727,9 +727,9 @@ class _Step1State extends State<Step1> {
                                   .toList(),
                             ),
                           ),
-                          const Text(
-                            'Speciality: ',
-                            style: TextStyle(
+                          Text(
+                            translation(context).lbl_specialty_colon,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w500),
                           ),
                           CustomDropdownButtonFormField(
@@ -1425,7 +1425,7 @@ class _Step3State extends State<Step3> {
             imagePath: 'assets/images/upload_image.png',
             width: 50.w,
           ),
-          const Text('Upload Logo & Banner Photo'),
+          Text(translation(context).lbl_upload_logo_banner),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Container(
               width: 45.w,
@@ -1478,7 +1478,7 @@ class Step4 extends StatelessWidget {
               return Column(
                 children: [
                   Text(
-                    'Successfully',
+                    translation(context).lbl_successfully,
                     style:  TextStyle(fontFamily: 'Poppins',
                         color: Colors.blue,
                         fontSize: 14.sp,
@@ -1498,7 +1498,7 @@ class Step4 extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      'Group Created Successfully',
+                      translation(context).msg_group_created_success,
                       style:  TextStyle(fontFamily: 'Poppins',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,
@@ -1536,7 +1536,7 @@ class Step4 extends StatelessWidget {
                     height: 20,
                   ),
                   Text(
-                    'Error !',
+                    translation(context).lbl_error_exclamation,
                     style: TextStyle(fontFamily: 'Poppins',
                         color: Colors.red,
                         fontSize: 14.sp,
@@ -1548,7 +1548,7 @@ class Step4 extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      'An Error Occurred While Creating The Group. Please Go To The Basic Info And Provide The Correct Details',
+                      translation(context).msg_group_create_error,
                       style:  TextStyle(fontFamily: 'Poppins',
                           color: svGetBodyColor(),
                           fontSize: 10.sp,

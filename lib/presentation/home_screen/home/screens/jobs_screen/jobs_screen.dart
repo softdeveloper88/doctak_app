@@ -5,6 +5,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
@@ -87,12 +88,12 @@ class _JobsScreenState extends State<JobsScreen> {
           children: [
             BlocBuilder<SplashBloc, SplashState>(builder: (context, state) {
               if (state is CountriesDataInitial) {
-                return const Column(
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Text('Loading...'),
+                    Text(translation(context).lbl_loading),
                   ],
                 );
               } else if (state is CountriesDataLoaded) {
@@ -116,7 +117,7 @@ class _JobsScreenState extends State<JobsScreen> {
                         // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                              child: Text('Jobs',
+                              child: Text(translation(context).lbl_jobs,
                                   textAlign: TextAlign.left,
                                   style: boldTextStyle(size: 18))),
                           Expanded(
@@ -252,7 +253,7 @@ class _JobsScreenState extends State<JobsScreen> {
                                       },
                                       decoration: InputDecoration(
                                         border: InputBorder.none,
-                                        hintText: 'Search by Specialty',
+                                        hintText: translation(context).lbl_search_by_specialty,
                                         hintStyle: secondaryTextStyle(
                                             color: svGetBodyColor()),
                                         suffixIcon: GestureDetector(
@@ -425,13 +426,13 @@ class _JobsScreenState extends State<JobsScreen> {
                   LoadDropdownData('', '', '', ''),
                 );
 
-                return Center(child: Text('Error: ${state.errorMessage}'));
+                return Center(child: Text('${translation(context).lbl_error}: ${state.errorMessage}'));
               } else {
                 BlocProvider.of<SplashBloc>(context).add(
                   LoadDropdownData('', '', '', ''),
                 );
 
-                return const Center(child: Text('Unknown state'));
+                return Center(child: Text(translation(context).lbl_unknown_state));
               }
             }),
             BlocBuilder<JobsBloc, JobsState>(
@@ -452,8 +453,8 @@ class _JobsScreenState extends State<JobsScreen> {
                     ),
                   );
                 } else {
-                  return const Expanded(
-                      child: Center(child: Text('Something went wrong')));
+                  return Expanded(
+                      child: Center(child: Text(translation(context).msg_something_went_wrong)));
                 }
               },
             ),
@@ -467,8 +468,8 @@ class _JobsScreenState extends State<JobsScreen> {
     final bloc = jobsBloc;
     return Expanded(
       child: bloc.drugsData.isEmpty
-          ? const Center(
-              child: Text("No Jobs Found"),
+          ? Center(
+              child: Text(translation(context).msg_no_jobs_found),
             )
           : ListView.builder(
         padding: const EdgeInsets.only(top: 10),

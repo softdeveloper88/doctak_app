@@ -315,6 +315,7 @@
 // import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 // import 'package:doctak_app/core/utils/pusher_service.dart';
 // import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart';
+// import 'package:doctak_app/localization/app_localization.dart';
 // import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/search_user_screen.dart';
 // import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/seeting_host_control_screen.dart';
 // import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
@@ -520,7 +521,7 @@
 // //         actions: [
 // //           TextButton(
 // //             onPressed: () => Navigator.pop(context),
-// //             child: const Text('Cancel'),
+// //             child: Text(translation(context).lbl_cancel),
 // //           ),
 // //           TextButton(
 // //             onPressed: () {
@@ -793,8 +794,8 @@
 //                         return MeetingJoinRejectDialog(
 //                           joinName:
 //                               '${jsonMap['first_name']} ${jsonMap['last_name']}',
-//                           title: ' want to join the meeting ?',
-//                           yesButtonText: 'Accept',
+//                           title: translation(context).lbl_want_to_join_meeting,
+//                           yesButtonText: translation(context).lbl_accept,
 //                           profilePic:
 //                               '${AppData.imageUrl}${jsonMap['profile_pic']}',
 //                           callback: () async {
@@ -813,7 +814,7 @@
 //                             });
 //                             Navigator.of(context).pop();
 //                           },
-//                           noButtonText: 'Reject',
+//                           noButtonText: translation(context).lbl_decline,
 //                           callbackNegative: () async {
 //                             await rejectJoinMeet(
 //                                     context,
@@ -858,7 +859,7 @@
 //         return AlertDialog(
 //           // <-- SEE HERE
 //           title: Text(
-//             'You want to enable permission?',
+//             translation(context).lbl_you_want_enable_permission,
 //             textAlign: TextAlign.center,
 //             style: TextStyle(
 //               fontSize: 14.sp,
@@ -874,13 +875,13 @@
 //           // ),
 //           actions: <Widget>[
 //             TextButton(
-//               child: const Text('No'),
+//               child: Text(translation(context).lbl_cancel),
 //               onPressed: () {
 //                 Navigator.of(context).pop();
 //               },
 //             ),
 //             TextButton(
-//               child: const Text('Yes'),
+//               child: Text(translation(context).lbl_yes),
 //               onPressed: () {
 //                 openAppSettings();
 //                 Navigator.of(context).pop();
@@ -1441,7 +1442,7 @@
 //                           Clipboard.setData(
 //                               ClipboardData(text: channelName));
 //                           ScaffoldMessenger.of(context).showSnackBar(
-//                             const SnackBar(content: Text("Meeting code copied to clipboard")),
+//                             SnackBar(content: Text(translation(context).msg_meeting_code_copied)),
 //                           );
 //                         },
 //                         icon: const Icon(Icons.copy, color: Colors.white)),
@@ -1864,7 +1865,7 @@
 //         actions: [
 //           TextButton(
 //             onPressed: () => Navigator.pop(context),
-//             child: const Text('Cancel'),
+//             child: Text(translation(context).lbl_cancel),
 //           ),
 //           TextButton(
 //             onPressed: () async {
@@ -1879,7 +1880,7 @@
 //               Navigator.pop(context);
 //               Navigator.pop(context);
 //             },
-//             child: const Text('End Call', style: TextStyle(color: Colors.red)),
+//             child: Text(translation(context).lbl_end_call, style: const TextStyle(color: Colors.red)),
 //           ),
 //         ],
 //       ),
@@ -2402,23 +2403,22 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       barrierDismissible: false,
       builder: (context) =>
           AlertDialog(
-            title: const Text('Permissions Required'),
+            title: Text(translation(context).lbl_call_permission_error),
             content: Text('${deniedPermissions.join(
-                ', ')} permission(s) are required for the meeting. '
-                'The app may not function properly without these permissions.'),
+                ', ')} ${translation(context).lbl_you_want_enable_permission}'),
             actions: [
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
                   await openAppSettings();
                 },
-                child: const Text('Open Settings'),
+                child: Text(translation(context).lbl_retry),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('Continue Anyway'),
+                child: Text(translation(context).lbl_join),
               ),
             ],
           ),
@@ -2694,7 +2694,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
                   // Reset speaking state after a delay if no more audio
                   _localUserSpeakingTimer?.cancel();
-                  _localUserSpeakingTimer = Timer(Duration(milliseconds: 800), () {
+                  _localUserSpeakingTimer = Timer(const Duration(milliseconds: 800), () {
                     if (mounted) setState(() => _isLocalUserSpeaking = false);
                   });
                 } else {
@@ -2707,7 +2707,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                       _speakingTimers[speaker.uid]?.cancel();
 
                       // Create a timer to reset speaking state after delay
-                      _speakingTimers[speaker.uid!] = Timer(Duration(milliseconds: 800), () {
+                      _speakingTimers[speaker.uid!] = Timer(const Duration(milliseconds: 800), () {
                         if (mounted) {
                           setState(() {
                             for (var j = 0; j < _remoteVideos.length; j++) {
@@ -3202,7 +3202,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             content: Text(message),
             actions: [
               TextButton(onPressed: () => Navigator.pop(context),
-                  child: const Text('OK')),
+                  child: Text(translation(context).lbl_ok)),
             ],
           ),
     );
@@ -3305,14 +3305,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   Widget _buildMainVideoArea() {
     if (_remoteVideos.isEmpty) {
       // No remote videos, show waiting message or local preview fullscreen
-      return const Center(
+      return  Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text("Waiting for others to join...",
-                style: TextStyle(fontSize: 18, color: Colors.grey)),
+            const Icon(Icons.people, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(translation(context).msg_no_user_found,
+                style: const TextStyle(fontSize: 18, color: Colors.grey)),
           ],
         ),
       );
@@ -3606,8 +3606,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                       const Icon(Icons.screen_share, color: Colors.white, size: 14),
                       if (isFocused) ...[
                         const SizedBox(width: 4),
-                        const Text('Screen Sharing',
-                            style: TextStyle(color: Colors.white, fontSize: 12)),
+                        Text(translation(context).lbl_screen_sharing,
+                            style: const TextStyle(color: Colors.white, fontSize: 12)),
                       ]
                     ],
                   ),
@@ -3704,9 +3704,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             MeetingInfoScreen().launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
           },
           value: 1,
-          child: const ListTile(
-            trailing: Icon(Icons.info, color: Colors.white),
-            title: Text("Information", style: TextStyle(color: Colors.white)),
+          child: ListTile(
+            trailing: const Icon(Icons.info, color: Colors.white),
+            title: Text(translation(context).lbl_information, style: const TextStyle(color: Colors.white)),
           ),
         ),
         PopupMenuItem(
@@ -3720,9 +3720,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             }
           },
           value: 2,
-          child: const ListTile(
-            trailing: Icon(Icons.settings, color: Colors.white),
-            title: Text("Setting", style: TextStyle(color: Colors.white)),
+          child: ListTile(
+            trailing: const Icon(Icons.settings, color: Colors.white),
+            title: Text(translation(context).lbl_setting, style: const TextStyle(color: Colors.white)),
           ),
         ),
         PopupMenuItem(
@@ -3732,12 +3732,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: channelName));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Meeting code copied to clipboard")),
+                  SnackBar(content: Text(translation(context).msg_meeting_code_copied)),
                 );
               },
               icon: const Icon(Icons.copy, color: Colors.white),
             ),
-            title: Text("Meeting ID : $channelName", style: const TextStyle(color: Colors.white)),
+            title: Text("${translation(context).lbl_meeting_id} : $channelName", style: const TextStyle(color: Colors.white)),
           ),
         ),
         PopupMenuItem(
@@ -3747,7 +3747,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           value: 4,
           child: ListTile(
             trailing: const Icon(Icons.link, color: Colors.white),
-            title: Text("Send Invitation link : https://doctak.net/$channelName",
+            title: Text("${translation(context).lbl_send_invitation_link} : https://doctak.net/$channelName",
                 style: const TextStyle(color: Colors.white)),
           ),
         ),
@@ -3791,19 +3791,19 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   String _getNetworkQualityText() {
     switch (_networkQuality) {
       case 1:
-        return 'Excellent';
+        return translation(context).lbl_network_quality_excellent;
       case 2:
-        return 'Good';
+        return translation(context).lbl_network_quality_good;
       case 3:
-        return 'Poor';
+        return translation(context).lbl_network_quality_fair;
       case 4:
-        return 'Bad';
+        return translation(context).lbl_network_quality_poor;
       case 5:
-        return 'Very Bad';
+        return translation(context).lbl_network_quality_very_poor;
       case 6:
-        return 'Disconnected';
+        return translation(context).lbl_network_quality_unknown;
       default:
-        return 'Unknown';
+        return translation(context).lbl_network_quality_unknown;
     }
   }
 
@@ -3969,7 +3969,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 },
                 child: SvgPicture.asset(icChat, color: Colors.white),
               ),
-              const Text('Chat', style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
+              Text(translation(context).lbl_chat, style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
             ],
           ),
           // Screen share button
@@ -3986,7 +3986,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                   color: Colors.white,
                 ),
               ),
-              const Text('Share', style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
+              Text(translation(context).lbl_share, style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
             ],
           ),
           // End meeting button
@@ -3998,7 +3998,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 onPressed: _confirmEndCall,
                 child: const Icon(Icons.call_end, color: Colors.white),
               ),
-              const Text('End Meeting', style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
+              Text(translation(context).lbl_end_meeting, style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
             ],
           ),
         ],
@@ -4074,12 +4074,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('End Call'),
-        content: const Text('Are you sure you want to end the call?'),
+        title: Text(translation(context).lbl_end_call),
+        content: Text(translation(context).msg_confirm_end_call),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(translation(context).lbl_cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -4094,7 +4094,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               // Navigator.pop(context); // Close dialog
               // Navigator.pop(context); // Exit meeting screen
             },
-            child: const Text('End Call', style: TextStyle(color: Colors.red)),
+            child: Text(translation(context).lbl_end_call, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

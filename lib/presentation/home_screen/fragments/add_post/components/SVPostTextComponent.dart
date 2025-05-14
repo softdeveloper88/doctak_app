@@ -1,6 +1,7 @@
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:quill_html_converter/quill_html_converter.dart';
@@ -73,9 +74,9 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
            print(value);
             widget.searchPeopleBloc.add(TextFieldEvent(value));
 
-          },decoration: const InputDecoration(
+          },decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: "What's on your mind",
+            hintText: translation(context).lbl_whats_on_your_mind,
             focusedBorder: InputBorder.none,
             enabledBorder: InputBorder.none,
             errorBorder: InputBorder.none,

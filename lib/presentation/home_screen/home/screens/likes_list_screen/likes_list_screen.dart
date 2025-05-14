@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class _LikesListScreenState extends State<LikesListScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('People who likes', style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
+        title: Text(translation(context).lbl_people_who_likes, style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -74,8 +75,8 @@ class _LikesListScreenState extends State<LikesListScreen> {
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
               return likesBloc.postLikesList.isEmpty
-                  ? const Center(
-                      child: Text('No Likes'),
+                  ?  Center(
+                      child: Text(translation(context).msg_no_likes),
                     )
                   : Padding(
                       padding: const EdgeInsets.only(bottom: 60.0),

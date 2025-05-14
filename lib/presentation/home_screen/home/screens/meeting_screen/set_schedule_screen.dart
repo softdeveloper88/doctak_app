@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_call_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -62,12 +63,12 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
           const SizedBox(height: 20),
           // Form Fields
           CustomTextField(
-            labelText: "Meeting Topic",
+            labelText: translation(context).lbl_meeting_topic,
             controller: topicController,
           ),
           const SizedBox(height: 20),
           CustomTextField(
-            labelText: "Date",
+            labelText: translation(context).lbl_date,
             controller: dateController,
             icon: Icons.calendar_today,
             readOnly: true,
@@ -75,7 +76,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
           ),
           const SizedBox(height: 20),
           CustomTextField(
-            labelText: "Time",
+            labelText: translation(context).lbl_time,
             controller: startTimeController,
             icon: Icons.access_time,
             readOnly: true,
@@ -117,7 +118,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                   if (topicController.text.isEmpty ||
                       dateController.text.isEmpty ||
                       startTimeController.text.isEmpty) {
-                    toast('All fields are required');
+                    toast(translation(context).msg_all_fields_required);
                     return;
                   }
 
@@ -138,10 +139,10 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                     startTimeController.clear();
                     endTimeController.clear();
                   } catch (e) {
-                    toast('Error scheduling meeting');
+                    toast(translation(context).msg_error_scheduling_meeting);
                   }
                 },
-                text: 'SCHEDULE',
+                text: translation(context).lbl_schedule,
               ),
             ),
           ),
@@ -168,7 +169,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                    showToast(error);
                   });
                 },
-                text: 'Create Instant Meeting',
+                text: translation(context).lbl_create_instant_meeting,
               ),
             ),
           ),
@@ -182,7 +183,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                 onTap: () async {
                   _showJoinDialog(context);
                 },
-                text: 'Join  Meeting',
+                text: translation(context).lbl_join_meeting,
               ),
             ),
           ),
@@ -210,7 +211,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
     }).catchError((error) {
       // Stop the timer when condition is met
       ProgressDialogUtils.hideProgressDialog();
-      toast("Something went wrong");
+      toast(translation(context).msg_something_went_wrong);
     });
   }
 
@@ -332,15 +333,15 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Join Meeting'),
+        title: Text(translation(context).lbl_join_meeting),
         content: TextField(
           controller: channelController,
-          decoration: const InputDecoration(labelText: 'Channel Name'),
+          decoration: InputDecoration(labelText: translation(context).lbl_channel_name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(translation(context).lbl_cancel),
           ),
           TextButton(
             onPressed: () {
@@ -351,7 +352,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                 });
               }
             },
-            child: const Text('Join'),
+            child: Text(translation(context).lbl_join),
           ),
         ],
       ),

@@ -1,10 +1,12 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/common_navigator.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class IncompleteProfileCard extends StatelessWidget {
    IncompleteProfileCard(this.isEmailVerified,this.isInCompleteProfile,{Key? key}) : super(key: key);
@@ -42,36 +44,36 @@ class IncompleteProfileCard extends StatelessWidget {
          // Successful API call, handle the response if needed
          // Show success Snackbar
          ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
-             content: Text('Verification link sent successfully'),
-             duration: Duration(seconds: 2),
+           SnackBar(
+             content: Text(translation(context).msg_verification_link_sent_success),
+             duration: const Duration(seconds: 2),
            ),
          );
        } else if (response.statusCode == 422) {
          // Validation error or user email not found
          // Show error Snackbar
          ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
-             content: Text('Validation error or user email not found'),
-             duration: Duration(seconds: 2),
+           SnackBar(
+             content: Text(translation(context).msg_validation_error),
+             duration: const Duration(seconds: 2),
            ),
          );
        } else if (response.statusCode == 404) {
          // User already verified
          // Show info Snackbar
          ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
-             content: Text('User already verified'),
-             duration: Duration(seconds: 2),
+           SnackBar(
+             content: Text(translation(context).msg_user_already_verified),
+             duration: const Duration(seconds: 2),
            ),
          );
        } else {
          // Something went wrong
          // Show error Snackbar
          ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
-             content: Text('Something went wrong.'),
-             duration: Duration(seconds: 2),
+           SnackBar(
+             content: Text(translation(context).msg_something_went_wrong),
+             duration: const Duration(seconds: 2),
            ),
          );
        }
@@ -81,9 +83,9 @@ class IncompleteProfileCard extends StatelessWidget {
        Navigator.of(context).pop();
 
        ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(
-           content: Text('Something went wrong.'),
-           duration: Duration(seconds: 2),
+         SnackBar(
+           content: Text(translation(context).msg_something_went_wrong),
+           duration: const Duration(seconds: 2),
          ),
        );
      }
@@ -119,10 +121,10 @@ class IncompleteProfileCard extends StatelessWidget {
               height: 80,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Please verify your email to continue',
+            Text(
+              translation(context).msg_verify_email_continue,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: Colors.black87,
@@ -140,9 +142,9 @@ class IncompleteProfileCard extends StatelessWidget {
               onPressed: () {
                 sendVerificationLink(AppData.email,context);
               },
-              child: const Text(
-                'VERIFY EMAIL',
-                style: TextStyle(
+              child: Text(
+                translation(context).lbl_verify_email,
+                style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -167,19 +169,19 @@ class IncompleteProfileCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text(
-              'Your profile is incomplete',
-              style: TextStyle(
+            Text(
+              translation(context).msg_profile_incomplete,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Please complete the following fields',
+            Text(
+              translation(context).msg_complete_following,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.black54,
               ),
@@ -188,9 +190,9 @@ class IncompleteProfileCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildIconWithText('assets/images/ic_country.svg', 'Set Country'),
-                _buildIconWithText('assets/images/ic_state.svg', 'Set State'),
-                _buildIconWithText('assets/images/ic_specialty.svg', 'Set Specialty'),
+                _buildIconWithText('assets/images/ic_country.svg', translation(context).lbl_set_country),
+                _buildIconWithText('assets/images/ic_state.svg', translation(context).lbl_set_state),
+                _buildIconWithText('assets/images/ic_specialty.svg', translation(context).lbl_set_specialty),
               ],
             ),
             const SizedBox(height: 16),
@@ -207,9 +209,9 @@ class IncompleteProfileCard extends StatelessWidget {
                 launchScreen(context, const CompleteProfileScreen(),);
 
               },
-              child: const Text(
-                'COMPLETE PROFILE',
-                style: TextStyle(
+              child: Text(
+                translation(context).lbl_complete_profile,
+                style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

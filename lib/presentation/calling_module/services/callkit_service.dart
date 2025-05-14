@@ -845,7 +845,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:doctak_app/core/utils/navigator_service.dart';
-import 'package:doctak_app/presentation/call_module/call_api_service.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
@@ -856,6 +855,8 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+
+import 'call_api_service.dart';
 
 class CallKitService {
   static final CallKitService _instance = CallKitService._internal();

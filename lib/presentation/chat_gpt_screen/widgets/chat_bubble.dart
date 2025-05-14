@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,7 +80,7 @@ class ChatBubble extends StatelessWidget {
                           child: ConstrainedBox(
                               constraints:
                               BoxConstraints(maxWidth: bubbleMaxWidth),
-                              child: text == 'Generating response...'
+                              child: text == translation(context).lbl_generating_response
                                   ? Column(
                                 children: [
                                   MarkdownBlock(
@@ -134,8 +135,8 @@ class ChatBubble extends StatelessWidget {
                                 Clipboard.setData(ClipboardData(text: text));
                                 // You can show a snackbar or any other feedback here
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Text copied to clipboard'),
+                                  SnackBar(
+                                    content: Text(translation(context).lbl_text_copied_clipboard),
                                   ),
                                 );
                               },

@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/calling_module/models/call_state.dart';
 import 'package:doctak_app/presentation/calling_module/providers/call_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,42 +30,44 @@ class CallControls extends StatelessWidget {
 
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           // Mute button
-          _CallControlButton(onTap: callProvider.toggleMute,
-            icon: callState.isMuted ? CupertinoIcons.mic_off : CupertinoIcons
-                .mic,
-            label: "Mute",
-            bgColor: callState.isMuted ? Colors.red : Colors.white24,),
+          _CallControlButton(
+            onTap: callProvider.toggleMute,
+            icon: callState.isMuted ? CupertinoIcons.mic_off : CupertinoIcons.mic,
+            label: translation(context).lbl_mute,
+            bgColor: callState.isMuted ? Colors.red : Colors.white24,
+          ),
 
           // Switch call type button
-          _CallControlButton(onTap: callProvider.switchCallType,
+          _CallControlButton(
+            onTap: callProvider.switchCallType,
             icon: isVideoCall ? Icons.phone : Icons.videocam,
-            label: isVideoCall ? "Audio" : "Video",
-            bgColor: Colors.white24,),
+            label: isVideoCall ? translation(context).lbl_audio : translation(context).lbl_video,
+            bgColor: Colors.white24,
+          ),
 
           // Speaker button
-          _CallControlButton(onTap: callProvider.toggleSpeaker,
+          _CallControlButton(
+            onTap: callProvider.toggleSpeaker,
             icon: callState.isSpeakerOn ? Icons.volume_up : Icons.volume_off,
-            label: "Speaker",
-            bgColor: callState.isSpeakerOn ? Colors.white24 : Colors.white24,),
+            label: translation(context).lbl_speaker,
+            bgColor: callState.isSpeakerOn ? Colors.white24 : Colors.white24,
+          ),
 
           // Swap cameras button or switch view button
-          if (isVideoCall)_CallControlButton(onTap:
-          // !callState.isRemoteUserJoined
-          //     ? callProvider.swapLocalAndRemoteVideo
-          //     :
-          callProvider.switchCamera, icon:
-          // callState.isRemoteUserJoined
-          //     ? Icons.swap_horiz
-          //     :
-          CupertinoIcons.camera_rotate, label:
-          // callState.isRemoteUserJoined ? "Swap" :
-          "Flip", bgColor: Colors.white24,),
+          if (isVideoCall)_CallControlButton(
+            onTap: callProvider.switchCamera,
+            icon: CupertinoIcons.camera_rotate,
+            label: translation(context).lbl_flip,
+            bgColor: Colors.white24,
+          ),
 
           // End call button
-          _CallControlButton(onTap: onEndCallConfirm,
+          _CallControlButton(
+            onTap: onEndCallConfirm,
             icon: Icons.call_end,
-            label: "End",
-            bgColor: Colors.red,),
+            label: translation(context).lbl_end,
+            bgColor: Colors.red,
+          ),
         ],),
       ],),);
   }

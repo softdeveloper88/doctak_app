@@ -5,6 +5,7 @@ import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -59,7 +60,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text('Guidelines', style: boldTextStyle(size: 18)),
+        title: Text(translation(context).lbl_guidelines, style: boldTextStyle(size: 18)),
         actions: [
           InkWell(
             onTap: () {
@@ -116,7 +117,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     textFieldType: TextFieldType.NAME,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Search  ',
+                      hintText: translation(context).lbl_search,
                       hintStyle: secondaryTextStyle(color: svGetBodyColor()),
                       suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
                               height: 16,
@@ -191,8 +192,8 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                   ),
                 );
               } else {
-                return const Expanded(
-                    child: Center(child: Text('Something went wrong')));
+                return Expanded(
+                    child: Center(child: Text(translation(context).msg_something_went_wrong)));
               }
             },
           ),
@@ -302,7 +303,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 }
               },
               child: Text(
-                expandedMap[item.diseaseName]! ? 'Download PDF' : 'See More',
+                expandedMap[item.diseaseName]! ? translation(context).lbl_download_pdf : translation(context).lbl_see_more,
                 style:  TextStyle(fontFamily: 'Poppins',color: svGetBodyColor()),
               ),
             ),
@@ -323,7 +324,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       // Handle errors or show an alert to the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("An error occurred: ${e.toString()}"),
+          content: Text("${translation(context).msg_error_occurred}: ${e.toString()}"),
           backgroundColor: Colors.red,
         ),
       );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 // TODO: add flutter_svg package to pubspec.yaml
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 class NoInternetScreen extends StatefulWidget {
    NoInternetScreen({super.key});
@@ -36,9 +38,8 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
                 ),
                 const Spacer(flex: 2),
                 ErrorInfo(
-                  title: "Opps!....",
-                  description:
-                  "No Internet connection,Please connect to internet",
+                  title: translation(context).lbl_oops,
+                  description: translation(context).msg_no_internet_connection,
                   // button: you can pass your custom button,
                   // btnText: default is retry, you can pass your custom text,
                   press: () {
@@ -102,7 +103,7 @@ class ErrorInfo extends StatelessWidget {
                       foregroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8)))),
-                  child: Text(btnText ?? "Retry".toUpperCase()),
+                  child: Text(btnText ?? translation(context).lbl_retry.toUpperCase()),
                 ),
             const SizedBox(height: 16),
           ],

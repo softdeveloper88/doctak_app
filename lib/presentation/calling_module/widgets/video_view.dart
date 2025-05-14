@@ -1,4 +1,5 @@
 // lib/presentation/call_module/widgets/video_view.dart
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:provider/provider.dart';
@@ -127,7 +128,6 @@ class LocalVideoMainView extends StatelessWidget {
     );
   }
 }
-
 /// Widget that displays the remote video as main view with local video in PIP
 class RemoteVideoMainView extends StatelessWidget {
   final int? remoteUid;
@@ -349,7 +349,7 @@ class WaitingForRemoteView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              "Calling ${remoteUser.name}...",
+              "${translation(context).lbl_calling_user}".replaceAll("{name}", remoteUser.name),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -364,7 +364,7 @@ class WaitingForRemoteView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                isVideoCall ? "Video Call" : "Audio Call",
+                isVideoCall ? translation(context).lbl_video_call : translation(context).lbl_audio_call,
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 16,

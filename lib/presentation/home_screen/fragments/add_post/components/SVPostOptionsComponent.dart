@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -173,7 +175,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                       width: 10,
                     ),
                     Text(
-                      'From Gallery',
+                      translation(context).lbl_from_gallery,
                       style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
@@ -200,7 +202,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                       width: 10,
                     ),
                     Text(
-                      'Take Video',
+                      translation(context).lbl_take_video,
                       style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
@@ -228,7 +230,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                       width: 10,
                     ),
                     Text(
-                      'Take Picture',
+                      translation(context).lbl_take_picture,
                       style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: svGetBodyColor(),
@@ -278,7 +280,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     }
     else {
       // Handle other types of files
-      return const Text('Unsupported file type');
+      return Text(translation(context).msg_unsupported_file);
     }
   }
 }

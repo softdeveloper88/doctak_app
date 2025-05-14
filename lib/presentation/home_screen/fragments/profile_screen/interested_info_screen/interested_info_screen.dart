@@ -1,9 +1,11 @@
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/SVColors.dart';
@@ -34,7 +36,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
-        title: Text('Interest Information', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_interest_information, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: GestureDetector(
@@ -162,7 +164,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
 
                     Navigator.pop(context);
                   },
-                  text: 'Update',
+                  text: translation(context).lbl_update,
                 ),
             ],
           ),
@@ -175,8 +177,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
 
   Widget _buildInterestedInfoFields() {
     return widget.profileBloc.interestList!.isEmpty
-        ? const SizedBox(
-            height: 500, child: Center(child: Text('No Interest Add')))
+        ? SizedBox(
+            height: 500, child: Center(child: Text(translation(context).lbl_no_interest_added)))
         : Form(
             key: _formKey,
             child: Column(children: [
@@ -188,7 +190,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     children: [
                       Text(
                         capitalizeWords(
-                            'Areas of Interest (Specific fields of medicine, research interests)'),
+                            translation(context).lbl_areas_of_interest),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -196,12 +198,11 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                       ),
                       const SizedBox(height: 10),
                       TextFieldEditWidget(
-                        hints:
-                            'Areas of Interest (Specific fields of medicine, research interests)',
+                        hints: translation(context).hint_areas_of_interest,
                         isEditModeMap: isEditModeMap,
                         icon: Icons.description,
                         index: 2,
-                        label: 'Interest Details',
+                        label: translation(context).lbl_interest_details,
                         value: widget
                                 .profileBloc.interestList?[0].interestDetails ??
                             "",
@@ -221,7 +222,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                     children: [
                       Text(
                         capitalizeWords(
-                            'Participation in Conferences and Workshops'),
+                            translation(context).lbl_conferences_participation),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -232,8 +233,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                         isEditModeMap: isEditModeMap,
                         icon: Icons.description,
                         index: 2,
-                        hints: 'Publications (Research papers, articles)',
-                        label: 'Interest Details',
+                        hints: translation(context).hint_publications,
+                        label: translation(context).lbl_interest_details,
                         value: widget
                                 .profileBloc.interestList?[1].interestDetails ??
                             "",
@@ -251,9 +252,9 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Research Projects',
-                        style: TextStyle(
+                      Text(
+                        capitalizeWords(translation(context).lbl_research_projects),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -263,8 +264,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> {
                         isEditModeMap: isEditModeMap,
                         icon: Icons.description,
                         index: 2,
-                        hints: 'Clinical Trials...',
-                        label: 'Interest Details',
+                        hints: translation(context).hint_clinical_trials,
+                        label: translation(context).lbl_interest_details,
                         value: widget
                                 .profileBloc.interestList?[3].interestDetails ??
                             "",

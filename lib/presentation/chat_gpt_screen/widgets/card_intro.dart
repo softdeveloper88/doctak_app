@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 cardIntro(title, subTitle, onTap,{double? width}) {
   return Card(

@@ -2,6 +2,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 import '../presentation/home_screen/utils/SVColors.dart';
 
@@ -89,8 +90,11 @@ class CustomTextFormField extends StatelessWidget {
 
   final FormFieldValidator<String>? validator;
 
+  BuildContext? currentContext;
+
   @override
   Widget build(BuildContext context) {
+    currentContext = context;
     return alignment != null
         ? Align(
             alignment: alignment ?? Alignment.center,
@@ -126,7 +130,7 @@ class CustomTextFormField extends StatelessWidget {
       );
 
   InputDecoration get decoration => InputDecoration(
-        hintText: hintText ?? "",
+        hintText: hintText ?? translation(currentContext!).lbl_empty,
         hintStyle: hintStyle ?? theme.textTheme.bodyLarge,
         prefixIcon: prefix,
         prefixIconConstraints: prefixConstraints,

@@ -1,3 +1,4 @@
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/widgets/shimmer_widget/comment_list_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -117,13 +118,13 @@ class _ReplyCommentListWidgetState extends State<ReplyCommentListWidget> {
                         }
                       });
                 } else {
-                  return const Center(
-                    child: Text(''),
+                  return  Center(
+                    child: Text(translation(context).lbl_empty),
                   );
                 }
               } else if (state is DataError) {
                 return RetryWidget(
-                    errorMessage: "Something went wrong please try again",
+                    errorMessage: translation(context).msg_something_went_wrong_retry,
                     onRetry: () {
                       try {
                         commentBloc.add(FetchReplyComment(commentId: widget.commentId.toString(),postId: ''));

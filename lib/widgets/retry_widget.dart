@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 
 class RetryWidget extends StatelessWidget {
   final String errorMessage;
@@ -51,9 +52,9 @@ class RetryWidget extends StatelessWidget {
                 vertical: 12,
               ),
               elevation: 5,
-              child: const Text(
-                "Retry",
-                style: TextStyle(
+              child: Text(
+                translation(context).lbl_retry,
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16,
                   color: Colors.white,
