@@ -3,7 +3,6 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:doctak_app/widgets/shimmer_widget/comment_list_shimmer.dart';
 import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
@@ -164,21 +163,11 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                 ],
               );
             } else if (state1 is DataLoaded) {
-              return AnimatedBackground(
-                  child: Column(
+              return Column(
                 children: [
                   Expanded(
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: svGetBgColor(),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: appStore.isDarkMode
-                              ? [Colors.blueGrey[900]!, Colors.blueGrey[800]!]
-                              : [Colors.white, Colors.blue.withAlpha(13)],
-                        ),
-                      ),
+                      color: svGetScaffoldColor(),
                       child: ListView.builder(
                         padding: const EdgeInsets.only(top: 12, bottom: 12),
                         itemCount: state1.response.sessions?.length,
@@ -253,11 +242,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                                           height: 44,
                                           margin: const EdgeInsets.only(right: 16),
                                           decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [Colors.blue[400]!, Colors.blue[600]!],
-                                            ),
+                                            color: Colors.blue[600],
                                             borderRadius: BorderRadius.circular(12),
                                             boxShadow: [
                                               BoxShadow(
@@ -388,7 +373,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                     ),
                   ),
                 ],
-              ));
+              );
             } else {
               return Container();
             }

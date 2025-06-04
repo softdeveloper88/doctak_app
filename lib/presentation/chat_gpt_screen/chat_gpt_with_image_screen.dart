@@ -281,15 +281,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         if (isEmpty)
                           Expanded(
                             child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: appStore.isDarkMode
-                                      ? [Colors.blueGrey[900]!, Colors.blueGrey[800]!]
-                                      : [Colors.white, Colors.blue.withAlpha(13)],
-                                ),
-                              ),
+                              color: svGetScaffoldColor(),
                               child: SafeArea(
                                 child: SingleChildScrollView(
                                   padding: const EdgeInsets.all(24.0),
@@ -298,24 +290,20 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     children: [
                                       const SizedBox(height: 40),
                                       
-                                      // Hero Icon - redesigned
+                                      // Hero Icon - simplified
                                       Container(
                                         width: 120,
                                         height: 120,
                                         margin: const EdgeInsets.only(bottom: 32),
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [Colors.blue[400]!, Colors.purple[700]!],
-                                          ),
+                                          color: Colors.blue[600],
                                           shape: BoxShape.circle,
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.purple.withAlpha(77),
-                                              spreadRadius: 3,
-                                              blurRadius: 20,
-                                              offset: const Offset(0, 8),
+                                              color: Colors.blue.withOpacity(0.3),
+                                              spreadRadius: 2,
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
                                             ),
                                           ],
                                         ),
@@ -366,22 +354,20 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                           fontSize: 20,
                                           fontWeight: FontWeight.w600,
                                           fontFamily: 'Poppins',
-                                          color: Colors.purple[700],
+                                          color: Colors.blue[800],
                                         ),
                                       ),
                                       const SizedBox(height: 24),
                                       
-                                      // Upload Button - redesigned
+                                      // Upload Button - simplified
                                       Container(
                                         width: double.infinity,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(24),
-                                          gradient: LinearGradient(
-                                            colors: [Colors.blue[400]!, Colors.blue[600]!],
-                                          ),
+                                          color: Colors.blue[600],
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.purple.withOpacity(0.3),
+                                              color: Colors.blue.withOpacity(0.3),
                                               offset: const Offset(0, 4),
                                               blurRadius: 12,
                                               spreadRadius: 0,
@@ -447,20 +433,20 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       
                                       const SizedBox(height: 32),
                                       
-                                      // Info Container - redesigned
+                                      // Info Container - simplified
                                       Container(
                                         decoration: BoxDecoration(
                                           color: appStore.isDarkMode
-                                              ? Colors.purple.withAlpha(26)
-                                              : Colors.purple.withAlpha(13),
+                                              ? Colors.blue.withOpacity(0.1)
+                                              : Colors.blue.withOpacity(0.05),
                                           borderRadius: BorderRadius.circular(16),
                                           border: Border.all(
-                                            color: Colors.purple.withAlpha(51),
+                                            color: Colors.blue.withOpacity(0.2),
                                             width: 1.5,
                                           ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.purple.withAlpha(13),
+                                              color: Colors.blue.withOpacity(0.05),
                                               offset: const Offset(0, 2),
                                               blurRadius: 8,
                                               spreadRadius: 0,
@@ -473,7 +459,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: Colors.amber.withAlpha(51),
+                                                color: Colors.amber.withOpacity(0.2),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Icon(
@@ -490,7 +476,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                                   fontFamily: 'Poppins',
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w600,
-                                                  color: Colors.purple[700],
+                                                  color: Colors.blue[800],
                                                 ),
                                               ),
                                             ),
@@ -506,15 +492,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         else
                           Expanded(
                             child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: appStore.isDarkMode
-                                      ? [Colors.blueGrey[900]!, Colors.blueGrey[800]!]
-                                      : [Colors.white, Colors.blue.withAlpha(13)],
-                                ),
-                              ),
+                              color: svGetScaffoldColor(),
                               child: ListView.builder(
                                 controller: _scrollController,
                                 padding: const EdgeInsets.all(16),
@@ -638,7 +616,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       icon: Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: Colors.purple.withOpacity(0.1),
+                                          color: Colors.blue.withOpacity(0.1),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
@@ -705,12 +683,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       margin: const EdgeInsets.only(right: 8.0),
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        gradient: LinearGradient(
-                                          colors: [Colors.blue[400]!, Colors.blue[600]!],
-                                        ),
+                                        color: Colors.blue[600],
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.purple.withAlpha(77),
+                                            color: Colors.blue.withOpacity(0.3),
                                             offset: const Offset(0, 2),
                                             blurRadius: 8,
                                             spreadRadius: 0,
@@ -875,12 +851,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.purple.withAlpha(51),
+                            color: Colors.blue.withOpacity(0.2),
                             width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.purple.withAlpha(26),
+                              color: Colors.blue.withOpacity(0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -1062,9 +1038,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.blue[400]!, Colors.blue[600]!],
-                        ),
+                        color: Colors.blue[600],
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -1112,7 +1086,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         Expanded(
                           child: _buildAdvancedOption(
                             icon: Icons.face_retouching_natural,
-                            gradientColors: [Colors.pink[400]!, Colors.pink[600]!],
+                            color: Colors.pink[600]!,
                             title: 'Dermatological',
                             subtitle: 'Skin analysis',
                             onTap: () {
@@ -1126,7 +1100,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         Expanded(
                           child: _buildAdvancedOption(
                             icon: Icons.medical_services,
-                            gradientColors: [Colors.blue[400]!, Colors.blue[600]!],
+                            color: Colors.blue[600]!,
                             title: 'X-Ray',
                             subtitle: 'Radiograph scan',
                             onTap: () {
@@ -1144,7 +1118,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         Expanded(
                           child: _buildAdvancedOption(
                             icon: Icons.scanner,
-                            gradientColors: [Colors.blue[400]!, Colors.blue[600]!],
+                            color: Colors.blue[600]!,
                             title: 'CT Scan',
                             subtitle: 'Tomography',
                             onTap: () {
@@ -1158,7 +1132,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                         Expanded(
                           child: _buildAdvancedOption(
                             icon: Icons.document_scanner_sharp,
-                            gradientColors: [Colors.teal[400]!, Colors.teal[600]!],
+                            color: Colors.teal[600]!,
                             title: 'MRI',
                             subtitle: 'Magnetic scan',
                             onTap: () {
@@ -1173,7 +1147,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                     const SizedBox(height: 12),
                     _buildAdvancedOption(
                       icon: Icons.medical_information,
-                      gradientColors: [Colors.orange[400]!, Colors.orange[600]!],
+                      color: Colors.orange[600]!,
                       title: 'Mammography',
                       subtitle: 'Breast tissue analysis',
                       fullWidth: true,
@@ -1209,7 +1183,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
 
   Widget _buildAdvancedOption({
     required IconData icon,
-    required List<Color> gradientColors,
+    required Color color,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
@@ -1226,12 +1200,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
             color: appStore.isDarkMode ? Colors.grey[800] : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: gradientColors.first.withAlpha(51),
+              color: color.withOpacity(0.2),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: gradientColors.first.withAlpha(26),
+                color: color.withOpacity(0.1),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -1243,15 +1217,11 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: gradientColors,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: color,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: gradientColors.first.withAlpha(102),
+                      color: color.withOpacity(0.4),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
