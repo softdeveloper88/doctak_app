@@ -8,15 +8,13 @@ class CountriesDataLoaded extends SplashState {
   CountriesModel countriesModel;
   String countryFlag;
   String typeValue;
-  String? isExpired = 'New';
   String? searchTerms = '';
 
   CountriesDataLoaded(
       {required this.countriesModel,
       required this.countryFlag,
       required this.typeValue,
-      required this.searchTerms,
-      this.isExpired});
+      required this.searchTerms});
 }
 
 class CountriesDataLoaded1 extends SplashState {

@@ -7,6 +7,7 @@ import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 class AppData {
   // https://pharmadoc.net/
   static var base = "https://doctak.net/";
+  static var base2 = "https://doctak.net";
   static var basePath = "https://doctak.net/public/";
   static var imageUrl = "https://doctak-file.s3.ap-south-1.amazonaws.com/";
   static var remoteUrl = "https://doctak.net/api/v1";

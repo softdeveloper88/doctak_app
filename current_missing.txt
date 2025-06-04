@@ -1,0 +1,41 @@
+{
+  "fa": [
+    "lbl_add_interests",
+    "msg_add_interests",
+    "msg_no_details_added",
+    "msg_interests_updated",
+    "msg_privacy_info_desc",
+    "lbl_personal_info_privacy",
+    "lbl_professional_info_privacy",
+    "lbl_location_info_privacy",
+    "lbl_other_info_privacy",
+    "msg_privacy_settings_updated"
+  ],
+
+  "hi": [
+    "lbl_home",
+    "lbl_add_interests",
+    "msg_add_interests",
+    "msg_no_details_added",
+    "msg_interests_updated",
+    "msg_privacy_info_desc",
+    "lbl_personal_info_privacy",
+    "lbl_professional_info_privacy",
+    "lbl_location_info_privacy",
+    "lbl_other_info_privacy",
+    "msg_privacy_settings_updated"
+  ],
+
+  "ur": [
+    "lbl_add_interests",
+    "msg_add_interests",
+    "msg_no_details_added",
+    "msg_interests_updated",
+    "msg_privacy_info_desc",
+    "lbl_personal_info_privacy",
+    "lbl_professional_info_privacy",
+    "lbl_location_info_privacy",
+    "lbl_other_info_privacy",
+    "msg_privacy_settings_updated"
+  ]
+}

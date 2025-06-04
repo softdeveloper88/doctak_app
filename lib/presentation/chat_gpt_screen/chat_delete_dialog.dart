@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../main.dart';
+
 class ChatDeleteDialog extends StatelessWidget {
   final VoidCallback callback;
   final String title;
@@ -16,9 +18,9 @@ class ChatDeleteDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(16),
       ),
-      elevation: 0,
+      elevation: 8,
       backgroundColor: Colors.transparent,
       child: confirmationAlertDialog(context, title, callback),
     );
@@ -31,130 +33,180 @@ confirmationAlertDialog(
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
+        Container(
           width: 80.w,
-          child: StatefulBuilder(
-            builder: (context, snapshot) {
-              return Card(
-                color: context.cardColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: appStore.isDarkMode
+                ? Colors.blueGrey[800]
+                : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.blue.withOpacity(0.1),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.08),
+                blurRadius: 12,
+                spreadRadius: 0,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.only(top: 24, bottom: 16),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.red[600],
+                    size: 28,
+                  ),
                 ),
-                child: Column(
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  translation(context).lbl_delete_chat,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                      color: appStore.isDarkMode
+                          ? Colors.white70
+                          : Colors.black.withOpacity(0.7),
+                      height: 1.5,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: translation(context).msg_confirm_delete_chat,
+                      ),
+                      TextSpan(
+                        text: title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: appStore.isDarkMode
+                      ? Colors.blueGrey[900]
+                      : Colors.grey[50],
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                ),
+                child: Row(
+                  spacing: 12,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 20.0, bottom: 10.0, left: 40.0, right: 40.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: Text(translation(context).lbl_delete_chat,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 10.sp,
-                                        color: svGetBodyColor(),
-                                        fontWeight: FontWeight.w600)),
-                              ),
-                            )
-                          ],
+                    Expanded(
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: appStore.isDarkMode
+                              ? Colors.blueGrey[700]
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: MaterialButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop('dialog');
+                          },
+                          child: Text(
+                            translation(context).lbl_cancel_caps,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: appStore.isDarkMode
+                                  ? Colors.white70
+                                  : Colors.black87,
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            style: TextStyle(
-                                fontSize: 10.sp, color: svGetBodyColor()),
-                            children: <TextSpan>[
-                              TextSpan(
-                                  text: translation(context).msg_confirm_delete_chat),
-                              TextSpan(
-                                  text: title,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w900)),
-                            ],
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        spacing: 10,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              // margin: const EdgeInsets.all(20),
-                              width: 30.w,
-                              height: 10.w,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6.0),
-                              ),
-                              child: MaterialButton(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context, rootNavigator: true)
-                                      .pop('dialog');
-                                },
-                                child: Center(
-                                  child: Text(
-                                    translation(context).lbl_cancel_caps,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                      fontSize: 12.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                    Expanded(
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Colors.red[500]!, Colors.red[700]!],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.3),
+                              offset: const Offset(0, 4),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: MaterialButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          onPressed: callBack,
+                          child: Text(
+                            translation(context).lbl_delete_caps,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
                             ),
                           ),
-
-                          Expanded(
-                            child: Container(
-                              width: 30.w,
-                              height: 10.w,
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: MaterialButton(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                                onPressed: callBack,
-                                child: Center(
-                                  child: Text(
-                                    translation(context).lbl_delete_caps,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.red,
-                                      fontSize: 12.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
-              );
-            },
+              ),
+            ],
           ),
         ),
       ],

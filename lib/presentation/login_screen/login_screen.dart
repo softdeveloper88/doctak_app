@@ -245,7 +245,7 @@ class LoginScreenState extends State<LoginScreen> {
                   : Center(
                       child: Text(
                         translation(context).msg_no_saved_logins,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 16,
                           color: Colors.grey,
@@ -315,9 +315,8 @@ class LoginScreenState extends State<LoginScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           backgroundColor: svGetScaffoldColor(),
-          // appBar: _buildAppBar(context),
           body: BlocListener<LoginBloc, LoginState>(
               bloc: loginBloc,
               listener: (context, state) {
@@ -400,12 +399,25 @@ class LoginScreenState extends State<LoginScreen> {
                   }
                 }
               },
-              child: SizedBox(
+              child: Container(
                 width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Colors.blue.shade50.withOpacity(0.8),
+                    ],
+                    stops: const [0.3, 1.0],
+                  ),
+                ),
                 child: SingleChildScrollView(
                   padding: EdgeInsets.only(
                     bottom: MediaQuery.of(context).viewInsets.bottom,
                   ),
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                   child: AutofillGroup(
                     child: Form(
                       key: _formKey,
@@ -415,173 +427,256 @@ class LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // Logo and Welcome Text Section
-                            const SizedBox(height: 50),
-                            Image.asset(
-                              'assets/logo/logo.png',
-                              width: MediaQuery.of(context).size.width * 0.7,
-                              height: 100,
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                            Hero(
+                              tag: 'app_logo',
+                              child: Image.asset(
+                                'assets/logo/logo.png',
+                                width: MediaQuery.of(context).size.width * 0.18,
+                              ),
                             ),
+                            const SizedBox(height: 20),
                             Text(
-                              translation(context).lbl_welcome_back,
-                              style: const TextStyle(
+                              "Welcome Back",
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade700,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 4),
                             Text(
-                              translation(context).msg_please_login_to_continue,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 16),
+                              "Log In!",
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.primary,
+                                letterSpacing: 0.5,
+                              ),
                             ),
-                            const SizedBox(height:20),
+                            const SizedBox(height: 30),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 20,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
 
-                            // Email Field
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                translation(context).lbl_enter_your_email_colon,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            CustomTextFormField(
-                              fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
-                              filled: true,
-                              autofillHint: const [AutofillHints.username],
-                              focusNode: focusNode1,
-                              controller: emailController,
-                              hintText: translation(context).msg_enter_your_email,
-                              textInputType: TextInputType.emailAddress,
-                              prefix: Container(
-                                margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-                                child: CustomImageView(
-                                  color: Colors.blueGrey,
-                                  imagePath: imgCheckmark,
-                                  height: 24,
-                                  width: 24,
-                                ),
-                              ),
-                              prefixConstraints: const BoxConstraints(maxHeight: 56),
-                              validator: (value) {
-                                if (value == null || !isValidEmail(value, isRequired: true)) {
-                                  return translation(context)
-                                      .err_msg_please_enter_valid_email;
-                                }
-                                return null;
-                              },
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 18, horizontal: 16),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Password Field
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                translation(context).lbl_enter_your_password_colon,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            BlocBuilder<LoginBloc, LoginState>(
-                              bloc: loginBloc,
-                              builder: (context, state) {
-                                return CustomTextFormField(
-                                  fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
-                                  filled: true,
-                                  autofillHint: const [AutofillHints.password],
-                                  focusNode: focusNode2,
-                                  controller: passwordController,
-                                  hintText: translation(context).msg_enter_new_password,
-                                  textInputType: TextInputType.visiblePassword,
-                                  textInputAction: TextInputAction.done,
-                                  prefix: Container(
-                                    margin: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-                                    child: CustomImageView(
-                                      color: Colors.blueGrey,
-                                      imagePath: imgLocation,
-                                      height: 24,
-                                      width: 24,
+                                  // Email Field
+                                  Text(
+                                    translation(context).lbl_enter_your_email_colon,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade800,
                                     ),
                                   ),
-                                  prefixConstraints: const BoxConstraints(maxHeight: 56),
-                                  suffix: InkWell(
-                                    onTap: () {
-                                      loginBloc.add(
-                                        ChangePasswordVisibilityEvent(
-                                            value: !state.isShowPassword),
+                                  const SizedBox(height: 8),
+                                  CustomTextFormField(
+                                    fillColor: Colors.grey.shade50,
+                                    filled: true,
+                                    autofillHint: const [AutofillHints.username],
+                                    focusNode: focusNode1,
+                                    controller: emailController,
+                                    hintText: translation(context).msg_enter_your_email,
+                                    textInputType: TextInputType.emailAddress,
+                                    prefix: Container(
+                                      margin: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+                                      child: Icon(
+                                        Icons.email_outlined,
+                                        color: theme.colorScheme.primary,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    prefixConstraints: const BoxConstraints(maxHeight: 56),
+                                    validator: (value) {
+                                      if (value == null || !isValidEmail(value, isRequired: true)) {
+                                        return translation(context)
+                                            .err_msg_please_enter_valid_email;
+                                      }
+                                      return null;
+                                    },
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 18, horizontal: 16),
+                                    borderDecoration: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey.shade200),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Password Field
+                                  Text(
+                                    translation(context).lbl_enter_your_password_colon,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  BlocBuilder<LoginBloc, LoginState>(
+                                    bloc: loginBloc,
+                                    builder: (context, state) {
+                                      return CustomTextFormField(
+                                        fillColor: Colors.grey.shade50,
+                                        filled: true,
+                                        autofillHint: const [AutofillHints.password],
+                                        focusNode: focusNode2,
+                                        controller: passwordController,
+                                        hintText: translation(context).msg_enter_new_password,
+                                        textInputType: TextInputType.visiblePassword,
+                                        textInputAction: TextInputAction.done,
+                                        prefix: Container(
+                                          margin: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+                                          child: Icon(
+                                            Icons.lock_outline,
+                                            color: theme.colorScheme.primary,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        prefixConstraints: const BoxConstraints(maxHeight: 56),
+                                        suffix: InkWell(
+                                          onTap: () {
+                                            loginBloc.add(
+                                              ChangePasswordVisibilityEvent(
+                                                  value: !state.isShowPassword),
+                                            );
+                                          },
+                                          child: Container(
+                                            margin:
+                                            const EdgeInsets.symmetric(horizontal: 16),
+                                            child: Icon(
+                                              state.isShowPassword
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                              color: theme.colorScheme.primary.withOpacity(0.7),
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        suffixConstraints: const BoxConstraints(maxHeight: 56),
+                                        obscureText: !state.isShowPassword,
+                                        borderDecoration: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide(color: Colors.grey.shade200),
+                                        ),
                                       );
                                     },
-                                    child: Container(
-                                      margin:
-                                      const EdgeInsets.symmetric(horizontal: 16),
-                                      child: Icon(
-                                        state.isShowPassword
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                        color: Colors.black54,
-                                        size: 24,
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Remember Me Checkbox and Forgot Password
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: Checkbox(
+                                          value: _rememberMe,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          activeColor: theme.colorScheme.primary,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _rememberMe = value!;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        translation(context).lbl_remember_me,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade700,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      GestureDetector(
+                                        onTap: () => onTapTxtForgotPassword(context),
+                                        child: Text(
+                                          translation(context).msg_forgot_password,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 32),
+
+                                  // Login Button
+                                  Container(
+                                    width: double.infinity,
+                                    height: 54,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          theme.colorScheme.primary,
+                                          theme.colorScheme.primary.withOpacity(0.7),
+                                        ],
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: theme.colorScheme.primary.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (_formKey.currentState!.validate()) {
+                                          _formKey.currentState!.save();
+                                          final token = await FirebaseMessaging.instance.getToken();
+                                          loginBloc.add(
+                                            LoginButtonPressed(
+                                              username: emailController.text,
+                                              password: passwordController.text,
+                                              rememberMe: _rememberMe,
+                                              deviceToken: token ?? "",
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        translation(context).lbl_login_button,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  suffixConstraints: const BoxConstraints(maxHeight: 56),
-                                  obscureText: !state.isShowPassword,
-                                );
-                              },
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 16),
-
-                            // Remember Me Checkbox and Forgot Password
-                            Row(
-                              children: [
-                                Checkbox(
-                                  value: _rememberMe,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _rememberMe = value!;
-                                    });
-                                  },
-                                ),
-                                Text(translation(context).lbl_remember_me),
-                                const Spacer(),
-                                GestureDetector(
-                                  onTap: () => onTapTxtForgotPassword(context),
-                                  child: Text(
-                                    translation(context).msg_forgot_password,
-                                    style: CustomTextStyles.titleSmallPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Login Button
-                            svAppButton(
-                              context: context,
-                              text: translation(context).lbl_login_button,
-                              onTap: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  _formKey.currentState!.save();
-                                  final token = await FirebaseMessaging.instance.getToken();
-                                  loginBloc.add(
-                                    LoginButtonPressed(
-                                      username: emailController.text,
-                                      password: passwordController.text,
-                                      rememberMe: _rememberMe,
-                                      deviceToken: token ?? "",
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 30),
 
                             // Signup and Social Login
                             Row(
@@ -589,7 +684,10 @@ class LoginScreenState extends State<LoginScreen> {
                               children: [
                                 Text(
                                   translation(context).msg_don_t_have_an_account,
-                                  style: CustomTextStyles.bodyMediumGray600,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade700,
+                                  ),
                                 ),
                                 GestureDetector(
                                   onTap: () => onTapTxtSignUp(context),
@@ -597,20 +695,37 @@ class LoginScreenState extends State<LoginScreen> {
                                     padding: const EdgeInsets.only(left: 4),
                                     child: Text(
                                       translation(context).lbl_sign_up,
-                                      style: CustomTextStyles.titleSmallPrimarySemiBold,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              translation(context).lbl_or,
-                              style: Theme.of(context).textTheme.bodyLarge,
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    translation(context).lbl_or,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+                              ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
                             _buildSocial(context),
-                            const SizedBox(height: 10),
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                           ],
                         ),
                       ),
@@ -623,56 +738,85 @@ class LoginScreenState extends State<LoginScreen> {
   }
   /// Section Widget
   Widget _buildSocial(BuildContext context) {
-    return Column(children: [
-      CustomOutlinedButton(
-          buttonStyle: ElevatedButton.styleFrom(
-              side: const BorderSide(color: Colors.blue,),
-              foregroundColor: Colors.white,
-              // Button text color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0), // Rounded corners
-              )),
-          buttonTextStyle: const TextStyle(color: Colors.blue,fontWeight: FontWeight.bold),
-          text: translation(context).msg_sign_in_with_google,
-          leftIcon: Container(
-              margin: const EdgeInsets.only(right: 20),
-              child: CustomImageView(
-                  color: Colors.blue,
-                  imagePath: imgGoogle,
-                  height: 20,
-                  width: 19)),
-          onPressed: () {
-            onPressedGoogleLogin();
-            // onTapSignInWithGoogle(context);
-          }),
-      const SizedBox(height: 16),
-      if (Platform.isIOS)
-        CustomOutlinedButton(
-            buttonStyle: ElevatedButton.styleFrom(
-                side: const BorderSide(color: Colors.blue,),
-                foregroundColor: Colors.white,
-                // Button text color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0), // Rounded corners
-                )),
-            buttonTextStyle: const TextStyle(color: Colors.blue,fontWeight: FontWeight.bold),
-            onPressed: () {
-              signInWithApple();
-            },
-            text: translation(context).msg_sign_in_with_apple,
-            leftIcon: Container(
-                margin: const EdgeInsets.only(right: 30),
-                child: CustomImageView(
-                    color: Colors.blue,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Google Sign-in Button
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(28),
+              onTap: () {
+                onPressedGoogleLogin();
+              },
+              child: Center(
+                child: SvgPicture.asset(
+                   imgGoogle,
+                  height: 24,
+                  width: 24,
+                  // color: Colors.red,
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (Platform.isIOS) const SizedBox(width: 20),
+        // Apple Sign-in Button (iOS only)
+        if (Platform.isIOS)
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              border: Border.all(color: Colors.grey.shade300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(28),
+                onTap: () {
+                  signInWithApple();
+                },
+                child: Center(
+                  child: CustomImageView(
                     imagePath: imgApple,
-                    height: 20,
-                    width: 16))),
-      const SizedBox(height: 16),
-    ]);
+                    height: 24,
+                    width: 24,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   onTapTxtForgotPassword(BuildContext context) {
-    ForgotPassword().launch(context);
+    const ForgotPassword().launch(context);
   }
 
   onTapTxtSignUp(BuildContext context) {
@@ -785,19 +929,19 @@ class LoginScreenState extends State<LoginScreen> {
       token = await FirebaseMessaging.instance.getToken();
     }
     var response = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-     if(token !="") {
-       loginBloc.add(SocialLoginButtonPressed(
-         email: response.user?.email ?? ' ',
-         firstName: response.user?.displayName!.split(' ').first ?? ' ',
-         lastName: response.user?.displayName!.split(' ').last ?? ' ',
-         isSocialLogin: true,
-         provider: 'apple',
-         token: response.user!.uid ?? '',
-         deviceToken: token ?? '',
-       ));
-     }else{
-       toast(translation(context).msg_something_wrong);
-     }
+    if (token != "") {
+      loginBloc.add(SocialLoginButtonPressed(
+        email: response.user?.email ?? ' ',
+        firstName: response.user?.displayName!.split(' ').first ?? ' ',
+        lastName: response.user?.displayName!.split(' ').last ?? ' ',
+        isSocialLogin: true,
+        provider: 'apple',
+        token: response.user!.uid ?? '',
+        deviceToken: token ?? '',
+      ));
+    } else {
+      toast(translation(context).msg_something_wrong);
+    }
     print("${appleCredential.givenName} ${appleCredential.familyName}");
 
     GoogleSignIn().disconnect();
@@ -818,7 +962,7 @@ class LoginScreenState extends State<LoginScreen> {
     // //   );
     // }
     TextInput.finishAutofillContext(shouldSave: true);
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       toasty(context, translation(context).msg_login_success,
           bgColor: Colors.green, textColor: Colors.white);
       if (mounted) {

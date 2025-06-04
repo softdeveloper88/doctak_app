@@ -1,0 +1,3273 @@
+# Case Discussion Module - Complete Implementation
+
+## 1. Data Models
+
+### case_discussion_models.dart
+```dart
+// Models for the Case Discussion module
+class CaseDiscussion {
+  final int id;
+  final String title;
+  final String description;
+  final String status;
+  final String specialty;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final CaseAuthor author;
+  final CaseStats stats;
+  final PatientInfo? patientInfo;
+  final List<String>? symptoms;
+  final String? diagnosis;
+  final String? treatmentPlan;
+  final List<CaseAttachment>? attachments;
+  final AISummary? aiSummary;
+
+  CaseDiscussion({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.status,
+    required this.specialty,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.author,
+    required this.stats,
+    this.patientInfo,
+    this.symptoms,
+    this.diagnosis,
+    this.treatmentPlan,
+    this.attachments,
+    this.aiSummary,
+  });
+
+  factory CaseDiscussion.fromJson(Map<String, dynamic> json) {
+    return CaseDiscussion(
+      id: json['id'] ?? 0,
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      status: json['status'] ?? 'active',
+      specialty: json['specialty'] ?? '',
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
+      author: CaseAuthor.fromJson(json['author'] ?? {}),
+      stats: CaseStats.fromJson(json['stats'] ?? {}),
+      patientInfo: json['patient_info'] != null
+          ? PatientInfo.fromJson(json['patient_info'])
+          : null,
+      symptoms: json['symptoms'] != null
+          ? List<String>.from(json['symptoms'])
+          : null,
+      diagnosis: json['diagnosis'],
+      treatmentPlan: json['treatment_plan'],
+      attachments: json['attachments'] != null
+          ? (json['attachments'] as List)
+              .map((item) => CaseAttachment.fromJson(item))
+              .toList()
+          : null,
+      aiSummary: json['ai_summary'] != null
+          ? AISummary.fromJson(json['ai_summary'])
+          : null,
+    );
+  }
+}
+
+class CaseAuthor {
+  final int id;
+  final String name;
+  final String specialty;
+  final String? profilePic;
+
+  CaseAuthor({
+    required this.id,
+    required this.name,
+    required this.specialty,
+    this.profilePic,
+  });
+
+  factory CaseAuthor.fromJson(Map<String, dynamic> json) {
+    return CaseAuthor(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      specialty: json['specialty'] ?? '',
+      profilePic: json['profile_pic'],
+    );
+  }
+}
+
+class CaseStats {
+  final int commentsCount;
+  final int followersCount;
+  final int updatesCount;
+  final int likes;
+  final int views;
+
+  CaseStats({
+    required this.commentsCount,
+    required this.followersCount,
+    required this.updatesCount,
+    required this.likes,
+    required this.views,
+  });
+
+  factory CaseStats.fromJson(Map<String, dynamic> json) {
+    return CaseStats(
+      commentsCount: json['comments_count'] ?? 0,
+      followersCount: json['followers_count'] ?? 0,
+      updatesCount: json['updates_count'] ?? 0,
+      likes: json['likes'] ?? 0,
+      views: json['views'] ?? 0,
+    );
+  }
+}
+
+class PatientInfo {
+  final int age;
+  final String gender;
+  final String medicalHistory;
+
+  PatientInfo({
+    required this.age,
+    required this.gender,
+    required this.medicalHistory,
+  });
+
+  factory PatientInfo.fromJson(Map<String, dynamic> json) {
+    return PatientInfo(
+      age: json['age'] ?? 0,
+      gender: json['gender'] ?? '',
+      medicalHistory: json['medical_history'] ?? '',
+    );
+  }
+}
+
+class CaseAttachment {
+  final int id;
+  final String type;
+  final String url;
+  final String description;
+
+  CaseAttachment({
+    required this.id,
+    required this.type,
+    required this.url,
+    required this.description,
+  });
+
+  factory CaseAttachment.fromJson(Map<String, dynamic> json) {
+    return CaseAttachment(
+      id: json['id'] ?? 0,
+      type: json['type'] ?? '',
+      url: json['url'] ?? '',
+      description: json['description'] ?? '',
+    );
+  }
+}
+
+class AISummary {
+  final DateTime generatedAt;
+  final String summary;
+  final double confidenceScore;
+  final List<String>? keyPoints;
+
+  AISummary({
+    required this.generatedAt,
+    required this.summary,
+    required this.confidenceScore,
+    this.keyPoints,
+  });
+
+  factory AISummary.fromJson(Map<String, dynamic> json) {
+    return AISummary(
+      generatedAt: DateTime.parse(json['generated_at'] ?? DateTime.now().toIso8601String()),
+      summary: json['summary'] ?? '',
+      confidenceScore: (json['confidence_score'] ?? 0.0).toDouble(),
+      keyPoints: json['key_points'] != null
+          ? List<String>.from(json['key_points'])
+          : null,
+    );
+  }
+}
+
+class CaseComment {
+  final int id;
+  final int caseId;
+  final int userId;
+  final String comment;
+  final String? clinicalTags;
+  final int likes;
+  final int dislikes;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final CaseAuthor author;
+  final int repliesCount;
+  final bool? isLiked;
+  final bool? isDisliked;
+
+  CaseComment({
+    required this.id,
+    required this.caseId,
+    required this.userId,
+    required this.comment,
+    this.clinicalTags,
+    required this.likes,
+    required this.dislikes,
+    required this.createdAt,
+    this.updatedAt,
+    required this.author,
+    required this.repliesCount,
+    this.isLiked,
+    this.isDisliked,
+  });
+
+  factory CaseComment.fromJson(Map<String, dynamic> json) {
+    return CaseComment(
+      id: json['id'] ?? 0,
+      caseId: json['discuss_case_id'] ?? 0,
+      userId: json['user_id'] ?? 0,
+      comment: json['comment'] ?? '',
+      clinicalTags: json['clinical_tags'],
+      likes: json['likes'] ?? 0,
+      dislikes: json['dislikes'] ?? 0,
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
+      author: CaseAuthor.fromJson(json['author'] ?? {}),
+      repliesCount: json['replies_count'] ?? 0,
+      isLiked: json['is_liked'],
+      isDisliked: json['is_disliked'],
+    );
+  }
+}
+
+class CreateCaseRequest {
+  final String title;
+  final String description;
+  final PatientInfo? patientInfo;
+  final List<String>? symptoms;
+  final String? diagnosis;
+  final String? treatmentPlan;
+  final String? specialty;
+  final String privacyLevel;
+  final List<AttachmentData>? attachments;
+
+  CreateCaseRequest({
+    required this.title,
+    required this.description,
+    this.patientInfo,
+    this.symptoms,
+    this.diagnosis,
+    this.treatmentPlan,
+    this.specialty,
+    this.privacyLevel = 'public',
+    this.attachments,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      if (patientInfo != null) 'patient_info': {
+        'age': patientInfo!.age,
+        'gender': patientInfo!.gender,
+        'medical_history': patientInfo!.medicalHistory,
+      },
+      if (symptoms != null) 'symptoms': symptoms,
+      if (diagnosis != null) 'diagnosis': diagnosis,
+      if (treatmentPlan != null) 'treatment_plan': treatmentPlan,
+      if (specialty != null) 'specialty': specialty,
+      'privacy_level': privacyLevel,
+      if (attachments != null) 'attachments': attachments?.map((a) => a.toJson()).toList(),
+    };
+  }
+}
+
+class AttachmentData {
+  final String type;
+  final String file; // base64 encoded
+  final String description;
+
+  AttachmentData({
+    required this.type,
+    required this.file,
+    required this.description,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'file': file,
+      'description': description,
+    };
+  }
+}
+
+class ApiResponse<T> {
+  final String status;
+  final String message;
+  final T? data;
+  final Map<String, dynamic>? errors;
+  final ApiMeta meta;
+
+  ApiResponse({
+    required this.status,
+    required this.message,
+    this.data,
+    this.errors,
+    required this.meta,
+  });
+
+  bool get isSuccess => status == 'success';
+
+  factory ApiResponse.fromJson(Map<String, dynamic> json, T Function(dynamic)? fromJsonT) {
+    return ApiResponse<T>(
+      status: json['status'] ?? '',
+      message: json['message'] ?? '',
+      data: json['data'] != null && fromJsonT != null ? fromJsonT(json['data']) : json['data'],
+      errors: json['errors'],
+      meta: ApiMeta.fromJson(json['meta'] ?? {}),
+    );
+  }
+}
+
+class ApiMeta {
+  final DateTime timestamp;
+  final String version;
+
+  ApiMeta({
+    required this.timestamp,
+    required this.version,
+  });
+
+  factory ApiMeta.fromJson(Map<String, dynamic> json) {
+    return ApiMeta(
+      timestamp: DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()),
+      version: json['version'] ?? 'v3',
+    );
+  }
+}
+
+class PaginatedResponse<T> {
+  final List<T> items;
+  final PaginationMeta pagination;
+
+  PaginatedResponse({
+    required this.items,
+    required this.pagination,
+  });
+}
+
+class PaginationMeta {
+  final int currentPage;
+  final int lastPage;
+  final int perPage;
+  final int total;
+
+  PaginationMeta({
+    required this.currentPage,
+    required this.lastPage,
+    required this.perPage,
+    required this.total,
+  });
+
+  factory PaginationMeta.fromJson(Map<String, dynamic> json) {
+    return PaginationMeta(
+      currentPage: json['current_page'] ?? 1,
+      lastPage: json['last_page'] ?? 1,
+      perPage: json['per_page'] ?? 15,
+      total: json['total'] ?? 0,
+    );
+  }
+
+  bool get hasNextPage => currentPage < lastPage;
+}
+```
+
+## 2. Repository & API Service
+
+### case_discussion_repository.dart
+```dart
+import 'dart:convert';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+import 'case_discussion_models.dart';
+
+class CaseDiscussionRepository {
+  final Dio _dio;
+  final String baseUrl;
+  final String Function() getAuthToken;
+
+  CaseDiscussionRepository({
+    required this.baseUrl,
+    required this.getAuthToken,
+    Dio? dio,
+  }) : _dio = dio ?? Dio() {
+    _setupInterceptors();
+  }
+
+  void _setupInterceptors() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          options.headers['Authorization'] = 'Bearer ${getAuthToken()}';
+          options.headers['Content-Type'] = 'application/json';
+          options.headers['Accept'] = 'application/json';
+          handler.next(options);
+        },
+        onError: (error, handler) {
+          print('API Error: ${error.message}');
+          handler.next(error);
+        },
+      ),
+    );
+  }
+
+  // Get paginated list of case discussions
+  Future<PaginatedResponse<CaseDiscussion>> getCaseDiscussions({
+    int page = 1,
+    int perPage = 15,
+    String? search,
+    String? status,
+    String? specialty,
+    String? countryId,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'per_page': perPage,
+        if (search != null && search.isNotEmpty) 'search': search,
+        if (status != null) 'status': status,
+        if (specialty != null) 'specialty': specialty,
+        if (countryId != null) 'country_id': countryId,
+      };
+
+      final response = await _dio.get(
+        '$baseUrl/api/v3/cases',
+        queryParameters: queryParams,
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, null);
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.message);
+      }
+
+      final data = apiResponse.data as Map<String, dynamic>;
+      final cases = (data['cases'] as List)
+          .map((item) => CaseDiscussion.fromJson(item))
+          .toList();
+
+      final pagination = PaginationMeta.fromJson(data['pagination']);
+
+      return PaginatedResponse<CaseDiscussion>(
+        items: cases,
+        pagination: pagination,
+      );
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  // Get single case discussion details
+  Future<CaseDiscussion> getCaseDiscussion(int caseId) async {
+    try {
+      final response = await _dio.get('$baseUrl/api/v3/cases/$caseId');
+
+      final apiResponse = ApiResponse.fromJson(response.data, null);
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.message);
+      }
+
+      final data = apiResponse.data as Map<String, dynamic>;
+      return CaseDiscussion.fromJson(data['case']);
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  // Create new case discussion
+  Future<CaseDiscussion> createCaseDiscussion(CreateCaseRequest request) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v3/cases',
+        data: request.toJson(),
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, null);
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.message);
+      }
+
+      final data = apiResponse.data as Map<String, dynamic>;
+      return CaseDiscussion.fromJson(data['case']);
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  // Get comments for a case
+  Future<PaginatedResponse<CaseComment>> getCaseComments({
+    required int caseId,
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v3/cases/comments/fetch',
+        data: {
+          'discuss_case_id': caseId,
+          'page': page,
+          'per_page': perPage,
+        },
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, null);
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.message);
+      }
+
+      final data = apiResponse.data as Map<String, dynamic>;
+      final comments = (data['comments'] as List)
+          .map((item) => CaseComment.fromJson(item))
+          .toList();
+
+      final pagination = PaginationMeta.fromJson(data['pagination']);
+
+      return PaginatedResponse<CaseComment>(
+        items: comments,
+        pagination: pagination,
+      );
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  // Add comment to case
+  Future<CaseComment> addComment({
+    required int caseId,
+    required String comment,
+    String? clinicalTags,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v3/cases/comments',
+        data: {
+          'discuss_case_id': caseId,
+          'comment': comment,
+          if (clinicalTags != null) 'clinical_tags': clinicalTags,
+        },
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, null);
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.message);
+      }
+
+      final data = apiResponse.data as Map<String, dynamic>;
+      return CaseComment.fromJson(data['comment']);
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  // Perform case action (like, bookmark, etc.)
+  Future<Map<String, dynamic>> performCaseAction({
+    required int caseId,
+    required String action, // 'like', 'bookmark', 'share', etc.
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v3/cases/action',
+        data: {
+          'case_id': caseId,
+          'action': action,
+          if (metadata != null) 'metadata': metadata,
+        },
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, null);
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.message);
+      }
+
+      return apiResponse.data as Map<String, dynamic>;
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  // Like/unlike comment
+  Future<void> likeComment(int commentId) async {
+    try {
+      await _dio.post(
+        '$baseUrl/api/v3/cases/action',
+        data: {
+          'case_id': commentId,
+          'type': 'case_comment',
+          'action': 'likes',
+        },
+      );
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  // Delete comment
+  Future<void> deleteComment(int commentId) async {
+    try {
+      await _dio.delete('$baseUrl/api/v3/cases/comments/$commentId');
+    } on DioError catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  Exception _handleDioError(DioError error) {
+    switch (error.type) {
+      case DioErrorType.connectionTimeout:
+      case DioErrorType.sendTimeout:
+      case DioErrorType.receiveTimeout:
+        return Exception('Connection timeout. Please check your internet connection.');
+      case DioErrorType.badResponse:
+        final statusCode = error.response?.statusCode;
+        final message = error.response?.data?['message'] ?? 'Server error occurred';
+        return Exception('Server error ($statusCode): $message');
+      case DioErrorType.cancel:
+        return Exception('Request was cancelled');
+      case DioErrorType.unknown:
+        return Exception('Network error occurred. Please try again.');
+      default:
+        return Exception('An unexpected error occurred');
+    }
+  }
+}
+```
+
+## 3. BLoC Implementation
+
+### discussion_list_bloc.dart
+```dart
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import '../repository/case_discussion_repository.dart';
+import '../models/case_discussion_models.dart';
+
+// Events
+abstract class DiscussionListEvent extends Equatable {
+  const DiscussionListEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LoadDiscussionList extends DiscussionListEvent {
+  final bool refresh;
+  final String? search;
+  final String? specialty;
+  final String? countryId;
+
+  const LoadDiscussionList({
+    this.refresh = false,
+    this.search,
+    this.specialty,
+    this.countryId,
+  });
+
+  @override
+  List<Object?> get props => [refresh, search, specialty, countryId];
+}
+
+class LoadMoreDiscussions extends DiscussionListEvent {}
+
+class RefreshDiscussionList extends DiscussionListEvent {}
+
+class LikeDiscussion extends DiscussionListEvent {
+  final int caseId;
+
+  const LikeDiscussion(this.caseId);
+
+  @override
+  List<Object> get props => [caseId];
+}
+
+// States
+abstract class DiscussionListState extends Equatable {
+  const DiscussionListState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class DiscussionListInitial extends DiscussionListState {}
+
+class DiscussionListLoading extends DiscussionListState {}
+
+class DiscussionListLoaded extends DiscussionListState {
+  final List<CaseDiscussion> discussions;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  const DiscussionListLoaded({
+    required this.discussions,
+    required this.hasReachedMax,
+    this.isLoadingMore = false,
+  });
+
+  @override
+  List<Object> get props => [discussions, hasReachedMax, isLoadingMore];
+
+  DiscussionListLoaded copyWith({
+    List<CaseDiscussion>? discussions,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return DiscussionListLoaded(
+      discussions: discussions ?? this.discussions,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+}
+
+class DiscussionListError extends DiscussionListState {
+  final String message;
+
+  const DiscussionListError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+// BLoC
+class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> {
+  final CaseDiscussionRepository repository;
+
+  int _currentPage = 1;
+  List<CaseDiscussion> _discussions = [];
+  String? _currentSearch;
+  String? _currentSpecialty;
+  String? _currentCountryId;
+
+  DiscussionListBloc({required this.repository}) : super(DiscussionListInitial()) {
+    on<LoadDiscussionList>(_onLoadDiscussionList);
+    on<LoadMoreDiscussions>(_onLoadMoreDiscussions);
+    on<RefreshDiscussionList>(_onRefreshDiscussionList);
+    on<LikeDiscussion>(_onLikeDiscussion);
+  }
+
+  Future<void> _onLoadDiscussionList(
+    LoadDiscussionList event,
+    Emitter<DiscussionListState> emit,
+  ) async {
+    if (event.refresh) {
+      _currentPage = 1;
+      _discussions.clear();
+    }
+
+    _currentSearch = event.search;
+    _currentSpecialty = event.specialty;
+    _currentCountryId = event.countryId;
+
+    if (_discussions.isEmpty) {
+      emit(DiscussionListLoading());
+    }
+
+    try {
+      final result = await repository.getCaseDiscussions(
+        page: _currentPage,
+        search: event.search,
+        specialty: event.specialty,
+        countryId: event.countryId,
+      );
+
+      if (event.refresh) {
+        _discussions = result.items;
+      } else {
+        _discussions.addAll(result.items);
+      }
+
+      _currentPage++;
+
+      emit(DiscussionListLoaded(
+        discussions: List.from(_discussions),
+        hasReachedMax: !result.pagination.hasNextPage,
+      ));
+    } catch (e) {
+      emit(DiscussionListError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadMoreDiscussions(
+    LoadMoreDiscussions event,
+    Emitter<DiscussionListState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is DiscussionListLoaded && !currentState.hasReachedMax) {
+      emit(currentState.copyWith(isLoadingMore: true));
+
+      try {
+        final result = await repository.getCaseDiscussions(
+          page: _currentPage,
+          search: _currentSearch,
+          specialty: _currentSpecialty,
+          countryId: _currentCountryId,
+        );
+
+        _discussions.addAll(result.items);
+        _currentPage++;
+
+        emit(DiscussionListLoaded(
+          discussions: List.from(_discussions),
+          hasReachedMax: !result.pagination.hasNextPage,
+          isLoadingMore: false,
+        ));
+      } catch (e) {
+        emit(currentState.copyWith(isLoadingMore: false));
+      }
+    }
+  }
+
+  Future<void> _onRefreshDiscussionList(
+    RefreshDiscussionList event,
+    Emitter<DiscussionListState> emit,
+  ) async {
+    add(LoadDiscussionList(
+      refresh: true,
+      search: _currentSearch,
+      specialty: _currentSpecialty,
+      countryId: _currentCountryId,
+    ));
+  }
+
+  Future<void> _onLikeDiscussion(
+    LikeDiscussion event,
+    Emitter<DiscussionListState> emit,
+  ) async {
+    try {
+      await repository.performCaseAction(
+        caseId: event.caseId,
+        action: 'like',
+      );
+
+      // Update the like count in the local list
+      final currentState = state;
+      if (currentState is DiscussionListLoaded) {
+        final updatedDiscussions = currentState.discussions.map((discussion) {
+          if (discussion.id == event.caseId) {
+            final updatedStats = CaseStats(
+              commentsCount: discussion.stats.commentsCount,
+              followersCount: discussion.stats.followersCount,
+              updatesCount: discussion.stats.updatesCount,
+              likes: discussion.stats.likes + 1,
+              views: discussion.stats.views,
+            );
+            return CaseDiscussion(
+              id: discussion.id,
+              title: discussion.title,
+              description: discussion.description,
+              status: discussion.status,
+              specialty: discussion.specialty,
+              createdAt: discussion.createdAt,
+              updatedAt: discussion.updatedAt,
+              author: discussion.author,
+              stats: updatedStats,
+              patientInfo: discussion.patientInfo,
+              symptoms: discussion.symptoms,
+              diagnosis: discussion.diagnosis,
+              treatmentPlan: discussion.treatmentPlan,
+              attachments: discussion.attachments,
+              aiSummary: discussion.aiSummary,
+            );
+          }
+          return discussion;
+        }).toList();
+
+        emit(currentState.copyWith(discussions: updatedDiscussions));
+      }
+    } catch (e) {
+      // Handle error silently or show a snackbar
+      print('Error liking discussion: $e');
+    }
+  }
+}
+```
+
+### discussion_detail_bloc.dart
+```dart
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import '../repository/case_discussion_repository.dart';
+import '../models/case_discussion_models.dart';
+
+// Events
+abstract class DiscussionDetailEvent extends Equatable {
+  const DiscussionDetailEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LoadDiscussionDetail extends DiscussionDetailEvent {
+  final int caseId;
+
+  const LoadDiscussionDetail(this.caseId);
+
+  @override
+  List<Object> get props => [caseId];
+}
+
+class LoadComments extends DiscussionDetailEvent {
+  final int caseId;
+  final bool refresh;
+
+  const LoadComments(this.caseId, {this.refresh = false});
+
+  @override
+  List<Object> get props => [caseId, refresh];
+}
+
+class LoadMoreComments extends DiscussionDetailEvent {}
+
+class AddComment extends DiscussionDetailEvent {
+  final int caseId;
+  final String comment;
+  final String? clinicalTags;
+
+  const AddComment({
+    required this.caseId,
+    required this.comment,
+    this.clinicalTags,
+  });
+
+  @override
+  List<Object?> get props => [caseId, comment, clinicalTags];
+}
+
+class LikeComment extends DiscussionDetailEvent {
+  final int commentId;
+
+  const LikeComment(this.commentId);
+
+  @override
+  List<Object> get props => [commentId];
+}
+
+class DeleteComment extends DiscussionDetailEvent {
+  final int commentId;
+
+  const DeleteComment(this.commentId);
+
+  @override
+  List<Object> get props => [commentId];
+}
+
+// States
+abstract class DiscussionDetailState extends Equatable {
+  const DiscussionDetailState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class DiscussionDetailInitial extends DiscussionDetailState {}
+
+class DiscussionDetailLoading extends DiscussionDetailState {}
+
+class DiscussionDetailLoaded extends DiscussionDetailState {
+  final CaseDiscussion discussion;
+  final List<CaseComment> comments;
+  final bool hasMoreComments;
+  final bool isLoadingComments;
+  final bool isAddingComment;
+
+  const DiscussionDetailLoaded({
+    required this.discussion,
+    required this.comments,
+    required this.hasMoreComments,
+    this.isLoadingComments = false,
+    this.isAddingComment = false,
+  });
+
+  @override
+  List<Object> get props => [
+        discussion,
+        comments,
+        hasMoreComments,
+        isLoadingComments,
+        isAddingComment,
+      ];
+
+  DiscussionDetailLoaded copyWith({
+    CaseDiscussion? discussion,
+    List<CaseComment>? comments,
+    bool? hasMoreComments,
+    bool? isLoadingComments,
+    bool? isAddingComment,
+  }) {
+    return DiscussionDetailLoaded(
+      discussion: discussion ?? this.discussion,
+      comments: comments ?? this.comments,
+      hasMoreComments: hasMoreComments ?? this.hasMoreComments,
+      isLoadingComments: isLoadingComments ?? this.isLoadingComments,
+      isAddingComment: isAddingComment ?? this.isAddingComment,
+    );
+  }
+}
+
+class DiscussionDetailError extends DiscussionDetailState {
+  final String message;
+
+  const DiscussionDetailError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+// BLoC
+class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailState> {
+  final CaseDiscussionRepository repository;
+
+  int _currentPage = 1;
+  int? _currentCaseId;
+
+  DiscussionDetailBloc({required this.repository}) : super(DiscussionDetailInitial()) {
+    on<LoadDiscussionDetail>(_onLoadDiscussionDetail);
+    on<LoadComments>(_onLoadComments);
+    on<LoadMoreComments>(_onLoadMoreComments);
+    on<AddComment>(_onAddComment);
+    on<LikeComment>(_onLikeComment);
+    on<DeleteComment>(_onDeleteComment);
+  }
+
+  Future<void> _onLoadDiscussionDetail(
+    LoadDiscussionDetail event,
+    Emitter<DiscussionDetailState> emit,
+  ) async {
+    emit(DiscussionDetailLoading());
+    _currentCaseId = event.caseId;
+
+    try {
+      final discussion = await repository.getCaseDiscussion(event.caseId);
+
+      emit(DiscussionDetailLoaded(
+        discussion: discussion,
+        comments: [],
+        hasMoreComments: true,
+      ));
+
+      // Load comments
+      add(LoadComments(event.caseId));
+    } catch (e) {
+      emit(DiscussionDetailError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadComments(
+    LoadComments event,
+    Emitter<DiscussionDetailState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is DiscussionDetailLoaded) {
+      if (event.refresh) {
+        _currentPage = 1;
+      }
+
+      emit(currentState.copyWith(isLoadingComments: true));
+
+      try {
+        final result = await repository.getCaseComments(
+          caseId: event.caseId,
+          page: _currentPage,
+        );
+
+        final comments = event.refresh ? result.items : [...currentState.comments, ...result.items];
+        _currentPage++;
+
+        emit(currentState.copyWith(
+          comments: comments,
+          hasMoreComments: result.pagination.hasNextPage,
+          isLoadingComments: false,
+        ));
+      } catch (e) {
+        emit(currentState.copyWith(isLoadingComments: false));
+      }
+    }
+  }
+
+  Future<void> _onLoadMoreComments(
+    LoadMoreComments event,
+    Emitter<DiscussionDetailState> emit,
+  ) async {
+    if (_currentCaseId != null) {
+      add(LoadComments(_currentCaseId!));
+    }
+  }
+
+  Future<void> _onAddComment(
+    AddComment event,
+    Emitter<DiscussionDetailState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is DiscussionDetailLoaded) {
+      emit(currentState.copyWith(isAddingComment: true));
+
+      try {
+        final newComment = await repository.addComment(
+          caseId: event.caseId,
+          comment: event.comment,
+          clinicalTags: event.clinicalTags,
+        );
+
+        final updatedComments = [newComment, ...currentState.comments];
+
+        // Update discussion stats
+        final updatedStats = CaseStats(
+          commentsCount: currentState.discussion.stats.commentsCount + 1,
+          followersCount: currentState.discussion.stats.followersCount,
+          updatesCount: currentState.discussion.stats.updatesCount,
+          likes: currentState.discussion.stats.likes,
+          views: currentState.discussion.stats.views,
+        );
+
+        final updatedDiscussion = CaseDiscussion(
+          id: currentState.discussion.id,
+          title: currentState.discussion.title,
+          description: currentState.discussion.description,
+          status: currentState.discussion.status,
+          specialty: currentState.discussion.specialty,
+          createdAt: currentState.discussion.createdAt,
+          updatedAt: currentState.discussion.updatedAt,
+          author: currentState.discussion.author,
+          stats: updatedStats,
+          patientInfo: currentState.discussion.patientInfo,
+          symptoms: currentState.discussion.symptoms,
+          diagnosis: currentState.discussion.diagnosis,
+          treatmentPlan: currentState.discussion.treatmentPlan,
+          attachments: currentState.discussion.attachments,
+          aiSummary: currentState.discussion.aiSummary,
+        );
+
+        emit(currentState.copyWith(
+          discussion: updatedDiscussion,
+          comments: updatedComments,
+          isAddingComment: false,
+        ));
+      } catch (e) {
+        emit(currentState.copyWith(isAddingComment: false));
+      }
+    }
+  }
+
+  Future<void> _onLikeComment(
+    LikeComment event,
+    Emitter<DiscussionDetailState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is DiscussionDetailLoaded) {
+      try {
+        await repository.likeComment(event.commentId);
+
+        final updatedComments = currentState.comments.map((comment) {
+          if (comment.id == event.commentId) {
+            return CaseComment(
+              id: comment.id,
+              caseId: comment.caseId,
+              userId: comment.userId,
+              comment: comment.comment,
+              clinicalTags: comment.clinicalTags,
+              likes: comment.likes + 1,
+              dislikes: comment.dislikes,
+              createdAt: comment.createdAt,
+              updatedAt: comment.updatedAt,
+              author: comment.author,
+              repliesCount: comment.repliesCount,
+              isLiked: true,
+              isDisliked: comment.isDisliked,
+            );
+          }
+          return comment;
+        }).toList();
+
+        emit(currentState.copyWith(comments: updatedComments));
+      } catch (e) {
+        print('Error liking comment: $e');
+      }
+    }
+  }
+
+  Future<void> _onDeleteComment(
+    DeleteComment event,
+    Emitter<DiscussionDetailState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is DiscussionDetailLoaded) {
+      try {
+        await repository.deleteComment(event.commentId);
+
+        final updatedComments = currentState.comments
+            .where((comment) => comment.id != event.commentId)
+            .toList();
+
+        // Update discussion stats
+        final updatedStats = CaseStats(
+          commentsCount: currentState.discussion.stats.commentsCount - 1,
+          followersCount: currentState.discussion.stats.followersCount,
+          updatesCount: currentState.discussion.stats.updatesCount,
+          likes: currentState.discussion.stats.likes,
+          views: currentState.discussion.stats.views,
+        );
+
+        final updatedDiscussion = CaseDiscussion(
+          id: currentState.discussion.id,
+          title: currentState.discussion.title,
+          description: currentState.discussion.description,
+          status: currentState.discussion.status,
+          specialty: currentState.discussion.specialty,
+          createdAt: currentState.discussion.createdAt,
+          updatedAt: currentState.discussion.updatedAt,
+          author: currentState.discussion.author,
+          stats: updatedStats,
+          patientInfo: currentState.discussion.patientInfo,
+          symptoms: currentState.discussion.symptoms,
+          diagnosis: currentState.discussion.diagnosis,
+          treatmentPlan: currentState.discussion.treatmentPlan,
+          attachments: currentState.discussion.attachments,
+          aiSummary: currentState.discussion.aiSummary,
+        );
+
+        emit(currentState.copyWith(
+          discussion: updatedDiscussion,
+          comments: updatedComments,
+        ));
+      } catch (e) {
+        print('Error deleting comment: $e');
+      }
+    }
+  }
+}
+```
+
+### create_discussion_bloc.dart
+```dart
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import '../repository/case_discussion_repository.dart';
+import '../models/case_discussion_models.dart';
+
+// Events
+abstract class CreateDiscussionEvent extends Equatable {
+  const CreateDiscussionEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class CreateDiscussion extends CreateDiscussionEvent {
+  final CreateCaseRequest request;
+
+  const CreateDiscussion(this.request);
+
+  @override
+  List<Object> get props => [request];
+}
+
+class ResetCreateDiscussion extends CreateDiscussionEvent {}
+
+// States
+abstract class CreateDiscussionState extends Equatable {
+  const CreateDiscussionState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class CreateDiscussionInitial extends CreateDiscussionState {}
+
+class CreateDiscussionLoading extends CreateDiscussionState {}
+
+class CreateDiscussionSuccess extends CreateDiscussionState {
+  final CaseDiscussion discussion;
+
+  const CreateDiscussionSuccess(this.discussion);
+
+  @override
+  List<Object> get props => [discussion];
+}
+
+class CreateDiscussionError extends CreateDiscussionState {
+  final String message;
+
+  const CreateDiscussionError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+// BLoC
+class CreateDiscussionBloc extends Bloc<CreateDiscussionEvent, CreateDiscussionState> {
+  final CaseDiscussionRepository repository;
+
+  CreateDiscussionBloc({required this.repository}) : super(CreateDiscussionInitial()) {
+    on<CreateDiscussion>(_onCreateDiscussion);
+    on<ResetCreateDiscussion>(_onResetCreateDiscussion);
+  }
+
+  Future<void> _onCreateDiscussion(
+    CreateDiscussion event,
+    Emitter<CreateDiscussionState> emit,
+  ) async {
+    emit(CreateDiscussionLoading());
+
+    try {
+      final discussion = await repository.createCaseDiscussion(event.request);
+      emit(CreateDiscussionSuccess(discussion));
+    } catch (e) {
+      emit(CreateDiscussionError(e.toString()));
+    }
+  }
+
+  void _onResetCreateDiscussion(
+    ResetCreateDiscussion event,
+    Emitter<CreateDiscussionState> emit,
+  ) {
+    emit(CreateDiscussionInitial());
+  }
+}
+```
+
+## 4. UI Screens
+
+### discussion_list_screen.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/discussion_list_bloc.dart';
+import '../models/case_discussion_models.dart';
+import '../widgets/discussion_card.dart';
+import '../widgets/discussion_search_bar.dart';
+import 'discussion_detail_screen.dart';
+import 'create_discussion_screen.dart';
+
+class DiscussionListScreen extends StatefulWidget {
+  const DiscussionListScreen({Key? key}) : super(key: key);
+
+  @override
+  State<DiscussionListScreen> createState() => _DiscussionListScreenState();
+}
+
+class _DiscussionListScreenState extends State<DiscussionListScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedSpecialty;
+  String? _selectedCountry;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    context.read<DiscussionListBloc>().add(const LoadDiscussionList());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<DiscussionListBloc>().add(LoadMoreDiscussions());
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
+
+  void _onSearch(String query) {
+    context.read<DiscussionListBloc>().add(LoadDiscussionList(
+      refresh: true,
+      search: query.isEmpty ? null : query,
+      specialty: _selectedSpecialty,
+      countryId: _selectedCountry,
+    ));
+  }
+
+  void _onRefresh() {
+    context.read<DiscussionListBloc>().add(const RefreshDiscussionList());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Case Discussions'),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _navigateToCreateDiscussion(),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          DiscussionSearchBar(
+            controller: _searchController,
+            onSearch: _onSearch,
+            selectedSpecialty: _selectedSpecialty,
+            selectedCountry: _selectedCountry,
+            onSpecialtyChanged: (specialty) {
+              setState(() => _selectedSpecialty = specialty);
+              _onSearch(_searchController.text);
+            },
+            onCountryChanged: (country) {
+              setState(() => _selectedCountry = country);
+              _onSearch(_searchController.text);
+            },
+          ),
+          Expanded(
+            child: BlocBuilder<DiscussionListBloc, DiscussionListState>(
+              builder: (context, state) {
+                if (state is DiscussionListLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state is DiscussionListError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error loading discussions',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          state.message,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _onRefresh,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (state is DiscussionListLoaded) {
+                  if (state.discussions.isEmpty) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'No discussions found',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Be the first to start a discussion!',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: () async => _onRefresh(),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.discussions.length + (state.hasReachedMax ? 0 : 1),
+                      itemBuilder: (context, index) {
+                        if (index >= state.discussions.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+
+                        final discussion = state.discussions[index];
+                        return DiscussionCard(
+                          discussion: discussion,
+                          onTap: () => _navigateToDiscussionDetail(discussion),
+                          onLike: () => _likeDiscussion(discussion.id),
+                        );
+                      },
+                    ),
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToCreateDiscussion,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _navigateToDiscussionDetail(CaseDiscussion discussion) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => DiscussionDetailScreen(caseId: discussion.id),
+      ),
+    );
+  }
+
+  void _navigateToCreateDiscussion() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CreateDiscussionScreen(),
+      ),
+    ).then((created) {
+      if (created == true) {
+        _onRefresh();
+      }
+    });
+  }
+
+  void _likeDiscussion(int caseId) {
+    context.read<DiscussionListBloc>().add(LikeDiscussion(caseId));
+  }
+}
+```
+
+### discussion_detail_screen.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/discussion_detail_bloc.dart';
+import '../models/case_discussion_models.dart';
+import '../widgets/discussion_header.dart';
+import '../widgets/comment_card.dart';
+import '../widgets/comment_input.dart';
+
+class DiscussionDetailScreen extends StatefulWidget {
+  final int caseId;
+
+  const DiscussionDetailScreen({
+    Key? key,
+    required this.caseId,
+  }) : super(key: key);
+
+  @override
+  State<DiscussionDetailScreen> createState() => _DiscussionDetailScreenState();
+}
+
+class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _commentController = TextEditingController();
+  final FocusNode _commentFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    context.read<DiscussionDetailBloc>().add(LoadDiscussionDetail(widget.caseId));
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _commentController.dispose();
+    _commentFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<DiscussionDetailBloc>().add(LoadMoreComments());
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
+
+  void _addComment() {
+    final comment = _commentController.text.trim();
+    if (comment.isNotEmpty) {
+      context.read<DiscussionDetailBloc>().add(AddComment(
+        caseId: widget.caseId,
+        comment: comment,
+      ));
+      _commentController.clear();
+      _commentFocusNode.unfocus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Discussion'),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+      ),
+      body: BlocBuilder<DiscussionDetailBloc, DiscussionDetailState>(
+        builder: (context, state) {
+          if (state is DiscussionDetailLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is DiscussionDetailError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading discussion',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<DiscussionDetailBloc>()
+                          .add(LoadDiscussionDetail(widget.caseId));
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is DiscussionDetailLoaded) {
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: 1 + state.comments.length + (state.hasMoreComments ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return DiscussionHeader(discussion: state.discussion);
+                      }
+
+                      final commentIndex = index - 1;
+                      if (commentIndex >= state.comments.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      final comment = state.comments[commentIndex];
+                      return CommentCard(
+                        comment: comment,
+                        onLike: () => _likeComment(comment.id),
+                        onDelete: () => _deleteComment(comment.id),
+                      );
+                    },
+                  ),
+                ),
+                CommentInput(
+                  controller: _commentController,
+                  focusNode: _commentFocusNode,
+                  onSubmit: _addComment,
+                  isLoading: state.isAddingComment,
+                ),
+              ],
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+
+  void _likeComment(int commentId) {
+    context.read<DiscussionDetailBloc>().add(LikeComment(commentId));
+  }
+
+  void _deleteComment(int commentId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Comment'),
+        content: const Text('Are you sure you want to delete this comment?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<DiscussionDetailBloc>().add(DeleteComment(commentId));
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### create_discussion_screen.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/create_discussion_bloc.dart';
+import '../models/case_discussion_models.dart';
+
+class CreateDiscussionScreen extends StatefulWidget {
+  const CreateDiscussionScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CreateDiscussionScreen> createState() => _CreateDiscussionScreenState();
+}
+
+class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _diagnosisController = TextEditingController();
+  final _treatmentController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _medicalHistoryController = TextEditingController();
+
+  String _selectedGender = 'male';
+  String _selectedSpecialty = 'general';
+  String _selectedPrivacyLevel = 'public';
+  List<String> _symptoms = [];
+  final _symptomController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _diagnosisController.dispose();
+    _treatmentController.dispose();
+    _ageController.dispose();
+    _medicalHistoryController.dispose();
+    _symptomController.dispose();
+    super.dispose();
+  }
+
+  void _addSymptom() {
+    final symptom = _symptomController.text.trim();
+    if (symptom.isNotEmpty && !_symptoms.contains(symptom)) {
+      setState(() {
+        _symptoms.add(symptom);
+        _symptomController.clear();
+      });
+    }
+  }
+
+  void _removeSymptom(String symptom) {
+    setState(() {
+      _symptoms.remove(symptom);
+    });
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      final patientInfo = _ageController.text.isNotEmpty ||
+              _medicalHistoryController.text.isNotEmpty
+          ? PatientInfo(
+              age: int.tryParse(_ageController.text) ?? 0,
+              gender: _selectedGender,
+              medicalHistory: _medicalHistoryController.text,
+            )
+          : null;
+
+      final request = CreateCaseRequest(
+        title: _titleController.text,
+        description: _descriptionController.text,
+        patientInfo: patientInfo,
+        symptoms: _symptoms.isNotEmpty ? _symptoms : null,
+        diagnosis: _diagnosisController.text.isNotEmpty ? _diagnosisController.text : null,
+        treatmentPlan: _treatmentController.text.isNotEmpty ? _treatmentController.text : null,
+        specialty: _selectedSpecialty,
+        privacyLevel: _selectedPrivacyLevel,
+      );
+
+      context.read<CreateDiscussionBloc>().add(CreateDiscussion(request));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create Discussion'),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+      ),
+      body: BlocListener<CreateDiscussionBloc, CreateDiscussionState>(
+        listener: (context, state) {
+          if (state is CreateDiscussionSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Discussion created successfully!')),
+            );
+            Navigator.of(context).pop(true);
+          } else if (state is CreateDiscussionError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.message}')),
+            );
+          }
+        },
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Title
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Case Title *',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a title';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Description
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Case Description *',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a description';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Specialty
+              DropdownButtonFormField<String>(
+                value: _selectedSpecialty,
+                decoration: const InputDecoration(
+                  labelText: 'Medical Specialty',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'general', child: Text('General Medicine')),
+                  DropdownMenuItem(value: 'cardiology', child: Text('Cardiology')),
+                  DropdownMenuItem(value: 'neurology', child: Text('Neurology')),
+                  DropdownMenuItem(value: 'orthopedics', child: Text('Orthopedics')),
+                  DropdownMenuItem(value: 'pediatrics', child: Text('Pediatrics')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedSpecialty = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Patient Information Section
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Patient Information (Optional)',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 16),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _ageController,
+                              decoration: const InputDecoration(
+                                labelText: 'Age',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedGender,
+                              decoration: const InputDecoration(
+                                labelText: 'Gender',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'male', child: Text('Male')),
+                                DropdownMenuItem(value: 'female', child: Text('Female')),
+                                DropdownMenuItem(value: 'other', child: Text('Other')),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedGender = value!;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      TextFormField(
+                        controller: _medicalHistoryController,
+                        decoration: const InputDecoration(
+                          labelText: 'Medical History',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 3,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Symptoms
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Symptoms',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 16),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _symptomController,
+                              decoration: const InputDecoration(
+                                labelText: 'Add symptom',
+                                border: OutlineInputBorder(),
+                              ),
+                              onSubmitted: (_) => _addSymptom(),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: _addSymptom,
+                            child: const Text('Add'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _symptoms.map((symptom) {
+                          return Chip(
+                            label: Text(symptom),
+                            onDeleted: () => _removeSymptom(symptom),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Diagnosis
+              TextFormField(
+                controller: _diagnosisController,
+                decoration: const InputDecoration(
+                  labelText: 'Working Diagnosis (Optional)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 16),
+
+              // Treatment Plan
+              TextFormField(
+                controller: _treatmentController,
+                decoration: const InputDecoration(
+                  labelText: 'Treatment Plan (Optional)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+
+              // Privacy Level
+              DropdownButtonFormField<String>(
+                value: _selectedPrivacyLevel,
+                decoration: const InputDecoration(
+                  labelText: 'Privacy Level',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'public', child: Text('Public')),
+                  DropdownMenuItem(value: 'colleagues_only', child: Text('Colleagues Only')),
+                  DropdownMenuItem(value: 'private', child: Text('Private')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPrivacyLevel = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // Submit Button
+              BlocBuilder<CreateDiscussionBloc, CreateDiscussionState>(
+                builder: (context, state) {
+                  return ElevatedButton(
+                    onPressed: state is CreateDiscussionLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: state is CreateDiscussionLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Create Discussion'),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+## 5. Widget Components
+
+### discussion_card.dart
+```dart
+import 'package:flutter/material.dart';
+import '../models/case_discussion_models.dart';
+
+class DiscussionCard extends StatelessWidget {
+  final CaseDiscussion discussion;
+  final VoidCallback onTap;
+  final VoidCallback onLike;
+
+  const DiscussionCard({
+    Key? key,
+    required this.discussion,
+    required this.onTap,
+    required this.onLike,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with author info
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundImage: discussion.author.profilePic != null
+                        ? NetworkImage(discussion.author.profilePic!)
+                        : null,
+                    child: discussion.author.profilePic == null
+                        ? Text(discussion.author.name.isNotEmpty
+                            ? discussion.author.name[0].toUpperCase()
+                            : '?')
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          discussion.author.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          discussion.author.specialty,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getSpecialtyColor(discussion.specialty).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      discussion.specialty.toUpperCase(),
+                      style: TextStyle(
+                        color: _getSpecialtyColor(discussion.specialty),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Title
+              Text(
+                discussion.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+
+              // Description preview
+              Text(
+                discussion.description,
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontSize: 14,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 12),
+
+              // Patient info if available
+              if (discussion.patientInfo != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        size: 16,
+                        color: Colors.blue[700],
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${discussion.patientInfo!.gender.toUpperCase()}, ${discussion.patientInfo!.age} years',
+                        style: TextStyle(
+                          color: Colors.blue[700],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+
+              // Symptoms if available
+              if (discussion.symptoms != null && discussion.symptoms!.isNotEmpty) ...[
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: discussion.symptoms!.take(3).map((symptom) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        symptom,
+                        style: TextStyle(
+                          color: Colors.orange[700],
+                          fontSize: 10,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                if (discussion.symptoms!.length > 3)
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      '+${discussion.symptoms!.length - 3} more symptoms',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+              ],
+
+              // Footer with stats and actions
+              Row(
+                children: [
+                  // Stats
+                  _buildStat(Icons.thumb_up_outlined, discussion.stats.likes),
+                  const SizedBox(width: 16),
+                  _buildStat(Icons.comment_outlined, discussion.stats.commentsCount),
+                  const SizedBox(width: 16),
+                  _buildStat(Icons.visibility_outlined, discussion.stats.views),
+
+                  const Spacer(),
+
+                  // Time
+                  Text(
+                    _formatTime(discussion.createdAt),
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStat(IconData icon, int count) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.grey[600],
+        ),
+        const SizedBox(width: 4),
+        Text(
+          count.toString(),
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getSpecialtyColor(String specialty) {
+    switch (specialty.toLowerCase()) {
+      case 'cardiology':
+        return Colors.red;
+      case 'neurology':
+        return Colors.purple;
+      case 'orthopedics':
+        return Colors.blue;
+      case 'pediatrics':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
+  }
+}
+```
+
+### discussion_search_bar.dart
+```dart
+import 'package:flutter/material.dart';
+
+class DiscussionSearchBar extends StatelessWidget {
+  final TextEditingController controller;
+  final Function(String) onSearch;
+  final String? selectedSpecialty;
+  final String? selectedCountry;
+  final Function(String?) onSpecialtyChanged;
+  final Function(String?) onCountryChanged;
+
+  const DiscussionSearchBar({
+    Key? key,
+    required this.controller,
+    required this.onSearch,
+    this.selectedSpecialty,
+    this.selectedCountry,
+    required this.onSpecialtyChanged,
+    required this.onCountryChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Search field
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: 'Search discussions...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey[100],
+            ),
+            onChanged: onSearch,
+          ),
+          const SizedBox(height: 12),
+
+          // Filters
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: selectedSpecialty,
+                  decoration: InputDecoration(
+                    labelText: 'Specialty',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('All Specialties')),
+                    DropdownMenuItem(value: 'general', child: Text('General')),
+                    DropdownMenuItem(value: 'cardiology', child: Text('Cardiology')),
+                    DropdownMenuItem(value: 'neurology', child: Text('Neurology')),
+                    DropdownMenuItem(value: 'orthopedics', child: Text('Orthopedics')),
+                    DropdownMenuItem(value: 'pediatrics', child: Text('Pediatrics')),
+                  ],
+                  onChanged: onSpecialtyChanged,
+                  isExpanded: true,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: selectedCountry,
+                  decoration: InputDecoration(
+                    labelText: 'Country',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('All Countries')),
+                    DropdownMenuItem(value: '1', child: Text('United States')),
+                    DropdownMenuItem(value: '2', child: Text('United Kingdom')),
+                    DropdownMenuItem(value: '3', child: Text('Canada')),
+                    // Add more countries as needed
+                  ],
+                  onChanged: onCountryChanged,
+                  isExpanded: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### comment_card.dart & comment_input.dart
+```dart
+// comment_card.dart
+import 'package:flutter/material.dart';
+import '../models/case_discussion_models.dart';
+
+class CommentCard extends StatelessWidget {
+  final CaseComment comment;
+  final VoidCallback onLike;
+  final VoidCallback onDelete;
+
+  const CommentCard({
+    Key? key,
+    required this.comment,
+    required this.onLike,
+    required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: comment.author.profilePic != null
+                      ? NetworkImage(comment.author.profilePic!)
+                      : null,
+                  child: comment.author.profilePic == null
+                      ? Text(comment.author.name.isNotEmpty
+                          ? comment.author.name[0].toUpperCase()
+                          : '?')
+                      : null,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        comment.author.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        _formatTime(comment.createdAt),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuButton(
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Text('Delete'),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      onDelete();
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Comment text
+            Text(
+              comment.comment,
+              style: const TextStyle(fontSize: 14),
+            ),
+
+            // Clinical tags if available
+            if (comment.clinicalTags != null && comment.clinicalTags!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                children: comment.clinicalTags!.split(',').map((tag) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      tag.trim(),
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontSize: 10,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+
+            const SizedBox(height: 12),
+
+            // Actions
+            Row(
+              children: [
+                IconButton(
+                  onPressed: onLike,
+                  icon: Icon(
+                    comment.isLiked == true
+                        ? Icons.thumb_up
+                        : Icons.thumb_up_outlined,
+                    size: 18,
+                    color: comment.isLiked == true
+                        ? Colors.blue
+                        : Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  comment.likes.toString(),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Icon(
+                  Icons.thumb_down_outlined,
+                  size: 18,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  comment.dislikes.toString(),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
+  }
+}
+
+// comment_input.dart
+class CommentInput extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final VoidCallback onSubmit;
+  final bool isLoading;
+
+  const CommentInput({
+    Key? key,
+    required this.controller,
+    required this.focusNode,
+    required this.onSubmit,
+    this.isLoading = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(top: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                hintText: 'Add a comment...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              maxLines: null,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => onSubmit(),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: isLoading ? null : onSubmit,
+            icon: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.send),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### discussion_header.dart
+```dart
+import 'package:flutter/material.dart';
+import '../models/case_discussion_models.dart';
+
+class DiscussionHeader extends StatelessWidget {
+  final CaseDiscussion discussion;
+
+  const DiscussionHeader({
+    Key? key,
+    required this.discussion,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Author info
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundImage: discussion.author.profilePic != null
+                      ? NetworkImage(discussion.author.profilePic!)
+                      : null,
+                  child: discussion.author.profilePic == null
+                      ? Text(discussion.author.name.isNotEmpty
+                          ? discussion.author.name[0].toUpperCase()
+                          : '?')
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        discussion.author.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        discussion.author.specialty,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        _formatTime(discussion.createdAt),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getSpecialtyColor(discussion.specialty).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    discussion.specialty.toUpperCase(),
+                    style: TextStyle(
+                      color: _getSpecialtyColor(discussion.specialty),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Title
+            Text(
+              discussion.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Description
+            Text(
+              discussion.description,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+
+            // Patient info if available
+            if (discussion.patientInfo != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person,
+                          color: Colors.blue[700],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Patient Information',
+                          style: TextStyle(
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${discussion.patientInfo!.gender.toUpperCase()}, ${discussion.patientInfo!.age} years old',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    if (discussion.patientInfo!.medicalHistory.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Medical History: ${discussion.patientInfo!.medicalHistory}',
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Symptoms
+            if (discussion.symptoms != null && discussion.symptoms!.isNotEmpty) ...[
+              Text(
+                'Symptoms',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: discussion.symptoms!.map((symptom) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      symptom,
+                      style: TextStyle(
+                        color: Colors.orange[700],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Diagnosis
+            if (discussion.diagnosis != null && discussion.diagnosis!.isNotEmpty) ...[
+              _buildInfoSection(
+                'Working Diagnosis',
+                discussion.diagnosis!,
+                Colors.green,
+                Icons.local_hospital,
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Treatment Plan
+            if (discussion.treatmentPlan != null && discussion.treatmentPlan!.isNotEmpty) ...[
+              _buildInfoSection(
+                'Treatment Plan',
+                discussion.treatmentPlan!,
+                Colors.purple,
+                Icons.healing,
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // AI Summary
+            if (discussion.aiSummary != null) ...[
+              _buildAISummary(discussion.aiSummary!),
+              const SizedBox(height: 12),
+            ],
+
+            // Stats
+            const Divider(),
+            Row(
+              children: [
+                _buildStat(Icons.thumb_up_outlined, discussion.stats.likes, 'Likes'),
+                const SizedBox(width: 16),
+                _buildStat(Icons.comment_outlined, discussion.stats.commentsCount, 'Comments'),
+                const SizedBox(width: 16),
+                _buildStat(Icons.visibility_outlined, discussion.stats.views, 'Views'),
+                const Spacer(),
+                _buildStat(Icons.people_outlined, discussion.stats.followersCount, 'Followers'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoSection(String title, String content, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAISummary(AISummary aiSummary) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.indigo.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.indigo.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.psychology, color: Colors.indigo[700], size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'AI Summary',
+                style: TextStyle(
+                  color: Colors.indigo[700],
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${(aiSummary.confidenceScore * 100).toInt()}% confidence',
+                  style: TextStyle(
+                    color: Colors.indigo[700],
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            aiSummary.summary,
+            style: const TextStyle(fontSize: 14),
+          ),
+          if (aiSummary.keyPoints != null && aiSummary.keyPoints!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...aiSummary.keyPoints!.map((point) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 4,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: 6, right: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.indigo[700],
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      point,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStat(IconData icon, int count, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.grey[600],
+        ),
+        const SizedBox(width: 4),
+        Text(
+          count.toString(),
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getSpecialtyColor(String specialty) {
+    switch (specialty.toLowerCase()) {
+      case 'cardiology':
+        return Colors.red;
+      case 'neurology':
+        return Colors.purple;
+      case 'orthopedics':
+        return Colors.blue;
+      case 'pediatrics':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minutes ago';
+    } else {
+      return 'Just now';
+    }
+  }
+}
+```
+
+## 6. Main Module File
+
+### case_discussion_module.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+
+// Import all the files created above
+import 'repository/case_discussion_repository.dart';
+import 'bloc/discussion_list_bloc.dart';
+import 'bloc/discussion_detail_bloc.dart';
+import 'bloc/create_discussion_bloc.dart';
+import 'screens/discussion_list_screen.dart';
+
+class CaseDiscussionModule extends StatelessWidget {
+  final String baseUrl;
+  final String Function() getAuthToken;
+
+  const CaseDiscussionModule({
+    Key? key,
+    required this.baseUrl,
+    required this.getAuthToken,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RepositoryProvider(
+      create: (context) => CaseDiscussionRepository(
+        baseUrl: baseUrl,
+        getAuthToken: getAuthToken,
+        dio: Dio(),
+      ),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => DiscussionListBloc(
+              repository: context.read<CaseDiscussionRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => DiscussionDetailBloc(
+              repository: context.read<CaseDiscussionRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => CreateDiscussionBloc(
+              repository: context.read<CaseDiscussionRepository>(),
+            ),
+          ),
+        ],
+        child: const DiscussionListScreen(),
+      ),
+    );
+  }
+}
+
+// Usage in your main app:
+/*
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: CaseDiscussionModule(
+        baseUrl: 'https://your-api-domain.com',
+        getAuthToken: () => 'your_auth_token_here',
+      ),
+    );
+  }
+}
+*/
+```
+
+## Installation & Usage Instructions
+
+1. **Add Dependencies** to your `pubspec.yaml`:
+```yaml
+dependencies:
+  flutter_bloc: ^8.1.3
+  dio: ^5.3.2
+  equatable: ^2.0.5
+  cached_network_image: ^3.3.0
+```
+
+2. **Import the Module** in your app:
+```dart
+import 'case_discussion_module.dart';
+
+// Use it in your app
+CaseDiscussionModule(
+  baseUrl: 'https://your-api-domain.com',
+  getAuthToken: () => AppData.userToken,
+)
+```
+
+3. **File Structure**:
+```
+lib/
+├── case_discussion/
+│   ├── models/
+│   │   └── case_discussion_models.dart
+│   ├── repository/
+│   │   └── case_discussion_repository.dart
+│   ├── bloc/
+│   │   ├── discussion_list_bloc.dart
+│   │   ├── discussion_detail_bloc.dart
+│   │   └── create_discussion_bloc.dart
+│   ├── screens/
+│   │   ├── discussion_list_screen.dart
+│   │   ├── discussion_detail_screen.dart
+│   │   └── create_discussion_screen.dart
+│   ├── widgets/
+│   │   ├── discussion_card.dart
+│   │   ├── discussion_search_bar.dart
+│   │   ├── discussion_header.dart
+│   │   ├── comment_card.dart
+│   │   └── comment_input.dart
+│   └── case_discussion_module.dart
+```
+
+This complete implementation provides:
+- ✅ Clean BLoC architecture with separation of concerns
+- ✅ Full API integration as per your documentation
+- ✅ Responsive UI with proper error handling
+- ✅ Search and filtering capabilities
+- ✅ Pagination support
+- ✅ Like/comment functionality
+- ✅ Create new discussions
+- ✅ Modular and reusable code structure
+- ✅ Proper state management
+- ✅ Loading states and error handling

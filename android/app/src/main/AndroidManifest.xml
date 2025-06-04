@@ -51,7 +51,7 @@
 
     <application
         android:label="DocTak.net"
-        android:name="${applicationName}"
+        android:name=".DoctakApplication"
         android:icon="@mipmap/launcher_icon"
         android:requestLegacyExternalStorage="true"
         android:networkSecurityConfig="@xml/network_security_config"

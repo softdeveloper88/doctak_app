@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +21,6 @@ class TagFriendsListBottomSheet extends StatefulWidget {
 }
 
 class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
-
-  // AddPostBloc widget.searchPeopleBloc =AddPostBloc();
-
   @override
   void initState() {
     widget.searchPeopleBloc.add(LoadPageEvent(page: 1, name: ''));
@@ -29,437 +28,461 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
     afterBuildCreated(() {
       setStatusBarColor(svGetScaffoldColor());
     });
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: svGetScaffoldColor(),
+      decoration: BoxDecoration(
+        color: svGetScaffoldColor(),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          40.height,
-          Align(
-              alignment: Alignment.centerRight,
-              child: InkWell(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const SizedBox(
-                    height: 40,
-                    width: 40,
-                    child: Icon(
-                      Icons.cancel,
-                      size: 30,
-                    ),
-                  ))),
-          Container(
-            padding: const EdgeInsets.only(left: 8.0),
-            margin: const EdgeInsets.only(
-              left: 0,
-              top: 8.0,
-              bottom: 8.0,
-              right: 0,
-            ),
-            decoration: BoxDecoration(
-                color: context.dividerColor.withOpacity(0.4),
-                borderRadius: radius(5),
-                border: Border.all(color: Colors.black, width: 0.3)),
-            child: AppTextField(
-              textFieldType: TextFieldType.NAME,
-              onChanged: (name) {
-                widget.searchPeopleBloc.add(
-                  LoadPageEvent(
-                    page: 1,
-                    name: name,
-                  ),
-                );
-              },
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Search',
-                hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-                suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                        height: 16,
-                        width: 16,
-                        fit: BoxFit.cover,
-                        color: svGetBodyColor())
-                    .paddingAll(16),
+          // Modern Handle Bar
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          16.height,
-          BlocConsumer<AddPostBloc, AddPostState>(
-            bloc: widget.searchPeopleBloc,
-            // listenWhen: (previous, current) => current is PaginationLoadedState,
-            // buildWhen: (previous, current) => current is! PaginationLoadedState,
-            listener: (BuildContext context, AddPostState state) {
-              if (state is DataError) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    content: Text(state.errorMessage),
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Tag Friends',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: Colors.blue[800],
                   ),
-                );
-              }
-            },
-            builder: (context, state) {
-              if (state is PaginationLoadedState) {
-                final bloc = widget.searchPeopleBloc;
-                return SizedBox(
-                  height: 80,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    // physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: const EdgeInsets.only(left: 4),
-                        margin: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                            color: Colors.lightBlueAccent.withOpacity(0.4),
-                            borderRadius: radius(10)),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                                '${bloc.selectedSearchPeopleData[index].firstName} ${bloc.selectedSearchPeopleData[index].lastName}',
-                                style: boldTextStyle()),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.highlight_remove_outlined,
-                                color: Colors.black,
-                              ),
-                              onPressed: () {
-                                bloc.add(SelectFriendEvent(
-                                    userData:
-                                        bloc.selectedSearchPeopleData[index],
-                                    isAdd: false));
-                                // e.doSend = !e.doSend.validate();
-                                // setState(() {});
-                              },
-                              padding: const EdgeInsets.all(0),
-                            ),
-                          ],
-                        ).paddingSymmetric(vertical: 8),
-                      );
-                      // SVProfileFragment().launch(context);
-                    },
-                    // separatorBuilder: (BuildContext context, int index) {
-                    //   return const Divider(height: 20);
-                    // },
-                    itemCount: bloc.selectedSearchPeopleData.length,
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: Colors.grey[700],
+                      size: 20,
+                    ),
                   ),
-                );
-              } else {
-                return Container();
-              }
-            },
+                ),
+              ],
+            ),
           ),
-          // Row(
-          //   children: [
-          //     Image.asset('images/socialv/faces/face_5.png',
-          //             height: 48, width: 48, fit: BoxFit.cover)
-          //         .cornerRadiusWithClipRRect(SVAppCommonRadius),
-          //     10.width,
-          //     Text('Add post to your story',
-          //         style: secondaryTextStyle(color: svGetBodyColor())),
-          //   ],
-          // ),
-          Divider(color: Colors.grey[300]),
+          // Search Field
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: appStore.isDarkMode
+                  ? Colors.grey[800]
+                  : Colors.grey[100],
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.blue.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Icon(
+                    Icons.search_rounded,
+                    color: Colors.blue.withOpacity(0.6),
+                    size: 24,
+                  ),
+                ),
+                Expanded(
+                  child: AppTextField(
+                    textFieldType: TextFieldType.NAME,
+                    textStyle: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: appStore.isDarkMode
+                          ? Colors.white
+                          : Colors.black87,
+                    ),
+                    onChanged: (name) {
+                      widget.searchPeopleBloc.add(
+                        LoadPageEvent(
+                          page: 1,
+                          name: name,
+                        ),
+                      );
+                    },
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Search friends...',
+                      hintStyle: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        color: Colors.grey[500],
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Selected Friends
           BlocConsumer<AddPostBloc, AddPostState>(
             bloc: widget.searchPeopleBloc,
-            // listenWhen: (previous, current) => current is AddPostState,
-            // buildWhen: (previous, current) => current is! AddPostState,
-            listener: (BuildContext context, AddPostState state) {
-              if (state is DataError) {
-                // showDialog(
-                //   context: context,
-                //   builder: (context) => AlertDialog(
-                //     content: Text(state.errorMessage),
-                //   ),
-                // );
-              }
-            },
+            listener: (BuildContext context, AddPostState state) {},
             builder: (context, state) {
-              print("state $state");
-              if (state is PaginationLoadingState) {
-                return Expanded(
-                    child: Center(
-                        child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                )));
-              } else if (state is PaginationLoadedState) {
-                // print(state.drugsModel.length);
-                // return _buildPostList(context);
-                final bloc = widget.searchPeopleBloc;
-                return Expanded(
+              if (state is PaginationLoadedState &&
+                  widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty) {
+                return Container(
+                  height: 80,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: ListView.builder(
-                    shrinkWrap: true,
-                    // physics: const NeverScrollableScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.searchPeopleBloc.selectedSearchPeopleData.length,
                     itemBuilder: (context, index) {
-                      if (bloc.pageNumber <= bloc.numberOfPage) {
-                        if (index ==
-                            bloc.searchPeopleData.length -
-                                bloc.nextPageTrigger) {
-                          bloc.add(CheckIfNeedMoreDataEvent(index: index));
-                        }
-                      }
-                      return bloc.numberOfPage != bloc.pageNumber - 1 &&
-                              index >= bloc.searchPeopleData.length - 1
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: svGetBodyColor(),
+                      final person = widget.searchPeopleBloc.selectedSearchPeopleData[index];
+                      return Container(
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.blue.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Avatar
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.blue[100],
+                                shape: BoxShape.circle,
                               ),
-                            )
-                          :
-                          // InkWell(
-                          //         onTap: () {
-                          //           bloc.add(SelectFriendEvent(
-                          //               userData: bloc.searchPeopleData[index],
-                          //               isAdd: true));
-                          //         },
-                          //         child: Row(
-                          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //           children: [
-                          //             Row(
-                          //               mainAxisSize: MainAxisSize.min,
-                          //               children: [
-                          //                 bloc.searchPeopleData[index].profilePic == ''
-                          //                     ? Image.asset(
-                          //                             'images/socialv/faces/face_5.png',
-                          //                             height: 56,
-                          //                             width: 56,
-                          //                             fit: BoxFit.cover)
-                          //                         .cornerRadiusWithClipRRect(8)
-                          //                     : Image.network(
-                          //                             '${AppData.imageUrl}${bloc.searchPeopleData[index].profilePic.validate()}',
-                          //                             height: 56,
-                          //                             width: 56,
-                          //                             fit: BoxFit.cover)
-                          //                         .cornerRadiusWithClipRRect(8),
-                          //                 10.width,
-                          //                 Row(
-                          //                   mainAxisSize: MainAxisSize.min,
-                          //                   children: [
-                          //                     Text(
-                          //                         '${bloc.searchPeopleData[index].firstName} ${bloc.searchPeopleData[index].lastName}',
-                          //                         style: boldTextStyle()),
-                          //                     6.width,
-                          //                     // e.isOfficialAccount.validate()
-                          //                     //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-                          //                     //     : Offstage(),
-                          //                   ],
-                          //                 ),
-                          //               ],
-                          //             ),
-                          //           ],
-                          //         ).paddingSymmetric(vertical: 8),
-                          //       );
-                          // SVProfileFragment().launch(context);
-                          GestureDetector(
-                              onTap: () {
-                                bloc.add(SelectFriendEvent(
-                                    userData: bloc.searchPeopleData[index],
-                                    isAdd: true));
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Material(
-                                  elevation: 2,
-                                  color: context.cardColor,
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 10),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              GestureDetector(
-                                                onTap: () {
-                                                  // SVProfileFragment(userId:widget.element.id).launch(context);
-                                                },
-                                                child: Container(
-                                                  width: 50,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.grey
-                                                            .withOpacity(0.5),
-                                                        spreadRadius: 2,
-                                                        blurRadius: 5,
-                                                        offset:
-                                                            const Offset(0, 3),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  child: bloc
-                                                              .searchPeopleData[
-                                                                  index]
-                                                              .profilePic ==
-                                                          ''
-                                                      ? Image.asset(
-                                                              'images/socialv/faces/face_5.png',
-                                                              height: 56,
-                                                              width: 56,
-                                                              fit: BoxFit.cover)
-                                                          .cornerRadiusWithClipRRect(
-                                                              8)
-                                                      : Image.network(
-                                                              '${AppData.imageUrl}${bloc.searchPeopleData[index].profilePic.validate()}',
-                                                              height: 56,
-                                                              width: 56,
-                                                              fit: BoxFit.cover)
-                                                          .cornerRadiusWithClipRRect(
-                                                              8),
-                                                ),
-                                              ),
-                                              10.width,
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      SizedBox(
-                                                          width: 150,
-                                                          child: Text(
-                                                              "${bloc.searchPeopleData[index].firstName.validate()} ${bloc.searchPeopleData[index].lastName.validate()}",
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .clip,
-                                                              style:
-                                                                  boldTextStyle())),
-                                                      6.width,
-                                                    ],
-                                                  ),
-                                                  // Text(bloc.searchPeopleData[index]..validate(), style: secondaryTextStyle(color: svGetBodyColor())),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
-                                        //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
-                                        //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
-                                        //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
-                                        //   onTap:  () async {
-                                        //     setState(() {
-                                        //       isLoading = true; // Set loading state to true when button is clicked
-                                        //     });
-                                        //
-                                        //     // Perform API call
-                                        //     widget.onTap();
-                                        //
-                                        //     setState(() {
-                                        //       isLoading = false; // Set loading state to false after API response
-                                        //     });
-                                        //   },
-                                        //   elevation: 0,
-                                        //   color: widget.element.isFollowedByCurrentUser == true ?SVAppColorPrimary:buttonUnSelectColor,
-                                        // ),
-                                        // ElevatedButton(
-                                        //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                        //   onPressed: () async {
-                                        //     setState(() {
-                                        //       isLoading = true; // Set loading state to true when button is clicked
-                                        //     });
-                                        //
-                                        //     // Perform API call
-                                        //     await widget.onTap();
-                                        //
-                                        //     setState(() {
-                                        //       isLoading = false; // Set loading state to false after API response
-                                        //     });
-                                        //   },
-                                        //   child: isLoading
-                                        //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
-                                        //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
-                                        //   style: ElevatedButton.styleFrom(
-                                        //     // primary: Colors.blue, // Change button color as needed
-                                        //     elevation: 0,
-                                        //   ),
-                                        // ),
-                                      ],
-                                    ),
+                              child: Center(
+                                child: Text(
+                                  person.firstName?.substring(0, 1).toUpperCase() ?? 'U',
+                                  style: TextStyle(
+                                    color: Colors.blue[700],
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Poppins',
                                   ),
                                 ),
                               ),
-                            );
+                            ),
+                            const SizedBox(width: 8),
+                            // Name
+                            Text(
+                              '${person.firstName} ${person.lastName}',
+                              style: TextStyle(
+                                color: Colors.blue[900],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Remove Button
+                            GestureDetector(
+                              onTap: () {
+                                widget.searchPeopleBloc.add(
+                                  SelectFriendEvent(
+                                    userData: person,
+                                    isAdd: false,
+                                  ),
+                                );
+                              },
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: Colors.blue[700],
+                                size: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     },
-                    // separatorBuilder: (BuildContext context, int index) {
-                    //   return const Divider(height: 20);
-                    // },
+                  ),
+                );
+              }
+              return const SizedBox();
+            },
+          ),
+          if (widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty)
+            Divider(
+              color: Colors.grey.withOpacity(0.2),
+              indent: 16,
+              endIndent: 16,
+            ),
+          // Friends List
+          BlocConsumer<AddPostBloc, AddPostState>(
+            bloc: widget.searchPeopleBloc,
+            listener: (BuildContext context, AddPostState state) {},
+            builder: (context, state) {
+              if (state is PaginationLoadingState) {
+                return Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.blue[600],
+                      strokeWidth: 3,
+                    ),
+                  ),
+                );
+              } else if (state is PaginationLoadedState) {
+                final bloc = widget.searchPeopleBloc;
+                return Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: bloc.searchPeopleData.length,
+                    itemBuilder: (context, index) {
+                      if (bloc.pageNumber <= bloc.numberOfPage) {
+                        if (index ==
+                            bloc.searchPeopleData.length - bloc.nextPageTrigger) {
+                          bloc.add(CheckIfNeedMoreDataEvent(index: index));
+                        }
+                      }
+                      
+                      if (bloc.numberOfPage != bloc.pageNumber - 1 &&
+                          index >= bloc.searchPeopleData.length - 1) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.blue[600],
+                            strokeWidth: 3,
+                          ),
+                        );
+                      }
+                      
+                      final person = bloc.searchPeopleData[index];
+                      return InkWell(
+                        onTap: () {
+                          bloc.add(SelectFriendEvent(
+                            userData: person,
+                            isAdd: true,
+                          ));
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: appStore.isDarkMode
+                                ? Colors.grey[900]
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                offset: const Offset(0, 2),
+                                blurRadius: 6,
+                                spreadRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Profile Picture
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.blue.withOpacity(0.2),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: person.profilePic?.isNotEmpty == true
+                                      ? CachedNetworkImage(
+                                          imageUrl: '${AppData.imageUrl}${person.profilePic}',
+                                          height: 48,
+                                          width: 48,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) => Container(
+                                            color: Colors.blue[50],
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                color: Colors.blue[400],
+                                                strokeWidth: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          errorWidget: (context, url, error) => Container(
+                                            color: Colors.blue[50],
+                                            child: Center(
+                                              child: Text(
+                                                person.firstName?.substring(0, 1).toUpperCase() ?? 'U',
+                                                style: TextStyle(
+                                                  color: Colors.blue[700],
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Poppins',
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Container(
+                                          color: Colors.blue[50],
+                                          child: Center(
+                                            child: Text(
+                                              person.firstName?.substring(0, 1).toUpperCase() ?? 'U',
+                                              style: TextStyle(
+                                                color: Colors.blue[700],
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Poppins',
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // Name and Info
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            '${person.firstName} ${person.lastName}',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'Poppins',
+                                              color: Colors.black87,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        // if (person.isVerified ?? false) ...[
+                                        //   const SizedBox(width: 6),
+                                        //   Container(
+                                        //     padding: const EdgeInsets.all(2),
+                                        //     decoration: BoxDecoration(
+                                        //       color: Colors.blue,
+                                        //       shape: BoxShape.circle,
+                                        //     ),
+                                        //     child: const Icon(
+                                        //       Icons.check,
+                                        //       size: 10,
+                                        //       color: Colors.white,
+                                        //     ),
+                                        //   ),
+                                        // ],
+                                      ],
+                                    ),
+                                    // if (person.specialty != null) ...[
+                                    //   const SizedBox(height: 2),
+                                    //   Text(
+                                    //     person.specialty!,
+                                    //     style: TextStyle(
+                                    //       fontSize: 13,
+                                    //       color: Colors.grey[600],
+                                    //       fontFamily: 'Poppins',
+                                    //     ),
+                                    //     overflow: TextOverflow.ellipsis,
+                                    //   ),
+                                    // ],
+                                  ],
+                                ),
+                              ),
+                              // Add Icon
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  color: Colors.blue[700],
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               } else if (state is DataError) {
                 return Expanded(
                   child: Center(
-                    child: Text(state.errorMessage),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          state.errorMessage,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                            fontFamily: 'Poppins',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               } else {
                 return const Expanded(
-                    child: Center(child: Text('Something went wrong')));
+                  child: Center(
+                    child: Text(
+                      'Start typing to search friends',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ),
+                );
               }
             },
           ),
-          // Column(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: list.map((e) {
-          //     return Row(
-          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //       children: [
-          //         Row(
-          //           mainAxisSize: MainAxisSize.min,
-          //           children: [
-          //             Image.asset(e.profileImage.validate(), height: 56, width: 56, fit: BoxFit.cover),
-          //             10.width,
-          //             Row(
-          //               children: [
-          //                 Text(e.name.validate(), style: boldTextStyle()),
-          //                 6.width,
-          //                 e.isOfficialAccount.validate()
-          //                     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-          //                     : Offstage(),
-          //               ],
-          //               mainAxisSize: MainAxisSize.min,
-          //             ),
-          //           ],
-          //         ),
-          //         AppButton(
-          //           shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
-          //           text: 'Send',
-          //           textStyle: secondaryTextStyle(color: e.doSend.validate() ? Colors.white : SVAppColorPrimary, size: 10),
-          //           onTap: () {
-          //             e.doSend = !e.doSend.validate();
-          //             setState(() {});
-          //           },
-          //           elevation: 0,
-          //           height: 30,
-          //           width: 50,
-          //           color: e.doSend.validate() ? SVAppColorPrimary : svGetScaffoldColor(),
-          //           padding: EdgeInsets.all(0),
-          //         ),
-          //       ],
-          //     ).paddingSymmetric(vertical: 8);
-          //   }).toList(),
-          // )
+          const SizedBox(height: 16),
         ],
-      ).paddingAll(16),
+      ),
     );
   }
 }

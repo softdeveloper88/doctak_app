@@ -4,10 +4,11 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/widgets/job_card_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/bloc/search_bloc.dart';
-import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
+import 'package:doctak_app/widgets/shimmer_widget/jobs_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../../../main.dart';
 import '../jobs_screen/document_upload_dialog.dart';
 import 'bloc/search_event.dart';
 
@@ -20,45 +21,71 @@ class SearchJobList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (drugsBloc.drugsData.isNotEmpty) {
       return Expanded(
-        child: ListView.builder(
-          itemCount: drugsBloc.drugsData.length,
-          itemBuilder: (context, index) {
-            if (drugsBloc.pageNumber <= drugsBloc.numberOfPage) {
-              if (index ==
-                  drugsBloc.drugsData.length - drugsBloc.nextPageTrigger) {
-                drugsBloc.add(CheckIfNeedMoreDataEvent(index: index));
+        child: Container(
+          decoration: BoxDecoration(
+            color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
+          ),
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: drugsBloc.drugsData.length,
+            itemBuilder: (context, index) {
+              if (drugsBloc.pageNumber <= drugsBloc.numberOfPage) {
+                if (index ==
+                    drugsBloc.drugsData.length - drugsBloc.nextPageTrigger) {
+                  drugsBloc.add(CheckIfNeedMoreDataEvent(index: index));
+                }
               }
-            }
-            if (drugsBloc.numberOfPage != drugsBloc.pageNumber - 1 &&
-                index >= drugsBloc.drugsData.length - 1) {
-              return SizedBox(height: 400, child: ShimmerCardList());
-            } else {
-              return JobCardWidget(
-                jobData: drugsBloc.drugsData[index],
-                selectedIndex: 0,
-                onJobTap: () {
-                  JobsDetailsScreen(jobId: '${drugsBloc.drugsData[index].id}')
-                      .launch(context);
-                },
-                onShareTap: () {
-                  createDynamicLink(
-                    '${drugsBloc.drugsData[index].jobTitle ?? ""} \n Apply Link: ${drugsBloc.drugsData[index].link ?? ''}',
-                    'https://doctak.net/job/${drugsBloc.drugsData[index].id}',
-                    drugsBloc.drugsData[index].link ?? '',
-                  );
-                },
-                onApplyTap: (id) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return DocumentUploadDialog(id);
-                    },
-                  );
-                },
-                onLaunchLink: (url) {
-                  PostUtils.launchURL(context, url.toString());
-                },
-              );
+              if (drugsBloc.numberOfPage != drugsBloc.pageNumber - 1 &&
+                  index >= drugsBloc.drugsData.length - 1) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: const JobsShimmerLoader(),
+                );
+              } else {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        offset: const Offset(0, 2),
+                        blurRadius: 6,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: JobCardWidget(
+                      jobData: drugsBloc.drugsData[index],
+                      selectedIndex: 0,
+                      onJobTap: () {
+                        JobsDetailsScreen(jobId: '${drugsBloc.drugsData[index].id}')
+                            .launch(context);
+                      },
+                      onShareTap: () {
+                        createDynamicLink(
+                          '${drugsBloc.drugsData[index].jobTitle ?? ""} \n Apply Link: ${drugsBloc.drugsData[index].link ?? ''}',
+                          'https://doctak.net/job/${drugsBloc.drugsData[index].id}',
+                          drugsBloc.drugsData[index].link ?? '',
+                        );
+                      },
+                      onApplyTap: (id) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return DocumentUploadDialog(id);
+                          },
+                        );
+                      },
+                      onLaunchLink: (url) {
+                        PostUtils.launchURL(context, url.toString());
+                      },
+                    ),
+                  ),
+                );
               // return Container(
               //   margin: const EdgeInsets.all(10),
               //   decoration: BoxDecoration(
@@ -299,12 +326,31 @@ class SearchJobList extends StatelessWidget {
             // return PostItem(drugsBloc.drugsData[index].title, drugsBloc.posts[index].body);
           },
         ),
-      );
+      ));
     } else {
       return Expanded(
-          child: Center(
-        child: Text(translation(context).msg_no_jobs_found),
-      ));
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.work_off_rounded,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                translation(context).msg_no_jobs_found,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
   }
 }

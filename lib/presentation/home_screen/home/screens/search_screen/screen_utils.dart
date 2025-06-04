@@ -12,6 +12,7 @@ const String upComing = "UpComing";
 const String inProgress = "InProgress";
 const String end = "Ended";
 const String rentalData = "rentalData";
+const String assistant = 'assistant';
 
 ///  //////////////////////////
 ///  //////////////////////////

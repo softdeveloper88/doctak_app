@@ -19,6 +19,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
+import '../../home_screen/utils/SVColors.dart';
 import '../Pusher/PusherConfig.dart';
 import 'chat_room_screen.dart';
 
@@ -293,41 +294,75 @@ class _UserChatScreenState extends State<UserChatScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: appStore.isDarkMode ? const Color(0xFF0A0A0A) : const Color(0xFFF8F9FA),
       appBar: AppBar(
-        surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor(),size: 17,),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        iconTheme: IconThemeData(color: context.iconColor),
+        elevation: 0,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
         centerTitle: true,
-        title: Text(
-          translation(context).lbl_chats,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins',
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
           ),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.chat_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_chats,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
-            icon: Image.asset(
-              'assets/images/search.png',
-              color: svGetBodyColor(),
-              height: 20,
-              width: 20,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_rounded,
+                color: Colors.blue[600],
+                size: 18,
+              ),
             ),
             onPressed: () {
               SearchContactScreen().launch(context);
             },
           ),
-          // IconButton(
-          //   icon: const Icon(Icons.more_vert),
-          //   onPressed: () {
-          //     // Add more options functionality
-          //   },
-          // ),
+          const SizedBox(width: 16),
         ],
       ),
       body: RefreshIndicator(
@@ -351,28 +386,59 @@ class _UserChatScreenState extends State<UserChatScreen>
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Observer(builder: (context){
-                      return isCurrentlyOnNoInternet?Container(
-                        padding: const EdgeInsets.all(10),
-                          color: Colors.red,
-                          child: Text(translation(context).msg_no_internet,style: TextStyle(color: Colors.white,fontSize: 14,fontFamily: 'Poppins',fontWeight: FontWeight.w500),)):SizedBox();},),
+                    isCurrentlyOnNoInternet ? Container(
+                      padding: const EdgeInsets.all(10),
+                      color: Colors.red,
+                      child: Text(
+                        translation(context).msg_no_internet,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ) : const SizedBox(),
                     if (chatBloc.groupList.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          translation(context).lbl_groups,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins',
-                          ),
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              translation(context).lbl_groups,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Poppins',
+                                color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: SVAppColorPrimary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${chatBloc.groupList.length}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: SVAppColorPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     if (chatBloc.groupList.isNotEmpty)
-                      SizedBox(
-                        height: 100.0,
+                      Container(
+                        height: 120,
+                        padding: const EdgeInsets.only(left: 12),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
                           itemCount: chatBloc.groupList.length,
                           itemBuilder: (context, index) {
                             final bloc = chatBloc;
@@ -400,36 +466,93 @@ class _UserChatScreenState extends State<UserChatScreen>
                                   ).launch(context);
                                 },
                                 child: Container(
-                                  width: 200,
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
+                                  width: 220,
+                                  margin: const EdgeInsets.only(right: 12),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue,
-                                    borderRadius: BorderRadius.circular(10.0),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        SVAppColorPrimary.withOpacity(0.8),
+                                        SVAppColorPrimary,
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: SVAppColorPrimary.withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
                                   ),
-                                  child: Card(
-                                    elevation: 0,
-                                    color: Colors.transparent,
-                                    child: ListTile(
-                                      title: Text(
-                                        bloc.groupList[index].groupName ??
-                                            translation(context).lbl_unknown,
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          color: svGetBodyColor(),
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: const Icon(
+                                                Icons.group_rounded,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: const Text(
+                                                'Group',
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                      subtitle: Text(
-                                        bloc.groupList[index].latestMessage ??
-                                            '',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          color: svGetBodyColor(),
-                                          fontSize: 14,
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              bloc.groupList[index].groupName ??
+                                                  translation(context).lbl_unknown,
+                                              style: const TextStyle(
+                                                fontFamily: 'Poppins',
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 15,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              bloc.groupList[index].latestMessage ?? 'No messages yet',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                color: Colors.white.withOpacity(0.8),
+                                                fontSize: 12,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -448,8 +571,22 @@ class _UserChatScreenState extends State<UserChatScreen>
                     //     ),
                     //   ),
                     if (chatBloc.contactsList.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                        child: Text(
+                          translation(context).lbl_message,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Poppins',
+                            color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ),
+                    if (chatBloc.contactsList.isNotEmpty)
                       Expanded(
                         child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           itemCount: chatBloc.contactsList.length,
                           itemBuilder: (context, index) {
                             var bloc = chatBloc;
@@ -466,229 +603,230 @@ class _UserChatScreenState extends State<UserChatScreen>
                               return const UserShimmer();
                             } else {
                               return Container(
-                                margin: const EdgeInsets.only(
-                                    top: 8.0, left: 8.0, right: 8.0),
-                                decoration: BoxDecoration(
-                                    color: svGetScaffoldColor(),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: InkWell(
-                                  onTap: () {
-                                    bloc.contactsList[index].unreadCount = 0;
-                                    setState(() {});
-                                    ChatRoomScreen(
-                                      username:
-                                          '${bloc.contactsList[index].firstName ?? ''} ${bloc.contactsList[index].lastName ?? ''}',
-                                      profilePic:
-                                          '${bloc.contactsList[index].profilePic}',
-                                      id: '${bloc.contactsList[index].id}',
-                                      roomId:
-                                          '${bloc.contactsList[index].roomId}',
-                                    ).launch(context);
-                                    // Add navigation logic or any other action on contact tap
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 10),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              InkWell(
-                                                onTap: () {
-                                                  SVProfileFragment(
-                                                          userId: bloc
-                                                              .contactsList[
-                                                                  index]
-                                                              .id)
-                                                      .launch(context);
-                                                },
-                                                child: Container(
-                                                  width: 50,
-                                                  height: 50,
+                                margin: const EdgeInsets.only(bottom: 8),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      bloc.contactsList[index].unreadCount = 0;
+                                      setState(() {});
+                                      ChatRoomScreen(
+                                        username:
+                                            '${bloc.contactsList[index].firstName ?? ''} ${bloc.contactsList[index].lastName ?? ''}',
+                                        profilePic:
+                                            '${bloc.contactsList[index].profilePic}',
+                                        id: '${bloc.contactsList[index].id}',
+                                        roomId:
+                                            '${bloc.contactsList[index].roomId}',
+                                      ).launch(context);
+                                    },
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: appStore.isDarkMode
+                                            ? const Color(0xFF1A1A1A)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: appStore.isDarkMode
+                                              ? Colors.white.withOpacity(0.1)
+                                              : Colors.grey.withOpacity(0.1),
+                                          width: 1,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: appStore.isDarkMode
+                                                ? Colors.black.withOpacity(0.2)
+                                                : Colors.grey.withOpacity(0.08),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // Profile Picture
+                                          InkWell(
+                                            onTap: () {
+                                              SVProfileFragment(
+                                                      userId: bloc
+                                                          .contactsList[
+                                                              index]
+                                                          .id)
+                                                  .launch(context);
+                                            },
+                                            child: Stack(
+                                              children: [
+                                                Container(
+                                                  width: 56,
+                                                  height: 56,
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.grey
-                                                            .withOpacity(0.3),
-                                                        spreadRadius: 1,
-                                                        blurRadius: 3,
-                                                        offset:
-                                                            const Offset(0, 3),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  child: CustomImageView(
-                                                          placeHolder:
-                                                              'images/socialv/faces/face_5.png',
-                                                          imagePath:
-                                                              '${AppData.imageUrl}${bloc.contactsList[index].profilePic ?? ''}',
-                                                          height: 56,
-                                                          width: 56,
-                                                          fit: BoxFit.cover)
-                                                      .cornerRadiusWithClipRRect(
-                                                          30),
-                                                ),
-                                              ),
-                                              10.width,
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      SizedBox(
-                                                          width: 150,
-                                                          child: Text(
-                                                              sanitizeString(
-                                                                  "${bloc.contactsList[index].firstName ?? ""} ${bloc.contactsList[index].lastName ?? ''}"),
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .clip,
-                                                              style: TextStyle(
-                                                                  fontFamily:
-                                                                      'Poppins',
-                                                                  color:
-                                                                      svGetBodyColor(),
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  fontSize:
-                                                                      15))),
-                                                      6.width,
-                                                      // bloc.contactsList[index].isCurrentUser.validate()
-                                                      //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-                                                      //     : const Offstage(),
-                                                    ],
-                                                  ),
-                                                  (isSomeoneTyping &&
-                                                          FromId ==
-                                                              bloc
-                                                                  .contactsList[
-                                                                      index]
-                                                                  .id)
-                                                      ? Text(translation(context).lbl_typing,
-                                                          style: TextStyle(
-                                                            fontFamily:
-                                                                'Poppins',
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 14,
-                                                            color: Colors
-                                                                .blueAccent,
-                                                          ))
-                                                      : Text(
-                                                          (bloc
-                                                                          .contactsList[
-                                                                              index]
-                                                                          .latestMessage
-                                                                          ?.length ??
-                                                                      0) >
-                                                                  20
-                                                              ? '${bloc.contactsList[index].latestMessage?.substring(0, 15)}....'
-                                                              : bloc
-                                                                      .contactsList[
-                                                                          index]
-                                                                      .latestMessage ??
-                                                                  "",
-                                                          style: secondaryTextStyle(
-                                                              fontFamily:
-                                                                  'Poppins',
-                                                              color:
-                                                                  svGetBodyColor())),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Column(
-                                          children: [
-                                            if ((bloc.contactsList[index]
-                                                        .unreadCount ??
-                                                    0) >
-                                                0)
-                                              Container(
-                                                height: 20,
-                                                width: 20,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.red,
-                                                  border: Border.all(
-                                                    color: Colors.red,
-                                                  ),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    '${bloc.contactsList[index].unreadCount ?? 0}',
-                                                    style: const TextStyle(
-                                                      fontFamily:
-                                                          'Poppins',
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                    gradient: LinearGradient(
+                                                      colors: [
+                                                        SVAppColorPrimary.withOpacity(0.1),
+                                                        SVAppColorPrimary.withOpacity(0.05),
+                                                      ],
                                                     ),
                                                   ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(2),
+                                                    child: CustomImageView(
+                                                      placeHolder:
+                                                          'images/socialv/faces/face_5.png',
+                                                      imagePath:
+                                                          '${AppData.imageUrl}${bloc.contactsList[index].profilePic ?? ''}',
+                                                      height: 52,
+                                                      width: 52,
+                                                      fit: BoxFit.cover,
+                                                    ).cornerRadiusWithClipRRect(50),
+                                                  ),
                                                 ),
-                                              ),
-                                            Text(
+                                                // Online indicator placeholder - can be added when backend supports it
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          // Message Content
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Name Row
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        sanitizeString(
+                                                            "${bloc.contactsList[index].firstName ?? ""} ${bloc.contactsList[index].lastName ?? ''}"),
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: TextStyle(
+                                                          fontFamily: 'Poppins',
+                                                          color: appStore.isDarkMode
+                                                              ? Colors.white
+                                                              : Colors.black87,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    // Verification badge placeholder
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
+                                                // Message or Typing Indicator
+                                                (isSomeoneTyping &&
+                                                        FromId ==
+                                                            bloc
+                                                                .contactsList[
+                                                                    index]
+                                                                .id)
+                                                    ? Row(
+                                                        children: [
+                                                          Container(
+                                                            width: 6,
+                                                            height: 6,
+                                                            margin: const EdgeInsets.only(right: 4),
+                                                            decoration: const BoxDecoration(
+                                                              color: SVAppColorPrimary,
+                                                              shape: BoxShape.circle,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            translation(context).lbl_typing,
+                                                            style: const TextStyle(
+                                                              fontFamily: 'Poppins',
+                                                              fontWeight: FontWeight.w500,
+                                                              fontSize: 14,
+                                                              color: SVAppColorPrimary,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    : Text(
+                                                        (bloc.contactsList[index]
+                                                                        .latestMessage
+                                                                        ?.length ??
+                                                                    0) >
+                                                                30
+                                                            ? '${bloc.contactsList[index].latestMessage?.substring(0, 30)}...'
+                                                            : bloc.contactsList[index]
+                                                                    .latestMessage ??
+                                                                "Start a conversation",
+                                                        style: TextStyle(
+                                                          fontFamily: 'Poppins',
+                                                          color: appStore.isDarkMode
+                                                              ? Colors.white70
+                                                              : Colors.black54,
+                                                          fontSize: 14,
+                                                          height: 1.5,
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                              ],
+                                            ),
+                                          ),
+                                          // Time and Unread Count
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            children: [
+                                              // Time
+                                              Text(
                                                 timeAgo.format(DateTime.parse(
                                                     bloc.contactsList[index]
                                                             .latestMessageTime ??
                                                         '2024-01-01 00:00:00')),
-                                                style: secondaryTextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: svGetBodyColor(),
-                                                    size: 12)),
-                                          ],
-                                        ),
-                                        // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
-                                        //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
-                                        //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
-                                        //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
-                                        //   onTap:  () async {
-                                        //     setState(() {
-                                        //       isLoading = true; // Set loading state to true when button is clicked
-                                        //     });
-                                        //
-                                        //     // Perform API call
-                                        //     widget.onTap();
-                                        //
-                                        //     setState(() {
-                                        //       isLoading = false; // Set loading state to false after API response
-                                        //     });
-                                        //   },
-                                        //   elevation: 0,
-                                        //   color: widget.element.isFollowedByCurrentUser == true ?SVAppColorPrimary:buttonUnSelectColor,
-                                        // ),
-                                        // ElevatedButton(
-                                        //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                        //   onPressed: () async {
-                                        //     setState(() {
-                                        //       isLoading = true; // Set loading state to true when button is clicked
-                                        //     });
-                                        //
-                                        //     // Perform API call
-                                        //     await widget.onTap();
-                                        //
-                                        //     setState(() {
-                                        //       isLoading = false; // Set loading state to false after API response
-                                        //     });
-                                        //   },
-                                        //   child: isLoading
-                                        //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
-                                        //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
-                                        //   style: ElevatedButton.styleFrom(
-                                        //     // primary: Colors.blue, // Change button color as needed
-                                        //     elevation: 0,
-                                        //   ),
-                                        // ),
-                                      ],
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  color: appStore.isDarkMode
+                                                      ? Colors.white54
+                                                      : Colors.black45,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              // Unread Count Badge
+                                              if ((bloc.contactsList[index]
+                                                          .unreadCount ??
+                                                      0) >
+                                                  0)
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: 8, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      colors: [
+                                                        Colors.red.shade400,
+                                                        Colors.red.shade600,
+                                                      ],
+                                                    ),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.red.withOpacity(0.3),
+                                                        blurRadius: 4,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Text(
+                                                    '${bloc.contactsList[index].unreadCount ?? 0}',
+                                                    style: const TextStyle(
+                                                      fontFamily: 'Poppins',
+                                                      color: Colors.white,
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                )
+                                                // Read indicator placeholder
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

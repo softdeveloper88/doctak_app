@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShimmerCardList extends StatelessWidget {
+  const ShimmerCardList({Key? key}) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
     return ListView.builder(

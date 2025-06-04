@@ -349,7 +349,7 @@ class WaitingForRemoteView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              "${translation(context).lbl_calling_user}".replaceAll("{name}", remoteUser.name),
+              translation(context).lbl_calling_user(remoteUser.name),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,

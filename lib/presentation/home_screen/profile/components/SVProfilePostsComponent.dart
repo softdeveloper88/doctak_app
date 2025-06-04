@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/interested_info_screen/interested_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/personal_info_screen/personal_info_screen.dart';
@@ -24,89 +25,148 @@ class SVProfilePostsComponent extends StatefulWidget {
       _SVProfilePostsComponentState();
 }
 
-class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
+class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with SingleTickerProviderStateMixin {
   int selectedIndex = 0;
+
+  // Animation controller for tab transitions
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Setup animations
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: context.cardColor,
       ),
       child: Column(
         children: [
+          // Improved tab selector
           Container(
             color: svGetScaffoldColor(),
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-              width: 500,
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue, width: 2),
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.all(Radius.circular(8))),
+                border: Border.all(color: Colors.blue, width: 1.5),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
+                  // Posts tab
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        selectedIndex = 0;
-                        setState(() {});
+                        _animationController.reset();
+                        setState(() {
+                          selectedIndex = 0;
+                        });
+                        _animationController.forward();
                       },
+                      borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.all(10),
-                        // width: 210,
-                        height: 40,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                            color: selectedIndex == 1
-                                ? Colors.white
-                                : Colors.blue,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(6))),
-                        child: Center(
-                            child: Text(
-                          translation(context).lbl_posts,
-                          style: TextStyle(
-                              fontFamily: 'Poppins',
-                              color:
-                                  selectedIndex == 0 ? Colors.white : Colors.blue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14),
-                          // style: CustomTextStyles
-                          //     .titleMediumOnPrimaryContainer,
-                        )),
+                          color: selectedIndex == 0
+                              ? Colors.blue
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.article_rounded,
+                              size: 18,
+                              color: selectedIndex == 0 ? Colors.white : Colors.blue,
+                            ),
+                            8.width,
+                            Text(
+                              translation(context).lbl_posts,
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                color: selectedIndex == 0 ? Colors.white : Colors.blue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
+
+                  // About tab
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        selectedIndex = 1;
-                        setState(() {});
+                        _animationController.reset();
+                        setState(() {
+                          selectedIndex = 1;
+                        });
+                        _animationController.forward();
                       },
+                      borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.all(10),
-                        // width: 200,
-                        height: 40,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                            color:
-                                selectedIndex == 0 ? Colors.white : Colors.blue,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(6))),
-                        child: Center(
-                            child: Text(
-                          translation(context).lbl_about,
-                          style: TextStyle(
-                              fontFamily: 'Poppins',
-                              color:selectedIndex == 1
-                                  ? Colors.white
-                                  : Colors.blue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14),
-                          // style: CustomTextStyles
-                          //     .titleMediumOnPrimaryContainer,
-                        )),
+                          color: selectedIndex == 1
+                              ? Colors.blue
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.person_rounded,
+                              size: 18,
+                              color: selectedIndex == 1 ? Colors.white : Colors.blue,
+                            ),
+                            8.width,
+                            Text(
+                              translation(context).lbl_about,
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                color: selectedIndex == 1 ? Colors.white : Colors.blue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -114,12 +174,14 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> {
               ),
             ),
           ),
-          selectedIndex == 0
-              ? MyPostComponent(widget.profileBloc)
-              : AboutWidget(
-                  profileBloc: widget.profileBloc,
-                )
-          // : EditProfileScreen(widget.profileBloc),
+
+          // Tab content with fade animation
+          FadeTransition(
+            opacity: _fadeAnimation,
+            child: selectedIndex == 0
+                ? MyPostComponent(widget.profileBloc)
+                : AboutWidget(profileBloc: widget.profileBloc),
+          )
         ],
       ),
     );
@@ -140,6 +202,7 @@ class AboutWidget extends StatelessWidget {
 Widget _buildColumnlockone(BuildContext context, profileBloc) {
   return Column(
     children: [
+      // Personal Information card
       _buildRowinterested(
         onTap: () {
           PersonalInfoScreen(profileBloc: profileBloc).launch(context);
@@ -147,8 +210,12 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         context,
         imageOne: 'assets/icon/ic_lock.svg',
         interested: translation(context).lbl_personal_information,
+        iconColor: Colors.blue[700]!,
+        backgroundColor: Colors.blue.withOpacity(0.08),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 12),
+
+      // Professional Summary card
       _buildRowinterested(
         onTap: () {
           ProfessionalInfoScreen(profileBloc: profileBloc).launch(context);
@@ -156,8 +223,12 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         context,
         imageOne: 'assets/icon/ic_frame.svg',
         interested: translation(context).lbl_professional_summary,
+        iconColor: Colors.orange[700]!,
+        backgroundColor: Colors.orange.withOpacity(0.08),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 12),
+
+      // Professional Experience card
       _buildRowinterested(
         onTap: () {
           WorkInfoScreen(profileBloc: profileBloc).launch(context);
@@ -165,8 +236,12 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         context,
         imageOne: 'assets/icon/ic_calendar.svg',
         interested: translation(context).lbl_professional_experience,
+        iconColor: Colors.green[700]!,
+        backgroundColor: Colors.green.withOpacity(0.08),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 12),
+
+      // Interest Information card
       _buildRowinterested(
         onTap: () {
           InterestedInfoScreen(profileBloc: profileBloc).launch(context);
@@ -174,15 +249,21 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
         context,
         imageOne: 'assets/icon/ic_person.svg',
         interested: translation(context).lbl_interest_information,
+        iconColor: Colors.purple[700]!,
+        backgroundColor: Colors.purple.withOpacity(0.08),
       ),
-      const SizedBox(height: 10),
-      _buildRowinterested(
+      const SizedBox(height: 12),
+
+      // Privacy Information card
+    if(profileBloc.isMe)  _buildRowinterested(
         onTap: () {
           PrivacyInfoScreen(profileBloc: profileBloc).launch(context);
         },
         context,
         imageOne: 'assets/icon/ic_privacy.svg',
         interested: translation(context).lbl_privacy_information,
+        iconColor: Colors.red[700]!,
+        backgroundColor: Colors.red.withOpacity(0.08),
       ),
     ],
   );
@@ -192,7 +273,7 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
 Widget _buildScrollview(BuildContext context, profileBloc) {
   return SingleChildScrollView(
     child: Padding(
-      padding: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [_buildColumnlockone(context, profileBloc)],
       ),
@@ -200,54 +281,80 @@ Widget _buildScrollview(BuildContext context, profileBloc) {
   );
 }
 
-/// Common widget
+/// Common widget with improved styling
 Widget _buildRowinterested(
-  BuildContext context, {
-  required Function onTap,
-  required String imageOne,
-  required String interested,
-}) {
+    BuildContext context, {
+      required Function onTap,
+      required String imageOne,
+      required String interested,
+      required Color iconColor,
+      required Color backgroundColor,
+    }) {
   return GestureDetector(
     onTap: () => onTap(),
     child: Container(
-      margin: const EdgeInsets.only(left: 10, right: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 18,
+        horizontal: 20,
+        vertical: 16,
       ),
-      decoration: AppDecoration.fillGray.copyWith(
-        borderRadius: BorderRadius.circular(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CustomImageView(
-            color: svGetBodyColor(),
-            imagePath: imageOne,
-            height: 25,
-            width: 25,
-            margin: const EdgeInsets.only(top: 4),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 15,
-              top: 1,
+          // Icon with background
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              interested,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                color: svGetBodyColor(),
+            child: CustomImageView(
+              color: iconColor,
+              imagePath: imageOne,
+              height: 22,
+              width: 22,
+            ),
+          ),
+
+          // Section title
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Text(
+                interested,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
               ),
             ),
           ),
-          const Spacer(),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 25,
-            color: svGetBodyColor(),
+
+          // Arrow icon
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: Colors.grey[700],
+            ),
           )
         ],
       ),

@@ -11,8 +11,10 @@ import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
+// import 'package:sizer/sizer.dart'; // Not used
 
+import '../../../main.dart';
+import '../../home_screen/utils/SVColors.dart';
 import '../../home_screen/utils/SVCommon.dart';
 import '../../home_screen/utils/shimmer_widget.dart';
 import 'chat_room_screen.dart';
@@ -54,56 +56,155 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: appStore.isDarkMode ? const Color(0xFF0A0A0A) : const Color(0xFFF8F9FA),
       appBar: AppBar(
+        backgroundColor: svGetScaffoldColor(),
+        iconTheme: IconThemeData(color: context.iconColor),
+        elevation: 0,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
+        centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        surfaceTintColor: context.cardColor,
-        backgroundColor: context.cardColor,
-        centerTitle: false,
-        title: Text(
-          translation(context).lbl_search_contacts,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins',
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
           ),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_search_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_search_contacts,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
         ),
       ),
       body: Column(
         children: [
           Container(
-            color: svGetScaffoldColor(),
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: appStore.isDarkMode
+                    ? [
+                        const Color(0xFF1A1A1A),
+                        const Color(0xFF0A0A0A),
+                      ]
+                    : [
+                        Colors.white,
+                        const Color(0xFFF8F9FA),
+                      ],
+              ),
+            ),
             child: Container(
-              padding: const EdgeInsets.only(left: 8.0),
               decoration: BoxDecoration(
-                  color: context.dividerColor.withOpacity(0.4),
-                  borderRadius: radius(5),
-                  border: Border.all(color: Colors.black, width: 0.5)),
-              child: Center(
-                child: AppTextField(
-                  controller: _searchController,
-                  onChanged: _onSearchChanged,
-                  textFieldType: TextFieldType.NAME,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: translation(context).lbl_search,
-                    hintStyle: secondaryTextStyle(
-                      color: svGetBodyColor(),
-                      fontFamily: 'Poppins',
-                    ),
-                    suffixIcon: Image.asset(
-                            'images/socialv/icons/ic_Search.png',
-                            height: 16,
-                            width: 16,
-                            fit: BoxFit.cover,
-                            color: svGetBodyColor())
-                        .paddingAll(16),
-                  ),
+                color: appStore.isDarkMode
+                    ? const Color(0xFF262626)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: appStore.isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.grey.withOpacity(0.2),
+                  width: 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: appStore.isDarkMode
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.grey.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Icon(
+                      Icons.search_rounded,
+                      color: appStore.isDarkMode
+                          ? Colors.white54
+                          : Colors.black45,
+                      size: 24,
+                    ),
+                  ),
+                  Expanded(
+                    child: AppTextField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      textFieldType: TextFieldType.NAME,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: translation(context).lbl_search,
+                        hintStyle: TextStyle(
+                          color: appStore.isDarkMode
+                              ? Colors.white54
+                              : Colors.black45,
+                          fontFamily: 'Poppins',
+                          fontSize: 15,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 16),
+                      ),
+                      cursorColor: SVAppColorPrimary,
+                      textStyle: TextStyle(
+                        color: appStore.isDarkMode
+                            ? Colors.white
+                            : Colors.black87,
+                        fontFamily: 'Poppins',
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  if (_searchController.text.isNotEmpty)
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          _searchController.clear();
+                          _onSearchChanged('');
+                        },
+                        borderRadius: BorderRadius.circular(50),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: appStore.isDarkMode
+                                ? Colors.white54
+                                : Colors.black45,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -165,160 +266,193 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                               child: UserShimmer());
                         } else {
                           return Container(
-                            margin: const EdgeInsets.only(
-                                top: 8.0, left: 8.0, right: 8.0),
-                            decoration: BoxDecoration(
-                                color: svGetScaffoldColor(),
-                                borderRadius: BorderRadius.circular(10)),
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {
-                                ChatRoomScreen(
-                                  username:
-                                  '${bloc.searchContactsList[index].firstName ??
-                                      ''} ${bloc.searchContactsList[index]
-                                      .lastName ?? ""}',
-                                  profilePic:
-                                  '${bloc.searchContactsList[index]
-                                      .profilePic}',
-                                  id: '${bloc.searchContactsList[index].id}',
-                                  roomId: '',
-                                ).launch(context);
-
-                                // ChatRoomScreen(
-                                //   username:
-                                //   '${bloc.searchContactsList[index].firstName} ${bloc.searchContactsList[index].lastName}',
-                                //   profilePic:
-                                //   '${bloc.searchContactsList[index].profilePic}',
-                                //   id: '',
-                                //   roomId:
-                                //   '${bloc.searchContactsList[index].roomId}',
-                                // ).launch(context);
-
-                                // Add navigation logic or any other action on contact tap
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 10),
-                                child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              SVProfileFragment(
-                                                  userId: bloc
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  ChatRoomScreen(
+                                    username:
+                                    '${bloc.searchContactsList[index].firstName ??
+                                        ''} ${bloc.searchContactsList[index]
+                                        .lastName ?? ""}',
+                                    profilePic:
+                                    '${bloc.searchContactsList[index]
+                                        .profilePic}',
+                                    id: '${bloc.searchContactsList[index].id}',
+                                    roomId: '',
+                                  ).launch(context);
+                                },
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: appStore.isDarkMode
+                                        ? const Color(0xFF1A1A1A)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: appStore.isDarkMode
+                                          ? Colors.white.withOpacity(0.1)
+                                          : Colors.grey.withOpacity(0.1),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: appStore.isDarkMode
+                                            ? Colors.black.withOpacity(0.2)
+                                            : Colors.grey.withOpacity(0.08),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      children: [
+                                        // Profile Picture
+                                        GestureDetector(
+                                          onTap: () {
+                                            SVProfileFragment(
+                                                userId: bloc
+                                                    .searchContactsList[
+                                                index]
+                                                    .id)
+                                                .launch(context);
+                                          },
+                                          child: Stack(
+                                            children: [
+                                              Container(
+                                                width: 56,
+                                                height: 56,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      SVAppColorPrimary.withOpacity(0.1),
+                                                      SVAppColorPrimary.withOpacity(0.05),
+                                                    ],
+                                                  ),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(2),
+                                                  child: bloc
                                                       .searchContactsList[
                                                   index]
-                                                      .id)
-                                                  .launch(context);
-                                            },
-                                            child: Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.grey
-                                                        .withOpacity(0.5),
-                                                    spreadRadius: 1,
-                                                    blurRadius: 3,
-                                                    offset: const Offset(0, 3),
+                                                      .profilePic ==
+                                                      ''
+                                                      ? Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      gradient: LinearGradient(
+                                                        colors: [
+                                                          Colors.blue.shade400,
+                                                          Colors.blue.shade600,
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.person,
+                                                      color: Colors.white,
+                                                      size: 28,
+                                                    ),
+                                                  )
+                                                      : CachedNetworkImage(
+                                                    imageUrl:
+                                                    '${AppData.imageUrl}${bloc
+                                                        .searchContactsList[index]
+                                                        .profilePic.validate()}',
+                                                    height: 52,
+                                                    width: 52,
+                                                    fit: BoxFit.cover,
+                                                    placeholder: (context, url) => Container(
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: appStore.isDarkMode
+                                                            ? Colors.white.withOpacity(0.1)
+                                                            : Colors.grey.withOpacity(0.1),
+                                                      ),
+                                                    ),
+                                                    errorWidget: (context, url, error) => Container(
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        gradient: LinearGradient(
+                                                          colors: [
+                                                            Colors.blue.shade400,
+                                                            Colors.blue.shade600,
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white,
+                                                        size: 28,
+                                                      ),
+                                                    ),
+                                                  ).cornerRadiusWithClipRRect(50),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        // User Info
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      "${bloc
+                                                          .searchContactsList[index]
+                                                          .firstName
+                                                          .validate()} ${bloc
+                                                          .searchContactsList[index]
+                                                          .lastName.validate()}",
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontFamily: 'Poppins',
+                                                        color: appStore.isDarkMode
+                                                            ? Colors.white
+                                                            : Colors.black87,
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
                                                   ),
+                                                  // Verified badge can be added later if the model supports it
                                                 ],
                                               ),
-                                              child: bloc
-                                                  .searchContactsList[
-                                              index]
-                                                  .profilePic ==
-                                                  ''
-                                                  ? Image.asset(
-                                                  'images/socialv/faces/face_5.png',
-                                                  height: 56,
-                                                  width: 56,
-                                                  fit: BoxFit.cover)
-                                                  .cornerRadiusWithClipRRect(
-                                                  8)
-                                                  .cornerRadiusWithClipRRect(
-                                                  8)
-                                                  : CachedNetworkImage(
-                                                  imageUrl:
-                                                  '${AppData.imageUrl}${bloc
-                                                      .searchContactsList[index]
-                                                      .profilePic.validate()}',
-                                                  height: 56,
-                                                  width: 56,
-                                                  fit: BoxFit.cover)
-                                                  .cornerRadiusWithClipRRect(
-                                                  30),
+                                              const SizedBox(height: 4),
+                                              // Specialty can be shown if available in the model
+                                            ],
+                                          ),
+                                        ),
+                                        // Message Button
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                SVAppColorPrimary.withOpacity(0.1),
+                                                SVAppColorPrimary.withOpacity(0.05),
+                                              ],
                                             ),
+                                            borderRadius: BorderRadius.circular(12),
                                           ),
-                                          10.width,
-                                          SizedBox(
-                                            width: 60.w,
-                                            child: Text(
-                                                "${bloc
-                                                    .searchContactsList[index]
-                                                    .firstName
-                                                    .validate()} ${bloc
-                                                    .searchContactsList[index]
-                                                    .lastName.validate()}",
-                                                overflow: TextOverflow.clip,
-                                                style: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: svGetBodyColor(),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 16)),
+                                          child: const Icon(
+                                            Icons.chat_bubble_outline_rounded,
+                                            color: SVAppColorPrimary,
+                                            size: 22,
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                    // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
-                                    //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
-                                    //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
-                                    //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
-                                    //   onTap:  () async {
-                                    //     setState(() {
-                                    //       isLoading = true; // Set loading state to true when button is clicked
-                                    //     });
-                                    //
-                                    //     // Perform API call
-                                    //     widget.onTap();
-                                    //
-                                    //     setState(() {
-                                    //       isLoading = false; // Set loading state to false after API response
-                                    //     });
-                                    //   },
-                                    //   elevation: 0,
-                                    //   color: widget.element.isFollowedByCurrentUser == true ?SVAppColorPrimary:buttonUnSelectColor,
-                                    // ),
-                                    // ElevatedButton(
-                                    //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                    //   onPressed: () async {
-                                    //     setState(() {
-                                    //       isLoading = true; // Set loading state to true when button is clicked
-                                    //     });
-                                    //
-                                    //     // Perform API call
-                                    //     await widget.onTap();
-                                    //
-                                    //     setState(() {
-                                    //       isLoading = false; // Set loading state to false after API response
-                                    //     });
-                                    //   },
-                                    //   child: isLoading
-                                    //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
-                                    //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
-                                    //   style: ElevatedButton.styleFrom(
-                                    //     // primary: Colors.blue, // Change button color as needed
-                                    //     elevation: 0,
-                                    //   ),
-                                    // ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -330,8 +464,51 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                     ),
                   );
                 }else{
-                  return Expanded(child: Center(child: Text(translation(context).msg_no_user_found, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'))));
-
+                  return Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  SVAppColorPrimary.withOpacity(0.1),
+                                  SVAppColorPrimary.withOpacity(0.05),
+                                ],
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.search_off_rounded,
+                              size: 48,
+                              color: SVAppColorPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            translation(context).msg_no_user_found,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                              color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try searching with different keywords',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                              color: appStore.isDarkMode ? Colors.white54 : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
               } else if (state is DataError) {
                 return RetryWidget(

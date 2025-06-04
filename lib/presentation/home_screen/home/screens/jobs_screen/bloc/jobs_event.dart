@@ -38,13 +38,12 @@ class ShowApplicantEvent extends JobsEvent {
 class JobLoadPageEvent extends JobsEvent {
   int? page;
   final String? countryId;
-  String? isExpired = 'New';
   final String? searchTerm;
 
   JobLoadPageEvent(
-      {this.page, this.countryId, this.isExpired, this.searchTerm});
+      {this.page, this.countryId, this.searchTerm});
   @override
-  List<Object?> get props => [page, countryId, isExpired, searchTerm];
+  List<Object?> get props => [page, countryId, searchTerm];
 }
 
 class JobDetailPageEvent extends JobsEvent {

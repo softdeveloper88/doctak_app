@@ -35,8 +35,15 @@ import 'package:video_player/video_player.dart';
 import '../../calling_module/screens/call_screen.dart';
 import '../../calling_module/utils/start_outgoing_call.dart';
 import '../../home_screen/home/screens/meeting_screen/video_api.dart';
+import '../../home_screen/utils/SVColors.dart';
 import 'call_loading_screen.dart';
 import 'component/chat_bubble.dart';
+import 'component/optimized_message_list.dart';
+import 'component/chat_input_field.dart';
+import 'component/whatsapp_voice_recorder.dart';
+import 'component/audio_cache_manager.dart';
+import 'component/attachment_bottom_sheet.dart';
+import 'component/attachment_preview_screen.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String username;
@@ -79,10 +86,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   bool isSomeoneTyping = false;
   bool isDataLoaded = true;
   bool isTextTyping = false;
+  Timer? _typingTimer;
+  final FocusNode focusNode = FocusNode();
 
   // List<SelectedByte> selectedFiles = [];
   bool isMessageLoaded = false; // Initialize it as per your logic
-  File? _selectedFile;
   bool _isFileUploading = false;
   bool _isRecording = false;
   bool _isPaused = false;
@@ -99,10 +107,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     _timer?.cancel();
     _ampTimer?.cancel();
     _timerChat?.cancel();
+    _typingTimer?.cancel();
     _audioRecorder.dispose();
     _scrollController.removeListener(_checkScrollPosition);
     _scrollController.dispose();
     textController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
@@ -128,9 +138,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     print("sender id ${widget.id}");
     print("room id ${widget.roomId}");
     _startTimerForChat();
+    
+    // Clean old cache files on startup
+    _cleanOldAudioCache();
 
     // fetchMessages();
     // _createClient();
+  }
+  
+  Future<void> _cleanOldAudioCache() async {
+    try {
+      final cacheManager = AudioCacheManager();
+      await cacheManager.cleanOldCache();
+    } catch (e) {
+      debugPrint('Error cleaning audio cache: $e');
+    }
   }
 
   void _checkScrollPosition() {
@@ -713,206 +735,216 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-        backgroundColor: svGetBgColor(),
+        backgroundColor: appStore.isDarkMode ? const Color(0xFF0A0A0A) : const Color(0xFFF8F9FA),
         appBar: AppBar(
-          surfaceTintColor: context.cardColor,
-          backgroundColor: context.cardColor,
-          // toolbarHeight: 80,
-          leadingWidth: 30,
-          leading: IconButton(
-            iconSize: 20,
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+          backgroundColor: svGetScaffoldColor(),
+          iconTheme: IconThemeData(color: context.iconColor),
+          elevation: 0,
+          toolbarHeight: 70,
+          surfaceTintColor: svGetScaffoldColor(),
           centerTitle: false,
-          title: Row(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(1, 3),
-                        ),
-                      ],
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.blue[600],
+                size: 16,
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            }
+          ),
+          title: InkWell(
+            onTap: () {
+              SVProfileFragment(userId: widget.id).launch(context);
+            },
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue.withOpacity(0.1),
+                    border: Border.all(
+                      color: Colors.blue.withOpacity(0.2),
+                      width: 1.5,
                     ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
                     child: widget.profilePic == ''
-                        ? InkWell(
-                            onTap: () {
-                              SVProfileFragment(userId: widget.id)
-                                  .launch(context);
-                            },
-                            child: CircleAvatar(
-                              child: Image.asset(
-                                      'images/socialv/faces/face_5.png',
-                                      height: 56,
-                                      width: 56,
-                                      fit: BoxFit.cover)
-                                  .cornerRadiusWithClipRRect(8)
-                                  .cornerRadiusWithClipRRect(8),
+                        ? Center(
+                            child: Icon(
+                              Icons.person,
+                              color: Colors.blue[600],
+                              size: 22,
                             ),
                           )
-                        : InkWell(
-                            onTap: () {
-                              SVProfileFragment(userId: widget.id)
-                                  .launch(context);
-                            },
-                            child: CircleAvatar(
-                              child: CustomImageView(
-                                      imagePath:
-                                          '${AppData.imageUrl}${widget.profilePic.validate()}',
-                                      height: 56,
-                                      width: 56,
-                                      fit: BoxFit.cover)
-                                  .cornerRadiusWithClipRRect(30),
-                            ),
+                        : CustomImageView(
+                            imagePath: '${AppData.imageUrl}${widget.profilePic.validate()}',
+                            height: 40,
+                            width: 40,
+                            fit: BoxFit.cover,
                           ),
                   ),
-                ],
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    SVProfileFragment(userId: widget.id).launch(context);
-                  },
-                  child: Text(
-                    widget.username,
-                    style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.username,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                          color: Colors.blue[800],
+                        ),
+                      ),
+                      if (isSomeoneTyping && FromId == widget.id)
+                        Text(
+                          translation(context).lbl_typing,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
-            InkWell(
-              onTap: () async {
+            // Voice Call Button
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 36,
+              ),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.phone_outlined,
+                  color: Colors.blue[600],
+                  size: 18,
+                ),
+              ),
+              onPressed: () async {
                 startOutgoingCall(
                   widget.id,
                   widget.username,
                   widget.profilePic,
                   false,
                 );
-//                 // First navigate to CallScreen with preliminary data
-//                 String tempCallId = DateTime.now().millisecondsSinceEpoch.toString();
-//                 NavigatorService.navigatorKey.currentState?.push(MaterialPageRoute(
-//                   builder: (context) => CallScreen(
-//                     callId: tempCallId, // Temporary ID
-//                     contactId: widget.id,
-//                     contactName: widget.username,
-//                     contactAvatar: "${AppData.imageUrl}${widget.profilePic}",
-//                     isIncoming: false,
-//                     isVideoCall: false,
-//                     isWaitingForCallData: true, // Add this flag to your CallScreen
-//                   ),
-//                 ));
-//
-// // Then get the call data in background
-//                 CallKitService().startOutgoingCall(
-//                     userId: widget.id,
-//                     calleeName: widget.username,
-//                     avatar: "${AppData.imageUrl}${widget.profilePic}",
-//                     hasVideo: false
-//                 ).then((callData) {
-//                   // Update call data when available
-//                   if (NavigatorService.navigatorKey.currentContext != null) {
-//                     // Find the CallScreen in the widget tree and update its data
-//                     final callScreenState = NavigatorService.navigatorKey.currentContext!
-//                         .findAncestorStateOfType<_CallScreenState>();
-//                     if (callScreenState != null) {
-//                       callScreenState.updateCallData(callData['callId']);
-//                     }
-//                   }
-//                 });
-                // ProgressDialogUtils.showProgressDialog();
-                // await startMeetings().then((createMeeting) async {
-                //   await joinMeetings(
-                //           createMeeting.data?.meeting?.meetingChannel ?? '')
-                //       .then((joinMeetingData) async {
-                //     await testFCMCall(widget.id);
-                //
-                //     ProgressDialogUtils.hideProgressDialog();
-                // CallKitScreen(
-                //       // meetingDetailsModel: joinMeetingData,
-                //       // isHost: true,
-                //     ).launch(context,
-                //         pageRouteAnimation: PageRouteAnimation.Slide);
-                  // });
-                // });
               },
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: SvgPicture.asset(icCall),
+            ),
+            const SizedBox(width: 4),
+            // Video Call Button
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 36,
               ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            InkWell(
-              onTap: () async {
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.videocam_outlined,
+                  color: Colors.blue[600],
+                  size: 18,
+                ),
+              ),
+              onPressed: () async {
                 startOutgoingCall(
                   widget.id,
                   widget.username,
                   widget.profilePic,
                   true,
                 );
-                // Map<String,dynamic> callData= await  CallKitService().startOutgoingCall(userId: widget.id, calleeName: widget.username, avatar: "${AppData.imageUrl}${widget.profilePic}", hasVideo: true);
-                // print('callData $callData');
-                // NavigatorService.navigatorKey.currentState?.push(MaterialPageRoute(
-                //   builder: (context) => CallScreen(
-                //     callId: callData['callId'],
-                //     contactId: widget.id,
-                //     contactName:  widget.username,
-                //     contactAvatar: "${AppData.imageUrl}${widget.profilePic}",
-                //     isIncoming: false,
-                //     isVideoCall: true,
-                //   ),
-                // ));
               },
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: SvgPicture.asset(icVideo),
-              ),
             ),
-            PopupMenuButton(
-              itemBuilder: (context) {
-                return [
-                  PopupMenuItem(
-                    child: Builder(builder: (context) {
-                      return Column(
-                        children: [translation(context).lbl_media, translation(context).lbl_delete_chat].map((String item) {
-                          return PopupMenuItem(
-                            value: item,
-                            child: Text(item),
-                          );
-                        }).toList(),
-                      );
-                    }),
-                  ),
-                ];
+            // More Options Menu
+            PopupMenuButton<String>(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  Icons.more_vert,
+                  color: Colors.blue[600],
+                  size: 20,
+                ),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 8,
+              offset: const Offset(0, 50),
+              onSelected: (value) {
+                // Handle menu selection
               },
-              onSelected: (value) {},
-            )
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'media',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.photo_library_outlined,
+                        size: 20,
+                        color: Colors.blue[600],
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        translation(context).lbl_media,
+                        style: TextStyle(
+                          color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: Colors.red.shade400,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        translation(context).lbl_delete_chat,
+                        style: TextStyle(
+                          color: Colors.red.shade400,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 8),
           ],
         ),
         body: BlocConsumer<ChatBloc, ChatState>(
@@ -926,368 +958,136 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 ),
               );
             } else if (state is PaginationLoadedState) {
-              _isFileUploading = false;
+              setState(() {
+                _isFileUploading = false;
+              });
+            } else if (state is FileUploadingState) {
+              setState(() {
+                _isFileUploading = true;
+              });
+              // Optional: Show a brief toast for file uploads
+              // showToast('Uploading file...');
+            } else if (state is FileUploadedState) {
+              setState(() {
+                _isFileUploading = false;
+              });
             }
           },
           builder: (context, state) {
             if (state is PaginationLoadingState) {
               return ChatShimmerLoader();
-            } else if (state is PaginationLoadedState) {
+            } else if (state is PaginationLoadedState ||
+                state is FileUploadingState ||
+                state is FileUploadedState ||
+                state is DataInitial ||
+                state is PaginationInitialState) {
               isDataLoaded = false;
               var bloc = chatBloc;
               return Column(
                 children: [
                   Expanded(
-                    flex: 1,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      shrinkWrap: false,
-                      reverse: true,
-                      controller: _scrollController,
-                      itemBuilder: (context, index) {
-                        if (bloc.messagePageNumber <=
-                            bloc.messageNumberOfPage) {
-                          if (index ==
-                              bloc.messagesList.length -
-                                  bloc.messageNextPageTrigger) {
-                            bloc.add(CheckIfNeedMoreMessageDataEvent(
-                              index: index,
-                              userId: AppData.logInUserId,
-                              roomId: widget.roomId == ''
-                                  ? chatBloc.roomId!
-                                  : widget.roomId,
-                            ));
-                          }
-                        }
-                        if (bloc.messageNumberOfPage !=
-                                bloc.messagePageNumber - 1 &&
-                            index >= bloc.messagesList.length - 1) {
-                          return SizedBox(
-                              height: 100, child: ChatShimmerLoader());
-                        } else {
-                          final isLastOfOwnMessage =
-                              index == bloc.messagesList.length - 1 ||
-                                  bloc.messagesList[index].userId !=
-                                      bloc.messagesList[index + 1].userId;
-
-                          return InkWell(
-                            onLongPress: () {
-                              if (bloc.messagesList[index].userId !=
-                                  widget.id) {
-                                showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return CustomAlertDialog(
-                                          title:
-                                              translation(context).msg_confirm_delete_message,
-                                          callback: () {
-                                            bloc.add(DeleteMessageEvent(
-                                                id: bloc.messagesList[index].id
-                                                    .toString()));
-                                            Navigator.of(context).pop();
-                                          });
-                                    });
-                              }
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                top: isLastOfOwnMessage
-                                    ? 16
-                                    : 8, // Extra space after own last message
-                              ),
-                              child: ChatBubble(
-                                profile: bloc.messagesList[index].userId !=
-                                        widget.id
-                                    ? widget.profilePic
-                                    : "${AppData.imageUrl}${widget.profilePic}",
-                                message: bloc.messagesList[index].body ?? '',
-                                isMe:
-                                    bloc.messagesList[index].userId == widget.id
-                                        ? false
-                                        : true,
-                                attachmentJson:
-                                    bloc.messagesList[index].attachment,
-                                createAt: bloc.messagesList[index].createdAt,
-                                seen: bloc.messagesList[index].seen,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      itemCount: bloc.messagesList.length,
+                    child: OptimizedMessageList(
+                      chatBloc: bloc,
+                      userId: AppData.logInUserId,
+                      roomId: widget.roomId.isEmpty ? (chatBloc.roomId ?? '') : widget.roomId,
+                      profilePic: widget.profilePic,
+                      scrollController: _scrollController,
+                      isSomeoneTyping: isSomeoneTyping,
+                      fromId: FromId,
                     ),
                   ),
-                  (isSomeoneTyping && FromId == widget.id)
-                      ?  Padding(
-                          padding: EdgeInsets.only(left: 8.0),
-                          child: ChatBubble(
-                            profile: '',
-                            isMe: false,
-                            attachmentJson: null,
-                            createAt: null,
-                            seen: 0,
-                            message: translation(context).lbl_typing,
-                          ),
-                        )
-                      : Container(),
-                  if (_selectedFile != null)
-                    if (_isImageFile(_selectedFile!))
-                      _buildImagePreview(_selectedFile ?? File('')),
-                  if (_isVideoFile(_selectedFile))
-                    _buildVideoPreview(_selectedFile ?? File('')),
-                  if (_isDocumentFile(_selectedFile))
-                    _buildDocumentPreview(_selectedFile!),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: context.cardColor,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16.0, horizontal: 16.0),
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: appStore.isDarkMode
-                                  ? svGetScaffoldColor()
-                                  : cardLightColor,
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                              children: [
-                                isLoading
-                                    ? Container(
-                                        width: 25,
-                                        height: 25,
-                                        margin: const EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(
-                                          color: svGetBodyColor(),
-                                        ),
-                                      )
-                                    : IconButton(
-                                        icon: const Icon(Icons.add),
-                                        onPressed: () async {
-                                          const permission = Permission.storage;
-                                          const permission1 = Permission.photos;
-                                          var status = await permission.status;
-                                          print(status);
-                                          if (await permission1.isGranted) {
-                                            _showFileOptions();
-                                            // _selectFiles(context);
-                                          } else if (await permission1
-                                              .isDenied) {
-                                            final result =
-                                                await permission1.request();
-                                            if (status.isGranted) {
-                                              _showFileOptions();
-                                              // _selectFiles(context);
-                                              print("isGranted");
-                                            } else if (result.isGranted) {
-                                              _showFileOptions();
-                                              // _selectFiles(context);
-                                              print("isGranted");
-                                            } else if (result.isDenied) {
-                                              final result =
-                                                  await permission.request();
-                                              print("isDenied");
-                                            } else if (result
-                                                .isPermanentlyDenied) {
-                                              print("isPermanentlyDenied");
-                                              // _permissionDialog(context);
-                                            }
-                                          } else if (await permission
-                                              .isPermanentlyDenied) {
-                                            print("isPermanentlyDenied");
-                                            // _permissionDialog(context);
-                                          }
-                                        },
-                                      ),
-                                const SizedBox(width: 8.0),
-                                isRecording
-                                    ? Text(translation(context).lbl_recording_start)
-                                    : Flexible(
-                                        child: Container(
-                                          constraints: const BoxConstraints(
-                                            minHeight: 40,
-                                          ),
-                                          padding: const EdgeInsets.only(
-                                              left: 8, right: 8),
-                                          decoration: BoxDecoration(
-                                            color: appStore.isDarkMode
-                                                ? svGetScaffoldColor()
-                                                : cardLightColor,
-                                            borderRadius:
-                                                BorderRadius.circular(20.0),
-                                          ),
-                                          child: Center(
-                                            child: TextField(
-                                              style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontFamily: 'Poppins'),
-                                              minLines: 1,
-                                              maxLines: 8,
-                                              controller: textController,
-                                              decoration: InputDecoration
-                                                  .collapsed(
-                                                hintText:
-                                                    translation(context).lbl_type_message_here,
-                                                hintStyle: TextStyle(
-                                                    fontSize: 14,
-                                                    fontFamily: 'Poppins'),
-                                              ),
-                                              keyboardType:
-                                                  TextInputType.multiline,
-                                              textInputAction:
-                                                  TextInputAction.newline,
-                                              onChanged: (text) {
-                                                if (text.isNotEmpty) {
-                                                  isTextTyping = true;
-                                                } else {
-                                                  isTextTyping = false;
-                                                }
-
-                                                onTextFieldFocused(true);
-                                              },
-                                              onTapOutside: (text) {
-                                                onTextFieldFocused(false);
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                const SizedBox(width: 8.0),
-                                Material(
-                                  color: Colors.transparent,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _emojiShowing = !_emojiShowing;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.emoji_emotions_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        // (isTextTyping || _selectedFile!=null)?
-                        _isFileUploading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 3),
-                              )
-                            : IconButton(
-                                onPressed: () async {
-                                  if (textController.text.isNotEmpty) {
-                                    String message = textController.text;
-                                    _isFileUploading = true;
-                                    isTextTyping = false;
-                                    chatBloc.add(SendMessageEvent(
-                                        userId: AppData.logInUserId,
-                                        roomId: widget.roomId == ''
-                                            ? chatBloc.roomId
-                                            : widget.roomId,
-                                        receiverId: widget.id,
-                                        attachmentType: 'file',
-                                        file: _selectedFile?.path ?? '',
-                                        message: message));
-                                    textController.clear();
-                                    // setState(() {});
-                                    _selectedFile = null;
-                                    scrollToBottom();
-                                  } else if (textController.text.isEmpty &&
-                                      _selectedFile != null) {
-                                    String message = textController.text;
-                                    _isFileUploading = true;
-                                    chatBloc.add(SendMessageEvent(
-                                        userId: AppData.logInUserId,
-                                        roomId: widget.roomId == ''
-                                            ? chatBloc.roomId
-                                            : widget.roomId,
-                                        receiverId: widget.id,
-                                        attachmentType: 'file',
-                                        file: _selectedFile?.path ?? '',
-                                        message:
-                                            message == '' ? ' ' : message));
-                                    textController.clear();
-                                    // setState(() {});
-                                    _selectedFile = null;
-                                    scrollToBottom();
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.send,
-                                  color: Colors.blue,
-                                  size: 30,
-                                ),
-                              ),
-                        AudioRecorderWidget(
-                          onPause: () {},
-                          onResume: () {},
-                          onStart: () {
-                            setState(() {
-                              isRecording = true;
-                            });
-                          },
+                  isRecording
+                      ? WhatsAppVoiceRecorder(
                           onStop: (path) {
                             chatBloc.add(SendMessageEvent(
                               userId: AppData.logInUserId,
-                              roomId: chatBloc.roomId,
+                              roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
                               receiverId: widget.id,
-                              // Replace with your logic
                               attachmentType: 'voice',
                               file: path,
                               message: '',
                             ));
                             setState(() {
-                              _isFileUploading = true;
                               isRecording = false;
                             });
                             scrollToBottom();
                           },
+                          onCancel: () {
+                            setState(() {
+                              isRecording = false;
+                            });
+                          },
+                        )
+                      : ChatInputField(
+                          controller: textController,
+                          onSubmitted: (message) {
+                            setState(() {
+                              isTextTyping = false;
+                            });
+                            chatBloc.add(SendMessageEvent(
+                                userId: AppData.logInUserId,
+                                roomId: widget.roomId == ''
+                                    ? chatBloc.roomId
+                                    : widget.roomId,
+                                receiverId: widget.id,
+                                attachmentType: 'text',
+                                file: '',
+                                message: message));
+                            textController.clear();
+                            scrollToBottom();
+                          },
+                          onAttachmentPressed: () async {
+                            const permission = Permission.storage;
+                            const permission1 = Permission.photos;
+                            var status = await permission.status;
+                            print(status);
+                            if (await permission1.isGranted) {
+                              _showFileOptions();
+                            } else if (await permission1.isDenied) {
+                              final result = await permission1.request();
+                              if (status.isGranted) {
+                                _showFileOptions();
+                                print("isGranted");
+                              } else if (result.isGranted) {
+                                _showFileOptions();
+                                print("isGranted");
+                              } else if (result.isDenied) {
+                                final result = await permission.request();
+                                print("isDenied");
+                              } else if (result.isPermanentlyDenied) {
+                                print("isPermanentlyDenied");
+                              }
+                            } else if (await permission.isPermanentlyDenied) {
+                              print("isPermanentlyDenied");
+                            }
+                          },
+                          onRecordStateChanged: (recording) {
+                            setState(() {
+                              isRecording = recording;
+                            });
+                          },
+                          onVoiceRecorded: (path) {
+                            // This is handled by WhatsAppVoiceRecorder
+                          },
+                          isRecording: isRecording,
+                          isLoading: _isFileUploading || isLoading,
+                          onTyping: (text) {
+                            if (text.isNotEmpty) {
+                              isTextTyping = true;
+                            } else {
+                              isTextTyping = false;
+                            }
+                            onTextFieldFocused(true);
+                            
+                            // Add typing indicator logic
+                            _typingTimer?.cancel();
+                            _typingTimer = Timer(const Duration(seconds: 1), () {
+                              isTextTyping = false;
+                            });
+                            // Use existing typing event
+                            setState(() {});
+                          },
                         ),
-                        // :GestureDetector(
-                        //   onLongPress: () {
-                        //     _start();
-                        //     setState(() {
-                        //       isRecording = true;
-                        //     });
-                        //   },
-                        //   onLongPressEnd: (details) {
-                        //     _stop();
-                        //     setState(() {
-                        //       _isFileUploading = true;
-                        //       isRecording = false;
-                        //     });
-                        //   },
-                        //   child: Container(
-                        //     height: 50,
-                        //     margin: const EdgeInsets.fromLTRB(16, 5, 5, 5),
-                        //     decoration: BoxDecoration(
-                        //
-                        //         color: isRecording ? Colors.red :  appStore.isDarkMode
-                        //             ? svGetScaffoldColor()
-                        //             : cardLightColor,
-                        //         shape: BoxShape.circle),
-                        //     child: Container(
-                        //       padding: const EdgeInsets.all(10),
-                        //       child:  Icon(
-                        //         CupertinoIcons.mic,
-                        //         color: svGetBodyColor(),
-                        //         size: 25,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                  ),
                   Offstage(
                     offstage: !_emojiShowing,
                     child: EmojiPicker(
@@ -1418,206 +1218,76 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   void _startCall() {}
 
-  bool _isImageFile(File? file) {
-    // Check if the file is an image
-    return true; // Implement your logic here
-  }
-
-  bool _isVideoFile(File? file) {
-    // Check if the file is a video
-    return false; // Implement your logic here
-  }
-
-  bool _isDocumentFile(File? file) {
-    // Check if the file is a document
-    return false; // Implement your logic here
-  }
-
-  Widget _buildImagePreview(File file) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            height: 100,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-            padding: const EdgeInsets.all(8.0),
-            child: Image.file(
-              file,
-              width: 150,
-              height: 100,
-              fit: BoxFit.contain,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                _selectedFile = null;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVideoPreview(File? file) {
-    // Implement video preview widget
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            height: 100,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-            padding: const EdgeInsets.all(8.0),
-            child: Image.file(
-              file ?? File(''),
-              width: 150,
-              height: 100,
-              fit: BoxFit.contain,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                _selectedFile = null;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDocumentPreview(File file) {
-    // Implement document preview widget
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            height: 100,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-            padding: const EdgeInsets.all(8.0),
-            child: Image.file(
-              file,
-              width: 150,
-              height: 100,
-              fit: BoxFit.contain,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                _selectedFile = null;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showFileOptions() {
+    final BuildContext currentContext = context; // Store context reference
+    NavigatorState? bottomSheetNavigator;
+    
     showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: Text(translation(context).lbl_choose_from_gallery),
-                onTap: () async {
-                  Navigator.pop(context);
-                  try {
-                    File? file = await _pickFile(ImageSource.gallery);
-                    if (file != null) {
-                      setState(() {
-                        _selectedFile = file;
-                      });
-                    }
-                  } catch (e) {
-                    _permissionDialog(context);
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: Text(translation(context).lbl_take_a_picture),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.camera);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: Text(translation(context).lbl_take_video),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickVideoFile(ImageSource.camera);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
-                  }
-                },
-              ),
-              // ListTile(
-              //   leading: const Icon(Icons.insert_drive_file),
-              //   title: const Text('Select a document'),
-              //   onTap: () async {
-              //     Navigator.pop(context);
-              //     File? file = await _pickFile(ImageSource.gallery);
-              //     if (file != null) {
-              //       setState(() {
-              //         _selectedFile = file;
-              //       });
-              //     }
-              //   },
-              // ),
-            ],
-          ),
+      context: currentContext,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext bottomSheetContext) {
+        // Store the navigator reference
+        bottomSheetNavigator = Navigator.of(bottomSheetContext);
+        
+        return AttachmentBottomSheet(
+          onFileSelected: (File file, String type) {
+            // Safely close bottom sheet
+            try {
+              if (bottomSheetNavigator != null && bottomSheetNavigator!.mounted) {
+                bottomSheetNavigator!.pop();
+              } else if (bottomSheetContext.mounted) {
+                Navigator.of(bottomSheetContext).pop();
+              }
+            } catch (e) {
+              print('Error closing bottom sheet: $e');
+            }
+            
+            // Schedule the navigation to happen after the bottom sheet is completely closed
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Future.delayed(const Duration(milliseconds: 300), () {
+                if (mounted && currentContext.mounted) {
+                  Navigator.push(
+                    currentContext,
+                    MaterialPageRoute(
+                      builder: (context) => AttachmentPreviewScreen(
+                        file: file,
+                        type: type,
+                        onSend: (File sendFile, String caption) {
+                          // Only pop if we can (close preview screen only)
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop(); // Close preview screen
+                          }
+                           print("sendFile $sendFile");
+                          if (mounted) {
+                            // All file attachments (images, videos, documents) use 'file' type
+                            // Only voice recordings use 'voice' type
+                            String attachmentType = 'file';
+                            
+                            chatBloc.add(SendMessageEvent(
+                              userId: AppData.logInUserId,
+                              roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
+                              receiverId: widget.id,
+                              attachmentType: attachmentType,
+                              file: sendFile.path,
+                              message: caption,
+                            ));
+                            
+                            scrollToBottom();
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                }
+              });
+            });
+          },
         );
       },
     );
   }
 
-  Future<File?> _pickFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
-    }
-  }
-
-  Future<File?> _pickVideoFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickVideo(source: source);
-
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
-    }
-  }
 
   onSubscriptionCount(String channelName, int subscriptionCount) {}
 

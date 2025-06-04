@@ -1,17 +1,17 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/full_screen_image_page.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
-import 'package:flutter_chat_bubble/chat_bubble.dart';
-import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import 'package:voice_message_package/voice_message_package.dart';
 
-import '../../../home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
+import 'video_player_widget.dart';
+import 'custom_audio_player.dart';
+import 'voice_message_precacher.dart';
 
-class ChatBubble extends StatelessWidget {
+class ChatBubble extends StatefulWidget {
   final String message;
   final bool isMe;
   final String profile;
@@ -30,173 +30,175 @@ class ChatBubble extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<ChatBubble> createState() => _ChatBubbleState();
+}
+
+class _ChatBubbleState extends State<ChatBubble> {
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(
+        vertical: 4.0,
+        horizontal: 12.0,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (isMe)
-            chatItem.ChatBubble(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-              clipper: ChatBubbleClipper5(type: BubbleType.sendBubble),
-              alignment: Alignment.topRight,
-              backGroundColor: Colors.blueAccent,
-              child: Align(
-                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+          if (widget.isMe)
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    SVAppColorPrimary,
+                    SVAppColorPrimary.withOpacity(0.9),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(18),
+                  topRight: Radius.circular(18),
+                  bottomLeft: Radius.circular(18),
+                  bottomRight: Radius.circular(4),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: SVAppColorPrimary.withOpacity(0.2),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment:
-                      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    IntrinsicWidth(
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: 60.w,
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              message,
-                              style: TextStyle(
-                                  color: isMe ? Colors.white : Colors.black,
-                                  fontSize: 16.0,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            if (attachmentJson != null)
-                              _buildAttachment(context),
-                            // const SizedBox(height: 4.0),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    timeAgo.format(
-                                        DateTime.parse(createAt.toString())),
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 8.0,
-                                      fontWeight: FontWeight.w500,
-                                      color: isMe
-                                          ? Colors.white70
-                                          : Colors.black54,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  if (isMe)
-                                    if (seen == 1)
-                                      Image.asset(
-                                        color: Colors.lightBlueAccent.shade100,
-                                        'assets/icon/ic_seen.png',
-                                        height: 15,
-                                        width: 15,
-                                      )
-                                    else
-                                      Image.asset(
-                                        color: Colors.grey[400],
-                                        'assets/icon/ic_unseen.png',
-                                        height: 15,
-                                        width: 15,
-                                      )
-                                ],
-                              ),
-                            ),
-                          ],
+                    if (widget.message.isNotEmpty)
+                      Text(
+                        widget.message,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.0,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400,
+                          height: 1.4,
                         ),
                       ),
+                    if (widget.attachmentJson != null)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: widget.message.isNotEmpty ? 8 : 0,
+                        ),
+                        child: _buildAttachment(context),
+                      ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          timeAgo.format(DateTime.parse(widget.createAt.toString())),
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        if (widget.isMe)
+                          Icon(
+                            widget.seen == 1
+                                ? Icons.done_all_rounded
+                                : Icons.done_rounded,
+                            size: 16,
+                            color: widget.seen == 1
+                                ? Colors.lightBlueAccent
+                                : Colors.white.withOpacity(0.7),
+                          ),
+                      ],
                     ),
-
                   ],
                 ),
               ),
-              // ),
             )
           else
-            chatItem.ChatBubble(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              clipper: ChatBubbleClipper5(type: BubbleType.receiverBubble),
-              backGroundColor: const Color(0xffE7E7ED),
-              // margin: EdgeInsets.only(top: 20),
-              child: Align(
-                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
+              ),
+              decoration: BoxDecoration(
+                color: appStore.isDarkMode
+                    ? const Color(0xFF2A2A2A) // Slightly lighter dark gray
+                    : const Color(0xFFE8E8E8),
+                // Light gray for light mode
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(18),
+                  topRight: Radius.circular(18),
+                  bottomRight: Radius.circular(18),
+                  bottomLeft: Radius.circular(4),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: appStore.isDarkMode
+                        ? Colors.black.withOpacity(0.3)
+                        : Colors.grey.withOpacity(0.15),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment:
-                      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IntrinsicWidth(
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: 60.w,
+                    if (widget.message.isNotEmpty)
+                      Text(
+                        widget.message,
+                        style: TextStyle(
+                          color: appStore.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                          fontSize: 15.0,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400,
+                          height: 1.4,
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              message,
-                              style: TextStyle(
-
-                                  color: isMe ? Colors.white : Colors.black87,
-                                  fontSize: 16.0,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            if (attachmentJson != null)
-                              _buildAttachment(context),
-                            // const SizedBox(height: 4.0),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    createAt != null
-                                        ? timeAgo.format(
-                                            DateTime.parse(createAt.toString()))
-                                        : '',
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 8.0,
-                                      fontWeight: FontWeight.w500,
-                                      color: isMe
-                                          ? Colors.white70
-                                          : Colors.black54,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  if (isMe)
-                                    if (seen == 1)
-                                      Image.asset(
-                                        'assets/icon/ic_seen.png',
-                                        height: 15,
-                                        width: 15,
-                                      )
-                                    else
-                                      Image.asset(
-                                        'assets/icon/ic_unseen.png',
-                                        height: 15,
-                                        width: 15,
-                                      )
-                                ],
-                              ),
-                            ),
-                          ],
+                      ),
+                    if (widget.attachmentJson != null)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: widget.message.isNotEmpty ? 8 : 0,
                         ),
+                        child: _buildAttachment(context),
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.createAt != null
+                          ? timeAgo.format(DateTime.parse(widget.createAt.toString()))
+                          : '',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w400,
+                        color: appStore.isDarkMode
+                            ? Colors.white.withOpacity(0.5)
+                            : Colors.black.withOpacity(0.5),
                       ),
                     ),
                   ],
@@ -217,54 +219,144 @@ class ChatBubble extends StatelessWidget {
   }
 
   Widget _buildAttachment(BuildContext context) {
-    if (attachmentJson!.endsWith('mp3') || attachmentJson!.endsWith('m4a')) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Container(
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 1),
-          child: VoiceMessageView(
-            controller: VoiceController(
-              audioSrc: "${AppData.imageUrl}$attachmentJson",
-              maxDuration: const Duration(seconds: 10),
-              isFile: false,
-              onComplete: () {},
-              onPause: () {},
-              onPlaying: () {},
-            ),
-            innerPadding: 12,
-            cornerRadius: 20,
-          ),
-        ),
-      );
-    } else if (attachmentJson!.endsWith('mp4')) {
-      return VideoPlayerWidget(videoUrl: '${AppData.imageUrl}$attachmentJson');
-    } else {
-      return InkWell(
-        onTap: (){
+    try {
+      // Null safety check
+      if (widget.attachmentJson == null || widget.attachmentJson!.isEmpty) {
+        return const SizedBox.shrink();
+      }
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FullScreenImagePage(
-                listCount: 1,
-                imageUrl:  "${AppData.imageUrl}$attachmentJson",
-                post: null,
-                mediaUrls: [],
+      // Robust audio file type detection
+      final audioExtensions = [
+        'mp3',
+        'm4a',
+        'wav',
+        'aac',
+        'ogg',
+        'flac',
+        'amr'
+      ];
+      final videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp'];
+      // Image extensions for reference (not used in current logic)
+      // final imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+
+      // Safe file extension extraction
+      final parts = widget.attachmentJson!.split('.');
+      if (parts.isEmpty) {
+        return _buildErrorAttachment();
+      }
+
+      final fileExtension = parts.last.toLowerCase();
+
+      if (audioExtensions.contains(fileExtension)) {
+        // Use custom audio player with pre-caching for better performance
+        final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
+        return VoiceMessagePrecacher(
+          audioUrl: audioUrl,
+          child: CustomAudioPlayer(
+            audioUrl: audioUrl,
+            isMe: widget.isMe,
+          ),
+        );
+      } else if (videoExtensions.contains(fileExtension)) {
+        return VideoPlayerWidget(
+            videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
+      } else {
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FullScreenImagePage(
+                  listCount: 1,
+                  imageUrl: "${AppData.imageUrl}${widget.attachmentJson}",
+                  post: null,
+                  mediaUrls: [],
+                ),
+              ),
+            );
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.65,
+                maxHeight: 300,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  CustomImageView(
+                    imagePath: "${AppData.imageUrl}${widget.attachmentJson}",
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.fullscreen_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: CustomImageView(
-            imagePath:
-            "${AppData.imageUrl}$attachmentJson",
-            fit: BoxFit.cover,
-            width: MediaQuery.of(context).size.width * 0.6,
           ),
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      debugPrint('Error building attachment: $e');
+      return _buildErrorAttachment();
     }
   }
+
+  Widget _buildErrorAttachment() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.red.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.red,
+            size: 20,
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Unable to load attachment',
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 13,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

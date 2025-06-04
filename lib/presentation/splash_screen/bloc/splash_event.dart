@@ -26,9 +26,8 @@ class LoadDropdownData extends SplashEvent {
   String countryFlag;
   String typeValue;
   String searchTerms;
-  String? isExpired = "New";
   LoadDropdownData(
-      this.countryFlag, this.typeValue, this.searchTerms, this.isExpired);
+      this.countryFlag, this.typeValue, this.searchTerms, [String? placeholder]);
   @override
-  List<Object?> get props => [countryFlag, typeValue, searchTerms, isExpired];
+  List<Object?> get props => [countryFlag, typeValue, searchTerms];
 }

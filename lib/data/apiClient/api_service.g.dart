@@ -2541,7 +2541,10 @@ class _ApiService implements ApiService {
       'receiver_id': receiverId,
       'attachment_type': attachmentType,
       'message': message,
-      'file': await MultipartFile.fromFile(filePath),
+      'file': await MultipartFile.fromFile(
+        filePath,
+        filename: filePath.split('/').last,
+      ),
     });
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<SendMessageModel>(Options(

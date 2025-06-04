@@ -20,3 +20,7 @@ class DataError extends ChatState {
   final String errorMessage;
   DataError(this.errorMessage);
 }
+
+class FileUploadingState extends ChatState {}
+
+class FileUploadedState extends ChatState {}

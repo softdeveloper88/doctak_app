@@ -9,9 +9,9 @@ import '../../../utils/SVCommon.dart';
 import 'bloc/likes_bloc.dart';
 
 class LikesListScreen extends StatefulWidget {
-  String id;
+  final String id;
 
-  LikesListScreen({required this.id, Key? key}) : super(key: key);
+  const LikesListScreen({required this.id, Key? key}) : super(key: key);
 
   @override
   State<LikesListScreen> createState() => _LikesListScreenState();
@@ -22,7 +22,7 @@ class _LikesListScreenState extends State<LikesListScreen> {
 
   @override
   void initState() {
-    likesBloc.add(LoadPageEvent(postId: widget.id ?? '0'));
+    likesBloc.add(LoadPageEvent(postId: widget.id));
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(context.cardColor);
@@ -38,198 +38,173 @@ class _LikesListScreenState extends State<LikesListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.cardColor,
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
-        backgroundColor: context.cardColor,
+        backgroundColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text(translation(context).lbl_people_who_likes, style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
         elevation: 0,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
         centerTitle: true,
         leading: IconButton(
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
-        actions: const [
-          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-        ],
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.favorite_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_people_who_likes,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
+        ),
       ),
       body: BlocConsumer<LikesBloc, LikesState>(
-          bloc: likesBloc,
-          // listenWhen: (previous, current) => current is DrugsState,
-          // buildWhen: (previous, current) => current is! DrugsState,
-          listener: (BuildContext context, LikesState state) {
-            if (state is DataError) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  content: Text(state.errorMessage),
-                ),
-              );
-            }
-          },
-          builder: (context, state) {
-            if (state is DataInitial) {
-              return const UserShimmer();
-            } else if (state is PaginationLoadedState) {
-              // print(state.drugsModel.length);
-              return likesBloc.postLikesList.isEmpty
-                  ?  Center(
-                      child: Text(translation(context).msg_no_likes),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(bottom: 60.0),
-                      child: ListView.builder(
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: likesBloc.postLikesList.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            SVProfileFragment(
-                                                    userId: likesBloc
-                                                        .postLikesList[index]
-                                                        .id)
-                                                .launch(context);
-                                          },
-                                          child: Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey
-                                                      .withOpacity(0.5),
-                                                  spreadRadius: 2,
-                                                  blurRadius: 5,
-                                                  offset: const Offset(0, 3),
-                                                ),
-                                              ],
-                                            ),
-                                            child:
-                                                likesBloc.postLikesList[index]
-                                                            .profilePic ==
-                                                        ''
-                                                    ? Image.asset(
-                                                            'images/socialv/faces/face_5.png',
-                                                            height: 56,
-                                                            width: 56,
-                                                            fit: BoxFit.cover)
-                                                        .cornerRadiusWithClipRRect(
-                                                            8)
-                                                        .cornerRadiusWithClipRRect(
-                                                            8)
-                                                    : CachedNetworkImage(
-                                                            imageUrl: likesBloc
-                                                                .postLikesList[
-                                                                    index]
-                                                                .profilePic
-                                                                .validate(),
-                                                            height: 56,
-                                                            width: 56,
-                                                            fit: BoxFit.cover)
-                                                        .cornerRadiusWithClipRRect(
-                                                            30),
-                                          ),
-                                        ),
-                                        10.width,
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                SizedBox(
-                                                    width: 150,
-                                                    child: Text(
-                                                        likesBloc
-                                                            .postLikesList[
-                                                                index]
-                                                            .name
-                                                            .validate(),
-                                                        overflow:
-                                                            TextOverflow.clip,
-                                                        style: TextStyle(
-                                                            color:
-                                                                svGetBodyColor(),
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 16))),
-                                                6.width,
-                                                // bloc.contactsList[index].isCurrentUser.validate()
-                                                //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-                                                //     : const Offstage(),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+        bloc: likesBloc,
+        listener: (BuildContext context, LikesState state) {
+          if (state is DataError) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                content: Text(state.errorMessage),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is DataInitial) {
+            return const UserShimmer();
+          } else if (state is PaginationLoadedState) {
+            return likesBloc.postLikesList.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.favorite_border_rounded,
+                          size: 64,
+                          color: Colors.blue.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          translation(context).msg_no_likes,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: likesBloc.postLikesList.length,
+                    itemBuilder: (context, index) {
+                      final user = likesBloc.postLikesList[index];
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.cardColor,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          leading: GestureDetector(
+                            onTap: () {
+                              SVProfileFragment(userId: user.id)
+                                  .launch(context);
+                            },
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 1,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
                                   ),
-                                  // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
-                                  //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
-                                  //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
-                                  //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
-                                  //   onTap:  () async {
-                                  //     setState(() {
-                                  //       isLoading = true; // Set loading state to true when button is clicked
-                                  //     });
-                                  //
-                                  //     // Perform API call
-                                  //     widget.onTap();
-                                  //
-                                  //     setState(() {
-                                  //       isLoading = false; // Set loading state to false after API response
-                                  //     });
-                                  //   },
-                                  //   elevation: 0,
-                                  //   color: widget.element.isFollowedByCurrentUser == true ?SVAppColorPrimary:buttonUnSelectColor,
-                                  // ),
-                                  // ElevatedButton(
-                                  //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                  //   onPressed: () async {
-                                  //     setState(() {
-                                  //       isLoading = true; // Set loading state to true when button is clicked
-                                  //     });
-                                  //
-                                  //     // Perform API call
-                                  //     await widget.onTap();
-                                  //
-                                  //     setState(() {
-                                  //       isLoading = false; // Set loading state to false after API response
-                                  //     });
-                                  //   },
-                                  //   child: isLoading
-                                  //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
-                                  //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
-                                  //   style: ElevatedButton.styleFrom(
-                                  //     // primary: Colors.blue, // Change button color as needed
-                                  //     elevation: 0,
-                                  //   ),
-                                  // ),
                                 ],
                               ),
-                            );
-                          }),
-                    );
-            } else {
-              return const Center(child: Text(""));
-            }
-          }),
+                              child: user.profilePic!.isEmpty
+                                  ? Image.asset(
+                                      'images/socialv/faces/face_5.png',
+                                      fit: BoxFit.cover,
+                                    ).cornerRadiusWithClipRRect(25)
+                                  : CachedNetworkImage(
+                                      imageUrl: user.profilePic!,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Colors.grey[300],
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                    ).cornerRadiusWithClipRRect(25),
+                            ),
+                          ),
+                          title: Text(
+                            user.name.validate(),
+                            style: TextStyle(
+                              color: svGetBodyColor(),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+          } else {
+            return const SizedBox();
+          }
+        },
+      ),
     );
   }
 }

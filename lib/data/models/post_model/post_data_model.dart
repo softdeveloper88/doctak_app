@@ -1,3 +1,10 @@
+// lib/data/models/post_data_model.dart
+
+// Note: This is just an interface to match the existing model structure
+// You should use your actual model implementation here
+
+import 'dart:convert';
+
 class PostDataModel {
   Posts? posts;
 
@@ -31,20 +38,21 @@ class Posts {
   int? to;
   int? total;
 
-  Posts(
-      {this.currentPage,
-      this.data,
-      this.firstPageUrl,
-      this.from,
-      this.lastPage,
-      this.lastPageUrl,
-      this.links,
-      this.nextPageUrl,
-      this.path,
-      this.perPage,
-      this.prevPageUrl,
-      this.to,
-      this.total});
+  Posts({
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   Posts.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
@@ -112,22 +120,23 @@ class Post {
   List<Media>? media;
   List<Likes>? likes;
 
-  Post(
-      {this.id,
-      this.userId,
-      this.title,
-      this.lat,
-      this.lng,
-      this.country,
-      this.image,
-      this.createdAt,
-      this.updatedAt,
-      this.backgroundColor,
-      this.relevanceScore,
-      this.comments,
-      this.user,
-      this.media,
-      this.likes});
+  Post({
+    this.id,
+    this.userId,
+    this.title,
+    this.lat,
+    this.lng,
+    this.country,
+    this.image,
+    this.createdAt,
+    this.updatedAt,
+    this.backgroundColor,
+    this.relevanceScore,
+    this.comments,
+    this.user,
+    this.media,
+    this.likes,
+  });
 
   Post.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -207,21 +216,22 @@ class Comments {
   String? updatedAt;
   Commenter? commenter;
 
-  Comments(
-      {this.id,
-      this.commenterId,
-      this.commenterType,
-      this.guestName,
-      this.guestEmail,
-      this.commentableType,
-      this.commentableId,
-      this.comment,
-      this.approved,
-      this.childId,
-      this.deletedAt,
-      this.createdAt,
-      this.updatedAt,
-      this.commenter});
+  Comments({
+    this.id,
+    this.commenterId,
+    this.commenterType,
+    this.guestName,
+    this.guestEmail,
+    this.commentableType,
+    this.commentableId,
+    this.comment,
+    this.approved,
+    this.childId,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
+    this.commenter,
+  });
 
   Comments.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -294,13 +304,14 @@ class Media {
   String? createdAt;
   String? updatedAt;
 
-  Media(
-      {this.id,
-      this.postId,
-      this.mediaType,
-      this.mediaPath,
-      this.createdAt,
-      this.updatedAt});
+  Media({
+    this.id,
+    this.postId,
+    this.mediaType,
+    this.mediaPath,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Media.fromJson(Map<String, dynamic> json) {
     id = json['id'];

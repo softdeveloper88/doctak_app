@@ -43,8 +43,8 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width ?? 90.w,
-      height: height ?? 50,
+      width: width ?? 120,
+      height: height ?? 40,
       child: DropdownButtonFormField<T>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
         value: value,

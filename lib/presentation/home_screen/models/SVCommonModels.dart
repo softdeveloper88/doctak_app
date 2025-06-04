@@ -23,7 +23,6 @@ List<SVDrawerModel> getDrawerOptions(BuildContext context) {
   list.add(SVDrawerModel(image: 'assets/icon/ic_moh.png', title: translation(context).lbl_moh_update));
   list.add(SVDrawerModel(image: 'assets/icon/ic_discussion.png', title: translation(context).lbl_meeting));
   list.add(SVDrawerModel(image: 'assets/icon/ic_cme.png', title: translation(context).lbl_CME));
-  list.add(SVDrawerModel(image: 'assets/icon/ic_world_news.png', title: translation(context).lbl_world_news));
   list.add(SVDrawerModel(image: 'assets/icon/ic_discount.png', title: translation(context).lbl_discounts));
   list.add(SVDrawerModel(image: 'assets/icon/ic_suggestion.png', title: translation(context).lbl_suggestions));
   list.add(SVDrawerModel(image: 'assets/icon/ic_setting.png', title: translation(context).lbl_app_settings));

@@ -1,18 +1,218 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/app_export.dart';
 
 /// Helper class for managing themes and colors.
+
 class ThemeHelper {
+  // Updated modern dark theme
+  static ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFF227DDE), // Using your primary blue
+      brightness: Brightness.dark,
+    ),
+    scaffoldBackgroundColor: const Color(0xFF141414), // Darker background
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: true,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    ),
+    cardTheme: CardTheme(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFF444444),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFF444444),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFF227DDE), // Using your primary blue
+        ),
+      ),
+      filled: true,
+      fillColor: const Color(0xFF212121), // Darker input background
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color(0xFF1D1D1D), // Slightly lighter than background
+      elevation: 0,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: const Color(0xFF227DDE), // Using your primary blue
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      dense: true,
+      horizontalTitleGap: 8,
+      visualDensity: VisualDensity.compact,
+    ),
+    dividerTheme: const DividerThemeData(
+      color: Color(0xFF333333),
+      thickness: 1,
+      space: 1,
+    ),
+    fontFamily: 'Raleway', // Using your app's font
+  );
+
+  // Modern Light Theme - Using your theme structure and colors
+  static ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFF227DDE), // Using your primary blue
+      brightness: Brightness.light,
+    ),
+    scaffoldBackgroundColor: const Color(0xFFF7F8FA), // Light grey background
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      foregroundColor: Color(0xFF0B0C0C), // Your onPrimary color
+      elevation: 0,
+      centerTitle: true,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    ),
+    cardTheme: CardTheme(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF227DDE), // Your primary color
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        side: const BorderSide(color: Color(0xFFE0E2E4)), // Your gray300
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFFE0E2E4), // Your gray300
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFFE0E2E4), // Your gray300
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFF227DDE), // Your primary color
+        ),
+      ),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.white,
+      elevation: 0,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: const Color(0xFF227DDE), // Your primary color
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      dense: true,
+      horizontalTitleGap: 8,
+      visualDensity: VisualDensity.compact,
+    ),
+    dividerTheme: const DividerThemeData(
+      color: Color(0xFFE0E2E4), // Your gray300
+      thickness: 1,
+      space: 1,
+    ),
+    fontFamily: 'Raleway', // Using your app's font
+  );
+
   // The current app theme
   final _appTheme = PrefUtils().getThemeData();
 
-// A map of custom color themes supported by the app
+  // A map of custom color themes supported by the app
   final Map<String, PrimaryColors> _supportedCustomColor = {
     'primary': PrimaryColors()
   };
 
-// A map of color schemes supported by the app
+  // A map of color schemes supported by the app
   final Map<String, ColorScheme> _supportedColorScheme = {
     'primary': ColorSchemes.primaryColorScheme
   };
@@ -31,13 +231,24 @@ class ThemeHelper {
 
   /// Returns the current theme data.
   ThemeData _getThemeData() {
+    // Check if user has selected dark mode
+    if (_appTheme == 'dark') {
+      return darkTheme;
+    }
+
+    // Check if user has selected light mode
+    if (_appTheme == 'light') {
+      return lightTheme;
+    }
+
+    // Default fallback to your existing theme system
     //throw exception to notify given theme is not found or not generated by the generator
     if (!_supportedColorScheme.containsKey(_appTheme)) {
       throw Exception(
           "$_appTheme is not found.Make sure you have added this theme class in JSON Try running flutter pub run build_runner");
     }
-    //return theme from map
 
+    //return theme from map
     var colorScheme =
         _supportedColorScheme[_appTheme] ?? ColorSchemes.primaryColorScheme;
     return ThemeData(
@@ -111,73 +322,73 @@ class ThemeHelper {
 /// Class containing the supported text theme styles.
 class TextThemes {
   static TextTheme textTheme(ColorScheme colorScheme) => TextTheme(
-        bodyLarge: TextStyle(
-          color: appTheme.gray500,
-          fontSize: 16,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w400,
-        ),
-        bodyMedium: TextStyle(
-          color: appTheme.blueGray700,
-          fontSize: 14,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w400,
-        ),
-        bodySmall: TextStyle(
-          color: appTheme.gray500,
-          fontSize: 12,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w400,
-        ),
-        displayMedium: TextStyle(
-          color: appTheme.whiteA700,
-          fontSize: 50,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w700,
-        ),
-        headlineSmall: TextStyle(
-          color: colorScheme.onPrimary,
-          fontSize: 24,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w700,
-        ),
-        labelLarge: TextStyle(
-          color: appTheme.gray500,
-          fontSize: 12,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w500,
-        ),
-        labelMedium: TextStyle(
-          color: appTheme.gray500,
-          fontSize: 10,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w500,
-        ),
-        labelSmall: TextStyle(
-          color: appTheme.gray500,
-          fontSize: 8,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w600,
-        ),
-        titleLarge: TextStyle(
-          color: colorScheme.onPrimary,
-          fontSize: 22,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w700,
-        ),
-        titleMedium: TextStyle(
-          color: colorScheme.onPrimary,
-          fontSize: 16,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w600,
-        ),
-        titleSmall: TextStyle(
-          color: appTheme.gray500,
-          fontSize: 14,
-          fontFamily: 'Raleway',
-          fontWeight: FontWeight.w500,
-        ),
-      );
+    bodyLarge: TextStyle(
+      color: appTheme.gray500,
+      fontSize: 16,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w400,
+    ),
+    bodyMedium: TextStyle(
+      color: appTheme.blueGray700,
+      fontSize: 14,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w400,
+    ),
+    bodySmall: TextStyle(
+      color: appTheme.gray500,
+      fontSize: 12,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w400,
+    ),
+    displayMedium: TextStyle(
+      color: appTheme.whiteA700,
+      fontSize: 50,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w700,
+    ),
+    headlineSmall: TextStyle(
+      color: colorScheme.onPrimary,
+      fontSize: 24,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w700,
+    ),
+    labelLarge: TextStyle(
+      color: appTheme.gray500,
+      fontSize: 12,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w500,
+    ),
+    labelMedium: TextStyle(
+      color: appTheme.gray500,
+      fontSize: 10,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w500,
+    ),
+    labelSmall: TextStyle(
+      color: appTheme.gray500,
+      fontSize: 8,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w600,
+    ),
+    titleLarge: TextStyle(
+      color: colorScheme.onPrimary,
+      fontSize: 22,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w700,
+    ),
+    titleMedium: TextStyle(
+      color: colorScheme.onPrimary,
+      fontSize: 16,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w600,
+    ),
+    titleSmall: TextStyle(
+      color: appTheme.gray500,
+      fontSize: 14,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w500,
+    ),
+  );
 }
 
 /// Class containing the supported color schemes.

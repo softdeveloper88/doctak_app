@@ -8,7 +8,7 @@ part of 'work_education_model.dart';
 
 WorkEducationModel _$WorkEducationModelFromJson(Map<String, dynamic> json) =>
     WorkEducationModel(
-      id: json['id'] as int?,
+      id: (json['id'] as num?)?.toInt(),
       userId: json['user_id'] as String?,
       workType: json['work_type'] as String?,
       name: json['name'] as String?,
@@ -22,6 +22,7 @@ WorkEducationModel _$WorkEducationModelFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
+      privacy: json['privacy'] as String?,
     );
 
 Map<String, dynamic> _$WorkEducationModelToJson(WorkEducationModel instance) =>
@@ -40,4 +41,5 @@ Map<String, dynamic> _$WorkEducationModelToJson(WorkEducationModel instance) =>
       'description': instance.description,
       'created_at': instance.createdAt,
       'updated_at': instance.updatedAt,
+      'privacy': instance.privacy,
     };

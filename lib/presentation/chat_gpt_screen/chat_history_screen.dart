@@ -19,6 +19,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../data/models/chat_gpt_model/ChatGPTResponse.dart';
+import '../../main.dart';
 import '../../data/models/chat_gpt_model/ChatGPTSessionModel.dart';
 import '../../data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'bloc/chat_gpt_event.dart';
@@ -73,17 +74,75 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     return Scaffold(
       backgroundColor: svGetBgColor(),
       appBar: AppBar(
+        backgroundColor: svGetScaffoldColor(),
+        iconTheme: IconThemeData(color: context.iconColor),
+        elevation: 0,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
+        centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor(),size: 17,),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded, 
+              color: Colors.blue[600],
+              size: 16,
+            ),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        centerTitle: false,
-        surfaceTintColor: context.cardColor,
-        backgroundColor: context.cardColor,
-        title: Text(
-          translation(context).lbl_history_ai,
-          style: TextStyle(fontSize: 17,fontWeight: FontWeight.w400),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_history_ai,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
         ),
+        actions: [
+          // New chat button
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 36,
+              ),
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add,
+                  color: Colors.blue[600],
+                  size: 14,
+                ),
+              ),
+              onPressed: () {
+                widget.onNewSessionTap();
+              },
+            ),
+          ),
+        ],
       ),
       body: BlocConsumer<ChatGPTBloc, ChatGPTState>(
           listener: (context, state) {},
@@ -95,20 +154,14 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                   state1.response.sessions?.first.name ?? translation(context).lbl_next_session;
             }
             if (state1 is DataInitial) {
-              return Scaffold(
-                backgroundColor: svGetBgColor(),
-                body: AnimatedBackground(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      SizedBox(
-                          height: 90.h,
-                          child: ShimmerCardList())
-                    ],
-                  ),
-                ),
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    child: ShimmerCardList())
+                ],
               );
             } else if (state1 is DataLoaded) {
               return AnimatedBackground(
@@ -116,142 +169,222 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                 children: [
                   Expanded(
                     child: Container(
-                      color: svGetBgColor(),
+                      decoration: BoxDecoration(
+                        color: svGetBgColor(),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: appStore.isDarkMode
+                              ? [Colors.blueGrey[900]!, Colors.blueGrey[800]!]
+                              : [Colors.white, Colors.blue.withAlpha(13)],
+                        ),
+                      ),
                       child: ListView.builder(
-                        shrinkWrap: true,
+                        padding: const EdgeInsets.only(top: 12, bottom: 12),
                         itemCount: state1.response.sessions?.length,
                         itemBuilder: (context, index) {
                           Sessions session = state1.response.sessions![index];
-                          // bool isSelected = session.id == selectedSessionId;
                           return Slidable(
-                              key: ValueKey(session.id),
-                              // Use session's id as a unique key
-                              startActionPane: const ActionPane(
-                                motion: ScrollMotion(),
-                                children: [
-                                  // SlidableAction(
-                                  //   onPressed: (context) =>
-                                  //       deleteRecord(context, session.id),
-                                  //   // Reference to your delete method
-                                  //   backgroundColor: Color(0xFFFE4A49),
-                                  //   foregroundColor: Colors.white,
-                                  //   icon: Icons.delete,
-                                  //   label: 'Delete',
-                                  // ),
-                                  // SlidableAction(
-                                  //   onPressed: (context) =>
-                                  //       editRecord(context, session.id),
-                                  //   // Reference to your edit method
-                                  //   backgroundColor: Color(0xFF21B7CA),
-                                  //   foregroundColor: Colors.white,
-                                  //   icon: Icons.edit,
-                                  //   label: 'Edit',
-                                  // ),
+                            key: ValueKey(session.id),
+                            endActionPane: ActionPane(
+                              motion: const ScrollMotion(),
+                              extentRatio: 0.25,
+                              children: [
+                                SlidableAction(
+                                  onPressed: (context) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return ChatDeleteDialog(
+                                          title: ' ${session.name ?? ''}',
+                                          callback: () {
+                                            chatGPTBloc.add(
+                                              DeleteChatSession(session.id ?? 0),
+                                            );
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
+                                  backgroundColor: Colors.red[400]!,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete_outline_rounded,
+                                  label: 'Delete',
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ],
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: appStore.isDarkMode
+                                    ? Colors.blueGrey[800]
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.blue.withAlpha(26),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withAlpha(13),
+                                    blurRadius: 8,
+                                    spreadRadius: 0,
+                                    offset: const Offset(0, 2),
+                                  ),
                                 ],
                               ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: context.cardColor,
-                                    borderRadius: BorderRadius.circular(10)),
-                                padding: const EdgeInsets.all(16),
-                                margin: const EdgeInsets.only(
-                                  top: 8,
-                                  left: 8,
-                                  right: 8,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => widget.onTap(session),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              session.name ?? "",
-                                              overflow: TextOverflow.clip,
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: svGetBodyColor()),
-                                            ),
-                                            Row(
-                                              children: <Widget>[
-                                               SvgPicture.asset(icTimeDate,
-                                                    height: 16,
-                                                    width: 16,
-                                                    color: svGetBodyColor()),
-                                                const SizedBox(
-                                                  width: 2,
-                                                ),
-                                                Text(
-                                                  DateFormat('MM dd, yyyy, h:mm a')
-                                                      .format(DateTime.parse(
-                                                          session.createdAt!)),
-                                                  // timeAgo.format(DateTime.parse(
-                                                  //     session.createdAt!)),
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: svGetBodyColor()),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return ChatDeleteDialog(
-                                                  title:
-                                                      ' ${session.name ?? ''}',
-                                                  callback: () {
-                                                    chatGPTBloc.add(
-                                                        DeleteChatSession(
-                                                            session.id ?? 0));
-                                                    Navigator.of(context).pop();
-                                                  });
-                                            });
-                                      },
-                                      child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(16),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: () => widget.onTap(session),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          margin: const EdgeInsets.only(right: 16),
                                           decoration: BoxDecoration(
-                                              color:
-                                                  Colors.red.withOpacity(0.2),
-                                              borderRadius:
-                                                  BorderRadius.circular(6)),
-                                          padding: const EdgeInsets.all(4),
-                                          child: const Icon(
-                                            CupertinoIcons.delete,
-                                            color: Colors.red,
-                                          )),
-                                    )
-                                  ],
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [Colors.blue[400]!, Colors.blue[600]!],
+                                            ),
+                                            borderRadius: BorderRadius.circular(12),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.blue.withOpacity(0.2),
+                                                blurRadius: 4,
+                                                spreadRadius: 0,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.chat_bubble_outline_rounded,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                session.name ?? "",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'Poppins',
+                                                  color: appStore.isDarkMode
+                                                      ? Colors.white
+                                                      : Colors.black87,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: <Widget>[
+                                                  Icon(
+                                                    Icons.access_time_rounded,
+                                                    size: 14,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    DateFormat('MMM dd, yyyy, h:mm a')
+                                                        .format(DateTime.parse(
+                                                            session.createdAt!)),
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontFamily: 'Poppins',
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.chevron_right_rounded,
+                                          color: Colors.grey[400],
+                                          size: 24,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                // title: Text(session.name!),
-                                // subtitle: Text(DateFormat('m d, y, h:mm a')
-                                //     .format(DateTime.parse(session.createdAt!))),
-                                // tileColor: isSelected ? Colors.grey[300] : null,
-                                // onTap:()=>widget.onTap(session)),
-                              ));
+                              ),
+                            ),
+                          );
                         },
                       ),
                     ),
                   ),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(8.0),
-                    child: svAppButton(
-                      context: context,
-                      onTap: () => widget.onNewSessionTap(),
-                      text: translation(context).lbl_new_chat,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                    decoration: BoxDecoration(
+                      color: svGetScaffoldColor(),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withAlpha(13),
+                          offset: const Offset(0, -3),
+                          blurRadius: 6,
+                        ),
+                      ],
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.2),
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () => widget.onNewSessionTap(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[600],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add_circle_outline_rounded, size: 20),
+                            const SizedBox(width: 10),
+                            Text(
+                              translation(context).lbl_new_chat,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],

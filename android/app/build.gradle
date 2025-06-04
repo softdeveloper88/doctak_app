@@ -99,6 +99,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 
 }
 def keystoreProperties = new Properties()
@@ -121,7 +122,7 @@ android {
         // Add other exclusions as needed
     }
     namespace = "com.kt.doctak"
-    compileSdk = 34
+    compileSdk = 35
 //    ndkVersion = '27.2.12479018'
     defaultConfig {
         externalNativeBuild {
@@ -185,6 +186,7 @@ dependencies {
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging:24.1.0'
+    implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'

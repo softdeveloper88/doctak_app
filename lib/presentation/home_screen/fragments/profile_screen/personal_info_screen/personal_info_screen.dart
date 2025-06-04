@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
@@ -31,87 +32,95 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   @override
   void initState() {
     isEditModeMap = false;
-    // TODO: implement initState
     super.initState();
   }
+
   Countries findModelByNameOrDefault(
       List<Countries> countries,
       String name,
       Countries defaultCountry,
       ) {
     return countries.firstWhere(
-          (country) => country.countryName?.toLowerCase() == name.toLowerCase(), // Case-insensitive match
-      orElse: () => defaultCountry, // Return defaultCountry if not found
+          (country) => country.countryName?.toLowerCase() == name.toLowerCase(),
+      orElse: () => defaultCountry,
     );
   }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
-        surfaceTintColor: svGetScaffoldColor(),
-        title: Text(translation(context).lbl_personal_information, style: boldTextStyle(size: 20,fontFamily: 'Poppins',)),
-        elevation: 0,
-        centerTitle: true,
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: svGetBodyColor(),
-              size: 17,
-            )),
         iconTheme: IconThemeData(color: context.iconColor),
+        elevation: 0,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
+        centerTitle: true,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_personal_information,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
+        ),
         actions: [
           if (widget.profileBloc.isMe)
-            MaterialButton(
-              textColor: Colors.black,
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 36,
+              ),
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isEditModeMap ? Icons.check : Icons.edit,
+                  color: isEditModeMap ? Colors.green[600] : Colors.blue[600],
+                  size: 14,
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   isEditModeMap = !isEditModeMap;
                 });
               },
-              elevation: 1,
-              // color: Colors.white,
-              minWidth: 50,
-              // shape: RoundedRectangleBorder(
-              //   borderRadius: radius(100),
-              //   side: const BorderSide(color: Colors.blue),
-              // ),
-              animationDuration: const Duration(milliseconds: 300),
-              focusColor: SVAppColorPrimary,
-              hoverColor: SVAppColorPrimary,
-              splashColor: SVAppColorPrimary,
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomImageView(
-                    onTap: () {
-                      setState(() {
-                        isEditModeMap = !isEditModeMap;
-                      });
-                    },
-                    color: Colors.black,
-                    imagePath: 'assets/icon/ic_vector.svg',
-                    height: 15,
-                    width: 15,
-                    // margin: const EdgeInsets.only(bottom: 4),
-                  ),
-                  // const Text(
-                  //   "Edit",
-                  //   style: TextStyle(
-                  //     fontSize: 10,
-                  //     fontWeight: FontWeight.w400,
-                  //     color: Colors.blue,
-                  //   ),
-                  // ),
-                ],
-              ),
             ),
+          const SizedBox(width: 16),
         ],
       ),
       body: Padding(
@@ -121,286 +130,471 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             key: _formKey,
             child: Column(
               children: [
-                TextFieldEditWidget(
-                  isEditModeMap: isEditModeMap,
-                  index: 0,
-                  icon: Icons.person,
-                  label: translation(context).lbl_first_name,
-                  value: widget.profileBloc.userProfile?.user?.firstName ?? '',
-                  onSave: (value) =>
-                      widget.profileBloc.userProfile?.user?.firstName = value,
-                ),
+                // Header card
                 if (!isEditModeMap)
-                  Divider(
-                    color: Colors.grey[300],
-                    indent: 10,
-                    endIndent: 10,
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.blue[700],
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            translation(context).msg_personal_info_desc,
+                            style: TextStyle(
+                              color: Colors.blue[700],
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                TextFieldEditWidget(
-                  isEditModeMap: isEditModeMap,
-                  index: 0,
-                  icon: Icons.person,
-                  label: translation(context).lbl_last_name,
-                  value: widget.profileBloc.userProfile?.user?.lastName ?? '',
-                  onSave: (value) =>
-                      widget.profileBloc.userProfile?.user?.lastName = value,
-                ),
-                if (!isEditModeMap)
-                  Divider(
-                    color: Colors.grey[300],
-                    indent: 10,
-                    endIndent: 10,
+
+                // Main info card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                TextFieldEditWidget(
-                  isEditModeMap: isEditModeMap,
-                  index: 0,
-                  icon: Icons.person,
-                  label: translation(context).lbl_phone_number,
-                  value: widget.profileBloc.userProfile?.user?.phone ?? '',
-                  onSave: (value) =>
-                      widget.profileBloc.userProfile?.user?.phone = value,
-                ),
-                if (!isEditModeMap)
-                  Divider(
-                    color: Colors.grey[300],
-                    indent: 10,
-                    endIndent: 10,
-                  ),
-                ProfileDateWidget(
-                  isEditModeMap: isEditModeMap,
-                  index: 0,
-                  label: translation(context).lbl_date_of_birth,
-                  value: widget.profileBloc.userProfile?.user?.dob ?? '',
-                  onSave: (value) {
-                    setState(() {
-                      // Value received from date picker
-                      widget.profileBloc.userProfile?.user?.dob = value;
-                    });
-                  },
-                ),
-                if (!isEditModeMap)
-                  Divider(
-                    color: Colors.grey[300],
-                    indent: 10,
-                    endIndent: 10,
-                  ),
-                TextFieldEditWidget(
-                  isEditModeMap: isEditModeMap,
-                  icon: Icons.numbers_rounded,
-                  index: 0,
-                  label: translation(context).lbl_license_no,
-                  value: widget.profileBloc.userProfile?.user?.licenseNo ?? '',
-                  onSave: (value) =>
-                      widget.profileBloc.userProfile?.user?.licenseNo = value,
-                ),
-                if (!isEditModeMap)
-                  Divider(
-                    color: Colors.grey[300],
-                    indent: 10,
-                    endIndent: 10,
-                  ),
-                if (!isEditModeMap)
-                  TextFieldEditWidget(
-                    index: 0,
-                    label: translation(context).lbl_country,
-                    value: widget.profileBloc.userProfile?.user?.country ?? '',
-                    onSave: (value) =>
-                        widget.profileBloc.userProfile?.user?.country = value,
-                  ),
-                if (!isEditModeMap)
-                  Divider(
-                    color: Colors.grey[300],
-                    indent: 10,
-                    endIndent: 10,
-                  ),
-                if (!isEditModeMap)
-                  TextFieldEditWidget(
-                    index: 0,
-                    label: translation(context).lbl_state,
-                    value: widget.profileBloc.userProfile?.user?.state ?? '',
-                    onSave: (value) => widget.profileBloc.userProfile?.user?.state = value,
-                  ),
-                if (!isEditModeMap)
-                  Divider(
-                    color: Colors.grey[300],
-                    indent: 10,
-                    endIndent: 10,
-                  ),
-                if (isEditModeMap)
-                  BlocBuilder<ProfileBloc, ProfileState>(
-                      bloc: widget.profileBloc,
-                      builder: (context, state) {
-                        if (state is PaginationLoadedState) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!isEditModeMap)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
                             children: [
-                              const SizedBox(height: 10),
+                              const Icon(
+                                Icons.person_rounded,
+                                color: Colors.blue,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
                               Text(
-                                translation(context).lbl_country,
+                                translation(context).lbl_basic_info,
                                 style: const TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
                                 ),
                               ),
-                              CustomDropdownButtonFormField(
-                                itemBuilder: (item) => Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      item.countryName??'',
-                                      style: const TextStyle(color: Colors.black),
-                                    ),
-                                    Text(item.flag??'')
-                                  ],
-                                ),
-                                items: state.firstDropdownValues,
-                                value: findModelByNameOrDefault(state.firstDropdownValues,state.selectedFirstDropdownValue??'',state.firstDropdownValues.first),
-                                width: double.infinity,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 0,
-                                ),
-                                onChanged: (newValue) {
-                                  widget.profileBloc.country = newValue?.countryName??'';
-                                  widget.profileBloc.userProfile?.user
-                                      ?.country = newValue?.countryName??'';
-                                  // widget.profileBloc
-                                  //     .add(UpdateFirstDropdownValue(newValue));
-                                  widget.profileBloc.add(
-                                      UpdateSecondDropdownValues(newValue?.countryName??""));
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                translation(context).lbl_state,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              CustomDropdownButtonFormField(
-                                itemBuilder: (item) => Text(
-                                  item??'',
-                                  style: const TextStyle(color: Colors.black),
-                                ),
-                                items: state.secondDropdownValues,
-                                value: state.selectedSecondDropdownValue,
-                                width: double.infinity,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 0,
-                                ),
-                                onChanged: (String? newValue) {
-                                  widget.profileBloc.stateName = newValue!;
-                                  widget.profileBloc.userProfile?.user?.state =
-                                      newValue;
-                                  widget.profileBloc.add(
-                                      UpdateSpecialtyDropdownValue(
-                                          state.selectedSecondDropdownValue));
-                                  // widget.profileBloc.add(
-                                  //     UpdateUniversityDropdownValues(newValue));
-                                },
-                              ),
-                              if (AppData.userType == "doctor")
-                                const SizedBox(height: 10),
-                              if (AppData.userType == "doctor")
-                                Text(
-                                  translation(context).lbl_specialty,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              if (AppData.userType == "doctor")
-                                CustomDropdownButtonFormField(
-                                  itemBuilder: (item) => Text(
-                                    item??'',
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
-                                  items: state.specialtyDropdownValue,
-                                  value: state.selectedSpecialtyDropdownValue,
-                                  width: double.infinity,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 0,
-                                  ),
-                                  onChanged: (String? newValue) {
-                                    // Selected specialty value
-                                    // Update specialty in profile bloc
-                                    widget.profileBloc.specialtyName = newValue!;
-                                    widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
-                                  },
-                                ),
-                              if (AppData.userType != "doctor")
-                                const SizedBox(height: 10),
-                              // if (AppData.userType != "doctor")
-                              //   Padding(
-                              //     padding: EdgeInsets.only(top: 8.0),
-                              //     child: Text(
-                              //       translation(context).lbl_university,
-                              //       style: TextStyle(
-                              //         fontSize: 16,
-                              //         fontWeight: FontWeight.w500,
-                              //       ),
-                              //     ),
-                              //   ),
-                              // if (AppData.userType != "doctor")
-                                // CustomDropdownButtonFormField(
-                                //   itemBuilder: (item) => Text(
-                                //     item??'',
-                                //     style: const TextStyle(color: Colors.black),
-                                //   ),
-                                //   items: state.universityDropdownValue,
-                                //   value: state.selectedUniversityDropdownValue ==
-                                //               ''
-                                //           ? null
-                                //           : state
-                                //               .selectedUniversityDropdownValue,
-                                //   width: double.infinity,
-                                //   contentPadding: const EdgeInsets.symmetric(
-                                //     horizontal: 10,
-                                //     vertical: 0,
-                                //   ),
-                                //   onChanged: (String? newValue) {
-                                //     print(newValue);
-                                //     widget.profileBloc.university = newValue!;
-                                //     // selectedNewUniversity=newValue;
-                                //     // widget.profileBloc.add(
-                                //     //     UpdateUniversityDropdownValues(
-                                //     //         newValue));
-                                //   },
-                                // ),
-                              // if (AppData.userType!="doctor")
-                              //   const SizedBox(height: 10),
-                              // if (AppData.userType != "doctor" &&
-                              //     state.selectedUniversityDropdownValue ==
-                              //         'Add new University')
                             ],
-                          );
-                        } else {
-                          return Text(translation(context).msg_something_wrong);
-                        }
-                      }),
-                10.height,
+                          ),
+                        ),
+
+                      // First name field
+                      TextFieldEditWidget(
+                        isEditModeMap: isEditModeMap,
+                        index: 0,
+                        icon: Icons.person,
+                        label: translation(context).lbl_first_name,
+                        value: widget.profileBloc.userProfile?.user?.firstName ?? '',
+                        onSave: (value) =>
+                        widget.profileBloc.userProfile?.user?.firstName = value,
+                      ),
+                      if (!isEditModeMap)
+                        Divider(
+                          color: Colors.grey[200],
+                          thickness: 1.5,
+                          indent: 10,
+                          endIndent: 10,
+                        ),
+
+                      // Last name field
+                      TextFieldEditWidget(
+                        isEditModeMap: isEditModeMap,
+                        index: 0,
+                        icon: Icons.person,
+                        label: translation(context).lbl_last_name,
+                        value: widget.profileBloc.userProfile?.user?.lastName ?? '',
+                        onSave: (value) =>
+                        widget.profileBloc.userProfile?.user?.lastName = value,
+                      ),
+                      if (!isEditModeMap)
+                        Divider(
+                          color: Colors.grey[200],
+                          thickness: 1.5,
+                          indent: 10,
+                          endIndent: 10,
+                        ),
+
+                      // Phone number field
+                      TextFieldEditWidget(
+                        isEditModeMap: isEditModeMap,
+                        index: 0,
+                        icon: Icons.phone,
+                        label: translation(context).lbl_phone_number,
+                        value: widget.profileBloc.userProfile?.user?.phone ?? '',
+                        onSave: (value) =>
+                        widget.profileBloc.userProfile?.user?.phone = value,
+                      ),
+                      if (!isEditModeMap)
+                        Divider(
+                          color: Colors.grey[200],
+                          thickness: 1.5,
+                          indent: 10,
+                          endIndent: 10,
+                        ),
+
+                      // Date of birth field
+                      ProfileDateWidget(
+                        isEditModeMap: isEditModeMap,
+                        index: 0,
+                        label: translation(context).lbl_date_of_birth,
+                        value: widget.profileBloc.userProfile?.user?.dob ?? '',
+                        onSave: (value) {
+                          setState(() {
+                            widget.profileBloc.userProfile?.user?.dob = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // License info card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!isEditModeMap)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.badge_rounded,
+                                color: Colors.green,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                translation(context).lbl_license_info,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // License number field
+                      TextFieldEditWidget(
+                        isEditModeMap: isEditModeMap,
+                        icon: Icons.numbers_rounded,
+                        index: 0,
+                        label: translation(context).lbl_license_no,
+                        value: widget.profileBloc.userProfile?.user?.licenseNo ?? '',
+                        onSave: (value) =>
+                        widget.profileBloc.userProfile?.user?.licenseNo = value,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Location info card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!isEditModeMap)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_rounded,
+                                color: Colors.orange,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                translation(context).lbl_location_info,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Country field
+                      if (!isEditModeMap)
+                        TextFieldEditWidget(
+                          index: 0,
+                          label: translation(context).lbl_country,
+                          value: widget.profileBloc.userProfile?.user?.country ?? '',
+                          onSave: (value) =>
+                          widget.profileBloc.userProfile?.user?.country = value,
+                        ),
+                      if (!isEditModeMap)
+                        Divider(
+                          color: Colors.grey[200],
+                          thickness: 1.5,
+                          indent: 10,
+                          endIndent: 10,
+                        ),
+
+                      // State field
+                      if (!isEditModeMap)
+                        TextFieldEditWidget(
+                          index: 0,
+                          label: translation(context).lbl_state,
+                          value: widget.profileBloc.userProfile?.user?.state ?? '',
+                          onSave: (value) => widget.profileBloc.userProfile?.user?.state = value,
+                        ),
+
+                      // Country and State dropdown fields in edit mode
+                      if (isEditModeMap)
+                        BlocBuilder<ProfileBloc, ProfileState>(
+                            bloc: widget.profileBloc,
+                            builder: (context, state) {
+                              if (state is PaginationLoadedState) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      translation(context).lbl_country,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    // Country dropdown
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.grey.shade300),
+                                      ),
+                                      child: CustomDropdownButtonFormField(
+                                        itemBuilder: (item) => Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              item.countryName ?? '',
+                                              style: const TextStyle(color: Colors.black),
+                                            ),
+                                            Text(item.flag ?? '')
+                                          ],
+                                        ),
+                                        items: state.firstDropdownValues,
+                                        value: findModelByNameOrDefault(
+                                            state.firstDropdownValues,
+                                            state.selectedFirstDropdownValue ?? '',
+                                            state.firstDropdownValues.first
+                                        ),
+                                        width: double.infinity,
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 4,
+                                        ),
+                                        onChanged: (newValue) {
+                                          widget.profileBloc.country = newValue?.countryName ?? '';
+                                          widget.profileBloc.userProfile?.user?.country = newValue?.countryName ?? '';
+                                          widget.profileBloc.add(
+                                              UpdateSecondDropdownValues(newValue?.countryName ?? "")
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 16),
+
+                                    // State dropdown
+                                    Text(
+                                      translation(context).lbl_state,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.grey.shade300),
+                                      ),
+                                      child: CustomDropdownButtonFormField(
+                                        itemBuilder: (item) => Text(
+                                          item ?? '',
+                                          style: const TextStyle(color: Colors.black),
+                                        ),
+                                        items: state.secondDropdownValues,
+                                        value: state.selectedSecondDropdownValue,
+                                        width: double.infinity,
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 4,
+                                        ),
+                                        onChanged: (String? newValue) {
+                                          widget.profileBloc.stateName = newValue!;
+                                          widget.profileBloc.userProfile?.user?.state = newValue;
+                                          widget.profileBloc.add(
+                                              UpdateSpecialtyDropdownValue(state.selectedSecondDropdownValue)
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                                    // Specialty dropdown for doctors
+                                    if (AppData.userType == "doctor") const SizedBox(height: 16),
+                                    if (AppData.userType == "doctor")
+                                      Text(
+                                        translation(context).lbl_specialty,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    if (AppData.userType == "doctor") const SizedBox(height: 8),
+                                    if (AppData.userType == "doctor")
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.grey.shade300),
+                                        ),
+                                        child: CustomDropdownButtonFormField(
+                                          itemBuilder: (item) => Text(
+                                            item ?? '',
+                                            style: const TextStyle(color: Colors.black),
+                                          ),
+                                          items: state.specialtyDropdownValue,
+                                          value: state.selectedSpecialtyDropdownValue,
+                                          width: double.infinity,
+                                          contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 4,
+                                          ),
+                                          onChanged: (String? newValue) {
+                                            widget.profileBloc.specialtyName = newValue!;
+                                            widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
+                                          },
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              } else {
+                                return Text(translation(context).msg_something_wrong);
+                              }
+                            }
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Update button
                 if (isEditModeMap)
-                  svAppButton(
-                    context: context,
-                    // style: svAppButton(text: text, onTap: onTap, context: context),
-                    onTap: () async {
-                      setState(() {
-                        isEditModeMap = false;
-                      });
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                      }
-                      widget.profileBloc.add(UpdateProfileEvent(
-                        updateProfileSection: 1,
-                        userProfile: widget.profileBloc.userProfile,
-                        userProfilePrivacyModel: UserProfilePrivacyModel(),
-                      ));
-                    },
-                    text: translation(context).lbl_update,
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isEditModeMap = false;
+                        });
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                        }
+
+                        widget.profileBloc.add(UpdateProfileEvent(
+                          updateProfileSection: 1,
+                          userProfile: widget.profileBloc.userProfile,
+                          userProfilePrivacyModel: UserProfilePrivacyModel(),
+                        ));
+
+                        // Show success message
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(translation(context).msg_profile_updated),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.white),
+                          const SizedBox(width: 10),
+                          Text(
+                            translation(context).lbl_update,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
               ],
             ),

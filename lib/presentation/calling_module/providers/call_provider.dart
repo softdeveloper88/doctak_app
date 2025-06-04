@@ -306,7 +306,6 @@ class CallProvider extends ChangeNotifier {
       print('Error toggling speaker: $e');
     }
   }
-
   // Toggle local video
   // Future<void> toggleLocalVideo() async {
   //   if (!isVideoCall) return;

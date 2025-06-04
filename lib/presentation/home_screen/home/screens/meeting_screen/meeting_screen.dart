@@ -50,98 +50,162 @@ class _MeetingScreenState extends State<MeetingScreen> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: Colors.grey.shade50,
         body: Column(
           children: [
             AppBar(
-              surfaceTintColor: svGetScaffoldColor(),
-              backgroundColor: svGetScaffoldColor(),
-              iconTheme: IconThemeData(color: context.iconColor),
-              title: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child: Text(translation(context).lbl_meeting,
-                          textAlign: TextAlign.left,
-                          style: boldTextStyle(size: 18))),
-                ],
-              ),
+              backgroundColor: Colors.white,
+              elevation: 0,
+              toolbarHeight: 70,
+              surfaceTintColor: Colors.white,
+              centerTitle: true,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded,
-                    color: svGetBodyColor()),
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.blue[600],
+                    size: 16,
+                  ),
+                ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              elevation: 0,
-              centerTitle: false,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Column(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          setState(() {});
+                  Icon(
+                    Icons.meeting_room_outlined,
+                    color: Colors.blue[600],
+                    size: 24,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    translation(context).lbl_meeting,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: Colors.blue[800],
+                    ),
+                  ),
+                ],
+              ),
+              actions: const [
+                SizedBox(width: 48), // Balance the title centering
+              ],
+            ),
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.grey.shade200,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
                           selectedIndex = 0;
-                        },
-                        child: Text(
-                          translation(context).lbl_set_schedule,
-                          style: TextStyle(
-                            color: selectedIndex == 0 ? Colors.black:Colors.black38,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        height: 2,
-                        width: context.width() / 2 - 10,
-                        color: selectedIndex == 0
-                            ? SVAppColorPrimary
-                            : SVAppColorPrimary.withOpacity(0.2),
-                      ),
-                    ],
-                  ),
-                  Center(
+                        });
+                      },
                       child: Container(
-                    color: Colors.grey.shade300,
-                    height: 30,
-                    width: 1,
-                  )),
-                  Column(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          setState(() { });
-                          selectedIndex = 1;
-                        },
-                        child: Text(
-                          translation(context).lbl_upcoming,
-                          style: TextStyle(
-                            color: selectedIndex == 1 ? Colors.black:Colors.black38,
-                            fontSize: 14,
-                            fontWeight:FontWeight.w700,
-                          ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: selectedIndex == 0 ? Colors.white : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: selectedIndex == 0 ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ] : null,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.schedule_outlined,
+                              size: 18,
+                              color: selectedIndex == 0 ? Colors.blue[600] : Colors.grey[600],
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              translation(context).lbl_set_schedule,
+                              style: TextStyle(
+                                color: selectedIndex == 0 ? Colors.blue[700] : Colors.grey[600],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Container(
-                        height: 2,
-                        width: context.width() / 2 - 10,
-                        color: selectedIndex == 1
-                            ? SVAppColorPrimary
-                            : SVAppColorPrimary.withOpacity(0.2),
-                      ),
-                    ],
+                    ),
                   ),
-                  16.height,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedIndex = 1;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: selectedIndex == 1 ? Colors.white : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: selectedIndex == 1 ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ] : null,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.upcoming_outlined,
+                              size: 18,
+                              color: selectedIndex == 1 ? Colors.blue[600] : Colors.grey[600],
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              translation(context).lbl_upcoming,
+                              style: TextStyle(
+                                color: selectedIndex == 1 ? Colors.blue[700] : Colors.grey[600],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-      const SizedBox(height: 10,),
-      if(selectedIndex==0) SetScheduleScreen()
-        else const Expanded(child: UpcomingMeetingScreen())
+            
+            // Content area
+            if(selectedIndex == 0) 
+              Expanded(child: SetScheduleScreen())
+            else 
+              const Expanded(child: UpcomingMeetingScreen())
           ],
         ),
       ),

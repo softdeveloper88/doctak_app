@@ -40,7 +40,6 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     // emit(DrugsDataInitial());
     print('search text ${event.searchTerm}');
     print('country id ${event.countryId}');
-    print('isExpired ${event.isExpired}');
     if (event.page == 1) {
       print('object clear');
       drugsData.clear();
@@ -56,7 +55,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
         '$pageNumber',
         event.countryId ?? "1",
         event.searchTerm ?? '',
-        event.isExpired == 'New' ? "false" : 'true');
+        ""); // Empty string to get all jobs
     numberOfPage = response.jobs?.lastPage ?? 0;
     if (pageNumber < numberOfPage + 1) {
       pageNumber = pageNumber + 1;
@@ -126,7 +125,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
           "1",
           event.countryId,
           event.searchTerm,
-          'false');
+          ""); // Empty string to get all jobs
       print("ddd${response.jobs?.data!.length}");
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);

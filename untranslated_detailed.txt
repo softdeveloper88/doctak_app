@@ -1,0 +1,38 @@
+Missing translations:
+
+Farsi (fa):
+1. msg_account_update_success
+2. msg_unlock_personalized_features
+3. msg_please_select_country
+4. msg_please_select_state
+5. msg_please_select_specialty
+6. lbl_waiting_approval
+7. lbl_create_new_password
+8. msg_enter_new_password
+9. lbl_login
+10. lbl_cancel
+
+Hindi (hi):
+1. msg_account_update_success
+2. msg_unlock_personalized_features
+3. msg_please_select_country
+4. msg_please_select_state
+5. msg_please_select_specialty
+6. lbl_waiting_approval
+7. lbl_create_new_password
+8. msg_enter_new_password
+9. lbl_login
+10. lbl_cancel
+11. lbl_not_specified
+
+Urdu (ur):
+1. msg_account_update_success
+2. msg_unlock_personalized_features
+3. msg_please_select_country
+4. msg_please_select_state
+5. msg_please_select_specialty
+6. lbl_waiting_approval
+7. lbl_create_new_password
+8. msg_enter_new_password
+9. lbl_login
+10. lbl_cancel

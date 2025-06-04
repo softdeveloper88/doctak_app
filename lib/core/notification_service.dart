@@ -12,6 +12,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVP
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -743,7 +744,7 @@ class NotificationService {
               payload == 'discuss_case_comment') {
             return const CaseDiscussionScreen();
           }
-          return ForceUpgradePage(); // Default route if payload does not match
+          return UnifiedSplashUpgradeScreen(); // Default route if payload does not match
         }),
       );
     }

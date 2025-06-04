@@ -8,7 +8,10 @@ import 'package:doctak_app/presentation/about_us/about_us_screen.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/app_setting_screen/app_setting_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
+import 'package:doctak_app/presentation/case_discussion/screens/discussion_list_screen.dart';
+import 'package:doctak_app/presentation/case_discussion/bloc/discussion_list_bloc.dart';
+import 'package:doctak_app/presentation/case_discussion/repository/case_discussion_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drugs_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/guidelines_screen.dart';
@@ -21,13 +24,20 @@ import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/web_screen/web_page_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
+import 'dart:ui';
 
 import '../../../../localization/app_localization.dart';
+import '../../../case_discussion/screens/discussion_list_screen.dart';
+import '../../../doctak_ai_module/presentation/ai_chat_screen.dart';
+import '../../../group_screen/my_groups_screen.dart';
 import '../screens/case_discussion/add_case_discuss_screen.dart';
+import '../screens/case_discussion/case_discussion_screen.dart';
 import '../screens/meeting_screen/manage_meeting_screen.dart';
 
 class SVHomeDrawerComponent extends StatefulWidget {
@@ -37,377 +47,605 @@ class SVHomeDrawerComponent extends StatefulWidget {
 
 class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
   int selectedIndex = -1;
-  // @override
-  // void dispose() {
-  //   _bannerAd!.dispose();
-  //   super.dispose();
-  // }
-  //
-  // @override
-  // void initState() {
-  //   getBannerAds();
-  //   super.initState();
-  // }
-  // bool isLoaded = false;
-  // bool isActive = true;
-  // BannerAd? _bannerAd;
-  //
-  // getBannerAds() {
-  //   _bannerAd = BannerAd(
-  //       size: AdSize.banner,
-  //       adUnitId: AdmobSetting.bannerUnit,
-  //       listener: BannerAdListener(onAdClosed: (Ad ad) {
-  //         debugPrint("Ad Closed");
-  //       }, onAdFailedToLoad: (Ad ad, LoadAdError error) {
-  //         setState(() {
-  //           isLoaded = false;
-  //         });
-  //       }, onAdLoaded: (Ad ad) {
-  //         setState(() {
-  //           isLoaded = true;
-  //         });
-  //         debugPrint('Ad Loaded');
-  //       }, onAdOpened: (Ad ad) {
-  //         debugPrint('Ad opened');
-  //       }),
-  //       request: const AdRequest());
-  //
-  //   _bannerAd!.load();
-  // }
-  // Widget bannerAdLoaded() {
-  //   if (isLoaded == true) {
-  //     return Padding(
-  //       padding: const EdgeInsets.all(8.0),
-  //       child: SizedBox(
-  //         height: _bannerAd!.size.height.toDouble(),
-  //         child: AdWidget(
-  //           ad: _bannerAd!,
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     return const SizedBox(
-  //       height: 8,
-  //     );
-  //   }
-  // }
-  String _formatString(String template, Map<String, String> values) {
-    String result = template;
-    values.forEach((key, value) {
-      result = result.replaceAll('{$key}', value);
-    });
-    return result;
-  }
+
+  // Menu categories for better organization
+  final Map<String, List<int>> menuCategories = {
+    'Professional Tools': [0, 1, 2, 3, 4],
+    'Learning & Research': [5, 6, 7, 8, 9],
+    'Communication': [10, 11],
+    'Resources': [12, 13],
+    'Settings': [14, 15, 16],
+  };
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     List<SVDrawerModel> options = getDrawerOptions(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
+    
     return Drawer(
-        elevation: 0,
-        child: Container(
-          width: 300,
-          color: SVAppColorPrimary,
-          child: ListView(
-            children: [
-              // 10.height,
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.end,
-              //   children: [
-              //     Padding(
-              //       padding: const EdgeInsets.only(right: 8.0),
-              //       child: Switch(
-              //         onChanged: (val) {
-              //           appStore.toggleDarkMode(value: val);
-              //         },
-              //         value: appStore.isDarkMode,
-              //         activeColor: SVAppColorPrimary,
-              //       ),
-              //     ),
-              //   ],
-              // ),
-              40.height,
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      elevation: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.grey.shade50,
+              Colors.white,
+              Colors.grey.shade50,
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Background pattern
+            _buildBackgroundPattern(),
+            
+            // Main content
+            Column(
+              children: [
+                // Advanced Header
+                _buildAdvancedHeader(),
+                
+                // Menu Content
+                Expanded(
+                  child: _buildAdvancedMenuContent(options),
+                ),
+                
+                // Advanced Footer
+                _buildAdvancedFooter(l10n, isRtl),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Subtle background pattern
+  Widget _buildBackgroundPattern() {
+    return Positioned.fill(
+      child: CustomPaint(
+        painter: BackgroundPatternPainter(),
+      ),
+    );
+  }
+
+  // Compact glassmorphism header
+  Widget _buildAdvancedHeader() {
+    return Container(
+      height: 160,
+      child: Stack(
+        children: [
+          // Solid app color background
+          Container(
+            decoration: BoxDecoration(
+              color: SVAppColorPrimary,
+            ),
+          ),
+          
+          // Content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
                 children: [
-                  CachedNetworkImage(
-                          imageUrl: AppData.imageUrl + AppData.profile_pic,
-                          height: 62,
-                          width: 62,
-                          fit: BoxFit.cover)
-                      .cornerRadiusWithClipRRect(8),
+                  // Advanced profile picture with status indicator
+                  Stack(
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.3),
+                              Colors.white.withOpacity(0.1),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 15,
+                              spreadRadius: 3,
+                            ),
+                          ],
+                        ),
+                        padding: EdgeInsets.all(3),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(32),
+                          child: CachedNetworkImage(
+                            imageUrl: AppData.imageUrl + AppData.profile_pic,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.3),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.person,
+                                size: 32,
+                                color: Colors.white,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.3),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.person,
+                                size: 32,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      // Online status indicator
+                      Positioned(
+                        bottom: 4,
+                        right: 4,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  
                   16.width,
+                  
+                  // User info with modern typography
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           AppData.userType == 'doctor'
                               ? '${translation(context).lbl_dr_prefix}${capitalizeWords(AppData.name)}'
-                              : capitalizeWords(AppData.name), // User's name
-                          style: boldTextStyle(
-                            size: 18,
+                              : capitalizeWords(AppData.name),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                             fontFamily: 'Poppins',
+                            letterSpacing: 0.3,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        2.height,
-                        Text(
-                            textAlign: TextAlign.center,
+                        
+                        6.height,
+                        
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                          ),
+                          child: Text(
                             AppData.userType == 'doctor'
                                 ? AppData.specialty
                                 : AppData.userType == 'student'
                                     ? '${AppData.university}${translation(context).lbl_student_suffix}'
                                     : AppData.specialty,
-                            // User's specialty
-                            style: secondaryTextStyle(
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
                               color: Colors.white,
                               fontFamily: 'Poppins',
-                            )),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  // IconButton(
-                  //   icon: Image.asset('images/socialv/icons/ic_CloseSquare.png',
-                  //       height: 16,
-                  //       width: 16,
-                  //       fit: BoxFit.cover,
-                  //       color: context.iconColor),
-                  //   onPressed: () {
-                  //     finish(context);
-                  //   },
-                  // ),
                 ],
-              ).paddingOnly(left: 16, right: 8, bottom: 20, top: 0),
-              20.height,
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: options.map((e) {
-                  int index = options.indexOf(e);
-                  return SettingItemWidget(
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Colors.white,
-                      size: 25,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  // Advanced categorized menu with modern cards
+  Widget _buildAdvancedMenuContent(List<SVDrawerModel> options) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListView.builder(
+        itemCount: menuCategories.length,
+        itemBuilder: (context, categoryIndex) {
+          String categoryName = menuCategories.keys.elementAt(categoryIndex);
+          List<int> itemIndices = menuCategories[categoryName]!;
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Category header
+              _buildCategoryHeader(categoryName, categoryIndex),
+              
+              // Category items with optimized spacing
+              ...itemIndices.map((index) {
+                if (index < options.length) {
+                  return _buildAdvancedMenuItem(options[index], index);
+                }
+                return SizedBox.shrink();
+              }).toList(),
+              
+              12.height,
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // Compact category headers
+  Widget _buildCategoryHeader(String title, int categoryIndex) {
+    final icons = [
+      Icons.work_outline,
+      Icons.school_outlined,
+      Icons.forum_outlined,
+      Icons.library_books_outlined,
+      Icons.settings_outlined,
+    ];
+    
+    return Container(
+      margin: EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            SVAppColorPrimary.withOpacity(0.04),
+            SVAppColorPrimary.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: SVAppColorPrimary.withOpacity(0.08),
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: SVAppColorPrimary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Icon(
+              icons[categoryIndex],
+              size: 12,
+              color: SVAppColorPrimary,
+            ),
+          ),
+          8.width,
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+              fontFamily: 'Poppins',
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Compact menu items with optimized height
+  Widget _buildAdvancedMenuItem(SVDrawerModel item, int index) {
+    bool isSelected = selectedIndex == index;
+    
+    return Container(
+      margin: EdgeInsets.only(bottom: 4),
+      height: 56, // Fixed height for consistency
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _handleMenuTap(index),
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected 
+                  ? SVAppColorPrimary.withOpacity(0.08)
+                  : Colors.white.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected 
+                    ? SVAppColorPrimary.withOpacity(0.3)
+                    : Colors.grey.withOpacity(0.1),
+                width: isSelected ? 1.2 : 0.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isSelected 
+                      ? SVAppColorPrimary.withOpacity(0.08)
+                      : Colors.black.withOpacity(0.015),
+                  blurRadius: isSelected ? 6 : 3,
+                  spreadRadius: 0,
+                  offset: Offset(0, isSelected ? 1 : 0.5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Compact icon container
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isSelected
+                          ? [SVAppColorPrimary.withOpacity(0.15), SVAppColorPrimary.withOpacity(0.08)]
+                          : [Colors.grey.withOpacity(0.08), Colors.grey.withOpacity(0.04)],
                     ),
-                    decoration: BoxDecoration(
-                        color: selectedIndex == index
-                            ? SVAppColorPrimary.withAlpha(30)
-                            : SVAppColorPrimary),
-                    title: e.title.validate(),
-                    titleTextStyle: boldTextStyle(
-                      size: 14,
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected 
+                          ? SVAppColorPrimary.withOpacity(0.15)
+                          : Colors.grey.withOpacity(0.08),
+                      width: 0.5,
                     ),
-                    leading: (e.image == 'assets/images/docktak_ai_light.png' ||
-                            e.image == 'assets/icon/ic_discussion.png')
+                  ),
+                  child: Center(
+                    child: (item.image == 'assets/images/docktak_ai_light.png' ||
+                            item.image == 'assets/icon/ic_discussion.png')
                         ? Image.asset(
-                            e.image ?? "",
-                            height: 22,
-                            width: 22,
+                            item.image ?? "",
+                            height: 20,
+                            width: 20,
                             fit: BoxFit.contain,
                           )
                         : Image.asset(
-                            e.image ?? "",
-                            height: 22,
-                            width: 22,
-                            color: Colors.white,
+                            item.image ?? "",
+                            height: 20,
+                            width: 20,
+                            color: isSelected ? SVAppColorPrimary : Colors.grey.shade600,
                             fit: BoxFit.contain,
                           ),
-                    onTap: () {
-                      selectedIndex = index;
-                      setState(() {});
-                      if (selectedIndex == options.length - 1) {
-                        finish(context);
-                      }
-                      if (selectedIndex == 0) {
-                        //about us
-                        finish(context);
-                        AboutUsScreen().launch(context);
-                      } else if (selectedIndex == 1) {
-                        //AI
-                        finish(context);
-                        ChatDetailScreen(isFromMainScreen: true)
-                            .launch(context);
-                        print(selectedIndex);
-                      } else if (selectedIndex == 2) {
-                        //jobs
-                        finish(context);
-                        const JobsScreen().launch(context);
-                        print(selectedIndex);
-                      } else if (selectedIndex == 3) {
-                        //drugs list
-                        finish(context);
-                        const DrugsListScreen().launch(context);
-                        print(selectedIndex);
-                      } else if (selectedIndex == 4) {
-                        //case discussion
-                        finish(context);
-                        print(selectedIndex);
-                        CaseDiscussionScreen().launch(context);
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 5) {
-                        //docTak poll
-                        finish(context);
-                        print(selectedIndex);
-                        ComingSoonScreen().launch(context);
-                        // const GuidelinesScreen().launch(context);
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 6) {
-                        //groups Formation
-                        finish(context);
-                        print(selectedIndex);
-                        const ComingSoonScreen().launch(context);
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 7) {
-                        // guidelines
-                        finish(context);
-                        print(selectedIndex);
-                        const GuidelinesScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 8) {
-                        // conferences
-                        finish(context);
-                        print(selectedIndex);
-                        ConferencesScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 9) {
-                        // moh updates
-                        finish(context);
-                        print(selectedIndex);
-                        // MyGroupsScreen().launch(context);
-                        ComingSoonScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 10) {
-                        // meeting
-                        finish(context);
-                        print(selectedIndex);
-                        // MyGroupsScreen().launch(context);
-                        ManageMeetingScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 11) {
-                        //cme
-                        finish(context);
-                        print(selectedIndex);
-                        ComingSoonScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 12) {
-                        // world news
-                        finish(context);
-                        print(selectedIndex);
-                        NewsScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 13) {
-                        // discount
-                        finish(context);
-                        print(selectedIndex);
-                        ComingSoonScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 14) {
-                        // suggestions
-                        finish(context);
-                        print(selectedIndex);
-                        const SuggestionScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 15) {
-                        // app setting
-                        finish(context);
-
-                        const AppSettingScreen().launch(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 16) {
-                        // privacy
-                        finish(context);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => WebPageScreen(
-                                    page_name: l10n.lbl_privacy_policy,
-                                    url: 'https://doctak.net/privacy-policy')));
-
-                        // SVGroupProfileScreen().launch(context);
-                      } else if (selectedIndex == 17) {
-                        //logout
-                        finish(context);
-                        print(selectedIndex);
-                        // ComingSoonScreen().launch(context);
-                        logoutAccount(context);
-
-                        // SVGroupProfileScreen().launch(context);
-                      }
-                      // else if (selectedIndex == 17) { // delete
-                      //   print(selectedIndex);
-                      //   deleteAccount(context);
-                      //   // finish(context);
-                      //   // SVGroupProfileScreen().launch(context);
-                      // }
-                      // else if (selectedIndex == 13) {
-                      //
-                      //   finish(context);
-                      //   print(selectedIndex);
-                      //
-                      //   // SVGroupProfileScreen().launch(context);
-                      // }else if (selectedIndex == 14) {
-                      //   finish(context);
-                      //   print(selectedIndex);
-                      //
-                      //   // SVGroupProfileScreen().launch(context);
-                      // }
-                    },
-                  );
-                }).toList(),
-              ),
-              const Divider(
-                indent: 16,
-                endIndent: 16,
-                color: Colors.white,
-              ),
-              Center(
-                child: SnapHelperWidget<PackageInfo>(
-                  future: PackageInfo.fromPlatform(),
-                  onSuccess: (data) => Text(data.version,
-                      style: boldTextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                      )),
-                ),
-              ),
-              20.height,
-
-              TextButton.icon(
-                onPressed: () {
-                  finish(context);
-                },
-                icon: Icon(
-                  isRtl ? Icons.arrow_forward : Icons.arrow_back,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  l10n.lbl_home,
-                  style: boldTextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
                   ),
                 ),
-              ).center(),
-
-              20.height,
-            ],
+                
+                12.width,
+                
+                // Compact title only (removed subtitle to save space)
+                Expanded(
+                  child: Text(
+                    item.title.validate(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? SVAppColorPrimary : Colors.grey.shade800,
+                      fontFamily: 'Poppins',
+                      letterSpacing: 0.1,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                
+                // Minimalist chevron
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: isSelected ? SVAppColorPrimary : Colors.grey.shade400,
+                  size: 14,
+                ),
+              ],
+            ),
           ),
-        )
+        ),
+      ),
     );
+  }
+
+  // Get subtitle for menu items
+  String _getMenuSubtitle(int index) {
+    final subtitles = [
+      'Learn about DocTak',
+      'AI Assistant',
+      'Find opportunities',
+      'Medicine database',
+      'Clinical discussions',
+      'Community polls',
+      'Professional groups',
+      'Medical guidelines',
+      'Medical conferences',
+      'Health updates',
+      'Video meetings',
+      'Education credits',
+      'Latest medical news',
+      'Special offers',
+      'Share feedback',
+      'App preferences',
+      'Privacy & terms',
+      'Sign out',
+    ];
+    return index < subtitles.length ? subtitles[index] : '';
+  }
+
+  // Compact footer with modern styling
+  Widget _buildAdvancedFooter(AppLocalizations l10n, bool isRtl) {
+    return Container(
+      margin: EdgeInsets.all(12),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.8),
+            Colors.white.withOpacity(0.6),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Compact version display
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: SVAppColorPrimary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    "v${snapshot.data!.version}",
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: SVAppColorPrimary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                );
+              }
+              return SizedBox.shrink();
+            },
+          ),
+          
+          12.height,
+          
+          // Compact home button
+          Container(
+            width: double.infinity,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [SVAppColorPrimary, SVAppColorPrimary.withOpacity(0.8)],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: SVAppColorPrimary.withOpacity(0.25),
+                  blurRadius: 6,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => finish(context),
+                borderRadius: BorderRadius.circular(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isRtl ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    6.width,
+                    Text(
+                      l10n.lbl_home,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        fontFamily: 'Poppins',
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Handle menu item taps
+  void _handleMenuTap(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+    
+    HapticFeedback.lightImpact();
+    
+    Future.delayed(const Duration(milliseconds: 150), () {
+      finish(context);
+      
+      switch (index) {
+        case 0: AboutUsScreen().launch(context); break;
+        case 1: AiChatScreen().launch(context); break;
+        case 2: const JobsScreen().launch(context); break;
+        case 3: const DrugsListScreen().launch(context); break;
+        case 4: // const CaseDiscussionScreen().launch(context);
+      BlocProvider(
+            create: (context) => DiscussionListBloc(
+              repository: CaseDiscussionRepository(
+                baseUrl: AppData.base2,
+                // Use AppData.base instead of AppData.base2
+                getAuthToken: () => AppData.userToken ?? "",
+              ),
+            ),
+            child: const DiscussionListScreen(),
+          ).launch(context);
+          break;
+        case 5: ComingSoonScreen().launch(context); break;
+        case 6: MyGroupsScreen().launch(context); break;
+        case 7: const GuidelinesScreen().launch(context); break;
+        case 8: ConferencesScreen().launch(context); break;
+        case 9: ComingSoonScreen().launch(context); break;
+        case 10: ManageMeetingScreen().launch(context); break;
+        case 11: ComingSoonScreen().launch(context); break;
+        case 12: ComingSoonScreen().launch(context); break;
+        case 13: const SuggestionScreen().launch(context); break;
+        case 14: const AppSettingScreen().launch(context); break;
+        case 15:
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WebPageScreen(
+                page_name: AppLocalizations.of(context)!.lbl_privacy_policy,
+                url: 'https://doctak.net/privacy-policy',
+              ),
+            ),
+          );
+          break;
+        case 16: logoutAccount(context); break;
+      }
+    });
   }
 
   logoutAccount(BuildContext context) async {
@@ -468,8 +706,6 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                       ),
                       (route) => false);
                 }
-
-                // Call the delete account function
               },
             ),
           ],
@@ -510,8 +746,6 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
                     MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
                 } else {}
-
-                // Call the delete account function
               },
             ),
           ],
@@ -531,7 +765,6 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
       );
       print(response.body);
       if (response.statusCode == 200) {
-        // Handle successful account deletion
         return true;
       } else {
         return false;
@@ -539,7 +772,6 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
       }
     } catch (error) {
       return false;
-      // throw Exception('Error: $error');
     }
     return false;
   }
@@ -553,12 +785,10 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
         apiUrl,
         headers: <String, String>{
           'Authorization': 'Bearer ${AppData.userToken!}',
-          // 'Accept':'Application/json'
         },
       );
       print(response.body);
       if (response.statusCode == 200) {
-        // Handle successful account deletion
         return true;
       } else {
         return false;
@@ -566,7 +796,29 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
       }
     } catch (error) {
       return false;
-      // throw Exception('Error: $error');
     }
   }
+}
+
+// Custom painter for background pattern
+class BackgroundPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey.withOpacity(0.03)
+      ..strokeWidth = 1;
+
+    final path = Path();
+    for (int i = 0; i < 20; i++) {
+      for (int j = 0; j < 20; j++) {
+        final x = (size.width / 20) * i;
+        final y = (size.height / 20) * j;
+        path.addOval(Rect.fromCircle(center: Offset(x, y), radius: 1));
+      }
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
+import '../../main.dart';
 import 'bloc/notification_bloc.dart';
 import 'bloc/notification_state.dart';
 
@@ -56,9 +57,10 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
         } else if (state is PaginationLoadedState) {
           List<AnnouncementData> announcementData =
               notificationBloc.announcementModel?.data ?? [];
-          if(announcementData.isNotEmpty) {
-            return SizedBox(
-              height: 430,
+          if (announcementData.isNotEmpty) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.65, // Increased height for better display
+              margin: const EdgeInsets.symmetric(vertical: 8),
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: (index) {
@@ -68,239 +70,256 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
                 },
                 itemCount: announcementData.length,
                 itemBuilder: (context, index) {
-                  return Stack(
-                    children: [
-                      // Background Image
-                      Positioned.fill(
-                        child: Container(
-                          height: 1000,
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage('assets/images/image_icon.png'),
-                              fit: BoxFit
-                                  .cover, // Ensures the image covers the entire background
-                            ),
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.blue[400]!,
+                              Colors.blue[600]!,
+                            ],
                           ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withAlpha(77),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
                         ),
-                      ), // Content
-                      InkWell(
-                        onTap: () {
-                          UserAnnouncementDetailScreen(
-                            announcementId: announcementData[index].id,
-                          ).launch(context,
-                              pageRouteAnimation: PageRouteAnimation.Slide);
-                        },
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(24),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Expanded(
-                                    child: InkWell(
-                                      onTap: () {},
-                                      child: Row(
-                                        children: [
-                                          CircleAvatar(
-                                            backgroundImage: NetworkImage(
-                                              "${AppData
-                                                  .imageUrl}${announcementData[index]
-                                                  .user?.profilePic ?? ""}",
-                                            ),
-                                            radius: 25,
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Column(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                            children: [
-                                              Wrap(
-                                                crossAxisAlignment:
-                                                WrapCrossAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    '${announcementData[index]
-                                                        .user
-                                                        ?.firstName} ${announcementData[index]
-                                                        .user?.lastName}',
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                      FontWeight.bold,
-                                                      color: Colors.white,
-                                                    ),
+                                  // User info row
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: Colors.white.withAlpha(77),
+                                                  width: 2,
+                                                ),
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                    "${AppData.imageUrl}${announcementData[index].user?.profilePic ?? ""}",
                                                   ),
-                                                  const Text(
-                                                    ' · ',
-                                                    style: TextStyle(
-                                                        fontSize: 16,
+                                                  fit: BoxFit.cover,
+                                                  onError: (exception, stackTrace) {},
+                                                ),
+                                              ),
+                                              child: announcementData[index].user?.profilePic == null
+                                                  ? Container(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white.withAlpha(51),
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.person,
                                                         color: Colors.white,
-                                                        fontWeight:
-                                                        FontWeight.bold),
-                                                  ),
-                                                  SvgPicture.asset(
-                                                    'assets/icon/ic_tick.svg',
-                                                    height: 14,
-                                                    width: 14,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                spacing: 10,
+                                                        size: 24,
+                                                      ),
+                                                    )
+                                                  : null,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
-                                                  SvgPicture.asset(
-                                                    icSpecialty,
-                                                    height: 14,
-                                                    width: 14,
-                                                    fit: BoxFit.contain,
+                                                  Wrap(
+                                                    crossAxisAlignment:
+                                                        WrapCrossAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        '${announcementData[index].user?.firstName} ${announcementData[index].user?.lastName}',
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                      const Text(
+                                                        ' · ',
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      SvgPicture.asset(
+                                                        'assets/icon/ic_tick.svg',
+                                                        height: 14,
+                                                        width: 14,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ],
                                                   ),
-                                                  Text(
-                                                    announcementData[index]
-                                                        .user
-                                                        ?.specialty ??
-                                                        '',
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.white,
-                                                    ),
+                                                  Row(
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                        icSpecialty,
+                                                        height: 14,
+                                                        width: 14,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Expanded(
+                                                        child: Text(
+                                                          announcementData[index].user
+                                                                  ?.specialty ??
+                                                              '',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 14,
+                                                            color: Colors.white,
+                                                          ),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                  // const Text(
-                                                  //   ' · ',
-                                                  //   style: TextStyle(
-                                                  //       fontSize: 16,
-                                                  //       color: Colors.white,
-                                                  //       fontWeight:
-                                                  //           FontWeight.bold),
-                                                  // ),
-                                                  // SvgPicture.asset(
-                                                  //   icGlob,
-                                                  //   color: Colors.white,
-                                                  //   height: 12,
-                                                  //   width: 12,
-                                                  // ),
                                                 ],
                                               ),
-                                            ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        timeAgo.format(DateTime.parse(
+                                            announcementData[index]
+                                                    .createdAt ??
+                                                '')),
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Image Container with fixed size
+                                  Expanded(
+                                    child: Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        color: Colors.white.withAlpha(26),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: CustomImageView(
+                                          imagePath: announcementData[index].image ?? '',
+                                          fit: BoxFit.contain, // Changed to contain to show full image
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Title
+                                  Text(
+                                    announcementData[index].title ?? "",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'Poppins',
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // View Details Button
+                                  Container(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        UserAnnouncementDetailScreen(
+                                          announcementId: announcementData[index].id,
+                                        ).launch(context,
+                                            pageRouteAnimation: PageRouteAnimation.Slide);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.blue[700],
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 32, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(24),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'View Details',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'Poppins',
+                                              color: Colors.blue[700],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Icon(
+                                            Icons.arrow_forward_rounded,
+                                            size: 18,
+                                            color: Colors.blue[700],
                                           ),
                                         ],
                                       ),
                                     ),
                                   ),
-                                  Text(
-                                    timeAgo.format(DateTime.parse(
-                                        announcementData[index].createdAt ??
-                                            '')),
-                                    style: const TextStyle(color: Colors.white),
-                                  )
+                                  const SizedBox(height: 12),
+                                  // Dots indicator
+                                  Container(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: List.generate(
+                                        announcementData.length > 5
+                                            ? 5
+                                            : announcementData.length,
+                                        (dotIndex) {
+                                          int actualIndex = dotIndex;
+                                          if (announcementData.length > 5) {
+                                            if (_currentPage > 2 &&
+                                                _currentPage < announcementData.length - 2) {
+                                              actualIndex = _currentPage - 2 + dotIndex;
+                                            } else if (_currentPage >= announcementData.length - 2) {
+                                              actualIndex = announcementData.length - 5 + dotIndex;
+                                            }
+                                          }
+                                          return _buildDot(
+                                              isActive: actualIndex == _currentPage);
+                                        },
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
-                              const SizedBox(height: 24),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: CustomImageView(
-                                  imagePath:
-                                  announcementData[index].image ?? '',
-                                  fit: BoxFit.contain,
-                                  height: 300,
-                                  width: double.infinity,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              // Title and Details (Inside Slider)
-                              Center(
-                                child: Text(
-                                  announcementData[index].title ?? "",
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: selectIndex == index
-                                              ? announcementData[index].details
-                                              : (announcementData[index]
-                                              .details
-                                              ?.length ??
-                                              0) >
-                                              30
-                                              ? '${announcementData[index].details
-                                              ?.substring(0, 30)}...'
-                                              : announcementData[index]
-                                              .details,
-                                          style: const TextStyle(
-                                              fontSize: 16, color: Colors.white),
-                                        ),
-                                        if ((announcementData[index]
-                                            .details
-                                            ?.length ??
-                                            0) >
-                                            30)
-                                          WidgetSpan(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-
-                                                  // if (selectIndex == index) {
-                                                  //   selectIndex = -1;
-                                                  // } else {
-                                                  //   selectIndex = index;
-                                                  // }
-                                                });
-                                              },
-                                              child: Text(
-                                                selectIndex == index
-                                                    ? ' See Less'
-                                                    : ' See More',
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // const SizedBox(height: 16),
-                              Expanded(
-                                flex: 8,
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: List.generate(
-                                      announcementData.length,
-                                          (index) =>
-                                          _buildDot(
-                                              isActive: index == _currentPage),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                  );
-                },
-              ),
-            );
-          }else{
+                    );
+          } else {
             return const SizedBox.shrink();
           }
         } else if (state is DataError) {
@@ -316,13 +335,23 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
 
   // Dot Widget for Slider Indicator
   Widget _buildDot({required bool isActive}) {
-    return Container(
-      width: isActive ? 10 : 8,
-      height: isActive ? 10 : 8,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: isActive ? 24 : 8,
+      height: 8,
+      margin: const EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : const Color(0xFF96B8D5),
-        shape: BoxShape.circle,
+        color: isActive ? Colors.white : Colors.white.withAlpha(102),
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: Colors.white.withAlpha(77),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
     );
   }

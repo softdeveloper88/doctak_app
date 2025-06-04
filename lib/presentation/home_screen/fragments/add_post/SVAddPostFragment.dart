@@ -91,22 +91,52 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
       resizeToAvoidBottomInset: false,
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
+        toolbarHeight: 70,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        surfaceTintColor: context.cardColor,
+        surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        backgroundColor: context.cardColor,
-        title: Text(translation(context).lbl_new_post, style: boldTextStyle(size: 18)),
+        backgroundColor: svGetScaffoldColor(),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_circle_outline_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_new_post,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
+        ),
         elevation: 0,
         centerTitle: true,
         actions: [
           BlocListener<AddPostBloc, AddPostState>(
             bloc: searchPeopleBloc,
             listener: (BuildContext context, AddPostState state) {
-              if ( state is ResponseLoadedState) {
-
+              if (state is ResponseLoadedState) {
                 print("State: ${state.toString()}");
                 Map<String, dynamic> jsonMap = json.decode(state.message);
                 if (jsonMap['success'] == true) {
@@ -123,85 +153,184 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                   showToast(jsonMap['message']);
                   print('Error: ${jsonMap['message']}');
                 }
-                // Reset the flag here to ensure it's done only after processing is complete
-
               }
             },
-            child: AppButton(
-              shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
-              text: translation(context).lbl_post,
-              textStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500),
-              onTap: () {
-                // Reset flag before making a request
-                searchPeopleBloc.add(AddPostDataEvent());
-              },
-              elevation: 0,
-              color: SVAppColorPrimary,
-              width: 70,
-              padding: const EdgeInsets.all(0),
-            ).paddingAll(12),
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              child: ElevatedButton(
+                onPressed: () {
+                  searchPeopleBloc.add(AddPostDataEvent());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  translation(context).lbl_post,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Row(
-              children: [
-                CachedNetworkImage(
-                  imageUrl:
-                  "${AppData.imageUrl}${AppData.profile_pic.validate()}",
-                  height: 50,
-                  width: 50,
-                  fit: BoxFit.cover,
-                ).cornerRadiusWithClipRRect(100),
-                12.width,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(AppData.name ?? '', style: boldTextStyle()),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Image.asset(
-                              'images/socialv/icons/ic_TickSquare.png',
-                              height: 14,
-                              width: 14,
-                              fit: BoxFit.cover),
+            // Modern User Profile Section
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Profile Picture
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.blue.withOpacity(0.2),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    Text(capitalizeWords(AppData.specialty),
-                        style: secondaryTextStyle(
-                            color: svGetBodyColor(), size: 13)),
-                  ],
-                ),
-                4.width,
-              ],
-            ).paddingSymmetric(horizontal: 16),
-            Divider(
-              color: Colors.grey[300],
-              endIndent: 16,
-              indent: 16,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            "${AppData.imageUrl}${AppData.profile_pic.validate()}",
+                        height: 56,
+                        width: 56,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.blue[50],
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.blue[400],
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.blue[50],
+                          child: Center(
+                            child: Icon(
+                              Icons.person,
+                              color: Colors.blue[400],
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // User Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              AppData.name ?? '',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Poppins',
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                size: 10,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.medical_services_outlined,
+                              size: 14,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              capitalizeWords(AppData.specialty),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
+            // Post Content Section
             SVPostTextComponent(
               onColorChange: () => changeColor,
               colorValue: currentColor,
               searchPeopleBloc: searchPeopleBloc,
             ),
+            // Additional Features
             OtherFeatureComponent(
                 onColorChange: () => changeColor,
                 colorValue: currentColor,
                 searchPeopleBloc: searchPeopleBloc),
-            Divider(
-              color: Colors.grey[300],
-              endIndent: 16,
-              indent: 16,
+            // Divider
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              height: 1,
+              color: Colors.grey.withOpacity(0.2),
             ),
+            // Post Options
             SVPostOptionsComponent(searchPeopleBloc)
           ],
         ),

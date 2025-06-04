@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -20,6 +21,66 @@ import 'package:sizer/sizer.dart';
 
 import 'SVProfilePostsComponent.dart';
 
+// Stat item widget for posts/followers/following with improved design
+class StatItem extends StatelessWidget {
+  final String count;
+  final String label;
+  final Function() onTap;
+  final IconData icon;
+
+  const StatItem({
+    required this.count,
+    required this.label,
+    required this.onTap,
+    required this.icon,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 16,
+                  color: Colors.blue[600],
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  count,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[700],
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class SVProfileHeaderComponent extends StatefulWidget {
   UserProfile? userProfile;
   ProfileBloc? profileBoc;
@@ -34,23 +95,34 @@ class SVProfileHeaderComponent extends StatefulWidget {
       _SVProfileHeaderComponentState();
 }
 
+// Points card with improved design
 Widget _buildPointsCard(BuildContext context) {
   return Card(
-    elevation: 4.0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    elevation: 2.0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: Colors.blue.withOpacity(0.2), width: 1),
+    ),
     child: Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       child: Column(
         children: [
-          Text(
-            translation(context).lbl_your_earned_points,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                translation(context).lbl_your_earned_points,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           const Text(
             '300',
             style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
           ),
         ],
       ),
@@ -58,7 +130,37 @@ Widget _buildPointsCard(BuildContext context) {
   );
 }
 
-class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
+class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _profileImageAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Add animation for profile image
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _profileImageAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutBack,
+      ),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -67,30 +169,60 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              // Background Image
-                InkWell(
-                  onTap: (){
+              // Background Image with gradient overlay
+              InkWell(
+                  onTap: () {
                     ProfileImageScreen(
                       imageUrl: '${widget.userProfile?.coverPicture}',
                     ).launch(context);
                   },
                   child: Container(
-                  height: 260,
-                  width: double.maxFinite,
-                  decoration: BoxDecoration(),
-                  child: widget.userProfile?.coverPicture == null ||
-                          widget.userProfile?.coverPicture ==
-                              'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
-                      ? Image.asset('assets/images/img_cover.png')
-                      : CustomImageView(
+                    height: 260,
+                    width: double.maxFinite,
+                    decoration: BoxDecoration(
+                      // color: Colors.black,
+                    ),
+                    child: Stack(
+                      children: [
+                        // Cover image
+                        widget.userProfile?.coverPicture == null ||
+                            widget.userProfile?.coverPicture ==
+                                'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
+                            ? Image.asset(
+                          'assets/images/img_cover.png',
+                          width: double.maxFinite,
+                          height: 260,
+                          fit: BoxFit.cover,
+                        )
+                            : CustomImageView(
                           imagePath: widget.userProfile?.coverPicture ?? '',
                           height: 260,
                           width: double.maxFinite,
                           fit: BoxFit.cover,
                           placeHolder: 'assets/images/img_cover.png',
                         ),
-                              )
-                ), // Back button and overlay
+
+                        // Gradient overlay
+                        Container(
+                          width: double.maxFinite,
+                          height: 260,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.1),
+                                Colors.black.withOpacity(0.5),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+              ),
+
+              // Back button with improved styling
               if (!(widget.isMe ?? false))
                 Positioned(
                   top: 40,
@@ -99,8 +231,15 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(40),
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(40),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                          )
+                        ]
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
@@ -109,54 +248,57 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                       },
                       icon: const Icon(
                         Icons.arrow_back_ios,
-                        size: 20,
+                        size: 18,
                       ),
                     ),
                   ),
                 ),
+
+              // Camera icon for cover photo with improved styling
               if (widget.isMe ?? false)
                 Positioned(
                   top: 40,
                   right: 16,
                   child: IconButton(
                     onPressed: () async {
-                        const permission = Permission.storage;
-                        const permission1 = Permission.photos;
-                        var status = await permission.status;
-                        print(status);
-                        if (await permission1.isGranted) {
+                      const permission = Permission.storage;
+                      const permission1 = Permission.photos;
+                      var status = await permission.status;
+                      print(status);
+                      if (await permission1.isGranted) {
+                        _showFileOptions(false);
+                      } else if (await permission1.isDenied) {
+                        final result = await permission1.request();
+                        if (status.isGranted) {
                           _showFileOptions(false);
-                          // _selectFiles(context);
-                        } else if (await permission1.isDenied) {
-                          final result = await permission1.request();
-                          if (status.isGranted) {
-                            _showFileOptions(false);
-                            // _selectFiles(context);
-                            print("isGranted");
-                          } else if (result.isGranted) {
-                            _showFileOptions(false);
-                            // _selectFiles(context);
-                            print("isGranted");
-                          } else if (result.isDenied) {
-                            final result = await permission.request();
-                            print("isDenied");
-                          } else if (result.isPermanentlyDenied) {
-                            print("isPermanentlyDenied");
-                            // _permissionDialog(context);
-                          }
-                        } else if (await permission.isPermanentlyDenied) {
+                          print("isGranted");
+                        } else if (result.isGranted) {
+                          _showFileOptions(false);
+                          print("isGranted");
+                        } else if (result.isDenied) {
+                          final result = await permission.request();
+                          print("isDenied");
+                        } else if (result.isPermanentlyDenied) {
                           print("isPermanentlyDenied");
-                          // _permissionDialog(context);
                         }
-
+                      } else if (await permission.isPermanentlyDenied) {
+                        print("isPermanentlyDenied");
+                      }
                     },
                     icon: Container(
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(
-                        color: Colors.blue,
-                        border: Border.all(color: Colors.white, width: 2),
-                        borderRadius: BorderRadius.circular(25),
+                          color: Colors.blue,
+                          border: Border.all(color: Colors.white, width: 2),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 10,
+                              spreadRadius: 0,
+                            )
+                          ]
                       ),
                       child: const Icon(
                         Icons.camera_alt_outlined,
@@ -166,115 +308,142 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                     ),
                   ),
                 ),
+
+              // Curved top for profile content
               Positioned(
-                 top: 230,
+                  top: 230,
                   left: 0,
                   right: 0,
                   child: Container(
-                     height: 100,
-                decoration: BoxDecoration(
-                    color: context.cardColor,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    )
-                            ))),
+                      height: 100,
+                      decoration: BoxDecoration(
+                          color: context.cardColor,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(30),
+                            topRight: Radius.circular(30),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              spreadRadius: 0,
+                              offset: Offset(0, -2),
+                            )
+                          ]
+                      )
+                  )
+              ),
 
+              // Profile picture with animated scale effect
               Positioned(
                 right: (100.w/2)-60,
                 top: 180,
-                child: Stack(
-                  children: [
-                    // Profile Picture
-                    Container(
-                      margin: const EdgeInsets.all(10),
-                      height: 100,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 3),
-                        borderRadius: BorderRadius.circular(50),
-                        color: Colors.grey.shade200,
-                      ),
-                      child: ClipOval(
-                        child: widget.userProfile?.profilePicture == null
-                            ? Image.asset(
-                          'images/socialv/faces/face_5.png',
-                          height: 100,
-                          width: 100,
-                          fit: BoxFit.cover,
-                        )
-                            : CustomImageView(
-                          imagePath: widget.userProfile?.profilePicture ?? '',
-                          height: 100,
-                          width: 100,
-                          fit: BoxFit.cover,
-                          placeHolder: 'images/socialv/faces/face_5.png',
+                child: ScaleTransition(
+                  scale: _profileImageAnimation,
+                  child: Stack(
+                    children: [
+                      // Profile Picture with improved styling
+                      Container(
+                        margin: const EdgeInsets.all(10),
+                        height: 100,
+                        width: 100,
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white, width: 4),
+                            borderRadius: BorderRadius.circular(50),
+                            color: Colors.grey.shade200,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 10,
+                                spreadRadius: 0,
+                              )
+                            ]
                         ),
-                      ),
-                    ).onTap(() async {
-
+                        child: Hero(
+                          tag: 'profile-image',
+                          child: ClipOval(
+                            child: widget.userProfile?.profilePicture == null
+                                ? Image.asset(
+                              'images/socialv/faces/face_5.png',
+                              height: 100,
+                              width: 100,
+                              fit: BoxFit.cover,
+                            )
+                                : CustomImageView(
+                              imagePath: widget.userProfile?.profilePicture ?? '',
+                              height: 100,
+                              width: 100,
+                              fit: BoxFit.cover,
+                              placeHolder: 'images/socialv/faces/face_5.png',
+                            ),
+                          ),
+                        ),
+                      ).onTap(() async {
                         ProfileImageScreen(
                           imageUrl: '${widget.userProfile?.profilePicture}',
                         ).launch(context);
+                      }),
 
-                    }),
-                    // Camera Icon
-                    if (widget.isMe ?? false)
-                      Positioned(
-                        top: 10,
-                        right: 5,
-                        child: Material(
-                          color: Colors.transparent, // Ensure tap passes through transparent areas
-                          child: InkWell(
-                            onTap: () async {
-                              const permission = Permission.storage;
-                              const permission1 = Permission.photos;
-                              var status = await permission.status;
-                              print(status);
-                              if (await permission1.isGranted) {
-                                _showFileOptions(true);
-                                // _selectFiles(context);
-                              } else if (await permission1.isDenied) {
-                                final result = await permission1.request();
-                                if (status.isGranted) {
+                      // Camera icon for profile picture with improved styling
+                      if (widget.isMe ?? false)
+                        Positioned(
+                          top: 10,
+                          right: 5,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {
+                                const permission = Permission.storage;
+                                const permission1 = Permission.photos;
+                                var status = await permission.status;
+                                print(status);
+                                if (await permission1.isGranted) {
                                   _showFileOptions(true);
-                                  // _selectFiles(context);
-                                  print("isGranted");
-                                } else if (result.isGranted) {
-                                  _showFileOptions(true);
-                                  // _selectFiles(context);
-                                  print("isGranted");
-                                } else if (result.isDenied) {
-                                  final result = await permission.request();
-                                  print("isDenied");
-                                } else if (result.isPermanentlyDenied) {
+                                } else if (await permission1.isDenied) {
+                                  final result = await permission1.request();
+                                  if (status.isGranted) {
+                                    _showFileOptions(true);
+                                    print("isGranted");
+                                  } else if (result.isGranted) {
+                                    _showFileOptions(true);
+                                    print("isGranted");
+                                  } else if (result.isDenied) {
+                                    final result = await permission.request();
+                                    print("isDenied");
+                                  } else if (result.isPermanentlyDenied) {
+                                    print("isPermanentlyDenied");
+                                  }
+                                } else if (await permission.isPermanentlyDenied) {
                                   print("isPermanentlyDenied");
-                                  // _permissionDialog(context);
                                 }
-                              } else if (await permission.isPermanentlyDenied) {
-                                print("isPermanentlyDenied");
-                                // _permissionDialog(context);
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(20), // For ripple effect shape
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                border: Border.all(color: Colors.white, width: 2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt_outlined,
-                                color: Colors.white,
-                                size: 20,
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                height: 36,
+                                width: 36,
+                                decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                    borderRadius: BorderRadius.circular(18),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 5,
+                                        spreadRadius: 0,
+                                      )
+                                    ]
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt_outlined,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -282,7 +451,9 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
           Column(
             children: [
               // Profile Image
-              const SizedBox(height:30),
+              const SizedBox(height: 30),
+
+              // User name with verification badge
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -291,259 +462,309 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                       '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
                       style: TextStyle(
                           color: svGetBodyColor(),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500)),
-                  4.width,
+                          fontSize: 20, // Increased font size
+                          fontWeight: FontWeight.w600)), // Made font bolder
+                  8.width, // More spacing
                   Image.asset('images/socialv/icons/ic_TickSquare.png',
-                      height: 14, width: 14, fit: BoxFit.cover),
+                      height: 16, width: 16, fit: BoxFit.cover),
                 ],
               ),
+
+              // Location information
               SizedBox(
                 width: 80.w,
-                child: Text('${widget.userProfile?.user?.state?? ''} ${widget.userProfile?.user?.state != null ?',':''}${widget.userProfile?.user?.country ?? ''}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    )),
-              ),
-              SizedBox(
-                width: 80.w,
-                child: Text(widget.userProfile?.user?.specialty ?? '',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: svGetBodyColor(),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    )),
-              ),
-              SizedBox(
-                width: 80.w,
-                child: Text(widget.userProfile?.profile?.aboutMe ?? '',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: svGetBodyColor(),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                    )),
-              ),
-              // Follow button
-              // ElevatedButton.icon(
-              //   onPressed: () {},
-              //   icon: const Icon(Icons.person_add),
-              //   label: const Text('Follow'),
-              //   style: ElevatedButton.styleFrom(
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(20),
-              //     ),
-              //   ),
-              // ),
-              // const SizedBox(height: 20),
-              // // Stats Row
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //   children: [
-              //     Column(
-              //       children: const [
-              //         Text(
-              //           '150',
-              //           style: TextStyle(
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //           ),
-              //         ),
-              //         Text(
-              //           'Posts',
-              //           style: TextStyle(color: Colors.grey),
-              //         ),
-              //       ],
-              //     ),
-              //     Column(
-              //       children: const [
-              //         Text(
-              //           '2500',
-              //           style: TextStyle(
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //           ),
-              //         ),
-              //         Text(
-              //           'Following',
-              //           style: TextStyle(color: Colors.grey),
-              //         ),
-              //       ],
-              //     ),
-              //     Column(
-              //       children: const [
-              //         Text(
-              //           '3500',
-              //           style: TextStyle(
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //           ),
-              //         ),
-              //         Text(
-              //           'Followers',
-              //           style: TextStyle(color: Colors.grey),
-              //         ),
-              //       ],
-              //     ),
-              //   ],
-              // ),
-              if (widget.isMe ?? false) _buildPointsCard(context),
-              if (widget.isMe != true)
-                Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    InkWell(
-                      onTap: () {
-                        ChatRoomScreen(
-                          username:
-                          '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}',
-                          profilePic:
-                          '${widget.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                          id: '${widget.userProfile?.user?.id}',
-                          roomId: '',
-                        ).launch(context);
-                      },
-                      child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border:
-                            Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          height: 40.0,
-                          child: SvgPicture.asset(
-                            'assets/icon/ic_message.svg',
-                            color: Colors.blue,
-                          )
-                        // Text('Chat',
-                        //     style: boldTextStyle(color: Colors.white)),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    MaterialButton(
-                      height: 40.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6)),
-                      minWidth: 100,
-                      onPressed: () {
-                        if (widget.userProfile!.isFollowing ?? false) {
-                          widget.profileBoc?.add(SetUserFollow(
-                              widget.userProfile?.user?.id ?? '',
-                              'unfollow'));
-
-                          widget.userProfile!.isFollowing = false;
-                        } else {
-                          widget.profileBoc?.add(SetUserFollow(
-                              widget.userProfile?.user?.id ?? '',
-                              'follow'));
-
-                          widget.userProfile!.isFollowing = true;
-                        }
-                        setState(() {});
-                      },
-                      elevation: 2,
-                      color: SVAppColorPrimary,
-                      child: Text(
-                          widget.userProfile?.isFollowing ?? false
-                              ? translation(context).lbl_following
-                              : translation(context).lbl_follow,
-                          style: boldTextStyle(color: Colors.white)),
+                    Icon(Icons.location_on, size: 14, color: Colors.blue[300]),
+                    4.width,
+                    Text(
+                        '${widget.userProfile?.user?.state ?? ''} ${widget.userProfile?.user?.state != null ? ',' : ''}${widget.userProfile?.user?.country ?? ''}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500, // Made font bolder
+                        )
                     ),
                   ],
                 ),
-              16.height,
-              // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: Column(
-                      children: [
-                        Text('${widget.userProfile?.totalPosts ?? ''}',
-                            style: boldTextStyle(size: 18)),
-                        4.height,
-                        Text(translation(context).lbl_posts,
-                            style: secondaryTextStyle(
-                                color: svGetBodyColor(), size: 12)),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      if (!(widget.isMe ?? false)) {
-                        FollowerScreen(
-                          isFollowersScreen: true,
-                          userId: widget.userProfile?.user?.id ?? '',
-                        ).launch(context);
-                      } else {
-                        FollowerScreen(
-                          isFollowersScreen: true,
-                          userId: AppData.logInUserId,
-                        ).launch(context);
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Text(
-                            widget.userProfile?.totalFollows
-                                ?.totalFollowings ??
-                                '',
-                            style: boldTextStyle(size: 18)),
-                        4.height,
-                        Text(translation(context).lbl_followers,
-                            style: secondaryTextStyle(
-                                color: svGetBodyColor(), size: 12)),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      if (!(widget.isMe ?? false)) {
-                        FollowerScreen(
-                          isFollowersScreen: false,
-                          userId: widget.userProfile?.user?.id ?? '',
-                        ).launch(context);
-                      } else {
-                        FollowerScreen(
-                          isFollowersScreen: false,
-                          userId: AppData.logInUserId,
-                        ).launch(context);
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Text(
-                            widget.userProfile?.totalFollows
-                                ?.totalFollowers ??
-                                '',
-                            style: boldTextStyle(size: 18)),
-                        4.height,
-                        Text(translation(context).lbl_followings,
-                            style: secondaryTextStyle(
-                                color: svGetBodyColor(), size: 12)),
-                      ],
-                    ),
-                  )
-                ],
               ),
-              16.height,
+
+              // Specialty
+              if (widget.userProfile?.user?.specialty != null && widget.userProfile!.user!.specialty!.isNotEmpty)
+                SizedBox(
+                  width: 80.w,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.medical_services_outlined, size: 14, color: Colors.blue[300]),
+                      4.width,
+                      Flexible(
+                        child: Text(
+                            widget.userProfile?.user?.specialty ?? '',
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: svGetBodyColor(),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            )
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // About me text
+              if (widget.userProfile?.profile?.aboutMe != null && widget.userProfile!.profile!.aboutMe!.isNotEmpty)
+                Container(
+                  width: 90.w,
+                  margin: const EdgeInsets.only(top: 8, bottom: 4),
+                  child: Text(
+                      widget.userProfile?.profile?.aboutMe ?? '',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: svGetBodyColor(),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        height: 1.4,
+                      )
+                  ),
+                ),
+
+              // Points card for the user's own profile
+              if (widget.isMe ?? false)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: _buildPointsCard(context),
+                ),
+
+              // Message and Follow buttons for other users' profiles
+              if (widget.isMe != true)
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Message button with improved styling
+                      InkWell(
+                        onTap: () {
+                          ChatRoomScreen(
+                            username:
+                            '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}',
+                            profilePic:
+                            '${widget.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                            id: '${widget.userProfile?.user?.id}',
+                            roomId: '',
+                          ).launch(context);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.blue),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.1),
+                                blurRadius: 5,
+                                offset: Offset(0, 2),
+                              )
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icon/ic_message.svg',
+                                color: Colors.blue,
+                                width: 20,
+                                height: 20,
+                              ),
+                              8.width,
+                              Text(
+                                translation(context).lbl_message,
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      // Follow button with improved styling
+                      MaterialButton(
+                        height: 40.0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)
+                        ),
+                        minWidth: 110,
+                        onPressed: () {
+                          if (widget.userProfile!.isFollowing ?? false) {
+                            widget.profileBoc?.add(SetUserFollow(
+                                widget.userProfile?.user?.id ?? '',
+                                'unfollow'));
+
+                            widget.userProfile!.isFollowing = false;
+                          } else {
+                            widget.profileBoc?.add(SetUserFollow(
+                                widget.userProfile?.user?.id ?? '',
+                                'follow'));
+
+                            widget.userProfile!.isFollowing = true;
+                          }
+                          setState(() {});
+                        },
+                        elevation: 2,
+                        color: widget.userProfile?.isFollowing ?? false
+                            ? Colors.grey[200]
+                            : SVAppColorPrimary,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              widget.userProfile?.isFollowing ?? false
+                                  ? Icons.check
+                                  : Icons.person_add_alt_1_rounded,
+                              color: widget.userProfile?.isFollowing ?? false
+                                  ? Colors.black54
+                                  : Colors.white,
+                              size: 18,
+                            ),
+                            6.width,
+                            Text(
+                                widget.userProfile?.isFollowing ?? false
+                                    ? translation(context).lbl_following
+                                    : translation(context).lbl_follow,
+                                style: TextStyle(
+                                  color: widget.userProfile?.isFollowing ?? false
+                                      ? Colors.black54
+                                      : Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                )
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Stats row (posts, followers, following)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.shade200, width: 1),
+                    bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Posts stat
+                    GestureDetector(
+                      onTap: () {},
+                      child: StatItem(
+                        count: '${widget.userProfile?.totalPosts ?? ''}',
+                        label: translation(context).lbl_posts,
+                        onTap: () {},
+                        icon: Icons.article_rounded,
+                      ),
+                    ),
+
+                    // Followers stat
+                    GestureDetector(
+                      onTap: () {
+                        if (!(widget.isMe ?? false)) {
+                          FollowerScreen(
+                            isFollowersScreen: true,
+                            userId: widget.userProfile?.user?.id ?? '',
+                          ).launch(context);
+                        } else {
+                          FollowerScreen(
+                            isFollowersScreen: true,
+                            userId: AppData.logInUserId,
+                          ).launch(context);
+                        }
+                      },
+                      child: StatItem(
+                        count: widget.userProfile?.totalFollows?.totalFollowings ?? '',
+                        label: translation(context).lbl_followers,
+                        onTap: () {
+                          if (!(widget.isMe ?? false)) {
+                            FollowerScreen(
+                              isFollowersScreen: true,
+                              userId: widget.userProfile?.user?.id ?? '',
+                            ).launch(context);
+                          } else {
+                            FollowerScreen(
+                              isFollowersScreen: true,
+                              userId: AppData.logInUserId,
+                            ).launch(context);
+                          }
+                        },
+                        icon: Icons.people_alt_rounded,
+                      ),
+                    ),
+
+                    // Following stat
+                    GestureDetector(
+                      onTap: () {
+                        if (!(widget.isMe ?? false)) {
+                          FollowerScreen(
+                            isFollowersScreen: false,
+                            userId: widget.userProfile?.user?.id ?? '',
+                          ).launch(context);
+                        } else {
+                          FollowerScreen(
+                            isFollowersScreen: false,
+                            userId: AppData.logInUserId,
+                          ).launch(context);
+                        }
+                      },
+                      child: StatItem(
+                        count: widget.userProfile?.totalFollows?.totalFollowers ?? '',
+                        label: translation(context).lbl_followings,
+                        onTap: () {
+                          if (!(widget.isMe ?? false)) {
+                            FollowerScreen(
+                              isFollowersScreen: false,
+                              userId: widget.userProfile?.user?.id ?? '',
+                            ).launch(context);
+                          } else {
+                            FollowerScreen(
+                              isFollowersScreen: false,
+                              userId: AppData.logInUserId,
+                            ).launch(context);
+                          }
+                        },
+                        icon: Icons.person_add_rounded,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+
               Container(
                 color: svGetBgColor(),
                 height: 10,
               ),
+
+              // Profile posts component
               SVProfilePostsComponent(
                 widget.profileBoc!,
               ),
             ],
           ),
-
         ],
       ),
     );
@@ -551,18 +772,50 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
 
   var _selectedFile;
 
+  // Improved file picker bottom sheet
   void _showFileOptions(bool isProfilePic) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
       builder: (BuildContext context) {
         return Container(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Text(
+                isProfilePic
+                    ? translation(context).lbl_update_profile_picture
+                    : translation(context).lbl_update_cover_photo,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 20),
               ListTile(
-                leading: const Icon(Icons.photo),
-                title: Text(translation(context).lbl_choose_from_gallery),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.photo_library, color: Colors.blue),
+                ),
+                title: Text(
+                  translation(context).lbl_choose_from_gallery,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   File? file = await _pickFile(ImageSource.gallery);
@@ -576,9 +829,22 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                   }
                 },
               ),
+              const SizedBox(height: 8),
               ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: Text(translation(context).lbl_take_a_picture),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.camera_alt, color: Colors.green),
+                ),
+                title: Text(
+                  translation(context).lbl_take_a_picture,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   File? file = await _pickFile(ImageSource.camera);
@@ -592,19 +858,6 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> {
                   }
                 },
               ),
-              // ListTile(
-              //   leading: const Icon(Icons.insert_drive_file),
-              //   title: const Text('Select a document'),
-              //   onTap: () async {
-              //     Navigator.pop(context);
-              //     File? file = await _pickFile(ImageSource.gallery);
-              //     if (file != null) {
-              //       setState(() {
-              //         _selectedFile = file;
-              //       });
-              //     }
-              //   },
-              // ),
             ],
           ),
         );

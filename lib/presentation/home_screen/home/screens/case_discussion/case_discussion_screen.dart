@@ -159,7 +159,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                                           newValue.id.toString(),
                                           state.typeValue,
                                           state.searchTerms ?? '',
-                                          state.isExpired ?? 'New'));
+                                           'New'));
                                   caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
                                     page: 1,
                                     countryId: newValue.id.toString(),
@@ -233,7 +233,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                                             state.countryFlag,
                                             state.typeValue,
                                             searchTxt ?? '',
-                                            state.isExpired));
+                                            ''));
                                     caseDiscusstionBloc.add(CaseDiscussionLoadPageEvent(
                                       page: 1,
                                       countryId: state.countryFlag != ''
@@ -257,7 +257,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                                                 state.countryFlag,
                                                 state.typeValue,
                                                 _controller.text ?? '',
-                                                state.isExpired));
+                                               ''));
                                         caseDiscusstionBloc
                                             .add(CaseDiscussionLoadPageEvent(
                                           page: 1,

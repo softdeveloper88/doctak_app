@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
+import '../../main.dart';
 import 'bloc/notification_bloc.dart';
 import 'bloc/notification_state.dart';
 
@@ -39,24 +40,75 @@ class _UserAnnouncementDetailScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: appStore.isDarkMode ? Colors.grey[900] : Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: context.cardColor,
+        backgroundColor: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Announcement Detail',
-            style: boldTextStyle(
-              size: 20,
-            )),
         elevation: 0,
-        centerTitle: false,
+        toolbarHeight: 70,
+        surfaceTintColor: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
+        centerTitle: true,
         leading: IconButton(
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.announcement_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Announcement Detail',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.share_rounded,
+                color: Colors.blue[600],
+                size: 14,
+              ),
+            ),
             onPressed: () {
-              Navigator.pop(context);
-            }),
-        actions: const [
-          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+              // Add share functionality
+            },
+          ),
+          const SizedBox(width: 16),
         ],
       ),
       body: BlocConsumer<NotificationBloc, NotificationState>(
@@ -73,188 +125,332 @@ class _UserAnnouncementDetailScreenState
             AnnouncementDetailData announcementData =
                 notificationBloc.announcementDetailModel?.data ??
                     AnnouncementDetailData();
-            return Stack(
-              children: [
-                // Background Image
-                Positioned.fill(
-                  child: Container(
-                    width: double.maxFinite,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/image_icon.png'),
-                        fit: BoxFit
-                            .fill, // Ensures the image covers the entire background
-                      ),
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Main announcement card
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(10),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ),
-                ), // Content
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {},
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                        "${AppData.imageUrl}${announcementData.user?.profilePic ?? ""}",
-                                      ),
-                                      radius: 25,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Wrap(
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          children: [
-                                            Text(
-                                              '${announcementData.user?.firstName} ${announcementData.user?.lastName}',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // User info header
+                          Row(
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.blue.withAlpha(26),
+                                ),
+                                child: ClipOval(
+                                  child: announcementData.user?.profilePic != null
+                                      ? Image.network(
+                                          "${AppData.imageUrl}${announcementData.user?.profilePic ?? ""}",
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Center(
+                                              child: Text(
+                                                announcementData.user?.firstName?.substring(0, 1).toUpperCase() ?? 'A',
+                                                style: TextStyle(
+                                                  color: Colors.blue[700],
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                ),
                                               ),
+                                            );
+                                          },
+                                        )
+                                      : Center(
+                                          child: Text(
+                                            announcementData.user?.firstName?.substring(0, 1).toUpperCase() ?? 'A',
+                                            style: TextStyle(
+                                              color: Colors.blue[700],
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
                                             ),
-                                            const Text(
-                                              ' · ',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            SvgPicture.asset(
-                                             'assets/icon/ic_tick.svg',
-                                              height: 14,
-                                              width: 14,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ],
+                                          ),
                                         ),
-                                        Row(
-                                          spacing: 10,
-                                          children: [
-                                            SvgPicture.asset(
-                                              icSpecialty,
-                                              height: 14,
-                                              width: 14,
-                                              fit: BoxFit.contain,
-                                            ),
-                                            Text(
-                                              announcementData
-                                                  .user
-                                                  ?.specialty ??
-                                                  '',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            // const Text(
-                                            //   ' · ',
-                                            //   style: TextStyle(
-                                            //       fontSize: 16,
-                                            //       color: Colors.white,
-                                            //       fontWeight:
-                                            //           FontWeight.bold),
-                                            // ),
-                                            // SvgPicture.asset(
-                                            //   icGlob,
-                                            //   color: Colors.white,
-                                            //   height: 12,
-                                            //   width: 12,
-                                            // ),
-                                          ],
+                                ),
+                              ),
+                              16.width,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${announcementData.user?.firstName} ${announcementData.user?.lastName}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: appStore.isDarkMode
+                                                ? Colors.white
+                                                : Colors.grey[800],
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                        6.width,
+                                        SvgPicture.asset(
+                                          'assets/icon/ic_tick.svg',
+                                          height: 16,
+                                          width: 16,
+                                          colorFilter: ColorFilter.mode(
+                                            Colors.blue[600]!,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    4.height,
+                                    Row(
+                                      children: [
+                                        SvgPicture.asset(
+                                          icSpecialty,
+                                          height: 14,
+                                          width: 14,
+                                          colorFilter: ColorFilter.mode(
+                                            Colors.grey[600]!,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                        6.width,
+                                        Text(
+                                          announcementData.user?.specialty ?? '',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[600],
+                                            fontFamily: 'Poppins',
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                            Text(
-                              timeAgo.format(DateTime.parse(
-                                  announcementData.createdAt ?? '')),
-                              style: const TextStyle(color: Colors.white),
-                            )
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: CustomImageView(
-                            imagePath: announcementData.image ?? '',
-                            fit: BoxFit.cover,
-                            height: 300,
-                            width: double.infinity,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withAlpha(26),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      'Official',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.blue[700],
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
+                                  6.height,
+                                  Text(
+                                    timeAgo.format(DateTime.parse(
+                                        announcementData.createdAt ?? '')),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[500],
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Title and Details (Inside Slider)
-                        Center(
-                          child: Text(
+                          24.height,
+                          // Title
+                          Text(
                             announcementData.title ?? "",
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: appStore.isDarkMode
+                                  ? Colors.white
+                                  : Colors.grey[900],
+                              fontFamily: 'Poppins',
                             ),
                           ),
-                        ),
-                        Center(
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: _isExpanded
-                                      ? announcementData.details
-                                      : (announcementData.details?.length ??
-                                                  0) >
-                                              100
-                                          ? '${announcementData.details?.substring(0, 100)}...'
-                                          : announcementData.details,
-                                  style: const TextStyle(
-                                      fontSize: 16, color: Colors.white),
+                          16.height,
+                          // Announcement image
+                          if (announcementData.image != null && announcementData.image!.isNotEmpty)
+                            Container(
+                              width: double.infinity,
+                              height: 200,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.grey[100],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: CustomImageView(
+                                  imagePath: announcementData.image ?? '',
+                                  fit: BoxFit.cover,
                                 ),
-                                if ((announcementData.details?.length ?? 0) >
-                                    100)
-                                  WidgetSpan(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _isExpanded = !_isExpanded;
-                                        });
-                                      },
-                                      child: Text(
-                                        _isExpanded ? ' See Less' : ' See More',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                              ),
+                            ),
+                          if (announcementData.image != null && announcementData.image!.isNotEmpty)
+                            20.height,
+                          // Details section
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: appStore.isDarkMode ? Colors.grey[800] : Colors.grey[50],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.blue.withAlpha(26),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline_rounded,
+                                      color: Colors.blue[600],
+                                      size: 20,
+                                    ),
+                                    8.width,
+                                    Text(
+                                      'Details',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.blue[700],
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                12.height,
+                                Text(
+                                  _isExpanded
+                                      ? announcementData.details ?? ''
+                                      : (announcementData.details?.length ?? 0) > 200
+                                          ? '${announcementData.details?.substring(0, 200)}...'
+                                          : announcementData.details ?? '',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: appStore.isDarkMode
+                                        ? Colors.grey[300]
+                                        : Colors.grey[700],
+                                    fontFamily: 'Poppins',
+                                    height: 1.6,
+                                  ),
+                                ),
+                                if ((announcementData.details?.length ?? 0) > 200)
+                                  8.height,
+                                if ((announcementData.details?.length ?? 0) > 200)
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _isExpanded = !_isExpanded;
+                                      });
+                                    },
+                                    child: Text(
+                                      _isExpanded ? 'Show Less' : 'Show More',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.blue[600],
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Poppins',
                                       ),
                                     ),
                                   ),
                               ],
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  24.height,
+                  // Action buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // Add bookmark functionality
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appStore.isDarkMode ? Colors.grey[800] : Colors.grey[100],
+                            foregroundColor: appStore.isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          icon: const Icon(Icons.bookmark_border_rounded, size: 18),
+                          label: const Text(
+                            'Save',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ),
+                      ),
+                      12.width,
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // Add share functionality
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[600],
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          icon: const Icon(Icons.share_rounded, size: 18),
+                          label: const Text(
+                            'Share',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Bottom padding for better scroll experience
+                  32.height,
+                ],
+              ),
             );
           } else if (state is DataError) {
             return Center(

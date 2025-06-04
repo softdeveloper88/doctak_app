@@ -157,6 +157,7 @@ class CustomDropdownField<T> extends StatelessWidget {
     this.textSizedBoxwidth,
     this.contentPadding,
     this.borderRadius,
+    this.decoration,
     this.isTimeDropDown = false,
     this.isEnableDropDown = true,
     this.isTextBold = true,
@@ -173,6 +174,7 @@ class CustomDropdownField<T> extends StatelessWidget {
   final double? borderRadius;
   final bool isTextBold;
   final EdgeInsets? contentPadding;
+  final BoxDecoration? decoration;
 
   final Function(T?) onChanged;
   final Widget Function(T) itemBuilder;

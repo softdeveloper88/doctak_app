@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:quill_html_converter/quill_html_converter.dart';
 import 'package:sizer/sizer.dart';
+import 'package:nb_utils/nb_utils.dart';
 
+import '../../../../../main.dart';
 import '../bloc/add_post_event.dart';
 
 class SVPostTextComponent extends StatefulWidget {
@@ -60,28 +62,54 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 16, right: 16),
-      // margin: const EdgeInsets.only(left: 16,right: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-          color: svGetScaffoldColor(),
-          borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(SVAppCommonRadius),
-              topRight: Radius.circular(SVAppCommonRadius))),
+        color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(color: Colors.white, child: TextFormField(controller:textEditingController,focusNode: editorFocusNode,minLines: 5,maxLines: 10,onChanged: (value){
-           print(value);
-            widget.searchPeopleBloc.add(TextFieldEvent(value));
-
-          },decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: translation(context).lbl_whats_on_your_mind,
-            focusedBorder: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            errorBorder: InputBorder.none,
-            disabledBorder: InputBorder.none,
-          ),)),
+          // Modern Text Input Field
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: TextFormField(
+              controller: textEditingController,
+              focusNode: editorFocusNode,
+              minLines: 5,
+              maxLines: 10,
+              style: const TextStyle(
+                fontSize: 16,
+                fontFamily: 'Poppins',
+                color: Colors.black87,
+              ),
+              onChanged: (value) {
+                print(value);
+                widget.searchPeopleBloc.add(TextFieldEvent(value));
+              },
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: translation(context).lbl_whats_on_your_mind,
+                hintStyle: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Poppins',
+                  color: Colors.grey[400],
+                ),
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+              ),
+            ),
+          ),
           // PreferredSize(
           //   preferredSize: const Size.fromHeight(kToolbarHeight),
           //   child: quill.QuillToolbar.simple(
@@ -144,32 +172,82 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
           //   //   scrollController: ScrollController(),
           //   // )
           // ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  height: 30,
-                  width: 30,
+          // Color Selector Section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.05),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Color Preview
+                Container(
+                  height: 32,
+                  width: 32,
                   decoration: BoxDecoration(
-                      color: widget.colorValue,
-                      border: Border.all(color: svGetBodyColor(), width: 1),
-                      borderRadius: BorderRadius.circular(100)),
+                    color: widget.colorValue,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.grey.withOpacity(0.3),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.colorValue!.withOpacity(0.3),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                    onPressed: widget.onColorChange!(),
-                    icon: Icon(
-                      Icons.color_lens,
-                      color: svGetBodyColor(),
-                      size: 40,
-                    )),
-              ),
-            ],
-          )
+                const SizedBox(width: 12),
+                // Color Picker Button
+                InkWell(
+                  onTap: widget.onColorChange!(),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.blue.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.palette_outlined,
+                          color: Colors.blue[700],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Background',
+                          style: TextStyle(
+                            color: Colors.blue[700],
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

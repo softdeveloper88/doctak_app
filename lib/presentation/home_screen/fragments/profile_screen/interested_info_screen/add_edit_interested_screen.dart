@@ -23,38 +23,75 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
-        surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
-        title: Text(translation(context).lbl_interest_details, style: boldTextStyle(size: 20)),
-        elevation: 0,
-        centerTitle: true,
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Icon(Icons.arrow_back_ios, color: svGetBodyColor())),
         iconTheme: IconThemeData(color: context.iconColor),
+        elevation: 0,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
+        centerTitle: true,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.edit_note_rounded,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_interest_details,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
+        ),
         actions: [
-          GestureDetector(
-            onTap: () {
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_circle_outline,
+                color: Colors.blue[600],
+                size: 14,
+              ),
+            ),
+            onPressed: () {
               setState(() {
                 // widget.profileBloc.interestList!.add(InterestModel());
               });
             },
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.add_circle_outline_sharp,
-                color: Colors.black,
-                size: 30,
-                // color: Colors.black,
-                // imagePath: 'assets/icon/ic_vector.svg',
-                // height: 25.adaptSize,
-                // width: 25.adaptSize,
-                // margin: EdgeInsets.only(top: 4.v, right: 4.v),
-              ),
-            ),
           ),
+          const SizedBox(width: 16),
         ],
       ),
       body: Padding(

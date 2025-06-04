@@ -34,6 +34,7 @@ class CustomTextField extends StatelessWidget {
     this.initialValue,
     this.onSaved,
     this.onFieldSubmitted,
+    this.onChanged,
     this.validator,
   }) : super(
           key: key,
@@ -85,6 +86,7 @@ class CustomTextField extends StatelessWidget {
   final bool? isReadOnly;
   final Function(String)? onSaved;
   final Function(String)? onFieldSubmitted;
+  final Function(String)? onChanged;
   final String? initialValue;
 
   final FormFieldValidator<String>? validator;
@@ -108,12 +110,25 @@ class CustomTextField extends StatelessWidget {
           readOnly: isReadOnly ?? false,
           scrollPadding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          onFieldSubmitted: (v) => onFieldSubmitted!(v),
+          onFieldSubmitted: (v) {
+            if (onFieldSubmitted != null) {
+              onFieldSubmitted!(v);
+            }
+          },
+          onChanged: (v) {
+            if (onChanged != null) {
+              onChanged!(v);
+            }
+          },
           controller: controller,
           focusNode: focusNode ?? FocusNode(),
           autofocus: autofocus!,
           minLines: minLines ?? 1,
-          onSaved: (v) => onSaved!(v!),
+          onSaved: (v) {
+            if (onSaved != null) {
+              onSaved!(v ?? '');
+            }
+          },
           initialValue: initialValue,
           style: secondaryTextStyle(color: SVAppColorPrimary),
           // style: textStyle ?? CustomTextStyles.titleMediumMedium,

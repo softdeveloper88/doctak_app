@@ -85,7 +85,7 @@ class ConnectingView extends StatelessWidget {
               customMessage ?? (isIncoming
                   ? translation(context).lbl_connecting
                   : "${translation(context).lbl_ringing} $contactName..."),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,

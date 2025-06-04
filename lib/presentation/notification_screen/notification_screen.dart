@@ -1,23 +1,17 @@
-import 'dart:async';
-
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discuss_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
-import 'package:doctak_app/presentation/notification_screen/user_announcement_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../localization/app_localization.dart';
 import '../../widgets/custom_image_view.dart';
@@ -33,15 +27,11 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  // NotificationBloc widget.notificationBloc = NotificationBloc();
-  Timer? _debounce;
-  final TextEditingController _controller = TextEditingController();
-  List<String> _filteredSuggestions = [];
-  int selectIndex = 0;
+  bool isFilterShow = false;
+  int selectedFilterIndex = 0; // 0 for All, 1 for Unread
 
   @override
   void dispose() {
-    _debounce?.cancel();
     super.dispose();
   }
 
@@ -54,51 +44,215 @@ class _NotificationScreenState extends State<NotificationScreen> {
     super.initState();
   }
 
-  // var selectedValue;
-  // bool isShownSuggestion = false;
-  // bool isSearchShow = true;
-  int selectedIndex = 0;
-
-  Future<void> _launchInBrowser(Uri url) async {
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
-      throw Exception('Could not launch $url');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-        backgroundColor: context.cardColor,
-        iconTheme: IconThemeData(color: context.iconColor),
-        title: Text(translation(context).lbl_notifications,
-            style: boldTextStyle(
-              size: 20,
-            )),
-        elevation: 0,
-        centerTitle: false,
-        leading: IconButton(
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-            onPressed: () {
-              widget.notificationBloc.add(
-                NotificationLoadPageEvent(
-                  page: 1,
-                ),
-              );
-              Navigator.pop(context);
-            }),
-        actions: const [
-          // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-        ],
-      ),
       body: Column(
         children: [
+          // Modern AppBar
+          AppBar(
+            backgroundColor: svGetScaffoldColor(),
+            iconTheme: IconThemeData(color: context.iconColor),
+            elevation: 0,
+            toolbarHeight: 70,
+            surfaceTintColor: svGetScaffoldColor(),
+            centerTitle: true,
+            leading: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.blue[600],
+                  size: 16,
+                ),
+              ),
+              onPressed: () {
+                widget.notificationBloc.add(
+                  NotificationLoadPageEvent(
+                    page: 1,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.notifications_rounded,
+                  color: Colors.blue[600],
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  translation(context).lbl_notifications,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: Colors.blue[800],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              // Filter icon button
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 36,
+                  minHeight: 36,
+                ),
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.filter_list_rounded,
+                    color: Colors.blue[600],
+                    size: 14,
+                  ),
+                ),
+                onPressed: () {
+                  setState(() {
+                    isFilterShow = !isFilterShow;
+                  });
+                },
+              ),
+              const SizedBox(width: 16),
+            ],
+          ),
+          // Filter toggle buttons
+          Container(
+            color: svGetScaffoldColor(),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: isFilterShow ? 66 : 0,
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: isFilterShow
+                  ? Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedFilterIndex = 0;
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: selectedFilterIndex == 0 
+                                    ? Colors.blue
+                                    : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (selectedFilterIndex == 0)
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          margin: const EdgeInsets.only(right: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.all_inclusive,
+                                            size: 14,
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                      Text(
+                                        'All',
+                                        style: TextStyle(
+                                          color: selectedFilterIndex == 0 
+                                            ? Colors.white
+                                            : Colors.black87,
+                                          fontSize: 14,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedFilterIndex = 1;
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: selectedFilterIndex == 1 
+                                    ? Colors.blue
+                                    : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (selectedFilterIndex == 1)
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          margin: const EdgeInsets.only(right: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.mark_email_unread,
+                                            size: 14,
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                      Text(
+                                        'Unread',
+                                        style: TextStyle(
+                                          color: selectedFilterIndex == 1 
+                                            ? Colors.white
+                                            : Colors.black87,
+                                          fontSize: 14,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox(),
+              ),
+            ),
+          ),
           Expanded(
             child: BlocConsumer<NotificationBloc, NotificationState>(
               bloc: widget.notificationBloc,
@@ -130,22 +284,55 @@ class _NotificationScreenState extends State<NotificationScreen> {
               },
             ),
           ),
-          if (widget.notificationBloc.totalNotifications > 0)
-            MaterialButton(
-              onPressed: () {
-                if (widget.notificationBloc.totalNotifications > 0) {
-                  widget.notificationBloc.add(
-                    NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'),
-                  );
-                }
-              },
-              minWidth: 100.w,
-              color: Colors.blue,
-              child: Text(
-                translation(context).lbl_mark_all_read,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
+          if (widget.notificationBloc.totalNotifications > 0 && widget.notificationBloc.notificationsList.any((n) => n.isRead != 1))
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: svGetScaffoldColor(),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    offset: const Offset(0, -2),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (widget.notificationBloc.totalNotifications > 0) {
+                    widget.notificationBloc.add(
+                      NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.done_all,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      translation(context).lbl_mark_all_read,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -158,169 +345,380 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget _buildPostList(BuildContext context) {
     final bloc = widget.notificationBloc;
     if (bloc.notificationsList.isNotEmpty) {
+      // Filter notifications based on selectedFilterIndex
+      final filteredList = selectedFilterIndex == 0 
+          ? bloc.notificationsList 
+          : bloc.notificationsList.where((notification) => notification.isRead != 1).toList();
+      
+      if (filteredList.isEmpty && selectedFilterIndex == 1) {
+        // Show empty state for unread filter when no unread notifications
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.mark_email_read,
+                  size: 48,
+                  color: Colors.blue[600],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'No unread notifications',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+      
       return ListView.builder(
-        itemCount: bloc.notificationsList.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: filteredList.length,
         itemBuilder: (context, index) {
+          final notification = filteredList[index];
+          final originalIndex = bloc.notificationsList.indexOf(notification);
+          
           if (bloc.pageNumber <= bloc.numberOfPage) {
-            if (index == bloc.notificationsList.length - bloc.nextPageTrigger) {
-              bloc.add(NotificationCheckIfNeedMoreDataEvent(index: index));
-              print(index);
+            if (originalIndex == bloc.notificationsList.length - bloc.nextPageTrigger) {
+              bloc.add(NotificationCheckIfNeedMoreDataEvent(index: originalIndex));
             }
           }
           if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-              index >= bloc.notificationsList.length - 1) {
+              index >= filteredList.length - 1 && selectedFilterIndex == 0) {
             return const SizedBox(height: 200, child: UserShimmer());
           } else {
-            return Column(
-              children: [
-                Material(
-                  color: bloc.notificationsList[index].isRead == 1
-                      ? Colors.white
-                      : Colors.blue[50],
-                  // color: Theme.of(context).cardColor,
-                  elevation: 0,
-                  borderRadius: BorderRadius.circular(10),
-                  child: ListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 16.0),
-                    title: RichText(
-                        text: TextSpan(
-                            text:
-                                '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''} ', // Default style for the initial part
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              color: Colors.black, // Default color
-                              fontSize: 16,
-                              fontWeight:
-                                  FontWeight.bold, // Default font size
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: notification.isRead == 1
+                    ? (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[850]
+                        : Colors.white)
+                    : Colors.blue.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: notification.isRead == 1
+                      ? Colors.grey.withOpacity(0.1)
+                      : Colors.blue.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    offset: const Offset(0, 2),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    bloc.add(ReadNotificationEvent(
+                        notificationId:
+                            notification.id.toString()));
+                    notification.isRead = 1;
+                    var typeNotification =
+                        notification.type;
+                    if (typeNotification == 'message') {
+                      ChatRoomScreen(
+                        username:
+                            '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''}',
+                        profilePic:
+                            '${notification.senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                        id: '${notification.userId}',
+                        roomId: '',
+                      ).launch(context);
+                    } else if (typeNotification == 'message_received') {
+                      ChatRoomScreen(
+                        username:
+                            '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''}',
+                        profilePic:
+                            '${notification.senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                        id: '${notification.fromUserId}',
+                        roomId: '',
+                      ).launch(context);
+                    } else if (typeNotification == 'discuss_case_comment_like') {
+                      CaseDiscussionScreen().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
+                    } else if (typeNotification == 'follow_request' ||
+                        typeNotification == 'friend_request' ||
+                        typeNotification == 'follower_notification' ||
+                        typeNotification == 'un_follower_notification') {
+                      SVProfileFragment(
+                              userId:
+                                  notification.fromUserId)
+                          .launch(context);
+                    } else if (typeNotification == 'comments_on_posts' || typeNotification == 'reply_to_comment' ||
+                        typeNotification == 'like_comment_on_post' ||
+                        typeNotification == 'like_comments') {
+                      PostDetailsScreen(
+                              commentId: notification.postId
+                                  .toInt())
+                          .launch(context);
+                      // SVCommentScreen(
+                      //   id: notification.postId.toInt(), homeBloc: HomeBloc(),)
+                      //     .launch(context);
+                    } else if (typeNotification == 'new_like' ||
+                        typeNotification == 'like_on_posts' ||
+                        typeNotification == 'likes_on_posts' ||
+                        typeNotification == 'post_liked') {
+                      PostDetailsScreen(
+                              postId: notification.postId
+                                  .toInt())
+                          .launch(context);
+                    } else if (typeNotification == 'new_job_posted' ||
+                        typeNotification == 'job_post_notification' ||
+                        typeNotification == 'job_update') {
+                      JobsDetailsScreen(
+                              jobId: notification.postId ??
+                                  '')
+                          .launch(context);
+                    }
+                    // Add your onTap functionality here
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        // Avatar with notification type indicator
+                        Stack(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                SVProfileFragment(
+                                        userId:
+                                            notification.fromUserId)
+                                    .launch(context);
+                              },
+                              borderRadius: BorderRadius.circular(25),
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.blue.withOpacity(0.2),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: CustomImageView(
+                                    fit: BoxFit.cover,
+                                    width: 50,
+                                    height: 50,
+                                    imagePath:
+                                        '${AppData.imageUrl}${notification.senderProfilePic ?? ''}',
+                                  ),
+                                ),
+                              ),
                             ),
-                            children: [
-                          TextSpan(
-                            text: bloc.notificationsList[index].text ?? "",
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.black, // Change color to blue
+                            // Notification type indicator
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: _getNotificationColor(notification.type),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  _getNotificationIcon(notification.type),
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                        ])),
-                    subtitle: Text(
-                      timeAgo.format(DateTime.parse(
-                          bloc.notificationsList[index].createdAt ?? "")),
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: Colors.grey[600],
-                        fontSize: 14.0,
-                      ),
-                    ),
-                    leading: InkWell(
-                      onTap: () {
-                        SVProfileFragment(
-                                userId:
-                                    bloc.notificationsList[index].fromUserId)
-                            .launch(context);
-                      },
-                      child: CircleAvatar(
-                        child: CustomImageView(
-                          fit: BoxFit.cover,
-                          width: 40,
-                          height: 40,
-                          radius: BorderRadius.circular(20),
-                          imagePath:
-                              '${AppData.imageUrl}${bloc.notificationsList[index].senderProfilePic ?? ''}',
+                          ],
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        // Content
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title
+                              RichText(
+                                text: TextSpan(
+                                  text: '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''} ',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black87,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: notification.text ?? "",
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Theme.of(context).brightness == Brightness.dark
+                                            ? Colors.white70
+                                            : Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              // Time
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    timeAgo.format(DateTime.parse(
+                                        notification.createdAt ?? "")),
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      color: Colors.grey[500],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Arrow
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Colors.blue[600],
+                            size: 14,
+                          ),
+                        ),
+                      ],
                     ),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      color: Colors.grey[600],
-                      size: 16.0,
-                    ),
-                    onTap: () {
-
-                      bloc.add(ReadNotificationEvent(
-                          notificationId:
-                              bloc.notificationsList[index].id.toString()));
-                      bloc.notificationsList[index].isRead = 1;
-                      var typeNotification =
-                          bloc.notificationsList[index].type;
-                      print(typeNotification);
-                      if (typeNotification == 'message') {
-                        ChatRoomScreen(
-                          username:
-                              '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
-                          profilePic:
-                              '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                          id: '${bloc.notificationsList[index].userId}',
-                          roomId: '',
-                        ).launch(context);
-                      } else if (typeNotification == 'message_received') {
-                        ChatRoomScreen(
-                          username:
-                              '${bloc.notificationsList[index].senderFirstName ?? ''} ${bloc.notificationsList[index].senderLastName ?? ''}',
-                          profilePic:
-                              '${bloc.notificationsList[index].senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                          id: '${bloc.notificationsList[index].fromUserId}',
-                          roomId: '',
-                        ).launch(context);
-                      } else if (typeNotification == 'discuss_case_comment_like') {
-                        CaseDiscussionScreen().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
-                      } else if (typeNotification == 'follow_request' ||
-                          typeNotification == 'friend_request' ||
-                          typeNotification == 'follower_notification' ||
-                          typeNotification == 'un_follower_notification') {
-                        SVProfileFragment(
-                                userId:
-                                    bloc.notificationsList[index].fromUserId)
-                            .launch(context);
-                      } else if (typeNotification == 'comments_on_posts' || typeNotification == 'reply_to_comment' ||
-                          typeNotification == 'like_comment_on_post' ||
-                          typeNotification == 'like_comments') {
-                        PostDetailsScreen(
-                                commentId: bloc
-                                    .notificationsList[index].postId
-                                    .toInt())
-                            .launch(context);
-                        // SVCommentScreen(
-                        //   id: bloc.notificationsList[index].postId.toInt(), homeBloc: HomeBloc(),)
-                        //     .launch(context);
-                      } else if (typeNotification == 'new_like' ||
-                          typeNotification == 'like_on_posts' ||
-                          typeNotification == 'likes_on_posts' ||
-                          typeNotification == 'post_liked') {
-                        PostDetailsScreen(
-                                postId: bloc.notificationsList[index].postId
-                                    .toInt())
-                            .launch(context);
-                      } else if (typeNotification == 'new_job_posted' ||
-                          typeNotification == 'job_post_notification' ||
-                          typeNotification == 'job_update') {
-                        JobsDetailsScreen(
-                                jobId: bloc.notificationsList[index].postId ??
-                                    '')
-                            .launch(context);
-                      }
-                      // Add your onTap functionality here
-                    },
                   ),
                 ),
-                const Divider(
-                  thickness: 0.2,
-                  endIndent: 16,
-                  indent: 16,
-                  color: Colors.grey,
-                )
-              ],
+              ),
             );
           }
         },
       );
     } else {
       return Center(
-        child: Text(translation(context).msg_no_notifications),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.notifications_off_outlined,
+                size: 48,
+                color: Colors.blue[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              translation(context).msg_no_notifications,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
       );
+    }
+  }
+
+  Color _getNotificationColor(String? type) {
+    switch (type) {
+      case 'message':
+      case 'message_received':
+        return Colors.green;
+      case 'new_like':
+      case 'like_on_posts':
+      case 'likes_on_posts':
+      case 'post_liked':
+        return Colors.red;
+      case 'comments_on_posts':
+      case 'reply_to_comment':
+      case 'like_comment_on_post':
+      case 'like_comments':
+        return Colors.blue;
+      case 'follow_request':
+      case 'friend_request':
+      case 'follower_notification':
+      case 'un_follower_notification':
+        return Colors.purple;
+      case 'new_job_posted':
+      case 'job_post_notification':
+      case 'job_update':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getNotificationIcon(String? type) {
+    switch (type) {
+      case 'message':
+      case 'message_received':
+        return Icons.message;
+      case 'new_like':
+      case 'like_on_posts':
+      case 'likes_on_posts':
+      case 'post_liked':
+        return Icons.favorite;
+      case 'comments_on_posts':
+      case 'reply_to_comment':
+      case 'like_comment_on_post':
+      case 'like_comments':
+        return Icons.comment;
+      case 'follow_request':
+      case 'friend_request':
+      case 'follower_notification':
+      case 'un_follower_notification':
+        return Icons.person_add;
+      case 'new_job_posted':
+      case 'job_post_notification':
+      case 'job_update':
+        return Icons.work;
+      default:
+        return Icons.notifications;
     }
   }
 }

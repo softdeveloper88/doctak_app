@@ -1,0 +1,40 @@
+# Missing Translations Report
+Generated on 2025-05-22 00:02:23.703507
+
+## fa: 10 untranslated message(s):
+  - "lbl_add_interests": "Add Interests"
+  - "msg_add_interests": "Add interests to showcase your professional focus and connect with colleagues in similar fields."
+  - "msg_no_details_added": "No details added"
+  - "msg_interests_updated": "Interests updated successfully"
+  - "msg_privacy_info_desc": "Manage who can see your profile information. Your privacy settings help you control your personal information visibility."
+  - "lbl_personal_info_privacy": "Personal Info Privacy"
+  - "lbl_professional_info_privacy": "Professional Info Privacy"
+  - "lbl_location_info_privacy": "Location Info Privacy"
+  - "lbl_other_info_privacy": "Other Info Privacy"
+  - "msg_privacy_settings_updated": "Privacy settings updated successfully"
+
+## hi: 11 untranslated message(s):
+  - "lbl_home": "Home"
+  - "lbl_add_interests": "Add Interests"
+  - "msg_add_interests": "Add interests to showcase your professional focus and connect with colleagues in similar fields."
+  - "msg_no_details_added": "No details added"
+  - "msg_interests_updated": "Interests updated successfully"
+  - "msg_privacy_info_desc": "Manage who can see your profile information. Your privacy settings help you control your personal information visibility."
+  - "lbl_personal_info_privacy": "Personal Info Privacy"
+  - "lbl_professional_info_privacy": "Professional Info Privacy"
+  - "lbl_location_info_privacy": "Location Info Privacy"
+  - "lbl_other_info_privacy": "Other Info Privacy"
+  - "msg_privacy_settings_updated": "Privacy settings updated successfully"
+
+## ur: 10 untranslated message(s):
+  - "lbl_add_interests": "Add Interests"
+  - "msg_add_interests": "Add interests to showcase your professional focus and connect with colleagues in similar fields."
+  - "msg_no_details_added": "No details added"
+  - "msg_interests_updated": "Interests updated successfully"
+  - "msg_privacy_info_desc": "Manage who can see your profile information. Your privacy settings help you control your personal information visibility."
+  - "lbl_personal_info_privacy": "Personal Info Privacy"
+  - "lbl_professional_info_privacy": "Professional Info Privacy"
+  - "lbl_location_info_privacy": "Location Info Privacy"
+  - "lbl_other_info_privacy": "Other Info Privacy"
+  - "msg_privacy_settings_updated": "Privacy settings updated successfully"
+

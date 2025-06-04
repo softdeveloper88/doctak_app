@@ -5,9 +5,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:markdown_widget/config/configs.dart';
-import 'package:markdown_widget/widget/markdown_block.dart';
-import 'package:sizer/sizer.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 
 import '../../../core/utils/app/AppData.dart';
 import '../../../widgets/custom_image_view.dart';
@@ -17,12 +15,12 @@ class ChatBubble extends StatelessWidget {
   final String text;
   final bool isUserMessage;
   final Function? onTapReginarate;
-  File? imageUrl1;
-  File? imageUrl2;
-  String responseImageUrl1;
-  String responseImageUrl2;
+  final File? imageUrl1;
+  final File? imageUrl2;
+  final String responseImageUrl1;
+  final String responseImageUrl2;
 
-  ChatBubble({
+  const ChatBubble({
     Key? key,
     required this.text,
     required this.isUserMessage,
@@ -43,72 +41,119 @@ class ChatBubble extends StatelessWidget {
     // print("response1 ${responseImageUrl}");
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
       child: IntrinsicHeight(
         child: Row(
           mainAxisAlignment:
           isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (!isUserMessage) ...[
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.end,
-                spacing: 8.0,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: svGetBodyColor(),
-                    child: Image.asset(
-                      'assets/logo/ic_web.png',
-                      width: 25,
-                      height: 25,
+              Container(
+                margin: const EdgeInsets.only(right: 12, bottom: 4),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.blue[400]!, Colors.blue[600]!],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withAlpha(51),
+                        blurRadius: 4,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.psychology_rounded,
+                      color: Colors.white,
+                      size: 20,
                     ),
                   ),
-                  Container(
-                    width: 75.w,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          topLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10)),
-                      color:
-                      appStore.isDarkMode ? Colors.white30 : Colors.white,
+                ),
+              ),
+              Flexible(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                      bottomLeft: Radius.circular(4),
                     ),
+                    color: appStore.isDarkMode
+                        ? Colors.blueGrey[800]
+                        : Colors.white,
+                    border: Border.all(
+                      color: Colors.blue.withAlpha(26),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withAlpha(13),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 6.0),
-                          child: ConstrainedBox(
-                              constraints:
-                              BoxConstraints(maxWidth: bubbleMaxWidth),
-                              child: text == translation(context).lbl_generating_response
-                                  ? Column(
-                                children: [
-                                  MarkdownBlock(
-                                      data: text,
-                                      config: MarkdownConfig(configs: [])),
-                                  // Text(
-                                  //   // fitContent: true,
-                                  //   // selectable: true,
-                                  //   // softLineBreak: true,
-                                  //   // shrinkWrap: true,
-                                  //   text
-                                  //       .replaceAll("*", '')
-                                  //       .replaceAll('#', ''),
-                                  //   style:  TextStyle(fontFamily: 'Poppins',
-                                  //       color: Colors.black,
-                                  //       fontSize: 12.sp),
-                                  // ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  CircularProgressIndicator(
-                                    color: svGetBodyColor(),
+                        Flexible(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 12.0),
+                            child: text == translation(context).lbl_generating_response
+                                ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                MarkdownBlock(
+                                    data: text,
+                                    config: MarkdownConfig(
+                                      configs: [
+                                        PreConfig(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[100],
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          padding: const EdgeInsets.all(12),
+                                        ),
+                                      ],
+                                    )),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                CircularProgressIndicator(
+                                  color: svGetBodyColor(),
+                                ),
+                              ],
+                            )
+                                : MarkdownBlock(
+                              data: text,
+                              config: MarkdownConfig(
+                                configs: [
+                                  PreConfig(
+                                    decoration: BoxDecoration(
+                                      color: appStore.isDarkMode 
+                                        ? Colors.grey[800] 
+                                        : Colors.grey[100],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    padding: const EdgeInsets.all(12),
                                   ),
                                 ],
-                              )
-                                  : MarkdownBlock(
-                                data: text,
-                              )),
+                              ),
+                            ),
+                          ),
                         ),
                         Divider(
                           color: Colors.grey[200],
@@ -146,45 +191,45 @@ class ChatBubble extends StatelessWidget {
                       ],
                     ),
                   ),
-                ],
-              ),
-              // Expanded(
-              //   flex: 1,
-              //   child: Align(
-              //     alignment: Alignment.topLeft,
-              //     child: IconButton(
-              //       icon: const Icon(Icons.copy),
-              //       onPressed: () {
-              //         // Copy text to clipboard
-              //         Clipboard.setData(ClipboardData(text: text));
-              //         // You can show a snackbar or any other feedback here
-              //         ScaffoldMessenger.of(context).showSnackBar(
-              //           const SnackBar(
-              //             content: Text('Text copied to clipboard'),
-              //           ),
-              //         );
-              //       },
-              //     ),
-              //   ),
-              // ),
-            ] else
-              ...[
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.end,
-                  spacing: 8.0,
-                  children: [
-                    Material(
-                      borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
-                          bottomLeft: Radius.circular(10)),
-                      color: Colors.blue[300],
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14.0, vertical: 10.0),
-                        child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                                maxWidth: bubbleMaxWidth),
+                ),
+              ]
+
+              else ...[
+                Flexible(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 48),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                              bottomLeft: Radius.circular(16),
+                              bottomRight: Radius.circular(4),
+                            ),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Colors.blue[500]!, Colors.blue[700]!],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withAlpha(51),
+                                blurRadius: 8,
+                                spreadRadius: 0,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 12.0),
+                            child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                    maxWidth: bubbleMaxWidth),
                             child: Column(
                               children: [
                                 if (imageUrl2 != null)
@@ -193,7 +238,7 @@ class ChatBubble extends StatelessWidget {
                                       if (responseImageUrl1 != '')
                                         SizedBox(
                                             height: 100,
-                                            width: 25.w,
+                                            width: 100,
                                             child: CustomImageView(
                                               imagePath: responseImageUrl1,
                                             ))
@@ -201,7 +246,7 @@ class ChatBubble extends StatelessWidget {
                                         if (imageUrl1 != null)
                                           SizedBox(
                                               height: 100,
-                                              width: 25.w,
+                                              width: 100,
                                               child: imageUrl1 != null
                                                   ? Image.file(
                                                 imageUrl1!,
@@ -219,7 +264,7 @@ class ChatBubble extends StatelessWidget {
                                       if (responseImageUrl2 != '')
                                         SizedBox(
                                             height: 100,
-                                            width: 25.w,
+                                            width: 100,
                                             child: CustomImageView(
                                               imagePath: responseImageUrl2,
                                             ))
@@ -227,7 +272,7 @@ class ChatBubble extends StatelessWidget {
                                         if (imageUrl2 != null)
                                           SizedBox(
                                               height: 100,
-                                              width: 25.w,
+                                              width: 100,
                                               child: imageUrl2 != null
                                                   ? Image.file(
                                                 imageUrl2!,
@@ -257,17 +302,34 @@ class ChatBubble extends StatelessWidget {
                                       },),
                                 Text(text,
                                     style: const TextStyle(
-                                        color: Colors.white,fontFamily: 'Poppins')),
+                                        color: Colors.white,
+                                        fontFamily: 'Poppins',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500)),
                               ],
                             )),
+                          ),
+                        ),
                       ),
-                    ),
-                    CircleAvatar(
-                      backgroundImage: CachedNetworkImageProvider(
-                          AppData.imageUrl + AppData.profile_pic),
-                      radius: 12,
-                    ),
-                  ],
+                      Container(
+                        margin: const EdgeInsets.only(left: 12, bottom: 4),
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.blue.withAlpha(51),
+                            width: 2,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          backgroundImage: CachedNetworkImageProvider(
+                              AppData.imageUrl + AppData.profile_pic),
+                          radius: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
           ],

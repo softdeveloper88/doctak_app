@@ -10,11 +10,9 @@ import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart'
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart';
-import 'package:doctak_app/presentation/chat_gpt_screen/widgets/card_intro.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -41,14 +39,10 @@ class ChatGptWithImageScreen extends StatefulWidget {
 }
 
 class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
-  // ... (existing variables)
-
   final ScrollController _scrollController = ScrollController();
-
-  List<ChatGPTResponse> messages = []; // Add this line
-
+  List<ChatGPTResponse> messages = [];
   late Future<List<Session>> futureSessions;
-  int? selectedSessionId = 0; // State variable for tracking selected session
+  int? selectedSessionId = 0;
   Future<List<ChatGPTResponse>> futureMessages = Future.value([]);
   final TextEditingController textController = TextEditingController();
   bool isLoadingMessages = true;
@@ -60,18 +54,21 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   bool isAlreadyAsk = true;
   bool isEmpty = false;
   bool isOneTimeImageUploaded = false;
+  bool isError = false;
   FocusNode focusNode = FocusNode();
+  String imageType = '';
+  List<XFile> selectedImageFiles = [];
+  ImageUploadBloc imageUploadBloc = ImageUploadBloc();
 
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
     if (question.isEmpty) return;
 
-    // setState(() {
     var myMessage = Messages(
         id: -1,
         gptSessionId: selectedSessionId.toString(),
         question: question,
-        response: 'Generating response...',
+        response: translation(context).lbl_generating_response,
         createdAt: DateTime.now().toString(),
         updatedAt: DateTime.now().toString());
 
@@ -80,26 +77,23 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     BlocProvider.of<ChatGPTBloc>(context).add(
       GetPost(
         sessionId: selectedSessionId.toString(),
-        question: question, // replace with real input
+        question: question,
       ),
     );
     textController.clear();
     scrollToBottom();
-    // });
+    
     try {
       isWriting = false;
-      // });
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Update the chatWithAi string with the localized version if needed
     if (chatWithAi == "Preparing DocTak AI.") {
       chatWithAi = translation(context).lbl_preparing_ai;
     }
@@ -110,967 +104,1297 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     focusNode.unfocus();
     _scrollController.dispose();
     textController.dispose();
-
     super.dispose();
   }
-bool isError=false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      body: BlocProvider(
-          create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-          child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
-              builder: (context, state1) {
-            if (selectedSessionId == 0 && state1 is DataLoaded) {
-              selectedSessionId = state1.response.newSessionId;
-              chatWithAi =
-                  state1.response.sessions?.first.name ?? translation(context).lbl_preparing_ai;
-            } else if (state1 is DataError) {
-
-              showToast(translation(context).msg_something_wrong);
-              try {
-                if(isError) {
-                  BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                  isOneTimeImageUploaded = false;
-                  isError=false;
-                  selectedSessionId =
-                      BlocProvider
-                          .of<ChatGPTBloc>(context)
-                          .newChatSessionId;
-                  // Session newSession = await createNewChatSession();
-                  // setState(() {
-                  //   futureSessions = Future(() =>
-                  //       [newSession, ...(snapshot.data ?? [])]);
-                  // });
-                }
-              } catch (e) {
-                // Error logging suppressed
-              }
-
-            }
-            if (state1 is DataInitial) {
-              return AnimatedBackground(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(
-                      height: 80.h,
-                      child: ChatShimmerLoader())
-                ],
-              ));
-            } else if (state1 is DataLoaded) {
-              isEmpty = state1.response1.messages?.isEmpty ?? false;
-              // Response data received
-              if (!widget.isFromMainScreen) {
-                if (isAlreadyAsk) {
-                  setState(() {
-                    isEmpty = false;
-                  });
-                  isAlreadyAsk = false;
-                  // Future.delayed(const Duration(seconds: 1),(){
-                  drugsAskQuestion(state1, context);
-                  // });
-                  // textController.text = widget.question.toString();
-                }
-              }
-              return Column(
-                children: <Widget>[
-                  AppBar(
-                    leading: GestureDetector(
-                      onTap: () {
-                        ChatHistoryScreen(
-                          onNewSessionTap: () {
-                            try {
-                              BlocProvider.of<ChatGPTBloc>(context)
-                                  .add(GetNewChat());
-                              Navigator.of(context).pop();
-                              isOneTimeImageUploaded = false;
-                              selectedSessionId =
-                                  BlocProvider.of<ChatGPTBloc>(context)
-                                      .newChatSessionId;
-
-                              // Session newSession = await createNewChatSession();
-                              // setState(() {
-                              //   futureSessions = Future(() =>
-                              //       [newSession, ...(snapshot.data ?? [])]);
-                              // });
-                            } catch (e) {
-                              // Error logging suppressed
-                            }
-                          },
-                          onTap: (session) {
-                            isError=true;
-                            chatWithAi = session.name!;
-                            isEmptyPage = false;
-                            // Session ID selected
-                            selectedSessionId =
-                                session.id; // Update the selected session
-                            isLoadingMessages = true;
-                            isOneTimeImageUploaded = true;
-                            // });
-                            BlocProvider.of<ChatGPTBloc>(context).add(
-                              GetMessages(
-                                  sessionId: selectedSessionId.toString()),
-                            );
-                            // loadMessages(selectedSessionId.toString())
-                            //     .then((loadedMessages) {
-                            //   setState(() {
-                            //     messages = loadedMessages;
-                            //
-                            //     scrollToBottom();
-                            //     chatWithAi = session.name!;
-                            //
-                            //     isLoadingMessages = false;
-                            //   });
-                            // });
-                            Navigator.of(context)
-                                .pop(); // This line will close the drawer
-                          },
-                        ).launch(context);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Image.asset(
-                          'assets/icon/ic_chat_history.png',
-                          color: svGetBodyColor(),
-                        ),
-                      ),
+      body: Column(
+        children: [
+          // App Bar - completely redesigned using drugs_list pattern
+          AppBar(
+            backgroundColor: svGetScaffoldColor(),
+            iconTheme: IconThemeData(color: context.iconColor),
+            elevation: 0,
+            toolbarHeight: 70,
+            surfaceTintColor: svGetScaffoldColor(),
+            centerTitle: true,
+            leading: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.blue[600],
+                  size: 16,
+                ),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.image_search_rounded,
+                  color: Colors.blue[600],
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  "AI Image Analysis",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: Colors.blue[800],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              // History button
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 36,
+                  minHeight: 36,
+                ),
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.history_rounded,
+                    color: Colors.blue[600],
+                    size: 14,
+                  ),
+                ),
+                onPressed: () {
+                  ChatHistoryScreen(
+                    onNewSessionTap: () {
+                      try {
+                        BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                        Navigator.of(context).pop();
+                        isOneTimeImageUploaded = false;
+                        selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                      } catch (e) {
+                        print(e);
+                      }
+                    },
+                    onTap: (session) {
+                      isError = true;
+                      chatWithAi = session.name!;
+                      isEmptyPage = false;
+                      selectedSessionId = session.id;
+                      isLoadingMessages = true;
+                      isOneTimeImageUploaded = true;
+                      BlocProvider.of<ChatGPTBloc>(context).add(
+                        GetMessages(sessionId: selectedSessionId.toString()),
+                      );
+                      Navigator.of(context).pop();
+                    },
+                  ).launch(context);
+                },
+              ),
+              // New Analysis button
+              Container(
+                margin: const EdgeInsets.only(right: 16),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
+                  icon: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
-                    centerTitle: true,
-                    surfaceTintColor: context.cardColor,
-                    backgroundColor: context.cardColor,
-                    title: Builder(
-                      builder: (context) {
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              // Wrap the Text widget with Expanded
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  MaterialButton(
-                                    minWidth: 40.w,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      // side: const BorderSide(
-                                      //     color: Colors.black, width: 1.0),
-                                    ),
-                                    color: Colors.lightBlue,
-                                    onPressed: () {
-                                      isOneTimeImageUploaded = false;
-                                      try {
-                                        BlocProvider.of<ChatGPTBloc>(context)
-                                            .add(GetNewChat());
-                                        // Navigator.of(context).pop();
-
-                                        selectedSessionId =
-                                            BlocProvider.of<ChatGPTBloc>(
-                                                    context)
-                                                .newChatSessionId;
-
-                                        // Session newSession = await createNewChatSession();
-                                        // setState(() {
-                                        //   futureSessions = Future(() =>
-                                        //       [newSession, ...(snapshot.data ?? [])]);
-                                        // });
-                                      } catch (e) {
-                                        // Error logging suppressed
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        translation(context).lbl_next_image,
-                                        style:
-                                            TextStyle(color: white,fontFamily: 'Poppins',),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: isLoadingMessages
-                                        ? Image.asset(
-                                            'assets/images/docktak_ai_light.png',
-                                            height: 25,
-                                            width: 25,
-                                          )
-                                        // ? TypingIndicators(
-                                        //     color: svGetBodyColor(),
-                                        //     size: 2.0) // Custom typing indicator
-                                        : const Text(""),
-                                    onPressed: () {},
-                                  )
-                                ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: appStore.isDarkMode
-                                        ? svGetScaffoldColor()
-                                        : cardLightColor),
-                                child: Icon(
-                                  Icons.close,
-                                  color: svGetBodyColor(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                    child: Icon(
+                      Icons.add_photo_alternate_rounded,
+                      color: Colors.blue[600],
+                      size: 14,
                     ),
                   ),
-                  // const SizedBox(height: 10,),
-                  if (isEmpty)
-                    Expanded(
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(16.0),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 20),
-                                Text(
-                                  translation(context).lbl_welcome_doctor,
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
+                  onPressed: () {
+                    isOneTimeImageUploaded = false;
+                    try {
+                      BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                      selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                    } catch (e) {
+                      print(e);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          
+          // Main content - completely redesigned
+          Expanded(
+            child: BlocProvider(
+              create: (context) => ChatGPTBloc()..add(LoadDataValues()),
+              child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+                builder: (context, state1) {
+                  if (selectedSessionId == 0 && state1 is DataLoaded) {
+                    selectedSessionId = state1.response.newSessionId;
+                    chatWithAi = state1.response.sessions?.first.name ?? translation(context).lbl_preparing_ai;
+                  } else if (state1 is DataError) {
+                    showToast(translation(context).msg_something_wrong);
+                    if (isError) {
+                      try {
+                        BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                        isOneTimeImageUploaded = false;
+                        isError = false;
+                        selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                      } catch (e) {
+                        // Error logging suppressed
+                      }
+                    }
+                  }
+                  
+                  if (state1 is DataInitial) {
+                    return ChatShimmerLoader();
+                  } else if (state1 is DataLoaded) {
+                    isEmpty = state1.response1.messages?.isEmpty ?? false;
+                    
+                    if (!widget.isFromMainScreen) {
+                      if (isAlreadyAsk) {
+                        setState(() {
+                          isEmpty = false;
+                        });
+                        isAlreadyAsk = false;
+                        drugsAskQuestion(state1, context);
+                      }
+                    }
+                    
+                    return Column(
+                      children: [
+                        if (isEmpty)
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: appStore.isDarkMode
+                                      ? [Colors.blueGrey[900]!, Colors.blueGrey[800]!]
+                                      : [Colors.white, Colors.blue.withAlpha(13)],
+                                ),
+                              ),
+                              child: SafeArea(
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(height: 40),
+                                      
+                                      // Hero Icon - redesigned
+                                      Container(
+                                        width: 120,
+                                        height: 120,
+                                        margin: const EdgeInsets.only(bottom: 32),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [Colors.blue[400]!, Colors.purple[700]!],
+                                          ),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.purple.withAlpha(77),
+                                              spreadRadius: 3,
+                                              blurRadius: 20,
+                                              offset: const Offset(0, 8),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.image_search_rounded,
+                                            color: Colors.white,
+                                            size: 60,
+                                          ),
+                                        ),
+                                      ),
+                                      
+                                      // Welcome Text
+                                      Text(
+                                        translation(context).lbl_welcome_doctor,
+                                        style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Poppins',
+                                          letterSpacing: 0.5,
+                                          color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      
+                                      // Description
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                                        child: Text(
+                                          "Upload medical images for AI-powered analysis and insights",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Poppins',
+                                            height: 1.5,
+                                            color: appStore.isDarkMode 
+                                                ? Colors.white70
+                                                : Colors.black.withAlpha(179),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 40),
+                                      
+                                      // Upload Section
+                                      Text(
+                                        "Select Medical Image Type",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Poppins',
+                                          color: Colors.purple[700],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 24),
+                                      
+                                      // Upload Button - redesigned
+                                      Container(
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(24),
+                                          gradient: LinearGradient(
+                                            colors: [Colors.blue[400]!, Colors.blue[600]!],
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.purple.withOpacity(0.3),
+                                              offset: const Offset(0, 4),
+                                              blurRadius: 12,
+                                              spreadRadius: 0,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(24),
+                                            onTap: () async {
+                                              if (isOneTimeImageUploaded) {
+                                                toasty(context, translation(context).lbl_only_one_image_allowed);
+                                              } else {
+                                                const permission = Permission.photos;
+                                                if (await permission.isGranted) {
+                                                  _showBeforeFileOptions();
+                                                } else if (await permission.isDenied) {
+                                                  final result = await permission.request();
+                                                  if (result.isGranted) {
+                                                    _showBeforeFileOptions();
+                                                  } else if (result.isPermanentlyDenied) {
+                                                    _showBeforeFileOptions();
+                                                  }
+                                                } else if (await permission.isPermanentlyDenied) {
+                                                  _permissionDialog();
+                                                }
+                                              }
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.all(6),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white.withOpacity(0.2),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.add_photo_alternate_rounded, 
+                                                      color: Colors.white,
+                                                      size: 24
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 16),
+                                                  Text(
+                                                    translation(context).lbl_medical_images,
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w600,
+                                                      fontFamily: 'Poppins',
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      
+                                      const SizedBox(height: 32),
+                                      
+                                      // Info Container - redesigned
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: appStore.isDarkMode
+                                              ? Colors.purple.withAlpha(26)
+                                              : Colors.purple.withAlpha(13),
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: Colors.purple.withAlpha(51),
+                                            width: 1.5,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.purple.withAlpha(13),
+                                              offset: const Offset(0, 2),
+                                              blurRadius: 8,
+                                              spreadRadius: 0,
+                                            ),
+                                          ],
+                                        ),
+                                        padding: const EdgeInsets.all(16),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.amber.withAlpha(51),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.lightbulb_rounded,
+                                                color: Colors.amber[700],
+                                                size: 18,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                translation(context).msg_upload_images_prompt,
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.purple[700],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  translation(context).msg_ai_assistant_intro,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 16,fontFamily: 'Poppins',),
+                              ),
+                            ),
+                          )
+                        else
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: appStore.isDarkMode
+                                      ? [Colors.blueGrey[900]!, Colors.blueGrey[800]!]
+                                      : [Colors.white, Colors.blue.withAlpha(13)],
                                 ),
-                                const SizedBox(height: 30),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    cardIntro(translation(context).lbl_medical_images,
-                                        translation(context).msg_upload_images_prompt,
-                                        () async {
-                                      // Medication Review: check interactions and dosage
-                                      // widget.question = 'initial assessment';
-
-                                      if (isOneTimeImageUploaded) {
-                                        toasty(context,
-                                            translation(context).lbl_only_one_image_allowed);
-                                      } else {
-                                        const permission = Permission.photos;
-                                        if (await permission.isGranted) {
-                                          // Permission is already granted
-                                          _showBeforeFileOptions();
-                                        } else if (await permission.isDenied) {
-                                          // Permission was denied; request it
-                                          final result =
-                                              await permission.request();
-                                          debugPrint(result.toString());
-                                          // Check the result after requesting permission
-                                          if (result.isGranted) {
-                                            _showBeforeFileOptions();
-                                          } else if (result
-                                              .isPermanentlyDenied) {
-                                            // Permission is permanently denied
-                                            debugPrint(
-                                                "Permission is permanently denied.");
-                                            // _permissionDialog(context);
-                                            _showBeforeFileOptions();
-                                          } else if (result.isGranted) {
-                                            _showBeforeFileOptions();
-
-                                            // Permission is still denied
-                                            debugPrint("Permission is denied.");
+                              ),
+                              child: ListView.builder(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.all(16),
+                                itemCount: state1.response1.messages?.length,
+                                itemBuilder: (context, index) {
+                                  Messages message = state1.response1.messages?[index] ?? Messages();
+                                  return Column(
+                                    children: [
+                                      ChatBubble(
+                                        text: message.question ?? '',
+                                        isUserMessage: true,
+                                        imageUrl1: index != 0
+                                            ? null
+                                            : selectedImageFiles.isNotEmpty
+                                                ? File(selectedImageFiles.first.path)
+                                                : null,
+                                        imageUrl2: index != 0
+                                            ? null
+                                            : selectedImageFiles.isNotEmpty
+                                                ? selectedImageFiles.length == 2
+                                                    ? File(selectedImageFiles.last.path)
+                                                    : null
+                                                : null,
+                                        responseImageUrl1: index != 0 ? '' : message.imageUrl1 ?? '',
+                                        responseImageUrl2: index != 0 ? '' : message.imageUrl2 ?? '',
+                                      ),
+                                      ChatBubble(
+                                        text: message.response ?? "",
+                                        isUserMessage: false,
+                                        imageUrl1: selectedImageFiles.isNotEmpty
+                                            ? File(selectedImageFiles.first.path)
+                                            : null,
+                                        imageUrl2: selectedImageFiles.isNotEmpty
+                                            ? selectedImageFiles.length == 2
+                                                ? File(selectedImageFiles.last.path)
+                                                : null
+                                            : null,
+                                        responseImageUrl1: message.imageUrl1 ?? '',
+                                        responseImageUrl2: message.imageUrl2 ?? '',
+                                        onTapReginarate: () {
+                                          String question = message.question ?? "";
+                                          if (question.isEmpty) return;
+                                          
+                                          setState(() {
+                                            var myMessage = Messages(
+                                                id: -1,
+                                                gptSessionId: selectedSessionId.toString(),
+                                                question: question,
+                                                imageUrl1: message.imageUrl1,
+                                                imageUrl2: message.imageUrl2,
+                                                response: translation(context).lbl_generating_response,
+                                                createdAt: DateTime.now().toString(),
+                                                updatedAt: DateTime.now().toString());
+                                            state1.response1.messages!.add(myMessage);
+                                            BlocProvider.of<ChatGPTBloc>(context).add(
+                                              GetPost(
+                                                sessionId: selectedSessionId.toString(),
+                                                question: question,
+                                              ),
+                                            );
+                                            textController.clear();
+                                            scrollToBottom();
+                                          });
+                                          
+                                          try {
+                                            isWriting = false;
+                                          } catch (e) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Error: $e')));
                                           }
-                                        } else if (await permission
-                                            .isPermanentlyDenied) {
-                                          // Permission was permanently denied
-                                          debugPrint(
-                                              "Permission is permanently denied.");
-                                          _permissionDialog();
-                                        }
-                                      }
-                                      // Future.delayed(const Duration(seconds: 1),(){
-
-                                      // });
-                                      // textController.text = widget.question.toString();
-                                    }),
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        
+                        // Image Preview Section - redesigned
+                        _buildImagePreview(),
+                        
+                        // Input Section - completely redesigned using drugs_list pattern
+                        Container(
+                          decoration: BoxDecoration(
+                            color: svGetScaffoldColor(),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withAlpha(13),
+                                offset: const Offset(0, -3),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                          child: Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: appStore.isDarkMode
+                                      ? Colors.blueGrey[800]
+                                      : Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(24.0),
+                                  border: Border.all(
+                                    color: Colors.blue.withOpacity(0.2),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.05),
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 8,
+                                      spreadRadius: 0,
+                                    ),
                                   ],
                                 ),
-                                const SizedBox(height: 20),
-                                Text(
-                                  translation(context).msg_upload_images_prompt,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 14,fontFamily: 'Poppins',),
+                                child: Row(
+                                  children: [
+                                    // Attachment button
+                                    IconButton(
+                                      icon: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.purple.withOpacity(0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.attach_file_rounded,
+                                          color: Colors.blue[600],
+                                          size: 20,
+                                        ),
+                                      ),
+                                      onPressed: () async {
+                                        if (isOneTimeImageUploaded) {
+                                          toasty(context, 'Only allowed one time image in one session');
+                                        } else {
+                                          const permission = Permission.photos;
+                                          var status = await Permission.storage.request();
+                                          if (status.isGranted || await permission.isGranted) {
+                                            _showBeforeFileOptions();
+                                          } else if (await permission.isDenied) {
+                                            final result = await permission.request();
+                                            if (result.isGranted) {
+                                              _showBeforeFileOptions();
+                                            } else if (result.isPermanentlyDenied) {
+                                              _showBeforeFileOptions();
+                                            }
+                                          } else if (await permission.isPermanentlyDenied) {
+                                            _permissionDialog();
+                                          }
+                                        }
+                                      },
+                                    ),
+                                    
+                                    // Text input
+                                    Expanded(
+                                      child: TextField(
+                                        focusNode: focusNode,
+                                        controller: textController,
+                                        minLines: 1,
+                                        maxLines: 4,
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14,
+                                          color: appStore.isDarkMode 
+                                              ? Colors.white
+                                              : Colors.black87,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintStyle: TextStyle(
+                                            color: appStore.isDarkMode
+                                                ? Colors.white60
+                                                : Colors.black54,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                          hintText: translation(context).msg_clinical_summary_hint,
+                                          border: InputBorder.none,
+                                          contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0, 
+                                            vertical: 16.0
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    
+                                    // Send button
+                                    Container(
+                                      margin: const EdgeInsets.only(right: 8.0),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          colors: [Colors.blue[400]!, Colors.blue[600]!],
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.purple.withAlpha(77),
+                                            offset: const Offset(0, 2),
+                                            blurRadius: 8,
+                                            spreadRadius: 0,
+                                          ),
+                                        ],
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(30),
+                                          onTap: () async {
+                                            isError = true;
+                                            focusNode.unfocus();
+                                            
+                                            if (selectedImageFiles.isEmpty) {
+                                              return;
+                                            } else if (imageUploadBloc.imagefiles.isEmpty && isOneTimeImageUploaded) {
+                                              String question = textController.text.trim();
+                                              if (question != '') {
+                                                setState(() {
+                                                  isOneTimeImageUploaded = true;
+                                                  var myMessage = Messages(
+                                                    id: -1,
+                                                    gptSessionId: selectedSessionId.toString(),
+                                                    question: question,
+                                                    response: translation(context).lbl_generating_response,
+                                                    createdAt: DateTime.now().toString(),
+                                                    updatedAt: DateTime.now().toString(),
+                                                    imageUrl1: '',
+                                                    imageUrl2: '',
+                                                  );
+                                                  state1.response1.messages!.add(myMessage);
+
+                                                  BlocProvider.of<ChatGPTBloc>(context).add(
+                                                    GetPost(
+                                                        sessionId: selectedSessionId.toString(),
+                                                        question: question,
+                                                        imageUrl1: null,
+                                                        imageUrl2: null,
+                                                        imageType: imageType),
+                                                  );
+                                                  imageUploadBloc.imagefiles.clear();
+                                                  textController.clear();
+                                                  scrollToBottom();
+                                                });
+
+                                                try {
+                                                  isWriting = false;
+                                                } catch (e) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(content: Text('Error: $e')));
+                                                }
+                                              } else {
+                                                toasty(context, translation(context).lbl_please_ask_question);
+                                              }
+                                            } else if (imageUploadBloc.imagefiles.isNotEmpty && !isOneTimeImageUploaded) {
+                                              String question = textController.text.trim();
+                                              setState(() {
+                                                isOneTimeImageUploaded = true;
+                                                var myMessage = Messages(
+                                                  id: -1,
+                                                  gptSessionId: selectedSessionId.toString(),
+                                                  question: question,
+                                                  response: translation(context).lbl_generating_response,
+                                                  createdAt: DateTime.now().toString(),
+                                                  updatedAt: DateTime.now().toString(),
+                                                  imageUrl1: imageUploadBloc.imagefiles.first.path,
+                                                  imageUrl2: imageUploadBloc.imagefiles.first.path,
+                                                );
+                                                state1.response1.messages!.add(myMessage);
+
+                                                BlocProvider.of<ChatGPTBloc>(context).add(
+                                                  GetPost(
+                                                      sessionId: selectedSessionId.toString(),
+                                                      question: question == ""
+                                                          ? translation(context).lbl_analyse_image
+                                                          : question,
+                                                      imageUrl1: imageUploadBloc.imagefiles.first.path,
+                                                      imageUrl2: imageUploadBloc.imagefiles.last.path,
+                                                      imageType: imageType),
+                                                );
+                                                imageUploadBloc.imagefiles.clear();
+                                                textController.clear();
+                                                scrollToBottom();
+                                              });
+                                              try {
+                                                isWriting = false;
+                                              } catch (e) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(content: Text('Error: $e')));
+                                              }
+                                            }
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: isWriting
+                                              ? const TypingIndicators(
+                                                  color: Colors.white,
+                                                  size: 3.0,
+                                                )
+                                              : const Icon(
+                                                  Icons.send_rounded,
+                                                  color: Colors.white,
+                                                  size: 20,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 10),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                translation(context).msg_ai_disclaimer,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 11,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  } else if (state1 is DataError) {
+                    return _buildErrorState(context, state1.errorMessage.toString());
+                  } else {
+                    return Text(translation(context).lbl_error);
+                  }
+                }
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Image Preview Widget - redesigned using drugs_list pattern
+  Widget _buildImagePreview() {
+    return Container(
+      color: svGetScaffoldColor(),
+      child: BlocBuilder<ImageUploadBloc, ImageUploadState>(
+          bloc: imageUploadBloc,
+          builder: (context, state) {
+        if (state is FileLoadedState && imageUploadBloc.imagefiles.isNotEmpty) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: imageUploadBloc.imagefiles.map((imageone) {
+                return Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.purple.withAlpha(51),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.purple.withAlpha(26),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: buildMediaItem(File(imageone.path)),
+                        ),
+                      ),
+                      Positioned(
+                        top: -4,
+                        right: -4,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {});
+                            selectedImageFiles.remove(imageone);
+                            imageUploadBloc.add(SelectedFiles(
+                                pickedfiles: imageone, isRemove: true));
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red[500],
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withAlpha(77),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
                               ],
+                            ),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white,
+                              size: 12,
                             ),
                           ),
                         ),
                       ),
-                    )
-                  else
-                    Expanded(
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        itemCount: state1.response1.messages?.length,
-                        itemBuilder: (context, index) {
-                          debugPrint(
-                              state1.response1.messages?[index].gptSessionId);
-                          Messages message =
-                              state1.response1.messages?[index] ?? Messages();
-                          return Column(
-                            children: [
-                              ChatBubble(
-                                text: message.question ?? '',
-                                isUserMessage: true,
-                                imageUrl1: index != 0
-                                    ? null
-                                    : selectedImageFiles.isNotEmpty
-                                        ? File(selectedImageFiles.first.path)
-                                        : null,
-                                imageUrl2: index != 0
-                                    ? null
-                                    : selectedImageFiles.isNotEmpty
-                                        ? selectedImageFiles.length == 2
-                                            ? File(selectedImageFiles.last.path)
-                                            : null
-                                        : null,
-                                responseImageUrl1:
-                                    index != 0 ? '' : message.imageUrl1 ?? '',
-                                responseImageUrl2:
-                                    index != 0 ? '' : message.imageUrl2 ?? '',
-                              ),
-                              ChatBubble(
-                                text: message.response ?? "",
-                                isUserMessage: false,
-                                imageUrl1: selectedImageFiles.isNotEmpty
-                                    ? File(selectedImageFiles.first.path)
-                                    : null,
-                                imageUrl2: selectedImageFiles.isNotEmpty
-                                    ? selectedImageFiles.length == 2
-                                        ? File(selectedImageFiles.last.path)
-                                        : null
-                                    : null,
-                                responseImageUrl1: message.imageUrl1 ?? '',
-                                responseImageUrl2: message.imageUrl2 ?? '',
-                                onTapReginarate: () {
-                                  String question = message.question ?? "";
-                                  if (question.isEmpty) return;
-                                  // String sessionId = selectedSessionId.toString();
-                                  // var tempId =
-                                  //     -1; // Unique temporary ID for the response
-                                  setState(() {
-                                    var myMessage = Messages(
-                                        id: -1,
-                                        gptSessionId:
-                                            selectedSessionId.toString(),
-                                        question: question,
-                                        imageUrl1: message.imageUrl1,
-                                        imageUrl2: message.imageUrl2,
-                                        response: 'Generating response...',
-                                        createdAt: DateTime.now().toString(),
-                                        updatedAt: DateTime.now().toString());
-                                    state1.response1.messages!.add(myMessage);
-                                    BlocProvider.of<ChatGPTBloc>(context).add(
-                                      GetPost(
-                                        sessionId: selectedSessionId.toString(),
-                                        question: question,
-                                        // imageUrl: _uploadedFile??''// replace with real input
-                                      ),
-                                    );
-                                    textController.clear();
-                                    scrollToBottom();
-                                  });
-                                  try {
-                                    isWriting = false;
-                                    // });
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Error: $e')));
-                                  }
-                                },
-                              ),
-                            ],
-                          );
-                        },
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        } else {
+          return Container();
+        }
+      }),
+    );
+  }
+
+  // Error State Widget - redesigned using drugs_list pattern
+  Widget _buildErrorState(BuildContext context, String errorMessage) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            margin: const EdgeInsets.only(bottom: 24),
+            decoration: BoxDecoration(
+              color: Colors.red.withAlpha(26),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline_rounded,
+              color: Colors.red[600],
+              size: 40,
+            ),
+          ),
+          Text(
+            translation(context).lbl_error,
+            style: TextStyle(
+              color: Colors.red[700],
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            errorMessage,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: appStore.isDarkMode ? Colors.white70 : Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(height: 32),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withAlpha(51),
+                  offset: const Offset(0, 4),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                try {
+                  BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                  isOneTimeImageUploaded = false;
+                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                } catch (e) {
+                  debugPrint(e.toString());
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[600],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              child: Text(
+                translation(context).lbl_try_again,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // File Options Dialog - redesigned using drugs_list pattern  
+  void _showBeforeFileOptions() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withAlpha(26),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Header
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.blue[400]!, Colors.blue[600]!],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.medical_services_outlined,
+                        color: Colors.white,
+                        size: 20,
                       ),
                     ),
-
-                  _buildImagePreview(),
-                  Container(
-                    padding: const EdgeInsets.all(10.0),
-                    color: context.cardColor,
-                    child: Container(
-                      margin: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: appStore.isDarkMode
-                            ? svGetScaffoldColor()
-                            : cardLightColor,
-                        // border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-
-                      child: Row(
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.attach_file),
-                            onPressed: () async {
-                              if (isOneTimeImageUploaded) {
-                                toasty(context,
-                                    'Only allowed one time image in one session');
-                              } else {
-                                const permission = Permission.photos;
-                                var status = await Permission.storage.request();
-                                if (status.isGranted ||
-                                    await permission.isGranted) {
-                                  // Permission is already granted
-                                  _showBeforeFileOptions();
-                                } else if (await permission.isDenied) {
-                                  // Permission was denied; request it
-                                  final result = await permission.request();
-                                  debugPrint(result.toString());
-                                  // Check the result after requesting permission
-                                  if (result.isGranted) {
-                                    _showBeforeFileOptions();
-                                  } else if (result.isPermanentlyDenied) {
-                                    // Permission is permanently denied
-                                    debugPrint(
-                                        "Permission is permanently denied.");
-                                    // _permissionDialog(context);
-                                    _showBeforeFileOptions();
-                                  } else if (result.isGranted) {
-                                    _showBeforeFileOptions();
-                                    // Permission is still denied
-                                    debugPrint("Permission is denied.");
-                                  }
-                                } else if (await permission.isPermanentlyDenied) {
-                                  // Permission was permanently denied
-                                  debugPrint("Permission is permanently denied.");
-                                  _permissionDialog();
-                                }
-                              }
-                            },
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Container(
-                              constraints: const BoxConstraints(maxHeight: 200),
-                              padding: const EdgeInsets.only(left: 8, right: 8),
-                              child: TextField(
-                                focusNode: focusNode,
-                                controller: textController,
-                                minLines: 1,
-                                // Minimum lines
-                                maxLines: null,
-                                // Allows for unlimited lines
-                                decoration: InputDecoration(
-                                  hintStyle: const TextStyle(color: Colors.grey,fontFamily: 'Poppins',),
-                                  hintText:
-                                      translation(context).msg_clinical_summary_hint,
-                                  border: InputBorder.none,
-                                ),
-                              ),
+                          Text(
+                            translation(context).lbl_select_option,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Poppins',
+                              color: appStore.isDarkMode ? Colors.white : Colors.black87,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30.0),
-                                gradient: const LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [Colors.blueAccent, Colors.blue],
-                                  stops: [0.37, 1.0],
-                                ),
-                              ),
-                              child: IconButton(
-                                icon: isWriting
-                                    ? const TypingIndicators(
-                                        color: Colors.white,
-                                        size: 2.0) // Custom typing indicator
-                                    : const Icon(Icons.send, color: Colors.white),
-                                onPressed: () async {
-                                  isError=true;
-                                  focusNode.unfocus();
-                                  debugPrint(selectedSessionId.toString());
-                                  if (selectedImageFiles.isEmpty) {
-                                    return;
-                                  } else if (imageUploadBloc.imagefiles.isEmpty &&
-                                      isOneTimeImageUploaded) {
-                                    String question = textController.text.trim();
-                                    // String sessionId = selectedSessionId.toString();
-                                    // var tempId =
-                                    //     -1; // Unique temporary ID for the response
-                                    if (question != '') {
-                                      setState(() {
-                                        isOneTimeImageUploaded = true;
-                                        var myMessage = Messages(
-                                          id: -1,
-                                          gptSessionId:
-                                              selectedSessionId.toString(),
-                                          question: question,
-                                          response: 'Generating response...',
-                                          createdAt: DateTime.now().toString(),
-                                          updatedAt: DateTime.now().toString(),
-                                          imageUrl1: '',
-                                          imageUrl2: '',
-                                        );
-                                        state1.response1.messages!.add(myMessage);
-
-                                        BlocProvider.of<ChatGPTBloc>(context).add(
-                                          GetPost(
-                                              sessionId:
-                                                  selectedSessionId.toString(),
-                                              question: question,
-                                              imageUrl1: null,
-                                              imageUrl2: null,
-                                              // replace with real input
-                                              imageType: imageType),
-                                        );
-                                        imageUploadBloc.imagefiles.clear();
-                                        textController.clear();
-
-                                        scrollToBottom();
-                                      });
-
-                                      try {
-                                        isWriting = false;
-                                        // });
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                                content: Text('Error: $e')));
-                                      }
-                                    } else {
-                                      toasty(context, translation(context).lbl_please_ask_question);
-                                    }
-                                  } else if (imageUploadBloc
-                                          .imagefiles.isNotEmpty &&
-                                      !isOneTimeImageUploaded) {
-                                    String question = textController.text.trim();
-                                    // String sessionId = selectedSessionId.toString();
-                                    // var tempId =
-                                    //     -1; // Unique temporary ID for the response
-                                    setState(() {
-                                      isOneTimeImageUploaded = true;
-                                      var myMessage = Messages(
-                                        id: -1,
-                                        gptSessionId:
-                                            selectedSessionId.toString(),
-                                        question: question,
-                                        response: 'Generating response...',
-                                        createdAt: DateTime.now().toString(),
-                                        updatedAt: DateTime.now().toString(),
-                                        imageUrl1:
-                                            imageUploadBloc.imagefiles.first.path,
-                                        imageUrl2:
-                                            imageUploadBloc.imagefiles.first.path,
-                                      );
-                                      state1.response1.messages!.add(myMessage);
-
-                                      BlocProvider.of<ChatGPTBloc>(context).add(
-                                        GetPost(
-                                            sessionId:
-                                                selectedSessionId.toString(),
-                                            question: question == ""
-                                                ? translation(context).lbl_analyse_image
-                                                : question,
-                                            imageUrl1: imageUploadBloc
-                                                .imagefiles.first.path,
-                                            imageUrl2: imageUploadBloc
-                                                .imagefiles.last.path,
-                                            // replace with real input
-                                            imageType: imageType),
-                                      );
-                                      imageUploadBloc.imagefiles.clear();
-                                      textController.clear();
-                                      scrollToBottom();
-                                    });
-                                    try {
-                                      isWriting = false;
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Error: $e')));
-                                    }
-                                  }
-                                },
-                              ),
+                          Text(
+                            'Choose medical image type for AI analysis',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                              color: Colors.grey[600],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    color: Colors.white,
-                    child: Marquee(
-                        pauseDuration: const Duration(milliseconds: 100),
-                        direction: Axis.horizontal,
-                        directionMarguee: DirectionMarguee.oneDirection,
-                        textDirection: TextDirection.ltr,
-                        child: Text(
-                            translation(context).msg_ai_disclaimer)),
-                  )
-                ],
-              );
-            }
-            else if (state1 is DataError) {
-              return Container(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      translation(context).lbl_error,
-                      style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: Colors.red,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      state1.errorMessage.toString(),
-                      style: const TextStyle(color: black,fontFamily: 'Poppins',),
-                    ),
-                    MaterialButton(
-                      onPressed: () {
-                        try {
-                          BlocProvider.of<ChatGPTBloc>(context)
-                              .add(GetNewChat());
-
-                          isOneTimeImageUploaded = false;
-                          selectedSessionId =
-                              BlocProvider.of<ChatGPTBloc>(context)
-                                  .newChatSessionId;
-
-                          // Session newSession = await createNewChatSession();
-                          // setState(() {
-                          //   futureSessions = Future(() =>
-                          //       [newSession, ...(snapshot.data ?? [])]);
-                          // });
-                        } catch (e) {
-                          // Error logging suppressed
-                        }
-                      },
-                      color: appButtonBackgroundColorGlobal,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Text(
-                        translation(context).lbl_try_again,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    )
                   ],
                 ),
-              );
-            }
-            else {
-              return Text(translation(context).lbl_error);
-            }
-          })),
-    );
-  }
-
-  List<XFile> selectedImageFiles = [];
-
-  Widget _buildImagePreview() {
-    return Container(
-      color: Colors.white,
-      width: 100.w,
-      // margin: const EdgeInsets.all(8.0),
-      child: BlocBuilder<ImageUploadBloc, ImageUploadState>(
-          bloc: imageUploadBloc,
-          builder: (context, state) {
-            if (state is FileLoadedState) {
-              return imageUploadBloc.imagefiles != []
-                  ? Wrap(
-                      children: imageUploadBloc.imagefiles.map((imageone) {
-                        return Stack(children: [
-                          Card(
-                            child: SizedBox(
-                              height: 60, width: 60,
-                              child: buildMediaItem(File(imageone.path)),
-                              // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
-                            ),
+              ),
+              const SizedBox(height: 8),
+              // Options Grid
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildAdvancedOption(
+                            icon: Icons.face_retouching_natural,
+                            gradientColors: [Colors.pink[400]!, Colors.pink[600]!],
+                            title: 'Dermatological',
+                            subtitle: 'Skin analysis',
+                            onTap: () {
+                              Navigator.pop(context);
+                              imageType = 'Dermatological';
+                              _showFileOptions();
+                            },
                           ),
-                          Positioned(
-                            right: 0,
-                            child: GestureDetector(
-                                onTap: () {
-                                  setState(() {});
-                                  selectedImageFiles.remove(imageone);
-                                  imageUploadBloc.add(SelectedFiles(
-                                      pickedfiles: imageone, isRemove: true));
-                                },
-                                child: const Icon(
-                                  Icons.remove_circle_outlined,
-                                  color: Colors.red,
-                                )),
-                          )
-                        ]);
-                      }).toList(),
-                    )
-                  : Container();
-            } else {
-              return Container();
-            }
-          }),
-      // child:
-      // ListTile(
-      //   leading: CircleAvatar(
-      //     backgroundImage: FileImage(file),
-      //   ),
-      //   title: Text(file.path.split('/').last),
-      //   trailing: IconButton(
-      //     icon: const Icon(Icons.clear),
-      //     onPressed: () {
-      //       setState(() {
-      //         _selectedFile = null;
-      //       });
-      //     },
-      //   ),
-      // ),
-    );
-  }
-
-  String imageType = '';
-
-  void _showFileOptions() {
-    int imageLimit = 0;
-    debugPrint(imageType);
-    if (imageType == 'X-ray' || imageType == 'Mammography') {
-      imageLimit = 2;
-    } else {
-      imageLimit = 1;
-    }
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: MultipleImageUploadWidget(
-              imageType: imageType,
-              imageUploadBloc,
-              imageLimit: imageLimit, (imageFiles) {
-            selectedImageFiles = imageFiles;
-            debugPrint(selectedImageFiles.toString());
-            setState(() {});
-            Navigator.pop(context);
-          }),
-          // Column(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: <Widget>[
-          //     ListTile(
-          //       leading: const Icon(Icons.photo),
-          //       title: const Text('Choose from gallery'),
-          //       onTap: () async {
-          //         Navigator.pop(context);
-          //         File? file = await _pickFile(ImageSource.gallery);
-          //         if (file != null) {
-          //           setState(() {
-          //             _selectedFile = file;
-          //           });
-          //         }
-          //       },
-          //     ),
-          //     ListTile(
-          //       leading: const Icon(Icons.camera_alt),
-          //       title: const Text('Take a picture'),
-          //       onTap: () async {
-          //         Navigator.pop(context);
-          //         File? file = await _pickFile(ImageSource.camera);
-          //         if (file != null) {
-          //           setState(() {
-          //             _selectedFile = file;
-          //           });
-          //         }
-          //       },
-          //     ),
-          //     // ListTile(
-          //     //   leading: const Icon(Icons.insert_drive_file),
-          //     //   title: const Text('Select a document'),
-          //     //   onTap: () async {
-          //     //     Navigator.pop(context);
-          //     //     File? file = await _pickFile(ImageSource.gallery);
-          //     //     if (file != null) {
-          //     //       setState(() {
-          //     //         _selectedFile = file;
-          //     //       });
-          //     //     }
-          //     //   },
-          //     // ),
-          //   ],
-          // ),
-        );
-      },
-    );
-  }
-
-  ImageUploadBloc imageUploadBloc = ImageUploadBloc();
-
-  void _showBeforeFileOptions() {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  translation(context).lbl_select_option,
-                  style: TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildAdvancedOption(
+                            icon: Icons.medical_services,
+                            gradientColors: [Colors.blue[400]!, Colors.blue[600]!],
+                            title: 'X-Ray',
+                            subtitle: 'Radiograph scan',
+                            onTap: () {
+                              Navigator.pop(context);
+                              imageType = 'X-ray';
+                              _showFileOptions();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildAdvancedOption(
+                            icon: Icons.scanner,
+                            gradientColors: [Colors.blue[400]!, Colors.blue[600]!],
+                            title: 'CT Scan',
+                            subtitle: 'Tomography',
+                            onTap: () {
+                              Navigator.pop(context);
+                              imageType = 'CT Scan';
+                              _showFileOptions();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildAdvancedOption(
+                            icon: Icons.document_scanner_sharp,
+                            gradientColors: [Colors.teal[400]!, Colors.teal[600]!],
+                            title: 'MRI',
+                            subtitle: 'Magnetic scan',
+                            onTap: () {
+                              Navigator.pop(context);
+                              imageType = 'MRI Scan';
+                              _showFileOptions();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildAdvancedOption(
+                      icon: Icons.medical_information,
+                      gradientColors: [Colors.orange[400]!, Colors.orange[600]!],
+                      title: 'Mammography',
+                      subtitle: 'Breast tissue analysis',
+                      fullWidth: true,
+                      onTap: () {
+                        Navigator.pop(context);
+                        imageType = 'Mammography';
+                        _showFileOptions();
+                      },
+                    ),
+                  ],
                 ),
-                _buildHorizontalOption(
-                  icon: Icons.image_search,
-                  text: translation(context).lbl_dermatological_assessment,
-                  onTap: () async {
-                    Navigator.pop(context);
-                    imageType = 'Dermatological';
-                    _showFileOptions();
-                  },
+              ),
+              SafeArea(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'AI-powered medical image analysis',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                      color: Colors.grey[500],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                // _buildHorizontalOption(
-                //   icon: Icons.image_search,
-                //   text: 'ECG analysis',
-                //   onTap: () async {
-                //     Navigator.pop(context);
-                //     imageType = 'ECG';
-                //     _showFileOptions();
-                //   },
-                // ),
-                _buildHorizontalOption(
-                  icon: Icons.image_search,
-                  text: translation(context).lbl_xray_evaluation,
-                  onTap: () async {
-                    Navigator.pop(context);
-                    imageType = 'X-ray';
-                    _showFileOptions();
-                  },
-                ),
-                _buildHorizontalOption(
-                  icon: Icons.image_search,
-                  text: translation(context).lbl_ct_scan_evaluation,
-                  onTap: () async {
-                    Navigator.pop(context);
-                    imageType = 'CT Scan';
-                    _showFileOptions();
-                  },
-                ),
-                _buildHorizontalOption(
-                  icon: Icons.image_search,
-                  text: translation(context).lbl_mri_evaluation,
-                  onTap: () async {
-                    Navigator.pop(context);
-                    imageType = 'MRI Scan';
-                    _showFileOptions();
-                  },
-                ),
-                _buildHorizontalOption(
-                  icon: Icons.image_search,
-                  text: translation(context).lbl_mammography_analysis,
-                  onTap: () async {
-                    Navigator.pop(context);
-                    imageType = 'Mammography';
-                    _showFileOptions();
-                  },
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildHorizontalOption({
+  Widget _buildAdvancedOption({
     required IconData icon,
-    required String text,
+    required List<Color> gradientColors,
+    required String title,
+    required String subtitle,
     required VoidCallback onTap,
+    bool fullWidth = false,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 10.0),
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          color: Colors.grey[200],
-        ),
-        child: Row(
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 30.0,
-              color: Colors.blue,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: appStore.isDarkMode ? Colors.grey[800] : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: gradientColors.first.withAlpha(51),
+              width: 1,
             ),
-            const SizedBox(width: 15.0),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w500,
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors.first.withAlpha(26),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: gradientColors,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: gradientColors.first.withAlpha(102),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 32,
                 ),
               ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16.0,
-              color: Colors.grey,
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                  color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'Poppins',
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _showFileOptions() {
+    int imageLimit = 0;
+    if (imageType == 'X-ray' || imageType == 'Mammography') {
+      imageLimit = 2;
+    } else {
+      imageLimit = 1;
+    }
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: appStore.isDarkMode ? Colors.grey[900] : Colors.grey[50],
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(26),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Upload area
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: appStore.isDarkMode
+                                  ? Colors.grey[850]
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.blue.withAlpha(26),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withAlpha(13),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: MultipleImageUploadWidget(
+                              imageType: imageType,
+                              imageUploadBloc,
+                              imageLimit: imageLimit, (imageFiles) {
+                                selectedImageFiles = imageFiles;
+                                setState(() {});
+                                Navigator.pop(context);
+                              }
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
   Future<void> _permissionDialog() async {
     return showDialog(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          // <-- SEE HERE
           title: Text(
             translation(context).msg_something_wrong,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14.sp),
           ),
-          // content: const SingleChildScrollView(
-          //   child: ListBody(
-          // //     children: <Widget>[
-          // //       Text('Are you sure want to enable permission?'),
-          // //     ],
-          //   ),
-          // ),
           actions: <Widget>[
             TextButton(
               child: Text(translation(context).lbl_cancel),

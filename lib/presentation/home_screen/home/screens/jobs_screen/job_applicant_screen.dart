@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -12,22 +13,18 @@ import 'package:timeago/timeago.dart' as timeAgo;
 import 'bloc/jobs_event.dart';
 
 class JobApplicantScreen extends StatefulWidget {
-  String jobId;
-  JobsBloc jobBloc;
+  final String jobId;
+  final JobsBloc jobBloc;
 
-  JobApplicantScreen(this.jobId, this.jobBloc, {super.key});
+  const JobApplicantScreen(this.jobId, this.jobBloc, {super.key});
 
   @override
   State<JobApplicantScreen> createState() => _JobApplicantScreenState();
 }
 
 class _JobApplicantScreenState extends State<JobApplicantScreen> {
-  // JobsBloc widget.jobBloc = JobsBloc();
   @override
   void initState() {
-    setStatusBarColor(svGetScaffoldColor());
-    // Data jobsModel = widget.jobBloc.drugsData.singleWhere((job)=>job.id.toString()==widget.jobId.toString());
-    // applicantList=jobsModel.applicants!.toList();
     widget.jobBloc.add(ShowApplicantEvent(jobId: widget.jobId));
     super.initState();
   }
@@ -37,18 +34,49 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
-        surfaceTintColor: svGetScaffoldColor(),
         backgroundColor: svGetScaffoldColor(),
+        iconTheme: IconThemeData(color: context.iconColor),
+        elevation: 0,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
+        centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.blue[600],
+              size: 16,
+            ),
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          }
         ),
-        centerTitle: false,
-        title: const Text(
-          'Applicants',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people,
+              color: Colors.blue[600],
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              translation(context).lbl_applicants,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
         ),
-        actions: [],
       ),
       body: BlocConsumer<JobsBloc, JobsState>(
         bloc: widget.jobBloc,
@@ -64,151 +92,169 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return ShimmerCardList();
+            return const ShimmerCardList();
           } else if (state is PaginationLoadedState) {
+            final applicants = widget.jobBloc.jobApplicantsModel?.applicants;
+            
+            if (applicants == null || applicants.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.people_outline,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      translation(context).msg_no_applicants,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            
             return ListView.builder(
-              itemCount:
-                  widget.jobBloc.jobApplicantsModel?.applicants?.length ?? 0,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: applicants.length,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
+                final applicant = applicants[index];
+                final user = applicant.user;
+                
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
                     onTap: () {
-                      // Add navigation logic or any other action on contact tap
+                      if (user?.id != null) {
+                        SVProfileFragment(userId: user!.id.toString()).launch(context);
+                      }
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 10),
+                      padding: const EdgeInsets.all(16.0),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // Profile Image
+                          Hero(
+                            tag: 'profile-${user?.id}',
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 1,
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: CustomImageView(
+                                placeHolder: 'images/socialv/faces/face_5.png',
+                                imagePath: '${AppData.imageUrl}${user?.profilePic.validate()}',
+                                height: 60,
+                                width: 60,
+                                fit: BoxFit.cover,
+                                radius: BorderRadius.circular(30),
+                              ),
+                            ),
+                          ),
+                          
+                          const SizedBox(width: 16),
+                          
+                          // User info
                           Expanded(
-                            child: Row(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    // SVProfileFragment(userId:bloc.contactsList[index].id).launch(context);
-                                  },
-                                  child: Container(
-                                    width: 50,
-                                    height: 50,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        user?.name.validate() ?? translation(context).lbl_unknown,
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    _buildAppliedTimeChip(applicant.createdAt),
+                                  ],
+                                ),
+                                
+                                const SizedBox(height: 4),
+                                
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.email_outlined,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        user?.email ?? "",
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                
+                                // Resume or CV indicator (if applicable)
+                                if (applicant.cv != null && applicant.cv!.isNotEmpty)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: const Offset(0, 3),
+                                      color: Colors.green.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.green, width: 0.5),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.description_outlined,
+                                          size: 14,
+                                          color: Colors.green,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          translation(context).lbl_resume_attached,
+                                          style: const TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 12,
+                                            color: Colors.green,
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    child:
-                                        // bloc
-                                        //             .contactsList[
-                                        //                 index]
-                                        //             .profilePic ==
-                                        //         ''
-                                        //     ? Image.asset(
-                                        //             'images/socialv/faces/face_5.png',
-                                        //             height: 56,
-                                        //             width: 56,
-                                        //             fit: BoxFit
-                                        //                 .cover)
-                                        //         .cornerRadiusWithClipRRect(
-                                        //             8)
-                                        //         .cornerRadiusWithClipRRect(
-                                        //             8)
-                                        //     :
-                                        CustomImageView(
-                                                placeHolder:
-                                                    'images/socialv/faces/face_5.png',
-                                                imagePath:
-                                                    '${AppData.imageUrl}${widget.jobBloc.jobApplicantsModel?.applicants![index].user?.profilePic.validate()}',
-                                                height: 56,
-                                                width: 56,
-                                                fit: BoxFit.cover)
-                                            .cornerRadiusWithClipRRect(30),
                                   ),
-                                ),
-                                10.width,
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                            width: 150,
-                                            child: Text(
-                                                "${widget.jobBloc.jobApplicantsModel?.applicants?[index].user?.name.validate()}",
-                                                overflow: TextOverflow.clip,
-                                                style: TextStyle(
-                                                    color: svGetBodyColor(),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 16))),
-                                        6.width,
-                                        // bloc.contactsList[index].isCurrentUser.validate()
-                                        //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
-                                        //     : const Offstage(),
-                                      ],
-                                    ),
-                                    Text(
-                                        widget.jobBloc.jobApplicantsModel?.applicants?[index].user?.email ??
-                                            "",
-                                        style: secondaryTextStyle(
-                                            color: svGetBodyColor())),
-                                  ],
-                                ),
                               ],
                             ),
                           ),
-                          Text(
-                              timeAgo.format(DateTime.parse(widget.jobBloc.jobApplicantsModel?.applicants?[index].createdAt ??
-                                  "")),
-                              style: secondaryTextStyle(
-                                  color: svGetBodyColor(), size: 12)),
-                          // isLoading ? const CircularProgressIndicator(color: svGetBodyColor(),):  AppButton(
-                          //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
-                          //   text:widget.element.isFollowedByCurrentUser == true ? 'Unfollow':'Follow',
-                          //   textStyle: boldTextStyle(color:  widget.element.isFollowedByCurrentUser != true ?SVAppColorPrimary:buttonUnSelectColor,size: 10),
-                          //   onTap:  () async {
-                          //     setState(() {
-                          //       isLoading = true; // Set loading state to true when button is clicked
-                          //     });
-                          //
-                          //     // Perform API call
-                          //     widget.onTap();
-                          //
-                          //     setState(() {
-                          //       isLoading = false; // Set loading state to false after API response
-                          //     });
-                          //   },
-                          //   elevation: 0,
-                          //   color: widget.element.isFollowedByCurrentUser == true ?SVAppColorPrimary:buttonUnSelectColor,
-                          // ),
-                          // ElevatedButton(
-                          //   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          //   onPressed: () async {
-                          //     setState(() {
-                          //       isLoading = true; // Set loading state to true when button is clicked
-                          //     });
-                          //
-                          //     // Perform API call
-                          //     await widget.onTap();
-                          //
-                          //     setState(() {
-                          //       isLoading = false; // Set loading state to false after API response
-                          //     });
-                          //   },
-                          //   child: isLoading
-                          //       ? CircularProgressIndicator(color: svGetBodyColor(),) // Show progress indicator if loading
-                          //       : Text(widget.element.isFollowedByCurrentUser == true ? 'Unfollow' : 'Follow', style: boldTextStyle(color: Colors.white, size: 10)),
-                          //   style: ElevatedButton.styleFrom(
-                          //     // primary: Colors.blue, // Change button color as needed
-                          //     elevation: 0,
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),
@@ -217,23 +263,47 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
               },
             );
           } else if (state is DataError) {
-            return Expanded(
-              child: Center(
-                child: Text(state.errorMessage),
-              ),
+            return Center(
+              child: Text(state.errorMessage),
             );
           } else {
-            return const Center(child: Text('Something went wrong'));
+            return Center(child: Text(translation(context).msg_something_went_wrong));
           }
         },
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     GroupViewScreen().launch(context);
-      //     // Add functionality to start a new chat
-      //   },
-      //   child: const Icon(Icons.group),
-      // ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // Implement any additional action if needed
+          // Perhaps open a filter dialog or export applicants list
+        },
+        icon: const Icon(Icons.people_outline),
+        label: Text(translation(context).lbl_total_applicants +
+            ": ${widget.jobBloc.jobApplicantsModel?.applicants?.length ?? 0}"),
+        backgroundColor: Colors.blue,
+      ),
+    );
+  }
+
+  Widget _buildAppliedTimeChip(String? createdAt) {
+    if (createdAt == null) return const SizedBox.shrink();
+    
+    final timeAgoString = timeAgo.format(DateTime.parse(createdAt));
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        timeAgoString,
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 12,
+          color: Colors.blue[700],
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

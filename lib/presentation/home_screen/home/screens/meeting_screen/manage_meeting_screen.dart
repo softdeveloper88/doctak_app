@@ -65,7 +65,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     meetingBloc.add(FetchMeetings());
     // Initialize date field with tomorrow's date
     _dateController.text =
@@ -292,13 +292,70 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         ),
       ),
       child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
-          leading: IconButton(icon: const Icon(Icons.arrow_back_ios), onPressed: () {
-            Navigator.pop(context);
-          },),
-          title: Text(translation(context).lbl_meeting_management),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          toolbarHeight: 70,
+          surfaceTintColor: Colors.white,
+          centerTitle: true,
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.blue[600],
+                size: 16,
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            }
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.video_call_outlined,
+                color: Colors.blue[600],
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                translation(context).lbl_meeting_management,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                  color: Colors.blue[800],
+                ),
+              ),
+            ],
+          ),
+          actions: const [
+            SizedBox(width: 48), // Balance the title centering
+          ],
           bottom: TabBar(
             controller: _tabController,
+            // labelColor: Colors.blue[700],
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: Colors.blue[600],
+            indicatorWeight: 3,
+            labelStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Poppins',
+              fontSize: 12,
+            ),
             tabs: [
               Tab(
                 icon: const Icon(Icons.videocam_outlined),
@@ -312,10 +369,6 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                 icon: const Icon(Icons.history_outlined),
                 text: translation(context).lbl_history,
               ),
-              Tab(
-                icon: const Icon(Icons.video_library_outlined),
-                text: translation(context).lbl_recordings,
-              ),
             ],
           ),
         ),
@@ -325,7 +378,6 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             _buildJoinCreateTab(),
             const UpcomingMeetingScreen(),
             _buildHistoryTab(),
-            _buildRecordingsTab(),
           ],
         ),
       ),
@@ -1217,226 +1269,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     );
   }
 
-  Widget _buildRecordingsTab() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      physics: const BouncingScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.8,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-      ),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return _buildRecordingCard(
-          title: 'Medical Conference ${index + 1}',
-          date: DateTime.now().subtract(Duration(days: (index + 1) * 10)),
-          duration: Duration(minutes: 30 + (index * 15)),
-          thumbnailColor: index % 2 == 0 ? AppColors.primary : AppColors.accent,
-        );
-      },
-    );
-  }
 
-  Widget _buildRecordingCard({
-    required String title,
-    required DateTime date,
-    required Duration duration,
-    required Color thumbnailColor,
-  }) {
-    return Card(
-      elevation: 3,
-      shadowColor: thumbnailColor.withOpacity(0.3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Thumbnail with play button
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Container(
-                  height: 120,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        thumbnailColor.withOpacity(0.8),
-                        thumbnailColor.withOpacity(0.6),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.video_library,
-                    color: Colors.white.withOpacity(0.7),
-                    size: 48,
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: Center(
-                  child: Material(
-                    elevation: 4,
-                    color: Colors.white,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: () {
-                        // Play recording
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Playing recording...'),
-                            backgroundColor: AppColors.primary,
-                          ),
-                        );
-                      },
-                      customBorder: const CircleBorder(),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.play_arrow_rounded,
-                          color: thumbnailColor,
-                          size: 36,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '${duration.inHours > 0 ? '${duration.inHours}:' : ''}${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          // Recording info
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.calendar_today,
-                      size: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${date.day}/${date.month}/${date.year}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: thumbnailColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.hd,
-                            size: 16,
-                            color: thumbnailColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'HD',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: thumbnailColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.download_outlined,
-                            size: 20,
-                            color: AppColors.textSecondary,
-                          ),
-                          constraints: const BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                          onPressed: () {
-                            toast('Downloading recording...');
-                          },
-                        ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.share_outlined,
-                            size: 20,
-                            color: AppColors.textSecondary,
-                          ),
-                          constraints: const BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                          onPressed: () {
-                            toast('Sharing recording...');
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // Functionality from SetScheduleScreen
   void _checkJoinStatus(BuildContext context, String channel) {

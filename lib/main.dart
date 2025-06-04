@@ -1,15 +1,23 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/presentation/NoInternetScreen.dart';
-import 'package:doctak_app/presentation/calling_module/providers/pusher_provider.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
 import 'package:doctak_app/presentation/calling_module/services/agora_service.dart';
 import 'package:doctak_app/presentation/calling_module/services/call_service.dart';
+
+// import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
+import 'package:doctak_app/presentation/case_discussion/bloc/create_discussion_bloc.dart';
+import 'package:doctak_app/presentation/case_discussion/bloc/discussion_detail_bloc.dart';
+import 'package:doctak_app/presentation/case_discussion/bloc/discussion_list_bloc.dart';
+import 'package:doctak_app/presentation/case_discussion/repository/case_discussion_repository.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
+import 'package:doctak_app/presentation/doctak_ai_module/blocs/ai_chat/ai_chat_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -26,36 +34,31 @@ import 'package:doctak_app/presentation/home_screen/store/AppStore.dart';
 import 'package:doctak_app/presentation/home_screen/utils/AppTheme.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
+import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
-import 'package:doctak_app/theme/bloc/theme_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:hive_flutter/hive_flutter.dart'; // Import hive_flutter package
 import 'package:nb_utils/nb_utils.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+
 import 'ads_setting/ad_setting.dart';
 import 'core/app_export.dart';
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
 import 'core/utils/common_navigator.dart';
 import 'core/utils/get_shared_value.dart';
-import 'core/utils/navigator_service.dart';
-import 'core/utils/pref_utils.dart';
 import 'core/utils/pusher_service.dart';
 import 'firebase_options.dart';
-import 'localization/app_localization.dart';
-import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
-import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 
 // Global service instances that persist throughout app lifecycle
 final CallService globalCallService = CallService();
@@ -78,11 +81,13 @@ late AndroidNotificationChannel channel;
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: 'Main Navigator');
+final GlobalKey<NavigatorState> navigatorKey =
+    GlobalKey(debugLabel: 'Main Navigator');
 var calllRoute;
 
 @pragma('vm:entry-point')
-void onDidReceiveNotificationResponse(NotificationResponse notificationResponse) async {
+void onDidReceiveNotificationResponse(
+    NotificationResponse notificationResponse) async {
   final String? payload = notificationResponse.payload;
   if (notificationResponse.payload != null) {
     debugPrint('notification payload: $payload');
@@ -105,19 +110,20 @@ void checkNotificationPermission() async {
 Future<String> _getBaseUrlFromPrefs() async {
   try {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('api_base_url') ??'https://doctak.net/api/v3';
+    return prefs.getString('api_base_url') ?? 'https://doctak.net/api/v3';
   } catch (e) {
     debugPrint('Error getting base URL from prefs: $e');
     return AppData.remoteUrl3;
   }
 }
+
 Future<String> getToken() async {
   try {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token') ??'';
+    return prefs.getString('token') ?? '';
   } catch (e) {
     debugPrint('Error getting base URL from prefs: $e');
-    return AppData.userToken??"";
+    return AppData.userToken ?? "";
   }
 }
 
@@ -134,7 +140,8 @@ Future<void> _cleanupStaleCallData() async {
     // Clean up active call data if it's too old
     if (savedCallId != null) {
       final savedTimestamp = prefs.getInt('active_call_timestamp') ?? 0;
-      if (now - savedTimestamp > 60000) { // 60 seconds
+      if (now - savedTimestamp > 60000) {
+        // 60 seconds
         debugPrint('Found stale active call data, cleaning up');
         await prefs.remove('active_call_id');
         await prefs.remove('active_call_user_id');
@@ -148,7 +155,8 @@ Future<void> _cleanupStaleCallData() async {
     // Clean up pending call data if it's too old
     if (pendingCallId != null) {
       final pendingTimestamp = prefs.getInt('pending_call_timestamp') ?? 0;
-      if (now - pendingTimestamp > 30000) { // 30 seconds
+      if (now - pendingTimestamp > 30000) {
+        // 30 seconds
         debugPrint('Found stale pending call data, cleaning up');
         await prefs.remove('pending_call_id');
         await prefs.remove('pending_call_timestamp');
@@ -184,7 +192,8 @@ Future<bool> _isActiveCallPending() async {
         return true;
       }
 
-      debugPrint('Found call in CallKit but it appears stale, clearing: $callId');
+      debugPrint(
+          'Found call in CallKit but it appears stale, clearing: $callId');
       await callKitService.endCall(callId);
     }
 
@@ -227,6 +236,7 @@ Future<bool> _isActiveCallPending() async {
 Future<void> main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
 
   // Override HTTP client
   HttpOverrides.global = MyHttpsOverrides();
@@ -242,11 +252,16 @@ Future<void> main() async {
     await initializeAsync();
     AppData.initializePusher();
     await PusherService().initialize();
+
+    // Initialize image cache manager
+    // PostImageCacheManager.initMemoryPressureListener();
+    // Pre-create cache instance
+    // PostImageCacheManager.instance;
+    debugPrint('PostImageCacheManager initialized');
   } catch (e) {
     debugPrint('Error in initializeAsync: $e');
     // Continue even if this fails, as it shouldn't block call handling
   }
-
 
   final baseUrl = await _getBaseUrlFromPrefs();
   try {
@@ -255,7 +270,7 @@ Future<void> main() async {
     await callKitService.initialize(
         baseUrl: baseUrl,
         shouldUpdateStatus: false // Let CallService handle status updates
-    );
+        );
     debugPrint('CallKitService initialized successfully');
   } catch (e) {
     debugPrint('Error initializing CallKitService, continuing: $e');
@@ -295,7 +310,7 @@ Future<void> main() async {
     await callKitService.initialize(
         baseUrl: baseUrl,
         shouldUpdateStatus: false // Let CallService handle status updates
-    );
+        );
     debugPrint('CallKitService initialized successfully');
   } catch (e) {
     debugPrint('Error initializing CallKitService, continuing: $e');
@@ -341,9 +356,7 @@ Future<void> main() async {
   try {
     debugPrint('Initializing CallService...');
     await globalCallService.initialize(
-        baseUrl: baseUrl,
-        isFromCallNotification: isFromCallNotification
-    );
+        baseUrl: baseUrl, isFromCallNotification: isFromCallNotification);
     debugPrint('CallService initialized successfully');
   } catch (e) {
     debugPrint('Error initializing CallService, continuing: $e');
@@ -369,7 +382,8 @@ Future<void> main() async {
     final hasVideo = initialRoute.data['is_video_call'] == 'true';
     final avatar = initialRoute.data['caller_avatar'] ?? '';
 
-    debugPrint('Handling incoming call from notification: $callId from $callerName');
+    debugPrint(
+        'Handling incoming call from notification: $callId from $callerName');
 
     try {
       await globalCallService.handleIncomingCall(
@@ -447,9 +461,9 @@ Future<void> main() async {
   // Finally run the app
   runApp(MyApp(
       message: initialRoute,
-      initialRoute: isHandlingCallAtStartup ? 'call' : initialRoute?.data['type'] ?? '',
-      id: initialRoute?.data['id'] ?? ''
-  ));
+      initialRoute:
+          isHandlingCallAtStartup ? 'call' : initialRoute?.data['type'] ?? '',
+      id: initialRoute?.data['id'] ?? ''));
 }
 
 class MyApp extends StatefulWidget {
@@ -475,7 +489,7 @@ late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   Locale? _locale;
 
@@ -531,14 +545,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final timestamp = prefs.getInt('active_call_timestamp') ?? 0;
         final now = DateTime.now().millisecondsSinceEpoch;
 
-        if (now - timestamp > 60000) { // 60 seconds
+        if (now - timestamp > 60000) {
+          // 60 seconds
           // Call is too old, end it
           debugPrint('Call too old, ending: $callId');
           await callKitService.endCall(callId);
           return;
         }
 
-        debugPrint('Found active call, ensuring call screen is displayed: $callId');
+        debugPrint(
+            'Found active call, ensuring call screen is displayed: $callId');
         await callKitService.resumeCallScreenIfNeeded();
       }
     } catch (e) {
@@ -554,7 +570,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     try {
       NotificationSettings settings =
-      await FirebaseMessaging.instance.requestPermission(
+          await FirebaseMessaging.instance.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -610,6 +626,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     return _updateConnectionStatus(result);
   }
+
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
     setState(() {
       _connectionStatus = result;
@@ -675,7 +692,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
             // ChangeNotifierProvider(create: (_) => PusherProvider()),
             ///
+            ///
+
+            BlocProvider<AiChatBloc>(
+              create: (context) => AiChatBloc(),
+            ),
             // BlocProvider(create: (context) => DropdownBloc()),
+            BlocProvider(
+                create: (context) => DiscussionDetailBloc(
+                  repository: CaseDiscussionRepository(
+                      baseUrl: AppData.base2,
+                      getAuthToken: () {
+                        return AppData.userToken ?? "";
+                      }),
+                )),
+            BlocProvider(
+                create: (context) => CreateDiscussionBloc(
+                  repository: CaseDiscussionRepository(
+                      baseUrl: AppData.base2,
+                      getAuthToken: () {
+                        return AppData.userToken ?? "";
+                      }),
+                )),
             BlocProvider(create: (context) => HomeBloc()),
             BlocProvider(create: (context) => DrugsBloc()),
             BlocProvider(create: (context) => SplashBloc()),
@@ -683,7 +721,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             BlocProvider(create: (context) => SearchPeopleBloc()),
             BlocProvider(create: (context) => ChatGPTBloc()),
             BlocProvider(create: (context) => ConferenceBloc()),
-            BlocProvider(create: (context) => NewsBloc()),
             BlocProvider(create: (context) => GuidelinesBloc()),
             BlocProvider(create: (context) => AddPostBloc()),
             BlocProvider(create: (context) => ProfileBloc()),
@@ -694,263 +731,303 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ChangeNotifierProvider<CallService>.value(value: globalCallService),
             BlocProvider(
                 create: (context) => ThemeBloc(
-                  ThemeState(
-                    themeType: PrefUtils().getThemeData(),
-                  ),
-                )),
+                      ThemeState(
+                        themeType: PrefUtils().getThemeData(),
+                      ),
+                    )),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               return Observer(
                   builder: (_) => MaterialApp(
-                    scaffoldMessengerKey: globalMessengerKey,
-                    navigatorKey: NavigatorService.navigatorKey,
-                    // If handling a call, use '/call' as our home route, otherwise use the regular route
-                    initialRoute: isHandlingCallAtStartup ? '/call' : '/${widget.initialRoute}',
+                        scaffoldMessengerKey: globalMessengerKey,
+                        navigatorKey: NavigatorService.navigatorKey,
+                        // If handling a call, use '/call' as our home route, otherwise use the regular route
+                        initialRoute: isHandlingCallAtStartup
+                            ? '/call'
+                            : '/${widget.initialRoute}',
 
-                    // Add onGenerateRoute to better handle deep linking for calls
-                    onGenerateRoute: (settings) {
-                      print('Generating route for: ${settings.name}');
+                        // Add onGenerateRoute to better handle deep linking for calls
+                        onGenerateRoute: (settings) {
+                          print('Generating route for: ${settings.name}');
 
-                      // Handle call routes with special care
-                      if (settings.name == '/call') {
-                        // When no arguments are provided, get active call info from CallKit
-                        if (settings.arguments == null) {
-                          // Return a "loading" route that will be replaced with call info
-                          return MaterialPageRoute(
-                            settings: const RouteSettings(name: '/call'),
-                            builder: (context) {
-                              // Use a FutureBuilder to get call info and show appropriate screen
-                              return FutureBuilder<List<Map<String, dynamic>>>(
-                                future: callKitService.getActiveCalls(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    // Show a loading indicator while getting call info
-                                    return const Scaffold(
-                                      body: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-
-                                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                                    // We have active call data, but verify it's still active
-                                    final call = snapshot.data!.first;
-                                    final callId = call['id']?.toString() ?? '';
-
-                                    // Extract call data carefully - handling type issues
-                                    Map<String, dynamic> extra = {};
-                                    if (call['extra'] is Map) {
-                                      final rawExtra = call['extra'] as Map;
-                                      rawExtra.forEach((key, value) {
-                                        if (key is String) {
-                                          extra[key] = value;
-                                        }
-                                      });
-                                    }
-
-                                    final userId = extra['userId']?.toString() ?? '';
-                                    final name = call['nameCaller']?.toString() ?? 'Unknown';
-                                    final avatar = extra['avatar']?.toString() ?? '';
-                                    final hasVideo = extra['has_video'] == true ||
-                                        extra['has_video'] == 'true';
-
-                                    // Navigate to call screen - handle null safety properly
-                                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                                      Navigator.of(context).pushReplacement(
-                                        MaterialPageRoute(
-                                          settings: const RouteSettings(name: '/call'),
-                                          builder: (context) => CallScreen(
-                                            callId: callId,
-                                            contactId: userId,
-                                            contactName: name,
-                                            contactAvatar: avatar,
-                                            isIncoming: true,
-                                            isVideoCall: hasVideo,
-                                            token: '',
+                          // Handle call routes with special care
+                          if (settings.name == '/call') {
+                            // When no arguments are provided, get active call info from CallKit
+                            if (settings.arguments == null) {
+                              // Return a "loading" route that will be replaced with call info
+                              return MaterialPageRoute(
+                                settings: const RouteSettings(name: '/call'),
+                                builder: (context) {
+                                  // Use a FutureBuilder to get call info and show appropriate screen
+                                  return FutureBuilder<
+                                      List<Map<String, dynamic>>>(
+                                    future: callKitService.getActiveCalls(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        // Show a loading indicator while getting call info
+                                        return const Scaffold(
+                                          body: Center(
+                                            child: CircularProgressIndicator(),
                                           ),
-                                        ),
-                                      );
-                                    });
+                                        );
+                                      }
 
-                                    // Return a temporary screen while we check
-                                    return const Scaffold(
-                                      body: Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            CircularProgressIndicator(),
-                                            SizedBox(height: 16),
-                                            Text('Preparing call...'),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }
+                                      if (snapshot.hasData &&
+                                          snapshot.data!.isNotEmpty) {
+                                        // We have active call data, but verify it's still active
+                                        final call = snapshot.data!.first;
+                                        final callId =
+                                            call['id']?.toString() ?? '';
 
-                                  // No active call found, check for pending calls
-                                  WidgetsBinding.instance.addPostFrameCallback((_) async {
-                                    final prefs = await SharedPreferences.getInstance();
-                                    final pendingCallId = prefs.getString('pending_call_id');
+                                        // Extract call data carefully - handling type issues
+                                        Map<String, dynamic> extra = {};
+                                        if (call['extra'] is Map) {
+                                          final rawExtra = call['extra'] as Map;
+                                          rawExtra.forEach((key, value) {
+                                            if (key is String) {
+                                              extra[key] = value;
+                                            }
+                                          });
+                                        }
 
-                                    if (pendingCallId != null) {
-                                      // Check if the pending call is recent
-                                      final pendingTimestamp = prefs.getInt('pending_call_timestamp') ?? 0;
-                                      final now = DateTime.now().millisecondsSinceEpoch;
+                                        final userId =
+                                            extra['userId']?.toString() ?? '';
+                                        final name =
+                                            call['nameCaller']?.toString() ??
+                                                'Unknown';
+                                        final avatar =
+                                            extra['avatar']?.toString() ?? '';
+                                        final hasVideo =
+                                            extra['has_video'] == true ||
+                                                extra['has_video'] == 'true';
 
-                                      if (now - pendingTimestamp < 15000) { // Within 15 seconds
-                                        // Extract pending call information
-                                        final callerId = prefs.getString('pending_caller_id') ?? '';
-                                        final callerName = prefs.getString('pending_caller_name') ?? 'Unknown';
-                                        final avatar = prefs.getString('pending_caller_avatar') ?? '';
-                                        final hasVideo = prefs.getBool('pending_call_has_video') ?? false;
+                                        // Navigate to call screen - handle null safety properly
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          Navigator.of(context).pushReplacement(
+                                            MaterialPageRoute(
+                                              settings: const RouteSettings(
+                                                  name: '/call'),
+                                              builder: (context) => CallScreen(
+                                                callId: callId,
+                                                contactId: userId,
+                                                contactName: name,
+                                                contactAvatar: avatar,
+                                                isIncoming: true,
+                                                isVideoCall: hasVideo,
+                                                token: '',
+                                              ),
+                                            ),
+                                          );
+                                        });
 
-                                        // Handle the pending call
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            settings: const RouteSettings(name: '/call'),
-                                            builder: (context) => CallScreen(
-                                              callId: pendingCallId,
-                                              contactId: callerId,
-                                              contactName: callerName,
-                                              contactAvatar: avatar,
-                                              isIncoming: true,
-                                              isVideoCall: hasVideo,
-                                              token: '',
+                                        // Return a temporary screen while we check
+                                        return const Scaffold(
+                                          body: Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                CircularProgressIndicator(),
+                                                SizedBox(height: 16),
+                                                Text('Preparing call...'),
+                                              ],
                                             ),
                                           ),
                                         );
-                                        return;
                                       }
-                                    }
 
-                                    // If we get here, no call is active, redirect to home
-                                    Navigator.of(context).pushReplacementNamed('/');
-                                  });
+                                      // No active call found, check for pending calls
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) async {
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        final pendingCallId =
+                                            prefs.getString('pending_call_id');
 
-                                  return const Scaffold(
-                                    body: Center(child: CircularProgressIndicator()),
+                                        if (pendingCallId != null) {
+                                          // Check if the pending call is recent
+                                          final pendingTimestamp = prefs.getInt(
+                                                  'pending_call_timestamp') ??
+                                              0;
+                                          final now = DateTime.now()
+                                              .millisecondsSinceEpoch;
+
+                                          if (now - pendingTimestamp < 15000) {
+                                            // Within 15 seconds
+                                            // Extract pending call information
+                                            final callerId = prefs.getString(
+                                                    'pending_caller_id') ??
+                                                '';
+                                            final callerName = prefs.getString(
+                                                    'pending_caller_name') ??
+                                                'Unknown';
+                                            final avatar = prefs.getString(
+                                                    'pending_caller_avatar') ??
+                                                '';
+                                            final hasVideo = prefs.getBool(
+                                                    'pending_call_has_video') ??
+                                                false;
+
+                                            // Handle the pending call
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                settings: const RouteSettings(
+                                                    name: '/call'),
+                                                builder: (context) =>
+                                                    CallScreen(
+                                                  callId: pendingCallId,
+                                                  contactId: callerId,
+                                                  contactName: callerName,
+                                                  contactAvatar: avatar,
+                                                  isIncoming: true,
+                                                  isVideoCall: hasVideo,
+                                                  token: '',
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                        }
+
+                                        // If we get here, no call is active, redirect to home
+                                        Navigator.of(context)
+                                            .pushReplacementNamed('/');
+                                      });
+
+                                      return const Scaffold(
+                                        body: Center(
+                                            child: CircularProgressIndicator()),
+                                      );
+                                    },
                                   );
                                 },
                               );
-                            },
-                          );
-                        }
+                            }
 
-                        // Handle call with provided arguments
-                        final args = _extractCallArguments(settings.arguments);
+                            // Handle call with provided arguments
+                            final args =
+                                _extractCallArguments(settings.arguments);
 
-                        return MaterialPageRoute(
-                          settings: RouteSettings(name: '/call'), // Important for route recognition
-                          builder: (context) => CallScreen(
-                            callId: args['callId'] ?? '',
-                            contactId: args['contactId'] ?? '',
-                            contactName: args['contactName'] ?? 'Unknown',
-                            contactAvatar: args['contactAvatar'] ?? '',
-                            isIncoming: args['isIncoming'] ?? true,
-                            isVideoCall: args['isVideoCall'] ?? false,
-                            token: args['token'] ?? '',
-                          ),
-                        );
-                      }
+                            return MaterialPageRoute(
+                              settings: RouteSettings(
+                                  name:
+                                      '/call'), // Important for route recognition
+                              builder: (context) => CallScreen(
+                                callId: args['callId'] ?? '',
+                                contactId: args['contactId'] ?? '',
+                                contactName: args['contactName'] ?? 'Unknown',
+                                contactAvatar: args['contactAvatar'] ?? '',
+                                isIncoming: args['isIncoming'] ?? true,
+                                isVideoCall: args['isVideoCall'] ?? false,
+                                token: args['token'] ?? '',
+                              ),
+                            );
+                          }
 
-                      // Handle message routes
-                      if (settings.name == '/message_received') {
-                        return MaterialPageRoute(
-                          settings: settings,
-                          builder: (context) => ChatRoomScreen(
-                            id: widget.id.toString(),
-                            roomId: '',
-                            username: widget.message?.notification?.title ?? "",
-                            profilePic: widget.message?.data['image'] ?? ''
-                                .replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', ''),
-                          ),
-                        );
-                      }
+                          // Handle message routes
+                          if (settings.name == '/message_received') {
+                            return MaterialPageRoute(
+                              settings: settings,
+                              builder: (context) => ChatRoomScreen(
+                                id: widget.id.toString(),
+                                roomId: '',
+                                username:
+                                    widget.message?.notification?.title ?? "",
+                                profilePic: widget.message?.data['image'] ??
+                                    ''.replaceAll(
+                                        'https://doctak-file.s3.ap-south-1.amazonaws.com/',
+                                        ''),
+                              ),
+                            );
+                          }
 
-                      // Let other routes be handled by the routes map
-                      return null;
-                    },
+                          // Let other routes be handled by the routes map
+                          return null;
+                        },
 
-                    routes: {
-                      '/': (context) => ForceUpgradePage(),
+                        routes: {
+                          '/': (context) => UnifiedSplashUpgradeScreen(),
 
-                      // Keep all your existing routes
-                      '/follow_request': (context) => SVProfileFragment(
-                        userId: widget.id ?? '',
-                      ),
-                      '/follower_notification': (context) =>
-                          SVProfileFragment(
-                            userId: widget.id ?? '',
-                          ),
-                      '/un_follower_notification': (context) =>
-                          SVProfileFragment(
-                            userId: widget.id ?? '',
-                          ),
-                      '/friend_request': (context) => SVProfileFragment(
-                        userId: widget.id ?? '',
-                      ),
-                      '/message_received': (context) => ChatRoomScreen(
-                        id: widget.id.toString(),
-                        roomId: '',
-                        username:
-                        widget.message?.notification?.title ?? "",
-                        profilePic: widget.message?.data['image'] ??
-                            ''.replaceAll(
-                                'https://doctak-file.s3.ap-south-1.amazonaws.com/',
-                                ''),
-                      ),
-                      '/comments_on_posts': (context) => PostDetailsScreen(
-                        commentId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/reply_to_comment': (context) => PostDetailsScreen(
-                        commentId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/like_comment_on_post': (context) =>
-                          PostDetailsScreen(
-                            commentId: int.parse(widget.id ?? '0'),
-                          ),
-                      '/like_comments': (context) => PostDetailsScreen(
-                        commentId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/new_like': (context) => PostDetailsScreen(
-                        postId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/like_on_posts': (context) => PostDetailsScreen(
-                        postId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/new_job_posted': (context) => JobsDetailsScreen(
-                        jobId: widget.id ?? '0',
-                      ),
-                      '/job_update': (context) => JobsDetailsScreen(
-                        jobId: widget.id ?? '0',
-                      ),
-                      '/conference_invitation': (context) =>
-                          ConferencesScreen(),
-                      '/new_discuss_case': (context) =>
-                      const CaseDiscussionScreen(),
-                      '/discuss_case_comment': (context) =>
-                      const CaseDiscussionScreen(),
-                      '/job_post_notification': (context) =>
-                          JobsDetailsScreen(
-                            jobId: widget.id ?? '0',
-                          ),
-                    },
+                          // Keep all your existing routes
+                          '/follow_request': (context) => SVProfileFragment(
+                                userId: widget.id ?? '',
+                              ),
+                          '/follower_notification': (context) =>
+                              SVProfileFragment(
+                                userId: widget.id ?? '',
+                              ),
+                          '/un_follower_notification': (context) =>
+                              SVProfileFragment(
+                                userId: widget.id ?? '',
+                              ),
+                          '/friend_request': (context) => SVProfileFragment(
+                                userId: widget.id ?? '',
+                              ),
+                          '/message_received': (context) => ChatRoomScreen(
+                                id: widget.id.toString(),
+                                roomId: '',
+                                username:
+                                    widget.message?.notification?.title ?? "",
+                                profilePic: widget.message?.data['image'] ??
+                                    ''.replaceAll(
+                                        'https://doctak-file.s3.ap-south-1.amazonaws.com/',
+                                        ''),
+                              ),
+                          '/comments_on_posts': (context) => PostDetailsScreen(
+                                commentId: int.parse(widget.id ?? '0'),
+                              ),
+                          '/reply_to_comment': (context) => PostDetailsScreen(
+                                commentId: int.parse(widget.id ?? '0'),
+                              ),
+                          '/like_comment_on_post': (context) =>
+                              PostDetailsScreen(
+                                commentId: int.parse(widget.id ?? '0'),
+                              ),
+                          '/like_comments': (context) => PostDetailsScreen(
+                                commentId: int.parse(widget.id ?? '0'),
+                              ),
+                          '/new_like': (context) => PostDetailsScreen(
+                                postId: int.parse(widget.id ?? '0'),
+                              ),
+                          '/like_on_posts': (context) => PostDetailsScreen(
+                                postId: int.parse(widget.id ?? '0'),
+                              ),
+                          '/new_job_posted': (context) => JobsDetailsScreen(
+                                jobId: widget.id ?? '0',
+                              ),
+                          '/job_update': (context) => JobsDetailsScreen(
+                                jobId: widget.id ?? '0',
+                              ),
+                          '/conference_invitation': (context) =>
+                              ConferencesScreen(),
+                          '/new_discuss_case': (context) =>
+                              const CaseDiscussionScreen(),
+                          '/discuss_case_comment': (context) =>
+                              const CaseDiscussionScreen(),
+                          '/job_post_notification': (context) =>
+                              JobsDetailsScreen(
+                                jobId: widget.id ?? '0',
+                              ),
+                        },
 
-                    debugShowCheckedModeBanner: false,
-                    scrollBehavior: SBehavior(),
-                    themeAnimationDuration: const Duration(microseconds: 500),
-                    theme: AppTheme.lightTheme,
-                    darkTheme: AppTheme.darkTheme,
-                    themeMode: appStore.isDarkMode
-                        ? ThemeMode.dark
-                        : ThemeMode.light,
-                    localizationsDelegates:
-                    AppLocalizations.localizationsDelegates,
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    locale: _locale,
-                  ));
+                        debugShowCheckedModeBanner: false,
+                        scrollBehavior: SBehavior(),
+                        themeAnimationDuration:
+                            const Duration(microseconds: 500),
+                        theme: AppTheme.lightTheme,
+                        darkTheme: AppTheme.darkTheme,
+                        themeMode: appStore.isDarkMode
+                            ? ThemeMode.dark
+                            : ThemeMode.light,
+                        localizationsDelegates:
+                            AppLocalizations.localizationsDelegates,
+                        supportedLocales: AppLocalizations.supportedLocales,
+                        locale: _locale,
+                      ));
             },
           ),
         );
