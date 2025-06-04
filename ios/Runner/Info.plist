@@ -89,11 +89,25 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera access required that you can share images and videos with your friends</string>
+	<string>Camera access is required for video calls, meetings, and sharing visual content with other medical professionals. This ensures secure face-to-face consultations and case discussions.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Microphone access required that can share voice message with your friends</string>
+	<string>Microphone access is required for voice calls, video meetings, and recording voice messages for professional medical communication and consultations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Phone Photo access required that you can share images and video with your friends</string>
+	<string>Photo library access is needed to share medical images, case studies, and other visual content during professional discussions and meetings.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Local network access is required to establish direct peer-to-peer connections for improved call quality during meetings and video calls with medical professionals.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Bluetooth access is required to connect to wireless headphones and speakers during video calls and meetings for better audio quality during medical consultations.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Bluetooth access is required to connect to wireless audio devices during medical consultations and meetings.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Speech recognition may be used for voice commands and meeting transcription features during medical consultations.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Media library access is required for playing notification sounds and managing audio sessions during video calls.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location access may be used to enhance meeting security and provide location-based medical services when permitted.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Contacts access allows you to easily invite medical colleagues to meetings and discussions from your address book.</string>
 	<key>GADApplicationIdentifier</key>
     <string>ca-app-pub-9354893692913823~4368543936</string>
 	<key>SKAdNetworkItems</key>
@@ -301,6 +315,9 @@
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>voip</string>
+		<string>audio</string>
+		<string>background-processing</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
