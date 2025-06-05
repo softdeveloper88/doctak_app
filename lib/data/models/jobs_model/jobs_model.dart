@@ -212,10 +212,10 @@ class Data {
   String? lastDate;
   dynamic totalJobs;
   dynamic specialty;
-  String? noOfJobs;
+  dynamic noOfJobs;
   dynamic postedAt;
   String? salaryRange;
-  int? promoted;
+  bool? promoted;
   int? views;
   int? clicks;
   List<Specialties>? specialties;
