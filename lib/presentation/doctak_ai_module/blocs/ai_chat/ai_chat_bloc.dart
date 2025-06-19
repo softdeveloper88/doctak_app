@@ -209,14 +209,7 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
         if (!emit.isDone) {
           print("⚠️⚠️⚠️ About to emit MessageSent state (title case) - current state: ${state.runtimeType}");
           
-          // First emit temporary state to clear MessageSending state
-          emit(SessionSelected(
-            sessions: updatedSessions,
-            selectedSession: updatedSelectedSession,
-            messages: messagesWithResponse,
-          ));
-            
-          // Now emit the final MessageSent state
+          // Emit only the final MessageSent state to avoid double emissions
           emit(MessageSent(
             sessions: updatedSessions,
             selectedSession: updatedSelectedSession,
@@ -248,14 +241,7 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
         try {
           print("⚠️⚠️⚠️ About to emit MessageSent state - current state: ${state.runtimeType}");
             
-          // First emit temporary state to clear MessageSending state
-          emit(SessionSelected(
-            sessions: sessions,
-            selectedSession: selectedSession,
-            messages: messagesWithResponse,
-          ));
-            
-          // Now emit the final MessageSent state
+          // Emit only the final MessageSent state to avoid double emissions
           emit(MessageSent(
             sessions: sessions,
             selectedSession: selectedSession,

@@ -3,7 +3,7 @@ import 'package:doctak_app/core/utils/image_constant.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:doctak_app/l10n/app_localizations.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_comman_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';

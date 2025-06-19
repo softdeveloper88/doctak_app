@@ -52,28 +52,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
       // Load all sessions first to ensure the drawer has data
       context.read<AiChatBloc>().add(LoadSessions());
       
-      // If we have an initial session ID, select it
+      // If we have an initial session ID, select it immediately after sessions load
       if (widget.initialSessionId != null) {
-        // Small delay to ensure sessions are loaded first
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (!mounted) return;
-          context.read<AiChatBloc>().add(SelectSession(sessionId: widget.initialSessionId!));
-          setState(() {
-            _showWelcomeScreen = false;
-          });
+        setState(() {
+          _showWelcomeScreen = false;
         });
-      } else {
-        // For welcome screen, create a session in the background
-        // This ensures a session is ready when user clicks a prompt
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (!mounted) return;
-          // Only create a new session if we're still showing the welcome screen
-          // and don't have any pending messages
-          final state = context.read<AiChatBloc>().state;
-          if (_showWelcomeScreen && (state is SessionsLoaded || state is SessionCreated)) {
-            context.read<AiChatBloc>().add(const CreateSession());
-          }
-        });
+        context.read<AiChatBloc>().add(SelectSession(sessionId: widget.initialSessionId!));
       }
     });
   }
@@ -132,13 +116,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
     _pendingMessage = promptText;
     _pendingImageFile = _selectedImage;
     
-    // Create the session in the background with a small delay to ensure UI updates first
-    Future.delayed(const Duration(milliseconds: 50), () {
-      if (!mounted) return;
-      
+    // Create the session immediately without delay
+    if (mounted) {
       // The BLoC will handle the actual sending after session creation
       context.read<AiChatBloc>().add(CreateSession(name: sessionName));
-    });
+    }
   }
 
   void _sendMessage(String message, {bool isFeatureCardPrompt = false}) {
@@ -721,10 +703,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
         if (state is MessageSending) {
           bool hasMessages = state.messages.isNotEmpty;
           setState(() {
-            // Only hide welcome if there are existing messages or we're actively sending one
-            if (hasMessages || _pendingMessage != null) {
-              _showWelcomeScreen = false;
-            }
+            // Always hide welcome screen when sending messages
+            _showWelcomeScreen = false;
             _isWaitingForResponse = true;
           });
         }
@@ -761,98 +741,63 @@ class _AiChatScreenState extends State<AiChatScreen> {
             ),
           );
         }
-        // CASE 4: Session selection
+        // When a new session is created
+        else if (state is SessionCreated) {
+          debugPrint("SessionCreated received - selecting session: ${state.newSession.id}");
+
+          // Use a microtask to avoid race conditions with state transitions
+          Future.microtask(() {
+            if (mounted) {
+              context.read<AiChatBloc>().add(SelectSession(
+                sessionId: state.newSession.id.toString(),
+              ));
+            }
+          });
+        }
+        // CASE 4: Session selection - handle this only once
         else if (state is SessionSelected) {
-          // Determine if this is a prompt-based session by checking if name isn't "New Chat"
-          bool isPromptBasedSession = state.selectedSession.name != "New Chat";
           bool hasMessages = state.messages.isNotEmpty;
 
+          // Handle pending messages for empty sessions first
+          if (state.messages.isEmpty && _pendingMessage != null) {
+            final String messageToSend = _pendingMessage!;
+            final File? fileToSend = _pendingImageFile;
+
+            debugPrint("Sending pending message to session: ${state.selectedSession.id}");
+
+            // Send message immediately
+            context.read<AiChatBloc>().add(SendMessage(
+              message: messageToSend,
+              model: _selectedModel,
+              temperature: _temperature,
+              maxTokens: _maxTokens,
+              webSearch: _webSearchEnabled,
+              searchContextSize: _webSearchEnabled ? _searchContextSize : null,
+              file: fileToSend,
+              suggestTitle: true, // Always suggest title for first message
+            ));
+
+            // Clear pending message and file
+            _pendingMessage = null;
+            _pendingImageFile = null;
+
+            // Clear selected image if it was used and not already cleared
+            if (_selectedImage != null) {
+              _clearImage();
+            }
+            
+            return; // Return early to avoid the setState below
+          }
+
           setState(() {
-            // Hide welcome screen if:
-            // 1. Session has messages, or
-            // 2. Session name indicates it's from a prompt, or
-            // 3. We have a pending message to send
-            _showWelcomeScreen = !(hasMessages || isPromptBasedSession || _pendingMessage != null);
+            // Only show welcome screen if session is empty - once we have messages, never show welcome again
+            _showWelcomeScreen = !hasMessages;
             _isWaitingForResponse = false;
           });
 
           // Scroll to bottom only when session has messages
           if (hasMessages) {
             _scrollToBottom();
-          }
-        }
-
-        // When a new session is created
-        if (state is SessionCreated) {
-          debugPrint("SessionCreated received - selecting session: ${state.newSession.id}");
-
-          // Keep welcome screen hidden if we have a pending message (e.g. from a prompt card)
-          if (_pendingMessage != null) {
-            setState(() {
-              _showWelcomeScreen = false;
-            });
-          }
-
-          // Always select the newly created session immediately
-          context.read<AiChatBloc>().add(SelectSession(
-            sessionId: state.newSession.id.toString(),
-          ));
-        }
-
-        // When a new session is selected after creation, send the pending message
-        if (state is SessionSelected) {
-          // Reset waiting indicator in case it was stuck
-          if (_isWaitingForResponse && state.messages.isNotEmpty) {
-            setState(() {
-              _isWaitingForResponse = false;
-            });
-          }
-
-          // Process pending messages for empty sessions
-          // Don't check _showWelcomeScreen here, as we want to process
-          // pending messages while welcome screen is visible
-          if (state.messages.isEmpty) {
-            // Check for pending message from feature card or regular input
-            final String messageToSend = _pendingMessage ?? _inputController?.text ?? "";
-            final File? fileToSend = _pendingImageFile ?? _selectedImage;
-
-            debugPrint("Empty SessionSelected - checking for pending message: ${messageToSend.isNotEmpty}");
-
-            if (messageToSend.isNotEmpty || fileToSend != null) {
-              debugPrint("Sending pending message to session: ${state.selectedSession.id}");
-
-              // Hide welcome screen and set waiting indicator
-              setState(() {
-                _showWelcomeScreen = false; // Hide welcome screen as we're sending a message
-                _isWaitingForResponse = true;
-              });
-
-              // Send message immediately
-              context.read<AiChatBloc>().add(SendMessage(
-                message: messageToSend,
-                model: _selectedModel,
-                temperature: _temperature,
-                maxTokens: _maxTokens,
-                webSearch: _webSearchEnabled,
-                searchContextSize: _webSearchEnabled ? _searchContextSize : null,
-                file: fileToSend,
-                suggestTitle: true, // Always suggest title for first message
-              ));
-
-              // Clear pending message and file
-              _pendingMessage = null;
-              _pendingImageFile = null;
-
-              // Clear input controller if it was used
-              if (_inputController != null && _inputController!.text.isNotEmpty) {
-                _inputController!.clear();
-              }
-
-              // Clear selected image if it was used and not already cleared
-              if (_selectedImage != null) {
-                _clearImage();
-              }
-            }
           }
         }
 
@@ -878,9 +823,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
         // This prevents flickering between different UI states
 
         // First case: If the welcome screen should be shown (for new sessions)
-        // Only show welcome screen if explicitly requested and not currently sending a message
-        if (_showWelcomeScreen && _pendingMessage == null &&
-            !(state is MessageSending || state is MessageSent)) {
+        // Simple logic: only show welcome screen if flag is true and no activity is happening
+        if (_showWelcomeScreen && !_isWaitingForResponse) {
           return _buildWelcomeScreen();
         }
 

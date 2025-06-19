@@ -179,7 +179,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           ),
           iconTheme: IconThemeData(color: Colors.white),
         ),
-        tabBarTheme: const TabBarTheme(
+        tabBarTheme: const TabBarThemeData(
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorSize: TabBarIndicatorSize.tab,
@@ -191,7 +191,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             ),
           ),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

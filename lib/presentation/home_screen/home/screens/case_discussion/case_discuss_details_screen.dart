@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/case_model/case_discuss_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_state.dart';
@@ -50,7 +51,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
       appBar: AppBar(
         backgroundColor: context.cardColor,
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Case Details', style: boldTextStyle(size: 20)),
+        title: Text(translation(context).lbl_case_details, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -158,9 +159,9 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                 ),
                 widget.caseDiscussionBloc.caseComments.comments?.isEmpty ??
                     false
-                    ? const Expanded(
+                    ? Expanded(
                       child: Center(
-                                        child: Text('No answer added yet'),
+                                        child: Text(translation(context).msg_no_answer_added_yet),
                                       ),
                     )
                     : Expanded(child: ListView.builder(
@@ -215,7 +216,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                                   PopupMenuItem(
                                                     child: Builder(builder: (context) {
                                                       return Column(
-                                                        children: ["Delete"].map((String item) {
+                                                        children: [translation(context).lbl_delete].map((String item) {
                                                           return PopupMenuItem(
                                                             value: item,
                                                             child: Text(item),
@@ -227,7 +228,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                                                 ];
                                               },
                                               onSelected: (value) {
-                                                if (value == 'Delete') {
+                                                if (value == translation(context).lbl_delete) {
                                                   showDialog(
                                                       context: context,
                                                       builder: (BuildContext context) {
@@ -342,7 +343,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                           controller: commentController,
                           textFieldType: TextFieldType.MULTILINE,
                           decoration: InputDecoration(
-                            hintText: 'Write your view',
+                            hintText: translation(context).hint_write_your_view,
                             hintStyle:
                             secondaryTextStyle(color: svGetBodyColor()),
                             border: InputBorder.none,
@@ -368,7 +369,7 @@ class _CaseDiscussDetailsScreenState extends State<CaseDiscussDetailsScreen> {
                       commentController.clear();
                     }
                   },
-                  child: Text('Post',
+                  child: Text(translation(context).lbl_post,
                       style: secondaryTextStyle(color: SVAppColorPrimary)),
                 ),
               ],

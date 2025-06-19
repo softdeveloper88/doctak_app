@@ -12,12 +12,14 @@ class AiMessageBubble extends StatefulWidget {
   final AiChatMessageModel message;
   final bool showAvatar;
   final Function(String feedback) onFeedbackSubmitted;
+  final bool isNewMessage;
 
   const AiMessageBubble({
     super.key,
     required this.message,
     this.showAvatar = true,
     required this.onFeedbackSubmitted,
+    this.isNewMessage = false,
   });
 
   @override
@@ -34,7 +36,15 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _startTypingAnimation();
+    if (widget.isNewMessage) {
+      // Only start typing animation for new messages
+      _startTypingAnimation();
+    } else {
+      // For historical messages, show full content immediately
+      _currentlyDisplayedText = widget.message.content;
+      _isTyping = false;
+      _currentCharIndex = widget.message.content.length;
+    }
   }
   
   @override
@@ -46,12 +56,19 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
   @override
   void didUpdateWidget(AiMessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If message content changed, restart typing animation
+    // If message content changed, restart typing animation only if it's a new message
     if (oldWidget.message.content != widget.message.content) {
-      _currentlyDisplayedText = '';
-      _currentCharIndex = 0;
-      _isTyping = true;
-      _startTypingAnimation();
+      if (widget.isNewMessage) {
+        _currentlyDisplayedText = '';
+        _currentCharIndex = 0;
+        _isTyping = true;
+        _startTypingAnimation();
+      } else {
+        // For historical messages, show full content immediately
+        _currentlyDisplayedText = widget.message.content;
+        _isTyping = false;
+        _currentCharIndex = widget.message.content.length;
+      }
     }
   }
   

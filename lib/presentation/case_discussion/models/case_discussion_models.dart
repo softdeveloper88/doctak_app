@@ -348,29 +348,23 @@ class CreateCaseRequest {
   final String title;
   final String description;
   final String? tags;
-  final String? specialtyId;
-  final String? attachedFile;
-  final PatientInfo? patientInfo;
-  final List<String>? symptoms;
-  final String? diagnosis;
-  final String? treatmentPlan;
-  final String? specialty;
-  final String privacyLevel;
-  final List<AttachmentData>? attachments;
+  // final String? specialtyId;
+  final Map<String, dynamic>? patientDemographics;
+  final String? clinicalComplexity;
+  final String? teachingValue;
+  final bool? isAnonymized;
+  final List<String>? attachedFiles;
 
   CreateCaseRequest({
     required this.title,
     required this.description,
     this.tags,
-    this.specialtyId,
-    this.attachedFile,
-    this.patientInfo,
-    this.symptoms,
-    this.diagnosis,
-    this.treatmentPlan,
-    this.specialty,
-    this.privacyLevel = 'public',
-    this.attachments,
+    // this.specialtyId,
+    this.patientDemographics,
+    this.clinicalComplexity,
+    this.teachingValue,
+    this.isAnonymized,
+    this.attachedFiles,
   });
 
   Map<String, dynamic> toJson() {
@@ -378,19 +372,12 @@ class CreateCaseRequest {
       'title': title,
       'description': description,
       if (tags != null) 'tags': tags,
-      if (specialtyId != null) 'specialty_id': specialtyId,
-      if (attachedFile != null) 'attached_file': attachedFile,
-      if (patientInfo != null) 'patient_info': {
-        'age': patientInfo!.age,
-        'gender': patientInfo!.gender,
-        'medical_history': patientInfo!.medicalHistory,
-      },
-      if (symptoms != null) 'symptoms': symptoms,
-      if (diagnosis != null) 'diagnosis': diagnosis,
-      if (treatmentPlan != null) 'treatment_plan': treatmentPlan,
-      if (specialty != null) 'specialty': specialty,
-      'privacy_level': privacyLevel,
-      if (attachments != null) 'attachments': attachments?.map((a) => a.toJson()).toList(),
+      // if (specialtyId != null) 'specialty_id': specialtyId,
+      if (patientDemographics != null) 'patient_demographics': patientDemographics,
+      if (clinicalComplexity != null) 'clinical_complexity': clinicalComplexity,
+      if (teachingValue != null) 'teaching_value': teachingValue,
+      if (isAnonymized != null) 'is_anonymized': isAnonymized,
+      if (attachedFiles != null) 'attached_files': attachedFiles,
     };
   }
 }

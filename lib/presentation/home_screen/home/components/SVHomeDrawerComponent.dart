@@ -28,9 +28,10 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:doctak_app/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:ui';
+import 'dart:math' as math;
 
 import '../../../../localization/app_localization.dart';
 import '../../../case_discussion/screens/discussion_list_screen.dart';
@@ -41,420 +42,560 @@ import '../screens/case_discussion/case_discussion_screen.dart';
 import '../screens/meeting_screen/manage_meeting_screen.dart';
 
 class SVHomeDrawerComponent extends StatefulWidget {
+  const SVHomeDrawerComponent({Key? key}) : super(key: key);
+
   @override
   State<SVHomeDrawerComponent> createState() => _SVHomeDrawerComponentState();
 }
 
-class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
+class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   int selectedIndex = -1;
+  late AnimationController _animationController;
+  late Animation<double> _slideAnimation;
+  bool _isDisposed = false;
 
-  // Menu categories for better organization
-  final Map<String, List<int>> menuCategories = {
-    'Professional Tools': [0, 1, 2, 3, 4],
-    'Learning & Research': [5, 6, 7, 8, 9],
-    'Communication': [10, 11],
-    'Resources': [12, 13],
-    'Settings': [14, 15, 16],
-  };
+  // Updated menu items with localization keys
+  static List<MenuItemData> getMenuItems(BuildContext context) {
+    final l10n = translation(context);
+    return [
+      MenuItemData(0, Icons.psychology_outlined, l10n.lbl_medical_ai, l10n.desc_medical_ai),
+      MenuItemData(1, Icons.business_center_outlined, l10n.lbl_jobs, l10n.desc_jobs),
+      MenuItemData(2, Icons.medical_services_outlined, l10n.lbl_drugs, l10n.desc_drugs),
+      MenuItemData(3, Icons.forum_outlined, l10n.lbl_discussions, l10n.desc_discussions),
+      MenuItemData(4, Icons.groups_outlined, l10n.lbl_groups, l10n.desc_groups),
+      MenuItemData(5, Icons.description_outlined, l10n.lbl_guidelines, l10n.desc_guidelines),
+      MenuItemData(6, Icons.event_outlined, l10n.lbl_conferences, l10n.desc_conferences),
+      MenuItemData(7, Icons.video_call_outlined, l10n.lbl_meetings, l10n.desc_meetings),
+      MenuItemData(8, Icons.lightbulb_outline, l10n.lbl_suggestions, l10n.desc_suggestions),
+      MenuItemData(9, Icons.settings_outlined, l10n.lbl_settings, l10n.desc_settings),
+      MenuItemData(10, Icons.privacy_tip_outlined, l10n.lbl_privacy, l10n.desc_privacy),
+      MenuItemData(11, Icons.work_outline, l10n.lbl_about, l10n.desc_about),
+    ];
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimation();
+  }
+
+  void _initializeAnimation() {
+    if (!mounted) return;
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    if (mounted) {
+      _animationController.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _safeSetState(VoidCallback fn) {
+    if (mounted && !_isDisposed) {
+      setState(fn);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+    if (!mounted) return const SizedBox.shrink();
+
     final l10n = AppLocalizations.of(context)!;
-    List<SVDrawerModel> options = getDrawerOptions(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
-    
+
     return Drawer(
+      key: const ValueKey('main_drawer'),
       elevation: 0,
+      width: math.max(280, MediaQuery.of(context).size.width * 0.75), // Responsive width with minimum
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Colors.grey.shade50,
-              Colors.white,
-              Colors.grey.shade50,
+              Color(0xFFF8FAFF),
+              Color(0xFFEEF4FF),
+              Color(0xFFE0ECFF),
+              Color(0xFFD4E5FF),
             ],
-            stops: [0.0, 0.5, 1.0],
+            stops: const [0.0, 0.3, 0.7, 1.0],
           ),
         ),
-        child: Stack(
+        child: Column(
           children: [
-            // Background pattern
-            _buildBackgroundPattern(),
-            
-            // Main content
-            Column(
-              children: [
-                // Advanced Header
-                _buildAdvancedHeader(),
-                
-                // Menu Content
-                Expanded(
-                  child: _buildAdvancedMenuContent(options),
-                ),
-                
-                // Advanced Footer
-                _buildAdvancedFooter(l10n, isRtl),
-              ],
+            // Compact Professional Header
+            _buildCompactHeader(),
+
+            // Optimized Menu Content
+            Expanded(
+              child: _buildOptimizedMenuContent(),
             ),
+
+            // Compact Footer
+            _buildCompactFooter(l10n, isRtl),
           ],
         ),
       ),
     );
   }
 
-  // Subtle background pattern
-  Widget _buildBackgroundPattern() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: BackgroundPatternPainter(),
-      ),
-    );
-  }
-
-  // Compact glassmorphism header
-  Widget _buildAdvancedHeader() {
+  // Professional header with matching splash screen background
+  Widget _buildCompactHeader() {
     return Container(
-      height: 160,
+      key: const ValueKey('drawer_header'),
+      height: 220,
       child: Stack(
         children: [
-          // Solid app color background
+          // Main background matching splash screen
           Container(
+            height: 220,
             decoration: BoxDecoration(
-              color: SVAppColorPrimary,
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFFF8FAFF),
+                  Color(0xFFEEF4FF),
+                  Color(0xFFE0ECFF),
+                  Color(0xFFD4E5FF),
+                ],
+                stops: const [0.0, 0.3, 0.7, 1.0],
+              ),
             ),
           ),
-          
-          // Content
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  // Advanced profile picture with status indicator
-                  Stack(
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.3),
-                              Colors.white.withOpacity(0.1),
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 15,
-                              spreadRadius: 3,
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.all(3),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(32),
-                          child: CachedNetworkImage(
-                            imageUrl: AppData.imageUrl + AppData.profile_pic,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.person,
-                                size: 32,
-                                color: Colors.white,
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.person,
-                                size: 32,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
+
+          // Decorative curved elements like splash screen
+          Positioned(
+            top: -50,
+            right: -30,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.3),
+                    Colors.white.withOpacity(0.1),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.7, 1.0],
+                ),
+              ),
+            ),
+          ),
+
+          // Another decorative element
+          Positioned(
+            top: 30,
+            left: -40,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0xFF4285F4).withOpacity(0.1),
+                    Color(0xFF4285F4).withOpacity(0.05),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.6, 1.0],
+                ),
+              ),
+            ),
+          ),
+
+          // Curved design element
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              width: 150,
+              height: 100,
+              child: CustomPaint(
+                painter: CurvedElementPainter(),
+              ),
+            ),
+          ),
+
+          // Profile section centered with better positioning
+          Positioned(
+            top: 40,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                // Profile avatar with professional styling
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF4285F4), // Google Blue
+                        Color(0xFF1A73E8),
+                        Color(0xFF1557B0),
+                      ],
+                    ),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 4,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFF4285F4).withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: Offset(0, 8),
+                        spreadRadius: 2,
                       ),
-                      
-                      // Online status indicator
-                      Positioned(
-                        bottom: 4,
-                        right: 4,
-                        child: Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
-                            ),
-                          ),
-                        ),
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.8),
+                        blurRadius: 10,
+                        offset: Offset(0, -2),
+                        spreadRadius: 0,
                       ),
                     ],
                   ),
-                  
-                  16.width,
-                  
-                  // User info with modern typography
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(45),
+                    child: CachedNetworkImage(
+                      imageUrl: AppData.imageUrl + AppData.profile_pic,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(AppData.name),
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(AppData.name),
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 16),
+
+                // User info section with better spacing
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      // User name with better typography
+                      Text(
+                        AppData.userType == 'doctor'
+                            ? 'Dr. ${capitalizeWords(AppData.name)}'
+                            : capitalizeWords(AppData.name),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A365D), // Dark blue-gray
+                          fontFamily: 'Poppins',
+                          letterSpacing: 0.5,
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: 8),
+
+                      // Specialty/Role with professional styling
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Color(0xFF4285F4).withOpacity(0.2),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFF4285F4).withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
                           AppData.userType == 'doctor'
-                              ? '${translation(context).lbl_dr_prefix}${capitalizeWords(AppData.name)}'
-                              : capitalizeWords(AppData.name),
+                              ? AppData.specialty
+                              : AppData.userType == 'student'
+                              ? '${AppData.university} ${translation(context).lbl_student}'
+                              : AppData.specialty,
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF4285F4),
                             fontFamily: 'Poppins',
                             letterSpacing: 0.3,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
-                        
-                        6.height,
-                        
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Text(
-                            AppData.userType == 'doctor'
-                                ? AppData.specialty
-                                : AppData.userType == 'student'
-                                    ? '${AppData.university}${translation(context).lbl_student_suffix}'
-                                    : AppData.specialty,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                              fontFamily: 'Poppins',
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper function to get user initials
+  String _getInitials(String name) {
+    if (name.isEmpty) return 'U';
+
+    List<String> nameParts = name.split(' ');
+    if (nameParts.length >= 2) {
+      return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
+    } else {
+      return name.substring(0, math.min(2, name.length)).toUpperCase();
+    }
+  }
+
+  // Menu content with responsive design and overflow protection
+  Widget _buildOptimizedMenuContent() {
+    return AnimatedBuilder(
+      animation: _slideAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, (1 - _slideAnimation.value) * 50),
+          child: Opacity(
+            opacity: _slideAnimation.value,
+            child: Container(
+              key: const ValueKey('menu_content'),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), // Reduced padding
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Get screen width for responsive adjustments
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  final drawerWidth = constraints.maxWidth;
+                  
+                  return ListView.builder(
+                    key: const ValueKey('menu_list'),
+                    padding: EdgeInsets.zero,
+                    physics: const BouncingScrollPhysics(), // Better scroll physics
+                    itemCount: getMenuItems(context).length,
+                    itemBuilder: (context, index) {
+                      return _buildMenuItem(getMenuItems(context)[index]);
+                    },
+                  );
+                },
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
+  // Menu item with overflow protection and responsive design
+  Widget _buildMenuItem(MenuItemData item) {
+    bool isSelected = selectedIndex == item.index;
 
-
-  // Advanced categorized menu with modern cards
-  Widget _buildAdvancedMenuContent(List<SVDrawerModel> options) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListView.builder(
-        itemCount: menuCategories.length,
-        itemBuilder: (context, categoryIndex) {
-          String categoryName = menuCategories.keys.elementAt(categoryIndex);
-          List<int> itemIndices = menuCategories[categoryName]!;
-          
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Category header
-              _buildCategoryHeader(categoryName, categoryIndex),
-              
-              // Category items with optimized spacing
-              ...itemIndices.map((index) {
-                if (index < options.length) {
-                  return _buildAdvancedMenuItem(options[index], index);
-                }
-                return SizedBox.shrink();
-              }).toList(),
-              
-              12.height,
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  // Compact category headers
-  Widget _buildCategoryHeader(String title, int categoryIndex) {
-    final icons = [
-      Icons.work_outline,
-      Icons.school_outlined,
-      Icons.forum_outlined,
-      Icons.library_books_outlined,
-      Icons.settings_outlined,
-    ];
-    
-    return Container(
-      margin: EdgeInsets.only(bottom: 6),
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            SVAppColorPrimary.withOpacity(0.04),
-            SVAppColorPrimary.withOpacity(0.02),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: SVAppColorPrimary.withOpacity(0.08),
-          width: 0.5,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: SVAppColorPrimary.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Icon(
-              icons[categoryIndex],
-              size: 12,
-              color: SVAppColorPrimary,
-            ),
-          ),
-          8.width,
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
-              fontFamily: 'Poppins',
-              letterSpacing: 0.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Compact menu items with optimized height
-  Widget _buildAdvancedMenuItem(SVDrawerModel item, int index) {
-    bool isSelected = selectedIndex == index;
-    
-    return Container(
-      margin: EdgeInsets.only(bottom: 4),
-      height: 56, // Fixed height for consistency
+      key: ValueKey('menu_item_${item.index}'),
+      margin: const EdgeInsets.only(bottom: 6),
+      height: 68, // Increased height to accommodate text better
       child: Material(
         color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          onTap: () => _handleMenuTap(index),
-          borderRadius: BorderRadius.circular(10),
+          onTap: () => _handleMenuTap(item.index),
+          borderRadius: BorderRadius.circular(16),
+          splashColor: Color(0xFF4285F4).withOpacity(0.1),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Reduced horizontal padding
             decoration: BoxDecoration(
-              color: isSelected 
-                  ? SVAppColorPrimary.withOpacity(0.08)
+              color: isSelected
+                  ? Colors.white.withOpacity(0.9)
                   : Colors.white.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isSelected 
-                    ? SVAppColorPrimary.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.1),
-                width: isSelected ? 1.2 : 0.8,
+                color: isSelected
+                    ? Color(0xFF4285F4).withOpacity(0.3)
+                    : Colors.white.withOpacity(0.5),
+                width: isSelected ? 1.5 : 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isSelected 
-                      ? SVAppColorPrimary.withOpacity(0.08)
-                      : Colors.black.withOpacity(0.015),
-                  blurRadius: isSelected ? 6 : 3,
+                  color: isSelected
+                      ? Color(0xFF4285F4).withOpacity(0.15)
+                      : Colors.black.withOpacity(0.05),
+                  blurRadius: isSelected ? 12 : 6,
+                  offset: Offset(0, isSelected ? 4 : 2),
                   spreadRadius: 0,
-                  offset: Offset(0, isSelected ? 1 : 0.5),
                 ),
+                if (isSelected)
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.8),
+                    blurRadius: 8,
+                    offset: Offset(0, -1),
+                    spreadRadius: 0,
+                  ),
               ],
             ),
             child: Row(
               children: [
-                // Compact icon container
+                // Icon container with compact styling
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 38, // Reduced width
+                  height: 38, // Reduced height
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: isSelected
-                          ? [SVAppColorPrimary.withOpacity(0.15), SVAppColorPrimary.withOpacity(0.08)]
-                          : [Colors.grey.withOpacity(0.08), Colors.grey.withOpacity(0.04)],
+                    gradient: isSelected
+                        ? LinearGradient(
+                      colors: [
+                        Color(0xFF4285F4).withOpacity(0.15),
+                        Color(0xFF1A73E8).withOpacity(0.1),
+                      ],
+                    )
+                        : LinearGradient(
+                      colors: [
+                        Color(0xFFF8FAFF),
+                        Color(0xFFEEF4FF),
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isSelected 
-                          ? SVAppColorPrimary.withOpacity(0.15)
-                          : Colors.grey.withOpacity(0.08),
-                      width: 0.5,
+                      color: isSelected
+                          ? Color(0xFF4285F4).withOpacity(0.2)
+                          : Colors.grey.withOpacity(0.1),
+                      width: 1,
                     ),
                   ),
-                  child: Center(
-                    child: (item.image == 'assets/images/docktak_ai_light.png' ||
-                            item.image == 'assets/icon/ic_discussion.png')
-                        ? Image.asset(
-                            item.image ?? "",
-                            height: 20,
-                            width: 20,
-                            fit: BoxFit.contain,
-                          )
-                        : Image.asset(
-                            item.image ?? "",
-                            height: 20,
-                            width: 20,
-                            color: isSelected ? SVAppColorPrimary : Colors.grey.shade600,
-                            fit: BoxFit.contain,
-                          ),
+                  child: Icon(
+                    item.icon,
+                    size: 18, // Reduced icon size
+                    color: isSelected ? Color(0xFF4285F4) : Color(0xFF64748B),
                   ),
                 ),
-                
-                12.width,
-                
-                // Compact title only (removed subtitle to save space)
+
+                const SizedBox(width: 10), // Reduced spacing
+
+                // Text content with overflow protection
                 Expanded(
-                  child: Text(
-                    item.title.validate(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? SVAppColorPrimary : Colors.grey.shade800,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 0.1,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Title with better overflow handling
+                      Text(
+                        item.title,
+                        style: TextStyle(
+                          fontSize: 14, // Slightly reduced font size
+                          fontWeight: FontWeight.w600,
+                          color: isSelected ? Color(0xFF1A365D) : Color(0xFF2D3748),
+                          fontFamily: 'Poppins',
+                          height: 1.1, // Tighter line height
+                          letterSpacing: 0.1, // Reduced letter spacing
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false, // Prevent wrapping
+                      ),
+                      
+                      const SizedBox(height: 2),
+                      
+                      // Subtitle with better overflow handling
+                      Text(
+                        item.subtitle,
+                        style: TextStyle(
+                          fontSize: 10, // Reduced font size
+                          fontWeight: FontWeight.w400,
+                          color: isSelected ? Color(0xFF4285F4) : Color(0xFF64748B),
+                          fontFamily: 'Poppins',
+                          height: 1.1, // Tighter line height
+                          letterSpacing: 0.05, // Minimal letter spacing
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false, // Prevent wrapping
+                      ),
+                    ],
                   ),
                 ),
-                
-                // Minimalist chevron
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: isSelected ? SVAppColorPrimary : Colors.grey.shade400,
-                  size: 14,
+
+                const SizedBox(width: 4), // Small spacing before arrow
+
+                // Compact arrow icon
+                Container(
+                  width: 24, // Fixed width for arrow container
+                  height: 24, // Fixed height for arrow container
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Color(0xFF4285F4).withOpacity(0.1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: isSelected ? Color(0xFF4285F4) : Color(0xFF94A3B8),
+                    size: 10, // Reduced arrow size
+                  ),
                 ),
               ],
             ),
@@ -464,175 +605,271 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
     );
   }
 
-  // Get subtitle for menu items
-  String _getMenuSubtitle(int index) {
-    final subtitles = [
-      'Learn about DocTak',
-      'AI Assistant',
-      'Find opportunities',
-      'Medicine database',
-      'Clinical discussions',
-      'Community polls',
-      'Professional groups',
-      'Medical guidelines',
-      'Medical conferences',
-      'Health updates',
-      'Video meetings',
-      'Education credits',
-      'Latest medical news',
-      'Special offers',
-      'Share feedback',
-      'App preferences',
-      'Privacy & terms',
-      'Sign out',
-    ];
-    return index < subtitles.length ? subtitles[index] : '';
-  }
-
-  // Compact footer with modern styling
-  Widget _buildAdvancedFooter(AppLocalizations l10n, bool isRtl) {
+  // Footer with splash screen compatible styling
+  Widget _buildCompactFooter(AppLocalizations l10n, bool isRtl) {
     return Container(
-      margin: EdgeInsets.all(12),
-      padding: EdgeInsets.all(16),
+      key: const ValueKey('drawer_footer'),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacity(0.8),
-            Colors.white.withOpacity(0.6),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.15),
-        ),
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.8),
+            blurRadius: 6,
+            offset: const Offset(0, -1),
             spreadRadius: 0,
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Compact version display
-          FutureBuilder<PackageInfo>(
-            future: PackageInfo.fromPlatform(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: SVAppColorPrimary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    "v${snapshot.data!.version}",
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: SVAppColorPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                );
-              }
-              return SizedBox.shrink();
-            },
-          ),
-          
-          12.height,
-          
-          // Compact home button
-          Container(
-            width: double.infinity,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [SVAppColorPrimary, SVAppColorPrimary.withOpacity(0.8)],
-              ),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: SVAppColorPrimary.withOpacity(0.25),
-                  blurRadius: 6,
-                  offset: Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => finish(context),
-                borderRadius: BorderRadius.circular(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      isRtl ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    6.width,
-                    Text(
-                      l10n.lbl_home,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                        letterSpacing: 0.3,
+          // Main button row
+          Row(
+            children: [
+              // Version info
+              Expanded(
+                child: FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    return Container(
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF4285F4).withOpacity(0.1),
+                            Color(0xFF1A73E8).withOpacity(0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Color(0xFF4285F4).withOpacity(0.2),
+                        ),
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 14,
+                            color: Color(0xFF4285F4),
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            snapshot.hasData ? "v${snapshot.data!.version}" : "DocTak",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF4285F4),
+                              fontFamily: 'Poppins',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // Home button with icon only
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFF4285F4).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (mounted && !_isDisposed) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Icon(
+                      Icons.home_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
               ),
-            ),
+
+              const SizedBox(width: 10),
+
+              // Logout button
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(0.2)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => logoutAccount(context),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Icon(
+                      Icons.logout_rounded,
+                      color: Colors.red.shade600,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Button labels row
+          Row(
+            children: [
+              // Version label
+              Expanded(
+                child: Text(
+                  translation(context).lbl_version,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF64748B),
+                    fontFamily: 'Poppins',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // Home label
+              Container(
+                width: 44,
+                child: Text(
+                  l10n.lbl_home,
+                  style: TextStyle(
+                    fontSize: 9, // Slightly reduced for better fit
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF4285F4),
+                    fontFamily: 'Poppins',
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // Logout label
+              Container(
+                width: 44,
+                child: Text(
+                  l10n.lbl_logout,
+                  style: TextStyle(
+                    fontSize: 9, // Slightly reduced for better fit
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red.shade600,
+                    fontFamily: 'Poppins',
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  // Handle menu item taps
+  // Handle menu item taps with updated indices
   void _handleMenuTap(int index) {
-    setState(() {
+    _safeSetState(() {
       selectedIndex = index;
     });
-    
+
     HapticFeedback.lightImpact();
-    
-    Future.delayed(const Duration(milliseconds: 150), () {
-      finish(context);
-      
+
+    Future.delayed(const Duration(milliseconds: 120), () {
+      if (!mounted || _isDisposed) return;
+
+      Navigator.of(context).pop();
+
       switch (index) {
-        case 0: AboutUsScreen().launch(context); break;
-        case 1: AiChatScreen().launch(context); break;
-        case 2: const JobsScreen().launch(context); break;
-        case 3: const DrugsListScreen().launch(context); break;
-        case 4: // const CaseDiscussionScreen().launch(context);
-      BlocProvider(
+        case 0:
+          AiChatScreen().launch(context);
+          break;
+        case 1:
+          const JobsScreen().launch(context);
+          break;
+        case 2:
+          const DrugsListScreen().launch(context);
+          break;
+        case 3:
+          BlocProvider(
             create: (context) => DiscussionListBloc(
               repository: CaseDiscussionRepository(
                 baseUrl: AppData.base2,
-                // Use AppData.base instead of AppData.base2
                 getAuthToken: () => AppData.userToken ?? "",
               ),
             ),
             child: const DiscussionListScreen(),
           ).launch(context);
           break;
-        case 5: ComingSoonScreen().launch(context); break;
-        case 6: MyGroupsScreen().launch(context); break;
-        case 7: const GuidelinesScreen().launch(context); break;
-        case 8: ConferencesScreen().launch(context); break;
-        case 9: ComingSoonScreen().launch(context); break;
-        case 10: ManageMeetingScreen().launch(context); break;
-        case 11: ComingSoonScreen().launch(context); break;
-        case 12: ComingSoonScreen().launch(context); break;
-        case 13: const SuggestionScreen().launch(context); break;
-        case 14: const AppSettingScreen().launch(context); break;
-        case 15:
+        case 4:
+          MyGroupsScreen().launch(context);
+          break;
+        case 5:
+          const GuidelinesScreen().launch(context);
+          break;
+        case 6:
+          ConferencesScreen().launch(context);
+          break;
+        case 7:
+          ManageMeetingScreen().launch(context);
+          break;
+        case 8:
+          const SuggestionScreen().launch(context);
+          break;
+        case 9:
+          const AppSettingScreen().launch(context);
+          break;
+        case 10:
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -643,109 +880,59 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
             ),
           );
           break;
-        case 16: logoutAccount(context); break;
+        case 11:
+          AboutUsScreen().launch(context);
+          break;
       }
     });
   }
 
-  logoutAccount(BuildContext context) async {
+  Future<void> logoutAccount(BuildContext context) async {
+    if (!mounted || _isDisposed) return;
+
     final l10n = AppLocalizations.of(context)!;
     return showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           title: Text(l10n.lbl_logout),
           content: Text(l10n.msg_confirm_logout),
           actions: [
             TextButton(
               child: Text(l10n.lbl_cancel),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(child: Text(
-                l10n.lbl_yes,
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-              onPressed: () async {
-                DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-                String deviceId = '';
-                String deviceType = '';
-                if (isAndroid) {
-                  AndroidDeviceInfo androidInfo =
-                      await deviceInfoPlugin.androidInfo;
-                  print('Running on ${androidInfo.model}');
-                  deviceType = "android";
-                  deviceId = androidInfo.id;
-                } else {
-                  IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
-                  print(
-                      'Running on ${iosInfo.utsname.machine}'); // e.g. "iPod7,1"
-                  deviceType = "ios";
-                  deviceId = iosInfo.identifierForVendor.toString();
-                }
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                var result = await logoutUserAccount(deviceId);
-                if (result) {
-                  AppSharedPreferences().clearSharedPreferencesData(context);
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginScreen(),
-                      ),
-                      (route) => false);
-                } else {
-                  AppSharedPreferences().clearSharedPreferencesData(context);
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginScreen(),
-                      ),
-                      (route) => false);
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  deleteAccount(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(l10n.lbl_delete_account_confirmation),
-          content: Text(l10n.msg_delete_account_warning),
-          actions: [
-            TextButton(
-              child: Text(l10n.lbl_cancel),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
               child: Text(
-                l10n.lbl_delete,
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontFamily: 'Poppins',
-                ),
+                l10n.lbl_yes,
+                style: const TextStyle(color: Colors.red),
               ),
               onPressed: () async {
-                var result = await deleteUserAccount();
-                if (result) {
+                Navigator.of(dialogContext).pop();
+
+                DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+                String deviceId = '';
+
+                if (isAndroid) {
+                  AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+                  deviceId = androidInfo.id;
+                } else {
+                  IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+                  deviceId = iosInfo.identifierForVendor.toString();
+                }
+
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                var result = await logoutUserAccount(deviceId);
+
+                if (mounted && !_isDisposed) {
                   AppSharedPreferences().clearSharedPreferencesData(context);
-                  Navigator.pushReplacement(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (route) => false,
                   );
-                } else {}
+                }
               },
             ),
           ],
@@ -763,60 +950,115 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent> {
           'Authorization': 'Bearer ${AppData.userToken!}',
         },
       );
-      print(response.body);
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-        throw Exception('Failed to delete account');
-      }
+      return response.statusCode == 200;
     } catch (error) {
       return false;
     }
-    return false;
   }
 
-  Future<bool> logoutUserAccount(deviceId) async {
+  Future<bool> logoutUserAccount(String deviceId) async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/logout');
     try {
-      print(AppData.userToken);
       final response = await http.post(
-        body: {'device_id': deviceId},
         apiUrl,
+        body: {'device_id': deviceId},
         headers: <String, String>{
           'Authorization': 'Bearer ${AppData.userToken!}',
         },
       );
-      print(response.body);
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-        throw Exception('Failed to delete account');
-      }
+      return response.statusCode == 200;
     } catch (error) {
       return false;
     }
   }
 }
 
-// Custom painter for background pattern
-class BackgroundPatternPainter extends CustomPainter {
+// Data class for menu items
+class MenuItemData {
+  final int index;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const MenuItemData(this.index, this.icon, this.title, this.subtitle);
+}
+
+// Header pattern painter
+class HeaderPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.withOpacity(0.03)
-      ..strokeWidth = 1;
+      ..color = Colors.white.withOpacity(0.1)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
 
     final path = Path();
-    for (int i = 0; i < 20; i++) {
-      for (int j = 0; j < 20; j++) {
-        final x = (size.width / 20) * i;
-        final y = (size.height / 20) * j;
-        path.addOval(Rect.fromCircle(center: Offset(x, y), radius: 1));
-      }
+    for (int i = 0; i < 8; i++) {
+      final y = (size.height / 8) * i;
+      path.moveTo(0, y);
+      path.quadraticBezierTo(size.width / 2, y + 10, size.width, y);
     }
     canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Curved element painter for splash screen style decorations
+class CurvedElementPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0xFF4285F4).withOpacity(0.08)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+
+    // Create a curved element similar to splash screen
+    path.moveTo(size.width * 0.3, 0);
+    path.quadraticBezierTo(
+      size.width * 0.8,
+      size.height * 0.3,
+      size.width,
+      size.height * 0.8,
+    );
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width * 0.7, size.height);
+    path.quadraticBezierTo(
+      size.width * 0.4,
+      size.height * 0.6,
+      0,
+      size.height * 0.3,
+    );
+    path.close();
+
+    canvas.drawPath(path, paint);
+
+    // Add another subtle curved layer
+    final paint2 = Paint()
+      ..color = Colors.white.withOpacity(0.5)
+      ..style = PaintingStyle.fill;
+
+    final path2 = Path();
+    path2.moveTo(size.width * 0.5, 0);
+    path2.quadraticBezierTo(
+      size.width * 0.9,
+      size.height * 0.2,
+      size.width,
+      size.height * 0.6,
+    );
+    path2.lineTo(size.width, size.height);
+    path2.lineTo(size.width * 0.8, size.height);
+    path2.quadraticBezierTo(
+      size.width * 0.6,
+      size.height * 0.4,
+      size.width * 0.2,
+      size.height * 0.1,
+    );
+    path2.close();
+
+    canvas.drawPath(path2, paint2);
   }
 
   @override

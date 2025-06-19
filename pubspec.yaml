@@ -16,10 +16,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.0.5+95
+version: 3.0.6+96
 
 environment:
-  sdk: '>=3.6.1 <4.0.0'
+  sdk: '>=3.8.1 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -80,10 +80,10 @@ dependencies:
   flutter_plugin_android_lifecycle: ^2.0.16
   flutter_chat_bubble: ^2.0.2
 #  agora_rtm: ^2.2.2
-  agora_rtc_engine: ^6.5.1
+  agora_rtc_engine: ^6.5.2
   flutter_widget_from_html: ^0.15.1
-  flutter_quill: ^10.0.0
-  quill_html_converter: ^9.4.0
+  flutter_quill: ^11.4.1
+#  quill_html_converter: ^9.4.0
 #  html_editor_enhanced: ^2.6.0
   flutter_sound_record: ^3.3.2
   app_links: ^6.1.4
@@ -155,7 +155,7 @@ dependencies:
 #  record_mp3: ^3.0.0
 #  flutter_sound: ^9.2.13
 #  audio_session: ^0.1.16
-  voice_message_package: ^2.2.1
+#  voice_message_package: ^2.2.1
 #  assets_audio_player: ^3.0.3+3
 #  in_app_update: ^3.0.0
 #  upgrader: ^8.1.0

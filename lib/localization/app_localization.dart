@@ -23,7 +23,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:doctak_app/l10n/app_localizations.dart';
 
 const String LAGUAGE_CODE = 'languageCode';
 
@@ -31,6 +31,9 @@ const String LAGUAGE_CODE = 'languageCode';
 const String ENGLISH = 'en';
 const String FARSI = 'fa';
 const String ARABIC = 'ar';
+const String FRENCH = 'fr';
+const String SPANISH = 'es';
+const String GERMAN = 'de';
 const String HINDI = 'hi';
 const String URDU = 'ur';
 
@@ -54,6 +57,12 @@ Locale _locale(String languageCode) {
       return const Locale(FARSI, "");
     case ARABIC:
       return const Locale(ARABIC, "");
+    case FRENCH:
+      return const Locale(FRENCH, "");
+    case SPANISH:
+      return const Locale(SPANISH, "");
+    case GERMAN:
+      return const Locale(GERMAN, "");
     case HINDI:
       return const Locale(HINDI, "");
     case URDU:

@@ -232,6 +232,7 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
     Emitter<DiscussionListState> emit,
   ) async {
     try {
+      // TODO: Add like state tracking to properly toggle like/unlike
       await repository.performCaseAction(
         caseId: event.caseId,
         action: 'like',

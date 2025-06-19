@@ -92,6 +92,7 @@
   "lbl_CME": "CME",
   "lbl_world_news": "اخبار العالم",
   "lbl_suggestions": "اقتراحات",
+  "desc_suggestions": "تقديم اقتراحات",
   "lbl_discounts": "خصومات",
   "lbl_share_app": "شارك التطبيق",
   "lbl_rate_us": "قيمنا",
@@ -234,12 +235,10 @@
   "msg_delete_account_warning": "إذا اخترت الحذف، سنقوم بحذف حسابك على خادمنا.\n\nسيتم أيضًا حذف بيانات التطبيق الخاصة بك ولن تتمكن من استردادها.\n\nنظرًا لأن هذه عملية حساسة من حيث الأمان، قد يُطلب منك تسجيل الدخول قبل حذف حسابك.",
   "lbl_cancel": "إلغاء",
   "lbl_delete": "حذف",
-  "lbl_english_language": "🇺🇸 الإنجليزية",
-  "lbl_arabic_language": "🇸🇦 اَلْعَرَبِيَّة",
-  "lbl_farsi_language": "🇦🇫 الفارسية",
-  "lbl_hindi_language": "🇮🇳 الهندية",
-  "lbl_urdu_language": "🇵🇰 الأردية",
-  
+  "lbl_english_language": " الإنجليزية",
+  "lbl_arabic_language": " اَلْعَرَبِيَّة",
+  "lbl_farsi_language": " الفارسية",
+
   "@_HOME_DRAWER": {},
   "lbl_dr_name_format": "د. {name}",
   "lbl_university_student_format": "طالب {university}",
@@ -327,6 +326,7 @@
   "@_HOME_SCREEN": {},
   "lbl_about_us": "من نحن",
   "lbl_medical_ai": "الذكاء الاصطناعي الطبي",
+  "desc_medical_ai": "مساعد ذكي طبي",
   "lbl_case_discussion": "مناقشة الحالات",
   "lbl_post_poll": "نشر استطلاع",
   "lbl_groups_formation": "تكوين المجموعات",
@@ -702,6 +702,76 @@
   "lbl_case_description": "وصف الحالة:",
   "lbl_case_keyword": "الكلمات المفتاحية للحالة:",
   "lbl_submit": "إرسال",
+  "hint_search_by_keyword": "البحث بالكلمة المفتاحية",
+  "msg_error_occurred": "خطأ: {errorMessage}",
+  "@msg_error_occurred": {
+    "placeholders": {
+      "errorMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "msg_unknown_state": "حالة غير معروفة",
+  "msg_something_went_wrong": "حدث خطأ ما",
+  "msg_no_case_found": "لم يتم العثور على حالة",
+  "lbl_view_details": "عرض التفاصيل",
+  "lbl_likes_count": "{count} إعجاب",
+  "@lbl_likes_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lbl_comments_count": "{count} تعليق",
+  "@lbl_comments_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lbl_views_count": "{count} مشاهدة",
+  "@lbl_views_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lbl_case_details": "تفاصيل الحالة",
+  "msg_no_answer_added_yet": "لم تتم إضافة إجابة بعد",
+  "hint_write_your_view": "اكتب رأيك",
+  "lbl_post": "نشر",
+  "lbl_delete": "حذف",
+
+  "@_DRAWER_MENU": {},
+  "lbl_about": "حول",
+  "desc_about": "تعرف على DocTak",
+  "lbl_ai_assistant": "مساعد الذكي",
+  "desc_ai_assistant": "مساعدة الذكاء الاصطناعي الطبي",
+  "lbl_jobs": "وظائف",
+  "desc_jobs": "فرص مهنية",
+  "lbl_drugs": "أدوية",
+  "desc_drugs": "قاعدة بيانات الأدوية",
+  "lbl_discussions": "مناقشات",
+  "desc_discussions": "مناقشات الحالات",
+  "lbl_groups": "مجموعات",
+  "desc_groups": "مجموعات مهنية",
+  "lbl_guidelines": "إرشادات",
+  "desc_guidelines": "بروتوكولات طبية",
+  "lbl_conferences": "مؤتمرات",
+  "desc_conferences": "فعاليات طبية",
+  "lbl_meetings": "اجتماعات",
+  "desc_meetings": "مؤتمرات فيديو",
+  "lbl_feedback": "ملاحظات",
+  "desc_feedback": "شارك أفكارك",
+  "lbl_settings": "إعدادات",
+  "desc_settings": "تفضيلات التطبيق",
+  "lbl_privacy": "خصوصية",
+  "desc_privacy": "الشروط والخصوصية",
+  "lbl_student": "طالب",
+  "lbl_version": "إصدار",
 
   "@_JOBS_SCREEN": {},
   "lbl_loading": "جار التحميل...",
@@ -722,7 +792,6 @@
   "msg_post_deleted_successfully": "تم حذف المنشور بنجاح",
   "msg_no_post_found": "لم يتم العثور على منشورات",
   "lbl_yes": "نعم",
-  "lbl_about": "حول",
 
   "@_TEXT_FORMATTING": {},
   "lbl_normal": "عادي",
@@ -861,5 +930,77 @@
 
   "lbl_basic_info": "معلومات أساسية",
   "lbl_not_specified": "غير محدد",
-  "hint_select_date": "حدد التاريخ"
+  "hint_select_date": "حدد التاريخ",
+
+  "@_CASE_DISCUSSION": {},
+  "lbl_select_attachment": "حدد المرفق",
+  "lbl_gallery": "المعرض",
+  "lbl_file": "ملف",
+  "lbl_camera": "الكاميرا",
+  "msg_error_picking_image": "خطأ في اختيار الصورة",
+  "msg_error_picking_file": "خطأ في اختيار الملف",
+  "lbl_clinical_complexity": "التعقيد السريري",
+  "lbl_teaching_value": "القيمة التعليمية",
+  "lbl_submit_case": "إرسال الحالة",
+  "msg_confirm_patient_info_removed_checkbox": "أؤكد أن معلومات المريض ستكون مجهولة الهوية",
+  "lbl_create_case_discussion": "إنشاء مناقشة حالة",
+  "lbl_patient_info": "معلومات المريض",
+  "lbl_case_info": "معلومات الحالة",
+  "lbl_clinical_keywords": "الكلمات المفتاحية السريرية",
+  "hint_clinical_keywords": "أدخل الكلمات المفتاحية مفصولة بفواصل",
+  "lbl_medical_specialty": "التخصص الطبي",
+  "lbl_select_specialty": "حدد التخصص",
+  "hint_select_specialty": "اختر تخصصك الطبي",
+  "lbl_medical_images": "الصور الطبية",
+  "lbl_no_images_selected": "لم يتم اختيار صور",
+  "lbl_remove": "إزالة",
+  "lbl_low": "منخفض",
+  "lbl_medium": "متوسط",
+  "lbl_high": "عالي",
+  "msg_case_discussion_created": "تم إنشاء مناقشة الحالة بنجاح",
+  "msg_failed_to_create_discussion": "فشل في إنشاء المناقشة",
+  "lbl_case_title": "عنوان الحالة",
+  "hint_case_title": "أدخل عنوان وصفي لحالتك",
+  "lbl_case_description": "وصف الحالة",
+  "hint_case_description": "صف تفاصيل حالتك الطبية",
+  "lbl_patient_age": "عمر المريض",
+  "hint_patient_age": "أدخل العمر",
+  "lbl_patient_gender": "جنس المريض",
+  "lbl_male": "ذكر",
+  "lbl_female": "أنثى",
+  "lbl_other": "آخر",
+  "lbl_patient_ethnicity": "عرق المريض",
+  "lbl_caucasian": "قوقازي",
+  "lbl_african": "أفريقي",
+  "lbl_asian": "آسيوي",
+  "lbl_hispanic": "هسباني",
+  "lbl_native_american": "أمريكي أصلي",
+  "lbl_pacific_islander": "جزر المحيط الهادئ",
+  "lbl_mixed_race": "عرق مختلط",
+  "lbl_prefer_not_to_say": "أفضل عدم القول",
+  "msg_title_required": "العنوان مطلوب",
+  "msg_description_required": "الوصف مطلوب",
+  "msg_age_invalid": "يرجى إدخال عمر صحيح",
+  "msg_specialty_required": "يرجى اختيار التخصص",
+  "msg_create_case_discussion_description": "إنشاء مناقشة حالة طبية جديدة من خلال تقديم جميع التفاصيل اللازمة للمجتمع الطبي.",
+  "lbl_got_it": "فهمت",
+  "lbl_patient_demographics": "البيانات الديموغرافية للمريض",
+  "lbl_select_gender": "حدد الجنس",
+  "lbl_gender": "الجنس",
+  "lbl_select_ethnicity": "حدد العرق",
+  "lbl_ethnicity": "العرق",
+  "lbl_african_american": "أمريكي أفريقي",
+  "lbl_hispanic_latino": "هسباني/لاتيني",
+  "lbl_middle_eastern": "شرق أوسطي",
+  "msg_enter_keywords": "أدخل الكلمات المفتاحية السريرية (اختياري)",
+  "lbl_attach_medical_images": "إرفاق الصور الطبية",
+  "lbl_add_medical_images": "إضافة الصور الطبية",
+  "lbl_select_clinical_complexity": "حدد التعقيد السريري",
+  "lbl_select_teaching_value": "حدد القيمة التعليمية",
+  "msg_please_enter_title": "يرجى إدخال عنوان",
+  "msg_please_enter_description": "يرجى إدخال وصف",
+  "msg_confirm_patient_info_removed": "ستتم إزالة معلومات المريض من هذه الحالة لحماية الخصوصية",
+  "lbl_french_language": "الفرنسية",
+  "lbl_spanish_language": "الإسبانية",
+  "lbl_german_language": "الألمانية"
 }

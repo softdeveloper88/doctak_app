@@ -4,7 +4,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/com
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/bloc/case_discussion_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:doctak_app/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'bloc/case_discussion_bloc.dart';

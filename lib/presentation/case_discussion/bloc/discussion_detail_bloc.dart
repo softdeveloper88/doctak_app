@@ -351,9 +351,17 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
       emit(currentState.copyWith(comments: optimisticComments));
 
       try {
+        // Determine action based on current like state
+        final comment = currentState.comments.firstWhere((c) => c.id == event.commentId);
+        final isCurrentlyLiked = comment.isLiked ?? false;
+        final action = isCurrentlyLiked ? 'unlike' : 'like';
+        
         // Make API call in background
-        await repository.likeComment(event.commentId);
-        print('✅ Comment like synced with server');
+        await repository.likeComment(
+          commentId: event.commentId,
+          action: action,
+        );
+        print('✅ Comment $action synced with server');
       } catch (e) {
         print('❌ Error liking comment, reverting: $e');
         // REVERT: If API fails, revert the optimistic update
@@ -452,7 +460,8 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
       emit(currentState.copyWith(discussion: updatedDiscussion));
 
       try {
-        // Make API call in background
+        // For now, assuming we're always liking (need to add like state to case model)
+        // TODO: Add isLiked field to CaseDiscussion model for proper toggle
         await repository.performCaseAction(
           caseId: event.caseId,
           action: 'like',

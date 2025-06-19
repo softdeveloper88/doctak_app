@@ -81,6 +81,7 @@
  "lbl_CME": "CME",
  "lbl_world_news": "World News",
  "lbl_suggestions": "Suggestions",
+ "desc_suggestions": "Submit suggestions",
  "lbl_discounts": "Discounts",
  "lbl_share_app": "Share App",
  "lbl_rate_us": "Rate Us",
@@ -255,12 +256,10 @@
  "msg_delete_account_warning": "If you select Delete we will delete your account on our server.\n\nYour app data will also be deleted and you won't be able to retrieve it.\n\nSince this is a security-sensitive operation, you eventually are asked to login before your account can be deleted.",
  "lbl_cancel": "Cancel",
  "lbl_delete": "Delete",
- "lbl_english_language": "🇺🇸 English",
- "lbl_arabic_language": "🇸🇦 اَلْعَرَبِيَّة",
- "lbl_farsi_language": "🇦🇫 فارسی",
- "lbl_hindi_language": "🇮🇳 हिंदी",
- "lbl_urdu_language": "🇵🇰 اردو",
- 
+ "lbl_english_language": "English",
+ "lbl_arabic_language": " اَلْعَرَبِيَّة",
+ "lbl_farsi_language": " فارسی",
+
  "@_HOME_DRAWER": {},
  "lbl_dr_name_format": "Dr. {name}",
  "lbl_university_student_format": "{university} Student",
@@ -336,6 +335,7 @@
  "@_HOME_SCREEN": {},
  "lbl_about_us": "About Us",
  "lbl_medical_ai": "Medical AI",
+ "desc_medical_ai": "AI medical assistant",
  "lbl_case_discussion": "Case Discussion",
  "lbl_post_poll": "Post a poll",
  "lbl_groups_formation": "Groups Formation",
@@ -691,6 +691,76 @@
  "lbl_case_description": "Case Description:",
  "lbl_case_keyword": "Case Keyword:",
  "lbl_submit": "Submit",
+ "hint_search_by_keyword": "Search by keyword",
+ "msg_error_occurred": "Error: {errorMessage}",
+ "@msg_error_occurred": {
+   "placeholders": {
+     "errorMessage": {
+       "type": "String"
+     }
+   }
+ },
+ "msg_unknown_state": "Unknown state",
+ "msg_something_went_wrong": "Something went wrong",
+ "msg_no_case_found": "No Case Found",
+ "lbl_view_details": "View details",
+ "lbl_likes_count": "{count} Likes",
+ "@lbl_likes_count": {
+   "placeholders": {
+     "count": {
+       "type": "int"
+     }
+   }
+ },
+ "lbl_comments_count": "{count} Comments",
+ "@lbl_comments_count": {
+   "placeholders": {
+     "count": {
+       "type": "int"
+     }
+   }
+ },
+ "lbl_views_count": "{count} Views",
+ "@lbl_views_count": {
+   "placeholders": {
+     "count": {
+       "type": "int"
+     }
+   }
+ },
+ "lbl_case_details": "Case Details",
+ "msg_no_answer_added_yet": "No answer added yet",
+ "hint_write_your_view": "Write your view",
+ "lbl_post": "Post",
+ "lbl_delete": "Delete",
+
+ "@_DRAWER_MENU": {},
+ "lbl_about": "About",
+ "desc_about": "Learn about DocTak",
+ "lbl_ai_assistant": "AI Assistant",
+ "desc_ai_assistant": "Medical AI help",
+ "lbl_jobs": "Jobs",
+ "desc_jobs": "Career opportunities",
+ "lbl_drugs": "Drugs",
+ "desc_drugs": "Medicine database",
+ "lbl_discussions": "Discussions",
+ "desc_discussions": "Case discussions",
+ "lbl_groups": "Groups",
+ "desc_groups": "Professional groups",
+ "lbl_guidelines": "Guidelines",
+ "desc_guidelines": "Medical protocols",
+ "lbl_conferences": "Conferences",
+ "desc_conferences": "Medical events",
+ "lbl_meetings": "Meetings",
+ "desc_meetings": "Video conferences",
+ "lbl_feedback": "Feedback",
+ "desc_feedback": "Share thoughts",
+ "lbl_settings": "Settings",
+ "desc_settings": "App preferences",
+ "lbl_privacy": "Privacy",
+ "desc_privacy": "Terms & privacy",
+ "lbl_student": "Student",
+ "lbl_version": "Version",
 
  "@_POST_DETAILS": {},
  "lbl_post_detail": "Post Detail",
@@ -825,5 +895,77 @@
 
 "lbl_basic_info": "Basic Info",
 "lbl_not_specified": "Not Specified",
-"hint_select_date": "Select date"
+"hint_select_date": "Select date",
+
+"@_CASE_DISCUSSION": {},
+"lbl_select_attachment": "Select Attachment",
+"lbl_gallery": "Gallery",
+"lbl_file": "File",
+"lbl_camera": "Camera",
+"msg_error_picking_image": "Error picking image",
+"msg_error_picking_file": "Error picking file",
+"lbl_clinical_complexity": "Clinical Complexity",
+"lbl_teaching_value": "Teaching Value",
+"lbl_submit_case": "Submit Case",
+"msg_confirm_patient_info_removed_checkbox": "I confirm that patient information will be anonymized",
+"lbl_create_case_discussion": "Create Case Discussion",
+"lbl_patient_info": "Patient Information",
+"lbl_case_info": "Case Information",
+"lbl_clinical_keywords": "Clinical Keywords",
+"hint_clinical_keywords": "Enter keywords separated by commas",
+"lbl_medical_specialty": "Medical Specialty",
+"lbl_select_specialty": "Select Specialty",
+"hint_select_specialty": "Choose your medical specialty",
+"lbl_medical_images": "Medical Images",
+"lbl_no_images_selected": "No images selected",
+"lbl_remove": "Remove",
+"lbl_low": "Low",
+"lbl_medium": "Medium",
+"lbl_high": "High",
+"msg_case_discussion_created": "Case discussion created successfully",
+"msg_failed_to_create_discussion": "Failed to create discussion",
+"lbl_case_title": "Case Title",
+"hint_case_title": "Enter a descriptive title for your case",
+"lbl_case_description": "Case Description",
+"hint_case_description": "Describe the details of your medical case",
+"lbl_patient_age": "Patient Age",
+"hint_patient_age": "Enter age",
+"lbl_patient_gender": "Patient Gender",
+"lbl_male": "Male",
+"lbl_female": "Female",
+"lbl_other": "Other",
+"lbl_patient_ethnicity": "Patient Ethnicity",
+"lbl_caucasian": "Caucasian",
+"lbl_african": "African",
+"lbl_asian": "Asian",
+"lbl_hispanic": "Hispanic",
+"lbl_native_american": "Native American",
+"lbl_pacific_islander": "Pacific Islander",
+"lbl_mixed_race": "Mixed Race",
+"lbl_prefer_not_to_say": "Prefer not to say",
+"msg_title_required": "Title is required",
+"msg_description_required": "Description is required",
+"msg_age_invalid": "Please enter a valid age",
+"msg_specialty_required": "Please select a specialty",
+"msg_create_case_discussion_description": "Create a new medical case discussion by providing all necessary details for the medical community.",
+"lbl_got_it": "Got it",
+"lbl_patient_demographics": "Patient Demographics",
+"lbl_select_gender": "Select Gender",
+"lbl_gender": "Gender",
+"lbl_select_ethnicity": "Select Ethnicity",
+"lbl_ethnicity": "Ethnicity",
+"lbl_african_american": "African American",
+"lbl_hispanic_latino": "Hispanic/Latino",
+"lbl_middle_eastern": "Middle Eastern",
+"msg_enter_keywords": "Enter clinical keywords (optional)",
+"lbl_attach_medical_images": "Attach Medical Images",
+"lbl_add_medical_images": "Add Medical Images",
+"lbl_select_clinical_complexity": "Select Clinical Complexity",
+"lbl_select_teaching_value": "Select Teaching Value",
+"msg_please_enter_title": "Please enter a title",
+"msg_please_enter_description": "Please enter a description",
+"msg_confirm_patient_info_removed": "Patient information will be removed from this case for privacy protection",
+"lbl_french_language": "French",
+"lbl_spanish_language": "Spanish",
+"lbl_german_language": "German"
 }

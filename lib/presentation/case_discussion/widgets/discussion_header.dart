@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../../core/utils/app/AppData.dart';
 import '../models/case_discussion_models.dart';
 
 class DiscussionHeader extends StatelessWidget {
@@ -45,7 +47,7 @@ class DiscussionHeader extends StatelessWidget {
                   radius: 28,
                   backgroundColor: Colors.blue.withOpacity(0.1),
                   backgroundImage: discussion.author.profilePic != null
-                      ? NetworkImage(discussion.author.profilePic!)
+                      ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}")
                       : null,
                   child: discussion.author.profilePic == null
                       ? Text(

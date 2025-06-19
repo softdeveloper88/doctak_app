@@ -17,6 +17,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   final ApiService postService = ApiService(Dio());
   int newChatSessionId = 0;
   bool isWait = false;
+  bool isLoadingHistory = false;
 
   ChatGPTBloc() : super(DataInitial()) {
     on<LoadDataValues>(_onGetPosts);
@@ -79,41 +80,50 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       //     updatedAt: DateTime.now().toString());
       // (state as DataLoaded).response1.messages!.add(myMessage);
       // emit(DataLoaded(ChatGptSession(), ChatGptMessageHistory(), response));
-      emit(DataLoaded((state as DataLoaded).response, (state as DataLoaded).response1, response));
-      for (int i = 0;
-          i <= (state as DataLoaded).response2.content!.length;
-          i++) {
-        await Future.delayed(
-            const Duration(milliseconds: 1)); // Delay to simulate typing speed
-        int index = (state as DataLoaded).response1.messages?.indexWhere((msg) => msg.id == -1)??0;
-        if (index != -1) {
-          String typingText =
-              (state as DataLoaded).response2.content!.substring(0, i);
-          (state as DataLoaded).response1.messages![index] = Messages(
-              id: -1,
-              gptSessionId: event.sessionId,
-              question: event.question,
-              // imageUrl: event.imageUrl,
-              response: typingText,
-              createdAt: DateTime.now().toString(),
-              updatedAt: DateTime.now().toString());
-          if ((state as DataLoaded).response2.content!.length == i) {
+      
+      // Only apply typing animation for new messages, not for history
+      if (isLoadingHistory) {
+        // If loading history, don't apply typing animation
+        isWait = false;
+        emit(DataLoaded((state as DataLoaded).response, (state as DataLoaded).response1, response));
+      } else {
+        // Only apply typing animation for new messages
+        emit(DataLoaded((state as DataLoaded).response, (state as DataLoaded).response1, response));
+        for (int i = 0;
+            i <= (state as DataLoaded).response2.content!.length;
+            i++) {
+          await Future.delayed(
+              const Duration(milliseconds: 1)); // Delay to simulate typing speed
+          int index = (state as DataLoaded).response1.messages?.indexWhere((msg) => msg.id == -1)??0;
+          if (index != -1) {
+            String typingText =
+                (state as DataLoaded).response2.content!.substring(0, i);
             (state as DataLoaded).response1.messages![index] = Messages(
-                id: response.responseMessageId,
+                id: -1,
                 gptSessionId: event.sessionId,
                 question: event.question,
                 // imageUrl: event.imageUrl,
                 response: typingText,
                 createdAt: DateTime.now().toString(),
                 updatedAt: DateTime.now().toString());
+            if ((state as DataLoaded).response2.content!.length == i) {
+              (state as DataLoaded).response1.messages![index] = Messages(
+                  id: response.responseMessageId,
+                  gptSessionId: event.sessionId,
+                  question: event.question,
+                  // imageUrl: event.imageUrl,
+                  response: typingText,
+                  createdAt: DateTime.now().toString(),
+                  updatedAt: DateTime.now().toString());
+            }
           }
-        }
-        isWait=false;
+          isWait=false;
 
-        emit(DataLoaded((state as DataLoaded).response,
-            (state as DataLoaded).response1, response));
-        // });
-        // scrollToBottom();
+          emit(DataLoaded((state as DataLoaded).response,
+              (state as DataLoaded).response1, response));
+          // });
+          // scrollToBottom();
+        }
       }
 
       // emit(QuestionResponseLoaded(response));
@@ -128,14 +138,24 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
+      // Set flag to indicate we're loading history
+      isLoadingHistory = true;
+      isWait = false;
+      
       ChatGptMessageHistory response = await postService.gptChatMessages(
           'Bearer ${AppData.userToken}', event.sessionId);
       ProgressDialogUtils.hideProgressDialog();
+      
+      // Emit the loaded state with all messages at once (no typing animation)
       emit(DataLoaded((state as DataLoaded).response, response,
           (state as DataLoaded).response2));
+      
+      // Reset the flag after loading
+      isLoadingHistory = false;
     } catch (e) {
       print(e);
       ProgressDialogUtils.hideProgressDialog();
+      isLoadingHistory = false;
       emit(DataError('An error occurred$e'));
     }
   }

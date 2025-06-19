@@ -5,7 +5,6 @@ import 'package:doctak_app/presentation/home_screen/home/components/full_screen_
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
-import 'package:voice_message_package/voice_message_package.dart';
 
 import 'video_player_widget.dart';
 import 'custom_audio_player.dart';

@@ -21,7 +21,7 @@ class AppTheme {
           SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
     ),
     textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
-    cardTheme: const CardTheme(color: Colors.white),
+    cardTheme: const CardThemeData(color: Colors.white),
     cardColor: SVAppSectionBackground,
     iconTheme: const IconThemeData(color: textPrimaryColor),
     bottomSheetTheme: const BottomSheetThemeData(backgroundColor: whiteColor),
@@ -64,7 +64,7 @@ class AppTheme {
     primaryTextTheme: TextTheme(
         titleLarge: primaryTextStyle(color: Colors.white),
         labelSmall: primaryTextStyle(color: Colors.white)),
-    cardTheme: const CardTheme(color: cardBackgroundBlackDark),
+    cardTheme: const CardThemeData(color: cardBackgroundBlackDark),
     cardColor: cardBackgroundBlackDark,
     iconTheme: const IconThemeData(color: whiteColor),
     textTheme: const TextTheme(

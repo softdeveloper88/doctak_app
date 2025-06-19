@@ -1,3 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:flutter/material.dart';
 import '../models/case_discussion_models.dart';
 
@@ -31,7 +34,7 @@ class DiscussionCard extends StatelessWidget {
                   CircleAvatar(
                     radius: 20,
                     backgroundImage: discussion.author.profilePic != null
-                        ? NetworkImage(discussion.author.profilePic!)
+                        ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}")
                         : null,
                     child: discussion.author.profilePic == null
                         ? Text(discussion.author.name.isNotEmpty

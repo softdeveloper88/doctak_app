@@ -113,7 +113,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
             _buildBottomNavigationBarItem('ic_Home', 'ic_HomeSelected', translation(context).lbl_home),
           ] : [
             _buildBottomNavigationBarItem('ic_Home', 'ic_HomeSelected', translation(context).lbl_home),
-            _buildBottomNavigationBarItem('ic_Search', 'ic_SearchSelected', translation(context).lbl_search),
+            _buildBottomNavigationBarItem('ic_Search', 'ic_Search', translation(context).lbl_search),
             _buildBottomNavigationBarItem('ic_Plus', 'ic_PlusSelected', translation(context).lbl_add),
             BottomNavigationBarItem(
               icon: _buildProfileAvatar(),

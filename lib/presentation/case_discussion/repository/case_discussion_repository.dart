@@ -408,24 +408,52 @@ class CaseDiscussionRepository {
       formData.fields.add(MapEntry('description', request.description));
       
       // Add optional fields
-      if (request.tags != null) {
-        formData.fields.add(MapEntry('tags', request.tags!));
-      }
-      if (request.specialtyId != null) {
-        formData.fields.add(MapEntry('specialty_id', request.specialtyId!));
+      // if (request.tags != null) {
+      //   formData.fields.add(MapEntry('tags', request.tags!));
+      // }
+      // if (request.specialtyId != null) {
+      //   formData.fields.add(MapEntry('specialty_id', request.specialtyId!));
+      // }
+      
+      // Add specialty ID if provided
+      // if (request.specialtyId != null) {
+      //   formData.fields.add(MapEntry('specialty_id', request.specialtyId!));
+      // }
+      
+      // Add patient demographics if provided
+      if (request.patientDemographics != null) {
+        // Convert patient demographics to JSON string
+        formData.fields.add(MapEntry('patient_demographics', json.encode(request.patientDemographics!)));
       }
       
-      // Add file attachment if provided
-      if (request.attachedFile != null) {
-        if (request.attachedFile!.startsWith('http')) {
-          // If it's a URL, add it as a field
-          formData.fields.add(MapEntry('attached_file', request.attachedFile!));
-        } else {
-          // If it's a local file path, add it as a file
-          formData.files.add(MapEntry(
-            'attached_file',
-            await MultipartFile.fromFile(request.attachedFile!),
-          ));
+      // Add other new fields
+      // if (request.ethnicity != null) {
+      //   formData.fields.add(MapEntry('ethnicity', request.ethnicity!));
+      // }
+      if (request.clinicalComplexity != null) {
+        formData.fields.add(MapEntry('clinical_complexity', request.clinicalComplexity!));
+      }
+      if (request.teachingValue != null) {
+        formData.fields.add(MapEntry('teaching_value', request.teachingValue!));
+      }
+      if (request.isAnonymized != null) {
+        formData.fields.add(MapEntry('is_anonymized', request.isAnonymized!.toString()));
+      }
+      
+      // Add multiple file attachments if provided
+      if (request.attachedFiles != null && request.attachedFiles!.isNotEmpty) {
+        for (int i = 0; i < request.attachedFiles!.length; i++) {
+          final filePath = request.attachedFiles![i];
+          if (filePath.startsWith('http')) {
+            // If it's a URL, add it as a field
+            formData.fields.add(MapEntry('attached_files[$i]', filePath));
+          } else {
+            // If it's a local file path, add it as a file
+            formData.files.add(MapEntry(
+              'attached_files[]',
+              await MultipartFile.fromFile(filePath),
+            ));
+          }
         }
       }
 
@@ -463,13 +491,13 @@ class CaseDiscussionRepository {
               'title': request.title,
               'description': request.description,
               'status': 'active',
-              'specialty': request.specialty ?? 'General',
+              'specialty': 'General',
               'created_at': DateTime.now().toIso8601String(),
               'updated_at': DateTime.now().toIso8601String(),
               'author': {
                 'id': 0,
                 'name': 'Me',
-                'specialty': request.specialty ?? '',
+                'specialty': '',
                 'profile_pic': null,
               },
               'stats': {
@@ -494,13 +522,13 @@ class CaseDiscussionRepository {
           'title': request.title,
           'description': request.description,
           'status': 'active',
-          'specialty': request.specialty ?? 'General',
+          'specialty': 'General',
           'created_at': DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),
           'author': {
             'id': 0,
             'name': 'Me',
-            'specialty': request.specialty ?? '',
+            'specialty': '',
             'profile_pic': null,
           },
           'stats': {
@@ -766,46 +794,55 @@ class CaseDiscussionRepository {
     }
   }
 
-  // Perform case action (like, bookmark, etc.)
+  // Perform case action (like, unlike, bookmark, etc.) using new API v3
   Future<Map<String, dynamic>> performCaseAction({
     required int caseId,
-    required String action, // 'like', 'bookmark', 'share', etc.
-    Map<String, dynamic>? metadata,
+    required String action, // 'like', 'unlike', 'bookmark', 'share', etc.
+    String? reason, // Optional reason for reporting
   }) async {
     try {
-      // Use the old API endpoint for case actions
+      // Use the new API v3 endpoint for case actions
       final response = await _dio.post(
-        '$baseUrl/api/v3/discuss-case-action',
+        '$baseUrl/api/v3/cases/action',
         data: {
-          'id': caseId.toString(),
-          'type': 'case',
-          'action_type': action == 'like' ? 'likes' : action,
+          'discuss_case_id': caseId,
+          'action': action,
+          if (reason != null) 'reason': reason,
         },
       );
 
-      // Return a simple success response
+      print('Case action response: ${response.data}');
+      
+      // Return response data
       return {
         'success': true,
         'action': action,
         'case_id': caseId,
+        'response': response.data,
       };
     } on DioError catch (e) {
+      print('Error performing case action: ${e.message}');
       throw _handleDioError(e);
     }
   }
 
-  // Like/unlike comment
-  Future<void> likeComment(int commentId) async {
+  // Like/unlike comment using new API v3
+  Future<void> likeComment({
+    required int commentId,
+    required String action, // 'like' or 'unlike'
+    String? reason,
+  }) async {
     try {
       await _dio.post(
         '$baseUrl/api/v3/cases/action',
         data: {
-          'case_id': commentId,
-          'type': 'case_comment',
-          'action': 'likes',
+          'discuss_case_id': commentId,
+          'action': action,
+          if (reason != null) 'reason': reason,
         },
       );
     } on DioError catch (e) {
+      print('Error liking/unliking comment: ${e.message}');
       throw _handleDioError(e);
     }
   }

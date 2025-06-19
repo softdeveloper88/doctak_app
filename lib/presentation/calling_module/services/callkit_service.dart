@@ -1104,12 +1104,27 @@ class CallKitService {
   void listenToCallEvents() {
     // Cancel any existing subscription to prevent duplicates
     _callKitEventSubscription?.cancel();
+    _callKitEventSubscription = null;
 
-    _callKitEventSubscription = FlutterCallkitIncoming.onEvent.listen((event) async {
-      final eventType = event?.event;
+    // Only start listening if service is initialized
+    if (!_isInitialized) {
+      debugPrint('Cannot listen to call events: service not initialized');
+      return;
+    }
 
-      // Safely extract data - fix for the type error by explicit type conversion
-      final Map<String, dynamic> data = {};
+    _callKitEventSubscription = FlutterCallkitIncoming.onEvent.listen(
+      (event) async {
+        // Safety check: don't process events if service is disposed
+        if (!_isInitialized) {
+          debugPrint('Ignoring CallKit event: service not initialized');
+          return;
+        }
+
+        try {
+          final eventType = event?.event;
+
+          // Safely extract data - fix for the type error by explicit type conversion
+          final Map<String, dynamic> data = {};
 
       // Extract call data safely by converting types
       if (event?.body != null) {
@@ -1253,7 +1268,18 @@ class CallKitService {
         default:
           break;
       }
-    });
+        } catch (e) {
+          debugPrint('Error processing CallKit event: $e');
+        }
+      },
+      onError: (error) {
+        debugPrint('CallKit event stream error: $error');
+      },
+      onDone: () {
+        debugPrint('CallKit event stream closed');
+        _callKitEventSubscription = null;
+      },
+    );
   }
 
   // Improved end call method
@@ -1803,12 +1829,32 @@ class CallKitService {
 
   // Make sure to clean up when the service is disposed
   void dispose() {
+    // Cancel event subscription
     _callKitEventSubscription?.cancel();
+    _callKitEventSubscription = null;
+    
+    // Cancel initialization retry timer
     _initRetryTimer?.cancel();
+    _initRetryTimer = null;
+    
+    // Complete any pending initialization
+    if (_initializationCompleter != null && !_initializationCompleter!.isCompleted) {
+      _initializationCompleter!.complete(false);
+    }
+    _initializationCompleter = null;
+    
+    // Clear all tracking data
     _lastHandledCallEvent = null;
     _lastEventTime = null;
     _lastEventsByType.clear();
     _callEndProcessed.clear();
     _lastActionForCall.clear();
+    
+    // Reset initialization state
+    _isInitialized = false;
+    _isInitializing = false;
+    _initRetryCount = 0;
+    
+    debugPrint('CallKitService disposed and cleaned up');
   }
 }

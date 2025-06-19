@@ -139,38 +139,38 @@ class AgoraService {
   }
 
   // Join channel
-  Future<bool> joinChannel({
-    required String channelId,
-    required int uid,
-    String? token,
-    required bool isVideoCall,
-  }) async {
-    try {
-      if (_engine == null) return false;
-
-      print('AgoraService: Joining channel $channelId with token: ${token ??
-          'empty'}, uid: $uid, isVideoCall: $isVideoCall');
-
-      // Join the channel with updated options
-      await _engine!.joinChannel(
-        token: '',
-        channelId: channelId,
-        uid: uid,
-        options: const ChannelMediaOptions(
-          channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-          clientRoleType: ClientRoleType.clientRoleBroadcaster,
-        ),
-      );
-
-      return true;
-    } catch (e) {
-      print('Channel ID: $channelId, UID: $uid, Token empty: ${token == null ||
-          token.isEmpty}');
-
-      print('Join channel error: $e');
-      return false;
-    }
-  }
+  // Future<bool> joinChannel({
+  //   required String channelId,
+  //   required int uid,
+  //   String? token,
+  //   required bool isVideoCall,
+  // }) async {
+  //   try {
+  //     if (_engine == null) return false;
+  //
+  //     print('AgoraService: Joining channel $channelId with token: ${token ??
+  //         'empty'}, uid: $uid, isVideoCall: $isVideoCall');
+  //
+  //     // Join the channel with updated options
+  //     await _engine!.joinChannel(
+  //       token: '',
+  //       channelId: channelId,
+  //       uid: uid,
+  //       options: const ChannelMediaOptions(
+  //         channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+  //         clientRoleType: ClientRoleType.clientRoleBroadcaster,
+  //       ),
+  //     );
+  //
+  //     return true;
+  //   } catch (e) {
+  //     print('Channel ID: $channelId, UID: $uid, Token empty: ${token == null ||
+  //         token.isEmpty}');
+  //
+  //     print('Join channel error: $e');
+  //     return false;
+  //   }
+  // }
 
   // Improved method to configure media settings
   Future<void> configureMediaSettings({required bool isVideoCall}) async {
@@ -437,13 +437,37 @@ class AgoraService {
     if (_engine == null) return;
 
     try {
-      // First leave channel if still connected
+      // Stop preview if running
+      try {
+        await _engine!.stopPreview();
+      } catch (e) {
+        print('Warning: Error stopping preview: $e');
+      }
+
+      // Disable video if enabled
+      try {
+        await _engine!.disableVideo();
+      } catch (e) {
+        print('Warning: Error disabling video: $e');
+      }
+
+      // Deactivate audio session on iOS
+      try {
+        await deactivateAudioSession();
+      } catch (e) {
+        print('Warning: Error deactivating audio session: $e');
+      }
+
+      // Leave channel if still connected
       try {
         await _engine!.leaveChannel();
       } catch (e) {
         print('Warning: Error leaving channel: $e');
         // Continue with release even if leave fails
       }
+
+      // Clear callbacks to prevent memory leaks
+      _clearCallbacks();
 
       // Then release engine resources
       await _engine!.release();
@@ -454,6 +478,18 @@ class AgoraService {
       // Always set engine to null to prevent further usage attempts
       _engine = null;
     }
+  }
+
+  // Helper method to clear all callbacks
+  void _clearCallbacks() {
+    _onJoinChannelSuccess = null;
+    _onUserJoined = null;
+    _onUserOffline = null;
+    _onAudioVolumeIndication = null;
+    _onNetworkQuality = null;
+    _onConnectionStateChanged = null;
+    _onFirstRemoteVideoFrame = null;
+    _onError = null;
   }
 
   // Toggle local video
@@ -468,6 +504,54 @@ class AgoraService {
       await _engine!.muteLocalVideoStream(!enabled);
     } catch (e) {
       print('Error toggling local video: $e');
+    }
+  }
+
+  // Safe dispose method that can be called multiple times
+  Future<void> dispose() async {
+    await release();
+  }
+
+  // Helper method to check if engine is in a valid state
+  bool _isEngineValid() {
+    return _engine != null;
+  }
+
+  // Enhanced join channel with better error handling
+  Future<bool> joinChannel({
+    required String channelId,
+    required int uid,
+    String? token,
+    required bool isVideoCall,
+  }) async {
+    if (!_isEngineValid()) {
+      print('Cannot join channel: Agora engine not initialized');
+      return false;
+    }
+
+    try {
+      final options = ChannelMediaOptions(
+        publishCameraTrack: isVideoCall,
+        publishMicrophoneTrack: true,
+        autoSubscribeAudio: true,
+        autoSubscribeVideo: isVideoCall,
+        channelProfile: ChannelProfileType.channelProfileCommunication,
+        clientRoleType: ClientRoleType.clientRoleBroadcaster,
+        publishCustomVideoTrack: false,
+        publishCustomAudioTrack: false,
+      );
+
+      await _engine!.joinChannel(
+        token: token ?? '',
+        channelId: channelId,
+        uid: uid,
+        options: options,
+      );
+
+      return true;
+    } catch (e) {
+      print('Error joining channel: $e');
+      return false;
     }
   }
 }

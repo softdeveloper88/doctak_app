@@ -33,6 +33,10 @@ class CallProvider extends ChangeNotifier {
   // Additional reconnection handling
   int _reconnectionAttempts = 0;
   bool _isRecoveringConnection = false;
+  
+  // Disposed state tracking
+  bool _disposed = false;
+  bool get mounted => !_disposed;
 
   // Constructor
   CallProvider({
@@ -199,8 +203,12 @@ class CallProvider extends ChangeNotifier {
   }
 
   void _handleSpeakingState(int uid, bool isSpeaking) {
+    // Safety check: don't proceed if disposed
+    if (!mounted) return;
+    
     // Cancel previous timer
     _speakingTimers[uid]?.cancel();
+    _speakingTimers[uid] = null;
 
     // Update state based on UID
     if (uid == 0) {
@@ -211,6 +219,9 @@ class CallProvider extends ChangeNotifier {
 
     // Set timer to reset speaking state
     _speakingTimers[uid] = Timer(const Duration(milliseconds: 800), () {
+      // Safety check: only update if not disposed
+      if (!mounted) return;
+      
       if (uid == 0) {
         _updateCallState(isLocalUserSpeaking: false);
       } else {
@@ -257,21 +268,37 @@ class CallProvider extends ChangeNotifier {
 
   // Call timer
   void _startCallTimer() {
+    // Cancel existing timer first
     _callTimer?.cancel();
+    _callTimer = null;
+    
+    // Only start timer if not disposed
+    if (!mounted) return;
+    
     _callTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      // Safety check: stop timer if provider is disposed
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       _updateCallState(callDuration: _callState.callDuration + 1);
     });
   }
 
   // Controls visibility timer
   void _startControlsAutoHideTimer() {
+    // Cancel existing timer first
     _controlsAutoHideTimer?.cancel();
+    _controlsAutoHideTimer = null;
+    
+    // Only start timer if not disposed and conditions are met
+    if (!mounted || !isVideoCall || !_callState.isRemoteUserJoined) return;
 
-    if (isVideoCall && _callState.isRemoteUserJoined) {
-      _controlsAutoHideTimer = Timer(const Duration(seconds: 5), () {
-        _updateCallState(isControlsVisible: false);
-      });
-    }
+    _controlsAutoHideTimer = Timer(const Duration(seconds: 5), () {
+      // Safety check: only update if not disposed
+      if (!mounted) return;
+      _updateCallState(isControlsVisible: false);
+    });
   }
 
   // Show controls
@@ -470,6 +497,23 @@ class CallProvider extends ChangeNotifier {
 
   // End call
   void endCall() {
+    // Stop all timers immediately when ending call
+    _callTimer?.cancel();
+    _callTimer = null;
+    _controlsAutoHideTimer?.cancel();
+    _controlsAutoHideTimer = null;
+    
+    // Cancel all speaking timers
+    for (var timer in _speakingTimers.values) {
+      timer?.cancel();
+    }
+    _speakingTimers.clear();
+    
+    // Reset reconnection state
+    _isRecoveringConnection = false;
+    _reconnectionAttempts = 0;
+    
+    // Release Agora resources
     _agoraService.leaveChannel();
     _agoraService.release();
   }
@@ -590,13 +634,24 @@ class CallProvider extends ChangeNotifier {
   }
   @override
   void dispose() {
+    // Mark as disposed first to prevent new timers
+    _disposed = true;
+    
+    // Cancel all timers
     _callTimer?.cancel();
+    _callTimer = null;
     _controlsAutoHideTimer?.cancel();
+    _controlsAutoHideTimer = null;
 
+    // Cancel speaking timers
     for (var timer in _speakingTimers.values) {
       timer?.cancel();
     }
     _speakingTimers.clear();
+    
+    // Reset reconnection state
+    _isRecoveringConnection = false;
+    _reconnectionAttempts = 0;
 
     super.dispose();
   }

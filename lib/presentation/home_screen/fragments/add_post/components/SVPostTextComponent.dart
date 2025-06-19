@@ -4,7 +4,6 @@ import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:quill_html_converter/quill_html_converter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:nb_utils/nb_utils.dart';
 

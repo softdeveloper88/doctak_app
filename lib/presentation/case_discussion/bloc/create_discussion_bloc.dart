@@ -72,8 +72,8 @@ class CreateDiscussionBloc extends Bloc<CreateDiscussionEvent, CreateDiscussionS
       print('Title: ${event.request.title}');
       print('Description: ${event.request.description}');
       print('Tags: ${event.request.tags}');
-      print('Specialty ID: ${event.request.specialtyId}');
-      print('Attached File: ${event.request.attachedFile}');
+      // print('Specialty ID: ${event.request.specialtyId}');
+      print('Attached File: ${event.request.attachedFiles}');
       
       final discussion = await repository.createCaseDiscussion(event.request);
       

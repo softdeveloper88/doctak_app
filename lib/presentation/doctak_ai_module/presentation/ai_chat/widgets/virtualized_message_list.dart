@@ -39,6 +39,7 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
   @override
   void initState() {
     super.initState();
+    // Mark all initial messages as seen (historical messages)
     _markCurrentMessagesAsSeen();
   }
   
@@ -46,13 +47,18 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
   void didUpdateWidget(VirtualizedMessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
     
-    // Check for new messages
+    // Check for new messages - only mark new ones as seen after animation completes
     if (widget.messages.length > oldWidget.messages.length) {
       _scrollToBottom();
+      
+      // Mark only the new messages as seen after a delay to allow typing animation
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _markCurrentMessagesAsSeen();
+      });
+    } else {
+      // If no new messages, mark all as seen immediately (e.g., when loading history)
+      _markCurrentMessagesAsSeen();
     }
-    
-    // Mark current messages as seen
-    _markCurrentMessagesAsSeen();
   }
   
   void _markCurrentMessagesAsSeen() {
@@ -127,6 +133,7 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
             messageBubble = AiMessageBubble(
               message: message,
               showAvatar: showAvatar,
+              isNewMessage: isNewMessage,
               onFeedbackSubmitted: (feedback) {
                 widget.onFeedbackSubmitted(message.id.toString(), feedback);
               },

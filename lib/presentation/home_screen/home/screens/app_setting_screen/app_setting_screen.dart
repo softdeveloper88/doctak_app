@@ -281,13 +281,13 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               ),
                             ),
                             PopupMenuItem(
-                              value: 'hi',
+                              value: 'fr',
                               child: Row(
                                 children: [
-                                  const Text('🇮🇳', style: TextStyle(fontSize: 18)),
+                                  const Text('🇫🇷', style: TextStyle(fontSize: 18)),
                                   const SizedBox(width: 12),
                                   Text(
-                                    translation(context).lbl_hindi_language,
+                                    translation(context).lbl_french_language,
                                     style: const TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
@@ -297,13 +297,13 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               ),
                             ),
                             PopupMenuItem(
-                              value: 'ur',
+                              value: 'es',
                               child: Row(
                                 children: [
-                                  const Text('🇵🇰', style: TextStyle(fontSize: 18)),
+                                  const Text('🇪🇸', style: TextStyle(fontSize: 18)),
                                   const SizedBox(width: 12),
                                   Text(
-                                    translation(context).lbl_urdu_language,
+                                    translation(context).lbl_spanish_language,
                                     style: const TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
@@ -312,6 +312,38 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                                 ],
                               ),
                             ),
+                            PopupMenuItem(
+                              value: 'de',
+                              child: Row(
+                                children: [
+                                  const Text('🇩🇪', style: TextStyle(fontSize: 18)),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    translation(context).lbl_german_language,
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // PopupMenuItem(
+                            //   value: 'ur',
+                            //   child: Row(
+                            //     children: [
+                            //       const Text('🇵🇰', style: TextStyle(fontSize: 18)),
+                            //       const SizedBox(width: 12),
+                            //       Text(
+                            //         translation(context).lbl_urdu_language,
+                            //         style: const TextStyle(
+                            //           fontFamily: 'Poppins',
+                            //           fontSize: 14,
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                           ];
                         },
                         onSelected: (value) async {

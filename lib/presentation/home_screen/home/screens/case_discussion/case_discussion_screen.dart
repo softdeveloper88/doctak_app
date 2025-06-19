@@ -7,6 +7,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/case_model/case_discuss_model.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/add_case_discuss_screen.dart';
@@ -116,7 +117,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                           // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                                child: Text('Case Discussion',
+                                child: Text(translation(context).lbl_case_discussion,
                                     textAlign: TextAlign.center,
                                     style: boldTextStyle(size: 18))),
                             Expanded(
@@ -246,7 +247,7 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
-                                    hintText: 'Search by keyword',
+                                    hintText: translation(context).hint_search_by_keyword,
                                     hintStyle: secondaryTextStyle(
                                         color: svGetBodyColor()),
                                     suffixIcon: GestureDetector(
@@ -324,13 +325,13 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                   LoadDropdownData('', '', '', ''),
                 );
 
-                return Center(child: Text('Error: ${state.errorMessage}'));
+                return Center(child: Text(translation(context).msg_error_occurred(state.errorMessage)));
               } else {
                 BlocProvider.of<SplashBloc>(context).add(
                   LoadDropdownData('', '', '', ''),
                 );
 
-                return const Center(child: Text('Unknown state'));
+                return Center(child: Text(translation(context).msg_unknown_state));
               }
             }),
             BlocConsumer<CaseDiscussionBloc, CaseDiscussionState>(
@@ -364,8 +365,8 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
                     ),
                   );
                 } else {
-                  return const Expanded(
-                      child: Center(child: Text('Something went wrong')));
+                  return Expanded(
+                      child: Center(child: Text(translation(context).msg_something_went_wrong)));
                 }
               },
             ),
@@ -385,8 +386,8 @@ class _CaseDiscussionScreenState extends State<CaseDiscussionScreen> {
     final bloc = caseDiscusstionBloc;
     return Expanded(
       child: bloc.caseDiscussList.isEmpty
-          ? const Center(
-              child: Text("No Case Found"),
+          ? Center(
+              child: Text(translation(context).msg_no_case_found),
             )
           : ListView.builder(
         padding: const EdgeInsets.all(10),
@@ -747,7 +748,7 @@ class PostCard extends StatelessWidget {
                       );
                       // AddCaseDiscussScreen().launch(context);
                     },
-                    child: const Text('View details'),
+                    child: Text(translation(context).lbl_view_details),
                   ),
                   const Divider(
                     color: Colors.grey,
@@ -761,13 +762,13 @@ class PostCard extends StatelessWidget {
 
                       },icon:const Icon(Icons.thumb_up_alt_outlined)),
                       const SizedBox(width: 4),
-                      Text('${caseDiscussList.likes} Likes'),
+                      Text(translation(context).lbl_likes_count(caseDiscussList.likes ?? 0)),
                       const SizedBox(width: 16),
                       const Icon(Icons.comment_outlined),
                       const SizedBox(width: 4),
-                      Text('${caseDiscussList.comments} Comments'),
+                      Text(translation(context).lbl_comments_count(caseDiscussList.comments ?? 0)),
                       const SizedBox(width: 16),
-                      Text('${caseDiscussList.views} Views'),
+                      Text(translation(context).lbl_views_count(caseDiscussList.views ?? 0)),
                     ],
                   ),
                 ],

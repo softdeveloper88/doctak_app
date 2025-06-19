@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
+import '../../../l10n/app_localizations.dart';
 import '../bloc/create_discussion_bloc.dart';
 import '../models/case_discussion_models.dart';
 import '../repository/case_discussion_repository.dart';
@@ -25,13 +26,20 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _tagController = TextEditingController();
+  final _clinicalKeywordsController = TextEditingController();
+  final _ageController = TextEditingController();
   
   String _selectedSpecialty = 'General';
   String _selectedSpecialtyId = '1';
-  File? _selectedFile;
-  String? _selectedFileName;
-  List<String> _tags = [];
+  String? _selectedGender;
+  String? _selectedEthnicity;
+  String _selectedClinicalComplexity = 'low';
+  String _selectedTeachingValue = 'low';
+  // Remove medical history - ethnicity is now in patient demographics
+  bool _isAnonymized = false;
+  
+  List<File> _selectedImages = [];
+  List<String> _selectedImageNames = [];
   
   final ImagePicker _imagePicker = ImagePicker();
   late CaseDiscussionRepository _repository;
@@ -56,7 +64,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _tagController.dispose();
+    _clinicalKeywordsController.dispose();
+    _ageController.dispose();
+    // Removed medical history controller disposal
     super.dispose();
   }
 
@@ -128,7 +138,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Select Attachment',
+              AppLocalizations.of(context)!.lbl_select_attachment,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -141,17 +151,17 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
               children: [
                 _buildAttachmentOption(
                   icon: Icons.camera_alt,
-                  label: 'Camera',
+                  label: AppLocalizations.of(context)!.lbl_camera,
                   onTap: () => _pickImageFromCamera(),
                 ),
                 _buildAttachmentOption(
                   icon: Icons.photo_library,
-                  label: 'Gallery',
+                  label: AppLocalizations.of(context)!.lbl_gallery,
                   onTap: () => _pickImageFromGallery(),
                 ),
                 _buildAttachmentOption(
                   icon: Icons.attach_file,
-                  label: 'File',
+                  label: AppLocalizations.of(context)!.lbl_file,
                   onTap: () => _pickDocument(),
                 ),
               ],
@@ -203,13 +213,13 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       final pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
         setState(() {
-          _selectedFile = File(pickedFile.path);
-          _selectedFileName = pickedFile.name;
+          _selectedImages.add(File(pickedFile.path));
+          _selectedImageNames.add(pickedFile.name);
         });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')),
       );
     }
   }
@@ -219,13 +229,13 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         setState(() {
-          _selectedFile = File(pickedFile.path);
-          _selectedFileName = pickedFile.name;
+          _selectedImages.add(File(pickedFile.path));
+          _selectedImageNames.add(pickedFile.name);
         });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')),
       );
     }
   }
@@ -235,62 +245,78 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+        allowMultiple: true,
       );
 
-      if (result != null && result.files.single.path != null) {
+      if (result != null && result.files.isNotEmpty) {
         setState(() {
-          _selectedFile = File(result.files.single.path!);
-          _selectedFileName = result.files.single.name;
+          for (var file in result.files) {
+            if (file.path != null) {
+              _selectedImages.add(File(file.path!));
+              _selectedImageNames.add(file.name);
+            }
+          }
         });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking file: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_file}: $e')),
       );
     }
   }
 
-  void _removeAttachment() {
+  void _removeAttachment(int index) {
     setState(() {
-      _selectedFile = null;
-      _selectedFileName = null;
+      _selectedImages.removeAt(index);
+      _selectedImageNames.removeAt(index);
     });
   }
 
-  // Tag management functions
-  void _addTag() {
-    final tag = _tagController.text.trim();
-    if (tag.isNotEmpty && !_tags.contains(tag)) {
-      setState(() {
-        _tags.add(tag);
-        _tagController.clear();
-      });
-    }
-  }
-
-  void _removeTag(String tag) {
-    setState(() {
-      _tags.remove(tag);
-    });
-  }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      if (!_isAnonymized) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.msg_confirm_patient_info_removed),
+            backgroundColor: Colors.orange[600],
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+      
       print('=== Form Validation Passed ===');
       print('📝 Title: ${_titleController.text.trim()}');
       print('📄 Description: ${_descriptionController.text.trim()}');
-      print('🏷️ Tags: ${_tags.isNotEmpty ? _tags.join(',') : 'None'}');
+      print('🏷️ Clinical Keywords: ${_clinicalKeywordsController.text.trim()}');
       print('🩺 Specialty ID: $_selectedSpecialtyId');
       print('🩺 Specialty Name: $_selectedSpecialty');
-      print('📎 Attached File: ${_selectedFile?.path ?? 'None'}');
+      print('👤 Patient Demographics: {age: ${_ageController.text.trim()}, gender: $_selectedGender, ethnicity: $_selectedEthnicity}');
+      print('👤 Ethnicity: $_selectedEthnicity');
+      print('📊 Clinical Complexity: $_selectedClinicalComplexity');
+      print('📚 Teaching Value: $_selectedTeachingValue');
+      print('🔒 Anonymized: $_isAnonymized');
+      print('📸 Medical Images: ${_selectedImages.length} files');
       
+      // Create patient demographics object
+      final patientDemographics = {
+        'age': _ageController.text.trim().isNotEmpty ? int.tryParse(_ageController.text.trim()) ?? 0 : 0,
+        'gender': _selectedGender?.toLowerCase(),
+        'ethnicity': _selectedEthnicity,
+      };
+
       final request = CreateCaseRequest(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        tags: _tags.isNotEmpty ? _tags.join(',') : null,
-        specialtyId: _selectedSpecialtyId,
-        attachedFile: _selectedFile?.path,
-        specialty: _selectedSpecialty,
+        tags: _clinicalKeywordsController.text.trim().isNotEmpty ? _clinicalKeywordsController.text.trim() : null,
+        // specialtyId: _selectedSpecialtyId, // Removed specialty from request
+        patientDemographics: patientDemographics,
+        // ethnicity is now in patient demographics
+        clinicalComplexity: _selectedClinicalComplexity,
+        teachingValue: _selectedTeachingValue,
+        isAnonymized: _isAnonymized,
+        attachedFiles: _selectedImages.map((file) => file.path).toList(),
       );
 
       context.read<CreateDiscussionBloc>().add(CreateDiscussion(request));
@@ -301,6 +327,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize dropdown values with localized strings
+    _selectedGender ??= AppLocalizations.of(context)!.lbl_male;
+    _selectedEthnicity ??= AppLocalizations.of(context)!.lbl_not_specified;
     return Scaffold(
       backgroundColor: svGetBgColor(),
       appBar: AppBar(
@@ -335,7 +364,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              'Create Case Discussion',
+              AppLocalizations.of(context)!.lbl_create_case_discussion,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -371,15 +400,14 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Create Case Discussion'),
-                    content: const Text(
-                      'Share medical cases for discussion with other healthcare professionals. '
-                      'Include relevant details and attach files if needed.',
+                    title: Text(AppLocalizations.of(context)!.lbl_create_case_discussion),
+                    content: Text(
+                      AppLocalizations.of(context)!.msg_create_case_discussion_description,
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Got it'),
+                        child: Text(AppLocalizations.of(context)!.lbl_got_it),
                       ),
                     ],
                   ),
@@ -396,9 +424,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
               SnackBar(
                 content: Row(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.white),
+                    const Icon(Icons.check_circle, color: Colors.white),
                     const SizedBox(width: 12),
-                    Text('Case discussion created successfully!'),
+                    Text(AppLocalizations.of(context)!.msg_case_discussion_created),
                   ],
                 ),
                 backgroundColor: Colors.green[600],
@@ -411,11 +439,11 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
               SnackBar(
                 content: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.white),
+                    const Icon(Icons.error_outline, color: Colors.white),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Failed to create discussion: ${state.message}',
+                        '${AppLocalizations.of(context)!.msg_failed_to_create_discussion}: ${state.message}',
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),
@@ -424,7 +452,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                 backgroundColor: Colors.red[600],
                 duration: const Duration(seconds: 5),
                 action: SnackBarAction(
-                  label: 'Retry',
+                  label: AppLocalizations.of(context)!.lbl_retry,
                   textColor: Colors.white,
                   onPressed: _submitForm,
                 ),
@@ -457,8 +485,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Case Title *',
-                      hintStyle: TextStyle(
+                      hintText: '${AppLocalizations.of(context)!.lbl_case_title} *',
+                      hintStyle: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
                         color: Colors.black54,
@@ -472,7 +500,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a title';
+                        return AppLocalizations.of(context)!.msg_please_enter_title;
                       }
                       return null;
                     },
@@ -498,8 +526,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Case Description *',
-                      hintStyle: TextStyle(
+                      hintText: '${AppLocalizations.of(context)!.lbl_case_description} *',
+                      hintStyle: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
                         color: Colors.black54,
@@ -513,14 +541,14 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a description';
+                        return AppLocalizations.of(context)!.msg_please_enter_description;
                       }
                       return null;
                     },
                   ),
                 ),
 
-                // Tags Section
+                // Patient Demographics Section
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
@@ -535,14 +563,198 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       Row(
                         children: [
                           Icon(
-                            Icons.tag_rounded,
+                            Icons.person_outline,
                             color: Colors.blue.withOpacity(0.6),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Tags (Optional)',
-                            style: TextStyle(
+                            AppLocalizations.of(context)!.lbl_patient_demographics,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Age Field
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: AppTextField(
+                          controller: _ageController,
+                          textFieldType: TextFieldType.NUMBER,
+                          textStyle: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                            ),
+                            hintText: 'Age (years)',
+                            hintStyle: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                            contentPadding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                      ),
+                      
+                      // Gender and Ethnicity Row
+                      Row(
+                        children: [
+                          // Gender Dropdown
+                          Expanded(
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 8, bottom: 12),
+                              child: DropdownButtonFormField<String>(
+                                value: _selectedGender,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                                  ),
+                                  hintText: AppLocalizations.of(context)!.lbl_select_gender,
+                                  labelText: AppLocalizations.of(context)!.lbl_gender,
+                                  contentPadding: const EdgeInsets.all(12),
+                                ),
+                                items: [AppLocalizations.of(context)!.lbl_male, AppLocalizations.of(context)!.lbl_female, AppLocalizations.of(context)!.lbl_other].map((gender) {
+                                  return DropdownMenuItem<String>(
+                                    value: gender,
+                                    child: Text(
+                                      gender,
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      _selectedGender = value;
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          // Ethnicity Dropdown
+                          Expanded(
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 8, bottom: 12),
+                              child: DropdownButtonFormField<String>(
+                                isExpanded: true,
+                                value: _selectedEthnicity,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                                  ),
+                                  hintText: AppLocalizations.of(context)!.lbl_select_ethnicity,
+                                  labelText: AppLocalizations.of(context)!.lbl_ethnicity,
+                                  contentPadding: const EdgeInsets.all(12),
+                                ),
+                                items: [AppLocalizations.of(context)!.lbl_not_specified, AppLocalizations.of(context)!.lbl_caucasian, AppLocalizations.of(context)!.lbl_african_american, AppLocalizations.of(context)!.lbl_asian, AppLocalizations.of(context)!.lbl_hispanic_latino, AppLocalizations.of(context)!.lbl_middle_eastern, AppLocalizations.of(context)!.lbl_other].map((ethnicity) {
+                                  return DropdownMenuItem<String>(
+                                    value: ethnicity,
+                                    child: Text(
+                                      ethnicity,
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      _selectedEthnicity = value;
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // Medical history removed - ethnicity is now in patient demographics
+                    ],
+                  ),
+                ),
+
+                // Clinical Keywords Field
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                  ),
+                  child: AppTextField(
+                    controller: _clinicalKeywordsController,
+                    textFieldType: TextFieldType.MULTILINE,
+                    maxLines: 2,
+                    textStyle: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: AppLocalizations.of(context)!.msg_enter_keywords,
+                      labelText: AppLocalizations.of(context)!.lbl_clinical_keywords,
+                      hintStyle: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                      contentPadding: const EdgeInsets.all(16),
+                      prefixIcon: Icon(
+                        Icons.local_offer_outlined,
+                        color: Colors.blue.withOpacity(0.6),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Medical Images Section
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.photo_library_outlined,
+                            color: Colors.blue.withOpacity(0.6),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            AppLocalizations.of(context)!.lbl_attach_medical_images,
+                            style: const TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14,
                               color: Colors.black87,
@@ -553,125 +765,87 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       ),
                       const SizedBox(height: 12),
                       
-                      // Tag input field
-                      StatefulBuilder(
-                        builder: (context, setState) {
-                          return Row(
+                      // Add Images Button
+                      GestureDetector(
+                        onTap: _pickFile,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.blue.withOpacity(0.3),
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _tagController,
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                  ),
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
-                                        color: Colors.blue.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
-                                        color: Colors.blue.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
-                                        color: Colors.blue.withOpacity(0.6),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    hintText: 'Add a tag...',
-                                    hintStyle: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                  ),
-                                  onChanged: (value) {
-                                    setState(() {}); // Rebuild to update button state
-                                  },
-                                  onSubmitted: (_) {
-                                    if (_tagController.text.trim().isNotEmpty) {
-                                      _addTag();
-                                      setState(() {}); // Rebuild after adding tag
-                                    }
-                                  },
-                                ),
+                              Icon(
+                                Icons.add_photo_alternate_outlined,
+                                color: Colors.blue[600],
+                                size: 24,
                               ),
                               const SizedBox(width: 8),
-                              GestureDetector(
-                                onTap: _tagController.text.trim().isNotEmpty ? () {
-                                  _addTag();
-                                  setState(() {}); // Rebuild after adding tag
-                                } : null,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: _tagController.text.trim().isNotEmpty 
-                                        ? Colors.blue[600] 
-                                        : Colors.grey[400],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    Icons.add_rounded,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
+                              Text(
+                                AppLocalizations.of(context)!.lbl_add_medical_images,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 14,
+                                  color: Colors.blue[800],
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
-                          );
-                        },
+                          ),
+                        ),
                       ),
                       
-                      // Display tags as chips
-                      if (_tags.isNotEmpty) ...[
+                      // Display selected images
+                      if (_selectedImages.isNotEmpty) ...[
                         const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _tags.map((tag) {
+                        Column(
+                          children: _selectedImages.asMap().entries.map((entry) {
+                            int index = entry.key;
                             return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.blue.withOpacity(0.3),
-                                ),
+                                color: Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.green.withOpacity(0.3)),
                               ),
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    tag,
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 12,
-                                      color: Colors.blue[800],
-                                      fontWeight: FontWeight.w500,
+                                  Icon(
+                                    Icons.image_outlined,
+                                    color: Colors.green[600],
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _selectedImageNames[index],
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: Colors.green[800],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
-                                  GestureDetector(
-                                    onTap: () => _removeTag(tag),
-                                    child: Icon(
+                                  IconButton(
+                                    onPressed: () => _removeAttachment(index),
+                                    icon: Icon(
                                       Icons.close_rounded,
-                                      size: 16,
-                                      color: Colors.blue[600],
+                                      color: Colors.red[600],
+                                      size: 18,
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 32,
+                                      minHeight: 32,
                                     ),
                                   ),
                                 ],
@@ -699,6 +873,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Select Specialty',
+                          labelText: 'Medical Specialty',
                           contentPadding: const EdgeInsets.all(16),
                           prefixIcon: Icon(
                             Icons.medical_services_rounded,
@@ -738,118 +913,126 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       ),
                 ),
 
-                // File Attachment Section
+                // Clinical Complexity and Teaching Value Row
+                Row(
+                  children: [
+                    // Clinical Complexity Dropdown
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8, bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          value: _selectedClinicalComplexity,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: AppLocalizations.of(context)!.lbl_select_clinical_complexity,
+                            labelText: AppLocalizations.of(context)!.lbl_clinical_complexity,
+                            contentPadding: const EdgeInsets.all(16),
+                            prefixIcon: Icon(
+                              Icons.assessment_outlined,
+                              color: Colors.blue.withOpacity(0.6),
+                              size: 20,
+                            ),
+                          ),
+                          items: [
+                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedClinicalComplexity = value;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    // Teaching Value Dropdown
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 8, bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          value: _selectedTeachingValue,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: AppLocalizations.of(context)!.lbl_select_teaching_value,
+                            labelText: AppLocalizations.of(context)!.lbl_teaching_value,
+                            contentPadding: const EdgeInsets.all(16),
+                            prefixIcon: Icon(
+                              Icons.school_outlined,
+                              color: Colors.blue.withOpacity(0.6),
+                              size: 20,
+                            ),
+                          ),
+                          items: [
+                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedTeachingValue = value;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Anonymization Checkbox
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
+                    color: Colors.orange.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                    border: Border.all(color: Colors.orange.withOpacity(0.2)),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.attach_file_rounded,
-                            color: Colors.blue.withOpacity(0.6),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Attachment (Optional)',
+                      Checkbox(
+                        value: _isAnonymized,
+                        onChanged: (value) {
+                          setState(() {
+                            _isAnonymized = value ?? false;
+                          });
+                        },
+                        activeColor: Colors.orange[600],
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isAnonymized = !_isAnonymized;
+                            });
+                          },
+                          child: Text(
+                            AppLocalizations.of(context)!.msg_confirm_patient_info_removed_checkbox,
                             style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 14,
-                              color: Colors.black87,
+                              fontSize: 13,
+                              color: Colors.orange[800],
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      if (_selectedFile == null)
-                        GestureDetector(
-                          onTap: _pickFile,
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Colors.blue.withOpacity(0.3),
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.cloud_upload_rounded,
-                                  color: Colors.blue[600],
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Tap to attach file',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    color: Colors.blue[800],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.green.withOpacity(0.3)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle_rounded,
-                                color: Colors.green[600],
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _selectedFileName ?? 'File attached',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12,
-                                    color: Colors.green[800],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: _removeAttachment,
-                                icon: Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.red[600],
-                                  size: 18,
-                                ),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(
-                                  minWidth: 32,
-                                  minHeight: 32,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -862,7 +1045,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 32),
                       child: ElevatedButton(
-                        onPressed: state is CreateDiscussionLoading ? null : _submitForm,
+                        onPressed: (state is CreateDiscussionLoading || !_isAnonymized) ? null : _submitForm,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue[600],
                           foregroundColor: Colors.white,
@@ -884,15 +1067,15 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.send_rounded,
                                     size: 18,
                                     color: Colors.white,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Create Discussion',
-                                    style: TextStyle(
+                                    AppLocalizations.of(context)!.lbl_submit_case,
+                                    style: const TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,

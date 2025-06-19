@@ -1861,7 +1861,7 @@
 //       context: context,
 //       builder: (context) => AlertDialog(
 //         title: const Text('End Call'),
-//         content: const Text('Are you sure you want to end the call?'),
+//         content: const Text('Are you sure you want to end this meeting?'),
 //         actions: [
 //           TextButton(
 //             onPressed: () => Navigator.pop(context),
@@ -4074,7 +4074,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(translation(context).lbl_end_call),
+        title: const Text("Meeting"),
         content: Text(translation(context).msg_confirm_end_call),
         actions: [
           TextButton(
@@ -4094,7 +4094,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               // Navigator.pop(context); // Close dialog
               // Navigator.pop(context); // Exit meeting screen
             },
-            child: Text(translation(context).lbl_end_call, style: const TextStyle(color: Colors.red)),
+            child: const Text('End meeting', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
