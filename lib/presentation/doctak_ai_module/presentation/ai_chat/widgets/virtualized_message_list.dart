@@ -3,8 +3,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 import '../../../data/models/ai_chat_model/ai_chat_message_model.dart';
-import '../../ai_typing_indicator.dart';
-import '../../user_message_bubble.dart';
+import 'ai_typing_indicator.dart';
+import 'user_message_bubble.dart';
 import 'ai_message_bubble.dart';
 import 'streaming_message_bubble.dart';
 
@@ -89,7 +89,7 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
     return AnimationLimiter(
       child: ListView.builder(
         controller: widget.scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         itemCount: totalCount,
         itemBuilder: (context, index) {
           // Special cases for the last items

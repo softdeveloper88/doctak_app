@@ -414,7 +414,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_delete_caps => 'حذف';
 
   @override
-  String get lbl_history_ai => 'محادثة الذكاء الاصطناعي';
+  String get lbl_history_ai => 'محادثة';
 
   @override
   String get lbl_new_chat => '+ محادثة جديدة';

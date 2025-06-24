@@ -227,16 +227,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           
           // Main content - completely redesigned
           Expanded(
-            child: BlocProvider(
-              create: (context) => ChatGPTBloc()..add(LoadDataValues()),
-              child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
-                builder: (context, state1) {
+            child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+              builder: (context, state1) {
                   if (selectedSessionId == 0 && state1 is DataLoaded) {
                     selectedSessionId = state1.response.newSessionId;
                     chatWithAi = state1.response.sessions?.first.name ?? translation(context).lbl_next_session;
                   }
                   
-                  if (state1 is DataInitial) {
+                  if (state1 is DataInitial || state1 is DataLoading) {
                     return ChatShimmerLoader();
                   } else if (state1 is DataLoaded) {
                     isEmpty = state1.response1.messages?.isEmpty ?? false;
@@ -697,7 +695,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   }
                 }
               ),
-            ),
           ),
         ],
       ),

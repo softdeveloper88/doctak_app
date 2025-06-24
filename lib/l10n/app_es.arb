@@ -153,7 +153,7 @@
   "msg_confirm_delete_chat": "¿Estás seguro de que quieres eliminar este chat?",
   "lbl_cancel_caps": "CANCELAR",
   "lbl_delete_caps": "ELIMINAR",
-  "lbl_history_ai": "Historial de Inteligencia Artificial",
+  "lbl_history_ai": "Historial",
   "lbl_new_chat": "+ NUEVO CHAT",
   "lbl_text_copied_clipboard": "Texto copiado al portapapeles",
   "lbl_medical_images": "Imágenes médicas",

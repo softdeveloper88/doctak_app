@@ -106,7 +106,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
             Text(
               translation(context).lbl_history_ai,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
                 color: Colors.blue[800],
@@ -153,7 +153,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                   state1.response.sessions?.first.name ?? translation(context).lbl_next_session;
             }
             if (state1 is DataInitial) {
-              return Column(
+              return const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
@@ -234,13 +234,13 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                                   borderRadius: BorderRadius.circular(16),
                                   onTap: () => widget.onTap(session),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(16),
+                                    padding: const EdgeInsets.all(14),
                                     child: Row(
                                       children: [
                                         Container(
-                                          width: 44,
-                                          height: 44,
-                                          margin: const EdgeInsets.only(right: 16),
+                                          width: 40,
+                                          height: 40,
+                                          margin: const EdgeInsets.only(right: 12),
                                           decoration: BoxDecoration(
                                             color: Colors.blue[600],
                                             borderRadius: BorderRadius.circular(12),
@@ -257,7 +257,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                                             child: Icon(
                                               Icons.chat_bubble_outline_rounded,
                                               color: Colors.white,
-                                              size: 20,
+                                              size: 18,
                                             ),
                                           ),
                                         ),
@@ -269,7 +269,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                                                 session.name ?? "",
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w600,
                                                   fontFamily: 'Poppins',
                                                   color: appStore.isDarkMode
@@ -291,7 +291,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                                                         .format(DateTime.parse(
                                                             session.createdAt!)),
                                                     style: TextStyle(
-                                                      fontSize: 13,
+                                                      fontSize: 12,
                                                       fontFamily: 'Poppins',
                                                       fontWeight: FontWeight.w400,
                                                       color: Colors.grey[600],
@@ -348,7 +348,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue[600],
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          padding: const EdgeInsets.symmetric(vertical: 14.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
@@ -357,12 +357,12 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.add_circle_outline_rounded, size: 20),
-                            const SizedBox(width: 10),
+                            const Icon(Icons.add_circle_outline_rounded, size: 18),
+                            const SizedBox(width: 8),
                             Text(
                               translation(context).lbl_new_chat,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 fontFamily: 'Poppins',
                               ),

@@ -165,7 +165,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   Text(
                                     "Create Account",
                                     style: TextStyle(
-                                      fontSize: 28,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.w700,
                                       color: theme.colorScheme.primary,
                                       letterSpacing: 0.3,
@@ -176,7 +176,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     "Join our community and start your journey",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey.shade600,
                                       letterSpacing: 0.2,
@@ -316,7 +316,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                       Text(
                                                         translation(context).lbl_enter_first_name,
                                                         style: TextStyle(
-                                                          fontSize: 15,
+                                                          fontSize: 14,
                                                           fontWeight: FontWeight.w600,
                                                           color: Colors.grey.shade800,
                                                         ),
@@ -334,7 +334,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                       Text(
                                                         translation(context).lbl_enter_last_name,
                                                         style: TextStyle(
-                                                          fontSize: 15,
+                                                          fontSize: 14,
                                                           fontWeight: FontWeight.w600,
                                                           color: Colors.grey.shade800,
                                                         ),
@@ -350,7 +350,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             if (widget.isSocialLogin == false) 
                                               Text(translation(context).lbl_enter_email,
                                                 style: TextStyle(
-                                                  fontSize: 15,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.grey.shade800,
                                                 ),
@@ -373,7 +373,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                               Text(
                                                                 translation(context).lbl_create_password,
                                                                 style: TextStyle(
-                                                                  fontSize: 15,
+                                                                  fontSize: 14,
                                                                   fontWeight: FontWeight.w600,
                                                                   color: Colors.grey.shade800,
                                                                 ),
@@ -382,6 +382,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                               CustomTextFormField(
                                                                 fillColor: Colors.grey.shade50,
                                                                 filled: true,
+                                                                autofocus: false,
                                                                 focusNode: focusNode4,
                                                                 controller: passwordController,
                                                                 hintText: translation(context).lbl_create_password,
@@ -437,7 +438,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                               Text(
                                                                 'Confirm Password:',
                                                                 style: TextStyle(
-                                                                  fontSize: 15,
+                                                                  fontSize: 14,
                                                                   fontWeight: FontWeight.w600,
                                                                   color: Colors.grey.shade800,
                                                                 ),
@@ -446,6 +447,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                               CustomTextFormField(
                                                                 fillColor: Colors.grey.shade50,
                                                                 filled: true,
+                                                                autofocus: false,
                                                                 focusNode: focusNode5,
                                                                 controller: confirmPasswordController,
                                                                 hintText: translation(context).msg_confirm_password,
@@ -505,7 +507,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         Text(
                                                           translation(context).lbl_create_password,
                                                           style: TextStyle(
-                                                            fontSize: 15,
+                                                            fontSize: 14,
                                                             fontWeight: FontWeight.w600,
                                                             color: Colors.grey.shade800,
                                                           ),
@@ -514,6 +516,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         CustomTextFormField(
                                                           fillColor: Colors.grey.shade50,
                                                           filled: true,
+                                                          autofocus: false,
                                                           focusNode: focusNode4,
                                                           controller: passwordController,
                                                           hintText: translation(context).lbl_create_password,
@@ -562,7 +565,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         Text(
                                                           'Confirm Password:',
                                                           style: TextStyle(
-                                                            fontSize: 15,
+                                                            fontSize: 14,
                                                             fontWeight: FontWeight.w600,
                                                             color: Colors.grey.shade800,
                                                           ),
@@ -571,6 +574,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         CustomTextFormField(
                                                           fillColor: Colors.grey.shade50,
                                                           filled: true,
+                                                          autofocus: false,
                                                           focusNode: focusNode5,
                                                           controller: confirmPasswordController,
                                                           hintText: translation(context).msg_confirm_password,
@@ -809,6 +813,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return CustomTextFormField(
       fillColor: Colors.grey.shade50,
       filled: true,
+      autofocus: false,
       focusNode: focusNode1,
       controller: firstnameController,
       hintText: translation(context).lbl_enter_your_name1,
@@ -841,6 +846,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return CustomTextFormField(
       fillColor: Colors.grey.shade50,
       filled: true,
+      autofocus: false,
       focusNode: focusNode2,
       controller: lastNameController,
       hintText: translation(context).lbl_enter_your_name2,
@@ -873,6 +879,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return CustomTextFormField(
         fillColor: CupertinoColors.systemGrey5.withOpacity(0.4),
         filled: true,
+        autofocus: false,
         focusNode: focusNode6,
         textInputType: TextInputType.phone,
         controller: phoneController,
@@ -900,6 +907,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return CustomTextFormField(
       fillColor: Colors.grey.shade50,
       filled: true,
+      autofocus: false,
       focusNode: focusNode3,
       controller: emailController,
       hintText: translation(context).msg_enter_your_email2,

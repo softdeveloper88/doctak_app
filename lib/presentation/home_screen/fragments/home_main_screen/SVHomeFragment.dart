@@ -127,109 +127,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
         // resizeToAvoidBottomInset: false,
         key: scaffoldKey,
         backgroundColor: svGetBgColor(),
-        appBar: AppBar(
-          backgroundColor: svGetScaffoldColor(),
-          elevation: 0,
-          leading: IconButton(
-              icon: Image.asset(
-                'images/socialv/icons/ic_More.png',
-                width: 18,
-                height: 18,
-                fit: BoxFit.cover,
-                color: context.iconColor,
-              ),
-              onPressed: () {
-                widget.openDrawer();
-                FocusManager.instance.primaryFocus?.unfocus();
-              }),
-          title: Text(translation(context).lbl_home,
-              style: boldTextStyle(
-                size: 18,
-                fontFamily: 'Poppins',
-              )),
-          actions: [
-            IconButton(
-              onPressed: () {
-                FocusManager.instance.primaryFocus?.unfocus();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => NotificationScreen(notificationBloc),
-                  ),
-                );
-              },
-              icon: Stack(
-                children: [
-                  IconButton(
-                    color: context.cardColor,
-                    icon: Icon(
-                      CupertinoIcons.bell,
-                      size: 28,
-                      color: context.iconColor,
-                    ),
-                    onPressed: () async {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      NotificationScreen(notificationBloc).launch(context);
-                    },
-                  ),
-                  Positioned(
-                      right: 4,
-                      top: 0,
-                      child: BlocBuilder<NotificationBloc, NotificationState>(
-                          bloc: notificationBloc,
-                          builder: (context, state) {
-                            int unreadCount = 0;
-
-                            if (state is PaginationLoadedState) {
-                              // unreadCount = state.unreadCount;
-                              return notificationBloc.totalNotifications > 0
-                                  ? Container(
-                                      height: 20,
-                                      width: 20,
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        border: Border.all(
-                                          color: Colors.red,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          '${notificationBloc.totalNotifications ?? ''}',
-                                          style: const TextStyle(
-                                            fontFamily: 'Poppins',
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : const SizedBox();
-                            } else {
-                              return const SizedBox();
-                            }
-                          })),
-                ],
-              ),
-            ),
-            IconButton(
-              color: context.cardColor,
-              icon: SvgPicture.asset(
-                height: 25,
-                width:25,
-                icChat,
-                // CupertinoIcons.chat_bubble_2,
-                // size: 30,
-                color: context.iconColor,
-              ),
-              onPressed: () async {
-                FocusManager.instance.primaryFocus?.unfocus();
-                UserChatScreen().launch(context);
-              },
-            ),
-            const SizedBox(height: 16,)
-          ],
-        ),
+        appBar: _buildModernAppBar(context),
         body: GestureDetector(
           onTap: () {
             FocusManager.instance.primaryFocus?.unfocus();
@@ -252,5 +150,260 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 ]),
           ),
         ));
+  }
+
+  PreferredSizeWidget _buildModernAppBar(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(70),
+      child: Container(
+        decoration: BoxDecoration(
+          color: svGetScaffoldColor(),
+          boxShadow: [
+            BoxShadow(
+              color: isDark 
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: isDark 
+                  ? Colors.black.withOpacity(0.2)
+                  : Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              spreadRadius: -2,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          // Subtle gradient overlay for premium feel
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDark
+                ? [
+                    svGetScaffoldColor(),
+                    svGetScaffoldColor().withOpacity(0.95),
+                  ]
+                : [
+                    svGetScaffoldColor(),
+                    svGetScaffoldColor().withOpacity(0.98),
+                  ],
+          ),
+        ),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          toolbarHeight: 70,
+          leading: Container(
+            margin: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
+            child: _buildModernIconButton(
+              child: Image.asset(
+                'images/socialv/icons/ic_More.png',
+                width: 16,
+                height: 16,
+                fit: BoxFit.cover,
+                color: context.iconColor,
+              ),
+              onPressed: () {
+                widget.openDrawer();
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+            ),
+          ),
+          title: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              translation(context).lbl_home,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Poppins',
+                color: context.iconColor,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          actions: [
+            _buildNotificationButton(context),
+            const SizedBox(width: 8),
+            _buildModernIconButton(
+              child: SvgPicture.asset(
+                height: 24,
+                width: 24,
+                icChat,
+                color: context.iconColor,
+              ),
+              onPressed: () async {
+                FocusManager.instance.primaryFocus?.unfocus();
+                UserChatScreen().launch(context);
+              },
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernIconButton({
+    required Widget child,
+    required VoidCallback onPressed,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4,vertical: 8),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isDark 
+                  ? Colors.white.withOpacity(0.08)
+                  : Colors.black.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark 
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.06),
+                width: 0.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark 
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(child: child),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationButton(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => NotificationScreen(notificationBloc),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: isDark 
+                  ? Colors.white.withOpacity(0.08)
+                  : Colors.black.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark 
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.06),
+                width: 0.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark 
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  CupertinoIcons.bell,
+                  size: 24,
+                  color: context.iconColor,
+                ),
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: BlocBuilder<NotificationBloc, NotificationState>(
+                    bloc: notificationBloc,
+                    builder: (context, state) {
+                      if (state is PaginationLoadedState) {
+                        return notificationBloc.totalNotifications > 0
+                            ? Container(
+                                height: 18,
+                                width: 18,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.red[400]!,
+                                      Colors.red[600]!,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: svGetScaffoldColor(),
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.red.withOpacity(0.3),
+                                      blurRadius: 6,
+                                      spreadRadius: 0,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${notificationBloc.totalNotifications > 99 ? '99+' : notificationBloc.totalNotifications}',
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox();
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

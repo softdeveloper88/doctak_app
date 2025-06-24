@@ -55,12 +55,12 @@ class ReplyCommentComponent extends StatelessWidget {
                             Text(replyCommentList.commenter?.name??'',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16),
+                                fontSize: 14),
                             ),
                             const Text(
                               ' · ',
                               style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   color: Colors.grey,
                                   fontWeight: FontWeight.bold
                               ),

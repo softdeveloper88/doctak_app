@@ -6,6 +6,7 @@ import 'package:doctak_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown_widget/markdown_widget.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../core/utils/app/AppData.dart';
 import '../../../widgets/custom_image_view.dart';
@@ -126,6 +127,18 @@ class ChatBubble extends StatelessWidget {
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           padding: const EdgeInsets.all(12),
+                                          textStyle: TextStyle(
+                                            fontSize: 12.sp, // Responsive font size
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                        PConfig(
+                                          textStyle: TextStyle(
+                                            fontSize: 11.sp, // Responsive font size
+                                            fontFamily: 'Poppins',
+                                            height: 1.5,
+                                            color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                                          ),
                                         ),
                                       ],
                                     )),
@@ -149,6 +162,45 @@ class ChatBubble extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     padding: const EdgeInsets.all(12),
+                                    textStyle: TextStyle(
+                                      fontSize: 12.sp, // Responsive font size
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                  PConfig(
+                                    textStyle: TextStyle(
+                                      fontSize: 11.sp, // Responsive font size
+                                      fontFamily: 'Poppins',
+                                      height: 1.5,
+                                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  H1Config(
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                  H2Config(
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                  H3Config(
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                  CodeConfig(
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      fontFamily: 'monospace',
+                                    ),
                                   ),
                                 ],
                               ),
@@ -301,10 +353,10 @@ class ChatBubble extends StatelessWidget {
                                         return const SizedBox();
                                       },),
                                 Text(text,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Poppins',
-                                        fontSize: 14,
+                                        fontSize: 11.sp, // Responsive font size
                                         fontWeight: FontWeight.w500)),
                               ],
                             )),

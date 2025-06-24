@@ -105,7 +105,7 @@ class VerifyEmailCard extends StatelessWidget {
               Text(
                 translation(context).msg_verify_email_continue,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
                 ),
@@ -127,7 +127,7 @@ class VerifyEmailCard extends StatelessWidget {
                 child: Text(
                   translation(context).lbl_verify_email,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.white
                   ),

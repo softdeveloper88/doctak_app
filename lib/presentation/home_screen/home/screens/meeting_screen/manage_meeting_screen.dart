@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +67,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
     meetingBloc.add(FetchMeetings());
     // Initialize date field with tomorrow's date
     _dateController.text =
@@ -161,226 +165,226 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.background,
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: AppColors.primary,
-          secondary: AppColors.accent,
-        ),
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          backgroundColor: AppColors.primary,
-          titleTextStyle: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-          iconTheme: IconThemeData(color: Colors.white),
-        ),
-        tabBarTheme: const TabBarThemeData(
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicator: BoxDecoration(
-            color: AppColors.primaryDark,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-            ),
-          ),
-        ),
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          color: AppColors.cardBackground,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            elevation: 2,
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            side: const BorderSide(color: AppColors.primary),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: AppColors.formFieldBackground,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.formFieldBorder),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.formFieldBorder),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          labelStyle: const TextStyle(color: AppColors.textSecondary),
-          hintStyle: const TextStyle(color: AppColors.textSecondary),
-        ),
-        textTheme: const TextTheme(
-          titleLarge: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-          titleMedium: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-          titleSmall: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-          bodyLarge: TextStyle(
-            fontSize: 16,
-            color: AppColors.textPrimary,
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            color: AppColors.textPrimary,
-          ),
-          bodySmall: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        dividerTheme: const DividerThemeData(
-          color: AppColors.divider,
-          thickness: 1,
-          space: 24,
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          toolbarHeight: 70,
-          surfaceTintColor: Colors.white,
-          centerTitle: true,
-          leading: IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
+    return Scaffold(
+      backgroundColor: svGetBgColor(),
+        body: Column(
+          children: [
+            // Modern App Bar
+            AppBar(
+              backgroundColor: Colors.white,
+              iconTheme: IconThemeData(color: context.iconColor),
+              elevation: 0,
+              toolbarHeight: 70,
+              surfaceTintColor: Colors.white,
+              centerTitle: true,
+              leading: IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.blue[600],
+                    size: 16,
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
               ),
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.blue[600],
-                size: 16,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.video_call_outlined,
+                    color: Colors.blue[600],
+                    size: 24,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    translation(context).lbl_meeting_management,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: Colors.blue[800],
+                    ),
+                  ),
+                ],
               ),
             ),
-            onPressed: () {
-              Navigator.pop(context);
-            }
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.video_call_outlined,
-                color: Colors.blue[600],
-                size: 24,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                translation(context).lbl_meeting_management,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                  color: Colors.blue[800],
+            
+            // Compact Tab Container matching drugs_list_screen style
+            Container(
+              color: Colors.white,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          _tabController.animateTo(0);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _tabController.index == 0 
+                              ? Colors.blue
+                              : Colors.transparent,
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (_tabController.index == 0)
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    margin: const EdgeInsets.only(right: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.videocam_outlined,
+                                      size: 12,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                Text(
+                                  translation(context).lbl_join_create,
+                                  style: TextStyle(
+                                    color: _tabController.index == 0 
+                                      ? Colors.white
+                                      : Colors.black87,
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          _tabController.animateTo(1);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _tabController.index == 1 
+                              ? Colors.blue
+                              : Colors.transparent,
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (_tabController.index == 1)
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    margin: const EdgeInsets.only(right: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.calendar_today_outlined,
+                                      size: 12,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                Text(
+                                  translation(context).lbl_scheduled,
+                                  style: TextStyle(
+                                    color: _tabController.index == 1 
+                                      ? Colors.white
+                                      : Colors.black87,
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          _tabController.animateTo(2);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _tabController.index == 2 
+                              ? Colors.blue
+                              : Colors.transparent,
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (_tabController.index == 2)
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    margin: const EdgeInsets.only(right: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.history_outlined,
+                                      size: 12,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                Text(
+                                  translation(context).lbl_history,
+                                  style: TextStyle(
+                                    color: _tabController.index == 2 
+                                      ? Colors.white
+                                      : Colors.black87,
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          actions: const [
-            SizedBox(width: 48), // Balance the title centering
-          ],
-          bottom: TabBar(
-            controller: _tabController,
-            // labelColor: Colors.blue[700],
-            unselectedLabelColor: Colors.grey[600],
-            indicatorColor: Colors.blue[600],
-            indicatorWeight: 3,
-            labelStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-              fontSize: 12,
             ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Poppins',
-              fontSize: 12,
+            
+            // Tab Content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildJoinCreateTab(),
+                  const UpcomingMeetingScreen(),
+                  _buildHistoryTab(),
+                ],
+              ),
             ),
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.videocam_outlined),
-                text: translation(context).lbl_join_create,
-              ),
-              Tab(
-                icon: const Icon(Icons.calendar_today_outlined),
-                text: translation(context).lbl_scheduled,
-              ),
-              Tab(
-                icon: const Icon(Icons.history_outlined),
-                text: translation(context).lbl_history,
-              ),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildJoinCreateTab(),
-            const UpcomingMeetingScreen(),
-            _buildHistoryTab(),
           ],
         ),
-      ),
     );
   }
 
@@ -396,7 +400,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             elevation: 3,
             shadowColor: AppColors.primary.withOpacity(0.3),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               child: AnimatedCrossFade(
                 duration: const Duration(milliseconds: 300),
                 crossFadeState: _showNewMeeting
@@ -404,22 +408,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                     : CrossFadeState.showFirst,
                 firstChild: _buildJoinMeetingView(),
                 secondChild: _buildCreateMeetingView(),
-                layoutBuilder:
-                    (topChild, topChildKey, bottomChild, bottomChildKey) {
-                  return Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Positioned(
-                        key: bottomChildKey,
-                        child: bottomChild,
-                      ),
-                      Positioned(
-                        key: topChildKey,
-                        child: topChild,
-                      ),
-                    ],
-                  );
-                },
+                sizeCurve: Curves.easeInOut,
+                firstCurve: Curves.easeInOut,
+                secondCurve: Curves.easeInOut,
               ),
             ),
           ),
@@ -467,13 +458,20 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   showToast(error.toString());
                 }
               },
-              icon: const Icon(Icons.videocam, size: 24),
+              icon: const Icon(Icons.videocam, size: 20,color: Colors.white,),
               label: Text(
                 translation(context).lbl_create_instant_meeting,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold, 
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 shadowColor: Colors.transparent,
@@ -481,7 +479,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             ),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
 
           // Features heading
           Row(
@@ -498,7 +496,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               Text(
                 translation(context).lbl_key_features,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
@@ -506,7 +504,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // Feature cards
           GridView.count(
@@ -515,6 +513,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
+            childAspectRatio: 1.1,
             children: [
               _buildFeatureCard(
                 icon: Icons.hd,
@@ -557,35 +556,55 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             const Icon(
               Icons.login_rounded,
               color: AppColors.primary,
-              size: 24,
+              size: 20,
             ),
-            const SizedBox(width: 12),
-            Text(
-              translation(context).lbl_join_meeting,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                translation(context).lbl_join_meeting,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Spacer(),
-            TextButton.icon(
+            const SizedBox(width: 8),
+            TextButton(
               onPressed: () {
                 setState(() {
                   _showNewMeeting = true;
                 });
               },
-              icon: const Icon(Icons.add_circle_outline, size: 16),
-              label: Text(translation(context).lbl_create_instead),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add_circle_outline, size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    translation(context).lbl_create_instead,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: AppColors.primary.withOpacity(0.05),
             borderRadius: BorderRadius.circular(8),
@@ -595,17 +614,24 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           ),
           child: Text(
             translation(context).msg_enter_meeting_code_description,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            style: const TextStyle(
+              color: AppColors.textSecondary, 
+              fontSize: 12,
+              fontFamily: 'Poppins',
+              height: 1.3,
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         _buildCustomTextField(
           controller: _meetingCodeController,
           labelText: translation(context).lbl_meeting_code,
           hintText: translation(context).hint_enter_meeting_code,
           icon: Icons.meeting_room_outlined,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         ElevatedButton.icon(
           onPressed: () {
             final code = _meetingCodeController.text.trim();
@@ -615,43 +641,67 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               toast(translation(context).msg_please_enter_meeting_code);
             }
           },
-          icon: const Icon(Icons.login_rounded),
-          label: Text(translation(context).lbl_join_meeting),
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-          ),
-        ),
-        const SizedBox(height: 16),
-         Row(
-          children: [
-            const Expanded(child: Divider()),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                translation(context).lbl_or,
-                style: const TextStyle(color: AppColors.textSecondary),
-              ),
+          icon: const Icon(Icons.login_rounded, size: 18),
+          label: Text(
+            translation(context).lbl_join_meeting,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
             ),
-            const Expanded(child: Divider()),
-          ],
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: () {
-            // Open camera to scan QR code
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(translation(context).msg_qr_code_scan_implementation),
-                backgroundColor: AppColors.primary,
-              ),
-            );
-          },
-          icon: const Icon(Icons.qr_code_scanner),
-          label: Text(translation(context).lbl_scan_qr_code),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 44),
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
           ),
         ),
+        // const SizedBox(height: 12),
+        //  Row(
+        //   children: [
+        //     const Expanded(child: Divider()),
+        //     Padding(
+        //       padding: const EdgeInsets.symmetric(horizontal: 12),
+        //       child: Text(
+        //         translation(context).lbl_or,
+        //         style: const TextStyle(
+        //           color: AppColors.textSecondary,
+        //           fontSize: 12,
+        //           fontFamily: 'Poppins',
+        //         ),
+        //       ),
+        //     ),
+        //     const Expanded(child: Divider()),
+        //   ],
+        // ),
+        const SizedBox(height: 12),
+        // OutlinedButton.icon(
+        //   onPressed: () {
+        //     // Open camera to scan QR code
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       SnackBar(
+        //         content: Text(translation(context).msg_qr_code_scan_implementation),
+        //         backgroundColor: AppColors.primary,
+        //       ),
+        //     );
+        //   },
+        //   icon: const Icon(Icons.qr_code_scanner, size: 18),
+        //   label: Text(
+        //     translation(context).lbl_scan_qr_code,
+        //     style: const TextStyle(
+        //       fontFamily: 'Poppins',
+        //       fontSize: 14,
+        //     ),
+        //     maxLines: 1,
+        //     overflow: TextOverflow.ellipsis,
+        //   ),
+        //   style: OutlinedButton.styleFrom(
+        //     minimumSize: const Size(double.infinity, 44),
+        //     foregroundColor: AppColors.primary,
+        //     side: BorderSide(color: AppColors.primary),
+        //   ),
+        // ),
       ],
     );
   }
@@ -665,28 +715,48 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             const Icon(
               Icons.add_circle_outlined,
               color: AppColors.primary,
-              size: 24,
+              size: 20,
             ),
-            const SizedBox(width: 12),
-            Text(
-              translation(context).lbl_create_meeting,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                translation(context).lbl_create_meeting,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Spacer(),
-            TextButton.icon(
+            const SizedBox(width: 8),
+            TextButton(
               onPressed: () {
                 setState(() {
                   _showNewMeeting = false;
                 });
               },
-              icon: const Icon(Icons.login_rounded, size: 16),
-              label: Text(translation(context).lbl_join_instead),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.login_rounded, size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    translation(context).lbl_join_instead,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -706,7 +776,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         AnimatedCrossFade(
           duration: const Duration(milliseconds: 300),
           crossFadeState: _isScheduling
@@ -964,37 +1034,45 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 36, color: color),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-              textAlign: TextAlign.center,
+              child: Icon(icon, size: 28, color: color),
             ),
             const SizedBox(height: 8),
             Text(
-              description,
+              title,
               style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-                height: 1.4,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                fontFamily: 'Poppins',
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Expanded(
+              child: Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                  height: 1.2,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

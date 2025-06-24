@@ -88,15 +88,15 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             offset: const Offset(0, 2),
-            blurRadius: 8,
+            blurRadius: 6,
             spreadRadius: 0,
           ),
         ],
@@ -104,19 +104,19 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Selected Media Preview
+          // Selected Media Preview - More compact
           BlocBuilder<AddPostBloc, AddPostState>(
             bloc: widget.searchPeopleBloc,
             builder: (context, state) {
               if (state is PaginationLoadedState &&
                   widget.searchPeopleBloc.imagefiles.isNotEmpty) {
                 return Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.grey.withOpacity(0.05),
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
                   ),
                   child: SingleChildScrollView(
@@ -124,27 +124,27 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                     child: Row(
                       children: widget.searchPeopleBloc.imagefiles.map((imageone) {
                         return Container(
-                          margin: const EdgeInsets.only(right: 8),
+                          margin: const EdgeInsets.only(right: 6),
                           child: Stack(
                             children: [
                               Container(
-                                width: 80,
-                                height: 80,
+                                width: 60,
+                                height: 60,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: Colors.grey.withOpacity(0.2),
                                     width: 1,
                                   ),
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8),
                                   child: buildMediaItem(File(imageone.path)),
                                 ),
                               ),
                               Positioned(
-                                top: 4,
-                                right: 4,
+                                top: 2,
+                                right: 2,
                                 child: GestureDetector(
                                   onTap: () {
                                     setState(() {});
@@ -157,21 +157,21 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                                     );
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.all(2),
+                                    padding: const EdgeInsets.all(1),
                                     decoration: BoxDecoration(
                                       color: Colors.red,
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.2),
-                                          blurRadius: 4,
+                                          blurRadius: 3,
                                         ),
                                       ],
                                     ),
                                     child: const Icon(
                                       Icons.close,
                                       color: Colors.white,
-                                      size: 16,
+                                      size: 12,
                                     ),
                                   ),
                                 ),
@@ -187,33 +187,33 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
               return const SizedBox();
             },
           ),
-          // Media Options
+          // Media Options - More compact
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               children: [
                 // Gallery Option
                 InkWell(
                   onTap: () => openImages(),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
                             color: Colors.blue.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.photo_library_outlined,
-                            size: 24,
+                            size: 18,
                             color: Colors.blue[700],
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,17 +221,16 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                               Text(
                                 translation(context).lbl_from_gallery,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'Poppins',
                                   color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 2),
                               Text(
                                 'Choose photos or videos',
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 11,
                                   color: Colors.grey[600],
                                   fontFamily: 'Poppins',
                                 ),
@@ -242,39 +241,41 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                         Icon(
                           Icons.chevron_right_rounded,
                           color: Colors.grey[400],
+                          size: 20,
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Divider(
                   color: Colors.grey.withOpacity(0.2),
-                  indent: 60,
+                  indent: 48,
+                  height: 1,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 // Video Option
                 InkWell(
                   onTap: () => openVideo(),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
                             color: Colors.purple.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.videocam_outlined,
-                            size: 24,
+                            size: 18,
                             color: Colors.purple[700],
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,17 +283,16 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                               Text(
                                 translation(context).lbl_take_video,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'Poppins',
                                   color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 2),
                               Text(
                                 'Record a new video',
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 11,
                                   color: Colors.grey[600],
                                   fontFamily: 'Poppins',
                                 ),
@@ -303,39 +303,41 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                         Icon(
                           Icons.chevron_right_rounded,
                           color: Colors.grey[400],
+                          size: 20,
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Divider(
                   color: Colors.grey.withOpacity(0.2),
-                  indent: 60,
+                  indent: 48,
+                  height: 1,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 // Camera Option
                 InkWell(
                   onTap: () => openCamera(),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
                             color: Colors.green.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.camera_alt_outlined,
-                            size: 24,
+                            size: 18,
                             color: Colors.green[700],
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,17 +345,16 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                               Text(
                                 translation(context).lbl_take_picture,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'Poppins',
                                   color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 2),
                               Text(
                                 'Capture a new photo',
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 11,
                                   color: Colors.grey[600],
                                   fontFamily: 'Poppins',
                                 ),
@@ -364,6 +365,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                         Icon(
                           Icons.chevron_right_rounded,
                           color: Colors.grey[400],
+                          size: 20,
                         ),
                       ],
                     ),

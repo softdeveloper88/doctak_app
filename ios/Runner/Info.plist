@@ -108,6 +108,11 @@
 	<string>Location access may be used to enhance meeting security and provide location-based medical services when permitted.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Contacts access allows you to easily invite medical colleagues to meetings and discussions from your address book.</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>INSendMessageIntent</string>
+		<string>INStartCallIntent</string>
+	</array>
 	<key>GADApplicationIdentifier</key>
     <string>ca-app-pub-9354893692913823~4368543936</string>
 	<key>SKAdNetworkItems</key>

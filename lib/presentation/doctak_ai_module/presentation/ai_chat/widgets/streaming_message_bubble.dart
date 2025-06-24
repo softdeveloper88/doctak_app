@@ -92,9 +92,7 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
   
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -103,13 +101,21 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
         children: [
           // Avatar
           if (widget.showAvatar)
-            CircleAvatar(
-              backgroundColor: colorScheme.primaryContainer,
-              radius: 18,
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.blue.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
               child: Icon(
-                Icons.medical_services_rounded,
+                Icons.psychology_rounded,
                 size: 18,
-                color: colorScheme.primary,
+                color: Colors.blue[600],
               ),
             )
           else
@@ -126,8 +132,20 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant,
+                    color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.blue.withOpacity(0.1),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.05),
+                        offset: const Offset(0, 2),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,43 +154,63 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                       MarkdownBody(
                         data: _displayContent,
                         styleSheet: MarkdownStyleSheet(
-                          p: theme.textTheme.bodyMedium!.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                          p: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: Colors.black87,
                             height: 1.5,
                           ),
-                          h1: theme.textTheme.headlineSmall!.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                          h1: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
-                          h2: theme.textTheme.titleLarge!.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                          h2: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
-                          h3: theme.textTheme.titleMedium!.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                          h3: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
-                          blockquote: theme.textTheme.bodyMedium!.copyWith(
-                            color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                          blockquote: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: Colors.black54,
                             fontStyle: FontStyle.italic,
                           ),
-                          code: TextStyle(
+                          code: const TextStyle(
                             fontFamily: 'monospace',
-                            color: isDarkMode ? Colors.lightGreenAccent[100] : Colors.teal[700],
-                            backgroundColor: isDarkMode
-                                ? Colors.grey[850]
-                                : Colors.grey[200],
-                            fontSize: 14,
+                            color: Colors.teal,
+                            backgroundColor: Colors.grey,
+                            fontSize: 13,
                           ),
                           codeblockDecoration: BoxDecoration(
-                            color: isDarkMode ? Colors.grey[850] : Colors.grey[200],
+                            color: Colors.grey,
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.blue,
+                              width: 1,
+                            ),
                           ),
-                          listBullet: theme.textTheme.bodyMedium!.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                          listBullet: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: Colors.black87,
                           ),
-                          strong: const TextStyle(fontWeight: FontWeight.bold),
-                          em: const TextStyle(fontStyle: FontStyle.italic),
+                          strong: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                          em: const TextStyle(
+                            fontStyle: FontStyle.italic,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                         onTapLink: (text, href, title) {
                           if (href != null) {
@@ -202,42 +240,54 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                         // Copy button
                         Material(
                           color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              Clipboard.setData(ClipboardData(text: widget.partialContent));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Message copied to clipboard'),
-                                  duration: Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                              if (widget.onCopyPressed != null) widget.onCopyPressed!();
-                            },
-                            borderRadius: BorderRadius.circular(4),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.copy,
-                                    size: 14,
-                                    color: isDarkMode
-                                        ? Colors.white70
-                                        : Colors.black54,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Copy',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isDarkMode
-                                          ? Colors.white70
-                                          : Colors.black54,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.blue.withOpacity(0.1),
+                                width: 1,
+                              ),
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: widget.partialContent));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text(
+                                      'Message copied to clipboard',
+                                      style: TextStyle(fontFamily: 'Poppins'),
                                     ),
+                                    duration: const Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor: Colors.blue[600],
                                   ),
-                                ],
+                                );
+                                if (widget.onCopyPressed != null) widget.onCopyPressed!();
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.copy,
+                                      size: 16,
+                                      color: Colors.blue[600],
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Copy',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.blue[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -265,7 +315,7 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
             width: 8,
             height: 16,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: Colors.blue[600],
               borderRadius: BorderRadius.circular(2),
             ),
           ),

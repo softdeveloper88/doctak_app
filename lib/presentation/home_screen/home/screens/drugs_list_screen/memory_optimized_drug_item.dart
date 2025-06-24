@@ -99,6 +99,8 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -108,9 +110,13 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                     fontSize: 14,
                     fontFamily: 'Poppins',
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -126,9 +132,9 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -143,6 +149,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -196,6 +203,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                       Text(
                         widget.drug.manufacturerName ?? '',
                         overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                         style: TextStyle(
                           color: Colors.black87,
                           fontSize: 14,

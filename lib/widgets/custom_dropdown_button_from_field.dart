@@ -33,7 +33,7 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
   final bool isTextBold;
   final EdgeInsets? contentPadding;
 
-  final Function(T?) onChanged;
+  final void Function(T?) onChanged;
   final Widget Function(T) itemBuilder;
   final List<Widget> Function(BuildContext)? selectedItemBuilder;
 

@@ -76,7 +76,7 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
         // Show shimmer loader at the bottom if loading more
         if (bloc.numberOfPage != bloc.pageNumber - 1 &&
             index >= bloc.drugsData.length - 1) {
-          return SizedBox(
+          return const SizedBox(
             height: 400,
             child: DrugsShimmerLoader()
           );

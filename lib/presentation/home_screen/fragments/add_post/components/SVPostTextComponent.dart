@@ -61,15 +61,15 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             offset: const Offset(0, 2),
-            blurRadius: 8,
+            blurRadius: 6,
             spreadRadius: 0,
           ),
         ],
@@ -79,16 +79,17 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
         children: [
           // Modern Text Input Field
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: TextFormField(
               controller: textEditingController,
               focusNode: editorFocusNode,
-              minLines: 5,
-              maxLines: 10,
+              minLines: 4,
+              maxLines: 8,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontFamily: 'Poppins',
                 color: Colors.black87,
+                height: 1.4,
               ),
               onChanged: (value) {
                 print(value);
@@ -98,7 +99,7 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
                 border: InputBorder.none,
                 hintText: translation(context).lbl_whats_on_your_mind,
                 hintStyle: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontFamily: 'Poppins',
                   color: Colors.grey[400],
                 ),
@@ -171,14 +172,14 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
           //   //   scrollController: ScrollController(),
           //   // )
           // ),
-          // Color Selector Section
+          // Color Selector Section - More compact
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.grey.withOpacity(0.05),
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
               ),
             ),
             child: Row(
@@ -186,40 +187,33 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
               children: [
                 // Color Preview
                 Container(
-                  height: 32,
-                  width: 32,
+                  height: 24,
+                  width: 24,
                   decoration: BoxDecoration(
                     color: widget.colorValue,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: Colors.grey.withOpacity(0.3),
-                      width: 2,
+                      width: 1.5,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: widget.colorValue!.withOpacity(0.3),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 // Color Picker Button
                 InkWell(
                   onTap: widget.onColorChange!(),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: Colors.blue.withOpacity(0.3),
-                        width: 1.5,
+                        width: 1,
                       ),
                     ),
                     child: Row(
@@ -228,14 +222,14 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
                         Icon(
                           Icons.palette_outlined,
                           color: Colors.blue[700],
-                          size: 20,
+                          size: 16,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Text(
                           'Background',
                           style: TextStyle(
                             color: Colors.blue[700],
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                             fontFamily: 'Poppins',
                           ),

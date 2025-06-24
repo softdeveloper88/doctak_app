@@ -1,12 +1,18 @@
 import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/presentation/doctak_ai_module/presentation/user_message_bubble.dart';
+import 'package:doctak_app/presentation/doctak_ai_module/presentation/ai_chat/widgets/user_message_bubble.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
+import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nb_utils/nb_utils.dart';
+import 'package:sizer/sizer.dart';
 import '../../../theme/theme_helper.dart';
+import '../../../main.dart';
 import '../blocs/ai_chat/ai_chat_bloc.dart';
 import '../data/api/streaming_message_service.dart'; 
 import '../data/models/ai_chat_model/ai_chat_message_model.dart';
@@ -15,8 +21,8 @@ import 'ai_chat/widgets/ai_message_bubble.dart';
 import 'ai_chat/widgets/session_settings_bottom_sheet.dart';
 import 'ai_chat/widgets/streaming_message_bubble.dart';
 import 'ai_chat/widgets/virtualized_message_list.dart';
-import 'ai_typing_indicator.dart';
-import 'message_input.dart';
+import 'ai_chat/widgets/ai_typing_indicator.dart';
+import 'ai_chat/widgets/message_input.dart';
 
 class AiChatScreen extends StatefulWidget {
   final String? initialSessionId;
@@ -301,200 +307,218 @@ class _AiChatScreenState extends State<AiChatScreen> {
     );
   }
 
-  // Modern welcome screen with medical-specific feature cards
+  // Enhanced welcome screen with 4 essential medical prompt cards
   Widget _buildWelcomeScreen() {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = appStore.isDarkMode;
     final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.width < 360;
-    final isMediumScreen = screenSize.width >= 360 && screenSize.width < 600;
-    final isLargeScreen = screenSize.width >= 600;
+    final isSmallScreen = screenSize.width < 400;
+    final isVerySmallScreen = screenSize.height < 700;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        
-        // Animated header section with icon - more compact design
-        Container(
-          margin: EdgeInsets.only(top: isSmallScreen ? 6 : 10),
-          padding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: isSmallScreen ? 10 : 12,
-          ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colorScheme.primaryContainer.withOpacity(0.3),
-                colorScheme.primaryContainer.withOpacity(0.1),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              // Icon
-              Icon(
-                Icons.psychology_rounded,
-                size: isSmallScreen ? 40 : 48,
-                color: colorScheme.primary,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.blue[50]!.withOpacity(0.3),
+            Colors.white.withOpacity(0.1),
+          ],
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Compact Hero Header Section
+            Container(
+              margin: EdgeInsets.fromLTRB(
+                24, 
+                isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 24), 
+                24, 
+                isVerySmallScreen ? 12 : 20
               ),
-              
-              SizedBox(height: isSmallScreen ? 10 : 12),
-              
-              // Main title with better typography
-              Text(
-                'DocTak AI Assistant',
-                style: textTheme.titleLarge?.copyWith(
-                  fontSize: isSmallScreen ? 20 : 24,
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.primary,
-                  letterSpacing: -0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              SizedBox(height: isSmallScreen ? 6 : 8),
-              
-              // Subtitle with better readability
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'How can I help you today?',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontSize: isSmallScreen ? 14 : 16,
-                    fontWeight: FontWeight.w400,
-                    color: colorScheme.onSurface.withOpacity(0.8),
-                    height: 1.3,
+              child: Column(
+                children: [
+                  // Compact AI Icon
+                  Container(
+                    width: isVerySmallScreen ? 60 : (isSmallScreen ? 70 : 80),
+                    height: isVerySmallScreen ? 60 : (isSmallScreen ? 70 : 80),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.blue[400]!,
+                          Colors.blue[600]!,
+                          Colors.blue[800]!,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.3),
+                          blurRadius: 15,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.psychology_alt_rounded,
+                      size: isVerySmallScreen ? 30 : (isSmallScreen ? 35 : 40),
+                      color: Colors.white,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                  
+                  SizedBox(height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20)),
+                  
+                  // Compact title
+                  ShaderMask(
+                    shaderCallback: (bounds) => LinearGradient(
+                      colors: [Colors.blue[600]!, Colors.blue[800]!],
+                    ).createShader(bounds),
+                    child: Text(
+                      'DocTak AI Assistant',
+                      style: TextStyle(
+                        fontSize: isVerySmallScreen ? 22 : (isSmallScreen ? 26 : 30),
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Poppins',
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                        height: 1.1,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  
+                  SizedBox(height: isVerySmallScreen ? 8 : (isSmallScreen ? 10 : 12)),
+                  
+                  // Compact subtitle
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Your intelligent medical companion',
+                      style: TextStyle(
+                        fontSize: isVerySmallScreen ? 14 : (isSmallScreen ? 15 : 16),
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Poppins',
+                        color: Colors.blue[700]!.withOpacity(0.8),
+                        height: 1.3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        
-        // Gap before feature cards with visual divider - more compact
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 8 : 10),
-          child: Row(
-            children: [
-              Expanded(
-                child: Divider(
-                  color: colorScheme.outlineVariant.withOpacity(0.5),
-                  thickness: 1,
-                  indent: 24,
-                  endIndent: 12,
-                ),
-              ),
-              Text(
-                'Suggestions',
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 12 : 14,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface.withOpacity(0.6),
-                ),
-              ),
-              Expanded(
-                child: Divider(
-                  color: colorScheme.outlineVariant.withOpacity(0.5),
-                  thickness: 1,
-                  indent: 12,
-                  endIndent: 24,
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Medical features in a responsive grid layout - takes most of the screen
-        Expanded(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: isSmallScreen ? 10 : (isMediumScreen ? 12 : 16), 
-              vertical: 4 // Small vertical padding for better aesthetics
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Calculate optimal card width based on screen width with better spacing
-                // Use integer division to ensure even spacing
-                final int cardsPerRow = isLargeScreen ? 3 : 2;
-                final double totalSpacing = (cardsPerRow - 1) * (isSmallScreen ? 8 : (isMediumScreen ? 10 : 14));
-                final double cardWidth = (constraints.maxWidth - totalSpacing) / cardsPerRow;
-
-                return Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: isSmallScreen ? 8 : (isMediumScreen ? 10 : 14),
-                  runSpacing: isSmallScreen ? 8 : (isMediumScreen ? 10 : 14),
+            
+            // Compact Quick Start Section
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  // Compact section header
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isVerySmallScreen ? 16 : 18, 
+                      vertical: isVerySmallScreen ? 8 : 10
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[600],
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.flash_on_rounded,
+                          color: Colors.white,
+                          size: isVerySmallScreen ? 16 : (isSmallScreen ? 17 : 18),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Quick Start',
+                          style: TextStyle(
+                            fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 13 : 14),
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 22)),
+                ],
+              ),
+            ),
+            
+            // Enhanced 4-card grid layout - no scrolling
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: isSmallScreen ? 10 : 14,
+                  mainAxisSpacing: isSmallScreen ? 10 : 14,
+                  childAspectRatio: isVerySmallScreen ? 1.1 : (isSmallScreen ? 1.0 : 0.95),
+                  physics: const NeverScrollableScrollPhysics(), // Disable scrolling
+                  shrinkWrap: true,
                   children: [
-                    _buildFeatureCard(
-                      'Code Detection',
-                      'Identify CPT or ICD codes',
-                      Icons.qr_code,
-                      'What CPT code should I use for a routine physical exam?',
-                      cardWidth: cardWidth,
+                    _buildEnhancedFeatureCard(
+                      title: 'Diagnosis Support',
+                      description: 'Clinical decision assistance',
+                      icon: Icons.medical_services_rounded,
+                      gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
+                      prompt: 'What conditions should I consider for a patient with chest pain and shortness of breath?',
+                      isSmallScreen: isSmallScreen,
+                      isVerySmallScreen: isVerySmallScreen,
                     ),
-                    _buildFeatureCard(
-                      'Diagnosis Help',
-                      'Clinical decision support',
-                      Icons.health_and_safety,
-                      'What conditions should I consider for a patient with fever, headache and fatigue?',
-                      cardWidth: cardWidth,
+                    _buildEnhancedFeatureCard(
+                      title: 'Drug Information',
+                      description: 'Medication safety & interactions',
+                      icon: Icons.medication_liquid_rounded,
+                      gradientColors: [Colors.blue[200]!, Colors.blue[500]!],
+                      prompt: 'Are there any interactions between warfarin and aspirin?',
+                      isSmallScreen: isSmallScreen,
+                      isVerySmallScreen: isVerySmallScreen,
                     ),
-                    _buildFeatureCard(
-                      'Drug Interactions',
-                      'Check medication safety',
-                      Icons.medication,
-                      'Are there any interactions between metformin and lisinopril?',
-                      cardWidth: cardWidth,
+                    _buildEnhancedFeatureCard(
+                      title: 'Treatment Plans',
+                      description: 'Evidence-based protocols',
+                      icon: Icons.assignment_turned_in_rounded,
+                      gradientColors: [Colors.blue[400]!, Colors.blue[700]!],
+                      prompt: 'What is the current treatment protocol for acute myocardial infarction?',
+                      isSmallScreen: isSmallScreen,
+                      isVerySmallScreen: isVerySmallScreen,
                     ),
-                    _buildFeatureCard(
-                      'Templates',
-                      'Common medical documents',
-                      Icons.description,
-                      'Create a template for a discharge summary',
-                      cardWidth: cardWidth,
-                    ),
-                    _buildFeatureCard(
-                      'Patient Info',
-                      'Simple explanations',
-                      Icons.people,
-                      'How do I explain type 2 diabetes treatment to a patient?',
-                      cardWidth: cardWidth,
-                    ),
-                    _buildFeatureCard(
-                      'Guidelines',
-                      'Evidence-based practice',
-                      Icons.menu_book,
-                      'What are the current treatment guidelines for hypertension?',
-                      cardWidth: cardWidth,
-                    ),
-                    _buildFeatureCard(
-                      'Research',
-                      'Latest medical findings',
-                      Icons.science_outlined,
-                      'Summarize recent studies on ACE inhibitors for heart failure',
-                      cardWidth: cardWidth,
-                    ),
-                    _buildFeatureCard(
-                      'Treatment',
-                      'Compare options',
-                      Icons.medical_services_outlined,
-                      'What are the best hypertension treatments for elderly patients?',
-                      cardWidth: cardWidth,
+                    _buildEnhancedFeatureCard(
+                      title: 'Medical Codes',
+                      description: 'ICD-10 & CPT code lookup',
+                      icon: Icons.qr_code_scanner_rounded,
+                      gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
+                      prompt: 'What ICD-10 code should I use for Type 2 diabetes with complications?',
+                      isSmallScreen: isSmallScreen,
+                      isVerySmallScreen: isVerySmallScreen,
                     ),
                   ],
-                );
-              }
+                ),
+              ),
             ),
-          ),
+            
+            // Minimal bottom spacing
+            SizedBox(height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20)),
+          ],
         ),
-
-        // Bottom space
-        SizedBox(height: isSmallScreen ? 16 : 24),
-      ],
+      ),
     );
   }
 
@@ -506,9 +530,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     String promptText, 
     {double? cardWidth}
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = appStore.isDarkMode;
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.width < 360;
     final isMediumScreen = screenSize.width >= 360 && screenSize.width < 600;
@@ -542,20 +564,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
           ),
           decoration: BoxDecoration(
             color: isDarkMode
-                ? colorScheme.surfaceContainerHighest.withOpacity(0.4)
-                : colorScheme.surface,
-            borderRadius: BorderRadius.circular(14),
+                ? Colors.blueGrey[800]
+                : Colors.grey[100],
+            borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
-              color: isDarkMode
-                  ? colorScheme.primary.withOpacity(0.3)
-                  : colorScheme.outlineVariant,
-              width: 1,
+              color: Colors.blue.withOpacity(0.2),
+              width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
+                color: Colors.blue.withOpacity(0.05),
                 offset: const Offset(0, 2),
+                blurRadius: 6,
+                spreadRadius: 0,
               ),
             ],
           ),
@@ -571,13 +592,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Container(
                     padding: EdgeInsets.all(isSmallScreen ? 6 : 7),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.15),
+                      color: Colors.blue.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       icon,
                       size: isSmallScreen ? 14 : 16,
-                      color: colorScheme.primary,
+                      color: Colors.blue[600],
                     ),
                   ),
                   
@@ -587,9 +608,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Expanded(
                     child: Text(
                       title,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
                         fontSize: isSmallScreen ? 11 : 13,
+                        fontFamily: 'Poppins',
+                        color: Colors.blue[800],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -602,7 +625,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
               // Description with better text styling
               Text(
                 description,
-                style: textTheme.bodySmall?.copyWith(
+                style: TextStyle(
+                  fontFamily: 'Poppins',
                   color: isDarkMode
                       ? Colors.white70
                       : Colors.black54,
@@ -637,6 +661,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         child: Text(
                           _shortenPrompt(promptText),
                           style: TextStyle(
+                            fontFamily: 'Poppins',
                             color: isDarkMode ? Colors.white60 : Colors.black45,
                             fontSize: isSmallScreen ? 9 : 10,
                             fontStyle: FontStyle.italic,
@@ -659,14 +684,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: isDarkMode 
-                            ? colorScheme.primary.withOpacity(0.2)
-                            : colorScheme.primary.withOpacity(0.1),
+                            ? Colors.blue.withOpacity(0.2)
+                            : Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'Try it',
                         style: TextStyle(
-                          color: colorScheme.primary,
+                          color: Colors.blue[600],
                           fontSize: isSmallScreen ? 10 : 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -881,15 +906,17 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     child: CircularProgressIndicator(
                       strokeWidth: 3,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary,
+                        Colors.blue[600]!,
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Loading conversation...',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      color: Colors.black54,
                     ),
                   ),
                 ],
@@ -915,7 +942,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       Icon(
                         Icons.error_outline,
                         size: 48,
-                        color: Theme.of(context).colorScheme.error,
+                        color: Colors.red[600],
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -959,7 +986,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                             icon: const Icon(Icons.refresh),
                             label: const Text('Try Again'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              backgroundColor: Colors.blue[600],
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                               shape: RoundedRectangleBorder(
@@ -1008,13 +1035,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Icon(
                     Icons.chat_bubble_outline,
                     size: 64,
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                    color: Colors.blue[600]!.withOpacity(0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Select a chat from the menu',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -1022,20 +1052,22 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                      color: Colors.blue.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.menu,
                       size: 24,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Colors.blue[600],
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Open the menu to start a new chat',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: Colors.black38,
                       fontStyle: FontStyle.italic,
                     ),
                     textAlign: TextAlign.center,
@@ -1090,23 +1122,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: svGetBgColor(),
       appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: svGetScaffoldColor(),
+        iconTheme: IconThemeData(color: context.iconColor),
         elevation: 0,
-        scrolledUnderElevation: 1,
+        toolbarHeight: 70,
+        surfaceTintColor: svGetScaffoldColor(),
         centerTitle: true,
-        shadowColor: Colors.black26,
-        shape: Border(
-          bottom: BorderSide(
-            color: colorScheme.outlineVariant.withOpacity(0.2),
-            width: 1,
-          ),
-        ),
         title: BlocBuilder<AiChatBloc, AiChatState>(
           builder: (context, state) {
             if (state is SessionSelected ||
@@ -1134,9 +1159,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   title.isEmpty ? 'New Chat' : title.length > 25 ? '${title.substring(0, 25)}...' : title,
                   key: ValueKey(title), // For animation to detect changes
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
+                    fontFamily: 'Poppins',
+                    color: Colors.blue[800],
                   ),
                 ),
               );
@@ -1144,20 +1170,21 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
             // Show brand name when on welcome screen
             return Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.psychology_alt_rounded,
-                  size: 20,
-                  color: colorScheme.primary,
+                  color: Colors.blue[600],
+                  size: 24,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   'DocTak AI',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: Colors.blue[800],
                   ),
                 ),
               ],
@@ -1166,23 +1193,43 @@ class _AiChatScreenState extends State<AiChatScreen> {
         ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(
-              Icons.menu,
-              color: colorScheme.onSurface,
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.menu,
+                color: Colors.blue[600],
+                size: 16,
+              ),
             ),
             onPressed: () {
               HapticFeedback.lightImpact();
               Scaffold.of(context).openDrawer();
-            },
+            }
           ),
         ),
         actions: [
           // New Chat button in app bar - always visible (icon only)
           IconButton(
-            icon: Icon(
-              Icons.add_circle,
-              color: colorScheme.onSurface,
-              size: 26,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_circle,
+                color: Colors.blue[600],
+                size: 14,
+              ),
             ),
             tooltip: 'New Chat',
             onPressed: () {
@@ -1218,9 +1265,22 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   state is MessageSendError ||
                   state is MessageSent) {
                 return IconButton(
-                  icon: Icon(
-                    Icons.settings_outlined,
-                    color: colorScheme.onSurface,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
+                  icon: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.settings_outlined,
+                      color: Colors.blue[600],
+                      size: 14,
+                    ),
                   ),
                   onPressed: () {
                     HapticFeedback.lightImpact();
@@ -1231,6 +1291,28 @@ class _AiChatScreenState extends State<AiChatScreen> {
               return const SizedBox.shrink();
             },
           ),
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.home_filled,
+                color: Colors.blue[600],
+                size: 14,
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          )
         ],
       ),
       drawer: _buildChatDrawer(),
@@ -1305,17 +1387,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   Widget _buildChatDrawer() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = appStore.isDarkMode;
     final mediaQuery = MediaQuery.of(context);
     final topPadding = mediaQuery.padding.top + 8;
 
     return Drawer(
       width: mediaQuery.size.width * 0.85, // Better width for drawer
-      backgroundColor: isDarkMode 
-          ? colorScheme.surfaceContainerHighest 
-          : colorScheme.surface,
+      backgroundColor: svGetScaffoldColor(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1332,8 +1410,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  colorScheme.primaryContainer.withOpacity(0.2),
-                  colorScheme.surface,
+                  Colors.blue.withOpacity(0.1),
+                  svGetScaffoldColor(),
                 ],
               ),
             ),
@@ -1345,14 +1423,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   height: 48,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colorScheme.primaryContainer,
+                    color: Colors.blue.withOpacity(0.1),
                     border: Border.all(
-                      color: colorScheme.primary.withOpacity(0.2),
+                      color: Colors.blue.withOpacity(0.2),
                       width: 2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.shadow.withOpacity(0.1),
+                        color: Colors.blue.withOpacity(0.1),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -1361,7 +1439,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   child: Center(
                     child: CustomImageView(
                       imagePath: '${AppData.imageUrl}${AppData.profile_pic}',
-                      color: isDarkMode ? Colors.white : colorScheme.primary,
+                      color: isDarkMode ? Colors.white : Colors.blue[600],
                     ),
                   ),
                 ),
@@ -1372,17 +1450,20 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     children: [
                       Text(
                         'Dr. ${AppData.name}',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          color: isDarkMode ? Colors.white : Colors.blue[800],
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         AppData.specialty,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: isDarkMode ? Colors.white60 : Colors.black54,
                           fontSize: 12,
                         ),
                       ),
@@ -1394,7 +1475,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   icon: Icon(
                     Icons.close, 
                     size: 20,
-                    color: colorScheme.onSurfaceVariant,
+                    color: isDarkMode ? Colors.white60 : Colors.black54,
                   ),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -1406,7 +1487,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Divider(
-              color: colorScheme.outlineVariant.withOpacity(0.5),
+              color: Colors.blue.withOpacity(0.2),
               height: 1,
             ),
           ),
@@ -1451,12 +1532,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: colorScheme.primary,
+                backgroundColor: Colors.blue[600],
                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(25),
                 ),
-                elevation: 1,
+                elevation: 2,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1465,9 +1546,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   const SizedBox(width: 12),
                   Text(
                     'New Chat',
-                    style: textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
                       color: Colors.white,
+                      fontSize: 14,
                       letterSpacing: 0.2,
                     ),
                   ),
@@ -1484,16 +1567,17 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 Icon(
                   Icons.history,
                   size: 16,
-                  color: colorScheme.primary.withOpacity(0.7),
+                  color: Colors.blue[600]!.withOpacity(0.7),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Recent Chats',
-                  style: textTheme.bodyMedium?.copyWith(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     letterSpacing: 0.2,
-                    color: colorScheme.primary.withOpacity(0.9),
+                    fontFamily: 'Poppins',
+                    color: Colors.blue[600]!.withOpacity(0.9),
                   ),
                 ),
                 const Spacer(),
@@ -1510,15 +1594,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
+                        color: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '$count',
                         style: TextStyle(
-                          color: colorScheme.onPrimaryContainer,
+                          color: Colors.blue[600],
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
                         ),
                       ),
                     );
@@ -1584,7 +1669,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   return Center(
                     child: Text(
                       'No chat history',
-                      style: textTheme.bodyMedium?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isDarkMode
                             ? Colors.white54
                             : Colors.black38,
@@ -1607,7 +1692,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     } else if (state is MessageSendError) {
                       isSelected = state.selectedSession.id.toString() == session.id.toString();
                     }
-
                     return Dismissible(
                       key: Key('session_${session.id}'),
                       background: Container(
@@ -1653,10 +1737,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 14,
+                            fontFamily: 'Poppins',
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             color: isSelected 
-                                ? colorScheme.primary
-                                : colorScheme.onSurface,
+                                ? Colors.blue[600]
+                                : Colors.black87,
                             letterSpacing: isSelected ? 0.1 : 0,
                           ),
                         ),
@@ -1665,9 +1750,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           _formatSessionDate(session.updatedAt),
                           style: TextStyle(
                             fontSize: 11,
+                            fontFamily: 'Poppins',
                             color: isSelected
-                                ? colorScheme.primary.withOpacity(0.7)
-                                : colorScheme.onSurfaceVariant,
+                                ? Colors.blue[600]!.withOpacity(0.7)
+                                : Colors.grey[600],
                           ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1679,15 +1765,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isSelected
-                                ? colorScheme.primaryContainer
-                                : colorScheme.surfaceVariant,
+                                ? Colors.blue.withOpacity(0.1)
+                                : Colors.grey.withOpacity(0.1),
                           ),
                           child: Icon(
                             Icons.chat_bubble_outline,
                             size: 16,
                             color: isSelected
-                                ? colorScheme.primary
-                                : colorScheme.onSurfaceVariant,
+                                ? Colors.blue[600]
+                                : Colors.grey[600],
                           ),
                         ),
                         trailing: IconButton(
@@ -1695,14 +1781,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
                             padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colorScheme.surfaceVariant.withOpacity(0.5),
+                              color: Colors.grey.withOpacity(0.1),
                             ),
                             child: Icon(
                               Icons.delete_outline,
                               size: 16,
                               color: isSelected
-                                  ? colorScheme.primary
-                                  : colorScheme.onSurfaceVariant,
+                                  ? Colors.blue[600]
+                                  : Colors.grey[600],
                             ),
                           ),
                           onPressed: () async {
@@ -1720,7 +1806,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                                       onPressed: () => Navigator.of(context).pop(false),
                                       child: Text(
                                         'CANCEL',
-                                        style: TextStyle(color: colorScheme.primary),
+                                        style: TextStyle(
+                                          color: Colors.blue[600],
+                                          fontFamily: 'Poppins',
+                                        ),
                                       ),
                                     ),
                                     FilledButton(
@@ -1757,7 +1846,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           },
                         ),
                         selected: isSelected,
-                        selectedTileColor: colorScheme.primaryContainer.withOpacity(0.2),
+                        selectedTileColor: Colors.blue.withOpacity(0.1),
                         onTap: () {
                           // First close the drawer
                           Navigator.pop(context);
@@ -1808,6 +1897,137 @@ class _AiChatScreenState extends State<AiChatScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Enhanced feature card with gradient backgrounds and improved styling
+  Widget _buildEnhancedFeatureCard({
+    required String title,
+    required String description,
+    required IconData icon,
+    required List<Color> gradientColors,
+    required String prompt,
+    required bool isSmallScreen,
+    bool isVerySmallScreen = false,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          _preCreateSession(prompt);
+        },
+        borderRadius: BorderRadius.circular(isVerySmallScreen ? 16 : 18),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                gradientColors[0].withOpacity(0.1),
+                gradientColors[1].withOpacity(0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(isVerySmallScreen ? 16 : 18),
+            border: Border.all(
+              color: gradientColors[1].withOpacity(0.2),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors[1].withOpacity(0.12),
+                offset: const Offset(0, 3),
+                blurRadius: 8,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          padding: EdgeInsets.all(isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Compact icon with gradient background
+              Container(
+                padding: EdgeInsets.all(isVerySmallScreen ? 8 : (isSmallScreen ? 9 : 10)),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: gradientColors,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: gradientColors[1].withOpacity(0.25),
+                      offset: const Offset(0, 2),
+                      blurRadius: 6,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 20),
+                ),
+              ),
+              
+              SizedBox(height: isVerySmallScreen ? 8 : (isSmallScreen ? 10 : 12)),
+              
+              // Compact title
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 13 : 14),
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Poppins',
+                  color: gradientColors[1],
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              
+              SizedBox(height: isVerySmallScreen ? 3 : (isSmallScreen ? 4 : 5)),
+              
+              // Compact description
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: isVerySmallScreen ? 9 : (isSmallScreen ? 10 : 11),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Poppins',
+                  color: Colors.grey[600],
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              
+              const Spacer(),
+              
+              // Compact action indicator
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(isVerySmallScreen ? 4 : 5),
+                    decoration: BoxDecoration(
+                      color: gradientColors[1].withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: gradientColors[1],
+                      size: isVerySmallScreen ? 10 : (isSmallScreen ? 11 : 12),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

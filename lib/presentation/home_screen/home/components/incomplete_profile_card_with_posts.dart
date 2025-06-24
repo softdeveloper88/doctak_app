@@ -125,7 +125,7 @@ class IncompleteProfileCard extends StatelessWidget {
               translation(context).msg_verify_email_continue,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: Colors.black87,
               ),
@@ -172,7 +172,7 @@ class IncompleteProfileCard extends StatelessWidget {
             Text(
               translation(context).msg_profile_incomplete,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),

@@ -65,27 +65,33 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
 
     try {
-    PostDataModel response = await postService.getMyPosts(
-        'Bearer ${AppData.userToken}', '$pageNumber', AppData.logInUserId);
-    print('repsones$response');
-    numberOfPage = response.posts?.lastPage ?? 0;
-    if (pageNumber < numberOfPage + 1) {
-      pageNumber = pageNumber + 1;
-      postList.addAll(response.posts?.data ?? []);
-    }
-    emit(PaginationLoadedState(
-        (state as PaginationLoadedState).firstDropdownValues,
-        (state as PaginationLoadedState).selectedFirstDropdownValue,
-        (state as PaginationLoadedState).secondDropdownValues,
-        (state as PaginationLoadedState).selectedSecondDropdownValue,
-        (state as PaginationLoadedState).specialtyDropdownValue,
-        (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
-        [],
-        ''));
-    // emit(PaginationLoadedState());
-    // emit(DataLoaded(postList));
+      PostDataModel response = await postService.getMyPosts(
+          'Bearer ${AppData.userToken}', '$pageNumber', AppData.logInUserId);
+      print('repsones$response');
+      numberOfPage = response.posts?.lastPage ?? 0;
+      if (pageNumber < numberOfPage + 1) {
+        pageNumber = pageNumber + 1;
+        postList.addAll(response.posts?.data ?? []);
+      }
+      
+      // Check if current state is PaginationLoadedState before proceeding
+      if (state is PaginationLoadedState) {
+        final currentState = state as PaginationLoadedState;
+        emit(PaginationLoadedState(
+            currentState.firstDropdownValues,
+            currentState.selectedFirstDropdownValue,
+            currentState.secondDropdownValues,
+            currentState.selectedSecondDropdownValue,
+            currentState.specialtyDropdownValue,
+            currentState.selectedSpecialtyDropdownValue,
+            [],
+            ''));
+      } else {
+        // If not in loaded state, emit a basic loaded state
+        emit(PaginationLoadedState([], '', [], '', [], '', [], ''));
+      }
     } catch (e) {
-      print(e);
+      print('Error in _onGetPosts: $e');
 
       // emit(PaginationLoadedState());
 
@@ -131,18 +137,32 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       userProfile = response;
     }
     List<Countries>? countriesList = await _onGetCountries();
-    List<String>? stateList = await _onGetStates(
-        userProfile?.user?.country ?? countriesList?.first.countryName ?? '');
-    print('countriesList $countriesList');
-    print('user country ${userProfile?.user?.country}');
+    
+    // Get the country to use for states lookup
+    String selectedCountry = userProfile?.user?.country ?? 
+                            (countriesList?.isNotEmpty == true ? countriesList!.first.countryName ?? '' : '');
+    
+    List<String>? stateList = [];
+    if (selectedCountry.isNotEmpty) {
+      stateList = await _onGetStates(selectedCountry);
+      // If states loading fails, provide empty list instead of null
+      stateList ??= [];
+    }
+    
+    print('countriesList: ${countriesList?.length ?? 0} countries');
+    print('user country: ${userProfile?.user?.country}');
+    print('selected country: $selectedCountry');
+    print('states loaded: ${stateList.length} states');
+    
     List<String>? specialtyList = await _onGetSpecialty();
+    
     emit(PaginationLoadedState(
         countriesList ?? [],
-        userProfile?.user?.country ?? countriesList?.first.countryName ?? '',
-        stateList ?? [],
-        userProfile?.user?.city ?? stateList?.first ?? '',
-        specialtyList!,
-        userProfile?.user?.specialty ?? specialtyList.first,
+        selectedCountry,
+        stateList,
+        userProfile?.user?.city ?? (stateList.isNotEmpty ? stateList.first : ''),
+        specialtyList ?? [],
+        userProfile?.user?.specialty ?? (specialtyList?.isNotEmpty == true ? specialtyList!.first : ''),
         [],
         ''));
     // add(UpdateSecondDropdownValues(countriesList.first));
@@ -201,16 +221,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     print("DD ${response.data}");
     ProgressDialogUtils.hideProgressDialog();
 
-    emit(PaginationLoadedState(
-      (state as PaginationLoadedState).firstDropdownValues,
-      (state as PaginationLoadedState).selectedFirstDropdownValue,
-      (state as PaginationLoadedState).secondDropdownValues,
-      (state as PaginationLoadedState).selectedSecondDropdownValue,
-      (state as PaginationLoadedState).specialtyDropdownValue,
-      (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
-      (state as PaginationLoadedState).universityDropdownValue,
-      (state as PaginationLoadedState).selectedUniversityDropdownValue,
-    ));
+    // Check if current state is PaginationLoadedState before proceeding
+    if (state is PaginationLoadedState) {
+      final currentState = state as PaginationLoadedState;
+      emit(PaginationLoadedState(
+        currentState.firstDropdownValues,
+        currentState.selectedFirstDropdownValue,
+        currentState.secondDropdownValues,
+        currentState.selectedSecondDropdownValue,
+        currentState.specialtyDropdownValue,
+        currentState.selectedSpecialtyDropdownValue,
+        currentState.universityDropdownValue,
+        currentState.selectedUniversityDropdownValue,
+      ));
+    } else {
+      print('Warning: Cannot update profile picture, state is not PaginationLoadedState: ${state.runtimeType}');
+      emit(DataError('Profile not loaded properly'));
+    }
 
     // add(UpdateSecondDropdownValues(event.newValue));
   }
@@ -464,25 +491,38 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   void _updateSecondDropdownValues(
       UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
-    List<String> secondDropdownValues = [];
-    secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? ['United Arab Emirates'];
-    print(secondDropdownValues.toList());
-    // if (secondDropdownValues.isNotEmpty) {
-    //   List<String>? universityDropdownValues =
-    //       await _onGetUniversities(secondDropdownValues.first ?? '');
-    // }
-    // add(UpdateSpecialtyDropdownValue(secondDropdownValues.first ?? ''));
+    // Check if current state is PaginationLoadedState before proceeding
+    if (state is! PaginationLoadedState) {
+      print('Error: Current state is not PaginationLoadedState, it is ${state.runtimeType}');
+      return;
+    }
+    
+    final currentState = state as PaginationLoadedState;
+    
+    try {
+      List<String> secondDropdownValues = [];
+      secondDropdownValues = await _onGetStates(event.selectedFirstDropdownValue) ?? [];
+      
+      // If no states found, provide fallback
+      if (secondDropdownValues.isEmpty) {
+        secondDropdownValues = ['No states available'];
+      }
+      
+      print('States loaded: ${secondDropdownValues.toList()}');
 
-    emit(PaginationLoadedState(
-        (state as PaginationLoadedState).firstDropdownValues,
-        event.selectedFirstDropdownValue,
-        secondDropdownValues ?? [],
-        secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '',
-        (state as PaginationLoadedState).specialtyDropdownValue,
-        (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
-        [],
-        ''));
-    // add(UpdateSpecialtyDropdownValue(secondDropdownValues!.first));
+      emit(PaginationLoadedState(
+          currentState.firstDropdownValues,
+          event.selectedFirstDropdownValue,
+          secondDropdownValues,
+          secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '',
+          currentState.specialtyDropdownValue,
+          currentState.selectedSpecialtyDropdownValue,
+          [],
+          ''));
+    } catch (e) {
+      print('Error in _updateSecondDropdownValues: $e');
+      emit(DataError('Failed to load states: ${e.toString()}'));
+    }
   }
 
   // void _updateUniversityDropdownValues(
@@ -685,24 +725,35 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  _onGetStates(String value) async {
-    // emit(DataLoading());
+  Future<List<String>?> _onGetStates(String value) async {
     try {
+      // Validate input
+      if (value.isEmpty) {
+        print('Warning: Empty country value provided to _onGetStates');
+        return null;
+      }
+      
+      print('Fetching states for country: $value');
       final response = await postService.getStates(value);
 
-      // if (response.data!.isNotEmpty) {
-      // emit(DataSuccess(countriesModel: response));
       List<String> list = [];
-      print(response.data);
-
-      response.data?.forEach((element) {
-        list.add(element['state_name']);
-      });
-      print("states : ${list.toString()}");
-      return list;
+      
+      if (response.data != null && response.data!.isNotEmpty) {
+        response.data?.forEach((element) {
+          if (element != null && element['state_name'] != null) {
+            list.add(element['state_name'].toString());
+          }
+        });
+        print("States loaded successfully: ${list.toString()}");
+        return list;
+      } else {
+        print('No states found for country: $value');
+        return [];
+      }
     } catch (e) {
-      print(e);
-      // emit(DataFailure(error: 'An error occurred'));
+      print('Error fetching states for country "$value": $e');
+      // Return null to indicate error, let caller handle fallback
+      return null;
     }
   }
 

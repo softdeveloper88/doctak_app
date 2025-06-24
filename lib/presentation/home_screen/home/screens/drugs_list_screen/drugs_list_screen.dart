@@ -140,7 +140,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                           minHeight: 36,
                         ),
                         icon: Container(
-                          padding: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: Colors.blue.withOpacity(0.1),
                             shape: BoxShape.circle,
@@ -148,7 +148,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                           child: Icon(
                             isSearchShow ? Icons.close : Icons.search,
                             color: Colors.blue[600],
-                            size: 14,
+                            size: 16,
                           ),
                         ),
                         onPressed: () {
@@ -411,7 +411,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                         // ),
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          height: 50,
+                          height: 48,
                           decoration: BoxDecoration(
                             color: Colors.grey.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(25),

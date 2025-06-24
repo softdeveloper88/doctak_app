@@ -13,8 +13,6 @@ class SourceCitationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -25,22 +23,28 @@ class SourceCitationWidget extends StatelessWidget {
             Icon(
               Icons.article_outlined,
               size: 16,
-              color: colorScheme.primary,
+              color: Colors.blue[600],
             ),
             const SizedBox(width: 8),
             Text(
               'Sources (${sources.length})',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.bold,
+              style: TextStyle(
+                color: Colors.blue[600],
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                fontSize: 14,
               ),
             ),
           ],
         ),
-        collapsedBackgroundColor: colorScheme.primary.withOpacity(0.05),
-        backgroundColor: colorScheme.primary.withOpacity(0.05),
+        collapsedBackgroundColor: Colors.blue.withOpacity(0.05),
+        backgroundColor: Colors.blue.withOpacity(0.05),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: Colors.blue.withOpacity(0.1),
+            width: 1,
+          ),
         ),
         children: sources.map((source) => _buildSourceItem(context, source)).toList(),
       ),
@@ -48,23 +52,23 @@ class SourceCitationWidget extends StatelessWidget {
   }
 
   Widget _buildSourceItem(BuildContext context, Source source) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     return ListTile(
       dense: true,
       leading: Icon(
         Icons.public,
         size: 16,
-        color: colorScheme.primary,
+        color: Colors.blue[600],
       ),
       title: Text(
         source.title ?? 'Web source',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: colorScheme.onSurface,
+          fontFamily: 'Poppins',
+          color: Colors.black87,
         ),
       ),
       subtitle: Text(
@@ -73,7 +77,8 @@ class SourceCitationWidget extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 12,
-          color: colorScheme.onSurface.withOpacity(0.7),
+          fontFamily: 'Poppins',
+          color: Colors.grey[600],
         ),
       ),
       onTap: () async {

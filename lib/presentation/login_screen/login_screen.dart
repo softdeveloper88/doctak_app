@@ -181,7 +181,7 @@ class LoginScreenState extends State<LoginScreen> {
                     translation(context).lbl_saved_logins,
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.headlineSmall?.color,
                     ),
@@ -217,7 +217,7 @@ class LoginScreenState extends State<LoginScreen> {
                             username,
                             style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: isSelected
                                   ? FontWeight.bold
                                   : FontWeight.normal,
@@ -247,7 +247,7 @@ class LoginScreenState extends State<LoginScreen> {
                         translation(context).msg_no_saved_logins,
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 16,
+                          fontSize: 14,
                           color: Colors.grey,
                         ),
                       ),
@@ -439,7 +439,7 @@ class LoginScreenState extends State<LoginScreen> {
                             Text(
                               "Welcome Back",
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.grey.shade700,
                               ),
@@ -448,7 +448,7 @@ class LoginScreenState extends State<LoginScreen> {
                             Text(
                               "Log In!",
                               style: TextStyle(
-                                fontSize: 26,
+                                fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 color: theme.colorScheme.primary,
                                 letterSpacing: 0.5,
@@ -477,7 +477,7 @@ class LoginScreenState extends State<LoginScreen> {
                                   Text(
                                     translation(context).lbl_enter_your_email_colon,
                                     style: TextStyle(
-                                      fontSize: 15,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.grey.shade800,
                                     ),
@@ -486,6 +486,7 @@ class LoginScreenState extends State<LoginScreen> {
                                   CustomTextFormField(
                                     fillColor: Colors.grey.shade50,
                                     filled: true,
+                                    autofocus: false,
                                     autofillHint: const [AutofillHints.username],
                                     focusNode: focusNode1,
                                     controller: emailController,
@@ -520,7 +521,7 @@ class LoginScreenState extends State<LoginScreen> {
                                   Text(
                                     translation(context).lbl_enter_your_password_colon,
                                     style: TextStyle(
-                                      fontSize: 15,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.grey.shade800,
                                     ),
@@ -532,6 +533,7 @@ class LoginScreenState extends State<LoginScreen> {
                                       return CustomTextFormField(
                                         fillColor: Colors.grey.shade50,
                                         filled: true,
+                                        autofocus: false,
                                         autofillHint: const [AutofillHints.password],
                                         focusNode: focusNode2,
                                         controller: passwordController,
@@ -606,6 +608,12 @@ class LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ),
                                       const Spacer(),
+                                    ],
+                                  ),
+                                   Row(
+                                    children: [
+                                      const SizedBox(width: 8),
+                                      const Spacer(),
                                       GestureDetector(
                                         onTap: () => onTapTxtForgotPassword(context),
                                         child: Text(
@@ -617,6 +625,7 @@ class LoginScreenState extends State<LoginScreen> {
                                           ),
                                         ),
                                       ),
+
                                     ],
                                   ),
                                   const SizedBox(height: 32),
@@ -677,7 +686,6 @@ class LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 30),
-
                             // Signup and Social Login
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,

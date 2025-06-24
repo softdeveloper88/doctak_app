@@ -87,10 +87,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: svGetScaffoldColor(),
       appBar: AppBar(
-        toolbarHeight: 70,
+        toolbarHeight: 56,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
@@ -115,13 +115,13 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
             Icon(
               Icons.add_circle_outline_rounded,
               color: Colors.blue[600],
-              size: 24,
+              size: 20,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Text(
               translation(context).lbl_new_post,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
                 color: Colors.blue[800],
@@ -161,21 +161,21 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                   searchPeopleBloc.add(AddPostDataEvent());
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.blue[600],
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
+                    horizontal: 16,
+                    vertical: 8,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   elevation: 0,
                 ),
                 child: Text(
                   translation(context).lbl_post,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Poppins',
                   ),
@@ -185,154 +185,155 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Modern User Profile Section
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-              child: Row(
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
                 children: [
-                  // Profile Picture
+                  // Compact User Profile Section
                   Container(
-                    width: 56,
-                    height: 56,
+                    margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.blue.withOpacity(0.2),
-                        width: 2,
-                      ),
+                      color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 4,
+                          color: Colors.black.withOpacity(0.03),
                           offset: const Offset(0, 2),
+                          blurRadius: 6,
+                          spreadRadius: 0,
                         ),
                       ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(28),
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            "${AppData.imageUrl}${AppData.profile_pic.validate()}",
-                        height: 56,
-                        width: 56,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: Colors.blue[50],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.blue[400],
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.blue[50],
-                          child: Center(
-                            child: Icon(
-                              Icons.person,
-                              color: Colors.blue[400],
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // User Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              AppData.name ?? '',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Poppins',
-                                color: Colors.black87,
+                        // Profile Picture
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.blue.withOpacity(0.2),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(21),
+                            child: CachedNetworkImage(
+                              imageUrl:
+                                  "${AppData.imageUrl}${AppData.profile_pic.validate()}",
+                              height: 42,
+                              width: 42,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: Colors.blue[50],
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.blue[400],
+                                    strokeWidth: 1.5,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: Colors.blue[50],
+                                child: Center(
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Colors.blue[400],
+                                    size: 20,
+                                  ),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.check,
-                                size: 10,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.medical_services_outlined,
-                              size: 14,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              capitalizeWords(AppData.specialty),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                                fontFamily: 'Poppins',
+                        const SizedBox(width: 12),
+                        // User Info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      AppData.name ?? '',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Poppins',
+                                        color: Colors.black87,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    padding: const EdgeInsets.all(1.5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.check,
+                                      size: 8,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.medical_services_outlined,
+                                    size: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      capitalizeWords(AppData.specialty),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                        fontFamily: 'Poppins',
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  // Post Content Section
+                  SVPostTextComponent(
+                    onColorChange: () => changeColor,
+                    colorValue: currentColor,
+                    searchPeopleBloc: searchPeopleBloc,
+                  ),
+                  // Additional Features
+                  OtherFeatureComponent(
+                      onColorChange: () => changeColor,
+                      colorValue: currentColor,
+                      searchPeopleBloc: searchPeopleBloc),
+                  // Post Options - Moved to bottom
+                  SVPostOptionsComponent(searchPeopleBloc),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
-            // Post Content Section
-            SVPostTextComponent(
-              onColorChange: () => changeColor,
-              colorValue: currentColor,
-              searchPeopleBloc: searchPeopleBloc,
-            ),
-            // Additional Features
-            OtherFeatureComponent(
-                onColorChange: () => changeColor,
-                colorValue: currentColor,
-                searchPeopleBloc: searchPeopleBloc),
-            // Divider
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              height: 1,
-              color: Colors.grey.withOpacity(0.2),
-            ),
-            // Post Options
-            SVPostOptionsComponent(searchPeopleBloc)
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

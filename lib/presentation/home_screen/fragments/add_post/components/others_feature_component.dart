@@ -46,15 +46,15 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             offset: const Offset(0, 2),
-            blurRadius: 8,
+            blurRadius: 6,
             spreadRadius: 0,
           ),
         ],
@@ -100,7 +100,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
           // ),
           // Tag Friends Section
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -112,8 +112,8 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
+                      horizontal: 12,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(0.1),
@@ -129,14 +129,14 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                         Icon(
                           Icons.people_outline_rounded,
                           color: Colors.blue[700],
-                          size: 20,
+                          size: 16,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           translation(context).lbl_tag_friends,
                           style: TextStyle(
                             color: Colors.blue[700],
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Poppins',
                           ),
@@ -152,7 +152,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                     if (state is PaginationLoadedState &&
                         widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty) {
                       return Container(
-                        margin: const EdgeInsets.only(top: 12),
+                        margin: const EdgeInsets.only(top: 8),
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -160,10 +160,10 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                                 .searchPeopleBloc.selectedSearchPeopleData
                                 .map((element) {
                               return Container(
-                                margin: const EdgeInsets.only(right: 8),
+                                margin: const EdgeInsets.only(right: 6),
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                                  horizontal: 10,
+                                  vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.blue[50],
@@ -177,8 +177,8 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      width: 24,
-                                      height: 24,
+                                      width: 20,
+                                      height: 20,
                                       decoration: BoxDecoration(
                                         color: Colors.blue[100],
                                         shape: BoxShape.circle,
@@ -188,19 +188,19 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                                           '${element.firstName?.substring(0, 1).toUpperCase()}',
                                           style: TextStyle(
                                             color: Colors.blue[700],
-                                            fontSize: 12,
+                                            fontSize: 10,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'Poppins',
                                           ),
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: 6),
                                     Text(
                                       '${element.firstName} ${element.lastName}',
                                       style: TextStyle(
                                         color: Colors.blue[900],
-                                        fontSize: 13,
+                                        fontSize: 11,
                                         fontWeight: FontWeight.w500,
                                         fontFamily: 'Poppins',
                                       ),

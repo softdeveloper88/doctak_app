@@ -414,7 +414,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_delete_caps => 'ELIMINAR';
 
   @override
-  String get lbl_history_ai => 'Historial de Inteligencia Artificial';
+  String get lbl_history_ai => 'Historial';
 
   @override
   String get lbl_new_chat => '+ NUEVO CHAT';

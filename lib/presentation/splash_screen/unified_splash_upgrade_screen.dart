@@ -351,7 +351,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                 // Logo with scale and fade animations
                 Image.asset(
                   'assets/logo/logo.png',
-                  width: 50.w,
+                  width: 40.w,
                   fit: BoxFit.contain,
                 ).animate()
                  .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
@@ -451,7 +451,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                   padding: const EdgeInsets.all(15),
                   child: Image.asset(
                     'assets/logo/logo.png',
-                    width: 50.w,
+                    width: 40.w,
                     fit: BoxFit.contain,
                   ).animate()
                    .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)

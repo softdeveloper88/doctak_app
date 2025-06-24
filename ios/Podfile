@@ -39,6 +39,20 @@ post_install do |installer|
        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
       config.build_settings["ONLY_ACTIVE_ARCH"] = "NO"
+      
+      # Fix dSYM generation for Agora frameworks
+      if target.name.include?('AgoraAiEchoCancellationExtension') || 
+         target.name.include?('AgoraAiEchoCancellationLLExtension') ||
+         target.name.include?('agora_rtc_engine') ||
+         target.name.include?('Agora')
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+        config.build_settings['GENERATE_PROFILING_CODE'] = 'YES'
+        config.build_settings['DWARF_DSYM_FOLDER_PATH'] = '$(CONFIGURATION_BUILD_DIR)'
+        config.build_settings['DWARF_DSYM_FILE_NAME'] = '$(EXECUTABLE_NAME).dSYM'
+        config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'NO'
+        config.build_settings['COPY_PHASE_STRIP'] = 'NO'
+        config.build_settings['STRIP_STYLE'] = 'debugging'
+      end
     end
      flutter_additional_ios_build_settings(target)
   end

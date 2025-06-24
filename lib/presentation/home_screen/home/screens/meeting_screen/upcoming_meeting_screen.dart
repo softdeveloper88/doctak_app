@@ -184,12 +184,14 @@ class MeetingItem extends StatelessWidget {
                         color: Colors.grey[600],
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        "${translation(context).lbl_meeting_id}: $meetingId",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          fontFamily: 'Poppins',
+                      Expanded(
+                        child: Text(
+                          "${translation(context).lbl_meeting_id}: $meetingId",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                       ),
                     ],

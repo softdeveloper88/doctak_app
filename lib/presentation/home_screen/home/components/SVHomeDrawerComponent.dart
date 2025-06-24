@@ -63,14 +63,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
       MenuItemData(1, Icons.business_center_outlined, l10n.lbl_jobs, l10n.desc_jobs),
       MenuItemData(2, Icons.medical_services_outlined, l10n.lbl_drugs, l10n.desc_drugs),
       MenuItemData(3, Icons.forum_outlined, l10n.lbl_discussions, l10n.desc_discussions),
-      MenuItemData(4, Icons.groups_outlined, l10n.lbl_groups, l10n.desc_groups),
-      MenuItemData(5, Icons.description_outlined, l10n.lbl_guidelines, l10n.desc_guidelines),
-      MenuItemData(6, Icons.event_outlined, l10n.lbl_conferences, l10n.desc_conferences),
-      MenuItemData(7, Icons.video_call_outlined, l10n.lbl_meetings, l10n.desc_meetings),
-      MenuItemData(8, Icons.lightbulb_outline, l10n.lbl_suggestions, l10n.desc_suggestions),
-      MenuItemData(9, Icons.settings_outlined, l10n.lbl_settings, l10n.desc_settings),
-      MenuItemData(10, Icons.privacy_tip_outlined, l10n.lbl_privacy, l10n.desc_privacy),
-      MenuItemData(11, Icons.work_outline, l10n.lbl_about, l10n.desc_about),
+      MenuItemData(4, Icons.description_outlined, l10n.lbl_guidelines, l10n.desc_guidelines),
+      MenuItemData(5, Icons.event_outlined, l10n.lbl_conferences, l10n.desc_conferences),
+      MenuItemData(6, Icons.video_call_outlined, l10n.lbl_meetings, l10n.desc_meetings),
+      MenuItemData(7, Icons.lightbulb_outline, l10n.lbl_suggestions, l10n.desc_suggestions),
+      MenuItemData(8, Icons.settings_outlined, l10n.lbl_settings, l10n.desc_settings),
+      MenuItemData(9, Icons.privacy_tip_outlined, l10n.lbl_privacy, l10n.desc_privacy),
+      MenuItemData(10, Icons.work_outline, l10n.lbl_about, l10n.desc_about),
     ];
   }
 
@@ -131,7 +130,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
       elevation: 0,
       width: math.max(280, MediaQuery.of(context).size.width * 0.75), // Responsive width with minimum
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -141,7 +140,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               Color(0xFFE0ECFF),
               Color(0xFFD4E5FF),
             ],
-            stops: const [0.0, 0.3, 0.7, 1.0],
+            stops: [0.0, 0.3, 0.7, 1.0],
           ),
         ),
         child: Column(
@@ -166,13 +165,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   Widget _buildCompactHeader() {
     return Container(
       key: const ValueKey('drawer_header'),
-      height: 220,
+      height: 200,
       child: Stack(
         children: [
           // Main background matching splash screen
           Container(
-            height: 220,
-            decoration: BoxDecoration(
+            height: 200,
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -182,7 +181,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   Color(0xFFE0ECFF),
                   Color(0xFFD4E5FF),
                 ],
-                stops: const [0.0, 0.3, 0.7, 1.0],
+                stops: [0.0, 0.3, 0.7, 1.0],
               ),
             ),
           ),
@@ -219,8 +218,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Color(0xFF4285F4).withOpacity(0.1),
-                    Color(0xFF4285F4).withOpacity(0.05),
+                    const Color(0xFF4285F4).withOpacity(0.1),
+                    const Color(0xFF4285F4).withOpacity(0.05),
                     Colors.transparent,
                   ],
                   stops: [0.0, 0.6, 1.0],
@@ -244,18 +243,18 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 
           // Profile section centered with better positioning
           Positioned(
-            top: 40,
+            top: 30,
             left: 0,
             right: 0,
             child: Column(
               children: [
                 // Profile avatar with professional styling
                 Container(
-                  width: 90,
-                  height: 90,
+                  width: 70,
+                  height: 70,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
@@ -266,30 +265,30 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                     ),
                     border: Border.all(
                       color: Colors.white,
-                      width: 4,
+                      width: 3,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0xFF4285F4).withOpacity(0.3),
+                        color: const Color(0xFF4285F4).withOpacity(0.3),
                         blurRadius: 20,
-                        offset: Offset(0, 8),
+                        offset: const Offset(0, 8),
                         spreadRadius: 2,
                       ),
                       BoxShadow(
                         color: Colors.white.withOpacity(0.8),
                         blurRadius: 10,
-                        offset: Offset(0, -2),
+                        offset: const Offset(0, -2),
                         spreadRadius: 0,
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(45),
+                    borderRadius: BorderRadius.circular(35),
                     child: CachedNetworkImage(
                       imageUrl: AppData.imageUrl + AppData.profile_pic,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
                             colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
@@ -298,8 +297,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                         child: Center(
                           child: Text(
                             _getInitials(AppData.name),
-                            style: TextStyle(
-                              fontSize: 32,
+                            style: const TextStyle(
+                              fontSize: 24,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                               fontFamily: 'Poppins',
@@ -309,7 +308,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                         ),
                       ),
                       errorWidget: (context, url, error) => Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
                             colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
@@ -318,8 +317,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                         child: Center(
                           child: Text(
                             _getInitials(AppData.name),
-                            style: TextStyle(
-                              fontSize: 32,
+                            style: const TextStyle(
+                              fontSize: 24,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                               fontFamily: 'Poppins',
@@ -332,11 +331,11 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   ),
                 ),
 
-                SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // User info section with better spacing
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: [
                       // User name with better typography
@@ -344,8 +343,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                         AppData.userType == 'doctor'
                             ? 'Dr. ${capitalizeWords(AppData.name)}'
                             : capitalizeWords(AppData.name),
-                        style: TextStyle(
-                          fontSize: 20,
+                        style: const TextStyle(
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF1A365D), // Dark blue-gray
                           fontFamily: 'Poppins',
@@ -357,23 +356,23 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                         textAlign: TextAlign.center,
                       ),
 
-                      SizedBox(height: 8),
+                      const SizedBox(height: 6),
 
                       // Specialty/Role with professional styling
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Color(0xFF4285F4).withOpacity(0.2),
+                            color: const Color(0xFF4285F4).withOpacity(0.2),
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Color(0xFF4285F4).withOpacity(0.1),
+                              color: const Color(0xFF4285F4).withOpacity(0.1),
                               blurRadius: 8,
-                              offset: Offset(0, 2),
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -383,7 +382,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                               : AppData.userType == 'student'
                               ? '${AppData.university} ${translation(context).lbl_student}'
                               : AppData.specialty,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF4285F4),
@@ -429,7 +428,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             opacity: _slideAnimation.value,
             child: Container(
               key: const ValueKey('menu_content'),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), // Reduced padding
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), // Further reduced padding for mobile
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   // Get screen width for responsive adjustments
@@ -459,17 +458,17 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 
     return Container(
       key: ValueKey('menu_item_${item.index}'),
-      margin: const EdgeInsets.only(bottom: 6),
-      height: 68, // Increased height to accommodate text better
+      margin: const EdgeInsets.only(bottom: 4),
+      height: 56, // Reduced height for mobile optimization
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () => _handleMenuTap(item.index),
           borderRadius: BorderRadius.circular(16),
-          splashColor: Color(0xFF4285F4).withOpacity(0.1),
+          splashColor: const Color(0xFF4285F4).withOpacity(0.1),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Reduced horizontal padding
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), // Further reduced padding
             decoration: BoxDecoration(
               color: isSelected
                   ? Colors.white.withOpacity(0.9)
@@ -477,14 +476,14 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected
-                    ? Color(0xFF4285F4).withOpacity(0.3)
+                    ? const Color(0xFF4285F4).withOpacity(0.3)
                     : Colors.white.withOpacity(0.5),
                 width: isSelected ? 1.5 : 1,
               ),
               boxShadow: [
                 BoxShadow(
                   color: isSelected
-                      ? Color(0xFF4285F4).withOpacity(0.15)
+                      ? const Color(0xFF4285F4).withOpacity(0.15)
                       : Colors.black.withOpacity(0.05),
                   blurRadius: isSelected ? 12 : 6,
                   offset: Offset(0, isSelected ? 4 : 2),
@@ -494,7 +493,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   BoxShadow(
                     color: Colors.white.withOpacity(0.8),
                     blurRadius: 8,
-                    offset: Offset(0, -1),
+                    offset: const Offset(0, -1),
                     spreadRadius: 0,
                   ),
               ],
@@ -503,17 +502,17 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               children: [
                 // Icon container with compact styling
                 Container(
-                  width: 38, // Reduced width
-                  height: 38, // Reduced height
+                  width: 32, // Further reduced width
+                  height: 32, // Further reduced height
                   decoration: BoxDecoration(
                     gradient: isSelected
                         ? LinearGradient(
                       colors: [
-                        Color(0xFF4285F4).withOpacity(0.15),
-                        Color(0xFF1A73E8).withOpacity(0.1),
+                        const Color(0xFF4285F4).withOpacity(0.15),
+                        const Color(0xFF1A73E8).withOpacity(0.1),
                       ],
                     )
-                        : LinearGradient(
+                        : const LinearGradient(
                       colors: [
                         Color(0xFFF8FAFF),
                         Color(0xFFEEF4FF),
@@ -522,19 +521,19 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isSelected
-                          ? Color(0xFF4285F4).withOpacity(0.2)
+                          ? const Color(0xFF4285F4).withOpacity(0.2)
                           : Colors.grey.withOpacity(0.1),
                       width: 1,
                     ),
                   ),
                   child: Icon(
                     item.icon,
-                    size: 18, // Reduced icon size
-                    color: isSelected ? Color(0xFF4285F4) : Color(0xFF64748B),
+                    size: 16, // Further reduced icon size
+                    color: isSelected ? const Color(0xFF4285F4) : const Color(0xFF64748B),
                   ),
                 ),
 
-                const SizedBox(width: 10), // Reduced spacing
+                const SizedBox(width: 8), // Further reduced spacing
 
                 // Text content with overflow protection
                 Expanded(
@@ -546,30 +545,30 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                       Text(
                         item.title,
                         style: TextStyle(
-                          fontSize: 14, // Slightly reduced font size
+                          fontSize: 12, // Further reduced font size for mobile
                           fontWeight: FontWeight.w600,
-                          color: isSelected ? Color(0xFF1A365D) : Color(0xFF2D3748),
+                          color: isSelected ? const Color(0xFF1A365D) : const Color(0xFF2D3748),
                           fontFamily: 'Poppins',
-                          height: 1.1, // Tighter line height
-                          letterSpacing: 0.1, // Reduced letter spacing
+                          height: 1.0, // Tighter line height
+                          letterSpacing: 0.0, // Minimal letter spacing
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         softWrap: false, // Prevent wrapping
                       ),
                       
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       
                       // Subtitle with better overflow handling
                       Text(
                         item.subtitle,
                         style: TextStyle(
-                          fontSize: 10, // Reduced font size
+                          fontSize: 9, // Further reduced font size for mobile
                           fontWeight: FontWeight.w400,
-                          color: isSelected ? Color(0xFF4285F4) : Color(0xFF64748B),
+                          color: isSelected ? const Color(0xFF4285F4) : const Color(0xFF64748B),
                           fontFamily: 'Poppins',
-                          height: 1.1, // Tighter line height
-                          letterSpacing: 0.05, // Minimal letter spacing
+                          height: 1.0, // Tighter line height
+                          letterSpacing: 0.0, // No letter spacing
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -587,13 +586,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   height: 24, // Fixed height for arrow container
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Color(0xFF4285F4).withOpacity(0.1)
+                        ? const Color(0xFF4285F4).withOpacity(0.1)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: isSelected ? Color(0xFF4285F4) : Color(0xFF94A3B8),
+                    color: isSelected ? const Color(0xFF4285F4) : const Color(0xFF94A3B8),
                     size: 10, // Reduced arrow size
                   ),
                 ),
@@ -609,8 +608,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   Widget _buildCompactFooter(AppLocalizations l10n, bool isRtl) {
     return Container(
       key: const ValueKey('drawer_footer'),
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.8),
         borderRadius: BorderRadius.circular(16),
@@ -647,28 +646,28 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Color(0xFF4285F4).withOpacity(0.1),
-                            Color(0xFF1A73E8).withOpacity(0.05),
+                            const Color(0xFF4285F4).withOpacity(0.1),
+                            const Color(0xFF1A73E8).withOpacity(0.05),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Color(0xFF4285F4).withOpacity(0.2),
+                          color: const Color(0xFF4285F4).withOpacity(0.2),
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.info_outline_rounded,
                             size: 14,
                             color: Color(0xFF4285F4),
                           ),
-                          SizedBox(width: 6),
+                          const SizedBox(width: 6),
                           Text(
                             snapshot.hasData ? "v${snapshot.data!.version}" : "DocTak",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF4285F4),
@@ -690,13 +689,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
                   ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0xFF4285F4).withOpacity(0.3),
+                      color: const Color(0xFF4285F4).withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -711,7 +710,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                       }
                     },
                     borderRadius: BorderRadius.circular(12),
-                    child: Icon(
+                    child: const Icon(
                       Icons.home_rounded,
                       color: Colors.white,
                       size: 20,
@@ -763,7 +762,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               Expanded(
                 child: Text(
                   translation(context).lbl_version,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF64748B),
@@ -780,7 +779,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                 width: 44,
                 child: Text(
                   l10n.lbl_home,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 9, // Slightly reduced for better fit
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF4285F4),
@@ -832,7 +831,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 
       switch (index) {
         case 0:
-          AiChatScreen().launch(context);
+          const AiChatScreen().launch(context);
           break;
         case 1:
           const JobsScreen().launch(context);
@@ -852,24 +851,21 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           ).launch(context);
           break;
         case 4:
-          MyGroupsScreen().launch(context);
-          break;
-        case 5:
           const GuidelinesScreen().launch(context);
           break;
+        case 5:
+          const ConferencesScreen().launch(context);
+          break;
         case 6:
-          ConferencesScreen().launch(context);
+          const ManageMeetingScreen().launch(context);
           break;
         case 7:
-          ManageMeetingScreen().launch(context);
-          break;
-        case 8:
           const SuggestionScreen().launch(context);
           break;
-        case 9:
+        case 8:
           const AppSettingScreen().launch(context);
           break;
-        case 10:
+        case 9:
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -880,7 +876,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             ),
           );
           break;
-        case 11:
+        case 10:
           AboutUsScreen().launch(context);
           break;
       }
@@ -929,7 +925,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   AppSharedPreferences().clearSharedPreferencesData(context);
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
                         (route) => false,
                   );
                 }
@@ -1010,7 +1006,7 @@ class CurvedElementPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Color(0xFF4285F4).withOpacity(0.08)
+      ..color = const Color(0xFF4285F4).withOpacity(0.08)
       ..style = PaintingStyle.fill;
 
     final path = Path();

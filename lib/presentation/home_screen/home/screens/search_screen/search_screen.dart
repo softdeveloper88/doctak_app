@@ -407,7 +407,7 @@ class _SearchScreenState extends State<SearchScreen>
           builder: (context, state) {
             print("state $state");
             if (state is PaginationLoadingState) {
-              return Expanded(
+              return const Expanded(
                   child: ShimmerCardList());
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
@@ -583,6 +583,7 @@ class _SearchScreenState extends State<SearchScreen>
         children: [
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            height: 48,
             decoration: BoxDecoration(
               color: Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(25),
@@ -627,7 +628,7 @@ class _SearchScreenState extends State<SearchScreen>
                             color: Colors.white.withOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.article_outlined,
                             size: 12,
                             color: Colors.blue,
@@ -659,7 +660,7 @@ class _SearchScreenState extends State<SearchScreen>
                             color: Colors.white.withOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.work_outline,
                             size: 12,
                             color: Colors.blue,
@@ -691,7 +692,7 @@ class _SearchScreenState extends State<SearchScreen>
                             color: Colors.white.withOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.people_outline,
                             size: 12,
                             color: Colors.blue,
@@ -699,7 +700,7 @@ class _SearchScreenState extends State<SearchScreen>
                         ),
                       Flexible(
                         child: Text(
-                          translation(context).lbl_search_peoples,
+                          "People",
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: selectIndex == 2 ? 13 : 12,

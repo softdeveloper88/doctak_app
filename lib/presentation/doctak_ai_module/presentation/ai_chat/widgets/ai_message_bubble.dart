@@ -93,8 +93,6 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -107,13 +105,21 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
             children: [
               // Avatar
               widget.showAvatar 
-                ? CircleAvatar(
-                    backgroundColor: colorScheme.primaryContainer,
-                    radius: 18,
+                ? Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.blue.withOpacity(0.2),
+                        width: 1.5,
+                      ),
+                    ),
                     child: Icon(
-                      Icons.medical_services_rounded,
+                      Icons.psychology_rounded,
                       size: 18,
-                      color: colorScheme.primary,
+                      color: Colors.blue[600],
                     ),
                   ) 
                 : const SizedBox(width: 36),
@@ -124,8 +130,20 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
+                    color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.blue.withOpacity(0.1),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.05),
+                        offset: const Offset(0, 2),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -136,8 +154,10 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                         ? _buildTypingMessageContent() 
                         : Text(
                             '${_currentlyDisplayedText.substring(0, math.min(100, _currentlyDisplayedText.length))}...',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              color: Colors.black87,
                             ),
                           ),
                     
@@ -167,7 +187,7 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                         _isExpanded = !_isExpanded;
                       });
                     },
-                    iconColor: Colors.black,
+                    iconColor: Colors.blue[600]!,
                   ),
                 ),
 
@@ -180,14 +200,18 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                     final text = widget.message.content;
                     Clipboard.setData(ClipboardData(text: text));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Copied to clipboard'),
+                      SnackBar(
+                        content: const Text(
+                          'Copied to clipboard',
+                          style: TextStyle(fontFamily: 'Poppins'),
+                        ),
                         behavior: SnackBarBehavior.floating,
-                        duration: Duration(seconds: 2),
+                        duration: const Duration(seconds: 2),
+                        backgroundColor: Colors.blue[600],
                       ),
                     );
                   },
-                  iconColor: Colors.black,
+                  iconColor: Colors.blue[600]!,
                 ),
               ],
             ),
@@ -198,7 +222,6 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
   }
   
   Widget _buildTypingMessageContent() {
-    final colorScheme = Theme.of(context).colorScheme;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,29 +230,43 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
         MarkdownBody(
           data: _currentlyDisplayedText,
           styleSheet: MarkdownStyleSheet(
-            p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface,
+            p: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              color: Colors.black87,
+              height: 1.5,
             ),
-            h1: Theme.of(context).textTheme.titleLarge?.copyWith(
+            h1: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
+              color: Colors.black87,
             ),
-            h2: Theme.of(context).textTheme.titleMedium?.copyWith(
+            h2: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
+              color: Colors.black87,
             ),
-            h3: Theme.of(context).textTheme.titleSmall?.copyWith(
+            h3: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
+              color: Colors.black87,
             ),
-            code: Theme.of(context).textTheme.bodySmall?.copyWith(
+            code: const TextStyle(
               fontFamily: 'monospace',
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 13,
+              backgroundColor: Colors.grey,
+              color: Colors.black87,
             ),
             codeblockDecoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Colors.grey,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.blue,
+                width: 1,
+              ),
             ),
           ),
           onTapLink: (text, href, title) {
@@ -269,7 +306,7 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: Colors.blue,
               shape: BoxShape.circle,
             ),
           ),
@@ -314,33 +351,43 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
     bool isActive = false,
     Color? iconColor,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final buttonColor = iconColor ?? (isActive ? colorScheme.primary : Colors.black);
+    final buttonColor = iconColor ?? Colors.blue[600]!;
     
-    return TextButton.icon(
-      icon: Icon(
-        icon,
-        size: 20,
-        color: buttonColor,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.blue.withOpacity(0.1),
+          width: 1,
+        ),
       ),
-      label: Text(
-        label,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
+      child: TextButton.icon(
+        icon: Icon(
+          icon,
+          size: 16,
           color: buttonColor,
         ),
-      ),
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
+        label: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Poppins',
+            color: buttonColor,
+          ),
         ),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        alignment: Alignment.center,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          alignment: Alignment.center,
+        ),
+        onPressed: onPressed,
       ),
-      onPressed: onPressed,
     );
   }
 }

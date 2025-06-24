@@ -6,6 +6,8 @@ abstract class ChatGPTState {}
 
 class DataInitial extends ChatGPTState {}
 
+class DataLoading extends ChatGPTState {}
+
 class DataLoaded extends ChatGPTState {
   ChatGptSession response;
   ChatGptMessageHistory response1;
