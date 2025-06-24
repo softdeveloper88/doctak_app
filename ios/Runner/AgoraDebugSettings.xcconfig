@@ -1,0 +1,24 @@
+// Agora Debug Settings for dSYM generation
+// Include this in your Release.xcconfig or project settings
+
+// Enable debug information format for proper dSYM generation
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+
+// Ensure symbols are generated
+GENERATE_PROFILING_CODE = YES
+
+// dSYM settings
+DWARF_DSYM_FOLDER_PATH = $(CONFIGURATION_BUILD_DIR)
+DWARF_DSYM_FILE_NAME = $(EXECUTABLE_NAME).dSYM
+
+// Don't strip symbols in release builds for frameworks
+STRIP_INSTALLED_PRODUCT = NO
+COPY_PHASE_STRIP = NO
+STRIP_STYLE = debugging
+
+// Ensure all architectures are built
+ONLY_ACTIVE_ARCH = NO
+
+// Additional settings for proper symbol extraction
+GCC_GENERATE_DEBUGGING_SYMBOLS = YES
+DEPLOYMENT_POSTPROCESSING = YES
