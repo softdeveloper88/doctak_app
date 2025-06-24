@@ -916,7 +916,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_history_ai.
   ///
   /// In en, this message translates to:
-  /// **'History Artificial Intelligence'**
+  /// **'History '**
   String get lbl_history_ai;
 
   /// No description provided for @lbl_new_chat.
@@ -1804,7 +1804,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_medical_ai.
   ///
   /// In en, this message translates to:
-  /// **'Medical AI'**
+  /// **'Doctak AI'**
   String get lbl_medical_ai;
 
   /// No description provided for @desc_medical_ai.
@@ -1852,7 +1852,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_ai.
   ///
   /// In en, this message translates to:
-  /// **'Doctak AI'**
+  /// **'Doctak Images'**
   String get lbl_ai;
 
   /// No description provided for @lbl_images.

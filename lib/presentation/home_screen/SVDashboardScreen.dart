@@ -118,7 +118,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
-      height: 80 + bottomPadding, // Adjust for safe area
+      height: 82 + bottomPadding, // Adjust for safe area and improved text layout
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFAFAFA),
         boxShadow: [
@@ -245,7 +245,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          height: 64,
+          height: 66,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -321,26 +321,29 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
               
               const SizedBox(height: 4),
               
-              // Enhanced label with better typography
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                style: TextStyle(
-                  fontSize: isSelected ? 11 : 10,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                  color: isSelected
-                      ? Colors.blue[700]
-                      : (isDark ? Colors.grey[400] : Colors.grey[500]),
-                  fontFamily: 'Poppins',
-                  letterSpacing: isSelected ? 0.3 : 0.1,
-                  height: 1.0,
-                ),
-                overflow: TextOverflow.visible,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.visible,
-                  textAlign: TextAlign.center,
+              // Enhanced label with proper text overflow handling
+              Container(
+                constraints: const BoxConstraints(maxWidth: 70),
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOutCubic,
+                  style: TextStyle(
+                    fontSize: isSelected ? 10.5 : 9.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: isSelected
+                        ? Colors.blue[700]
+                        : (isDark ? Colors.grey[400] : Colors.grey[500]),
+                    fontFamily: 'Poppins',
+                    letterSpacing: isSelected ? 0.2 : 0.1,
+                    height: 1.1,
+                  ),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    softWrap: false,
+                  ),
                 ),
               ),
             ],
@@ -402,19 +405,24 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                       ),
                     ),
                     const SizedBox(height: 4),
-                    // Simple text label
-                    const Text(
-                      'Create',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
-                        letterSpacing: 0.3,
-                        height: 1.0,
+                    // Simple text label with proper overflow handling
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 70),
+                      child: const Text(
+                        'Create',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Poppins',
+                          letterSpacing: 0.2,
+                          height: 1.1,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        softWrap: false,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.visible,
                     ),
                   ],
                 ),
@@ -441,7 +449,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          height: 64,
+          height: 66,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -523,26 +531,29 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
               
               const SizedBox(height: 4),
               
-              // Enhanced label with better typography
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                style: TextStyle(
-                  fontSize: isSelected ? 11 : 10,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                  color: isSelected
-                      ? Colors.blue[700]
-                      : (isDark ? Colors.grey[400] : Colors.grey[500]),
-                  fontFamily: 'Poppins',
-                  letterSpacing: isSelected ? 0.3 : 0.1,
-                  height: 1.0,
-                ),
-                overflow: TextOverflow.visible,
-                child: Text(
-                  translation(context).lbl_profile,
-                  maxLines: 1,
-                  overflow: TextOverflow.visible,
-                  textAlign: TextAlign.center,
+              // Enhanced label with proper text overflow handling
+              Container(
+                constraints: const BoxConstraints(maxWidth: 70),
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOutCubic,
+                  style: TextStyle(
+                    fontSize: isSelected ? 10.5 : 9.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: isSelected
+                        ? Colors.blue[700]
+                        : (isDark ? Colors.grey[400] : Colors.grey[500]),
+                    fontFamily: 'Poppins',
+                    letterSpacing: isSelected ? 0.2 : 0.1,
+                    height: 1.1,
+                  ),
+                  child: Text(
+                    translation(context).lbl_profile,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    softWrap: false,
+                  ),
                 ),
               ),
             ],
@@ -553,7 +564,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
   }
 
   Widget _buildAINavItem() {
-    final isSelected = false; // Always false since it opens as separate screen
+    const isSelected = false; // Always false since it opens as separate screen
     final isDark = appStore.isDarkMode;
 
     return Expanded(
@@ -565,7 +576,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          height: 64,
+          height: 66,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -659,26 +670,29 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
               
               const SizedBox(height: 4),
               
-              // Enhanced label with better typography
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                style: TextStyle(
-                  fontSize: isSelected ? 11 : 10,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                  color: isSelected
-                      ? Colors.blue[700]
-                      : (isDark ? Colors.grey[400] : Colors.grey[500]),
-                  fontFamily: 'Poppins',
-                  letterSpacing: isSelected ? 0.3 : 0.1,
-                  height: 1.0,
-                ),
-                overflow: TextOverflow.visible,
-                child: Text(
-                  translation(context).lbl_ai,
-                  maxLines: 1,
-                  overflow: TextOverflow.visible,
-                  textAlign: TextAlign.center,
+              // Enhanced label with proper text overflow handling
+              Container(
+                constraints: const BoxConstraints(maxWidth: 70),
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOutCubic,
+                  style: TextStyle(
+                    fontSize: isSelected ? 10.5 : 9.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: isSelected
+                        ? Colors.blue[700]
+                        : (isDark ? Colors.grey[400] : Colors.grey[500]),
+                    fontFamily: 'Poppins',
+                    letterSpacing: isSelected ? 0.2 : 0.1,
+                    height: 1.1,
+                  ),
+                  child: Text(
+                    translation(context).lbl_ai,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    softWrap: false,
+                  ),
                 ),
               ),
             ],

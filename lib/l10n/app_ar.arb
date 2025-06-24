@@ -325,7 +325,7 @@
 
   "@_HOME_SCREEN": {},
   "lbl_about_us": "من نحن",
-  "lbl_medical_ai": "الذكاء الاصطناعي الطبي",
+  "lbl_medical_ai": "دكتك للذكاء الاصطناعي",
   "desc_medical_ai": "مساعد ذكي طبي",
   "lbl_case_discussion": "مناقشة الحالات",
   "lbl_post_poll": "نشر استطلاع",
@@ -333,7 +333,7 @@
   "lbl_meeting": "اجتماع",
   "lbl_search": "بحث",
   "lbl_add": "إضافة",
-  "lbl_ai": "الذكاء الاصطناعي",
+  "lbl_ai": "صور دكتك",
   "lbl_images": "الصور",
   "lbl_yes": "نعم",
   "msg_confirm_logout": "هل أنت متأكد أنك تريد تسجيل الخروج؟",

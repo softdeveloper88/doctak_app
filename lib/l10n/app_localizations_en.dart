@@ -414,7 +414,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lbl_delete_caps => 'DELETE';
 
   @override
-  String get lbl_history_ai => 'History';
+  String get lbl_history_ai => 'History ';
 
   @override
   String get lbl_new_chat => '+ NEW CHAT';
@@ -866,7 +866,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lbl_about_us => 'About Us';
 
   @override
-  String get lbl_medical_ai => 'Medical AI';
+  String get lbl_medical_ai => 'Doctak AI';
 
   @override
   String get desc_medical_ai => 'AI medical assistant';
@@ -890,7 +890,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lbl_add => 'Add';
 
   @override
-  String get lbl_ai => 'Doctak AI';
+  String get lbl_ai => 'Doctak Images';
 
   @override
   String get lbl_images => 'Images';

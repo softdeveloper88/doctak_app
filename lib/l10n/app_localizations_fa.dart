@@ -414,7 +414,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_delete_caps => 'حذف';
 
   @override
-  String get lbl_history_ai => 'تاریخچه ';
+  String get lbl_history_ai => 'تاریخچه';
 
   @override
   String get lbl_new_chat => '+ گفتگوی جدید';
@@ -866,7 +866,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_about_us => 'درباره ما';
 
   @override
-  String get lbl_medical_ai => 'هوش مصنوعی پزشکی';
+  String get lbl_medical_ai => 'دکتک هوش مصنوعی';
 
   @override
   String get desc_medical_ai => 'دستیار پزشکی هوشمند';
@@ -890,7 +890,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_add => 'افزودن';
 
   @override
-  String get lbl_ai => 'هوش مصنوعی دکتک';
+  String get lbl_ai => 'تصاویر دکتک';
 
   @override
   String get lbl_images => 'تصاویر';

@@ -414,7 +414,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_delete_caps => 'حذف';
 
   @override
-  String get lbl_history_ai => 'محادثة';
+  String get lbl_history_ai => 'محادثة الذكاء الاصطناعي';
 
   @override
   String get lbl_new_chat => '+ محادثة جديدة';
@@ -866,7 +866,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_about_us => 'من نحن';
 
   @override
-  String get lbl_medical_ai => 'الذكاء الاصطناعي الطبي';
+  String get lbl_medical_ai => 'دكتك للذكاء الاصطناعي';
 
   @override
   String get desc_medical_ai => 'مساعد ذكي طبي';
@@ -890,7 +890,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_add => 'إضافة';
 
   @override
-  String get lbl_ai => 'الذكاء الاصطناعي';
+  String get lbl_ai => 'صور دكتك';
 
   @override
   String get lbl_images => 'الصور';
