@@ -1946,6 +1946,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:http/http.dart' as http;
 
 import 'meeting_chat_screen.dart';
@@ -2029,6 +2030,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
+
+    // Keep screen awake during video call
+    WakelockPlus.enable();
 
     // Initialize animation controller for speaking indication
     _speakingAnimationController = AnimationController(
@@ -4083,6 +4087,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           ),
           TextButton(
             onPressed: () async {
+              // Disable wakelock when ending the call
+              WakelockPlus.disable();
+              
               if (widget.isHost ?? false) {
                 Navigator.pop(context); // Close dialog
                 Navigator.pop(context);
@@ -4116,6 +4123,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     // Agora cleanup
     _agoraEngine.leaveChannel();
     _agoraEngine.release();
+
+    // Disable wakelock when leaving the call
+    WakelockPlus.disable();
 
     super.dispose();
   }

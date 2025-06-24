@@ -118,6 +118,7 @@ dependencies:
   crypto: ^3.0.1
   pub_semver: ^2.0.0
   path_provider: ^2.0.2 # For getting the directory to store the downloaded file
+  gal: ^2.3.0 # For saving images/videos to gallery
 #  open_file: ^3.2.1 # For opening the file
 #  image_picker_plus: ^0.5.9
   photo_view: ^0.15.0
