@@ -330,7 +330,7 @@
 
   "@_HOME_SCREEN": {},
   "lbl_about_us": "Über uns",
-  "lbl_medical_ai": "Doctak KI",
+  "lbl_medical_ai": "DocTak KI",
   "desc_medical_ai": "KI-Medizinassistent",
   "lbl_case_discussion": "Falldiskussion",
   "lbl_post_poll": "Umfrage veröffentlichen",
@@ -338,7 +338,7 @@
   "lbl_meeting": "Besprechung",
   "lbl_search": "Suchen",
   "lbl_add": "Hinzufügen",
-  "lbl_ai": "DocTak Bilder",
+  "lbl_ai": "Bilder",
   "lbl_images": "Bilder",
   "lbl_yes": "Ja",
   "msg_confirm_logout": "Sind Sie sicher, dass Sie sich abmelden möchten?",

@@ -336,7 +336,7 @@
 
  "@_HOME_SCREEN": {},
  "lbl_about_us": "À propos de nous",
- "lbl_medical_ai": "Doctak IA",
+ "lbl_medical_ai": "DocTak IA",
  "desc_medical_ai": "Assistant médical IA",
  "lbl_case_discussion": "Discussion de cas",
  "lbl_post_poll": "Publier un sondage",
@@ -344,7 +344,7 @@
  "lbl_meeting": "Réunion",
  "lbl_search": "Rechercher",
  "lbl_add": "Ajouter",
- "lbl_ai": "Images DocTak",
+ "lbl_ai": "Images",
  "lbl_images": "Images",
  "lbl_yes": "Oui",
  "msg_confirm_logout": "Êtes-vous sûr de vouloir vous déconnecter ?",
