@@ -270,7 +270,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               },
               builder: (context, state) {
                 if (state is PaginationLoadingState) {
-                  return const UserShimmer();
+                  return const NotificationShimmer();
                 } else if (state is PaginationLoadedState) {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
@@ -397,7 +397,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           }
           if (bloc.numberOfPage != bloc.pageNumber - 1 &&
               index >= filteredList.length - 1 && selectedFilterIndex == 0) {
-            return const SizedBox(height: 200, child: UserShimmer());
+            return const SizedBox(height: 200, child: NotificationShimmer());
           } else {
             return Container(
               margin: const EdgeInsets.only(bottom: 12),

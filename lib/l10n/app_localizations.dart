@@ -1804,7 +1804,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_medical_ai.
   ///
   /// In en, this message translates to:
-  /// **'Doctak AI'**
+  /// **'DocTak AI'**
   String get lbl_medical_ai;
 
   /// No description provided for @desc_medical_ai.
@@ -1852,7 +1852,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_ai.
   ///
   /// In en, this message translates to:
-  /// **'Doctak Images'**
+  /// **'Images'**
   String get lbl_ai;
 
   /// No description provided for @lbl_images.

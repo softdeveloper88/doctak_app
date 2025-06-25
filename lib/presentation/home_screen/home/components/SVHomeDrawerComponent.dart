@@ -163,7 +163,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 
   // Professional header with matching splash screen background
   Widget _buildCompactHeader() {
-    return Container(
+    return SizedBox(
       key: const ValueKey('drawer_header'),
       height: 200,
       child: Stack(
@@ -232,7 +232,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           Positioned(
             bottom: 0,
             right: 0,
-            child: Container(
+            child: SizedBox(
               width: 150,
               height: 100,
               child: CustomPaint(
@@ -775,7 +775,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               const SizedBox(width: 10),
 
               // Home label
-              Container(
+              SizedBox(
                 width: 44,
                 child: Text(
                   l10n.lbl_home,
@@ -794,7 +794,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               const SizedBox(width: 10),
 
               // Logout label
-              Container(
+              SizedBox(
                 width: 44,
                 child: Text(
                   l10n.lbl_logout,

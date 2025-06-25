@@ -131,33 +131,74 @@ Widget _buildPointsCard(BuildContext context) {
 }
 
 class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
+  late AnimationController _headerController;
   late Animation<double> _profileImageAnimation;
+  late Animation<double> _headerOpacityAnimation;
+  late Animation<double> _headerScaleAnimation;
+
+  final ScrollController _scrollController = ScrollController();
+  double _scrollOffset = 0.0;
+  bool _isHeaderCollapsed = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Add animation for profile image
+    // Profile image animation
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
-    _profileImageAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
+    // Header collapse animation
+    _headerController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _profileImageAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _headerController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _headerScaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _headerController,
         curve: Curves.easeOutBack,
       ),
     );
 
+    // Add scroll listener for smooth header effects
+    _scrollController.addListener(_onScroll);
+
+    // Start animations
     _controller.forward();
+    _headerController.forward();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = _scrollController.offset;
+      _isHeaderCollapsed = _scrollOffset > 200;
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _headerController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 

@@ -866,7 +866,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get lbl_about_us => 'À propos de nous';
 
   @override
-  String get lbl_medical_ai => 'Doctak IA';
+  String get lbl_medical_ai => 'DocTak IA';
 
   @override
   String get desc_medical_ai => 'Assistant médical IA';
@@ -890,7 +890,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get lbl_add => 'Ajouter';
 
   @override
-  String get lbl_ai => 'Images DocTak';
+  String get lbl_ai => 'Images';
 
   @override
   String get lbl_images => 'Images';

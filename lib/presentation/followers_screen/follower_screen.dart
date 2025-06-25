@@ -272,7 +272,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
             builder: (context, state) {
               if (state is FollowersPaginationLoadingState) {
                 return const Expanded(
-                  child: UserShimmer()
+                  child: ProfileListShimmer()
                 );
               } else if (state is FollowersPaginationLoadedState) {
                 final bloc = followersBloc;
@@ -467,7 +467,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                 );
               } else {
                 return const Expanded(
-                  child: UserShimmer()
+                  child: ProfileListShimmer()
                 );
               }
             },

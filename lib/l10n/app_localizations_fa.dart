@@ -890,7 +890,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_add => 'افزودن';
 
   @override
-  String get lbl_ai => 'تصاویر دکتک';
+  String get lbl_ai => 'تصاویر';
 
   @override
   String get lbl_images => 'تصاویر';

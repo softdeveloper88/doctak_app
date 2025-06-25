@@ -890,7 +890,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_add => 'إضافة';
 
   @override
-  String get lbl_ai => 'صور دكتك';
+  String get lbl_ai => 'الصور';
 
   @override
   String get lbl_images => 'الصور';

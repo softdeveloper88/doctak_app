@@ -40,7 +40,7 @@ class SearchPeopleList extends StatelessWidget {
               decoration: BoxDecoration(
                 color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
               ),
-              child: const UserShimmer(),
+              child: const ProfileListShimmer(),
             ),
           );
         } else if (state is SearchPeoplePaginationLoadedState) {
@@ -66,7 +66,7 @@ class SearchPeopleList extends StatelessWidget {
                   ) {
                     return Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: const UserShimmer(),
+                      child: const ProfileListShimmer(),
                     );
                   }
                   return Container(
