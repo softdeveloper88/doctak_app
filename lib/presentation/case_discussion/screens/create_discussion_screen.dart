@@ -11,6 +11,7 @@ import '../models/case_discussion_models.dart';
 import '../repository/case_discussion_repository.dart';
 import '../widgets/specialty_loading_shimmer.dart';
 import '../../../localization/app_localization.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import '../../../core/utils/app/AppData.dart';
 import '../../home_screen/utils/SVColors.dart';
 import '../../home_screen/utils/SVCommon.dart';
@@ -332,48 +333,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     _selectedEthnicity ??= AppLocalizations.of(context)!.lbl_not_specified;
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.medical_information_rounded,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              AppLocalizations.of(context)!.lbl_create_case_discussion,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: AppLocalizations.of(context)!.lbl_create_case_discussion,
+        titleIcon: Icons.medical_information_rounded,
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),

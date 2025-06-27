@@ -7,6 +7,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -46,7 +47,10 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
     return Scaffold(
       backgroundColor: svGetBgColor(),
       // App Bar
-      appBar: _buildAppBar(),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_comments,
+        titleIcon: Icons.chat_bubble_outline_rounded,
+      ),
       // Body
       body: BlocConsumer<CommentBloc, CommentState>(
         bloc: commentBloc,
@@ -104,53 +108,4 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
     );
   }
 
-  // Build App Bar
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: svGetScaffoldColor(),
-      iconTheme: IconThemeData(color: context.iconColor),
-      elevation: 0,
-      toolbarHeight: 70,
-      surfaceTintColor: svGetScaffoldColor(),
-      centerTitle: true,
-      leading: IconButton(
-        icon: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.blue[600],
-            size: 16,
-          ),
-        ),
-        onPressed: () {
-          Navigator.pop(context);
-        }
-      ),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline_rounded,
-            color: Colors.blue[600],
-            size: 24,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            translation(context).lbl_comments,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-              color: Colors.blue[800],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -3,6 +3,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:doctak_app/widgets/shimmer_widget/comment_list_shimmer.dart';
 import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
@@ -72,48 +73,9 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded, 
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.history_rounded,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              translation(context).lbl_history_ai,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_history_ai,
+        titleIcon: Icons.history_rounded,
         actions: [
           // New chat button
           Container(

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../../../main.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
@@ -107,57 +108,21 @@ class _JobsScreenState extends State<JobsScreen> {
                 }
                 return Column(
                   children: [
-                    AppBar(
-                      backgroundColor: svGetScaffoldColor(),
-                      iconTheme: IconThemeData(color: context.iconColor),
-                      elevation: 0,
-                      toolbarHeight: 70,
-                      surfaceTintColor: svGetScaffoldColor(),
-                      centerTitle: true,
-                      leading: IconButton(
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withAlpha(25),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: Colors.blue[600],
-                            size: 16,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        }
-                      ),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.work_outline_rounded,
-                            color: Colors.blue[600],
-                            size: 24,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            translation(context).lbl_jobs,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                              color: Colors.blue[800],
-                            ),
-                          ),
-                        ],
-                      ),
+                    DoctakAppBar(
+                      title: translation(context).lbl_jobs,
+                      titleIcon: Icons.work_outline_rounded,
                       actions: [
                         // Search icon button
                         IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 36,
+                            minHeight: 36,
+                          ),
                           icon: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withAlpha(25),
+                              color: Colors.blue.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -194,10 +159,10 @@ class _JobsScreenState extends State<JobsScreen> {
                             tooltip: 'Select Country',
                             elevation: 8,
                             child: Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withAlpha(25),
-                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.blue.withOpacity(0.1),
+                                shape: BoxShape.circle,
                               ),
                               child: Text(
                                 state.countryFlag != '' 
@@ -213,9 +178,11 @@ class _JobsScreenState extends State<JobsScreen> {
                               return state.countriesModel.countries?.map((Countries item) {
                                 return PopupMenuItem<Countries>(
                                   value: item,
-                                  child: SizedBox(
-                                    width: 200, // Fixed width for popup items
+                                  height: 48,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Text(
@@ -226,9 +193,10 @@ class _JobsScreenState extends State<JobsScreen> {
                                               fontWeight: FontWeight.w500,
                                               fontSize: 14,
                                             ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 12),
                                         Text(
                                           item.flag ?? '',
                                           style: const TextStyle(fontSize: 16),

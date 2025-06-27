@@ -39,50 +39,9 @@ class _LikesListScreenState extends State<LikesListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          }
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_rounded,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              translation(context).lbl_people_who_likes,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_people_who_likes,
+        titleIcon: Icons.favorite_rounded,
       ),
       body: BlocConsumer<LikesBloc, LikesState>(
         bloc: likesBloc,

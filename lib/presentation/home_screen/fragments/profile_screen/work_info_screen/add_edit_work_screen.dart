@@ -6,6 +6,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -102,52 +103,11 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          }
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              widget.updateWork != null ? Icons.edit_outlined : Icons.work_outline,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              widget.updateWork != null
-                  ? translation(context).lbl_edit
-                  : translation(context).lbl_add_experience,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: widget.updateWork != null
+            ? translation(context).lbl_edit
+            : translation(context).lbl_add_experience,
+        titleIcon: widget.updateWork != null ? Icons.edit_outlined : Icons.work_outline,
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,

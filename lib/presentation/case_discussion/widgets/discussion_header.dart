@@ -77,18 +77,10 @@ class DiscussionHeader extends StatelessWidget {
                         fontFamily: 'Poppins',
                         color: Colors.blue[800],
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
                     ),
-                    const SizedBox(height: 4),
-                    if (discussion.author.specialty.isNotEmpty)
-                      Text(
-                        discussion.author.specialty,
-                        style: TextStyle(
-                          color: Colors.blue[600],
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -108,35 +100,38 @@ class DiscussionHeader extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _getSpecialtyColor(discussion.specialty).withOpacity(0.1),
+                            _getSpecialtyColor(discussion.specialty).withOpacity(0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: _getSpecialtyColor(discussion.specialty).withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        discussion.specialty.toUpperCase(),
+                        style: TextStyle(
+                          color: _getSpecialtyColor(discussion.specialty).withOpacity(0.8),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Poppins',
+                          letterSpacing: 0.3,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      _getSpecialtyColor(discussion.specialty).withOpacity(0.1),
-                      _getSpecialtyColor(discussion.specialty).withOpacity(0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: _getSpecialtyColor(discussion.specialty).withOpacity(0.3),
-                  ),
-                ),
-                child: Text(
-                  discussion.specialty.toUpperCase(),
-                  style: TextStyle(
-                    color: _getSpecialtyColor(discussion.specialty).withOpacity(0.8),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Poppins',
-                    letterSpacing: 0.5,
-                  ),
                 ),
               ),
             ],

@@ -49,7 +49,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       print(event.searchTerm);
     }
     // ProgressDialogUtils.showProgressDialog();
-    // try {
+    try {
     JobsModel response = await postService.getJobsList(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
@@ -63,13 +63,13 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     }
     emit(PaginationLoadedState());
     // emit(DataLoaded(drugsData));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   // emit(PaginationLoadedState());
-    //
-    //   emit(DataError('No Data Found'));
-    // }
+    } catch (e) {
+      print(e);
+
+      // emit(PaginationLoadedState());
+
+      emit(DataError('No Data Found'));
+    }
   }
 
   _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
@@ -130,6 +130,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);
       emit(PaginationLoadedState());
+
       // emit(DataLoaded(drugsData));
     } catch (e) {
       // ProgressDialogUtils.hideProgressDialog();
@@ -142,20 +143,25 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
 
-    // emit(PaginationLoadingState());
+    emit(PaginationLoadingState());
     try {
       Dio dio = Dio();
 
       try {
         Response response = await dio.post(
-          '${AppData.remoteUrl2}/jobs/${event.jobId}/withdraw-application', // Add query parameters
+          '${AppData.remoteUrl2}/jobs-applicants/${event.jobId}/withdraw-application', // Add query parameters
           options: Options(headers: {
             'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
           }),
         );
         toast(response.data['success']);
         print("response ${response.data}");
+        
+        // Reload job details after successful withdrawal
+        add(JobDetailPageEvent(jobId: event.jobId));
+        return; // Return early to let JobDetailPageEvent handle the emission
       } catch (e) {
+        emit(PaginationLoadedState());
         print('Error: $e');
       }
       emit(PaginationLoadedState());
@@ -164,7 +170,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       // ProgressDialogUtils.hideProgressDialog();
       print(e);
 
-      emit(DataError('No Data Found'));
+      emit(PaginationLoadedState());
     }
   }
   _showApplicant(ShowApplicantEvent event, Emitter<JobsState> emit) async {
@@ -172,29 +178,29 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     // ProgressDialogUtils.showProgressDialog();
 
     emit(PaginationLoadingState());
-    try {
+    // try {
       Dio dio = Dio();
 
 
         var response = await dio.get(
-          '${AppData.remoteUrl2}/jobs/${event.jobId}/applicants', // Add query parameters
+          '${AppData.remoteUrl2}/jobs-applicants/${event.jobId}/applicants', // Add query parameters
           options: Options(headers: {
             'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
           }),
         );
       jobApplicantsModel=JobApplicantsModel.fromJson(response.data);
         // showToast('message');
-        // print(response.data);
+        print(response.data);
         //
       emit(PaginationLoadedState());
       // emit(DataLoaded(drugsData));
-    } catch (e) {
-      // ProgressDialogUtils.hideProgressDialog();
-      print(e);
-      emit(PaginationLoadedState());
-
-      // emit(DataError('No Data Found'));
-    }
+    // } catch (e) {
+    //   // ProgressDialogUtils.hideProgressDialog();
+    //   print(e);
+    //   emit(PaginationLoadedState());
+    //
+    //   // emit(DataError('No Data Found'));
+    // }
   }
 
 }

@@ -8,6 +8,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -57,50 +58,9 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appStore.isDarkMode ? const Color(0xFF0A0A0A) : const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          }
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person_search_rounded,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              translation(context).lbl_search_contacts,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_search_contacts,
+        titleIcon: Icons.person_search_rounded,
       ),
       body: Column(
         children: [

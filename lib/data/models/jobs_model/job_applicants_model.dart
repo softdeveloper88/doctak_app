@@ -51,7 +51,7 @@ class Applicants {
   int? id;
   String? userId;
   String? jobId;
-  String? isViewedByAdmin;
+  dynamic isViewedByAdmin;
   String? createdAt;
   String? updatedAt;
   String? cv;

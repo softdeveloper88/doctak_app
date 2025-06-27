@@ -9,6 +9,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_scre
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/virtualized_guidelines_list.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/guidelines_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,9 +68,9 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(24),
                     topRight: Radius.circular(24),
                   ),
@@ -101,6 +102,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Icon(
+                              size: 16,
                               Icons.search,
                               color: Colors.grey[600],
                             ),
@@ -128,6 +130,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                             ),
                           ),
                           IconButton(
+                            iconSize: 16,
                             icon: const Icon(Icons.close),
                             onPressed: () {
                               bottomSearchController.clear();
@@ -158,50 +161,9 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       body: Column(
         children: [
           // App Bar with Title and Actions
-          AppBar(
-            backgroundColor: svGetScaffoldColor(),
-            iconTheme: IconThemeData(color: context.iconColor),
-            elevation: 0,
-            toolbarHeight: 70,
-            surfaceTintColor: svGetScaffoldColor(),
-            centerTitle: true,
-            leading: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.blue[600],
-                  size: 16,
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              }
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.medical_information,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  translation(context).lbl_guidelines,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ],
-            ),
+          DoctakAppBar(
+            title: translation(context).lbl_guidelines,
+            titleIcon: Icons.medical_information,
             actions: [
               // Search icon button
               IconButton(
@@ -211,7 +173,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                   minHeight: 36,
                 ),
                 icon: Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     shape: BoxShape.circle,
@@ -219,7 +181,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                   child: Icon(
                     isSearchShow ? Icons.close : Icons.search,
                     color: Colors.blue[600],
-                    size: 14,
+                    size: 16,
                   ),
                 ),
                 onPressed: () {
@@ -357,7 +319,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       : const SizedBox(),
                   ),
                 ),
-                SizedBox(height: 10,)
+                const SizedBox(height: 10,)
               ],
             ),
           ),
@@ -372,7 +334,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
             },
             builder: (context, state) {
               if (state is PaginationLoadingState) {
-                return Expanded(
+                return const Expanded(
                   child: GuidelinesShimmerLoader()
                 );
               } else if (state is PaginationLoadedState) {

@@ -159,39 +159,37 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       preferredSize: const Size.fromHeight(70),
       child: Container(
         decoration: BoxDecoration(
-          color: svGetScaffoldColor(),
+          // Exact same background as bottom navigation bar
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           boxShadow: [
+            // Primary shadow for depth (matching bottom nav)
             BoxShadow(
-              color: isDark 
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.08),
-              blurRadius: 20,
+              color: isDark
+                  ? Colors.black.withOpacity(0.6)
+                  : Colors.black.withOpacity(0.12),
+              blurRadius: 32,
               spreadRadius: 0,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 12),
             ),
+            // Secondary shadow for subtle elevation
             BoxShadow(
-              color: isDark 
-                  ? Colors.black.withOpacity(0.2)
-                  : Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              spreadRadius: -2,
-              offset: const Offset(0, 2),
+              color: isDark
+                  ? Colors.black.withOpacity(0.4)
+                  : Colors.black.withOpacity(0.06),
+              blurRadius: 16,
+              spreadRadius: -4,
+              offset: const Offset(0, 6),
+            ),
+            // Inner light effect for glass morphism
+            BoxShadow(
+              color: isDark
+                  ? Colors.white.withOpacity(0.02)
+                  : Colors.white.withOpacity(0.8),
+              blurRadius: 8,
+              spreadRadius: -8,
+              offset: const Offset(0, 1),
             ),
           ],
-          // Subtle gradient overlay for premium feel
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark
-                ? [
-                    svGetScaffoldColor(),
-                    svGetScaffoldColor().withOpacity(0.95),
-                  ]
-                : [
-                    svGetScaffoldColor(),
-                    svGetScaffoldColor().withOpacity(0.98),
-                  ],
-          ),
         ),
         child: AppBar(
           backgroundColor: Colors.transparent,
@@ -221,7 +219,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
                 fontFamily: 'Poppins',
-                color: context.iconColor,
+                color: Colors.blue[600],
                 letterSpacing: 0.5,
               ),
             ),
@@ -263,24 +261,24 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: isDark 
+              color: isDark
                   ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.04),
+                  : Colors.blue.withOpacity(0.04),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark 
+                color: isDark
                     ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.06),
+                    : Colors.blue.withOpacity(0.4),
                 width: 0.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isDark 
+                  color: isDark
                       ? Colors.black.withOpacity(0.2)
-                      : Colors.black.withOpacity(0.05),
+                      : Colors.blue.withOpacity(0.2),
                   blurRadius: 8,
                   spreadRadius: 0,
                   offset: const Offset(0, 2),
@@ -318,19 +316,19 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             decoration: BoxDecoration(
               color: isDark 
                   ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.04),
+                  : Colors.blue.withOpacity(0.04),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark 
                     ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.06),
+                    : Colors.blue.withOpacity(0.4),
                 width: 0.5,
               ),
               boxShadow: [
                 BoxShadow(
                   color: isDark 
                       ? Colors.black.withOpacity(0.2)
-                      : Colors.black.withOpacity(0.05),
+                      : Colors.blue.withOpacity(0.2),
                   blurRadius: 8,
                   spreadRadius: 0,
                   offset: const Offset(0, 2),

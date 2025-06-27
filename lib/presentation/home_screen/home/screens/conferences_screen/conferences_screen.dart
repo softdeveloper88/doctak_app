@@ -7,6 +7,7 @@ import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/virtualized_conferences_list.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
@@ -62,9 +63,114 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56), // Increased app bar height
-        child: _buildAppBar(),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_conference,
+        titleIcon: Icons.event,
+        onBackPressed: () {
+          if (widget.isFromSplash) {
+            const SVDashboardScreen().launch(context, isNewTask: true);
+          } else {
+            Navigator.of(context).pop();
+          }
+        },
+        actions: [
+          // Country dropdown and search actions moved here
+          BlocConsumer<SplashBloc, SplashState>(
+            bloc: SplashBloc()..add(
+              LoadDropdownData1('', ''),
+            ),
+            listener: (_, __) {},
+            builder: (context, state) {
+              if (state is CountriesDataLoaded1) {
+                List<dynamic> list = state.countriesModelList;
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Country flag selector
+                    Container(
+                      margin: const EdgeInsets.only(right: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: PopupMenuButton<dynamic>(
+                        tooltip: 'Select Country',
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        offset: const Offset(0, 32),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                list.first.toString(),
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                              const Icon(Icons.arrow_drop_down, size: 12),
+                            ],
+                          ),
+                        ),
+                        itemBuilder: (context) {
+                          return list.map((dynamic item) {
+                            return PopupMenuItem<dynamic>(
+                              value: item,
+                              child: Text(
+                                item.toString(),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            );
+                          }).toList();
+                        },
+                        onSelected: (dynamic newValue) {
+                          conferenceBloc.add(
+                            LoadPageEvent(
+                              page: 1,
+                              countryName: newValue.toString(),
+                              searchTerm: state.searchTerms!,
+                            ),
+                          );
+                          BlocProvider.of<SplashBloc>(context).add(
+                            LoadDropdownData1(newValue.toString(), state.searchTerms ?? ''),
+                          );
+                        },
+                      ),
+                    ),
+                    // Search button
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          isSearchShow = !isSearchShow;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isSearchShow ? Icons.close : Icons.search,
+                          color: Colors.blue[600],
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                );
+              } else if (state is CountriesDataError) {
+                return const SizedBox.shrink();
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -76,168 +182,6 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
     );
   }
 
-  // Build app bar with country selector and title
-  AppBar _buildAppBar() {
-    return AppBar(
-      leading: GestureDetector(
-        onTap: () {
-          if (widget.isFromSplash) {
-            const SVDashboardScreen().launch(context, isNewTask: true);
-          } else {
-            Navigator.of(context).pop();
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.blue[600],
-            size: 16,
-          ),
-        ),
-      ),
-      backgroundColor: svGetScaffoldColor(),
-      iconTheme: IconThemeData(color: context.iconColor),
-      surfaceTintColor: svGetScaffoldColor(),
-      title: BlocConsumer<SplashBloc, SplashState>(
-        bloc: SplashBloc()..add(
-          LoadDropdownData1('', ''),
-        ),
-        listener: (_, __) {},
-        builder: (context, state) {
-          if (state is CountriesDataLoaded1) {
-            List<dynamic> list = state.countriesModelList;
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Title section with icon (more compact)
-                Expanded(
-                  flex: 4,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.event,
-                        color: Colors.blue[600],
-                        size: 18,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          translation(context).lbl_conference, 
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                            color: Colors.blue[800],
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Country dropdown and search
-                Expanded(
-                  flex: 4,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Country flag selector (even more compact)
-                      Container(
-                        margin: const EdgeInsets.only(right: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: PopupMenuButton<dynamic>(
-                          tooltip: 'Select Country',
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          offset: const Offset(0, 32),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  list.first.toString(),
-                                  style: const TextStyle(fontSize: 11),
-                                ),
-                                const Icon(Icons.arrow_drop_down, size: 12),
-                              ],
-                            ),
-                          ),
-                          itemBuilder: (context) {
-                            return list.map((dynamic item) {
-                              return PopupMenuItem<dynamic>(
-                                value: item,
-                                child: Text(
-                                  item.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          onSelected: (dynamic newValue) {
-                            conferenceBloc.add(
-                              LoadPageEvent(
-                                page: 1,
-                                countryName: newValue.toString(),
-                                searchTerm: state.searchTerms!,
-                              ),
-                            );
-                            BlocProvider.of<SplashBloc>(context).add(
-                              LoadDropdownData1(newValue.toString(), state.searchTerms ?? ''),
-                            );
-                          },
-                        ),
-                      ),
-                      // Search button (larger size)
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            isSearchShow = !isSearchShow;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            isSearchShow ? Icons.close : Icons.search,
-                            color: Colors.blue[600],
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          } else if (state is CountriesDataError) {
-            return Center(child: Text('${translation(context).lbl_error}: $state'));
-          } else {
-            return const Center(child: Text(''));
-          }
-        },
-      ),
-      elevation: 0,
-      centerTitle: false,
-    );
-  }
 
   // Build search field
   Widget _buildSearchField() {

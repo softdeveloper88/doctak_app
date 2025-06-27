@@ -163,14 +163,18 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 
   // Professional header with matching splash screen background
   Widget _buildCompactHeader() {
+    // Calculate dynamic height based on safe area
+    final topPadding = MediaQuery.of(context).padding.top;
+    final headerHeight = math.max(220, topPadding + 180); // Ensure minimum space
+    
     return SizedBox(
       key: const ValueKey('drawer_header'),
-      height: 200,
+      height: headerHeight.toDouble(),
       child: Stack(
         children: [
           // Main background matching splash screen
           Container(
-            height: 200,
+            height: headerHeight.toDouble(),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -241,12 +245,14 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             ),
           ),
 
-          // Profile section centered with better positioning
+          // Profile section with proper positioning
           Positioned(
-            top: 30,
+            top: 60, // Fixed top position to avoid status bar overlap
             left: 0,
             right: 0,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Profile avatar with professional styling
                 Container(

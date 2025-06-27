@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVP
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -33,50 +34,9 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withAlpha(25),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          }
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.people,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              translation(context).lbl_applicants,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_applicants,
+        titleIcon: Icons.people,
       ),
       body: BlocConsumer<JobsBloc, JobsState>(
         bloc: widget.jobBloc,
@@ -183,7 +143,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                   children: [
                                     Flexible(
                                       child: Text(
-                                        user?.name.validate() ?? translation(context).lbl_unknown,
+                                        user?.name ?? translation(context).lbl_unknown,
                                         style: const TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 16,
@@ -271,16 +231,16 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Implement any additional action if needed
-          // Perhaps open a filter dialog or export applicants list
-        },
-        icon: const Icon(Icons.people_outline),
-        label: Text(translation(context).lbl_total_applicants +
-            ": ${widget.jobBloc.jobApplicantsModel?.applicants?.length ?? 0}"),
-        backgroundColor: Colors.blue,
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () {
+      //     // Implement any additional action if needed
+      //     // Perhaps open a filter dialog or export applicants list
+      //   },
+      //   icon: const Icon(Icons.people_outline),
+      //   label: Text(translation(context).lbl_total_applicants +
+      //       ": ${widget.jobBloc.jobApplicantsModel?.applicants?.length ?? 0}"),
+      //   backgroundColor: Colors.blue,
+      // ),
     );
   }
 

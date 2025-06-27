@@ -362,23 +362,6 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-            },
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -10,6 +10,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,20 +59,9 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          backgroundColor: svGetScaffoldColor(),
-          surfaceTintColor: svGetScaffoldColor(),
-          iconTheme: IconThemeData(color: context.iconColor),
-          title: Text('Post Detail', style: boldTextStyle(size: 18)),
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new_rounded,
-                  color: svGetBodyColor()),
-              onPressed: () {
-                NavigatorService.goBack();
-                // backPress!();
-              }),
-          elevation: 0,
-          centerTitle: true,
+        appBar: DoctakAppBar(
+          title: 'Post Detail',
+          titleIcon: Icons.article_outlined,
         ),
         body: BlocConsumer<HomeBloc, HomeState>(
             bloc: homeBloc,

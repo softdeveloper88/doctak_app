@@ -13,6 +13,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -59,6 +60,13 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   String imageType = '';
   List<XFile> selectedImageFiles = [];
   ImageUploadBloc imageUploadBloc = ImageUploadBloc();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the ChatGPT bloc with LoadDataValues event
+    BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
+  }
 
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
@@ -111,104 +119,62 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      body: Column(
-        children: [
-          // App Bar - completely redesigned using drugs_list pattern
-          AppBar(
-            backgroundColor: svGetScaffoldColor(),
-            iconTheme: IconThemeData(color: context.iconColor),
-            elevation: 0,
-            toolbarHeight: 70,
-            surfaceTintColor: svGetScaffoldColor(),
-            centerTitle: true,
-            leading: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.blue[600],
-                  size: 16,
-                ),
+      appBar: DoctakAppBar(
+        title: "AI Image Analysis",
+        titleIcon: Icons.image_search_rounded,
+        actions: [
+          // History button
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              onPressed: () => Navigator.pop(context),
+              child: Icon(
+                Icons.history_rounded,
+                color: Colors.blue[600],
+                size: 14,
+              ),
             ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.image_search_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  "AI Image Analysis",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              // History button
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 36,
-                  minHeight: 36,
-                ),
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.history_rounded,
-                    color: Colors.blue[600],
-                    size: 14,
-                  ),
-                ),
-                onPressed: () {
-                  ChatHistoryScreen(
-                    onNewSessionTap: () {
-                      try {
-                        BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                        Navigator.of(context).pop();
-                        isOneTimeImageUploaded = false;
-                        selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
-                      } catch (e) {
-                        print(e);
-                      }
-                    },
-                    onTap: (session) {
-                      isError = true;
-                      chatWithAi = session.name!;
-                      isEmptyPage = false;
-                      selectedSessionId = session.id;
-                      isLoadingMessages = true;
-                      isOneTimeImageUploaded = true;
-                      BlocProvider.of<ChatGPTBloc>(context).add(
-                        GetMessages(sessionId: selectedSessionId.toString()),
-                      );
-                      Navigator.of(context).pop();
-                    },
-                  ).launch(context);
+            onPressed: () {
+              ChatHistoryScreen(
+                onNewSessionTap: () {
+                  try {
+                    BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                    Navigator.of(context).pop();
+                    isOneTimeImageUploaded = false;
+                    selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                  } catch (e) {
+                    print(e);
+                  }
                 },
-              ),
-              // New Analysis button
-              Container(
-                margin: const EdgeInsets.only(right: 16),
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
+                onTap: (session) {
+                  isError = true;
+                  chatWithAi = session.name!;
+                  isEmptyPage = false;
+                  selectedSessionId = session.id;
+                  isLoadingMessages = true;
+                  isOneTimeImageUploaded = true;
+                  BlocProvider.of<ChatGPTBloc>(context).add(
+                    GetMessages(sessionId: selectedSessionId.toString()),
+                  );
+                  Navigator.of(context).pop();
+                },
+              ).launch(context);
+            },
+          ),
+          // New Analysis button
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
                     minWidth: 36,
                     minHeight: 36,
                   ),
@@ -237,10 +203,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               ),
             ],
           ),
-          
-          // Main content - completely redesigned
-          Expanded(
-            child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+      body: BlocBuilder<ChatGPTBloc, ChatGPTState>(
               builder: (context, state1) {
                   if (selectedSessionId == 0 && state1 is DataLoaded) {
                     selectedSessionId = state1.response.newSessionId;
@@ -262,7 +225,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                   if (state1 is DataInitial || state1 is DataLoading) {
                     return ChatShimmerLoader();
                   } else if (state1 is DataLoaded) {
-                    isEmpty = state1.response1.messages?.isEmpty ?? false;
+                    // Check if messages exist and are not null
+                    isEmpty = state1.response1.messages?.isEmpty ?? true;
                     
                     if (!widget.isFromMainScreen) {
                       if (isAlreadyAsk) {
@@ -820,9 +784,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                   }
                 }
               ),
-            ),
-        ],
-      ),
     );
   }
 

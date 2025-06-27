@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 
 import '../../../../../main.dart';
 import '../../../../splash_screen/bloc/splash_event.dart';
@@ -164,50 +165,12 @@ class _SearchScreenState extends State<SearchScreen>
       length: 3,
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
-        appBar: AppBar(
-          backgroundColor: svGetScaffoldColor(),
-          surfaceTintColor: svGetScaffoldColor(),
-          iconTheme: IconThemeData(color: context.iconColor),
-          elevation: 0,
-          toolbarHeight: 70,
-          centerTitle: true,
-          leading: IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.blue[600],
-                size: 16,
-              ),
-            ),
-            onPressed: () {
-              widget.backPress!();
-            }
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.search_rounded,
-                color: Colors.blue[600],
-                size: 24,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                translation(context).lbl_search,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                  color: Colors.blue[800],
-                ),
-              ),
-            ],
-          ),
+        appBar: DoctakAppBar(
+          title: translation(context).lbl_search,
+          titleIcon: Icons.search_rounded,
+          onBackPressed: () {
+            widget.backPress!();
+          },
           actions: [
             IconButton(
               padding: EdgeInsets.zero,

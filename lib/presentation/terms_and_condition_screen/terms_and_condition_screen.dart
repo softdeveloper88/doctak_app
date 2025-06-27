@@ -1,6 +1,7 @@
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -21,49 +22,10 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
       backgroundColor: svGetBgColor(),
       body: Column(
         children: [
-          // Modern App Bar
-          AppBar(
-            backgroundColor: svGetScaffoldColor(),
-            iconTheme: IconThemeData(color: context.iconColor),
-            elevation: 0,
-            toolbarHeight: 70,
-            surfaceTintColor: svGetScaffoldColor(),
-            centerTitle: true,
-            leading: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.blue[600],
-                  size: 16,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.description_outlined,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  translation(context).lbl_terms_and_conditions,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ],
-            ),
+          // Custom App Bar with DoctakAppBar
+          DoctakAppBar(
+            title: translation(context).lbl_terms_and_conditions,
+            titleIcon: Icons.description_outlined,
           ),
           
           // Content

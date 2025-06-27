@@ -8,6 +8,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -49,87 +50,48 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: svGetScaffoldColor(),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_notifications,
+        titleIcon: Icons.notifications_rounded,
+        onBackPressed: () {
+          widget.notificationBloc.add(
+            NotificationLoadPageEvent(
+              page: 1,
+            ),
+          );
+          Navigator.pop(context);
+        },
+        actions: [
+          // Filter icon button
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.filter_list_rounded,
+                color: Colors.blue[600],
+                size: 14,
+              ),
+            ),
+            onPressed: () {
+              setState(() {
+                isFilterShow = !isFilterShow;
+              });
+            },
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
       body: Column(
         children: [
-          // Modern AppBar
-          AppBar(
-            backgroundColor: svGetScaffoldColor(),
-            iconTheme: IconThemeData(color: context.iconColor),
-            elevation: 0,
-            toolbarHeight: 70,
-            surfaceTintColor: svGetScaffoldColor(),
-            centerTitle: true,
-            leading: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.blue[600],
-                  size: 16,
-                ),
-              ),
-              onPressed: () {
-                widget.notificationBloc.add(
-                  NotificationLoadPageEvent(
-                    page: 1,
-                  ),
-                );
-                Navigator.pop(context);
-              }
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.notifications_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  translation(context).lbl_notifications,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              // Filter icon button
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 36,
-                  minHeight: 36,
-                ),
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.filter_list_rounded,
-                    color: Colors.blue[600],
-                    size: 14,
-                  ),
-                ),
-                onPressed: () {
-                  setState(() {
-                    isFilterShow = !isFilterShow;
-                  });
-                },
-              ),
-              const SizedBox(width: 16),
-            ],
-          ),
           // Filter toggle buttons
           Container(
             color: svGetScaffoldColor(),

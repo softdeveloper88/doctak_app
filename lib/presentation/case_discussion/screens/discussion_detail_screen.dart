@@ -9,6 +9,7 @@ import '../widgets/comment_input.dart';
 import '../widgets/discussion_header.dart';
 import '../widgets/case_discussion_shimmer.dart';
 import '../../../localization/app_localization.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import '../../home_screen/utils/SVColors.dart';
 import '../../home_screen/utils/SVCommon.dart';
 
@@ -74,52 +75,18 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: BlocBuilder<DiscussionDetailBloc, DiscussionDetailState>(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: BlocBuilder<DiscussionDetailBloc, DiscussionDetailState>(
           builder: (context, state) {
             final commentCount = state is DiscussionDetailLoaded ? state.comments.length : 0;
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.medical_information_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Case Discussion',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-                if (commentCount > 0) ...[
-                  const SizedBox(width: 8),
+            return DoctakAppBar(
+              title: 'Case Discussion',
+              titleIcon: Icons.medical_information_rounded,
+              actions: [
+                if (commentCount > 0)
                   Container(
+                    margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.green[600],
@@ -146,42 +113,39 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                       ],
                     ),
                   ),
-                ],
+                // Share button
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.share_rounded,
+                        color: Colors.blue[600],
+                        size: 14,
+                      ),
+                    ),
+                    onPressed: () {
+                      // TODO: Implement share functionality
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Share functionality coming soon')),
+                      );
+                    },
+                  ),
+                ),
               ],
             );
           },
         ),
-        actions: [
-          // Share button
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.share_rounded,
-                  color: Colors.blue[600],
-                  size: 14,
-                ),
-              ),
-              onPressed: () {
-                // TODO: Implement share functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Share functionality coming soon')),
-                );
-              },
-            ),
-          ),
-        ],
       ),
       body: Container(
         color: svGetScaffoldColor(),

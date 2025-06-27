@@ -1,4 +1,5 @@
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -89,7 +90,10 @@ class _WebPageScreenState extends State<WebPageScreen> {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(title: Text(widget.page_name), actions: []),
+        appBar: DoctakAppBar(
+          title: widget.page_name,
+          titleIcon: Icons.web_rounded,
+        ),
         body: buildBody(),
       ),
     );

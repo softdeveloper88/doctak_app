@@ -6,6 +6,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -89,48 +90,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_new_post,
+        titleIcon: Icons.add_circle_outline_rounded,
         toolbarHeight: 56,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        surfaceTintColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        backgroundColor: svGetScaffoldColor(),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_circle_outline_rounded,
-              color: Colors.blue[600],
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              translation(context).lbl_new_post,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
-        elevation: 0,
-        centerTitle: true,
         actions: [
           BlocListener<AddPostBloc, AddPostState>(
             bloc: searchPeopleBloc,

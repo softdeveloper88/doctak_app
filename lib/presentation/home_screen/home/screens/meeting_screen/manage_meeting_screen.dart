@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 
 import 'bloc/meeting_bloc.dart';
 import 'upcoming_meeting_screen.dart';
@@ -169,49 +170,10 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
       backgroundColor: svGetBgColor(),
         body: Column(
           children: [
-            // Modern App Bar
-            AppBar(
-              backgroundColor: Colors.white,
-              iconTheme: IconThemeData(color: context.iconColor),
-              elevation: 0,
-              toolbarHeight: 70,
-              surfaceTintColor: Colors.white,
-              centerTitle: true,
-              leading: IconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Colors.blue[600],
-                    size: 16,
-                  ),
-                ),
-                onPressed: () => Navigator.pop(context),
-              ),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.video_call_outlined,
-                    color: Colors.blue[600],
-                    size: 24,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    translation(context).lbl_meeting_management,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                      color: Colors.blue[800],
-                    ),
-                  ),
-                ],
-              ),
+            // Custom App Bar using DoctakAppBar
+            DoctakAppBar(
+              title: translation(context).lbl_meeting_management,
+              titleIcon: Icons.video_call_outlined,
             ),
             
             // Compact Tab Container matching drugs_list_screen style

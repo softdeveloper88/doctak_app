@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -12,22 +13,9 @@ class AboutUsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7F6),
-      appBar: AppBar(
-        title: Text(
-          translation(context).lbl_about_us,
-          style: const TextStyle(
-              color: Colors.black, fontSize: 17, fontWeight: FontWeight.w600),
-        ),
-        surfaceTintColor: const Color(0xFFF5F7F6),
-        backgroundColor: const Color(0xFFF5F7F6),
-        // toolbarHeight: 80,
-        leadingWidth: 30,
-        leading: IconButton(
-          iconSize: 20,
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        centerTitle: true,
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_about_us,
+        titleIcon: Icons.info_outline_rounded,
       ),
       body: SingleChildScrollView(
         child: Column(

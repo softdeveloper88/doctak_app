@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -67,55 +68,14 @@ class _FollowerScreenState extends State<FollowerScreen> {
       backgroundColor: svGetBgColor(),
       body: Column(
         children: [
-          // Modern AppBar similar to drugs_list_screen
-          AppBar(
-            backgroundColor: svGetScaffoldColor(),
-            iconTheme: IconThemeData(color: context.iconColor),
-            elevation: 0,
-            toolbarHeight: 70,
-            surfaceTintColor: svGetScaffoldColor(),
-            centerTitle: true,
-            leading: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withAlpha(26),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.blue[600],
-                  size: 16,
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              }
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  widget.isFollowersScreen 
-                    ? Icons.people_rounded
-                    : Icons.person_add_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.isFollowersScreen 
-                    ? translation(context).lbl_followers 
-                    : translation(context).lbl_following,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ],
-            ),
+          // Custom AppBar with DoctakAppBar
+          DoctakAppBar(
+            title: widget.isFollowersScreen 
+              ? translation(context).lbl_followers 
+              : translation(context).lbl_following,
+            titleIcon: widget.isFollowersScreen 
+              ? Icons.people_rounded
+              : Icons.person_add_rounded,
             actions: [
               // Search icon button
               IconButton(
@@ -127,7 +87,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withAlpha(26),
+                    color: Colors.blue.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

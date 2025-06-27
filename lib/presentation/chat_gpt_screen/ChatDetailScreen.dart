@@ -11,6 +11,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -50,19 +51,26 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
     String question = widget.question ?? "";
     if (question.isEmpty) return;
 
+    // Ensure we have a valid session ID
+    int sessionId = selectedSessionId ?? BlocProvider.of<ChatGPTBloc>(context).newChatSessionId ?? 0;
+    
     var myMessage = Messages(
         id: -1,
-        gptSessionId: selectedSessionId.toString(),
+        gptSessionId: sessionId.toString(),
         question: question,
         response: translation(context).lbl_generating_response,
         createdAt: DateTime.now().toString(),
         updatedAt: DateTime.now().toString());
 
+    // Initialize messages list if it's null
+    if (state1.response1.messages == null) {
+      state1.response1.messages = [];
+    }
     state1.response1.messages!.add(myMessage);
 
     BlocProvider.of<ChatGPTBloc>(context).add(
       GetPost(
-        sessionId: selectedSessionId.toString(),
+        sessionId: sessionId.toString(),
         question: question,
       ),
     );
@@ -81,6 +89,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   void initState() {
     super.initState();
     chatWithAi = "Preparing DocTak AI.";
+    
+    // Initialize with LoadDataValues first
+    BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
   }
 
   @override
@@ -101,122 +112,80 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      body: Column(
-        children: [
-          // App Bar - completely redesigned using drugs_list pattern
-          AppBar(
-            backgroundColor: svGetScaffoldColor(),
-            iconTheme: IconThemeData(color: context.iconColor),
-            elevation: 0,
-            toolbarHeight: 70,
-            surfaceTintColor: svGetScaffoldColor(),
-            centerTitle: true,
-            leading: IconButton(
+      appBar: DoctakAppBar(
+        title: "DocTak AI",
+        titleIcon: Icons.psychology_rounded,
+        actions: [
+          // History button
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.history_rounded,
+                color: Colors.blue[600],
+                size: 14,
+              ),
+            ),
+            onPressed: () {
+              ChatHistoryScreen(
+                onNewSessionTap: () {
+                  try {
+                    BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                    Navigator.of(context).pop();
+                    selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+                onTap: (session) {
+                  chatWithAi = session.name!;
+                  isEmptyPage = false;
+                  selectedSessionId = session.id;
+                  isLoadingMessages = true;
+                  
+                  BlocProvider.of<ChatGPTBloc>(context).add(
+                    GetMessages(sessionId: selectedSessionId.toString()),
+                  );
+                  Navigator.of(context).pop();
+                },
+              ).launch(context);
+            },
+          ),
+          // New chat button
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 36,
+              ),
               icon: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
+                  Icons.add,
                   color: Colors.blue[600],
-                  size: 16,
+                  size: 14,
                 ),
               ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.psychology_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  "DocTak AI",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              // History button
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 36,
-                  minHeight: 36,
-                ),
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.history_rounded,
-                    color: Colors.blue[600],
-                    size: 14,
-                  ),
-                ),
-                onPressed: () {
-                  ChatHistoryScreen(
-                    onNewSessionTap: () {
-                      try {
-                        BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                        Navigator.of(context).pop();
-                        selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
-                      } catch (e) {
-                        print(e);
-                      }
-                    },
-                    onTap: (session) {
-                      chatWithAi = session.name!;
-                      isEmptyPage = false;
-                      selectedSessionId = session.id;
-                      isLoadingMessages = true;
-                      
-                      BlocProvider.of<ChatGPTBloc>(context).add(
-                        GetMessages(sessionId: selectedSessionId.toString()),
-                      );
-                      Navigator.of(context).pop();
-                    },
-                  ).launch(context);
-                },
-              ),
-              // New chat button
-              Container(
-                margin: const EdgeInsets.only(right: 16),
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
-                  ),
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color: Colors.blue[600],
-                      size: 14,
-                    ),
-                  ),
-                  onPressed: () {
-                    try {
-                      BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                      selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
-                    } catch (e) {
+              onPressed: () {
+                try {
+                  BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                } catch (e) {
                       print(e);
                     }
                   },
@@ -224,27 +193,44 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
               ),
             ],
           ),
-          
-          // Main content - completely redesigned
-          Expanded(
-            child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
+      body: BlocBuilder<ChatGPTBloc, ChatGPTState>(
               builder: (context, state1) {
-                  if (selectedSessionId == 0 && state1 is DataLoaded) {
-                    selectedSessionId = state1.response.newSessionId;
-                    chatWithAi = state1.response.sessions?.first.name ?? translation(context).lbl_next_session;
-                  }
-                  
                   if (state1 is DataInitial || state1 is DataLoading) {
                     return ChatShimmerLoader();
                   } else if (state1 is DataLoaded) {
-                    isEmpty = state1.response1.messages?.isEmpty ?? false;
+                    // Set session ID if not set
+                    if (selectedSessionId == 0) {
+                      selectedSessionId = state1.response.newSessionId;
+                      chatWithAi = state1.response.sessions?.first.name ?? translation(context).lbl_next_session;
+                    }
                     
-                    if (!widget.isFromMainScreen) {
-                      if (isAlreadyAsk) {
+                    isEmpty = state1.response1.messages?.isEmpty ?? true;
+                    
+                    // Handle drugs list prompts - create new session first, then ask question
+                    if (!widget.isFromMainScreen && isAlreadyAsk) {
+                      // Create new session for drugs list prompts
+                      BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                      isAlreadyAsk = false; // Prevent multiple calls
+                    }
+                    
+                    // Execute question when we have a new session from drugs list
+                    if (!widget.isFromMainScreen && 
+                        !isAlreadyAsk && 
+                        state1.response.newSessionId != null && 
+                        (widget.question?.isNotEmpty ?? false) &&
+                        (state1.response1.messages?.isEmpty ?? true)) {
+                      
+                      selectedSessionId = state1.response.newSessionId;
+                      setState(() {
                         isEmpty = false;
-                        isAlreadyAsk = false;
-                        drugsAskQuestion(state1, context);
-                      }
+                      });
+                      
+                      // Execute the question after getting new session
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        if (mounted) {
+                          drugsAskQuestion(state1, context);
+                        }
+                      });
                     }
                     
                     return Column(
@@ -695,9 +681,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   }
                 }
               ),
-          ),
-        ],
-      ),
+          
+
     );
   }
 

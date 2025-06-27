@@ -17,7 +17,7 @@ class JobDetailModel {
   Job? job;
   bool? hasApplied;
   int? totalApplicants;
-  String? isViewedByAdmin;
+  dynamic isViewedByAdmin;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -73,21 +73,29 @@ class Job {
     updatedAt = json['updated_at'];
     userId = json['user_id'];
     jobImage = json['job_image'];
-    countryId = json['country_id'];
+    countryId = json['country_id']?.toString();
     lastDate = json['last_date'];
     totalJobs = json['total_jobs'];
     specialty = json['specialty'];
-    noOfJobs = json['no_of_jobs'];
+    noOfJobs = json['no_of_jobs']?.toString();
     postedAt = json['posted_at'];
     preferredLanguage = json['preferred_language'];
     salaryRange = json['salary_range'];
-    promoted = json['promoted'];
+    promoted = json['promoted'] is bool ? (json['promoted'] ? 1 : 0) : json['promoted'];
     views = json['views'];
     clicks = json['clicks'];
     if (json['specialties'] != null) {
       specialties = [];
       json['specialties'].forEach((v) {
-        specialties?.add(Specialties.fromJson(v));
+        if (v is int) {
+          // Handle case where specialties is just array of IDs
+          specialties?.add(Specialties(id: v));
+        } else if (v is Map<String, dynamic>) {
+          specialties?.add(Specialties.fromJson(v));
+        } else {
+          // Handle string IDs
+          specialties?.add(Specialties(id: v));
+        }
       });
     }
     user = json['user'] != null ? User.fromJson(json['user']) : null;
@@ -102,16 +110,16 @@ class Job {
   String? createdAt;
   String? preferredLanguage;
   String? updatedAt;
-  String? userId;
+  dynamic userId;
   dynamic jobImage;
-  String? countryId;
+  dynamic countryId;
   String? lastDate;
   dynamic totalJobs;
   dynamic specialty;
-  String? noOfJobs;
+  dynamic noOfJobs;
   dynamic postedAt;
   String? salaryRange;
-  int? promoted;
+  dynamic promoted;
   int? views;
   int? clicks;
   List<Specialties>? specialties;
@@ -165,7 +173,7 @@ class User {
     name = json['name'];
     profilePic = json['profile_pic'];
   }
-  String? id;
+  dynamic? id;
   dynamic name;
   String? profilePic;
 
@@ -196,7 +204,7 @@ class Specialties {
     updatedAt = json['updated_at'];
     pivot = json['pivot'] != null ? Pivot.fromJson(json['pivot']) : null;
   }
-  String? id;
+  dynamic id;
   String? name;
   dynamic createdAt;
   dynamic updatedAt;

@@ -400,8 +400,8 @@ class LoginScreenState extends State<LoginScreen> {
                 }
               },
               child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
+                width: double.infinity,
+                height: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
@@ -418,14 +418,19 @@ class LoginScreenState extends State<LoginScreen> {
                     bottom: MediaQuery.of(context).viewInsets.bottom,
                   ),
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-                  child: AutofillGroup(
-                    child: Form(
-                      key: _formKey,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                  child: Container(
+                    width: double.infinity,
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height,
+                    ),
+                    child: AutofillGroup(
+                      child: Form(
+                        key: _formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                             // Logo and Welcome Text Section
                             SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                             Hero(
@@ -456,6 +461,8 @@ class LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 30),
                             Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.symmetric(horizontal: 0),
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -734,7 +741,8 @@ class LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             _buildSocial(context),
                             SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

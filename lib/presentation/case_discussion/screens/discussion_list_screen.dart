@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/utils/app/AppData.dart';
 import '../../../localization/app_localization.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import '../../home_screen/utils/SVColors.dart';
 import '../../home_screen/utils/SVCommon.dart';
 import '../bloc/create_discussion_bloc.dart';
@@ -96,48 +97,9 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.medical_information_rounded,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'Case Discussions',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: 'Case Discussions',
+        titleIcon: Icons.medical_information_rounded,
         actions: [
           // Search icon button
           IconButton(
@@ -147,7 +109,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
               minHeight: 36,
             ),
             icon: Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -155,7 +117,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
               child: Icon(
                 isSearchShow ? Icons.close : Icons.search,
                 color: Colors.blue[600],
-                size: 14,
+                size: 16,
               ),
             ),
             onPressed: () {
@@ -178,7 +140,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                 minHeight: 36,
               ),
               icon: Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.1),
                   shape: BoxShape.circle,
@@ -186,7 +148,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                 child: Icon(
                   Icons.add_rounded,
                   color: Colors.green[600],
-                  size: 14,
+                  size: 16,
                 ),
               ),
               onPressed: _navigateToCreateDiscussion,

@@ -3,6 +3,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/anousment_model/announcement_detail_model.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -41,50 +42,9 @@ class _UserAnnouncementDetailScreenState
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: appStore.isDarkMode ? Colors.grey[900] : Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.blue[600],
-              size: 16,
-            ),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          }
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.announcement_rounded,
-              color: Colors.blue[600],
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'Announcement Detail',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: Colors.blue[800],
-              ),
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: 'Announcement Detail',
+        titleIcon: Icons.announcement_rounded,
         actions: [
           IconButton(
             padding: EdgeInsets.zero,

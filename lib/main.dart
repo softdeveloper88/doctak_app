@@ -58,7 +58,12 @@ import 'core/notification_service.dart';
 import 'core/utils/common_navigator.dart';
 import 'core/utils/get_shared_value.dart';
 import 'core/utils/pusher_service.dart';
+import 'core/utils/text_scale_helper.dart';
+import 'core/utils/simple_fixed_media_query.dart';
+import 'core/utils/fixed_sizer.dart';
 import 'firebase_options.dart';
+import 'widgets/fixed_scale_material_app.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 // Global service instances that persist throughout app lifecycle
 final CallService globalCallService = CallService();
@@ -680,9 +685,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Sizer(
-      builder: (context, orientation, deviceType) {
-        return MultiBlocProvider(
+    return FixedSizer(
+      child: MultiBlocProvider(
           providers: [
             // ChangeNotifierProvider(create: (_) => ConnectivityService()),
             BlocProvider(create: (context) => LoginBloc()),
@@ -739,8 +743,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               return Observer(
-                  builder: (_) => MaterialApp(
-                        scaffoldMessengerKey: globalMessengerKey,
+                  builder: (_) => OverlaySupport.global(
+                    child: SimpleFixedMediaQuery.wrap(
+                      context: context,
+                      child: MaterialApp(
+
+                    scaffoldMessengerKey: globalMessengerKey,
                         navigatorKey: NavigatorService.navigatorKey,
                         // If handling a call, use '/call' as our home route, otherwise use the regular route
                         initialRoute: isHandlingCallAtStartup
@@ -1023,15 +1031,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         themeMode: appStore.isDarkMode
                             ? ThemeMode.dark
                             : ThemeMode.light,
+                        builder: (context, child) {
+                          return SimpleFixedMediaQuery.wrap(
+                            context: context,
+                            child: child!,
+                          );
+                        },
                         localizationsDelegates:
                             AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         locale: _locale,
-                      ));
+                      ),
+                    ),
+                  ));
             },
           ),
-        );
-      },
+        )
     );
   }
 
