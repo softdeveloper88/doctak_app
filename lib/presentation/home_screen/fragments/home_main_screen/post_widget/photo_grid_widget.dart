@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/media_type_detector.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
+import 'package:doctak_app/widgets/s3_image_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -38,11 +40,94 @@ class PhotoGrid extends StatelessWidget {
     );
   }
 
+  /// Helper method to determine if URL is an S3 URL
+  bool _isS3Url(String url) {
+    return url.contains('s3.') || url.contains('.amazonaws.com') || url.contains('s3-');
+  }
+
+  /// Helper method to build image widget with appropriate loader
+  Widget _buildImageWidget(String imageUrl, double width, double height) {
+    if (_isS3Url(imageUrl)) {
+      print('🔍 Using S3ImageLoader for URL: $imageUrl');
+      return S3ImageLoader(
+        imageUrl: imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        height: height,
+        width: width,
+        httpHeaders: const {
+          'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
+          'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Connection': 'keep-alive',
+          'Cache-Control': 'no-cache',
+        },
+        placeholder: (context, url) => Container(
+          color: Colors.grey[300],
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.grey,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) {
+          print('🚨 Image load error for URL: $url');
+          print('🚨 Error details: $error');
+          print('🚨 Error type: ${error.runtimeType}');
+          
+          return Container(
+            color: Colors.grey[300],
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.grey,
+                    size: 32,
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Image failed to load',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
   List<Widget> buildImages(BuildContext context) {
     int numImages = imageUrls.length;
     return List<Widget>.generate(min(numImages, maxImages), (index) {
       String imageUrl = imageUrls[index]["url"] ?? '';
       String urlType = imageUrls[index]["type"] ?? '';
+      
+      // Auto-detect media type if not properly set or validate existing type
+      String actualMediaType = MediaTypeDetector.getMediaType(imageUrl);
+
+      // Validate and warn if there's a mismatch
+      if (urlType.isNotEmpty && !MediaTypeDetector.validateMediaType(imageUrl, urlType)) {
+        print('🔧 Auto-correcting media type for: $imageUrl');
+        print('📝 Original type: $urlType → Corrected type: $actualMediaType');
+      }
+      
+      // Use the detected media type for better accuracy
+      final mediaType = actualMediaType;
 
       // If its the last image
       if (index == maxImages - 1) {
@@ -51,20 +136,27 @@ class PhotoGrid extends StatelessWidget {
 
         // If no more are remaining return a simple image widget
         if (remaining == 0) {
-          if (urlType == "image") {
+          if (mediaType == "image") {
             return GestureDetector(
-              child: CustomImageView(
-                imagePath: imageUrl,
-                fit: BoxFit.cover,
-                height: 300,
-                width: context.width() - 32,
-              ),
+              child: _buildImageWidget(imageUrl, context.width() - 32, 300),
               onTap: () => onImageClicked(index),
             );
           } else {
             return GestureDetector(
-              child: VideoPlayerWidget(
-                videoUrl: imageUrl,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: VideoPlayerWidget(
+                      videoUrl: imageUrl,
+                      showMinimalControls: true,
+                    ),
+                  ),
+                ),
               ),
               onTap: () => onImageClicked(index),
             );
@@ -77,20 +169,27 @@ class PhotoGrid extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 // Image.network(imageUrl, fit: BoxFit.cover),
-                if (urlType == "image")
+                if (mediaType == "image")
                   GestureDetector(
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      height: 300,
-                      width: context.width() - 32,
-                    ),
+                    child: _buildImageWidget(imageUrl, context.width() - 32, 300),
                     onTap: () => onImageClicked(index),
                   )
                 else
                   GestureDetector(
-                    child: VideoPlayerWidget(
-                      videoUrl: imageUrl,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Colors.black,
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: VideoPlayerWidget(
+                            videoUrl: imageUrl,
+                            showMinimalControls: true,
+                          ),
+                        ),
+                      ),
                     ),
                     onTap: () => onImageClicked(index),
                   ),
@@ -109,20 +208,27 @@ class PhotoGrid extends StatelessWidget {
           );
         }
       } else {
-        if (urlType == "image") {
+        if (mediaType == "image") {
           return GestureDetector(
-            child: CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              height: 300,
-              width: context.width() - 32,
-            ),
+            child: _buildImageWidget(imageUrl, context.width() - 32, 300),
             onTap: () => onImageClicked(index),
           );
         } else {
           return GestureDetector(
-            child: VideoPlayerWidget(
-              videoUrl: imageUrl,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.black,
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: VideoPlayerWidget(
+                    videoUrl: imageUrl,
+                    showMinimalControls: true,
+                  ),
+                ),
+              ),
             ),
             onTap: () => onImageClicked(index),
           );

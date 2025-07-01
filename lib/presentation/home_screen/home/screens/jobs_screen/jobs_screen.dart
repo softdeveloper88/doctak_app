@@ -74,13 +74,7 @@ class _JobsScreenState extends State<JobsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isShowingSuggestions = false;
-        });
-      },
-      child: Scaffold(
+    return Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: svGetBgColor(),
         body: Column(
@@ -137,6 +131,8 @@ class _JobsScreenState extends State<JobsScreen> {
                               if (!isSearchVisible) {
                                 // Clear search when closing
                                 _controller.clear();
+                                isShowingSuggestions = false;
+                                _filteredSpecialties.clear();
                                 jobsBloc.add(JobLoadPageEvent(
                                   page: 1,
                                   countryId: state.countryFlag != ''
@@ -233,12 +229,12 @@ class _JobsScreenState extends State<JobsScreen> {
                           // Search field with animated visibility
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            height: isSearchVisible ? 60 : 0,
+                            height: isSearchVisible ? 80 : 0,
                             child: SingleChildScrollView(
                               physics: const NeverScrollableScrollPhysics(),
                               child: isSearchVisible
                                 ? Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                                     decoration: BoxDecoration(
                                       color: appStore.isDarkMode
                                           ? Colors.blueGrey[800]
@@ -287,7 +283,9 @@ class _JobsScreenState extends State<JobsScreen> {
                                                 _debounce = Timer(
                                                     const Duration(milliseconds: 500), () {
                                                   _filterSpecialties(searchTxt);
-                                                  isShowingSuggestions = _filteredSpecialties.isNotEmpty;
+                                                  setState(() {
+                                                    isShowingSuggestions = searchTxt.isNotEmpty && _filteredSpecialties.isNotEmpty;
+                                                  });
                                                   BlocProvider.of<SplashBloc>(context).add(
                                                       LoadDropdownData(
                                                           state.countryFlag,
@@ -320,7 +318,10 @@ class _JobsScreenState extends State<JobsScreen> {
                                             onTap: () {
                                               // Clear the search text but keep search field visible
                                               _controller.clear();
-                                              isShowingSuggestions = false;
+                                              setState(() {
+                                                isShowingSuggestions = false;
+                                                _filteredSpecialties.clear();
+                                              });
                                               // Update search results
                                               jobsBloc.add(JobLoadPageEvent(
                                                 page: 1,
@@ -360,61 +361,153 @@ class _JobsScreenState extends State<JobsScreen> {
                           
                           // Suggestions dropdown when searching
                           if (isShowingSuggestions)
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Calculate available height dynamically
+                                final screenHeight = MediaQuery.of(context).size.height;
+                                final usedHeight = MediaQuery.of(context).padding.top + 
+                                                 kToolbarHeight + 80 + 100; // Approximate used space
+                                final availableHeight = screenHeight - usedHeight;
+                                final maxHeight = (availableHeight * 0.4).clamp(120.0, 300.0);
+                                final itemHeight = 56.0; // Approximate ListTile height
+                                final calculatedHeight = (_filteredSpecialties.length * itemHeight).clamp(0.0, maxHeight);
+                                final isScrollable = _filteredSpecialties.length * itemHeight > maxHeight;
+                                
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                                  constraints: BoxConstraints(
+                                    maxHeight: calculatedHeight,
                                   ),
-                                ],
-                              ),
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: _filteredSpecialties.length,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Flexible(
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics: isScrollable ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+                                          itemCount: _filteredSpecialties.length,
                                 itemBuilder: (context, index) {
                                   return Container(
+                                    margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                                     decoration: BoxDecoration(
-                                      border: (index != _filteredSpecialties.length - 1) 
-                                          ? Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.2)))
-                                          : const Border(),
+                                      color: Colors.grey[50],
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        width: 1.0,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.1),
+                                          blurRadius: 2,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
                                     ),
-                                    child: ListTile(
-                                      title: Text(
-                                        _filteredSpecialties[index],
-                                        style: const TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14,
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        onTap: () {
+                                          setState(() {
+                                            isShowingSuggestions = false;
+                                            _controller.text = _filteredSpecialties[index];
+                                          });
+                                          BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(
+                                            state.countryFlag,
+                                            state.typeValue,
+                                            _filteredSpecialties[index],
+                                            ''
+                                          ));
+                                          jobsBloc.add(JobLoadPageEvent(
+                                            page: 1,
+                                            countryId: state.countryFlag != ''
+                                                ? state.countryFlag
+                                                : '${state.countriesModel.countries?.first.id ?? 1}',
+                                            searchTerm: _filteredSpecialties[index]
+                                          ));
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.medical_services_outlined,
+                                                size: 16,
+                                                color: Colors.blue[600],
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Text(
+                                                  _filteredSpecialties[index],
+                                                  style: const TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 12,
+                                                color: Colors.grey[400],
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                      onTap: () {
-                                        setState(() {
-                                          isShowingSuggestions = false;
-                                          _controller.text = _filteredSpecialties[index];
-                                        });
-                                        BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(
-                                          state.countryFlag,
-                                          state.typeValue,
-                                          _filteredSpecialties[index],
-                                          ''
-                                        ));
-                                        jobsBloc.add(JobLoadPageEvent(
-                                          page: 1,
-                                          countryId: state.countryFlag != ''
-                                              ? state.countryFlag
-                                              : '${state.countriesModel.countries?.first.id ?? 1}',
-                                          searchTerm: _filteredSpecialties[index]
-                                        ));
-                                      },
                                     ),
                                   );
                                 },
                               ),
                             ),
+                            // Add scroll indicator when content is scrollable
+                                if (isScrollable)
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      borderRadius: const BorderRadius.only(
+                                        bottomLeft: Radius.circular(8),
+                                        bottomRight: Radius.circular(8),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.keyboard_arrow_down,
+                                          size: 16,
+                                          color: Colors.grey[600],
+                                        ),
+                                        Text(
+                                          'Scroll for more',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                         ],
                       ),
                     ),
@@ -437,7 +530,6 @@ class _JobsScreenState extends State<JobsScreen> {
             BlocBuilder<JobsBloc, JobsState>(
               bloc: jobsBloc,
               builder: (context, state) {
-                isShowingSuggestions = false;
                 if (state is PaginationLoadingState) {
                   return const Expanded(child: JobsShimmerLoader());
                 } else if (state is PaginationLoadedState) {
@@ -464,7 +556,6 @@ class _JobsScreenState extends State<JobsScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }

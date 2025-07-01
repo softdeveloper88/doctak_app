@@ -165,12 +165,12 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                 // Search field with animated visibility
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  height: isSearchShow ? 60 : 0,
+                  height: isSearchShow ? 80 : 0,
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
                     child: isSearchShow
                       ? Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                           decoration: BoxDecoration(
                             color: AppData.isShowGoogleBannerAds ?? false
                                 ? Colors.blueGrey[800]
@@ -384,126 +384,126 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                             ),
                             const SizedBox(width: 8),
                             // Country Filter
-                            Expanded(
-                              child: Container(
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: Colors.blue.withOpacity(0.2),
-                                  ),
-                                ),
-                                child: PopupMenuButton<CountryFilter>(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  offset: const Offset(0, 45),
-                                  tooltip: 'Filter by Country',
-                                  elevation: 8,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.location_on_outlined,
-                                          size: 16,
-                                          color: Colors.blue[600],
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            state.currentFilters.selectedCountry?.name ?? 'All Countries',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 16,
-                                          color: Colors.blue[600],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  itemBuilder: (BuildContext context) {
-                                    final items = <PopupMenuEntry<CountryFilter>>[];
-                                    
-                                    // Add "All" option
-                                    items.add(
-                                      PopupMenuItem<CountryFilter>(
-                                        value: CountryFilter(id: 0, name: 'All Countries', code: 'all', flag: ''),
-                                        height: 35,
-                                        child: Text(
-                                          'All Countries',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontFamily: 'Poppins',
-                                            color: state.currentFilters.selectedCountry == null
-                                                ? Colors.blue[800]
-                                                : Colors.black87,
-                                            fontWeight: state.currentFilters.selectedCountry == null
-                                                ? FontWeight.w600
-                                                : FontWeight.w400,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                    
-                                    // Add country options
-                                    items.addAll(
-                                      state.countries.map((country) {
-                                        return PopupMenuItem<CountryFilter>(
-                                          value: country,
-                                          height: 35,
-                                          child: Row(
-                                            children: [
-                                              if (country.flag.isNotEmpty) ...[
-                                                Text(
-                                                  country.flag,
-                                                  style: const TextStyle(fontSize: 14),
-                                                ),
-                                                const SizedBox(width: 8),
-                                              ],
-                                              Expanded(
-                                                child: Text(
-                                                  country.name,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontFamily: 'Poppins',
-                                                    color: state.currentFilters.selectedCountry?.id == country.id
-                                                        ? Colors.blue[800]
-                                                        : Colors.black87,
-                                                    fontWeight: state.currentFilters.selectedCountry?.id == country.id
-                                                        ? FontWeight.w600
-                                                        : FontWeight.w400,
-                                                  ),
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }).toList(),
-                                    );
-                                    
-                                    return items;
-                                  },
-                                  onSelected: (CountryFilter? selectedCountry) {
-                                    final updatedFilters = state.currentFilters.copyWith(
-                                      selectedCountry: selectedCountry?.id == 0 ? null : selectedCountry,
-                                      clearCountry: selectedCountry?.id == 0,
-                                    );
-                                    _onFiltersChanged(updatedFilters);
-                                  },
-                                ),
-                              ),
-                            ),
+                            // Expanded(
+                            //   child: Container(
+                            //     height: 40,
+                            //     decoration: BoxDecoration(
+                            //       color: Colors.grey.withOpacity(0.1),
+                            //       borderRadius: BorderRadius.circular(20),
+                            //       border: Border.all(
+                            //         color: Colors.blue.withOpacity(0.2),
+                            //       ),
+                            //     ),
+                            //     child: PopupMenuButton<CountryFilter>(
+                            //       shape: RoundedRectangleBorder(
+                            //         borderRadius: BorderRadius.circular(16),
+                            //       ),
+                            //       offset: const Offset(0, 45),
+                            //       tooltip: 'Filter by Country',
+                            //       elevation: 8,
+                            //       child: Container(
+                            //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            //         child: Row(
+                            //           mainAxisAlignment: MainAxisAlignment.center,
+                            //           children: [
+                            //             Icon(
+                            //               Icons.location_on_outlined,
+                            //               size: 16,
+                            //               color: Colors.blue[600],
+                            //             ),
+                            //             const SizedBox(width: 6),
+                            //             Expanded(
+                            //               child: Text(
+                            //                 state.currentFilters.selectedCountry?.name ?? 'All Countries',
+                            //                 style: const TextStyle(
+                            //                   fontSize: 12,
+                            //                   fontFamily: 'Poppins',
+                            //                   fontWeight: FontWeight.w500,
+                            //                 ),
+                            //                 overflow: TextOverflow.ellipsis,
+                            //               ),
+                            //             ),
+                            //             Icon(
+                            //               Icons.arrow_drop_down,
+                            //               size: 16,
+                            //               color: Colors.blue[600],
+                            //             ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //       itemBuilder: (BuildContext context) {
+                            //         final items = <PopupMenuEntry<CountryFilter>>[];
+                            //
+                            //         // Add "All" option
+                            //         items.add(
+                            //           PopupMenuItem<CountryFilter>(
+                            //             value: CountryFilter(id: 0, name: 'All Countries', code: 'all', flag: ''),
+                            //             height: 35,
+                            //             child: Text(
+                            //               'All Countries',
+                            //               style: TextStyle(
+                            //                 fontSize: 12,
+                            //                 fontFamily: 'Poppins',
+                            //                 color: state.currentFilters.selectedCountry == null
+                            //                     ? Colors.blue[800]
+                            //                     : Colors.black87,
+                            //                 fontWeight: state.currentFilters.selectedCountry == null
+                            //                     ? FontWeight.w600
+                            //                     : FontWeight.w400,
+                            //               ),
+                            //             ),
+                            //           ),
+                            //         );
+                            //
+                            //         // Add country options
+                            //         items.addAll(
+                            //           state.countries.map((country) {
+                            //             return PopupMenuItem<CountryFilter>(
+                            //               value: country,
+                            //               height: 35,
+                            //               child: Row(
+                            //                 children: [
+                            //                   if (country.flag.isNotEmpty) ...[
+                            //                     Text(
+                            //                       country.flag,
+                            //                       style: const TextStyle(fontSize: 14),
+                            //                     ),
+                            //                     const SizedBox(width: 8),
+                            //                   ],
+                            //                   Expanded(
+                            //                     child: Text(
+                            //                       country.name,
+                            //                       style: TextStyle(
+                            //                         fontSize: 12,
+                            //                         fontFamily: 'Poppins',
+                            //                         color: state.currentFilters.selectedCountry?.id == country.id
+                            //                             ? Colors.blue[800]
+                            //                             : Colors.black87,
+                            //                         fontWeight: state.currentFilters.selectedCountry?.id == country.id
+                            //                             ? FontWeight.w600
+                            //                             : FontWeight.w400,
+                            //                       ),
+                            //                       overflow: TextOverflow.ellipsis,
+                            //                     ),
+                            //                   ),
+                            //                 ],
+                            //               ),
+                            //             );
+                            //           }).toList(),
+                            //         );
+                            //
+                            //         return items;
+                            //       },
+                            //       onSelected: (CountryFilter? selectedCountry) {
+                            //         final updatedFilters = state.currentFilters.copyWith(
+                            //           selectedCountry: selectedCountry?.id == 0 ? null : selectedCountry,
+                            //           clearCountry: selectedCountry?.id == 0,
+                            //         );
+                            //         _onFiltersChanged(updatedFilters);
+                            //       },
+                            //     ),
+                            //   ),
+                            // ),
                             const SizedBox(width: 8),
                             // Sort Options
                             Container(

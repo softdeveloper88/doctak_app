@@ -131,7 +131,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               minHeight: 36,
             ),
             icon: Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -139,7 +139,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               child: Icon(
                 Icons.history_rounded,
                 color: Colors.blue[600],
-                size: 14,
+                size: 16,
               ),
             ),
             onPressed: () {
@@ -179,15 +179,16 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                     minHeight: 36,
                   ),
                   icon: Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
+
                       Icons.add_photo_alternate_rounded,
                       color: Colors.blue[600],
-                      size: 14,
+                      size: 16,
                     ),
                   ),
                   onPressed: () {

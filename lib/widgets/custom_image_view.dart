@@ -116,6 +116,13 @@ class CustomImageView extends StatelessWidget {
             fit: fit,
             imageUrl: imagePath!,
             color: color,
+            httpHeaders: const {
+              'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
+              'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+              'Accept-Encoding': 'gzip, deflate, br',
+              'Connection': 'keep-alive',
+              'Cache-Control': 'no-cache',
+            },
             placeholder: (context, url) => Center(
                 child: SizedBox(
                height: height??300,
@@ -141,11 +148,96 @@ class CustomImageView extends StatelessWidget {
             //     ),
             //   ),
             // ),
-            errorWidget: (context, url, error) => Image.asset(
-              placeHolder,
-              // height: height,
-              width: width,
-              fit: fit ?? BoxFit.cover,
+            errorWidget: (context, url, error) {
+              // Enhanced error debugging for S3 URLs
+              print('🚨 CustomImageView load error for URL: $url');
+              print('🚨 Error details: $error');
+              print('🚨 Error type: ${error.runtimeType}');
+              
+              // Check if it's actually a video file being loaded as image
+              final videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
+              final lowerUrl = url.toLowerCase();
+              final isVideoFile = videoExtensions.any((ext) => lowerUrl.endsWith(ext));
+              
+              if (isVideoFile) {
+                print('⚠️ WARNING: Attempting to load video file as image: $url');
+                print('💡 SOLUTION: Use VideoPlayerWidget instead of CustomImageView for video files');
+                
+                return Container(
+                  width: width,
+                  height: height,
+                  decoration: BoxDecoration(
+                    color: Colors.orange[100],
+                    borderRadius: radius,
+                  ),
+                  child: const Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.orange,
+                        size: 32,
+                      ),
+                      Positioned(
+                        bottom: 8,
+                        child: Text(
+                          'VIDEO FILE',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
+              return Image.asset(
+                placeHolder,
+                // height: height,
+                width: width,
+                fit: fit ?? BoxFit.cover,
+              );
+            },
+          );
+        case ImageType.video:
+          return Container(
+            width: width,
+            height: height??300,
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: radius,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.play_circle_filled,
+                  color: Colors.white,
+                  size: 48,
+                ),
+                Positioned(
+                  bottom: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'VIDEO',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         case ImageType.png:
@@ -166,6 +258,16 @@ class CustomImageView extends StatelessWidget {
 extension ImageTypeExtension on String {
   ImageType get imageType {
     if (startsWith('http') || startsWith('https')) {
+      // Check if it's a video file
+      final videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
+      final lowerPath = toLowerCase();
+      
+      for (String ext in videoExtensions) {
+        if (lowerPath.endsWith(ext)) {
+          return ImageType.video;
+        }
+      }
+      
       return ImageType.network;
     } else if (endsWith('.svg')) {
       return ImageType.svg;
@@ -177,4 +279,4 @@ extension ImageTypeExtension on String {
   }
 }
 
-enum ImageType { svg, png, network, file, unknown }
+enum ImageType { svg, png, network, file, video, unknown }

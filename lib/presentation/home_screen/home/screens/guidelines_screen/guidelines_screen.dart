@@ -210,12 +210,12 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 // Search field with animated visibility
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  height: isSearchShow ? 60 : 0,
+                  height: isSearchShow ? 80 : 0,
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
                     child: isSearchShow
                       ? Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                           decoration: BoxDecoration(
                             color: appStore.isDarkMode
                                 ? Colors.blueGrey[800]

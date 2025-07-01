@@ -9,8 +9,13 @@ import '../../../../../core/utils/video_utils.dart';
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
+  final bool showMinimalControls;
 
-  VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+  VideoPlayerWidget({
+    Key? key, 
+    required this.videoUrl,
+    this.showMinimalControls = false,
+  }) : super(key: key);
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -51,9 +56,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           videoPlayerController: _controller!,
           autoPlay: false,
           looping: false,
-          allowFullScreen: true,
+          allowFullScreen: !widget.showMinimalControls,
           allowMuting: true,
-          showControls: true,
+          showControls: !widget.showMinimalControls,
+          showControlsOnInitialize: false,
+          showOptions: false,
           materialProgressColors: ChewieProgressColors(
             playedColor: Colors.blue,
             handleColor: Colors.blueAccent,
@@ -143,22 +150,70 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     }
     
     if (_controller != null && _controller!.value.isInitialized && chewieController != null) {
-      return AspectRatio(
-        aspectRatio: _controller!.value.aspectRatio,
-        child: Chewie(controller: chewieController!),
-      );
+      Widget videoWidget = widget.showMinimalControls
+            ? Stack(
+                children: [
+                  Chewie(controller: chewieController!),
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_controller!.value.isPlaying) {
+                          _controller!.pause();
+                        } else {
+                          _controller!.play();
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Center(
+                          child: AnimatedOpacity(
+                            opacity: !_controller!.value.isPlaying ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 300),
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.play_arrow,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Chewie(controller: chewieController!);
+      
+      return widget.showMinimalControls 
+        ? videoWidget
+        : AspectRatio(
+            aspectRatio: _controller!.value.aspectRatio,
+            child: videoWidget,
+          );
     } else {
-      return AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Container(
-          color: appStore.isDarkMode ? Colors.black : Colors.grey[900],
-          child: Center(
-            child: CircularProgressIndicator(
-              color: appStore.isDarkMode ? Colors.white : Colors.blue,
-            ),
+      Widget loadingWidget = Container(
+        color: appStore.isDarkMode ? Colors.black : Colors.grey[900],
+        child: Center(
+          child: CircularProgressIndicator(
+            color: appStore.isDarkMode ? Colors.white : Colors.blue,
           ),
         ),
       );
+      
+      return widget.showMinimalControls 
+        ? loadingWidget
+        : AspectRatio(
+            aspectRatio: 16 / 9,
+            child: loadingWidget,
+          );
     }
   }
 

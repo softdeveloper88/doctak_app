@@ -374,10 +374,47 @@ class ChatBubble extends StatelessWidget {
                             width: 2,
                           ),
                         ),
-                        child: CircleAvatar(
-                          backgroundImage: CachedNetworkImageProvider(
-                              AppData.imageUrl + AppData.profile_pic),
-                          radius: 16,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: CachedNetworkImage(
+                            imageUrl: AppData.imageUrl + AppData.profile_pic,
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.cover,
+                            httpHeaders: const {
+                              'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
+                              'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+                              'Accept-Encoding': 'gzip, deflate, br',
+                              'Connection': 'keep-alive',
+                              'Cache-Control': 'no-cache',
+                            },
+                            placeholder: (context, url) => Container(
+                              color: Colors.blue[50],
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.blue,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) {
+                              // Enhanced error debugging for profile images
+                              print('🚨 Profile image load error for URL: $url');
+                              print('🚨 Error details: $error');
+                              print('🚨 Error type: ${error.runtimeType}');
+                              
+                              return Container(
+                                color: Colors.blue[100],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Colors.blue,
+                                    size: 20,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
