@@ -71,9 +71,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         homeBloc: homeBloc,
         openDrawer: () => scaffoldKey.currentState?.openDrawer(),
       ),
-      SearchScreen(
-        backPress: () => setState(() => selectedIndex = 0),
-      ),
+      SearchScreen(backPress: () => setState(() => selectedIndex = 0)),
       SVAddPostFragment(
         refresh: () {
           setState(() => selectedIndex = 0);
@@ -101,10 +99,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
       },
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
-        body: IndexedStack(
-          index: selectedIndex,
-          children: _fragments,
-        ),
+        body: IndexedStack(index: selectedIndex, children: _fragments),
         key: scaffoldKey,
         drawer: SVHomeDrawerComponent(),
         bottomNavigationBar: _buildModernBottomNavigationBar(),
@@ -118,7 +113,8 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
-      height: 82 + bottomPadding, // Adjust for safe area and improved text layout
+      height:
+          82 + bottomPadding, // Adjust for safe area and improved text layout
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFAFAFA),
         boxShadow: [
@@ -159,14 +155,8 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: isDark
-              ? [
-                  const Color(0xFF1C1C1E),
-                  const Color(0xFF1A1A1C),
-                ]
-              : [
-                  const Color(0xFFFBFBFB),
-                  const Color(0xFFF8F8F8),
-                ],
+              ? [const Color(0xFF1C1C1E), const Color(0xFF1A1A1C)]
+              : [const Color(0xFFFBFBFB), const Color(0xFFF8F8F8)],
         ),
       ),
       child: ClipRRect(
@@ -207,10 +197,18 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
   List<Widget> _buildLTRNavigationItems() {
     return [
-      _buildNavItem(0, Icons.home_rounded, Icons.home_outlined,
-          translation(context).lbl_home),
-      _buildNavItem(1, CupertinoIcons.search, CupertinoIcons.search,
-          translation(context).lbl_search),
+      _buildNavItem(
+        0,
+        Icons.home_rounded,
+        Icons.home_outlined,
+        translation(context).lbl_home,
+      ),
+      _buildNavItem(
+        1,
+        CupertinoIcons.search,
+        CupertinoIcons.search,
+        translation(context).lbl_search,
+      ),
       _buildAddButton(),
       _buildProfileNavItem(),
       _buildAINavItem(),
@@ -222,15 +220,27 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
       _buildAINavItem(),
       _buildProfileNavItem(),
       _buildAddButton(),
-      _buildNavItem(1, CupertinoIcons.search, CupertinoIcons.search,
-          translation(context).lbl_search),
-      _buildNavItem(0, Icons.home_rounded, Icons.home_outlined,
-          translation(context).lbl_home),
+      _buildNavItem(
+        1,
+        CupertinoIcons.search,
+        CupertinoIcons.search,
+        translation(context).lbl_search,
+      ),
+      _buildNavItem(
+        0,
+        Icons.home_rounded,
+        Icons.home_outlined,
+        translation(context).lbl_home,
+      ),
     ];
   }
 
-  Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon,
-      String label) {
+  Widget _buildNavItem(
+    int index,
+    IconData activeIcon,
+    IconData inactiveIcon,
+    String label,
+  ) {
     final isSelected = selectedIndex == index;
     final isDark = appStore.isDarkMode;
 
@@ -239,8 +249,9 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         onTap: () {
           if (selectedIndex != index) {
             setState(() => selectedIndex = index);
-            _animationController.forward().then((_) =>
-                _animationController.reverse());
+            _animationController.forward().then(
+              (_) => _animationController.reverse(),
+            );
           }
           FocusManager.instance.primaryFocus?.unfocus();
         },
@@ -265,35 +276,39 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                   border: isSelected
                       ? Border.all(
                           color: Colors.blue.withOpacity(0.25),
-                          width: 1.5
+                          width: 1.5,
                         )
                       : null,
-                  boxShadow: isSelected ? [
-                    // Primary glow effect
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.2),
-                      blurRadius: 12,
-                      spreadRadius: 0,
-                      offset: const Offset(0, 4),
-                    ),
-                    // Inner light for premium feel
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
-                      blurRadius: 6,
-                      spreadRadius: -2,
-                      offset: const Offset(0, 2),
-                    ),
-                  ] : null,
+                  boxShadow: isSelected
+                      ? [
+                          // Primary glow effect
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.2),
+                            blurRadius: 12,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 4),
+                          ),
+                          // Inner light for premium feel
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.1),
+                            blurRadius: 6,
+                            spreadRadius: -2,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                   // Subtle gradient background for selected state
-                  gradient: isSelected ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blue.withOpacity(0.18),
-                      Colors.blue.withOpacity(0.12),
-                      Colors.blue.withOpacity(0.08),
-                    ],
-                  ) : null,
+                  gradient: isSelected
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.blue.withOpacity(0.18),
+                            Colors.blue.withOpacity(0.12),
+                            Colors.blue.withOpacity(0.08),
+                          ],
+                        )
+                      : null,
                 ),
                 child: Center(
                   child: AnimatedSwitcher(
@@ -318,9 +333,9 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               // Enhanced label with proper text overflow handling
               Container(
                 constraints: const BoxConstraints(maxWidth: 70),
@@ -355,17 +370,18 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
   Widget _buildAddButton() {
     final isDark = appStore.isDarkMode;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
           _fragments[2].launch(context);
-          _animationController.forward().then((_) =>
-              _animationController.reverse());
+          _animationController.forward().then(
+            (_) => _animationController.reverse(),
+          );
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          height: 64,
+          constraints: const BoxConstraints(minHeight: 64, maxHeight: 80),
           child: AnimatedBuilder(
             animation: _scaleAnimation,
             builder: (context, child) {
@@ -373,7 +389,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                 scale: _scaleAnimation.value,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Refined Add button container
                     Container(
@@ -381,10 +397,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                       height: 42,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.blue[500]!,
-                            Colors.blue[700]!,
-                          ],
+                          colors: [Colors.blue[500]!, Colors.blue[700]!],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -404,24 +417,26 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                         size: 24,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     // Simple text label with proper overflow handling
-                    Container(
-                      constraints: const BoxConstraints(maxWidth: 70),
-                      child: const Text(
-                        'Create',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Poppins',
-                          letterSpacing: 0.2,
-                          height: 1.1,
+                    Flexible(
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 70),
+                        child: const Text(
+                          'Create',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Poppins',
+                            letterSpacing: 0.2,
+                            height: 1.0,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          softWrap: false,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        softWrap: false,
                       ),
                     ),
                   ],
@@ -443,8 +458,9 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         onTap: () {
           if (selectedIndex != 3) {
             setState(() => selectedIndex = 3);
-            _animationController.forward().then((_) =>
-                _animationController.reverse());
+            _animationController.forward().then(
+              (_) => _animationController.reverse(),
+            );
           }
           FocusManager.instance.primaryFocus?.unfocus();
         },
@@ -469,35 +485,39 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                   border: isSelected
                       ? Border.all(
                           color: Colors.blue.withOpacity(0.25),
-                          width: 1.5
+                          width: 1.5,
                         )
                       : null,
-                  boxShadow: isSelected ? [
-                    // Primary glow effect
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.2),
-                      blurRadius: 12,
-                      spreadRadius: 0,
-                      offset: const Offset(0, 4),
-                    ),
-                    // Inner light for premium feel
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
-                      blurRadius: 6,
-                      spreadRadius: -2,
-                      offset: const Offset(0, 2),
-                    ),
-                  ] : null,
+                  boxShadow: isSelected
+                      ? [
+                          // Primary glow effect
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.2),
+                            blurRadius: 12,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 4),
+                          ),
+                          // Inner light for premium feel
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.1),
+                            blurRadius: 6,
+                            spreadRadius: -2,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                   // Subtle gradient background for selected state
-                  gradient: isSelected ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blue.withOpacity(0.18),
-                      Colors.blue.withOpacity(0.12),
-                      Colors.blue.withOpacity(0.08),
-                    ],
-                  ) : null,
+                  gradient: isSelected
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.blue.withOpacity(0.18),
+                            Colors.blue.withOpacity(0.12),
+                            Colors.blue.withOpacity(0.08),
+                          ],
+                        )
+                      : null,
                 ),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 400),
@@ -528,9 +548,9 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               // Enhanced label with proper text overflow handling
               Container(
                 constraints: const BoxConstraints(maxWidth: 70),
@@ -571,8 +591,9 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
       child: GestureDetector(
         onTap: () {
           ChatGptWithImageScreen(isFromMainScreen: true).launch(context);
-          _animationController.forward().then((_) =>
-              _animationController.reverse());
+          _animationController.forward().then(
+            (_) => _animationController.reverse(),
+          );
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
@@ -596,42 +617,46 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                   border: isSelected
                       ? Border.all(
                           color: Colors.blue.withOpacity(0.25),
-                          width: 1.5
+                          width: 1.5,
                         )
                       : null,
-                  boxShadow: isSelected ? [
-                    // Enhanced glow for AI item
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.25),
-                      blurRadius: 16,
-                      spreadRadius: 0,
-                      offset: const Offset(0, 4),
-                    ),
-                    // Secondary glow
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
-                      blurRadius: 8,
-                      spreadRadius: -2,
-                      offset: const Offset(0, 2),
-                    ),
-                    // Pulsing effect for AI
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.05),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 6),
-                    ),
-                  ] : null,
+                  boxShadow: isSelected
+                      ? [
+                          // Enhanced glow for AI item
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.25),
+                            blurRadius: 16,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 4),
+                          ),
+                          // Secondary glow
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.1),
+                            blurRadius: 8,
+                            spreadRadius: -2,
+                            offset: const Offset(0, 2),
+                          ),
+                          // Pulsing effect for AI
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.05),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 6),
+                          ),
+                        ]
+                      : null,
                   // Subtle gradient background for selected state
-                  gradient: isSelected ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blue.withOpacity(0.18),
-                      Colors.blue.withOpacity(0.12),
-                      Colors.blue.withOpacity(0.08),
-                    ],
-                  ) : null,
+                  gradient: isSelected
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.blue.withOpacity(0.18),
+                            Colors.blue.withOpacity(0.12),
+                            Colors.blue.withOpacity(0.08),
+                          ],
+                        )
+                      : null,
                 ),
                 child: Center(
                   child: AnimatedSwitcher(
@@ -667,9 +692,9 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               // Enhanced label with proper text overflow handling
               Container(
                 constraints: const BoxConstraints(maxWidth: 70),
@@ -702,8 +727,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     );
   }
 
-  BottomNavigationBarItem _buildBottomNavigationBarItem(String icon,
-      String activeIcon, String label) {
+  BottomNavigationBarItem _buildBottomNavigationBarItem(
+    String icon,
+    String activeIcon,
+    String label,
+  ) {
     return BottomNavigationBarItem(
       icon: Padding(
         padding: const EdgeInsets.only(top: 12),
