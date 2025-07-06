@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/case_discussion_models.dart';
 
 class DiscussionStatsBar extends StatelessWidget {
-  final List<CaseDiscussion> discussions;
+  final List<CaseDiscussionListItem> discussions;
   final CaseDiscussionFilters currentFilters;
   final bool isLoading;
 

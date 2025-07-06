@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/presentation/case_discussion/screens/discussion_list_screen.dart';
+import 'package:shorebird_code_push/shorebird_code_push.dart';
 import 'package:doctak_app/presentation/NoInternetScreen.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
 import 'package:doctak_app/presentation/calling_module/services/agora_service.dart';
@@ -22,7 +24,6 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/p
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/bloc/conference_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
@@ -108,6 +109,35 @@ void checkNotificationPermission() async {
   if (status.isDenied) {
     // Request permission if it's denied
     await Permission.notification.request();
+  }
+}
+
+// Shorebird update check function
+Future<void> _checkForShorebirdUpdates(ShorebirdCodePush shorebirdCodePush) async {
+  try {
+    debugPrint('Checking for Shorebird updates...');
+    
+    // Check if updates are available
+    final isUpdateAvailable = await shorebirdCodePush.isNewPatchAvailableForDownload();
+    
+    if (isUpdateAvailable) {
+      debugPrint('Shorebird update available, downloading...');
+      
+      // Download the update
+      await shorebirdCodePush.downloadUpdateIfAvailable();
+      debugPrint('Shorebird update downloaded successfully');
+      
+      // Check if the update is ready to install
+      final isUpdateReadyToInstall = await shorebirdCodePush.isNewPatchReadyToInstall();
+      
+      if (isUpdateReadyToInstall) {
+        debugPrint('Shorebird update ready to install on next restart');
+      }
+    } else {
+      debugPrint('No Shorebird updates available');
+    }
+  } catch (e) {
+    debugPrint('Error checking for Shorebird updates: $e');
   }
 }
 
@@ -247,6 +277,17 @@ Future<void> main() async {
   HttpOverrides.global = MyHttpsOverrides();
 
   debugPrint('Starting app initialization...');
+
+  // Initialize Shorebird for over-the-air updates
+  try {
+    final shorebirdCodePush = ShorebirdCodePush();
+    debugPrint('Shorebird initialized successfully');
+    
+    // Check for updates in the background
+    _checkForShorebirdUpdates(shorebirdCodePush);
+  } catch (e) {
+    debugPrint('Shorebird initialization failed: $e');
+  }
 
   // Initialize Firebase FIRST, before any Firebase-dependent services
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -1013,9 +1054,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           '/conference_invitation': (context) =>
                               ConferencesScreen(),
                           '/new_discuss_case': (context) =>
-                              const CaseDiscussionScreen(),
+                              const DiscussionListScreen(),
                           '/discuss_case_comment': (context) =>
-                              const CaseDiscussionScreen(),
+                              const DiscussionListScreen(),
                           '/job_post_notification': (context) =>
                               JobsDetailsScreen(
                                 jobId: widget.id ?? '0',

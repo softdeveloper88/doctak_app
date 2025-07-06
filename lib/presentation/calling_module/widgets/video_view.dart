@@ -5,6 +5,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:provider/provider.dart';
 import 'package:doctak_app/presentation/calling_module/providers/call_provider.dart';
 import 'package:doctak_app/presentation/calling_module/models/call_state.dart';
+import '../utils/platform_config.dart';
 
 /// Widget that manages video views (local and remote)
 class VideoView extends StatelessWidget {
@@ -54,11 +55,13 @@ class LocalVideoMainView extends StatelessWidget {
 
     return Stack(
       children: [
-        // Main video (local)
+        // Main video (local) with platform-specific settings
         AgoraVideoView(
           controller: VideoViewController(
             rtcEngine: agoraEngine,
             canvas: const VideoCanvas(uid: 0),
+            useFlutterTexture: PlatformConfig.isIOS, // Use texture rendering on iOS
+            useAndroidSurfaceView: PlatformConfig.isAndroid,
           ),
         ),
 
@@ -116,8 +119,8 @@ class LocalVideoMainView extends StatelessWidget {
                       rtcEngine: agoraEngine,
                       canvas: VideoCanvas(uid: remoteUid),
                       connection: RtcConnection(channelId: channelId),
-                      useFlutterTexture: true,
-                      useAndroidSurfaceView: true,
+                      useFlutterTexture: PlatformConfig.isIOS,
+                      useAndroidSurfaceView: PlatformConfig.isAndroid,
                     ),
                   ),
                 ),
@@ -149,14 +152,14 @@ class RemoteVideoMainView extends StatelessWidget {
 
     return Stack(
       children: [
-        // Main video view - remote video
+        // Main video view - remote video with platform optimization
         AgoraVideoView(
           controller: VideoViewController.remote(
             rtcEngine: agoraEngine,
             canvas: VideoCanvas(uid: remoteUid),
             connection: RtcConnection(channelId: channelId),
-            // useFlutterTexture: true,
-            // useAndroidSurfaceView: true,
+            useFlutterTexture: PlatformConfig.isIOS,
+            useAndroidSurfaceView: PlatformConfig.isAndroid,
           ),
         ),
 
@@ -258,6 +261,8 @@ class LocalVideoPreview extends StatelessWidget {
                 controller: VideoViewController(
                   rtcEngine: agoraEngine,
                   canvas: const VideoCanvas(uid: 0),
+                  useFlutterTexture: PlatformConfig.isIOS,
+                  useAndroidSurfaceView: PlatformConfig.isAndroid,
                 ),
               )
                   : Container(

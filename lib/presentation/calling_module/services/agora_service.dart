@@ -73,20 +73,24 @@ class AgoraService {
 
   // Register event handlers
   void _registerEventHandlers() {
+    print('🎯 Registering Agora event handlers');
     _engine?.registerEventHandler(
       RtcEngineEventHandler(
           onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
+            print('✅ onJoinChannelSuccess: channel=${connection.channelId}, elapsed=${elapsed}ms');
             if (_onJoinChannelSuccess != null) {
               _onJoinChannelSuccess!(0, connection.channelId ?? "", elapsed);
             }
           },
           onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
+            print('👥 onUserJoined: uid=$remoteUid, channel=${connection.channelId}, elapsed=${elapsed}ms');
             if (_onUserJoined != null) {
               _onUserJoined!(remoteUid, elapsed);
             }
           },
           onUserOffline: (RtcConnection connection, int remoteUid,
               UserOfflineReasonType reason) {
+            print('👋 onUserOffline: uid=$remoteUid, channel=${connection.channelId}, reason=${reason.index}');
             if (_onUserOffline != null) {
               _onUserOffline!(remoteUid, reason.index);
             }
@@ -119,20 +123,40 @@ class AgoraService {
           },
           onConnectionStateChanged: (RtcConnection connection,
               ConnectionStateType state, ConnectionChangedReasonType reason) {
+            print('🔄 onConnectionStateChanged: state=${state.index}(${_getConnectionStateName(state.index)}), reason=${reason.index}(${_getConnectionReasonName(reason.index)})');
             if (_onConnectionStateChanged != null) {
               _onConnectionStateChanged!(state.index, reason.index);
             }
           },
           onFirstRemoteVideoFrame: (RtcConnection connection, int remoteUid,
               int width, int height, int elapsed) {
+            print('📹 onFirstRemoteVideoFrame: uid=$remoteUid, size=${width}x$height, elapsed=${elapsed}ms');
             if (_onFirstRemoteVideoFrame != null) {
               _onFirstRemoteVideoFrame!(remoteUid, width, height, elapsed);
             }
           },
           onError: (ErrorCodeType err, String msg) {
+            print('❌ onError: code=${err.value}, message=$msg');
             if (_onError != null) {
               _onError!(err, msg);
             }
+          },
+          // Additional event handlers for better debugging
+          onRemoteVideoStateChanged: (RtcConnection connection, int remoteUid,
+              RemoteVideoState state, RemoteVideoStateReason reason, int elapsed) {
+            print('📺 onRemoteVideoStateChanged: uid=$remoteUid, state=${state.index}, reason=${reason.index}, elapsed=${elapsed}ms');
+          },
+          onRemoteAudioStateChanged: (RtcConnection connection, int remoteUid,
+              RemoteAudioState state, RemoteAudioStateReason reason, int elapsed) {
+            print('🔊 onRemoteAudioStateChanged: uid=$remoteUid, state=${state.index}, reason=${reason.index}, elapsed=${elapsed}ms');
+          },
+          onLocalVideoStateChanged: (VideoSourceType source, LocalVideoStreamState state,
+              LocalVideoStreamReason reason) {
+            print('📱 onLocalVideoStateChanged: source=${source.index}, state=${state.index}, reason=${reason.index}');
+          },
+          onLocalAudioStateChanged: (RtcConnection connection, LocalAudioStreamState state,
+              LocalAudioStreamReason reason) {
+            print('🎤 onLocalAudioStateChanged: state=${state.index}, reason=${reason.index}');
           }
       ),
     );
@@ -172,77 +196,191 @@ class AgoraService {
   //   }
   // }
 
-  // Improved method to configure media settings
+  // Enhanced media configuration with better video stream handling
   Future<void> configureMediaSettings({required bool isVideoCall}) async {
     if (_engine == null) return;
+    
+    print('🎥 Configuring media settings: isVideoCall=$isVideoCall, platform=${Platform.operatingSystem}');
+    
     try {
-      // Set client role
+      // Set client role first
       await _engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+      print('✅ Client role set to broadcaster');
+      
+      // iOS-specific audio session configuration
+      if (Platform.isIOS) {
+        await _configureIOSAudioSession();
+      }
 
-      // Configure audio - match web implementation with AEC, ANS, AGC
-      await _engine!.setAudioProfile(
-        profile: AudioProfileType.audioProfileDefault,
-        scenario: AudioScenarioType.audioScenarioDefault,
+      // Configure audio with platform-specific settings
+      if (Platform.isIOS) {
+        // iOS optimized audio profile
+        await _engine!.setAudioProfile(
+          profile: AudioProfileType.audioProfileMusicHighQuality,
+          scenario: AudioScenarioType.audioScenarioGameStreaming, // Better for iOS
+        );
+      } else {
+        // Android optimized audio profile
+        await _engine!.setAudioProfile(
+          profile: AudioProfileType.audioProfileMusicHighQuality,
+          scenario: AudioScenarioType.audioScenarioDefault,
+        );
+      }
+
+      // Enable audio processing for clear audio
+      await _engine!.enableAudioVolumeIndication(
+        interval: 300,  // More frequent updates for better responsiveness
+        smooth: 3, 
+        reportVad: true
       );
-
-      // Enable audio processing options to match web
-      await _engine!.enableAudioVolumeIndication(interval: 500, smooth: 3, reportVad: true);
+      
+      // Audio enhancement parameters
       await _engine!.setParameters('{"che.audio.enable_aec": true}');
       await _engine!.setParameters('{"che.audio.enable_agc": true}');
       await _engine!.setParameters('{"che.audio.enable_ns": true}');
+      await _engine!.setParameters('{"che.audio.aec.enable": true}');
+      await _engine!.setParameters('{"che.audio.agc.enable": true}');
+      await _engine!.setParameters('{"che.audio.ns.enable": true}');
 
-      // Set default audio route
-      if (isVideoCall) {
-        await _engine!.setDefaultAudioRouteToSpeakerphone(true);
-      } else {
-        await _engine!.setDefaultAudioRouteToSpeakerphone(false);
-      }
+      print('✅ Audio settings configured');
 
       if (isVideoCall) {
-        // Enable video
+        // Enhanced video configuration with platform optimization
         await _engine!.enableVideo();
+        
+        // Platform-specific video encoder configuration
+        if (Platform.isIOS) {
+          // iOS optimized settings
+          await _engine!.setVideoEncoderConfiguration(
+            const VideoEncoderConfiguration(
+              dimensions: VideoDimensions(width: 640, height: 480),
+              frameRate: 15,
+              bitrate: 900,  // Slightly higher for iOS
+              minBitrate: 500,
+              orientationMode: OrientationMode.orientationModeAdaptive,
+              degradationPreference: DegradationPreference.maintainQuality, // iOS handles quality better
+              mirrorMode: VideoMirrorModeType.videoMirrorModeEnabled,
+              codecType: VideoCodecType.videoCodecH264,
+            ),
+          );
+        } else {
+          // Android optimized settings
+          await _engine!.setVideoEncoderConfiguration(
+            const VideoEncoderConfiguration(
+              dimensions: VideoDimensions(width: 640, height: 480),
+              frameRate: 15,
+              bitrate: 800,
+              minBitrate: 400,
+              orientationMode: OrientationMode.orientationModeAdaptive,
+              degradationPreference: DegradationPreference.maintainFramerate, // Android prefers framerate
+              mirrorMode: VideoMirrorModeType.videoMirrorModeEnabled,
+              codecType: VideoCodecType.videoCodecH264,
+            ),
+          );
+        }
 
-        // Set video encoder configuration to match web implementation's 480p_1 preset
-        await _engine!.setVideoEncoderConfiguration(
-          const VideoEncoderConfiguration(
-            dimensions: VideoDimensions(width: 640, height: 480), // Match web resolution
-            frameRate: 15,
-            // minFrameRate: FrameRate.frameRateFps10,
-            bitrate: 500, // Reduced for better compatibility
-            minBitrate: 400,
-            orientationMode: OrientationMode.orientationModeAdaptive,
-            degradationPreference: DegradationPreference.maintainQuality,
-            mirrorMode: VideoMirrorModeType.videoMirrorModeEnabled, // Enable mirroring as in web
-          ),
-        );
-
-        // Enable dual stream mode for better cross-platform compatibility
+        // Enable dual stream mode for adaptive quality
         await _engine!.enableDualStreamMode(enabled: true);
-        await _engine!.setRemoteVideoStreamType(
-          uid: 0, // Remote user
-          streamType: VideoStreamType.videoStreamLow, // Start with low stream, can switch based on quality
-        );
+        
+        // Set default remote video stream to high quality - removed as it requires specific UID
+        // await _engine!.setRemoteDefaultVideoStreamType(
+        //   streamType: VideoStreamType.videoStreamHigh,
+        // );
 
-        // Configure remote video rendering mode to match web's object-fit: cover
-        await _engine!.setRemoteRenderMode(
-          uid: 0,
-          renderMode: RenderModeType.renderModeFit,
-          mirrorMode: VideoMirrorModeType.videoMirrorModeDisabled,
-        );
+        // Platform-specific video parameters
+        if (Platform.isIOS) {
+          // iOS optimized parameters
+          await _engine!.setParameters('{"che.video.h264.profile": 77}'); // Main profile for iOS
+          await _engine!.setParameters('{"che.video.h264.preferFrameRateOverImageQuality": false}');
+          await _engine!.setParameters('{"che.video.contentHint": "motion"}');
+          await _engine!.setParameters('{"che.video.enablePreEncode": true}'); // iOS hardware acceleration
+          await _engine!.setParameters('{"che.video.lowBitRateStreamParameter": {"width":160,"height":120,"frameRate":15,"bitRate":80}}');
+        } else {
+          // Android optimized parameters
+          await _engine!.setParameters('{"che.video.h264.profile": 66}'); // Baseline profile for Android compatibility
+          await _engine!.setParameters('{"che.video.h264.preferFrameRateOverImageQuality": true}'); // Android prefers framerate
+          await _engine!.setParameters('{"che.video.contentHint": "motion"}');
+          await _engine!.setParameters('{"che.video.lowBitRateStreamParameter": {"width":160,"height":120,"frameRate":15,"bitRate":65}}');
+        }
 
-        // Set content hints to match web optimization mode
-        await _engine!.setParameters('{"che.video.contentHint": "balanced"}');
+        // Platform-specific camera settings
+        if (Platform.isIOS) {
+          await _engine!.setCameraCapturerConfiguration(
+            const CameraCapturerConfiguration(
+              cameraDirection: CameraDirection.cameraFront,
+            ),
+          );
+          
+          // iOS camera optimization
+          await _engine!.setParameters('{"che.video.camera.captureMode": 1}'); // Auto capture mode
+        } else {
+          await _engine!.setCameraCapturerConfiguration(
+            const CameraCapturerConfiguration(
+              cameraDirection: CameraDirection.cameraFront,
+            ),
+          );
+        }
 
-        // Start preview
-        await _engine!.startPreview();
+        // Start local video preview with error handling
+        try {
+          await _engine!.startPreview();
+          print('✅ Video preview started');
+        } catch (e) {
+          print('❌ Error starting preview: $e');
+          // Continue anyway - preview might still work during call
+        }
+
+        // Platform-specific audio routing for video calls
+        if (Platform.isIOS) {
+          // iOS audio routing
+          await _engine!.setDefaultAudioRouteToSpeakerphone(true);
+          await _engine!.setEnableSpeakerphone(true);
+          // iOS specific audio session management
+          await _engine!.setParameters('{"che.audio.keep_audiosession": true}');
+        } else {
+          // Android audio routing
+          await _engine!.setDefaultAudioRouteToSpeakerphone(true);
+          await _engine!.setEnableSpeakerphone(true);
+        }
+        
+        print('✅ Video settings configured');
       } else {
-        // Audio call configuration
+        // Audio call - disable video with platform-specific settings
         await _engine!.disableVideo();
+        
+        if (Platform.isIOS) {
+          // iOS audio call routing (to earpiece)
+          await _engine!.setDefaultAudioRouteToSpeakerphone(false);
+          await _engine!.setParameters('{"che.audio.forceAudioRoute": 0}'); // Route to earpiece
+        } else {
+          // Android audio call routing
+          await _engine!.setDefaultAudioRouteToSpeakerphone(false);
+        }
+        
+        print('✅ Audio-only call configured for ${Platform.operatingSystem}');
       }
+
     } catch (e) {
-      print('Error configuring media settings: $e');
+      print('❌ Error configuring media settings: $e');
+      rethrow;
     }
   }
+  // iOS-specific audio session configuration
+  Future<void> _configureIOSAudioSession() async {
+    try {
+      // iOS audio session optimization
+      await _engine!.setParameters('{"che.audio.audioSession.category": "AVAudioSessionCategoryPlayAndRecord"}');
+      await _engine!.setParameters('{"che.audio.audioSession.categoryOptions": ["AVAudioSessionCategoryOptionAllowBluetooth", "AVAudioSessionCategoryOptionDefaultToSpeaker"]}');
+      await _engine!.setParameters('{"che.audio.audioSession.mode": "AVAudioSessionModeVideoChat"}');
+      await _engine!.setParameters('{"che.audio.enable_aec": true}');
+      await _engine!.setParameters('{"che.audio.enable_ns": true}');
+      await _engine!.setParameters('{"che.audio.enable_agc": true}');
+      print('✅ iOS audio session configured');
+    } catch (e) {
+      print('❌ Error configuring iOS audio session: $e');
+    }
+  }
+
   // Add method to properly deactivate the audio session on iOS
   Future<void> deactivateAudioSession() async {
     if (_engine == null) return;
@@ -516,8 +654,79 @@ class AgoraService {
   bool _isEngineValid() {
     return _engine != null;
   }
+  
+  // Helper method to get connection state name for debugging
+  String _getConnectionStateName(int state) {
+    switch (state) {
+      case 1: return 'DISCONNECTED';
+      case 2: return 'CONNECTING';
+      case 3: return 'CONNECTED';
+      case 4: return 'RECONNECTING';
+      case 5: return 'FAILED';
+      default: return 'UNKNOWN($state)';
+    }
+  }
+  
+  // Helper method to get connection reason name for debugging
+  String _getConnectionReasonName(int reason) {
+    switch (reason) {
+      case 0: return 'CONNECTING';
+      case 1: return 'JOIN_SUCCESS';
+      case 2: return 'INTERRUPTED';
+      case 3: return 'BANNED_BY_SERVER';
+      case 4: return 'JOIN_FAILED';
+      case 5: return 'LEAVE_CHANNEL';
+      case 6: return 'INVALID_APP_ID';
+      case 7: return 'INVALID_CHANNEL_NAME';
+      case 8: return 'INVALID_TOKEN';
+      case 9: return 'TOKEN_EXPIRED';
+      case 10: return 'REJECTED_BY_SERVER';
+      case 11: return 'SETTING_PROXY_SERVER';
+      case 12: return 'RENEW_TOKEN';
+      case 13: return 'CLIENT_IP_ADDRESS_CHANGED';
+      case 14: return 'KEEP_ALIVE_TIMEOUT';
+      case 15: return 'REJOIN_SUCCESS';
+      case 16: return 'LOST';
+      case 17: return 'ECHO_TEST';
+      case 18: return 'CLIENT_IP_ADDRESS_CHANGED_BY_USER';
+      case 19: return 'SAME_UID_LOGIN';
+      case 20: return 'TOO_MANY_BROADCASTERS';
+      default: return 'UNKNOWN($reason)';
+    }
+  }
+  
+  // Log current engine state for debugging
+  Future<void> _logEngineState() async {
+    if (_engine == null) {
+      print('❌ Engine is null');
+      return;
+    }
+    
+    try {
+      final connectionState = await _engine!.getConnectionState();
+      print('📊 Engine connection state: ${connectionState.index} (${_getConnectionStateName(connectionState.index)})');
+    } catch (e) {
+      print('❌ Error getting engine state: $e');
+    }
+  }
 
-  // Enhanced join channel with better error handling
+  // Debug method to log all media settings
+  Future<void> _logMediaSettings({required bool isVideoCall}) async {
+    print('📋 Current media settings:');
+    print('  - Call type: ${isVideoCall ? 'VIDEO' : 'AUDIO'}');
+    print('  - Engine initialized: ${_engine != null}');
+    
+    if (_engine != null) {
+      try {
+        final connectionState = await _engine!.getConnectionState();
+        print('  - Connection state: ${connectionState.index} (${_getConnectionStateName(connectionState.index)})');
+      } catch (e) {
+        print('  - Connection state: ERROR - $e');
+      }
+    }
+  }
+
+  // Enhanced join channel with optimized media options
   Future<bool> joinChannel({
     required String channelId,
     required int uid,
@@ -525,20 +734,39 @@ class AgoraService {
     required bool isVideoCall,
   }) async {
     if (!_isEngineValid()) {
-      print('Cannot join channel: Agora engine not initialized');
+      print('❌ Cannot join channel: Agora engine not initialized');
       return false;
     }
 
     try {
+      print('🚀 Joining channel: $channelId with UID: $uid, isVideo: $isVideoCall');
+      print('📊 Current engine state before join:');
+      await _logEngineState();
+      await _logMediaSettings(isVideoCall: isVideoCall);
+      
+      // Enhanced channel media options for better compatibility
       final options = ChannelMediaOptions(
+        // Publishing options
         publishCameraTrack: isVideoCall,
         publishMicrophoneTrack: true,
-        autoSubscribeAudio: true,
-        autoSubscribeVideo: isVideoCall,
-        channelProfile: ChannelProfileType.channelProfileCommunication,
-        clientRoleType: ClientRoleType.clientRoleBroadcaster,
         publishCustomVideoTrack: false,
         publishCustomAudioTrack: false,
+        publishScreenTrack: false,
+        
+        // Subscription options
+        autoSubscribeAudio: true,
+        autoSubscribeVideo: isVideoCall,
+        
+        // Channel configuration
+        channelProfile: ChannelProfileType.channelProfileCommunication,
+        clientRoleType: ClientRoleType.clientRoleBroadcaster,
+        
+        // Audio/Video quality options for better performance
+        audioDelayMs: 0,
+        enableBuiltInMediaEncryption: false,
+        
+        // Additional options for stability
+        isInteractiveAudience: false,
       );
 
       await _engine!.joinChannel(
@@ -548,9 +776,20 @@ class AgoraService {
         options: options,
       );
 
+      print('✅ Successfully initiated channel join');
+      
+      // Log channel options for debugging
+      print('📋 Channel options used:');
+      print('  - publishCameraTrack: ${options.publishCameraTrack}');
+      print('  - publishMicrophoneTrack: ${options.publishMicrophoneTrack}');
+      print('  - autoSubscribeAudio: ${options.autoSubscribeAudio}');
+      print('  - autoSubscribeVideo: ${options.autoSubscribeVideo}');
+      print('  - channelProfile: ${options.channelProfile?.index}');
+      print('  - clientRoleType: ${options.clientRoleType?.index}');
+      
       return true;
     } catch (e) {
-      print('Error joining channel: $e');
+      print('❌ Error joining channel: $e');
       return false;
     }
   }

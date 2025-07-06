@@ -40,43 +40,16 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
   Widget build(BuildContext context) {
     final bloc = widget.commentBloc;
 
-    return bloc.postList.isEmpty
-        ? _buildEmptyState(context)
-        : _buildVirtualizedCommentList();
-  }
-
-  // Empty state widget
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 48,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            translation(context).msg_no_comments,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-    );
+    return _buildVirtualizedCommentList();
   }
 
   // Virtualized list implementation
   Widget _buildVirtualizedCommentList() {
     final bloc = widget.commentBloc;
-    
+
     return ListView.builder(
       controller: widget.scrollController,
-      padding: const EdgeInsets.only(top: 10, bottom: 80), // Add bottom padding for input field
+      padding: const EdgeInsets.only(top: 8, bottom: 70), // Reduced padding
       itemCount: bloc.postList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,
@@ -84,20 +57,16 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
         // Check if we need to load more data
         if (bloc.pageNumber <= bloc.numberOfPage) {
           if (index == bloc.postList.length - bloc.nextPageTrigger) {
-            bloc.add(CheckIfNeedMoreDataEvent(
-              postId: widget.postId,
-              index: index,
-            ));
+            bloc.add(
+              CheckIfNeedMoreDataEvent(postId: widget.postId, index: index),
+            );
           }
         }
-        
+
         // Show shimmer loader at the bottom if loading more
         if (bloc.numberOfPage != bloc.pageNumber - 1 &&
             index >= bloc.postList.length - 1) {
-          return const SizedBox(
-            height: 200,
-            child: EnhancedCommentShimmer()
-          );
+          return const SizedBox(height: 200, child: EnhancedCommentShimmer());
         }
         // Regular comment item
         else {
@@ -132,7 +101,7 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
     } else {
       _visibleCommentIndices.remove(index);
     }
-    
+
     // Can be used for analytics or optimization in the future
   }
 }

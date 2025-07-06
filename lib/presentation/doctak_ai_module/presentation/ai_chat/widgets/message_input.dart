@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../localization/app_localization.dart';
 import '../../../../../theme/theme_helper.dart';
 
 class MessageInput extends StatefulWidget {
@@ -188,12 +189,12 @@ class _MessageInputState extends State<MessageInput> {
                         Icons.arrow_drop_down,
                         color: Colors.blue[600],
                       ),
-                      items: [
+                      items: const [
                         DropdownMenuItem<String>(
                           value: 'low',
                           child: Text(
                             'Low context',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontFamily: 'Poppins',
                               color: Colors.blue,
@@ -205,7 +206,7 @@ class _MessageInputState extends State<MessageInput> {
                           value: 'medium',
                           child: Text(
                             'Medium context',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontFamily: 'Poppins',
                               color: Colors.blue,
@@ -217,7 +218,7 @@ class _MessageInputState extends State<MessageInput> {
                           value: 'high',
                           child: Text(
                             'High context',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontFamily: 'Poppins',
                               color: Colors.blue,
@@ -239,165 +240,132 @@ class _MessageInputState extends State<MessageInput> {
           ),
         ),
 
-        // Input field and buttons
+        // Input field and buttons - matching ChatGPT design
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 4,
-                offset: const Offset(0, -1),
+                color: Colors.blue.withAlpha(13),
+                offset: const Offset(0, -3),
+                blurRadius: 8,
               ),
             ],
-            border: Border(
-              top: BorderSide(
-                color: isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : appTheme.gray300.withOpacity(0.5),
-                width: 0.5,
-              ),
-            ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
             children: [
-              // Function buttons
               Row(
-                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // Attach file button
-                  IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(4),
+                  // Text input - ChatGPT style
+                  Expanded(
+                    child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.add_photo_alternate_outlined,
-                        size: 18,
-                        color: Colors.blue[600],
-                      ),
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
-                    ),
-                    onPressed: widget.isWaitingForResponse ? null : widget.onAttachImage,
-                    visualDensity: VisualDensity.compact,
-                  ),
-
-                  // Settings icon
-                  // IconButton(
-                  //   icon: Icon(
-                  //     _showAdvancedOptions ? Icons.keyboard_arrow_down : Icons.settings_outlined,
-                  //     size: 22,
-                  //     color: _showAdvancedOptions
-                  //         ? colorScheme.primary
-                  //         : isDarkMode
-                  //         ? Colors.white70
-                  //         : appTheme.gray600,
-                  //   ),
-                  //   padding: EdgeInsets.zero,
-                  //   constraints: const BoxConstraints(
-                  //     minWidth: 32,
-                  //     minHeight: 32,
-                  //   ),
-                  //   onPressed: () {
-                  //     setState(() {
-                  //       _showAdvancedOptions = !_showAdvancedOptions;
-                  //     });
-                  //   },
-                  //   visualDensity: VisualDensity.compact,
-                  // ),
-                ],
-              ),
-
-              const SizedBox(width: 8),
-
-              // Text input - Modern style input similar to ChatGPT
-              Expanded(
-                child: Container(
-                  constraints: const BoxConstraints(
-                    minHeight: 40,
-                    maxHeight: 120,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.blue.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          focusNode: _focusNode,
-                          decoration: InputDecoration(
-                            hintText: widget.isWaitingForResponse ? 'Waiting for AI response...' : 'Ask anything...',
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                            hintStyle: TextStyle(
-                              fontSize: 14,
-                              fontFamily: 'Poppins',
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Poppins',
-                            color: Colors.black87,
-                            height: 1.2,
-                          ),
-                          maxLines: null,
-                          textCapitalization: TextCapitalization.sentences,
-                          cursorColor: Colors.blue[600],
-                          textInputAction: TextInputAction.newline,
+                        color: isDarkMode
+                            ? Colors.blueGrey[800]
+                            : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(24.0),
+                        border: Border.all(
+                          color: Colors.blue.withOpacity(0.2),
+                          width: 1.5,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
                       ),
-
-                      // Send button
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4, bottom: 4),
-                        child: Material(
-                          color: widget.isWaitingForResponse
-                              ? Colors.grey.withOpacity(0.2) // Disabled color when waiting
-                              : _isComposing
-                                ? Colors.blue[600]
-                                : Colors.grey.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          child: InkWell(
-                            onTap: (!widget.isWaitingForResponse && _isComposing) ? _handleSend : null,
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.send,
-                                size: 16,
-                                color: _isComposing
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _controller,
+                              focusNode: _focusNode,
+                              minLines: 1,
+                              maxLines: 4,
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
+                                color: isDarkMode 
                                     ? Colors.white
-                                    : Colors.grey.shade400,
+                                    : Colors.black87,
+                              ),
+                              decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                  color: isDarkMode
+                                      ? Colors.white60
+                                      : Colors.black54,
+                                  fontFamily: 'Poppins',
+                                ),
+                                hintText: widget.isWaitingForResponse ? 'Waiting for AI response...' : 'Ask anything...',
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0, 
+                                  vertical: 16.0
+                                ),
+                              ),
+                              textCapitalization: TextCapitalization.sentences,
+                              cursorColor: Colors.blue[600],
+                              textInputAction: TextInputAction.newline,
+                            ),
+                          ),
+                          // Send button - ChatGPT style
+                          Container(
+                            margin: const EdgeInsets.only(right: 8.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _isComposing && !widget.isWaitingForResponse
+                                  ? Colors.blue[600]
+                                  : Colors.grey.withOpacity(0.3),
+                              boxShadow: _isComposing && !widget.isWaitingForResponse ? [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.3),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 8,
+                                  spreadRadius: 0,
+                                ),
+                              ] : [],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(30),
+                                onTap: (!widget.isWaitingForResponse && _isComposing) ? _handleSend : null,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Icon(
+                                    Icons.send_rounded,
+                                    color: _isComposing && !widget.isWaitingForResponse
+                                        ? Colors.white
+                                        : Colors.grey.shade400,
+                                    size: 20,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // Disclaimer note - ChatGPT style
+              Text(
+                translation(context).msg_ai_disclaimer,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 11,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),

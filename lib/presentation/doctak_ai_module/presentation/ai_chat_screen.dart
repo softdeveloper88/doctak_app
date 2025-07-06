@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/doctak_ai_module/presentation/ai_chat/wi
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +15,7 @@ import 'package:sizer/sizer.dart';
 import '../../../theme/theme_helper.dart';
 import '../../../main.dart';
 import '../blocs/ai_chat/ai_chat_bloc.dart';
-import '../data/api/streaming_message_service.dart'; 
+import '../data/api/streaming_message_service.dart';
 import '../data/models/ai_chat_model/ai_chat_message_model.dart';
 import '../data/models/ai_chat_model/ai_chat_session_model.dart';
 import 'ai_chat/widgets/ai_message_bubble.dart';
@@ -27,10 +28,7 @@ import 'ai_chat/widgets/message_input.dart';
 class AiChatScreen extends StatefulWidget {
   final String? initialSessionId;
 
-  const AiChatScreen({
-    super.key,
-    this.initialSessionId,
-  });
+  const AiChatScreen({super.key, this.initialSessionId});
 
   @override
   State<AiChatScreen> createState() => _AiChatScreenState();
@@ -57,13 +55,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Load all sessions first to ensure the drawer has data
       context.read<AiChatBloc>().add(LoadSessions());
-      
+
       // If we have an initial session ID, select it immediately after sessions load
       if (widget.initialSessionId != null) {
         setState(() {
           _showWelcomeScreen = false;
         });
-        context.read<AiChatBloc>().add(SelectSession(sessionId: widget.initialSessionId!));
+        context.read<AiChatBloc>().add(
+          SelectSession(sessionId: widget.initialSessionId!),
+        );
       }
     });
   }
@@ -87,7 +87,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (image != null) {
       setState(() {
@@ -106,22 +108,23 @@ class _AiChatScreenState extends State<AiChatScreen> {
   /// Stores a message to be sent after session creation
   String? _pendingMessage;
   File? _pendingImageFile;
-  
+
   // Handle prompt card tap with immediate UI update and session creation
   void _preCreateSession(String promptText) {
     // Immediately hide welcome screen when a prompt is clicked and show loading
     setState(() {
-      _showWelcomeScreen = false; // Hide welcome screen immediately when prompt is clicked
+      _showWelcomeScreen =
+          false; // Hide welcome screen immediately when prompt is clicked
       _isWaitingForResponse = true;
     });
-    
+
     // Generate session name from the prompt
     final sessionName = _generateSessionNameFromPrompt(promptText);
-    
+
     // Store message to be sent after session creation
     _pendingMessage = promptText;
     _pendingImageFile = _selectedImage;
-    
+
     // Create the session immediately without delay
     if (mounted) {
       // The BLoC will handle the actual sending after session creation
@@ -135,13 +138,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
       _preCreateSession(message);
       return;
     }
-    
+
     // Prevent sending if already waiting for a response
     if (_isWaitingForResponse) {
       debugPrint("Blocked message send - already waiting for response");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please wait for the AI to respond before sending another message'),
+          content: Text(
+            'Please wait for the AI to respond before sending another message',
+          ),
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -154,19 +159,20 @@ class _AiChatScreenState extends State<AiChatScreen> {
       debugPrint("Empty message attempted");
       return;
     }
-    
+
     // Set UI state to show we're waiting for response and now hide welcome screen
     // as user has explicitly sent a message
     setState(() {
-      _showWelcomeScreen = false; // Now hide the welcome screen as user is sending a message
+      _showWelcomeScreen =
+          false; // Now hide the welcome screen as user is sending a message
       _isWaitingForResponse = true;
-      
+
       // If using input controller, clear it after sending
       if (_inputController != null && _inputController!.text == message) {
         _inputController!.clear();
       }
     });
-    
+
     debugPrint("Sending message: $message");
     // Debug log
     if (_selectedImage != null) {
@@ -174,16 +180,18 @@ class _AiChatScreenState extends State<AiChatScreen> {
     } else {
       debugPrint("Sending text-only message");
     }
-    
+
     final state = context.read<AiChatBloc>().state;
 
     // Make a local copy of the selected image before clearing it
     final imageToSend = _selectedImage;
-    
+
     if (state is SessionSelected || state is MessageSent) {
       // Session already exists, send message to the current session
-      debugPrint("Using existing session for message (state: ${state.runtimeType})");
-      
+      debugPrint(
+        "Using existing session for message (state: ${state.runtimeType})",
+      );
+
       // Get session ID from either state type
       String sessionId;
       if (state is SessionSelected) {
@@ -194,28 +202,32 @@ class _AiChatScreenState extends State<AiChatScreen> {
         debugPrint("Unexpected state type when trying to get session ID");
         return;
       }
-      
+
       debugPrint("Continuing conversation in session: $sessionId");
-      
+
       // Send message to existing session
-      context.read<AiChatBloc>().add(SendMessage(
-        message: message,
-        model: _selectedModel,
-        temperature: _temperature,
-        maxTokens: _maxTokens,
-        webSearch: _webSearchEnabled,
-        searchContextSize: _webSearchEnabled ? _searchContextSize : null,
-        file: imageToSend, // Use local copy
-        suggestTitle: false, // Don't suggest title for normal messages
-      ));
+      context.read<AiChatBloc>().add(
+        SendMessage(
+          message: message,
+          model: _selectedModel,
+          temperature: _temperature,
+          maxTokens: _maxTokens,
+          webSearch: _webSearchEnabled,
+          searchContextSize: _webSearchEnabled ? _searchContextSize : null,
+          file: imageToSend, // Use local copy
+          suggestTitle: false, // Don't suggest title for normal messages
+        ),
+      );
     } else {
       // No session selected, create one first
-      debugPrint("No session selected, creating one first - state type: ${state.runtimeType}");
-      
+      debugPrint(
+        "No session selected, creating one first - state type: ${state.runtimeType}",
+      );
+
       // Store message to be sent after session creation
       _pendingMessage = message;
       _pendingImageFile = imageToSend;
-      
+
       // Create session with default name (will be updated later)
       context.read<AiChatBloc>().add(const CreateSession());
     }
@@ -224,7 +236,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     _clearImage();
     _scrollToBottom();
   }
-  
+
   /// Generates a session name from a prompt message
   String _generateSessionNameFromPrompt(String prompt) {
     // Extract first 4-5 words for a brief title
@@ -232,7 +244,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     if (words.length <= 5) {
       return prompt;
     }
-    
+
     // Take first 5 words and add ellipsis
     return '${words.take(5).join(' ')}...';
   }
@@ -250,7 +262,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
       );
       return;
     }
-    
+
     // Add haptic feedback when opening the sheet
     HapticFeedback.lightImpact();
 
@@ -287,12 +299,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
             setState(() {
               _isWaitingForResponse = true;
             });
-            
-            context.read<AiChatBloc>().add(RenameSession(
-              sessionId: state.selectedSession.id.toString(),
-              name: name,
-            ));
-            
+
+            context.read<AiChatBloc>().add(
+              RenameSession(
+                sessionId: state.selectedSession.id.toString(),
+                name: name,
+              ),
+            );
+
             // Reset loading indicator after a reasonable timeout
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted && _isWaitingForResponse) {
@@ -315,152 +329,109 @@ class _AiChatScreenState extends State<AiChatScreen> {
     final isVerySmallScreen = screenSize.height < 700;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.blue[50]!.withOpacity(0.3),
-            Colors.white.withOpacity(0.1),
-          ],
-        ),
-      ),
+      color: svGetScaffoldColor(),
       child: SafeArea(
         child: Column(
           children: [
             // Compact Hero Header Section
             Container(
               margin: EdgeInsets.fromLTRB(
-                24, 
-                isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 24), 
-                24, 
-                isVerySmallScreen ? 12 : 20
+                24,
+                isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 24),
+                24,
+                isVerySmallScreen ? 12 : 20,
               ),
               child: Column(
                 children: [
-                  // Compact AI Icon
+                  // AI Icon matching ChatGPT design
                   Container(
-                    width: isVerySmallScreen ? 60 : (isSmallScreen ? 70 : 80),
-                    height: isVerySmallScreen ? 60 : (isSmallScreen ? 70 : 80),
+                    width: 80,
+                    height: 80,
                     decoration: BoxDecoration(
+                      color: Colors.blue[600],
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.blue[400]!,
-                          Colors.blue[600]!,
-                          Colors.blue[800]!,
-                        ],
-                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.blue.withOpacity(0.3),
-                          blurRadius: 15,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 6),
+                          spreadRadius: 2,
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.psychology_alt_rounded,
-                      size: isVerySmallScreen ? 30 : (isSmallScreen ? 35 : 40),
-                      color: Colors.white,
-                    ),
-                  ),
-                  
-                  SizedBox(height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20)),
-                  
-                  // Compact title
-                  ShaderMask(
-                    shaderCallback: (bounds) => LinearGradient(
-                      colors: [Colors.blue[600]!, Colors.blue[800]!],
-                    ).createShader(bounds),
-                    child: Text(
-                      'DocTak AI Assistant',
-                      style: TextStyle(
-                        fontSize: isVerySmallScreen ? 22 : (isSmallScreen ? 26 : 30),
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
+                    child: const Center(
+                      child: Icon(
+                        Icons.psychology_alt_rounded,
                         color: Colors.white,
-                        letterSpacing: -0.5,
-                        height: 1.1,
+                        size: 40,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
-                  
-                  SizedBox(height: isVerySmallScreen ? 8 : (isSmallScreen ? 10 : 12)),
-                  
-                  // Compact subtitle
+
+                  SizedBox(
+                    height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20),
+                  ),
+
+                  // Title text matching ChatGPT design
+                  Text(
+                    'DocTak AI Assistant',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                      letterSpacing: 0.5,
+                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  SizedBox(
+                    height: isVerySmallScreen ? 8 : (isSmallScreen ? 10 : 12),
+                  ),
+
+                  // Description matching ChatGPT design
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       'Your intelligent medical companion',
-                      style: TextStyle(
-                        fontSize: isVerySmallScreen ? 14 : (isSmallScreen ? 15 : 16),
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'Poppins',
-                        color: Colors.blue[700]!.withOpacity(0.8),
-                        height: 1.3,
-                      ),
                       textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        height: 1.5,
+                        color: appStore.isDarkMode 
+                            ? Colors.white70
+                            : Colors.black.withAlpha(179),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // Compact Quick Start Section
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  // Compact section header
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isVerySmallScreen ? 16 : 18, 
-                      vertical: isVerySmallScreen ? 8 : 10
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[600],
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.25),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.flash_on_rounded,
-                          color: Colors.white,
-                          size: isVerySmallScreen ? 16 : (isSmallScreen ? 17 : 18),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Quick Start',
-                          style: TextStyle(
-                            fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 13 : 14),
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                            color: Colors.white,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
+                  // Section header matching ChatGPT design
+                  Text(
+                    "Quick Start",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: Colors.blue[800],
                     ),
                   ),
-                  
-                  SizedBox(height: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 22)),
+
+                  SizedBox(
+                    height: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 22),
+                  ),
                 ],
               ),
             ),
-            
+
             // Enhanced 4-card grid layout - no scrolling
             Expanded(
               child: Container(
@@ -469,8 +440,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: isSmallScreen ? 10 : 14,
                   mainAxisSpacing: isSmallScreen ? 10 : 14,
-                  childAspectRatio: isVerySmallScreen ? 1.1 : (isSmallScreen ? 1.0 : 0.95),
-                  physics: const NeverScrollableScrollPhysics(), // Disable scrolling
+                  childAspectRatio: isVerySmallScreen
+                      ? 1.1
+                      : (isSmallScreen ? 1.0 : 0.95),
+                  physics:
+                      const NeverScrollableScrollPhysics(), // Disable scrolling
                   shrinkWrap: true,
                   children: [
                     _buildEnhancedFeatureCard(
@@ -478,7 +452,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       description: 'Clinical decision assistance',
                       icon: Icons.medical_services_rounded,
                       gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
-                      prompt: 'What conditions should I consider for a patient with chest pain and shortness of breath?',
+                      prompt:
+                          'What conditions should I consider for a patient with chest pain and shortness of breath?',
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
@@ -487,7 +462,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       description: 'Medication safety & interactions',
                       icon: Icons.medication_liquid_rounded,
                       gradientColors: [Colors.blue[200]!, Colors.blue[500]!],
-                      prompt: 'Are there any interactions between warfarin and aspirin?',
+                      prompt:
+                          'Are there any interactions between warfarin and aspirin?',
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
@@ -496,7 +472,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       description: 'Evidence-based protocols',
                       icon: Icons.assignment_turned_in_rounded,
                       gradientColors: [Colors.blue[400]!, Colors.blue[700]!],
-                      prompt: 'What is the current treatment protocol for acute myocardial infarction?',
+                      prompt:
+                          'What is the current treatment protocol for acute myocardial infarction?',
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
@@ -505,7 +482,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       description: 'ICD-10 & CPT code lookup',
                       icon: Icons.qr_code_scanner_rounded,
                       gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
-                      prompt: 'What ICD-10 code should I use for Type 2 diabetes with complications?',
+                      prompt:
+                          'What ICD-10 code should I use for Type 2 diabetes with complications?',
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
@@ -513,9 +491,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 ),
               ),
             ),
-            
+
             // Minimal bottom spacing
-            SizedBox(height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20)),
+            SizedBox(
+              height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20),
+            ),
           ],
         ),
       ),
@@ -524,23 +504,28 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   // Medical feature card with icon, title, description, and prompt text
   Widget _buildFeatureCard(
-    String title, 
-    String description, 
-    IconData icon, 
-    String promptText, 
-    {double? cardWidth}
-  ) {
+    String title,
+    String description,
+    IconData icon,
+    String promptText, {
+    double? cardWidth,
+  }) {
     final isDarkMode = appStore.isDarkMode;
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.width < 360;
     final isMediumScreen = screenSize.width >= 360 && screenSize.width < 600;
-    
+
     // Calculate default width if not provided - ensure proper sizing on all screens
-    final width = cardWidth ?? (screenSize.width > 600 ? 220 : screenSize.width * 0.42);
-    
+    final width =
+        cardWidth ?? (screenSize.width > 600 ? 220 : screenSize.width * 0.42);
+
     // Adjust height based on screen size - use more compact heights to fit more cards
-    final double minHeight = isSmallScreen ? 100.0 : (isMediumScreen ? 110.0 : 120.0);
-    final double maxHeight = isSmallScreen ? 120.0 : (isMediumScreen ? 130.0 : 140.0);
+    final double minHeight = isSmallScreen
+        ? 100.0
+        : (isMediumScreen ? 110.0 : 120.0);
+    final double maxHeight = isSmallScreen
+        ? 120.0
+        : (isMediumScreen ? 130.0 : 140.0);
 
     return Material(
       color: Colors.transparent,
@@ -563,14 +548,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
             vertical: isSmallScreen ? 8 : 10,
           ),
           decoration: BoxDecoration(
-            color: isDarkMode
-                ? Colors.blueGrey[800]
-                : Colors.grey[100],
+            color: isDarkMode ? Colors.blueGrey[800] : Colors.grey[100],
             borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(
-              color: Colors.blue.withOpacity(0.2),
-              width: 1.5,
-            ),
+            border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: Colors.blue.withOpacity(0.05),
@@ -601,9 +581,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       color: Colors.blue[600],
                     ),
                   ),
-                  
+
                   SizedBox(width: isSmallScreen ? 8 : 10),
-                  
+
                   // Title in bold - make sure it doesn't overflow
                   Expanded(
                     child: Text(
@@ -619,17 +599,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   ),
                 ],
               ),
-              
+
               SizedBox(height: isSmallScreen ? 8 : 10),
-              
+
               // Description with better text styling
               Text(
                 description,
                 style: TextStyle(
                   fontFamily: 'Poppins',
-                  color: isDarkMode
-                      ? Colors.white70
-                      : Colors.black54,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
                   fontSize: isSmallScreen ? 10 : 11,
                   height: 1.2, // More compact line height
                   letterSpacing: -0.1,
@@ -637,16 +615,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              
+
               // Example text (hidden - just for tooltip/semantic access)
-              Semantics(
-                label: promptText,
-                child: const SizedBox.shrink(),
-              ),
-              
+              Semantics(label: promptText, child: const SizedBox.shrink()),
+
               // Use flexible spacing
               const Spacer(flex: 1),
-              
+
               // Action row with try it button and hint about prompt
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -672,10 +647,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         ),
                       ),
                     ),
-                    
+
                     // Spacing
                     const SizedBox(width: 8),
-                    
+
                     // Try it button with improved styling
                     Container(
                       padding: EdgeInsets.symmetric(
@@ -683,7 +658,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         vertical: isSmallScreen ? 4 : 5,
                       ),
                       decoration: BoxDecoration(
-                        color: isDarkMode 
+                        color: isDarkMode
                             ? Colors.blue.withOpacity(0.2)
                             : Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -706,12 +681,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
     );
   }
-  
+
   // Helper to shorten prompt text for preview
   String _shortenPrompt(String prompt) {
     final words = prompt.split(' ');
     if (words.length <= 4) return prompt;
-    
+
     return '${words.take(4).join(' ')}...';
   }
 
@@ -736,7 +711,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
         // CASE 2: States that indicate message activity is complete
         else if (state is MessageSent || state is MessageSendError) {
           setState(() {
-            _showWelcomeScreen = false; // Always hide welcome screen after message activity
+            _showWelcomeScreen =
+                false; // Always hide welcome screen after message activity
             _isWaitingForResponse = false;
           });
 
@@ -751,8 +727,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           setState(() {
             _isWaitingForResponse = true;
           });
-        }
-        else if (state is SessionUpdateError) {
+        } else if (state is SessionUpdateError) {
           setState(() {
             _isWaitingForResponse = false;
           });
@@ -768,14 +743,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
         }
         // When a new session is created
         else if (state is SessionCreated) {
-          debugPrint("SessionCreated received - selecting session: ${state.newSession.id}");
+          debugPrint(
+            "SessionCreated received - selecting session: ${state.newSession.id}",
+          );
 
           // Use a microtask to avoid race conditions with state transitions
           Future.microtask(() {
             if (mounted) {
-              context.read<AiChatBloc>().add(SelectSession(
-                sessionId: state.newSession.id.toString(),
-              ));
+              context.read<AiChatBloc>().add(
+                SelectSession(sessionId: state.newSession.id.toString()),
+              );
             }
           });
         }
@@ -788,19 +765,25 @@ class _AiChatScreenState extends State<AiChatScreen> {
             final String messageToSend = _pendingMessage!;
             final File? fileToSend = _pendingImageFile;
 
-            debugPrint("Sending pending message to session: ${state.selectedSession.id}");
+            debugPrint(
+              "Sending pending message to session: ${state.selectedSession.id}",
+            );
 
             // Send message immediately
-            context.read<AiChatBloc>().add(SendMessage(
-              message: messageToSend,
-              model: _selectedModel,
-              temperature: _temperature,
-              maxTokens: _maxTokens,
-              webSearch: _webSearchEnabled,
-              searchContextSize: _webSearchEnabled ? _searchContextSize : null,
-              file: fileToSend,
-              suggestTitle: true, // Always suggest title for first message
-            ));
+            context.read<AiChatBloc>().add(
+              SendMessage(
+                message: messageToSend,
+                model: _selectedModel,
+                temperature: _temperature,
+                maxTokens: _maxTokens,
+                webSearch: _webSearchEnabled,
+                searchContextSize: _webSearchEnabled
+                    ? _searchContextSize
+                    : null,
+                file: fileToSend,
+                suggestTitle: true, // Always suggest title for first message
+              ),
+            );
 
             // Clear pending message and file
             _pendingMessage = null;
@@ -810,7 +793,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
             if (_selectedImage != null) {
               _clearImage();
             }
-            
+
             return; // Return early to avoid the setState below
           }
 
@@ -865,7 +848,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
         // Use improved virtualized message list with streaming support
         final isStreaming = state is MessageStreaming;
-        final streamingContent = isStreaming ? (state as MessageStreaming).partialResponse : '';
+        final streamingContent = isStreaming
+            ? (state as MessageStreaming).partialResponse
+            : '';
 
         if (state is SessionLoading) {
           // When session is loading and we have a pending message, show it immediately
@@ -879,7 +864,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               content: _pendingMessage!,
               createdAt: DateTime.now(),
             );
-            
+
             return Stack(
               children: [
                 // Show the user message
@@ -947,9 +932,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'Failed to send message',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -965,22 +949,30 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           ElevatedButton.icon(
                             onPressed: () {
                               // Retry sending the last message
-                              final pendingMessage = _inputController?.text ?? "";
-                              
-                              if (pendingMessage.isNotEmpty || _selectedImage != null) {
+                              final pendingMessage =
+                                  _inputController?.text ?? "";
+
+                              if (pendingMessage.isNotEmpty ||
+                                  _selectedImage != null) {
                                 // Re-send the message with the same parameters
-                                context.read<AiChatBloc>().add(SendMessage(
-                                  message: pendingMessage,
-                                  model: _selectedModel,
-                                  temperature: _temperature,
-                                  maxTokens: _maxTokens,
-                                  webSearch: _webSearchEnabled,
-                                  searchContextSize: _webSearchEnabled ? _searchContextSize : null,
-                                  file: _selectedImage,
-                                ));
+                                context.read<AiChatBloc>().add(
+                                  SendMessage(
+                                    message: pendingMessage,
+                                    model: _selectedModel,
+                                    temperature: _temperature,
+                                    maxTokens: _maxTokens,
+                                    webSearch: _webSearchEnabled,
+                                    searchContextSize: _webSearchEnabled
+                                        ? _searchContextSize
+                                        : null,
+                                    file: _selectedImage,
+                                  ),
+                                );
                               } else {
                                 // Just clear the error state if no message to retry
-                                context.read<AiChatBloc>().add(ClearCurrentSession());
+                                context.read<AiChatBloc>().add(
+                                  ClearCurrentSession(),
+                                );
                               }
                             },
                             icon: const Icon(Icons.refresh),
@@ -988,7 +980,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue[600],
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -1000,10 +995,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
                             label: const Text('Dismiss'),
                             onPressed: () {
                               // Clear the error state
-                              context.read<AiChatBloc>().add(ClearCurrentSession());
+                              context.read<AiChatBloc>().add(
+                                ClearCurrentSession(),
+                              );
                             },
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -1055,11 +1055,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       color: Colors.blue.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.menu,
-                      size: 24,
-                      color: Colors.blue[600],
-                    ),
+                    child: Icon(Icons.menu, size: 24, color: Colors.blue[600]),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -1076,11 +1072,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
               ),
             );
           }
-          
+
           // Default case: show the welcome screen layout
           return _buildWelcomeScreen();
         }
-        
+
         // Return the virtualized message list for normal chat display
         return VirtualizedMessageList(
           messages: messages,
@@ -1090,10 +1086,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
           webSearch: _webSearchEnabled,
           scrollController: _scrollController,
           onFeedbackSubmitted: (messageId, feedback) {
-            context.read<AiChatBloc>().add(SubmitFeedback(
-              messageId: messageId,
-              feedback: feedback,
-            ));
+            context.read<AiChatBloc>().add(
+              SubmitFeedback(messageId: messageId, feedback: feedback),
+            );
           },
         );
       },
@@ -1104,7 +1099,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
   String _formatSessionDate(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inMinutes < 1) {
       return 'Just now';
     } else if (difference.inHours < 1) {
@@ -1118,134 +1113,96 @@ class _AiChatScreenState extends State<AiChatScreen> {
       return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     }
   }
-  
+
+  // Helper function to get current session title
+  String _getCurrentSessionTitle() {
+    final state = context.read<AiChatBloc>().state;
+    if (state is SessionSelected ||
+        state is SessionUpdating ||
+        state is MessageSending ||
+        state is MessageSendError ||
+        state is MessageSent) {
+      String title = '';
+      if (state is SessionSelected) {
+        title = state.selectedSession.name;
+      } else if (state is SessionUpdating) {
+        title = state.selectedSession?.name ?? 'Loading...';
+      } else if (state is MessageSending) {
+        title = state.selectedSession.name;
+      } else if (state is MessageSent) {
+        title = state.selectedSession.name;
+      } else if (state is MessageSendError) {
+        title = state.selectedSession.name;
+      }
+
+      // Return truncated session name for cleaner UI
+      return title.isEmpty
+          ? 'New Chat'
+          : title.length > 25
+          ? '${title.substring(0, 25)}...'
+          : title;
+    }
+
+    // Show brand name when on welcome screen
+    return 'DocTak AI';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        elevation: 0,
-        toolbarHeight: 70,
-        surfaceTintColor: svGetScaffoldColor(),
-        centerTitle: true,
-        title: BlocBuilder<AiChatBloc, AiChatState>(
-          builder: (context, state) {
-            if (state is SessionSelected ||
-                state is SessionUpdating ||
-                state is MessageSending ||
-                state is MessageSendError ||
-                state is MessageSent) {
-              String title = '';
-              if (state is SessionSelected) {
-                title = state.selectedSession.name;
-              } else if (state is SessionUpdating) {
-                title = state.selectedSession?.name ?? 'Loading...';
-              } else if (state is MessageSending) {
-                title = state.selectedSession.name;
-              } else if (state is MessageSent) {
-                title = state.selectedSession.name;
-              } else if (state is MessageSendError) {
-                title = state.selectedSession.name;
-              }
-
-              // Return truncated session name for cleaner UI
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Text(
-                  title.isEmpty ? 'New Chat' : title.length > 25 ? '${title.substring(0, 25)}...' : title,
-                  key: ValueKey(title), // For animation to detect changes
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              );
-            }
-
-            // Show brand name when on welcome screen
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.psychology_alt_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'DocTak AI',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.menu,
-                color: Colors.blue[600],
-                size: 16,
-              ),
-            ),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Scaffold.of(context).openDrawer();
-            }
-          ),
-        ),
+      appBar: DoctakAppBar(
+        title: _getCurrentSessionTitle(),
+        titleIcon: Icons.psychology_alt_rounded,
+        showBackButton: true,
+        onBackPressed: () {
+          HapticFeedback.lightImpact();
+          Navigator.pop(context);
+        },
         actions: [
-          // New Chat button in app bar - always visible (icon only)
+          // History button - moved to right side
+          Builder(
+            builder: (context) => IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.history, color: Colors.blue[600], size: 14),
+              ),
+              tooltip: 'Chat History',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Scaffold.of(context).openDrawer();
+              },
+            ),
+          ),
+          
+          // New Chat button
           IconButton(
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 36,
-            ),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.add_circle,
-                color: Colors.blue[600],
-                size: 14,
-              ),
+              child: Icon(Icons.add_circle, color: Colors.blue[600], size: 14),
             ),
             tooltip: 'New Chat',
             onPressed: () {
-              // Add haptic feedback
               HapticFeedback.mediumImpact();
-              
-              // Keep welcome screen visible, just show loading indicator
               setState(() {
                 _showWelcomeScreen = true;
                 _isWaitingForResponse = true;
               });
-              
-              // Create session immediately
               context.read<AiChatBloc>().add(const CreateSession());
-              
-              // Safety timeout in case creation takes too long
               Future.delayed(const Duration(seconds: 3), () {
                 if (mounted && _isWaitingForResponse) {
                   setState(() {
@@ -1255,7 +1212,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               });
             },
           ),
-          
+
           // Settings button (only visible when in a chat)
           BlocBuilder<AiChatBloc, AiChatState>(
             builder: (context, state) {
@@ -1266,10 +1223,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   state is MessageSent) {
                 return IconButton(
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
-                  ),
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                   icon: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
@@ -1291,28 +1245,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
               return const SizedBox.shrink();
             },
           ),
-          IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 36,
-            ),
-            icon: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.home_filled,
-                color: Colors.blue[600],
-                size: 14,
-              ),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          )
         ],
       ),
       drawer: _buildChatDrawer(),
@@ -1342,9 +1274,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     const Expanded(
                       child: Text(
                         'Image attached',
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(fontSize: 14),
                       ),
                     ),
                     IconButton(
@@ -1358,10 +1288,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
             // Input area
             MessageInput(
               controller: _inputController = TextEditingController(),
-              onSendMessage: _isWaitingForResponse ? null : _sendMessage, // Disable when waiting
-              onAttachImage: _isWaitingForResponse ? null : _pickImage, // Disable when waiting
+              onSendMessage: _isWaitingForResponse
+                  ? null
+                  : _sendMessage, // Disable when waiting
+              onAttachImage: _isWaitingForResponse
+                  ? null
+                  : _pickImage, // Disable when waiting
               selectedModel: _selectedModel,
-              isWaitingForResponse: _isWaitingForResponse, // Pass waiting state to input
+              isWaitingForResponse:
+                  _isWaitingForResponse, // Pass waiting state to input
               onModelChanged: (model) {
                 setState(() {
                   _selectedModel = model;
@@ -1400,19 +1335,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
           // User profile header with safe area padding
           Container(
             padding: EdgeInsets.only(
-              top: topPadding + 8, 
-              left: 16, 
-              right: 16, 
-              bottom: 16
+              top: topPadding + 8,
+              left: 16,
+              right: 16,
+              bottom: 16,
             ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.blue.withOpacity(0.1),
-                  svGetScaffoldColor(),
-                ],
+                colors: [Colors.blue.withOpacity(0.1), svGetScaffoldColor()],
               ),
             ),
             child: Row(
@@ -1473,7 +1405,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 // Add close button for better UX
                 IconButton(
                   icon: Icon(
-                    Icons.close, 
+                    Icons.close,
                     size: 20,
                     color: isDarkMode ? Colors.white60 : Colors.black54,
                   ),
@@ -1486,10 +1418,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           // Divider with better padding
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Divider(
-              color: Colors.blue.withOpacity(0.2),
-              height: 1,
-            ),
+            child: Divider(color: Colors.blue.withOpacity(0.2), height: 1),
           ),
 
           // New Chat Button - More prominent styling
@@ -1499,30 +1428,32 @@ class _AiChatScreenState extends State<AiChatScreen> {
               onPressed: () {
                 // Add haptic feedback
                 HapticFeedback.mediumImpact();
-                
+
                 // Close drawer first
                 Navigator.pop(context);
-                
+
                 // Keep welcome screen visible, just show loading indicator
                 setState(() {
                   _showWelcomeScreen = true; // Keep or restore welcome screen
                   _isWaitingForResponse = true;
                 });
-                
+
                 // Create session immediately
                 context.read<AiChatBloc>().add(const CreateSession());
-                
+
                 // Safety timeout in case creation takes too long
                 Future.delayed(const Duration(seconds: 4), () {
                   if (mounted && _isWaitingForResponse) {
                     setState(() {
                       _isWaitingForResponse = false;
                     });
-                    
+
                     // Show error toast if we timed out
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Session creation timed out. Please try again.'),
+                        content: Text(
+                          'Session creation timed out. Please try again.',
+                        ),
                         behavior: SnackBarBehavior.floating,
                         duration: Duration(seconds: 2),
                       ),
@@ -1533,7 +1464,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.blue[600],
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 16,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),
@@ -1561,7 +1495,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
           // Recent chats header with better styling
           Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: 8,
+            ),
             child: Row(
               children: [
                 Icon(
@@ -1590,9 +1529,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     if (state is SessionSelected) count = state.sessions.length;
                     if (state is MessageSending) count = state.sessions.length;
                     if (state is MessageSent) count = state.sessions.length;
-                    
+
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -1638,15 +1580,17 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 } else if (state is FeedbackError) {
                   sessions = state.sessions;
                 }
-                
+
                 // Make sure sessions are loaded at init or when empty
                 if (sessions.isEmpty) {
                   // Always try to load or refresh sessions when drawer is opened
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    debugPrint("Triggering LoadSessions from drawer - state: ${state.runtimeType}");
+                    debugPrint(
+                      "Triggering LoadSessions from drawer - state: ${state.runtimeType}",
+                    );
                     context.read<AiChatBloc>().add(LoadSessions());
                   });
-                  
+
                   // Show loading indicator for better UX
                   return const Center(
                     child: Padding(
@@ -1656,7 +1600,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         children: [
                           CircularProgressIndicator(),
                           SizedBox(height: 16),
-                          Text('Loading your conversations...', 
+                          Text(
+                            'Loading your conversations...',
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -1670,9 +1615,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     child: Text(
                       'No chat history',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDarkMode
-                            ? Colors.white54
-                            : Colors.black38,
+                        color: isDarkMode ? Colors.white54 : Colors.black38,
                       ),
                     ),
                   );
@@ -1686,11 +1629,17 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     // Determine if this session is selected
                     bool isSelected = false;
                     if (state is SessionSelected) {
-                      isSelected = state.selectedSession.id.toString() == session.id.toString();
+                      isSelected =
+                          state.selectedSession.id.toString() ==
+                          session.id.toString();
                     } else if (state is MessageSending) {
-                      isSelected = state.selectedSession.id.toString() == session.id.toString();
+                      isSelected =
+                          state.selectedSession.id.toString() ==
+                          session.id.toString();
                     } else if (state is MessageSendError) {
-                      isSelected = state.selectedSession.id.toString() == session.id.toString();
+                      isSelected =
+                          state.selectedSession.id.toString() ==
+                          session.id.toString();
                     }
                     return Dismissible(
                       key: Key('session_${session.id}'),
@@ -1698,10 +1647,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         color: Colors.red,
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.only(right: 16.0),
-                        child: const Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        ),
+                        child: const Icon(Icons.delete, color: Colors.white),
                       ),
                       direction: DismissDirection.endToStart,
                       confirmDismiss: (direction) async {
@@ -1710,14 +1656,18 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: const Text('Delete Conversation'),
-                              content: Text('Are you sure you want to delete "${session.name}"?'),
+                              content: Text(
+                                'Are you sure you want to delete "${session.name}"?',
+                              ),
                               actions: <Widget>[
                                 TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
                                   child: const Text('CANCEL'),
                                 ),
                                 TextButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
                                   child: const Text('DELETE'),
                                 ),
                               ],
@@ -1726,9 +1676,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         );
                       },
                       onDismissed: (direction) {
-                        context.read<AiChatBloc>().add(DeleteSession(
-                          sessionId: session.id.toString(),
-                        ));
+                        context.read<AiChatBloc>().add(
+                          DeleteSession(sessionId: session.id.toString()),
+                        );
                       },
                       child: ListTile(
                         title: Text(
@@ -1738,8 +1688,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontFamily: 'Poppins',
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected 
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
                                 ? Colors.blue[600]
                                 : Colors.black87,
                             letterSpacing: isSelected ? 0.1 : 0,
@@ -1756,7 +1708,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                                 : Colors.grey[600],
                           ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         dense: true,
                         visualDensity: VisualDensity.compact,
                         leading: Container(
@@ -1794,16 +1749,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           onPressed: () async {
                             // Add haptic feedback
                             HapticFeedback.lightImpact();
-                            
+
                             final shouldDelete = await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: const Text('Delete Conversation'),
-                                  content: Text('Are you sure you want to delete "${session.name}"?'),
+                                  content: Text(
+                                    'Are you sure you want to delete "${session.name}"?',
+                                  ),
                                   actions: <Widget>[
                                     TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
                                       child: Text(
                                         'CANCEL',
                                         style: TextStyle(
@@ -1816,27 +1774,32 @@ class _AiChatScreenState extends State<AiChatScreen> {
                                       style: FilledButton.styleFrom(
                                         backgroundColor: Colors.red,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                       ),
-                                      onPressed: () => Navigator.of(context).pop(true),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
                                       child: const Text('DELETE'),
                                     ),
                                   ],
                                 );
                               },
                             );
-                            
+
                             if (shouldDelete == true) {
-                              context.read<AiChatBloc>().add(DeleteSession(
-                                sessionId: session.id.toString(),
-                              ));
-                              
+                              context.read<AiChatBloc>().add(
+                                DeleteSession(sessionId: session.id.toString()),
+                              );
+
                               // Show success message
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Conversation "${session.name}" deleted'),
+                                    content: Text(
+                                      'Conversation "${session.name}" deleted',
+                                    ),
                                     behavior: SnackBarBehavior.floating,
                                     duration: const Duration(seconds: 2),
                                   ),
@@ -1850,28 +1813,31 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         onTap: () {
                           // First close the drawer
                           Navigator.pop(context);
-                          
+
                           // Check if this is already the selected session
-                          if (state is SessionSelected && 
-                              (state as SessionSelected).selectedSession.id.toString() == session.id.toString()) {
+                          if (state is SessionSelected &&
+                              (state as SessionSelected).selectedSession.id
+                                      .toString() ==
+                                  session.id.toString()) {
                             // Already selected, just clear welcome screen
                             setState(() {
                               _showWelcomeScreen = false;
                             });
                             return;
                           }
-                          
+
                           // Show loading indicator immediately - but don't hide welcome screen yet
                           // It will be properly handled in BlocConsumer based on session content
                           setState(() {
-                            _isWaitingForResponse = true; // Only show loading state
+                            _isWaitingForResponse =
+                                true; // Only show loading state
                           });
-                          
+
                           // Load the session immediately without delay
-                          context.read<AiChatBloc>().add(SelectSession(
-                            sessionId: session.id.toString(),
-                          ));
-                          
+                          context.read<AiChatBloc>().add(
+                            SelectSession(sessionId: session.id.toString()),
+                          );
+
                           // Safety timeout in case the session loading gets stuck
                           Future.delayed(const Duration(seconds: 5), () {
                             if (mounted && _isWaitingForResponse) {
@@ -1881,7 +1847,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
                               // Show error toast if we timed out
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Session loading timed out. Please try again.'),
+                                  content: Text(
+                                    'Session loading timed out. Please try again.',
+                                  ),
                                   behavior: SnackBarBehavior.floating,
                                   duration: Duration(seconds: 2),
                                 ),
@@ -1901,7 +1869,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     );
   }
 
-  // Enhanced feature card with gradient backgrounds and improved styling
+  // Professional feature card matching ChatGPT design
   Widget _buildEnhancedFeatureCard({
     required String title,
     required String description,
@@ -1918,112 +1886,71 @@ class _AiChatScreenState extends State<AiChatScreen> {
           HapticFeedback.lightImpact();
           _preCreateSession(prompt);
         },
-        borderRadius: BorderRadius.circular(isVerySmallScreen ? 16 : 18),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                gradientColors[0].withOpacity(0.1),
-                gradientColors[1].withOpacity(0.05),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(isVerySmallScreen ? 16 : 18),
+            color: appStore.isDarkMode ? Colors.grey[800] : Colors.white,
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: gradientColors[1].withOpacity(0.2),
-              width: 1.2,
+              color: Colors.blue.withOpacity(0.2),
+              width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: gradientColors[1].withOpacity(0.12),
-                offset: const Offset(0, 3),
-                blurRadius: 8,
-                spreadRadius: 0,
+                color: Colors.blue.withOpacity(0.1),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          padding: EdgeInsets.all(isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16)),
+          padding: const EdgeInsets.all(12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Compact icon with gradient background
+              // Icon matching ChatGPT style
               Container(
-                padding: EdgeInsets.all(isVerySmallScreen ? 8 : (isSmallScreen ? 9 : 10)),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: gradientColors,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.blue[600],
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: gradientColors[1].withOpacity(0.25),
-                      offset: const Offset(0, 2),
-                      blurRadius: 6,
-                      spreadRadius: 0,
+                      color: Colors.blue.withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Icon(
                   icon,
                   color: Colors.white,
-                  size: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 20),
+                  size: 24,
                 ),
               ),
+              const SizedBox(height: 8),
               
-              SizedBox(height: isVerySmallScreen ? 8 : (isSmallScreen ? 10 : 12)),
-              
-              // Compact title
+              // Title
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 13 : 14),
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
-                  color: gradientColors[1],
-                  height: 1.2,
+                  color: appStore.isDarkMode ? Colors.white : Colors.black87,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 4),
               
-              SizedBox(height: isVerySmallScreen ? 3 : (isSmallScreen ? 4 : 5)),
-              
-              // Compact description
+              // Description
               Text(
                 description,
                 style: TextStyle(
-                  fontSize: isVerySmallScreen ? 9 : (isSmallScreen ? 10 : 11),
-                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
                   fontFamily: 'Poppins',
                   color: Colors.grey[600],
-                  height: 1.2,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              
-              const Spacer(),
-              
-              // Compact action indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(isVerySmallScreen ? 4 : 5),
-                    decoration: BoxDecoration(
-                      color: gradientColors[1].withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: gradientColors[1],
-                      size: isVerySmallScreen ? 10 : (isSmallScreen ? 11 : 12),
-                    ),
-                  ),
-                ],
+                textAlign: TextAlign.center,
               ),
             ],
           ),

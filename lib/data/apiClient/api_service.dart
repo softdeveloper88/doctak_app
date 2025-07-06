@@ -232,6 +232,7 @@ abstract class ApiService {
   @POST("/discuss-case-action")
   Future<HttpResponse> discussCaseAction(@Header('Authorization') String token, @Field("id") String userId, @Field("type") String type,@Field('action_type') String actionType);
 
+
   @FormUrlEncoded()
   @GET("/user/{userId}/{follow}")
   Future<HttpResponse> setUserFollow(@Header('Authorization') String token,

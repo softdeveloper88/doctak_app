@@ -773,8 +773,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     final discussion = state.discussions[index];
                                     return DiscussionCard(
                                       discussion: discussion,
-                                      onTap: () => _navigateToDiscussionDetail(discussion),
+                                      onTap: () => _navigateToDiscussionDetail(discussion.id),
                                       onLike: () => _likeDiscussion(discussion.id),
+                                      onDelete: () => _deleteDiscussion(discussion.id),
+                                      onEdit: () => _editDiscussion(discussion),
                                     );
                                   },
                                 ),
@@ -793,10 +795,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
     );
   }
 
-  void _navigateToDiscussionDetail(CaseDiscussion discussion) {
+  void _navigateToDiscussionDetail(int caseId) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => DiscussionDetailScreen(caseId: discussion.id),
+        builder: (context) => DiscussionDetailScreen(caseId: caseId),
       ),
     );
   }
@@ -816,6 +818,51 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
 
   void _likeDiscussion(int caseId) {
     context.read<DiscussionListBloc>().add(LikeDiscussion(caseId));
+  }
+
+  void _deleteDiscussion(int caseId) {
+    context.read<DiscussionListBloc>().add(DeleteDiscussion(caseId));
+  }
+
+  void _editDiscussion(CaseDiscussionListItem discussion) async {
+    print('🔄 Navigating to edit mode for case: ${discussion.id}');
+    
+    // For editing, we need to convert list item to full case discussion
+    // For now, create a basic CaseDiscussion from the list item data
+    final caseDiscussion = CaseDiscussion(
+      id: discussion.id,
+      title: discussion.title,
+      description: discussion.title, // Use title as description for list items
+      status: 'active',
+      specialty: discussion.author.specialty,
+      createdAt: discussion.createdAt,
+      updatedAt: discussion.createdAt,
+      author: discussion.author,
+      stats: discussion.stats,
+      symptoms: discussion.parsedTags,
+    );
+    
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) => CreateDiscussionBloc(
+            repository: CaseDiscussionRepository(
+              baseUrl: AppData.base2,
+              getAuthToken: () => AppData.userToken ?? "",
+            ),
+          ),
+          child: CreateDiscussionScreen(existingCase: caseDiscussion),
+        ),
+      ),
+    );
+
+    // Refresh the list if the case was updated
+    if (result == true) {
+      print('✅ Case updated successfully, refreshing list');
+      context.read<DiscussionListBloc>().add(LoadDiscussionList(
+        refresh: true,
+      ));
+    }
   }
 
   bool _hasActiveFilters(CaseDiscussionFilters filters) {

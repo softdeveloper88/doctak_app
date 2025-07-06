@@ -27,10 +27,12 @@ class MemoryOptimizedCommentItem extends StatefulWidget {
   });
 
   @override
-  State<MemoryOptimizedCommentItem> createState() => _MemoryOptimizedCommentItemState();
+  State<MemoryOptimizedCommentItem> createState() =>
+      _MemoryOptimizedCommentItemState();
 }
 
-class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem> {
+class _MemoryOptimizedCommentItemState
+    extends State<MemoryOptimizedCommentItem> {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
@@ -50,9 +52,7 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCommentContent(),
-          ],
+          children: [_buildCommentContent()],
         ),
       ),
     );
@@ -66,9 +66,9 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
         children: [
           // User Avatar
           _buildAvatarSection(),
-          
+
           const SizedBox(width: 12),
-          
+
           // Comment Content
           Expanded(
             child: Column(
@@ -76,9 +76,9 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
               children: [
                 // User Info and Actions Row
                 _buildUserInfoRow(),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Comment Text
                 Text(
                   widget.comment.comment ?? '',
@@ -88,9 +88,9 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                     fontWeight: FontWeight.normal,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Timestamp
                 Text(
                   timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
@@ -100,9 +100,9 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                     fontFamily: 'Poppins',
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Actions Row (Reply & Like)
                 _buildActionRow(),
               ],
@@ -116,8 +116,9 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
   Widget _buildAvatarSection() {
     return InkWell(
       onTap: () {
-        SVProfileFragment(userId: widget.comment.commenter?.id ?? '')
-            .launch(context);
+        SVProfileFragment(
+          userId: widget.comment.commenter?.id ?? '',
+        ).launch(context);
       },
       borderRadius: BorderRadius.circular(24),
       child: ClipRRect(
@@ -129,7 +130,8 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
             color: Colors.blue.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: widget.comment.commenter?.profilePic != null &&
+          child:
+              widget.comment.commenter?.profilePic != null &&
                   widget.comment.commenter!.profilePic!.isNotEmpty
               ? Image.network(
                   widget.comment.commenter?.profilePic ?? '',
@@ -137,7 +139,8 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
                       child: Text(
-                        (widget.comment.commenter?.firstName ?? '')[0].toUpperCase(),
+                        (widget.comment.commenter?.firstName ?? '')[0]
+                            .toUpperCase(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -149,7 +152,8 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                 )
               : Center(
                   child: Text(
-                    (widget.comment.commenter?.firstName ?? '')[0].toUpperCase(),
+                    (widget.comment.commenter?.firstName ?? '')[0]
+                        .toUpperCase(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -170,8 +174,9 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
         Expanded(
           child: InkWell(
             onTap: () {
-              SVProfileFragment(userId: widget.comment.commenter?.id ?? '')
-                  .launch(context);
+              SVProfileFragment(
+                userId: widget.comment.commenter?.id ?? '',
+              ).launch(context);
             },
             child: Row(
               children: [
@@ -197,15 +202,11 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
             ),
           ),
         ),
-        
+
         // Delete menu (only for own comments)
         if (widget.comment.commenter?.id == AppData.logInUserId)
           PopupMenuButton(
-            icon: Icon(
-              Icons.more_vert,
-              color: Colors.grey[700],
-              size: 18,
-            ),
+            icon: Icon(Icons.more_vert, color: Colors.grey[700], size: 18),
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -243,7 +244,9 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                       title: translation(context).msg_confirm_delete_comment,
                       callback: () {
                         widget.commentBloc.add(
-                          DeleteCommentEvent(commentId: widget.comment.id.toString()),
+                          DeleteCommentEvent(
+                            commentId: widget.comment.id.toString(),
+                          ),
                         );
                         Navigator.of(context).pop();
                       },
@@ -287,23 +290,25 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // Like button
             TextButton.icon(
               onPressed: () {
                 widget.commentBloc.add(
                   LikeReplyComment(commentId: widget.comment.id.toString()),
                 );
-                
+
                 setState(() {
                   if (!(widget.comment.userHasLiked ?? true)) {
-                    widget.comment.reactionCount = (widget.comment.reactionCount ?? 0) + 1;
+                    widget.comment.reactionCount =
+                        (widget.comment.reactionCount ?? 0) + 1;
                     widget.comment.userHasLiked = true;
                   } else {
                     if ((widget.comment.reactionCount ?? 0) > 0) {
-                      widget.comment.reactionCount = (widget.comment.reactionCount ?? 0) - 1;
+                      widget.comment.reactionCount =
+                          (widget.comment.reactionCount ?? 0) - 1;
                     }
                     widget.comment.userHasLiked = false;
                   }
@@ -338,7 +343,7 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
             ),
           ],
         ),
-        
+
         // Show Reply Comment Section if selected
         if (widget.selectedCommentId == widget.comment.id)
           Container(
@@ -346,10 +351,7 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
             decoration: BoxDecoration(
               color: Colors.grey.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.grey.withOpacity(0.1),
-                width: 1,
-              ),
+              border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
             ),
             child: ImprovedReplyCommentListWidget(
               commentBloc: widget.commentBloc,

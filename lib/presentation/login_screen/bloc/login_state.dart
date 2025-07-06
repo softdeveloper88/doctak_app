@@ -7,7 +7,7 @@ import 'package:equatable/equatable.dart';
 
 class LoginState extends Equatable {
   LoginState({
-    this.isShowPassword = true,
+    this.isShowPassword = false,
   });
   bool isShowPassword;
   @override

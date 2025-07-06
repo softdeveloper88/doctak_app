@@ -619,7 +619,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         maxLines: 4,
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
-                                          fontSize: 14,
+                                          fontSize: 16,
                                           color: appStore.isDarkMode 
                                               ? Colors.white
                                               : Colors.black87,

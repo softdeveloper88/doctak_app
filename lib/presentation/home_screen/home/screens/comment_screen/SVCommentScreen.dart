@@ -14,9 +14,9 @@ import 'package:nb_utils/nb_utils.dart';
 class SVCommentScreen extends StatefulWidget {
   final int id;
   final HomeBloc homeBloc;
-  
+
   const SVCommentScreen({required this.id, required this.homeBloc, Key? key})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<SVCommentScreen> createState() => _SVCommentScreenState();
@@ -63,21 +63,18 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
           if (state is PaginationLoadingState) {
             return const EnhancedCommentShimmer();
           } else if (state is PaginationLoadedState) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 60.0),
-              child: VirtualizedCommentList(
-                commentBloc: commentBloc,
-                scrollController: _scrollController,
-                postId: widget.id,
-                selectedCommentId: selectedCommentId,
-                onReplySelected: (commentId) {
-                  setState(() {
-                    selectedCommentId = (selectedCommentId == commentId)
-                        ? null
-                        : commentId;
-                  });
-                },
-              ),
+            return VirtualizedCommentList(
+              commentBloc: commentBloc,
+              scrollController: _scrollController,
+              postId: widget.id,
+              selectedCommentId: selectedCommentId,
+              onReplySelected: (commentId) {
+                setState(() {
+                  selectedCommentId = (selectedCommentId == commentId)
+                      ? null
+                      : commentId;
+                });
+              },
             );
           } else if (state is DataError) {
             return RetryWidget(
@@ -88,7 +85,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                 } catch (e) {
                   debugPrint(e.toString());
                 }
-              }
+              },
             );
           }
           return Container();
@@ -97,15 +94,15 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
       // Comment Input Field
       bottomSheet: Container(
         color: svGetBgColor(),
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: ImprovedReplyInputField(
           commentBloc: commentBloc,
-          commentId: 0, // Not replying to a specific comment, posting to main thread
+          commentId:
+              0, // Not replying to a specific comment, posting to main thread
           postId: widget.id,
         ),
       ),
     );
   }
-
 }

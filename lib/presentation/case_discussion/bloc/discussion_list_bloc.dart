@@ -49,6 +49,15 @@ class LikeDiscussion extends DiscussionListEvent {
 
 class LoadFilterData extends DiscussionListEvent {}
 
+class DeleteDiscussion extends DiscussionListEvent {
+  final int caseId;
+
+  const DeleteDiscussion(this.caseId);
+
+  @override
+  List<Object> get props => [caseId];
+}
+
 class UpdateFilters extends DiscussionListEvent {
   final CaseDiscussionFilters filters;
 
@@ -71,7 +80,7 @@ class DiscussionListInitial extends DiscussionListState {}
 class DiscussionListLoading extends DiscussionListState {}
 
 class DiscussionListLoaded extends DiscussionListState {
-  final List<CaseDiscussion> discussions;
+  final List<CaseDiscussionListItem> discussions;
   final bool hasReachedMax;
   final bool isLoadingMore;
   final List<SpecialtyFilter> specialties;
@@ -91,7 +100,7 @@ class DiscussionListLoaded extends DiscussionListState {
   List<Object> get props => [discussions, hasReachedMax, isLoadingMore, specialties, countries, currentFilters];
 
   DiscussionListLoaded copyWith({
-    List<CaseDiscussion>? discussions,
+    List<CaseDiscussionListItem>? discussions,
     bool? hasReachedMax,
     bool? isLoadingMore,
     List<SpecialtyFilter>? specialties,
@@ -123,7 +132,7 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
   final CaseDiscussionRepository repository;
 
   int _currentPage = 1;
-  List<CaseDiscussion> _discussions = [];
+  List<CaseDiscussionListItem> _discussions = [];
   CaseDiscussionFilters _currentFilters = const CaseDiscussionFilters();
   List<SpecialtyFilter> _specialties = [];
   List<CountryFilter> _countries = [];
@@ -135,6 +144,7 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
     on<LikeDiscussion>(_onLikeDiscussion);
     on<LoadFilterData>(_onLoadFilterData);
     on<UpdateFilters>(_onUpdateFilters);
+    on<DeleteDiscussion>(_onDeleteDiscussion);
   }
 
   Future<void> _onLoadDiscussionList(
@@ -243,29 +253,20 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
       if (currentState is DiscussionListLoaded) {
         final updatedDiscussions = currentState.discussions.map((discussion) {
           if (discussion.id == event.caseId) {
-            final updatedStats = CaseStats(
-              commentsCount: discussion.stats.commentsCount,
-              followersCount: discussion.stats.followersCount,
-              updatesCount: discussion.stats.updatesCount,
-              likes: discussion.stats.likes + 1,
-              views: discussion.stats.views,
-            );
-            return CaseDiscussion(
+            // Create updated list item with incremented likes
+            return CaseDiscussionListItem(
               id: discussion.id,
               title: discussion.title,
-              description: discussion.description,
-              status: discussion.status,
-              specialty: discussion.specialty,
+              tags: discussion.tags,
+              likes: discussion.likes + 1,
+              views: discussion.views,
+              attachedFile: discussion.attachedFile,
+              promoted: discussion.promoted,
               createdAt: discussion.createdAt,
-              updatedAt: discussion.updatedAt,
-              author: discussion.author,
-              stats: updatedStats,
-              patientInfo: discussion.patientInfo,
-              symptoms: discussion.symptoms,
-              diagnosis: discussion.diagnosis,
-              treatmentPlan: discussion.treatmentPlan,
-              attachments: discussion.attachments,
-              aiSummary: discussion.aiSummary,
+              name: discussion.name,
+              profilePic: discussion.profilePic,
+              specialty: discussion.specialty,
+              comments: discussion.comments,
             );
           }
           return discussion;
@@ -355,5 +356,37 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
       refresh: true,
       filters: _currentFilters,
     ));
+  }
+
+  Future<void> _onDeleteDiscussion(
+    DeleteDiscussion event,
+    Emitter<DiscussionListState> emit,
+  ) async {
+    try {
+      print('🗑️ Starting delete process for case ID: ${event.caseId}');
+      print('📋 Current discussions count: ${_discussions.length}');
+      
+      // Call API to delete case
+      await repository.deleteCase(event.caseId);
+      print('✅ API delete call successful');
+
+      // Remove case from local list for real-time update
+      final initialCount = _discussions.length;
+      _discussions.removeWhere((discussion) => discussion.id == event.caseId);
+      print('📋 Discussions count after removal: ${_discussions.length} (removed: ${initialCount - _discussions.length})');
+
+      // Emit updated state
+      final currentState = state;
+      if (currentState is DiscussionListLoaded) {
+        print('🔄 Emitting updated state with ${_discussions.length} discussions');
+        emit(currentState.copyWith(discussions: List.from(_discussions)));
+      }
+
+      print('✅ Case deleted successfully and list updated');
+    } catch (e) {
+      print('❌ Error deleting case: $e');
+      // Optionally emit an error state or show a snackbar
+      // emit(DiscussionListError('Failed to delete discussion: $e'));
+    }
   }
 }

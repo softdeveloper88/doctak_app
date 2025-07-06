@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +18,9 @@ import '../../home_screen/utils/SVColors.dart';
 import '../../home_screen/utils/SVCommon.dart';
 
 class CreateDiscussionScreen extends StatefulWidget {
-  const CreateDiscussionScreen({Key? key}) : super(key: key);
+  final CaseDiscussion? existingCase; // For edit mode
+  
+  const CreateDiscussionScreen({Key? key, this.existingCase}) : super(key: key);
 
   @override
   State<CreateDiscussionScreen> createState() => _CreateDiscussionScreenState();
@@ -41,6 +44,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   
   List<File> _selectedImages = [];
   List<String> _selectedImageNames = [];
+  List<String> _existingFileUrls = []; // Track existing file URLs for edit mode
+  List<String> _clinicalTags = []; // Track clinical tags for better UI
   
   final ImagePicker _imagePicker = ImagePicker();
   late CaseDiscussionRepository _repository;
@@ -58,6 +63,12 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     );
     print('Repository initialized with baseUrl: ${AppData.base}');
     print('Auth token available: ${AppData.userToken != null && AppData.userToken!.isNotEmpty}');
+    
+    // Initialize form with existing data if in edit mode
+    if (widget.existingCase != null) {
+      _initializeEditMode();
+    }
+    
     _loadSpecialties();
   }
 
@@ -69,6 +80,77 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     _ageController.dispose();
     // Removed medical history controller disposal
     super.dispose();
+  }
+
+  void _initializeEditMode() {
+    final existingCase = widget.existingCase!;
+    
+    // Set basic fields
+    _titleController.text = existingCase.title;
+    _descriptionController.text = existingCase.description;
+    
+    // Set specialty
+    _selectedSpecialty = existingCase.specialty;
+    if (existingCase.specialtyId != null) {
+      _selectedSpecialtyId = existingCase.specialtyId.toString();
+    }
+    
+    // Parse and set existing tags
+    if (existingCase.symptoms != null && existingCase.symptoms!.isNotEmpty) {
+      _clinicalTags = existingCase.symptoms!;
+      _updateTagsController();
+    }
+    
+    // Extract patient demographics from metadata
+    if (existingCase.metadata != null && existingCase.metadata!['patient_demographics'] != null) {
+      final demographics = existingCase.metadata!['patient_demographics'] as Map<String, dynamic>;
+      
+      if (demographics['age'] != null) {
+        _ageController.text = demographics['age'].toString();
+      }
+      if (demographics['gender'] != null) {
+        _selectedGender = demographics['gender'].toString();
+      }
+      if (demographics['ethnicity'] != null) {
+        _selectedEthnicity = demographics['ethnicity'].toString();
+      }
+    }
+    
+    // Set clinical metadata
+    if (existingCase.metadata != null) {
+      if (existingCase.metadata!['clinical_complexity'] != null) {
+        _selectedClinicalComplexity = existingCase.metadata!['clinical_complexity'].toString();
+      }
+      if (existingCase.metadata!['teaching_value'] != null) {
+        _selectedTeachingValue = existingCase.metadata!['teaching_value'].toString();
+      }
+      if (existingCase.metadata!['is_anonymized'] != null) {
+        _isAnonymized = existingCase.metadata!['is_anonymized'] as bool;
+      }
+    }
+    
+    // Handle existing attached files
+    if (existingCase.attachments != null && existingCase.attachments!.isNotEmpty) {
+      _selectedImageNames = existingCase.attachments!
+          .where((attachment) => attachment.url.isNotEmpty && attachment.url != '[]' && !attachment.url.startsWith('"'))
+          .map((attachment) => attachment.description.isNotEmpty ? attachment.description : 'attachment_${attachment.id}')
+          .toList();
+      _existingFileUrls = existingCase.attachments!
+          .where((attachment) => attachment.url.isNotEmpty && attachment.url != '[]' && !attachment.url.startsWith('"'))
+          .map((attachment) => attachment.url)
+          .toList();
+    }
+    
+    print('=== Edit Mode Initialized ===');
+    print('Title: ${_titleController.text}');
+    print('Description: ${_descriptionController.text}');
+    print('Specialty: $_selectedSpecialty ($_selectedSpecialtyId)');
+    print('Age: ${_ageController.text}');
+    print('Gender: $_selectedGender');
+    print('Clinical Complexity: $_selectedClinicalComplexity');
+    print('Teaching Value: $_selectedTeachingValue');
+    print('Is Anonymized: $_isAnonymized');
+    print('Attached Files: $_selectedImageNames');
   }
 
   Future<void> _loadSpecialties() async {
@@ -273,6 +355,80 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     });
   }
 
+  // Helper method to format tags as JSON string
+  String? _formatTagsAsJson(String tagsInput) {
+    if (tagsInput.trim().isEmpty) return null;
+    
+    // Split by comma and clean up
+    final tags = tagsInput.split(',')
+        .map((tag) => tag.trim())
+        .where((tag) => tag.isNotEmpty)
+        .toList();
+    
+    if (tags.isEmpty) return null;
+    
+    // Format as JSON array with value objects
+    final tagObjects = tags.map((tag) => {'value': tag}).toList();
+    return jsonEncode(tagObjects);
+  }
+
+  // Helper method to parse existing tags from JSON format
+  List<String> _parseTagsFromJson(String? tagsJson) {
+    if (tagsJson == null || tagsJson.isEmpty) return [];
+    
+    try {
+      if (tagsJson.startsWith('[') && tagsJson.endsWith(']')) {
+        final List<dynamic> parsed = jsonDecode(tagsJson);
+        return parsed.map((item) {
+          if (item is Map<String, dynamic> && item['value'] != null) {
+            return item['value'].toString();
+          }
+          return item.toString();
+        }).toList();
+      } else {
+        // Handle simple comma-separated format
+        return tagsJson.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList();
+      }
+    } catch (e) {
+      print('Error parsing tags: $e');
+      // Fallback to simple comma-separated parsing
+      return tagsJson.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList();
+    }
+  }
+
+  // Add a tag to the list
+  void _addTag(String tag) {
+    if (tag.trim().isNotEmpty && !_clinicalTags.contains(tag.trim())) {
+      setState(() {
+        _clinicalTags.add(tag.trim());
+        _updateTagsController();
+      });
+    }
+  }
+
+  // Remove a tag from the list
+  void _removeTag(int index) {
+    setState(() {
+      _clinicalTags.removeAt(index);
+      _updateTagsController();
+    });
+  }
+
+  // Update the controller with comma-separated tags
+  void _updateTagsController() {
+    _clinicalKeywordsController.text = _clinicalTags.join(', ');
+  }
+
+  // Parse tags when controller text changes
+  void _onTagsChanged(String value) {
+    final tags = value.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList();
+    if (tags.length != _clinicalTags.length || !tags.every((tag) => _clinicalTags.contains(tag))) {
+      setState(() {
+        _clinicalTags = tags;
+      });
+    }
+  }
+
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -307,20 +463,47 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
         'ethnicity': _selectedEthnicity,
       };
 
+      // Combine existing file URLs with new file paths
+      final allFiles = <String>[];
+      
+      // Add existing file URLs (for edit mode) - filter out invalid URLs
+      if (widget.existingCase != null) {
+        final validExistingUrls = _existingFileUrls
+            .where((url) => url.isNotEmpty && url != '[]' && !url.startsWith('"') && !url.contains('null'))
+            .toList();
+        allFiles.addAll(validExistingUrls);
+      }
+      
+      // Add new file paths
+      allFiles.addAll(_selectedImages.map((file) => file.path).toList());
+      
+      print('📎 All files being sent: $allFiles');
+
+      // Format tags as JSON string in the required format
+      final formattedTags = _formatTagsAsJson(_clinicalKeywordsController.text.trim());
+      print('🏷️ Formatted Tags JSON: $formattedTags');
+      
       final request = CreateCaseRequest(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        tags: _clinicalKeywordsController.text.trim().isNotEmpty ? _clinicalKeywordsController.text.trim() : null,
+        tags: formattedTags,
         // specialtyId: _selectedSpecialtyId, // Removed specialty from request
         patientDemographics: patientDemographics,
         // ethnicity is now in patient demographics
         clinicalComplexity: _selectedClinicalComplexity,
         teachingValue: _selectedTeachingValue,
         isAnonymized: _isAnonymized,
-        attachedFiles: _selectedImages.map((file) => file.path).toList(),
+        attachedFiles: allFiles,
       );
 
-      context.read<CreateDiscussionBloc>().add(CreateDiscussion(request));
+      // Check if we're in edit mode or create mode
+      if (widget.existingCase != null) {
+        print('🔄 Updating existing case: ${widget.existingCase!.id}');
+        context.read<CreateDiscussionBloc>().add(UpdateDiscussion(widget.existingCase!.id, request));
+      } else {
+        print('✨ Creating new case');
+        context.read<CreateDiscussionBloc>().add(CreateDiscussion(request));
+      }
     } else {
       print('❌ Form validation failed');
     }
@@ -334,7 +517,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     return Scaffold(
       backgroundColor: svGetBgColor(),
       appBar: DoctakAppBar(
-        title: AppLocalizations.of(context)!.lbl_create_case_discussion,
+        title: widget.existingCase != null 
+            ? 'Edit Case Discussion' 
+            : AppLocalizations.of(context)!.lbl_create_case_discussion,
         titleIcon: Icons.medical_information_rounded,
         actions: [
           Container(
@@ -388,7 +573,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   children: [
                     const Icon(Icons.check_circle, color: Colors.white),
                     const SizedBox(width: 12),
-                    Text(AppLocalizations.of(context)!.msg_case_discussion_created),
+                    Text(state.isUpdate 
+                        ? 'Case discussion updated successfully!' 
+                        : AppLocalizations.of(context)!.msg_case_discussion_created),
                   ],
                 ),
                 backgroundColor: Colors.green[600],
@@ -658,39 +845,139 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   ),
                 ),
 
-                // Clinical Keywords Field
+                // Clinical Keywords/Tags Field with enhanced UI
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.blue.withOpacity(0.2)),
                   ),
-                  child: AppTextField(
-                    controller: _clinicalKeywordsController,
-                    textFieldType: TextFieldType.MULTILINE,
-                    maxLines: 2,
-                    textStyle: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: Colors.black87,
-                    ),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: AppLocalizations.of(context)!.msg_enter_keywords,
-                      labelText: AppLocalizations.of(context)!.lbl_clinical_keywords,
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: Colors.black54,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.local_offer_outlined,
+                            color: Colors.blue.withOpacity(0.6),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            AppLocalizations.of(context)!.lbl_clinical_keywords,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      contentPadding: const EdgeInsets.all(16),
-                      prefixIcon: Icon(
-                        Icons.local_offer_outlined,
-                        color: Colors.blue.withOpacity(0.6),
-                        size: 20,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Enter clinical keywords separated by commas (e.g., fever, headache, fatigue)',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      
+                      // Tags input field
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                        ),
+                        child: AppTextField(
+                          controller: _clinicalKeywordsController,
+                          textFieldType: TextFieldType.MULTILINE,
+                          maxLines: 2,
+                          onChanged: _onTagsChanged,
+                          textStyle: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'fever, headache, chest pain, shortness of breath...',
+                            hintStyle: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                            ),
+                            contentPadding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                      ),
+                      
+                      // Display current tags as chips
+                      if (_clinicalTags.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          'Current Tags:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _clinicalTags.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final tag = entry.value;
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.orange.withOpacity(0.15),
+                                    Colors.orange.withOpacity(0.1),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.orange.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    tag,
+                                    style: TextStyle(
+                                      color: Colors.orange[800],
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  GestureDetector(
+                                    onTap: () => _removeTag(index),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      size: 14,
+                                      color: Colors.orange[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
 
@@ -1036,7 +1323,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    AppLocalizations.of(context)!.lbl_submit_case,
+                                    widget.existingCase != null 
+                                        ? 'Update Case' 
+                                        : AppLocalizations.of(context)!.lbl_submit_case,
                                     style: const TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 16,

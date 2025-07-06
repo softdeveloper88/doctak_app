@@ -33,7 +33,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     on<DeleteReplyCommentEvent>(_onDeleteReplyComment);
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == postList.length - nextPageTrigger) {
-        add(LoadPageEvent(postId:event.postId,page: pageNumber));
+        add(LoadPageEvent(postId: event.postId, page: pageNumber));
       }
     });
   }
@@ -42,34 +42,34 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     if (event.page == 1) {
       postList.clear();
       pageNumber = 1;
-    emit(PaginationLoadingState());
+      emit(PaginationLoadingState());
     }
     try {
       try {
         Dio dio = Dio();
-          Response response1 = await dio.get(
-            '${AppData.remoteUrl2}/posts/${event.postId}/comments?page=${event.page}', // Add query parameters
-            options: Options(headers: {
-              'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-            }),
-          );
-          print("response ${response1.data}");
-          PostCommentModel response =  PostCommentModel.fromJson(response1.data);
-          numberOfPage = response.comments?.lastPage ?? 0;
-          if (pageNumber < numberOfPage + 1) {
-            pageNumber = pageNumber + 1;
-          }
-          postList.addAll(response.comments?.data ?? []);
-          emit(PaginationLoadedState());
-
-        } catch (e) {
-          print("error: $e");
-          emit(DataError('No Data Found'));
-
+        Response response1 = await dio.get(
+          '${AppData.remoteUrl2}/posts/${event.postId}/comments?page=${event.page}', // Add query parameters
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${AppData.userToken}', // Set headers
+            },
+          ),
+        );
+        print("response ${response1.data}");
+        PostCommentModel response = PostCommentModel.fromJson(response1.data);
+        numberOfPage = response.comments?.lastPage ?? 0;
+        if (pageNumber < numberOfPage + 1) {
+          pageNumber = pageNumber + 1;
         }
-          // postList.addAll(response.comments?.data ?? []);
+        postList.addAll(response.comments?.data ?? []);
+        emit(PaginationLoadedState());
+      } catch (e) {
+        print("error: $e");
+        emit(DataError('No Data Found'));
+      }
+      // postList.addAll(response.comments?.data ?? []);
 
-        // emit(DataLoaded(drugsData));
+      // emit(DataLoaded(drugsData));
       // } catch (e) {
       //   // ProgressDialogUtils.hideProgressDialog();
       //   print(e);
@@ -90,7 +90,11 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       // emit(DataError('An error occurred $e'));
     }
   }
-  _onGetReplyComment(FetchReplyComment event, Emitter<CommentState> emit) async {
+
+  _onGetReplyComment(
+    FetchReplyComment event,
+    Emitter<CommentState> emit,
+  ) async {
     // if (event.page == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -100,35 +104,35 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       try {
         Dio dio = Dio();
 
-          Response response1 = await dio.post(
-            '${AppData.remoteUrl2}/fetch-comment-replies', // Add query parameters
-            options: Options(headers: {
-              'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-            }),
-            data: FormData.fromMap({
-            'post_id':event.postId,
-            'comment_id':event.commentId
-            })
-          );
-          print("response ${response1.data}");
-        ReplyCommentModel response =  ReplyCommentModel.fromJson(response1.data);
-          // numberOfPage = response.pagination?.total ?? 0;
-          // if (pageNumber < numberOfPage + 1) {
-          //   pageNumber = pageNumber + 1;
-          // }
-          // postList.addAll(response.comments?.data ?? []);
+        Response response1 = await dio.post(
+          '${AppData.remoteUrl2}/fetch-comment-replies', // Add query parameters
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${AppData.userToken}', // Set headers
+            },
+          ),
+          data: FormData.fromMap({
+            'post_id': event.postId,
+            'comment_id': event.commentId,
+          }),
+        );
+        print("response ${response1.data}");
+        ReplyCommentModel response = ReplyCommentModel.fromJson(response1.data);
+        // numberOfPage = response.pagination?.total ?? 0;
+        // if (pageNumber < numberOfPage + 1) {
+        //   pageNumber = pageNumber + 1;
+        // }
+        // postList.addAll(response.comments?.data ?? []);
         print(response);
-        replyCommentList.addAll(response.comments??[]);
-          emit(PaginationLoadedState());
+        replyCommentList.addAll(response.comments ?? []);
+        emit(PaginationLoadedState());
+      } catch (e) {
+        print("error: $e");
+        emit(DataError('No Data Found'));
+      }
+      // postList.addAll(response.comments?.data ?? []);
 
-        } catch (e) {
-          print("error: $e");
-          emit(DataError('No Data Found'));
-
-        }
-          // postList.addAll(response.comments?.data ?? []);
-
-        // emit(DataLoaded(drugsData));
+      // emit(DataLoaded(drugsData));
       // } catch (e) {
       //   // ProgressDialogUtils.hideProgressDialog();
       //   print(e);
@@ -158,20 +162,24 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // }
     // try {
     final now = DateTime.now();
-    final formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(now); // Custom format
-    postList.add(PostComments(
-      id: -1,
-      comment:event.comment,
-      createdAt: formattedDateTime,
-      userHasLiked: false,
-      reactionCount:0,
-      replyCount:0,
-      commenter: Commenter(
-        id: AppData.logInUserId,
-        firstName: AppData.name,
-        lastName: '',
+    final formattedDateTime = DateFormat(
+      'yyyy-MM-dd HH:mm:ss',
+    ).format(now); // Custom format
+    postList.add(
+      PostComments(
+        id: -1,
+        comment: event.comment,
+        createdAt: formattedDateTime,
+        userHasLiked: false,
+        reactionCount: 0,
+        replyCount: 0,
+        commenter: Commenter(
+          id: AppData.logInUserId,
+          firstName: AppData.name,
+          lastName: '',
+        ),
       ),
-    ));
+    );
     var response = await postService.makeComment(
       'Bearer ${AppData.userToken}',
       event.postId.toString(),
@@ -195,7 +203,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // if (pageNumber < numberOfPage + 1) {
     //   pageNumber = pageNumber + 1;
 
-      // postList.addAll(response.data.postComments ?? []);
+    // postList.addAll(response.data.postComments ?? []);
     // }
     emit(PaginationLoadedState());
 
@@ -208,26 +216,30 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     //   // emit(DataError('An error occurred $e'));
     // }
   }
-  _onCommentReplyLike(LikeReplyComment event, Emitter<CommentState> emit) async {
 
-     try {
+  _onCommentReplyLike(
+    LikeReplyComment event,
+    Emitter<CommentState> emit,
+  ) async {
+    try {
       Dio dio = Dio();
       Response response1 = await dio.post(
-          '${AppData.remoteUrl2}/comments/${event.commentId}/like', // Add query parameters
-          options: Options(headers: {
-            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-          }),
-
+        '${AppData.remoteUrl2}/comments/${event.commentId}/like', // Add query parameters
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${AppData.userToken}', // Set headers
+          },
+        ),
       );
-    showToast('Comment Like successfully');
-    emit(PaginationLoadedState());
-
+      showToast('Comment Like successfully');
+      emit(PaginationLoadedState());
     } catch (e) {
       print(e);
 
       emit(DataError('An error occurred $e'));
     }
   }
+
   _onPostCommentReply(ReplyComment event, Emitter<CommentState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
@@ -239,37 +251,43 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
 
       Response response1 = await dio.post(
         '${AppData.remoteUrl2}/reply-comment', // Add query parameters
-        options: Options(headers: {
-          'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${AppData.userToken}', // Set headers
+          },
+        ),
+        data: FormData.fromMap({
+          'post_id': event.postId,
+          'comment_id': event.commentId,
+          'comment_text': event.commentText,
         }),
-          data: FormData.fromMap({
-            'post_id':event.postId,
-            'comment_id':event.commentId,
-            'comment_text':event.commentText
-          })
       );
 
-      ReplyCommentResponse response =  ReplyCommentResponse.fromJson(response1.data);
+      ReplyCommentResponse response = ReplyCommentResponse.fromJson(
+        response1.data,
+      );
       showToast('Comment post successfully');
-    final now = DateTime.now();
-    final formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(now); // Custom format
-    replyCommentList.add(CommentsModel(
-    id: response.comment?.id,
-    commenterId: AppData.logInUserId,
-    commentableId:event.postId,
-    comment:event.commentText,
-    createdAt: formattedDateTime,
-    commenter: ReplyCommenter(
-      name: AppData.name,
-      profilePic: AppData.imageUrl
-    ),
-    ));
-   emit(PaginationLoadedState());
-
+      final now = DateTime.now();
+      final formattedDateTime = DateFormat(
+        'yyyy-MM-dd HH:mm:ss',
+      ).format(now); // Custom format
+      replyCommentList.add(
+        CommentsModel(
+          id: response.comment?.id,
+          commenterId: AppData.logInUserId,
+          commentableId: event.postId,
+          comment: event.commentText,
+          createdAt: formattedDateTime,
+          commenter: ReplyCommenter(
+            name: AppData.name,
+            profilePic: AppData.imageUrl,
+          ),
+        ),
+      );
+      emit(PaginationLoadedState());
     } catch (e) {
       print("error: $e");
       emit(DataError('No Data Found'));
-
     }
     // try {
     // final now = DateTime.now();
@@ -390,13 +408,17 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // }
     print(event.commentId);
     try {
-    var response = await postService.deleteComments(
-        'Bearer ${AppData.userToken}', event.commentId.toString());
+      var response = await postService.deleteComments(
+        'Bearer ${AppData.userToken}',
+        event.commentId.toString(),
+      );
 
-    postList.removeWhere((element) => element.id.toString() == event.commentId);
-    showToast('Delete comment successfully');
-    emit(PaginationLoadedState());
-    // emit(DataLoaded(postList));
+      postList.removeWhere(
+        (element) => element.id.toString() == event.commentId,
+      );
+      showToast('Delete comment successfully');
+      emit(PaginationLoadedState());
+      // emit(DataLoaded(postList));
     } catch (e) {
       print(e);
 
@@ -405,7 +427,11 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       // emit(DataError('An error occurred $e'));
     }
   }
-  _onDeleteReplyComment(DeleteReplyCommentEvent event, Emitter<CommentState> emit) async {
+
+  _onDeleteReplyComment(
+    DeleteReplyCommentEvent event,
+    Emitter<CommentState> emit,
+  ) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -414,22 +440,30 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     try {
       Dio dio = Dio();
       Response response1 = await dio.post(
-          '${AppData.remoteUrl2}/comments-delete?comment_id=${event.commentId}', // Add query parameters
-          options: Options(headers: {
-            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-          }),
+        '${AppData.remoteUrl2}/comments-delete?comment_id=${event.commentId}', // Add query parameters
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${AppData.userToken}', // Set headers
+          },
+        ),
       );
-    int index=replyCommentList.indexWhere((CommentsModel element) => element.id.toString() == event.commentId);
+      int index = replyCommentList.indexWhere(
+        (CommentsModel element) => element.id.toString() == event.commentId,
+      );
       replyCommentList.removeAt(index);
       showToast('Delete comment successfully');
-    emit(PaginationLoadedState());
+      emit(PaginationLoadedState());
     } catch (e) {
       print(e);
 
       emit(DataError('An error occurred $e'));
     }
   }
-  _onUpdateReplyComment(UpdateReplyCommentEvent event, Emitter<CommentState> emit) async {
+
+  _onUpdateReplyComment(
+    UpdateReplyCommentEvent event,
+    Emitter<CommentState> emit,
+  ) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -439,15 +473,19 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       Dio dio = Dio();
 
       Response response1 = await dio.get(
-          '${AppData.remoteUrl2}/comments-update?comment_id=${event.commentId}&content=${event.content}', // Add query parameters
-          options: Options(headers: {
-            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-          }),
+        '${AppData.remoteUrl2}/comments-update?comment_id=${event.commentId}&content=${event.content}', // Add query parameters
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${AppData.userToken}', // Set headers
+          },
+        ),
       );
-   int index= replyCommentList.indexWhere((CommentsModel element) => element.id.toString() == event.commentId);
-    replyCommentList[index].comment=event.content;
+      int index = replyCommentList.indexWhere(
+        (CommentsModel element) => element.id.toString() == event.commentId,
+      );
+      replyCommentList[index].comment = event.content;
 
-    emit(PaginationLoadedState());
+      emit(PaginationLoadedState());
     } catch (e) {
       print(e);
 

@@ -9,7 +9,6 @@ import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/case_discussion/case_discussion_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_screen.dart';
@@ -28,6 +27,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../presentation/calling_module/services/call_api_service.dart';
 import '../presentation/calling_module/services/call_service.dart';
+import '../presentation/case_discussion/screens/discussion_list_screen.dart';
 
 @pragma('vm:entry-point')
 class NotificationService {
@@ -742,7 +742,7 @@ class NotificationService {
             return ConferencesScreen();
           } else if (payload == 'new_discuss_case' ||
               payload == 'discuss_case_comment') {
-            return const CaseDiscussionScreen();
+            return const DiscussionListScreen();
           }
           return UnifiedSplashUpgradeScreen(); // Default route if payload does not match
         }),

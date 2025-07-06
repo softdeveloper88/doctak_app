@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:path/path.dart' as path;
 import '../models/case_discussion_models.dart';
 
 class CaseDiscussionRepository {
@@ -27,21 +28,27 @@ class CaseDiscussionRepository {
         onRequest: (options, handler) {
           options.headers['Authorization'] = 'Bearer ${getAuthToken()}';
           options.headers['Accept'] = 'application/json';
-          
+
           // Only set Content-Type to JSON if it's not already set (for FormData it's automatically set to multipart)
           if (options.headers['Content-Type'] == null) {
             options.headers['Content-Type'] = 'application/json';
           }
-          
+
           print('🌐 API Request: ${options.method} ${options.uri}');
-          print('🔐 Authorization: Bearer ${getAuthToken().substring(0, 20)}...');
+          print(
+            '🔐 Authorization: Bearer ${getAuthToken().substring(0, 20)}...',
+          );
           print('📋 Headers: ${options.headers}');
           if (options.data is FormData) {
             final formData = options.data as FormData;
-            print('📄 Form Fields: ${formData.fields.map((e) => '${e.key}=${e.value}').join(', ')}');
-            print('📎 Form Files: ${formData.files.map((e) => '${e.key}=${e.value.filename}').join(', ')}');
+            print(
+              '📄 Form Fields: ${formData.fields.map((e) => '${e.key}=${e.value}').join(', ')}',
+            );
+            print(
+              '📎 Form Files: ${formData.files.map((e) => '${e.key}=${e.value.filename}').join(', ')}',
+            );
           }
-          
+
           handler.next(options);
         },
         onError: (error, handler) {
@@ -71,76 +78,93 @@ class CaseDiscussionRepository {
       }
 
       print('Fetching specialties from main API...');
-      
+
       List<SpecialtyFilter> specialties = [];
       List<CountryFilter> countries = [];
-      
+
       // Fetch specialties from the main specialty endpoint
       try {
         print('Fetching specialties from: $baseUrl/api/v1/specialty');
         final specialtyResponse = await _dio.get('$baseUrl/api/v1/specialty');
         print('Specialty response: ${specialtyResponse.data}');
-        
+
         if (specialtyResponse.data is List) {
           final specialtiesData = specialtyResponse.data as List;
-          specialties = specialtiesData.map((item) => SpecialtyFilter.fromJson({
-            'id': item['id'] ?? 0,
-            'name': item['name'] ?? item['specialty_name'] ?? 'Unknown',
-            'slug': (item['name'] ?? item['specialty_name'] ?? 'unknown').toString().toLowerCase().replaceAll(' ', '-'),
-            'is_active': true,
-          })).toList();
+          specialties = specialtiesData
+              .map(
+                (item) => SpecialtyFilter.fromJson({
+                  'id': item['id'] ?? 0,
+                  'name': item['name'] ?? item['specialty_name'] ?? 'Unknown',
+                  'slug': (item['name'] ?? item['specialty_name'] ?? 'unknown')
+                      .toString()
+                      .toLowerCase()
+                      .replaceAll(' ', '-'),
+                  'is_active': true,
+                }),
+              )
+              .toList();
         } else if (specialtyResponse.data is Map) {
           final responseMap = specialtyResponse.data as Map<String, dynamic>;
           if (responseMap['data'] is List) {
             final specialtiesData = responseMap['data'] as List;
-            specialties = specialtiesData.map((item) => SpecialtyFilter.fromJson({
-              'id': item['id'] ?? 0,
-              'name': item['name'] ?? item['specialty_name'] ?? 'Unknown',
-              'slug': (item['name'] ?? item['specialty_name'] ?? 'unknown').toString().toLowerCase().replaceAll(' ', '-'),
-              'is_active': true,
-            })).toList();
+            specialties = specialtiesData
+                .map(
+                  (item) => SpecialtyFilter.fromJson({
+                    'id': item['id'] ?? 0,
+                    'name': item['name'] ?? item['specialty_name'] ?? 'Unknown',
+                    'slug':
+                        (item['name'] ?? item['specialty_name'] ?? 'unknown')
+                            .toString()
+                            .toLowerCase()
+                            .replaceAll(' ', '-'),
+                    'is_active': true,
+                  }),
+                )
+                .toList();
           }
         }
       } catch (e) {
         print('Error fetching specialties: $e');
       }
-      
+
       // Fetch countries from the country-list endpoint
       try {
         print('Fetching countries from: $baseUrl/api/v1/country-list');
         final countryResponse = await _dio.get('$baseUrl/api/v1/country-list');
         print('Country response type: ${countryResponse.data.runtimeType}');
-        
+
         if (countryResponse.data is Map) {
           final responseMap = countryResponse.data as Map<String, dynamic>;
           if (responseMap['countries'] is List) {
             final countriesData = responseMap['countries'] as List;
-            countries = countriesData.map((item) => CountryFilter.fromJson({
-              'id': item['id'] ?? 0,
-              'name': item['countryName'] ?? item['name'] ?? 'Unknown',
-              'code': item['countryCode'] ?? item['code'] ?? '',
-              'flag': item['flag'] ?? '',
-            })).toList();
+            countries = countriesData
+                .map(
+                  (item) => CountryFilter.fromJson({
+                    'id': item['id'] ?? 0,
+                    'name': item['countryName'] ?? item['name'] ?? 'Unknown',
+                    'code': item['countryCode'] ?? item['code'] ?? '',
+                    'flag': item['flag'] ?? '',
+                  }),
+                )
+                .toList();
           }
         }
       } catch (e) {
         print('Error fetching countries: $e');
       }
-      
+
       // Cache the results
       _cachedSpecialties = specialties;
       _cachedCountries = countries;
       _lastFilterDataFetch = DateTime.now();
-      
-      print('Loaded ${specialties.length} specialties and ${countries.length} countries from main API');
-      
-      return {
-        'specialties': specialties,
-        'countries': countries,
-      };
-      
+
+      print(
+        'Loaded ${specialties.length} specialties and ${countries.length} countries from main API',
+      );
+
+      return {'specialties': specialties, 'countries': countries};
     } catch (e) {
-      print('Error loading filter data: $e');
+      print('Error loading filter patient data: $e');
       // Return empty data, not fallback - let the UI handle empty state
       return {
         'specialties': <SpecialtyFilter>[],
@@ -150,7 +174,7 @@ class CaseDiscussionRepository {
   }
 
   // Get paginated list of case discussions
-  Future<PaginatedResponse<CaseDiscussion>> getCaseDiscussions({
+  Future<PaginatedResponse<CaseDiscussionListItem>> getCaseDiscussions({
     int page = 1,
     int perPage = 12,
     String? search,
@@ -161,10 +185,7 @@ class CaseDiscussionRepository {
     CaseDiscussionFilters? filters,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
       // Apply filters if provided
       if (filters != null) {
@@ -215,56 +236,8 @@ class CaseDiscussionRepository {
         print('Found ${casesList.length} cases');
 
         final cases = casesList.map((item) {
-          // Parse tags if available
-          List<String>? symptoms;
-          if (item['tags'] != null && item['tags'].toString().isNotEmpty) {
-            try {
-              final tagsString = item['tags'].toString();
-              if (tagsString.startsWith('[') && tagsString.endsWith(']')) {
-                final parsed = json.decode(tagsString) as List;
-                symptoms = parsed.map((tag) => tag['value'].toString()).toList();
-              }
-            } catch (e) {
-              print('Error parsing tags: $e');
-            }
-          }
-
-          return CaseDiscussion.fromJson({
-            'id': item['id'],
-            'title': item['title'] ?? '',
-            'description': item['title'] ?? '', // Use title as description
-            'status': 'active',
-            'specialty': item['specialty'] ?? 'General',
-            'created_at': item['created_at'] ?? DateTime.now().toIso8601String(),
-            'updated_at': item['created_at'] ?? DateTime.now().toIso8601String(),
-            'author': {
-              'id': 0, // Not available in response
-              'name': item['name'] ?? 'Unknown',
-              'specialty': item['specialty'] ?? '',
-              'profile_pic': item['profile_pic'],
-            },
-            'stats': {
-              'comments_count': item['comments'] ?? 0,
-              'followers_count': 0, // Not available
-              'updates_count': 0, // Not available
-              'likes': item['likes'] ?? 0,
-              'views': item['views'] ?? 0,
-            },
-            'symptoms': symptoms,
-            'patient_info': null,
-            'diagnosis': null,
-            'treatment_plan': null,
-            'attachments': item['attached_file'] != null
-                ? [
-                    {
-                      'id': 0,
-                      'type': 'file',
-                      'url': item['attached_file'],
-                      'description': 'Attached file',
-                    }
-                  ]
-                : null,
-          });
+          print('📋 Processing case item: ${item['id']} - Name: ${item['name']} - Specialty: ${item['specialty']}');
+          return CaseDiscussionListItem.fromJson(item);
         }).toList();
 
         final pagination = PaginationMeta(
@@ -274,14 +247,18 @@ class CaseDiscussionRepository {
           total: casesData['total'] ?? 0,
         );
 
-        print('Returning ${cases.length} cases with pagination: page ${pagination.currentPage}/${pagination.lastPage}');
+        print(
+          'Returning ${cases.length} cases with pagination: page ${pagination.currentPage}/${pagination.lastPage}',
+        );
 
-        return PaginatedResponse<CaseDiscussion>(
+        return PaginatedResponse<CaseDiscussionListItem>(
           items: cases,
           pagination: pagination,
         );
       } else {
-        throw Exception(responseData['message'] ?? 'Failed to load case discussions');
+        throw Exception(
+          responseData['message'] ?? 'Failed to load case discussions',
+        );
       }
     } on DioError catch (e) {
       print('DioError in getCaseDiscussions: ${e.message}');
@@ -297,33 +274,122 @@ class CaseDiscussionRepository {
     try {
       print('🔍 Loading case discussion details for ID: $caseId');
       print('🌐 API URL: $baseUrl/api/v3/cases/$caseId');
-      
-      final response = await _dio.get(
-        '$baseUrl/api/v3/cases/$caseId',
-      );
-      
+
+      final response = await _dio.get('$baseUrl/api/v3/cases/$caseId');
+
       print('📱 Response Status: ${response.statusCode}');
       print('📄 Response Data Type: ${response.data.runtimeType}');
-      
+
+      // Handle potential null response data
+      if (response.data == null) {
+        throw Exception('Empty response from server');
+      }
+
+      // Additional check for response data type
+      if (response.data is! Map<String, dynamic>) {
+        print('❌ Unexpected response type: ${response.data.runtimeType}');
+        print('📄 Raw response: ${response.data}');
+        throw Exception('Invalid response format from server');
+      }
+
       final responseData = response.data as Map<String, dynamic>;
-      
+
       if (responseData['success'] == true) {
-        final data = responseData['data'] as Map<String, dynamic>;
-        final caseData = data['case'] as Map<String, dynamic>;
-        final userData = caseData['user'] as Map<String, dynamic>;
-        final commentsData = caseData['comments'] as List;
-        final metadata = data['metadata'] as Map<String, dynamic>?;
-        final relatedCases = data['related_cases'] as List? ?? [];
-        final isFollowing = data['is_following'] as bool? ?? false;
-        
+        final data = responseData['data'] as Map<String, dynamic>?;
+
+        if (data == null) {
+          throw Exception('No data in response');
+        }
+
+        final caseData = data['case'] as Map<String, dynamic>?;
+
+        if (caseData == null) {
+          throw Exception('No case data in response');
+        }
+
+        // Handle user data - could be nested under 'user' or directly in caseData
+        Map<String, dynamic>? userData;
+        String authorName = 'Unknown User';
+
+        if (caseData['user'] != null &&
+            caseData['user'] is Map<String, dynamic>) {
+          // Case detail API: user data is nested under 'user'
+          userData = caseData['user'] as Map<String, dynamic>;
+          authorName =
+              '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'
+                  .trim();
+        } else if (caseData['name'] != null) {
+          // Case list API: user data is directly in caseData
+          userData = {
+            'id': caseData['user_id'] ?? 0,
+            'first_name':
+                caseData['name']?.toString().split(' ').first ?? 'Unknown',
+            'last_name':
+                caseData['name']?.toString().split(' ').skip(1).join(' ') ?? '',
+            'specialty': caseData['specialty'],
+            'profile_pic': caseData['profile_pic'],
+          };
+          authorName = caseData['name']?.toString() ?? 'Unknown User';
+        } else {
+          // Fallback for missing user data
+          userData = null;
+          authorName = 'Unknown User';
+        }
+
+        // Handle comments data - could be List or int (count)
+        List commentsData = [];
+        final commentsRaw = caseData['comments'];
+        if (commentsRaw is List) {
+          commentsData = commentsRaw;
+        } else if (commentsRaw is int) {
+          // If it's an int, it's probably a count, so we'll use empty list for now
+          print('📊 Comments field is count ($commentsRaw), not list');
+          commentsData = [];
+        } else {
+          print(
+            '⚠️ Comments field is neither List nor int: ${commentsRaw.runtimeType}',
+          );
+          commentsData = [];
+        }
+
+        // Handle metadata safely
+        final metadata = (data['metadata'] is Map<String, dynamic>)
+            ? data['metadata'] as Map<String, dynamic>?
+            : null;
+
+        // Handle related_cases safely
+        final relatedCases = (data['related_cases'] is List)
+            ? data['related_cases'] as List
+            : [];
+
+        // Handle is_following safely
+        final isFollowing = (data['is_following'] is bool)
+            ? data['is_following'] as bool
+            : false;
+
+        // Debug logging
+        print('🔍 Debug Info:');
+        print('   - userData is null: ${userData == null}');
+        print('   - commentsRaw value: $commentsRaw');
+        print('   - commentsRaw type: ${commentsRaw.runtimeType}');
+        print(
+          '   - commentsData type: ${commentsData.runtimeType} (length: ${commentsData.length})',
+        );
+        print('   - caseData keys: ${caseData.keys.toList()}');
+        print('   - data keys: ${data.keys.toList()}');
+        if (userData != null) {
+          print('   - userData keys: ${userData.keys.toList()}');
+        }
+
         print('✅ Case loaded: ${caseData['title']}');
-        print('👤 Author: ${userData['first_name']} ${userData['last_name']}');
+        print('👤 Author: $authorName');
         print('💬 Comments: ${commentsData.length}');
         print('🔗 Related cases: ${relatedCases.length}');
-        
+
         // Parse tags if available
         List<String>? symptoms;
-        if (caseData['tags'] != null && caseData['tags'].toString().isNotEmpty) {
+        if (caseData['tags'] != null &&
+            caseData['tags'].toString().isNotEmpty) {
           try {
             final tagsString = caseData['tags'].toString();
             if (tagsString.startsWith('[') && tagsString.endsWith(']')) {
@@ -335,53 +401,39 @@ class CaseDiscussionRepository {
           }
         }
 
-        // Build author name from first_name and last_name
-        final authorName = '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'.trim();
+        // authorName is already built above based on the data source
+
+        // Create the JSON structure that matches the new API response
+        final caseJson = Map<String, dynamic>.from(caseData);
         
-        return CaseDiscussion.fromJson({
-          'id': caseData['id'],
-          'title': caseData['title'] ?? '',
-          'description': caseData['description'] ?? '',
-          'status': 'active',
-          'specialty': userData['specialty'] ?? 'General',
-          'created_at': caseData['created_at'] ?? DateTime.now().toIso8601String(),
-          'updated_at': caseData['updated_at'] ?? DateTime.now().toIso8601String(),
-          'author': {
-            'id': userData['id'] ?? 0,
-            'name': authorName.isNotEmpty ? authorName : 'Unknown User',
-            'specialty': userData['specialty'] ?? '',
-            'profile_pic': userData['profile_pic'],
-          },
-          'stats': {
-            'comments_count': commentsData.length,
-            'followers_count': (data['followers'] as List?)?.length ?? 0,
-            'updates_count': 0,
-            'likes': caseData['likes'] ?? 0,
-            'views': caseData['views'] ?? 0,
-          },
-          'symptoms': symptoms,
-          'attachments': caseData['attached_file'] != null
-              ? [
-                  {
-                    'id': 0,
-                    'type': 'file',
-                    'url': caseData['attached_file'],
-                    'description': 'Attached file',
-                  }
-                ]
-              : null,
-          'patient_info': metadata != null ? {
-            'age': 0, // Not provided in current API
-            'gender': '', // Not provided in current API  
-            'medical_history': metadata['clinical_complexity'] ?? '',
-          } : null,
-          // Store additional data for the screen
-          'metadata': metadata,
-          'is_following': isFollowing,
-          'related_cases': relatedCases,
-        });
+        // Add the additional data from the API response
+        if (data['is_like'] != null) {
+          caseJson['is_like'] = data['is_like'];
+        }
+        if (data['is_following'] != null) {
+          caseJson['is_following'] = data['is_following'];
+        }
+        if (data['ai_summary'] != null) {
+          caseJson['ai_summary'] = data['ai_summary'];
+        }
+        if (data['metadata'] != null) {
+          caseJson['metadata'] = data['metadata'];
+        }
+        if (data['decision_supports'] != null) {
+          caseJson['decision_supports'] = data['decision_supports'];
+        }
+        if (data['updates'] != null) {
+          caseJson['updates'] = data['updates'];
+        }
+        if (data['followers_count'] != null) {
+          caseJson['followers_count'] = data['followers_count'];
+        }
+
+        return CaseDiscussion.fromJson(caseJson);
       } else {
-        throw Exception(responseData['message'] ?? 'Failed to load case discussion');
+        throw Exception(
+          responseData['message'] ?? 'Failed to load case discussion',
+        );
       }
     } on DioError catch (e) {
       print('❌ Error loading case discussion: ${e.message}');
@@ -400,153 +452,339 @@ class CaseDiscussionRepository {
   // Create new case discussion
   Future<CaseDiscussion> createCaseDiscussion(CreateCaseRequest request) async {
     try {
-      // Prepare form data for the new API endpoint format
+      // Prepare FormData for the API endpoint
       final formData = FormData();
-      
+
       // Add required fields
       formData.fields.add(MapEntry('title', request.title));
       formData.fields.add(MapEntry('description', request.description));
-      
-      // Add optional fields
-      // if (request.tags != null) {
-      //   formData.fields.add(MapEntry('tags', request.tags!));
-      // }
-      // if (request.specialtyId != null) {
-      //   formData.fields.add(MapEntry('specialty_id', request.specialtyId!));
-      // }
-      
-      // Add specialty ID if provided
-      // if (request.specialtyId != null) {
-      //   formData.fields.add(MapEntry('specialty_id', request.specialtyId!));
-      // }
-      
-      // Add patient demographics if provided
-      if (request.patientDemographics != null) {
-        // Convert patient demographics to JSON string
-        formData.fields.add(MapEntry('patient_demographics', json.encode(request.patientDemographics!)));
+
+      // Add optional basic fields - parse JSON tags and send as simple comma-separated string
+      if (request.tags != null && request.tags!.isNotEmpty) {
+        try {
+          // Parse the JSON tags: [{"value":"tag1"},{"value":"tag2"}]
+          final parsed = json.decode(request.tags!) as List;
+          final tagValues = parsed
+              .map((tag) => tag['value'].toString())  // Extract values
+              .join(', ');  // Format as "tag1, tag2"
+          formData.fields.add(MapEntry('tags', tagValues));
+        } catch (e) {
+          // Fallback: send as-is if parsing fails
+          formData.fields.add(MapEntry('tags', request.tags!));
+        }
       }
-      
-      // Add other new fields
-      // if (request.ethnicity != null) {
-      //   formData.fields.add(MapEntry('ethnicity', request.ethnicity!));
-      // }
+
+      // Add specialty_id field (currently hardcoded to "1" as shown in Postman)
+      formData.fields.add(MapEntry('specialty_id', '1'));
+
+      // Add individual patient demographic fields instead of nested object
+      if (request.patientDemographics != null) {
+        final demographics = request.patientDemographics!;
+        if (demographics['age'] != null) {
+          formData.fields.add(MapEntry('patient_age', demographics['age'].toString()));
+        }
+        if (demographics['gender'] != null) {
+          formData.fields.add(MapEntry('patient_gender', demographics['gender'].toString()));
+        }
+        if (demographics['ethnicity'] != null) {
+          formData.fields.add(MapEntry('patient_ethnicity', demographics['ethnicity'].toString()));
+        }
+      }
+
+      // Add clinical metadata fields
       if (request.clinicalComplexity != null) {
         formData.fields.add(MapEntry('clinical_complexity', request.clinicalComplexity!));
       }
+      
       if (request.teachingValue != null) {
         formData.fields.add(MapEntry('teaching_value', request.teachingValue!));
       }
-      if (request.isAnonymized != null) {
-        formData.fields.add(MapEntry('is_anonymized', request.isAnonymized!.toString()));
-      }
       
-      // Add multiple file attachments if provided
+      if (request.isAnonymized != null) {
+        formData.fields.add(MapEntry('is_anonymized', request.isAnonymized! ? '1' : '0'));
+      }
+
+      // Add multiple file attachments
       if (request.attachedFiles != null && request.attachedFiles!.isNotEmpty) {
         for (int i = 0; i < request.attachedFiles!.length; i++) {
           final filePath = request.attachedFiles![i];
+          
           if (filePath.startsWith('http')) {
-            // If it's a URL, add it as a field
-            formData.fields.add(MapEntry('attached_files[$i]', filePath));
+            // Handle URL case (existing files)
+            formData.fields.add(MapEntry('existing_files[$i]', filePath));
           } else {
-            // If it's a local file path, add it as a file
-            formData.files.add(MapEntry(
-              'attached_files[]',
-              await MultipartFile.fromFile(filePath),
-            ));
+            // Local file - use array notation for multiple files
+            final file = await MultipartFile.fromFile(
+              filePath,
+              filename: path.basename(filePath),
+            );
+            formData.files.add(MapEntry('attached_files[]', file));
           }
         }
       }
 
       print('Creating case discussion with URL: $baseUrl/api/v3/cases');
-      print('Form data fields: ${formData.fields.map((e) => '${e.key}: ${e.value}').join(', ')}');
-      print('Form data files: ${formData.files.map((e) => '${e.key}: ${e.value.filename}').join(', ')}');
-      
+      print('Form fields: ${formData.fields.map((e) => '${e.key}: ${e.value}').join(', ')}');
+      print('Form files: ${formData.files.map((e) => '${e.key}: ${e.value.filename}').join(', ')}');
+
+      // Make the API request with FormData
       final response = await _dio.post(
         '$baseUrl/api/v3/cases',
         data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+          },
+          validateStatus: (status) => status! < 500, // Accept 4xx responses for better error handling
+        ),
       );
 
-      print('Create case response status: ${response.statusCode}');
+      print('Create case response status:patient_demographic ${response.statusCode}');
       print('Create case response data: ${response.data}');
 
-      // Handle different response formats
+      // Handle the response according to your Laravel API structure
       final responseData = response.data;
-      
+
       if (responseData is Map<String, dynamic>) {
-        // Check if response indicates success
-        if (responseData['success'] == true || response.statusCode == 200 || response.statusCode == 201) {
-          // Try to extract case data from different possible structures
-          Map<String, dynamic>? caseData;
+        // Check for successful response
+        if ((responseData['success'] == true || response.statusCode == 200 || response.statusCode == 201)) {
           
-          if (responseData['data'] != null && responseData['data']['case'] != null) {
-            caseData = responseData['data']['case'];
+          // Extract case data from the expected API response structure
+          Map<String, dynamic>? caseData;
+          Map<String, dynamic>? metadataData;
+
+          if (responseData['data'] != null) {
+            final data = responseData['data'];
+            caseData = data['case'];
+            metadataData = data['metadata'];
           } else if (responseData['case'] != null) {
             caseData = responseData['case'];
-          } else if (responseData['data'] != null) {
-            caseData = responseData['data'];
-          } else {
-            // If no specific case data, create a minimal case object
-            caseData = {
-              'id': DateTime.now().millisecondsSinceEpoch,
-              'title': request.title,
-              'description': request.description,
-              'status': 'active',
-              'specialty': 'General',
-              'created_at': DateTime.now().toIso8601String(),
-              'updated_at': DateTime.now().toIso8601String(),
-              'author': {
-                'id': 0,
-                'name': 'Me',
-                'specialty': '',
-                'profile_pic': null,
-              },
-              'stats': {
-                'comments_count': 0,
-                'followers_count': 0,
-                'updates_count': 0,
-                'likes': 0,
-                'views': 0,
-              },
-            };
-
           }
-          
-          return CaseDiscussion.fromJson(caseData!);
+
+          if (caseData != null) {
+            // Transform the Laravel response to match your Flutter model
+            final transformedCase = _transformLaravelCaseToFlutter(caseData, metadataData);
+            return CaseDiscussion.fromJson(transformedCase);
+          } else {
+            throw Exception('Invalid response structure: case data not found');
+          }
         } else {
-          throw Exception(responseData['message'] ?? 'Failed to create case discussion');
+          // Handle API errors
+          final message = responseData['message'] ?? 'Failed to create case discussion';
+          final errors = responseData['errors'];
+          
+          if (errors != null) {
+            throw ValidationException(message, errors);
+          } else {
+            throw Exception(message);
+          }
         }
       } else {
-        // If response is not a map, assume success and create a minimal case
-        return CaseDiscussion.fromJson({
-          'id': DateTime.now().millisecondsSinceEpoch,
-          'title': request.title,
-          'description': request.description,
-          'status': 'active',
-          'specialty': 'General',
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-          'author': {
-            'id': 0,
-            'name': 'Me',
-            'specialty': '',
-            'profile_pic': null,
-          },
-          'stats': {
-            'comments_count': 0,
-            'followers_count': 0,
-            'updates_count': 0,
-            'likes': 0,
-            'views': 0,
-          },
-        });
+        throw Exception('Invalid response format from server');
       }
-    } on DioError catch (e) {
-      print('Error creating case discussion: ${e.message}');
+      
+    } on DioException catch (e) {
+      print('DioException creating case discussion: ${e.message}');
       print('Response: ${e.response?.data}');
-      throw _handleDioError(e);
+      
+      // Handle specific HTTP error codes
+      switch (e.response?.statusCode) {
+        case 422:
+          // Validation errors
+          final errors = e.response?.data['errors'];
+          final message = e.response?.data['message'] ?? 'Validation failed';
+          throw ValidationException(message, errors);
+        
+        case 401:
+          throw UnauthorizedException('Authentication required');
+        
+        case 403:
+          throw ForbiddenException('Access denied');
+        
+        case 413:
+          throw Exception('File too large');
+        
+        case 500:
+          throw Exception('Server error occurred');
+        
+        default:
+          throw Exception('Network error: ${e.message}');
+      }
     } catch (e) {
       print('General error creating case discussion: $e');
       throw Exception('Failed to create case discussion: $e');
+    }
+  }
+
+  // Update existing case discussion - same format as create
+  Future<CaseDiscussion> updateCaseDiscussion(int caseId, CreateCaseRequest request) async {
+    try {
+      // Prepare FormData for the API endpoint - same format as create
+      final formData = FormData();
+
+      // Add required fields
+      formData.fields.add(MapEntry('title', request.title));
+      formData.fields.add(MapEntry('description', request.description));
+
+      // Add optional basic fields - parse JSON tags and send as simple comma-separated string
+      if (request.tags != null && request.tags!.isNotEmpty) {
+        try {
+          // Parse the JSON tags: [{"value":"tag1"},{"value":"tag2"}]
+          final parsed = json.decode(request.tags!) as List;
+          final tagValues = parsed
+              .map((tag) => tag['value'].toString())  // Extract values
+              .join(', ');  // Format as "tag1, tag2"
+          formData.fields.add(MapEntry('tags', tagValues));
+        } catch (e) {
+          // Fallback: send as-is if parsing fails
+          formData.fields.add(MapEntry('tags', request.tags!));
+        }
+      }
+
+      // Add specialty_id field (currently hardcoded to "1" as shown in Postman)
+      formData.fields.add(MapEntry('specialty_id', '1'));
+
+      // Add individual patient demographic fields instead of nested object
+      if (request.patientDemographics != null) {
+        final demographics = request.patientDemographics!;
+        if (demographics['age'] != null) {
+          formData.fields.add(MapEntry('patient_age', demographics['age'].toString()));
+        }
+        if (demographics['gender'] != null) {
+          formData.fields.add(MapEntry('patient_gender', demographics['gender'].toString()));
+        }
+        if (demographics['ethnicity'] != null) {
+          formData.fields.add(MapEntry('patient_ethnicity', demographics['ethnicity'].toString()));
+        }
+      }
+
+      // Add clinical metadata fields
+      if (request.clinicalComplexity != null) {
+        formData.fields.add(MapEntry('clinical_complexity', request.clinicalComplexity!));
+      }
+      
+      if (request.teachingValue != null) {
+        formData.fields.add(MapEntry('teaching_value', request.teachingValue!));
+      }
+      
+      if (request.isAnonymized != null) {
+        formData.fields.add(MapEntry('is_anonymized', request.isAnonymized! ? '1' : '0'));
+      }
+
+      // Add multiple file attachments
+      if (request.attachedFiles != null && request.attachedFiles!.isNotEmpty) {
+        for (int i = 0; i < request.attachedFiles!.length; i++) {
+          final filePath = request.attachedFiles![i];
+          
+          if (filePath.startsWith('http')) {
+            // Handle URL case (existing files)
+            formData.fields.add(MapEntry('existing_files[$i]', filePath));
+          } else {
+            // Local file - use array notation for multiple files
+            final file = await MultipartFile.fromFile(
+              filePath,
+              filename: path.basename(filePath),
+            );
+            formData.files.add(MapEntry('attached_files[]', file));
+          }
+        }
+      }
+
+      print('Updating case discussion with URL: $baseUrl/api/v3/cases/$caseId');
+      print('Form fields: ${formData.fields.map((e) => '${e.key}: ${e.value}').join(', ')}');
+      print('Form files: ${formData.files.map((e) => '${e.key}: ${e.value.filename}').join(', ')}');
+
+      // Make the API request with FormData - same as create method
+      final response = await _dio.post(
+        '$baseUrl/api/v3/cases/update-case/$caseId',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+          },
+          validateStatus: (status) => status! < 500, // Accept 4xx responses for better error handling
+        ),
+      );
+
+      print('Update case response status: ${response.statusCode}');
+      print('Update case response data: ${response.data}');
+
+      // Handle the response according to your Laravel API structure
+      final responseData = response.data;
+
+      if (responseData is Map<String, dynamic>) {
+        // Check for successful response
+        if ((responseData['success'] == true || response.statusCode == 200 || response.statusCode == 201)) {
+          
+          // Extract case data from the expected API response structure
+          Map<String, dynamic>? caseData;
+          Map<String, dynamic>? metadataData;
+
+          if (responseData['data'] != null) {
+            final data = responseData['data'];
+            caseData = data['case'];
+            metadataData = data['metadata'];
+          } else if (responseData['case'] != null) {
+            caseData = responseData['case'];
+          }
+
+          if (caseData != null) {
+            // Transform the Laravel response to match your Flutter model
+            final transformedCase = _transformLaravelCaseToFlutter(caseData, metadataData);
+            return CaseDiscussion.fromJson(transformedCase);
+          } else {
+            throw Exception('Invalid response structure: case data not found');
+          }
+        } else {
+          // Handle API errors
+          final message = responseData['message'] ?? 'Failed to update case discussion';
+          final errors = responseData['errors'];
+          
+          if (errors != null) {
+            throw ValidationException(message, errors);
+          } else {
+            throw Exception(message);
+          }
+        }
+      } else {
+        throw Exception('Invalid response format from server');
+      }
+      
+    } on DioException catch (e) {
+      print('DioException updating case discussion: ${e.message}');
+      print('Response: ${e.response?.data}');
+      
+      // Handle specific HTTP error codes
+      switch (e.response?.statusCode) {
+        case 422:
+          // Validation errors
+          final errors = e.response?.data['errors'];
+          final message = e.response?.data['message'] ?? 'Validation failed';
+          throw ValidationException(message, errors);
+        
+        case 401:
+          throw UnauthorizedException('Authentication required');
+        
+        case 403:
+          throw ForbiddenException('Access denied');
+        
+        case 404:
+          throw Exception('Case not found');
+        
+        case 413:
+          throw Exception('File too large');
+        
+        case 500:
+          throw Exception('Server error occurred');
+        
+        default:
+          throw Exception('Network error: ${e.message}');
+      }
+    } catch (e) {
+      print('General error updating case discussion: $e');
+      throw Exception('Failed to update case discussion: $e');
     }
   }
 
@@ -558,35 +796,67 @@ class CaseDiscussionRepository {
   }) async {
     try {
       print('💬 Loading comments for case ID: $caseId');
-      
+
       // Get the case details which includes comments
       final caseDetailResponse = await _dio.get(
         '$baseUrl/api/v3/cases/$caseId',
       );
-      
+
+      // Handle potential null response data
+      if (caseDetailResponse.data == null) {
+        throw Exception('Empty response from server');
+      }
+
       final responseData = caseDetailResponse.data as Map<String, dynamic>;
-      
+
       if (responseData['success'] == true) {
-        final data = responseData['data'] as Map<String, dynamic>;
-        final caseData = data['case'] as Map<String, dynamic>;
-        final commentsList = caseData['comments'] as List;
-        
+        final data = responseData['data'] as Map<String, dynamic>?;
+
+        if (data == null) {
+          throw Exception('No data in response');
+        }
+
+        final caseData = data['case'] as Map<String, dynamic>?;
+
+        if (caseData == null) {
+          throw Exception('No case data in response');
+        }
+
+        // Handle comments data - could be List or int (count)
+        List commentsList = [];
+        final commentsRaw = caseData['comments'];
+        if (commentsRaw is List) {
+          commentsList = commentsRaw;
+        } else if (commentsRaw is int) {
+          print(
+            '📊 Comments field is count ($commentsRaw), not list - no comments to load',
+          );
+          commentsList = [];
+        } else {
+          print(
+            '⚠️ Comments field is neither List nor int: ${commentsRaw.runtimeType}',
+          );
+          commentsList = [];
+        }
+
         print('✅ Found ${commentsList.length} comments for case $caseId');
 
         final comments = <CaseComment>[];
-        
+
         for (var item in commentsList) {
           try {
             print('🔍 Raw comment item: $item');
-            
+
             // Handle null user data gracefully
             final userDataRaw = item['user'];
             Map<String, dynamic> userData;
             String authorName;
-            
+
             if (userDataRaw != null && userDataRaw is Map<String, dynamic>) {
               userData = userDataRaw;
-              authorName = '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'.trim();
+              authorName =
+                  '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'
+                      .trim();
               print('👤 Found user data: $userData');
             } else {
               print('⚠️ User data is null or invalid, creating fallback user');
@@ -600,33 +870,38 @@ class CaseDiscussionRepository {
               };
               authorName = 'Anonymous User';
             }
-            
+
             print('👤 Author name: $authorName');
             print('💬 Comment text: ${item['comment']}');
             print('🆔 Comment ID: ${item['id']}');
-            
+
             // Convert discuss_case_id if it's a string
             dynamic rawDiscussCaseId = item['discuss_case_id'];
             int discussCaseIdInt = caseId; // Default to current caseId
             if (rawDiscussCaseId != null) {
               if (rawDiscussCaseId is String) {
                 discussCaseIdInt = int.tryParse(rawDiscussCaseId) ?? caseId;
-                print('📊 Converted discuss_case_id from String "$rawDiscussCaseId" to int $discussCaseIdInt');
+                print(
+                  '📊 Converted discuss_case_id from String "$rawDiscussCaseId" to int $discussCaseIdInt',
+                );
               } else if (rawDiscussCaseId is int) {
                 discussCaseIdInt = rawDiscussCaseId;
               }
             }
-            
+
             final commentData = {
               'id': item['id'] ?? 0,
               'discuss_case_id': discussCaseIdInt, // Now guaranteed to be int
-              'user_id': item['user_id'] ?? '0', // Keep as dynamic - could be string
+              'user_id':
+                  item['user_id'] ?? '0', // Keep as dynamic - could be string
               'comment': item['comment'] ?? '',
               'clinical_tags': item['specialty'],
               'likes': item['likes'] ?? 0,
               'dislikes': item['dislikes'] ?? 0,
-              'created_at': item['created_at'] ?? DateTime.now().toIso8601String(),
-              'updated_at': item['updated_at'] ?? DateTime.now().toIso8601String(),
+              'created_at':
+                  item['created_at'] ?? DateTime.now().toIso8601String(),
+              'updated_at':
+                  item['updated_at'] ?? DateTime.now().toIso8601String(),
               'replies_count': 0, // Not provided in current API
               'is_liked': false, // Not provided in current API
               'is_disliked': false, // Not provided in current API
@@ -639,9 +914,9 @@ class CaseDiscussionRepository {
                 'profile_pic': userData['profile_pic'],
               },
             };
-            
+
             print('📋 Prepared comment data: $commentData');
-            
+
             // Use a safer approach to create the comment
             final parsedComment = _createSafeComment(commentData);
             if (parsedComment != null) {
@@ -657,7 +932,7 @@ class CaseDiscussionRepository {
             continue;
           }
         }
-        
+
         print('📝 Total comments parsed: ${comments.length}');
 
         final pagination = PaginationMeta(
@@ -700,7 +975,7 @@ class CaseDiscussionRepository {
   CaseComment? _createSafeComment(Map<String, dynamic> commentData) {
     try {
       print('🛡️ Creating safe comment from: $commentData');
-      
+
       // Convert discuss_case_id to proper type
       dynamic discussCaseId = commentData['discuss_case_id'];
       if (discussCaseId is String) {
@@ -708,33 +983,39 @@ class CaseDiscussionRepository {
       } else if (discussCaseId == null) {
         discussCaseId = 0;
       }
-      
+
       // Ensure all required fields have safe defaults
       final safeCommentData = {
         'id': commentData['id'] ?? 0,
         'discuss_case_id': discussCaseId,
-        'user_id': commentData['user_id'] ?? '0', // Keep as dynamic - could be string or int
+        'user_id':
+            commentData['user_id'] ??
+            '0', // Keep as dynamic - could be string or int
         'comment': commentData['comment'] ?? '',
         'clinical_tags': commentData['clinical_tags'],
         'likes': commentData['likes'] ?? 0,
         'dislikes': commentData['dislikes'] ?? 0,
-        'created_at': commentData['created_at'] ?? DateTime.now().toIso8601String(),
-        'updated_at': commentData['updated_at'] ?? DateTime.now().toIso8601String(),
+        'created_at':
+            commentData['created_at'] ?? DateTime.now().toIso8601String(),
+        'updated_at':
+            commentData['updated_at'] ?? DateTime.now().toIso8601String(),
         'replies_count': commentData['replies_count'] ?? 0,
         'is_liked': commentData['is_liked'] ?? false,
         'is_disliked': commentData['is_disliked'] ?? false,
-        'user': commentData['user'] ?? {
-          'id': commentData['user_id'] ?? '0', // Use the same user_id
-          'name': 'Anonymous User',
-          'first_name': 'Anonymous',
-          'last_name': 'User',
-          'specialty': 'Unknown',
-          'profile_pic': null,
-        },
+        'user':
+            commentData['user'] ??
+            {
+              'id': commentData['user_id'] ?? '0', // Use the same user_id
+              'name': 'Anonymous User',
+              'first_name': 'Anonymous',
+              'last_name': 'User',
+              'specialty': 'Unknown',
+              'profile_pic': null,
+            },
       };
-      
+
       print('🛡️ Safe comment data: $safeCommentData');
-      
+
       return CaseComment.fromJson(safeCommentData);
     } catch (e, stackTrace) {
       print('❌ Error in _createSafeComment: $e');
@@ -765,8 +1046,8 @@ class CaseDiscussionRepository {
       // The old API might return success message
       final responseData = response.data;
       print('Add comment response: $responseData');
-      
-      // Since the API might not return the full comment data, 
+
+      // Since the API might not return the full comment data,
       // create a temporary comment object
       return CaseComment.fromJson({
         'id': DateTime.now().millisecondsSinceEpoch, // Temporary ID
@@ -812,7 +1093,7 @@ class CaseDiscussionRepository {
       );
 
       print('Case action response: ${response.data}');
-      
+
       // Return response data
       return {
         'success': true,
@@ -856,6 +1137,27 @@ class CaseDiscussionRepository {
     }
   }
 
+  // Delete case discussion
+  Future<void> deleteCase(int caseId) async {
+    try {
+      print('🗑️ Deleting case discussion with ID: $caseId');
+      print('🌐 API URL: $baseUrl/api/v3/cases/cases-delete/$caseId');
+
+      final response = await _dio.post(
+        '$baseUrl/api/v3/cases/cases-delete/$caseId',
+      );
+
+      print('✅ Case deleted successfully. Response: ${response.statusCode}');
+    } on DioError catch (e) {
+      print('❌ Error deleting case: ${e.message}');
+      if (e.response != null) {
+        print('📱 Response Status: ${e.response?.statusCode}');
+        print('📄 Response Data: ${e.response?.data}');
+      }
+      throw _handleDioError(e);
+    }
+  }
+
   // Get list of specialties for filtering (now using getFilterData)
   Future<List<SpecialtyFilter>> getSpecialties() async {
     try {
@@ -878,17 +1180,18 @@ class CaseDiscussionRepository {
     }
   }
 
-  
-
   Exception _handleDioError(DioError error) {
     switch (error.type) {
       case DioErrorType.connectionTimeout:
       case DioErrorType.sendTimeout:
       case DioErrorType.receiveTimeout:
-        return Exception('Connection timeout. Please check your internet connection.');
+        return Exception(
+          'Connection timeout. Please check your internet connection.',
+        );
       case DioErrorType.badResponse:
         final statusCode = error.response?.statusCode;
-        final message = error.response?.data?['message'] ?? 'Server error occurred';
+        final message =
+            error.response?.data?['message'] ?? 'Server error occurred';
         return Exception('Server error ($statusCode): $message');
       case DioErrorType.cancel:
         return Exception('Request was cancelled');
@@ -898,4 +1201,211 @@ class CaseDiscussionRepository {
         return Exception('An unexpected error occurred');
     }
   }
+
+  // Helper method to transform Laravel API response to Flutter model format
+  Map<String, dynamic> _transformLaravelCaseToFlutter(
+    Map<String, dynamic> caseData,
+    Map<String, dynamic>? metadataData,
+  ) {
+    return {
+      'id': caseData['id'],
+      'title': caseData['title'],
+      'description': caseData['description'],
+      'status': 'active', // Default status
+      'specialty': caseData['user']?['specialty'] ?? 'General',
+      'tags': caseData['tags'],
+      'created_at': caseData['created_at'],
+      'updated_at': caseData['updated_at'],
+      'attachments': caseData['attached_file'] != null 
+          ? _parseAttachedFilesFromList(caseData['attached_file']) 
+          : [],
+      
+      // Author information from the user relationship
+      'author': {
+        'id': caseData['user']?['id'] ?? 0,
+        'name': caseData['user']?['name'] ?? 'Unknown',
+        'specialty': caseData['user']?['specialty'] ?? '',
+        'profile_pic': caseData['user']?['profile_pic'],
+      },
+      
+      // Case statistics
+      'stats': {
+        'comments_count': caseData['comments_count'] ?? 0,
+        'followers_count': 0, // Will be updated when followers are implemented
+        'updates_count': 0,   // Will be updated when updates are implemented
+        'likes': caseData['likes'] ?? 0,
+        'views': caseData['views'] ?? 0,
+      },
+      
+      // Metadata if available
+      'metadata': metadataData != null ? {
+        'patient_demographics': metadataData['patient_demographics'],
+        'clinical_complexity': metadataData['clinical_complexity'],
+        'teaching_value': metadataData['teaching_value'],
+        'is_anonymized': metadataData['is_anonymized'],
+      } : null,
+    };
+  }
+
+  // Helper method to parse attached files from Laravel response
+  List<Map<String, dynamic>> _parseAttachedFiles(dynamic attachedFileData) {
+    try {
+      if (attachedFileData is String) {
+        // If it's a JSON string, decode it
+        final decoded = json.decode(attachedFileData);
+        if (decoded is List) {
+          return decoded.map((item) {
+            if (item is String) {
+              // If it's just a URL string, create a basic attachment object
+              return {
+                'id': DateTime.now().millisecondsSinceEpoch,
+                'type': 'image',
+                'url': item,
+                'description': path.basename(item),
+              };
+            } else if (item is Map<String, dynamic>) {
+              // If it's already an attachment object, return as is
+              return item;
+            }
+            return {
+              'id': DateTime.now().millisecondsSinceEpoch,
+              'type': 'unknown',
+              'url': item.toString(),
+              'description': 'attachment',
+            };
+          }).cast<Map<String, dynamic>>().toList();
+        }
+      } else if (attachedFileData is List) {
+        // If it's already a list, process each item
+        return attachedFileData.map((item) {
+          if (item is String) {
+            return {
+              'id': DateTime.now().millisecondsSinceEpoch,
+              'type': 'image',
+              'url': item,
+              'description': path.basename(item),
+            };
+          } else if (item is Map<String, dynamic>) {
+            return item;
+          }
+          return {
+            'id': DateTime.now().millisecondsSinceEpoch,
+            'type': 'unknown',
+            'url': item.toString(),
+            'description': 'attachment',
+          };
+        }).cast<Map<String, dynamic>>().toList();
+      }
+    } catch (e) {
+      print('Error parsing attached files: $e');
+    }
+    
+    return []; // Return empty list if parsing fails
+  }
+
+  // Enhanced helper method to parse attached files from various formats in list response
+  List<Map<String, dynamic>>? _parseAttachedFilesFromList(dynamic attachedFile) {
+    if (attachedFile == null || attachedFile.toString().isEmpty || attachedFile == "null") {
+      return null;
+    }
+
+    try {
+      final attachedFileString = attachedFile.toString();
+      
+      // Handle empty arrays
+      if (attachedFileString == "\"[]\"" || attachedFileString == "[]") {
+        return null;
+      }
+
+      // Handle complex JSON string format like "\"[\\\"uploads\\\\\\/...\\\"]\"" 
+      if (attachedFileString.startsWith('"[') && attachedFileString.endsWith(']"')) {
+        // Remove outer quotes and unescape
+        String cleanedString = attachedFileString.substring(1, attachedFileString.length - 1);
+        cleanedString = cleanedString.replaceAll('\\"', '"').replaceAll('\\\\', '\\');
+        
+        final parsed = json.decode(cleanedString) as List;
+        return parsed.asMap().entries.map((entry) {
+          final index = entry.key;
+          final url = entry.value.toString();
+          return {
+            'id': index,
+            'type': _getFileTypeFromUrl(url),
+            'url': url,
+            'description': 'Attachment ${index + 1}',
+          };
+        }).toList();
+      }
+
+      // Handle simple JSON array format
+      if (attachedFileString.startsWith('[') && attachedFileString.endsWith(']')) {
+        final parsed = json.decode(attachedFileString) as List;
+        return parsed.asMap().entries.map((entry) {
+          final index = entry.key;
+          final url = entry.value.toString();
+          return {
+            'id': index,
+            'type': _getFileTypeFromUrl(url),
+            'url': url,
+            'description': 'Attachment ${index + 1}',
+          };
+        }).toList();
+      }
+
+      // Handle single file URL
+      if (attachedFileString.isNotEmpty) {
+        return [
+          {
+            'id': 0,
+            'type': _getFileTypeFromUrl(attachedFileString),
+            'url': attachedFileString,
+            'description': 'Attached file',
+          }
+        ];
+      }
+    } catch (e) {
+      print('Error parsing attached files from list: $e');
+    }
+
+    return null;
+  }
+
+  // Helper method to determine file type from URL
+  String _getFileTypeFromUrl(String url) {
+    final lowerUrl = url.toLowerCase();
+    if (lowerUrl.contains('.jpg') || lowerUrl.contains('.jpeg') || lowerUrl.contains('.png') || lowerUrl.contains('.gif')) {
+      return 'image';
+    } else if (lowerUrl.contains('.pdf')) {
+      return 'pdf';
+    } else if (lowerUrl.contains('.doc') || lowerUrl.contains('.docx')) {
+      return 'document';
+    }
+    return 'file';
+  }
+}
+
+// Custom exception classes for better error handling
+class ValidationException implements Exception {
+  final String message;
+  final Map<String, dynamic>? errors;
+  
+  ValidationException(this.message, this.errors);
+  
+  @override
+  String toString() => 'ValidationException: $message';
+}
+
+class UnauthorizedException implements Exception {
+  final String message;
+  UnauthorizedException(this.message);
+  
+  @override
+  String toString() => 'UnauthorizedException: $message';
+}
+
+class ForbiddenException implements Exception {
+  final String message;
+  ForbiddenException(this.message);
+  
+  @override
+  String toString() => 'ForbiddenException: $message';
 }

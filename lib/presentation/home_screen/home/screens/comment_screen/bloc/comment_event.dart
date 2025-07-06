@@ -15,9 +15,7 @@ class ChangePasswordVisibilityEvent extends CommentEvent {
   bool value;
 
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value];
 }
 
 class ChangeCheckBoxEvent extends CommentEvent {
@@ -26,17 +24,15 @@ class ChangeCheckBoxEvent extends CommentEvent {
   bool value;
 
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value];
 }
 
 class LoadPageEvent extends CommentEvent {
   int? postId;
   int? page;
-  LoadPageEvent({this.postId,this.page});
+  LoadPageEvent({this.postId, this.page});
   @override
-  List<Object?> get props => [postId,page];
+  List<Object?> get props => [postId, page];
 }
 
 class PostCommentEvent extends CommentEvent {
@@ -46,62 +42,57 @@ class PostCommentEvent extends CommentEvent {
   @override
   List<Object?> get props => [postId, comment];
 }
+
 class ReplyComment extends CommentEvent {
   String? postId;
   String? commentId;
   String? commentText;
-  ReplyComment({this.commentId,this.postId,this.commentText});
+  ReplyComment({this.commentId, this.postId, this.commentText});
   @override
-  List<Object?> get props => [ commentId,postId,commentText];
+  List<Object?> get props => [commentId, postId, commentText];
 }
+
 class LikeReplyComment extends CommentEvent {
   String? commentId;
   LikeReplyComment({this.commentId});
   @override
-  List<Object?> get props => [ commentId];
+  List<Object?> get props => [commentId];
 }
+
 class FetchReplyComment extends CommentEvent {
   String? commentId;
   String? postId;
-  FetchReplyComment({this.commentId,this.postId});
+  FetchReplyComment({this.commentId, this.postId});
   @override
-  List<Object?> get props => [ commentId,postId];
+  List<Object?> get props => [commentId, postId];
 }
-
 
 class DeleteCommentEvent extends CommentEvent {
   String? commentId;
-  DeleteCommentEvent({
-    this.commentId,
-  });
+  DeleteCommentEvent({this.commentId});
   @override
   List<Object?> get props => [commentId];
 }
+
 class DeleteReplyCommentEvent extends CommentEvent {
   String? commentId;
-  DeleteReplyCommentEvent({
-    this.commentId,
-  });
+  DeleteReplyCommentEvent({this.commentId});
   @override
   List<Object?> get props => [commentId];
-
 }
+
 class UpdateReplyCommentEvent extends CommentEvent {
   String? commentId;
   String? content;
-  UpdateReplyCommentEvent({
-    this.commentId,
-    this.content,
-  });
+  UpdateReplyCommentEvent({this.commentId, this.content});
   @override
-  List<Object?> get props => [commentId,content];
-
+  List<Object?> get props => [commentId, content];
 }
 
 class CheckIfNeedMoreDataEvent extends CommentEvent {
   final int index;
   final int postId;
-  CheckIfNeedMoreDataEvent({required this.postId,required this.index});
+  CheckIfNeedMoreDataEvent({required this.postId, required this.index});
   @override
   List<Object?> get props => [index];
 }

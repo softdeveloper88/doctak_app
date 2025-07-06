@@ -5,15 +5,19 @@ import 'package:flutter/material.dart';
 import '../models/case_discussion_models.dart';
 
 class DiscussionCard extends StatelessWidget {
-  final CaseDiscussion discussion;
+  final CaseDiscussionListItem discussion;
   final VoidCallback onTap;
   final VoidCallback onLike;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
   const DiscussionCard({
     Key? key,
     required this.discussion,
     required this.onTap,
     required this.onLike,
+    this.onDelete,
+    this.onEdit,
   }) : super(key: key);
 
   @override
@@ -73,25 +77,72 @@ class DiscussionCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getSpecialtyColor(discussion.specialty).withOpacity(0.1),
+                      color: _getSpecialtyColor(discussion.author.specialty).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: _getSpecialtyColor(discussion.specialty)
+                        color: _getSpecialtyColor(discussion.author.specialty)
                             .withOpacity(0.3),
                         width: 0.5,
                       ),
                     ),
                     child: Text(
-                      discussion.specialty.isNotEmpty
-                          ? discussion.specialty.toUpperCase()
+                      discussion.author.specialty.isNotEmpty
+                          ? discussion.author.specialty.toUpperCase()
                           : 'GENERAL',
                       style: TextStyle(
-                        color: _getSpecialtyColor(discussion.specialty),
+                        color: _getSpecialtyColor(discussion.author.specialty),
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
+                  // Delete button - only show if current user is the author
+                  if (_isCurrentUserAuthor() && onDelete != null) ...[
+                    const SizedBox(width: 8),
+                    PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: Colors.grey[600],
+                        size: 20,
+                      ),
+                      onSelected: (value) {
+                        if (value == 'edit' && onEdit != null) {
+                          onEdit!();
+                        } else if (value == 'delete') {
+                          _showDeleteConfirmation(context);
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        if (onEdit != null)
+                          PopupMenuItem<String>(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, color: Colors.blue[600], size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Edit',
+                                  style: TextStyle(color: Colors.blue[600]),
+                                ),
+                              ],
+                            ),
+                          ),
+                        PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red[600], size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red[600]),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
               const SizedBox(height: 12),
@@ -108,9 +159,11 @@ class DiscussionCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Description preview
+              // Description preview (using title as description for list view)
               Text(
-                discussion.description,
+                discussion.title.length > 100 
+                    ? '${discussion.title.substring(0, 100)}...'
+                    : discussion.title,
                 style: TextStyle(
                   color: Colors.grey[700],
                   fontSize: 14,
@@ -120,42 +173,12 @@ class DiscussionCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // Patient info if available
-              if (discussion.patientInfo != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        size: 16,
-                        color: Colors.blue[700],
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${discussion.patientInfo!.gender.toUpperCase()}, ${discussion.patientInfo!.age} years',
-                        style: TextStyle(
-                          color: Colors.blue[700],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-
-              // Symptoms if available
-              if (discussion.symptoms != null && discussion.symptoms!.isNotEmpty) ...[
+              // Tags/Symptoms if available
+              if (discussion.parsedTags.isNotEmpty) ...[
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
-                  children: discussion.symptoms!.take(3).map((symptom) {
+                  children: discussion.parsedTags.take(3).map((tag) {
                     return Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -166,7 +189,7 @@ class DiscussionCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        symptom,
+                        tag,
                         style: TextStyle(
                           color: Colors.orange[700],
                           fontSize: 10,
@@ -175,11 +198,11 @@ class DiscussionCard extends StatelessWidget {
                     );
                   }).toList(),
                 ),
-                if (discussion.symptoms!.length > 3)
+                if (discussion.parsedTags.length > 3)
                   Container(
                     margin: const EdgeInsets.only(top: 6),
                     child: Text(
-                      '+${discussion.symptoms!.length - 3} more symptoms',
+                      '+${discussion.parsedTags.length - 3} more tags',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 10,
@@ -267,5 +290,41 @@ class DiscussionCard extends StatelessWidget {
     } else {
       return 'Just now';
     }
+  }
+
+  bool _isCurrentUserAuthor() {
+    // Check if the current user is the author of this discussion
+    // Compare the author ID with the current user's ID
+    return discussion.author.name.toString() == AppData.name.toString();
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Discussion'),
+          content: const Text(
+            'Are you sure you want to delete this case discussion? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onDelete?.call();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

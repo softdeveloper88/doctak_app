@@ -160,7 +160,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         countriesList ?? [],
         selectedCountry,
         stateList,
-        userProfile?.user?.city ?? (stateList.isNotEmpty ? stateList.first : ''),
+        userProfile?.user?.state ?? userProfile?.user?.city ?? (stateList.isNotEmpty ? stateList.first : ''),
         specialtyList ?? [],
         userProfile?.user?.specialty ?? (specialtyList?.isNotEmpty == true ? specialtyList!.first : ''),
         [],
@@ -510,11 +510,25 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       
       print('States loaded: ${secondDropdownValues.toList()}');
 
+      // Find the user's current state in the loaded states
+      String selectedState = '';
+      if (userProfile?.user?.state != null && userProfile!.user!.state!.isNotEmpty) {
+        // Check if user's state exists in the loaded states
+        if (secondDropdownValues.contains(userProfile!.user!.state!)) {
+          selectedState = userProfile!.user!.state!;
+        } else {
+          // If not found, use the first available state
+          selectedState = secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '';
+        }
+      } else {
+        selectedState = secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '';
+      }
+
       emit(PaginationLoadedState(
           currentState.firstDropdownValues,
           event.selectedFirstDropdownValue,
           secondDropdownValues,
-          secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '',
+          selectedState,
           currentState.specialtyDropdownValue,
           currentState.selectedSpecialtyDropdownValue,
           [],
