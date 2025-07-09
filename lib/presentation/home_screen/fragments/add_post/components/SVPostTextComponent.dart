@@ -27,22 +27,29 @@ class SVPostTextComponent extends StatefulWidget {
 }
 
 class _SVPostTextComponentState extends State<SVPostTextComponent> {
-  // final quill.QuillController _controller = quill.QuillController.basic();
-
   TextEditingController textEditingController = TextEditingController();
-  // @override
-  // void initState() {
-  //   // _controller.readOnly = false;
-  //   textEditingController.addListener(_onEditorChanged);
-  //   super.initState();
-  // }
 
   @override
   void dispose() {
     textEditingController.dispose();
-    // textEditingController.removeListener(_onEditorChanged);
-
     super.dispose();
+  }
+
+  // Function to determine text color based on background brightness
+  Color _getTextColor(Color? backgroundColor) {
+    if (backgroundColor == null) return Colors.black87;
+
+    // Calculate luminance to determine if background is dark or light
+    double luminance = backgroundColor.computeLuminance();
+    return luminance > 0.5 ? Colors.black87 : Colors.white;
+  }
+
+  // Function to determine hint text color based on background brightness
+  Color _getHintTextColor(Color? backgroundColor) {
+    if (backgroundColor == null) return Colors.grey[400]!;
+
+    double luminance = backgroundColor.computeLuminance();
+    return luminance > 0.5 ? Colors.grey[600]! : Colors.grey[300]!;
   }
 
   void _onEditorChanged() {
@@ -51,8 +58,8 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
     // final html = _controller.document.toDelta().toHtml();
     widget.searchPeopleBloc.add(TextFieldEvent(textEditingController.text));
     print(textEditingController.text);
-// Load Del-ta document using HTML
-//     _controller.document = quill.Document.fromDelta(quill.Document.fromHtml(html));
+    // Load Del-ta document using HTML
+    //     _controller.document = quill.Document.fromDelta(quill.Document.fromHtml(html));
   }
 
   final FocusNode editorFocusNode = FocusNode();
@@ -77,22 +84,22 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Modern Text Input Field
+          // Text Input with Background Color
           Container(
+            color: widget.colorValue ?? Colors.transparent,
             padding: const EdgeInsets.all(12),
             child: TextFormField(
               controller: textEditingController,
               focusNode: editorFocusNode,
-              minLines: 4,
-              maxLines: 8,
-              style: const TextStyle(
+              minLines: MediaQuery.of(context).size.height > 800 ? 6 : 4,
+              maxLines: MediaQuery.of(context).size.height > 800 ? 12 : 8,
+              style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
-                color: Colors.black87,
+                color: _getTextColor(widget.colorValue),
                 height: 1.4,
               ),
               onChanged: (value) {
-                print(value);
                 widget.searchPeopleBloc.add(TextFieldEvent(value));
               },
               decoration: InputDecoration(
@@ -101,12 +108,14 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
                 hintStyle: TextStyle(
                   fontSize: 14,
                   fontFamily: 'Poppins',
-                  color: Colors.grey[400],
+                  color: _getHintTextColor(widget.colorValue),
                 ),
                 focusedBorder: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 errorBorder: InputBorder.none,
                 disabledBorder: InputBorder.none,
+                fillColor: Colors.transparent,
+                filled: true,
               ),
             ),
           ),
@@ -201,7 +210,9 @@ class _SVPostTextComponentState extends State<SVPostTextComponent> {
                 const SizedBox(width: 8),
                 // Color Picker Button
                 InkWell(
-                  onTap: widget.onColorChange!(),
+                  onTap: () {
+                    widget.onColorChange!();
+                  },
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
                     padding: const EdgeInsets.symmetric(

@@ -57,8 +57,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
 
   void changeColor() {
     setState(() {
-      currentColor =
-          _hexToColor(colorListHex[random.nextInt(colorListHex.length)]);
+      currentColor = _hexToColor(
+        colorListHex[random.nextInt(colorListHex.length)],
+      );
       currentSetColor = colorListHex[random.nextInt(colorListHex.length)];
       searchPeopleBloc.backgroundColor = currentSetColor;
     });
@@ -79,11 +80,33 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   @override
   void dispose() {
     setStatusBarColor(
-        appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground);
+      appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground,
+    );
     super.dispose();
   }
 
+  bool _validatePost() {
+    // Check if there's either text content or media files
+    bool hasText = searchPeopleBloc.title.trim().isNotEmpty;
+    bool hasMedia = searchPeopleBloc.imagefiles.isNotEmpty;
 
+    return hasText || hasMedia;
+  }
+
+  void _showValidationError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Please add some content or select media to create a post',
+          style: TextStyle(fontFamily: 'Poppins', color: Colors.white),
+        ),
+        backgroundColor: Colors.orange[600],
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +144,12 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
               margin: const EdgeInsets.only(right: 16),
               child: ElevatedButton(
                 onPressed: () {
-                  searchPeopleBloc.add(AddPostDataEvent());
+                  // Validate post content before submitting
+                  if (_validatePost()) {
+                    searchPeopleBloc.add(AddPostDataEvent());
+                  } else {
+                    _showValidationError();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[600],
@@ -154,25 +182,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Compact User Profile Section
+                  // User Profile Section
                   Container(
-                    margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          offset: const Offset(0, 2),
-                          blurRadius: 6,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
+                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: Row(
                       children: [
-                        // Profile Picture
                         Container(
                           width: 42,
                           height: 42,
@@ -214,63 +228,31 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // User Info
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      AppData.name ?? '',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: 'Poppins',
-                                        color: Colors.black87,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Container(
-                                    padding: const EdgeInsets.all(1.5),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.check,
-                                      size: 8,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                AppData.name ?? '',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.medical_services_outlined,
-                                    size: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      capitalizeWords(AppData.specialty),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                        fontFamily: 'Poppins',
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                capitalizeWords(AppData.specialty),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
+                                  fontFamily: 'Poppins',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -278,20 +260,31 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
                       ],
                     ),
                   ),
-                  // Post Content Section
+                  // Post Text Input Section
                   SVPostTextComponent(
-                    onColorChange: () => changeColor,
+                    onColorChange: changeColor,
                     colorValue: currentColor,
                     searchPeopleBloc: searchPeopleBloc,
                   ),
-                  // Additional Features
-                  OtherFeatureComponent(
-                      onColorChange: () => changeColor,
-                      colorValue: currentColor,
-                      searchPeopleBloc: searchPeopleBloc),
-                  // Post Options - Moved to bottom
-                  SVPostOptionsComponent(searchPeopleBloc),
-                  const SizedBox(height: 8),
+                  // Tag Friends Section
+                  Row(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(12, 6, 12, 4),
+                        child: OtherFeatureComponent(
+                          onColorChange: changeColor,
+                          colorValue: currentColor,
+                          searchPeopleBloc: searchPeopleBloc,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Media Options Section
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(12, 4, 12, 6),
+                    child: SVPostOptionsComponent(searchPeopleBloc),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

@@ -6,6 +6,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../presentation/home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
+
 class CustomImageView extends StatelessWidget {
   ///[imagePath] is required parameter for showing image
   String? imagePath;
@@ -203,43 +205,44 @@ class CustomImageView extends StatelessWidget {
             },
           );
         case ImageType.video:
-          return Container(
-            width: width,
-            height: height??300,
-            decoration: BoxDecoration(
-              color: Colors.black87,
-              borderRadius: radius,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.play_circle_filled,
-                  color: Colors.white,
-                  size: 48,
-                ),
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'VIDEO',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
+          // return Container(
+          //   width: width,
+          //   height: height??300,
+          //   decoration: BoxDecoration(
+          //     color: Colors.black87,
+          //     borderRadius: radius,
+          //   ),
+          //   child: Stack(
+          //     alignment: Alignment.center,
+          //     children: [
+          //       Icon(
+          //         Icons.play_circle_filled,
+          //         color: Colors.white,
+          //         size: 48,
+          //       ),
+          //       Positioned(
+          //         bottom: 8,
+          //         left: 8,
+          //         child: Container(
+          //           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          //           decoration: BoxDecoration(
+          //             color: Colors.black54,
+          //             borderRadius: BorderRadius.circular(4),
+          //           ),
+          //           child: const Text(
+          //             'VIDEO',
+          //             style: TextStyle(
+          //               color: Colors.white,
+          //               fontSize: 10,
+          //               fontWeight: FontWeight.bold,
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // );
+        return  VideoPlayerWidget(videoUrl: imagePath!,);
         case ImageType.png:
         default:
           return Image.asset(

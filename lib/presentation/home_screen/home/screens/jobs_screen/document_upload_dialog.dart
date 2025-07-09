@@ -126,6 +126,13 @@ class _DocumentUploadDialogState extends State<DocumentUploadDialog>
     }
   }
 
+  // Function to show upload resume message
+  void _showUploadResumeMessage() {
+    setState(() {
+      _errorMessage = 'Please select a document first to upload your resume.';
+    });
+  }
+
   // Function to send document to server
   Future<void> _uploadDocument(jobId, context) async {
     try {
@@ -377,7 +384,9 @@ class _DocumentUploadDialogState extends State<DocumentUploadDialog>
                                   HapticFeedback.lightImpact();
                                   _uploadDocument(widget.jobId, context);
                                 }
-                              : null,
+                              : () {
+                                  _showUploadResumeMessage();
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _documentFile != null && !_isUploading
                                 ? Colors.blue[600]

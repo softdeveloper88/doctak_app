@@ -85,7 +85,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                   minHeight: 36,
                 ),
                 icon: Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     shape: BoxShape.circle,
@@ -93,7 +93,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                   child: Icon(
                     isSearchShow ? Icons.close : Icons.search,
                     color: Colors.blue[600],
-                    size: 14,
+                    size: 16,
                   ),
                 ),
                 onPressed: () {

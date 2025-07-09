@@ -17,7 +17,6 @@ class SearchJobList extends StatefulWidget {
   SearchJobList(this.drugsBloc, {super.key});
 
   SearchBloc drugsBloc;
-
   @override
   State<SearchJobList> createState() => _SearchJobListState();
 }

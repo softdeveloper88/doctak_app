@@ -9,6 +9,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/widgets/custom_dropdown_field.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
+import 'package:doctak_app/widgets/shimmer_widget/jobs_shimmer_loader.dart';
 import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -371,7 +372,7 @@ class _SearchScreenState extends State<SearchScreen>
             print("state $state");
             if (state is PaginationLoadingState) {
               return const Expanded(
-                  child: ShimmerCardList());
+                  child: JobsShimmerLoader());
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
               return SearchJobList(drugsBloc);

@@ -177,15 +177,16 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
         MediaQuery.of(context).size.width * 0.75,
       ), // Responsive width with minimum
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
+          // Brighter, cleaner background
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFF8FAFF),
-              Color(0xFFEEF4FF),
-              Color(0xFFE0ECFF),
-              Color(0xFFD4E5FF),
+              Colors.white,
+              Colors.blue.shade50,
+              Colors.blue.shade100.withOpacity(0.5),
+              Colors.blue.shade200.withOpacity(0.3),
             ],
             stops: [0.0, 0.3, 0.7, 1.0],
           ),
@@ -223,17 +224,17 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           // Main background matching splash screen
           Container(
             height: headerHeight.toDouble(),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFFF8FAFF),
-                  Color(0xFFEEF4FF),
-                  Color(0xFFE0ECFF),
-                  Color(0xFFD4E5FF),
+                  Colors.white,
+                  Colors.blue.shade50,
+                  Colors.blue.shade100.withOpacity(0.5),
+                  Colors.blue.shade200.withOpacity(0.3),
                 ],
-                stops: [0.0, 0.3, 0.7, 1.0],
+                stops: const [0.0, 0.3, 0.7, 1.0],
               ),
             ),
           ),
@@ -515,8 +516,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 
     return Container(
       key: ValueKey('menu_item_${item.index}'),
-      margin: const EdgeInsets.only(bottom: 4),
-      height: 60, // Increased height to accommodate larger subtitle text
+      margin: const EdgeInsets.only(bottom: 8),
+      height: 64, // Adjusted height to prevent overflow
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
@@ -525,70 +526,46 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           borderRadius: BorderRadius.circular(16),
           splashColor: const Color(0xFF4285F4).withOpacity(0.1),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 6,
-            ), // Further reduced padding
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
             decoration: BoxDecoration(
+              // Notification card style background
               color: isSelected
-                  ? Colors.white.withOpacity(0.9)
-                  : Colors.white.withOpacity(0.7),
+                  ? Colors.blue.withOpacity(0.12)
+                  : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected
-                    ? const Color(0xFF4285F4).withOpacity(0.3)
-                    : Colors.white.withOpacity(0.5),
-                width: isSelected ? 1.5 : 1,
+                    ? Colors.blue.withOpacity(0.3)
+                    : Colors.blue.withOpacity(0.8),
+                width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isSelected
-                      ? const Color(0xFF4285F4).withOpacity(0.15)
-                      : Colors.black.withOpacity(0.05),
-                  blurRadius: isSelected ? 12 : 6,
-                  offset: Offset(0, isSelected ? 4 : 2),
+                  color: Colors.black.withOpacity(0.04),
+                  offset: const Offset(0, 2),
+                  blurRadius: 8,
                   spreadRadius: 0,
                 ),
-                if (isSelected)
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.8),
-                    blurRadius: 8,
-                    offset: const Offset(0, -1),
-                    spreadRadius: 0,
-                  ),
               ],
             ),
             child: Row(
               children: [
                 // Icon container with compact styling
                 Container(
-                  width: 32, // Further reduced width
-                  height: 32, // Further reduced height
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
-                    gradient: isSelected
-                        ? LinearGradient(
-                            colors: [
-                              const Color(0xFF4285F4).withOpacity(0.15),
-                              const Color(0xFF1A73E8).withOpacity(0.1),
-                            ],
-                          )
-                        : const LinearGradient(
-                            colors: [Color(0xFFF8FAFF), Color(0xFFEEF4FF)],
-                          ),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFF4285F4).withOpacity(0.2)
-                          : Colors.grey.withOpacity(0.1),
-                      width: 1,
-                    ),
+                    color: isSelected
+                        ? Colors.blue.withOpacity(0.15)
+                        : Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(
                     item.icon,
-                    size: 16, // Further reduced icon size
+                    size: 18,
                     color: isSelected
-                        ? const Color(0xFF4285F4)
-                        : const Color(0xFF64748B),
+                        ? Colors.blue[700]
+                        : Colors.blue[600],
                   ),
                 ),
 
@@ -598,67 +575,65 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Title with better overflow handling
-                      Text(
-                        item.title,
-                        style: TextStyle(
-                          fontSize: 13, // Further reduced font size for mobile
-                          fontWeight: FontWeight.w600,
-                          color: isSelected
-                              ? const Color(0xFF1A365D)
-                              : const Color(0xFF2D3748),
-                          fontFamily: 'Poppins',
-                          height: 1.0, // Tighter line height
-                          letterSpacing: 0.0, // Minimal letter spacing
+                      Flexible(
+                        child: Text(
+                          item.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                            fontFamily: 'Poppins',
+                            height: 1.2,
+                            letterSpacing: 0.0,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false, // Prevent wrapping
                       ),
 
-                      const SizedBox(height: 1),
+                      const SizedBox(height: 2),
 
                       // Subtitle with better overflow handling
-                      Text(
-                        item.subtitle,
-                        style: TextStyle(
-                          fontSize:
-                              12, // Increased font size for better readability
-                          fontWeight: FontWeight.w400,
-                          color: isSelected
-                              ? const Color(0xFF4285F4)
-                              : const Color(0xFF64748B),
-                          fontFamily: 'Poppins',
-                          height:
-                              1.1, // Slightly increased line height for readability
-                          letterSpacing: 0.0, // No letter spacing
+                      Flexible(
+                        child: Text(
+                          item.subtitle,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white70
+                                : Colors.black54,
+                            fontFamily: 'Poppins',
+                            height: 1.1,
+                            letterSpacing: 0.0,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false, // Prevent wrapping
                       ),
                     ],
                   ),
                 ),
 
                 const SizedBox(width: 4), // Small spacing before arrow
-                // Compact arrow icon
+                // Arrow icon like notification
                 Container(
-                  width: 24, // Fixed width for arrow container
-                  height: 24, // Fixed height for arrow container
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFF4285F4).withOpacity(0.1)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(6),
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: isSelected
-                        ? const Color(0xFF4285F4)
-                        : const Color(0xFF94A3B8),
-                    size: 10, // Reduced arrow size
+                    color: Colors.blue[600],
+                    size: 14,
                   ),
                 ),
               ],
@@ -748,9 +723,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   },
                 ),
               ),
-
               const SizedBox(width: 10),
-
               // Home button with icon only
               Container(
                 width: 44,

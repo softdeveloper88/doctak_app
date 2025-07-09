@@ -7,6 +7,7 @@ import 'package:doctak_app/widgets/shimmer_widget/shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../main.dart';
@@ -24,14 +25,55 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   NotificationBloc notificationBloc = NotificationBloc();
+  Set<int> hiddenAnnouncementIds = <int>{};
 
-  // JSON Data
   @override
   void initState() {
+    _loadHiddenAnnouncements();
     notificationBloc.add(
       AnnouncementEvent(),
     );
     super.initState();
+  }
+
+  // Load hidden announcement IDs from cache
+  Future<void> _loadHiddenAnnouncements() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hiddenIds = prefs.getStringList('hidden_announcements') ?? [];
+    setState(() {
+      hiddenAnnouncementIds = hiddenIds.map((id) => int.tryParse(id) ?? 0).toSet();
+    });
+  }
+
+  // Hide an announcement and save to cache
+  Future<void> _hideAnnouncement(int announcementId) async {
+    final prefs = await SharedPreferences.getInstance();
+    hiddenAnnouncementIds.add(announcementId);
+    final hiddenIds = hiddenAnnouncementIds.map((id) => id.toString()).toList();
+    await prefs.setStringList('hidden_announcements', hiddenIds);
+    
+    // Adjust current page if needed
+    if (_currentPage > 0) {
+      setState(() {
+        _currentPage = _currentPage - 1;
+      });
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      setState(() {});
+    }
+  }
+
+  // Clear all hidden announcements (for testing/reset purposes)
+  Future<void> _clearHiddenAnnouncements() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('hidden_announcements');
+    setState(() {
+      hiddenAnnouncementIds.clear();
+    });
   }
 
   int selectIndex = -1;
@@ -55,8 +97,29 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
         if (state is PaginationLoadingState) {
           return const ShimmerLoader();
         } else if (state is PaginationLoadedState) {
-          List<AnnouncementData> announcementData =
+          List<AnnouncementData> allAnnouncementData =
               notificationBloc.announcementModel?.data ?? [];
+          // Filter out hidden announcements
+          List<AnnouncementData> announcementData = allAnnouncementData
+              .where((announcement) => !hiddenAnnouncementIds.contains(announcement.id))
+              .toList();
+          
+          // Ensure current page is within bounds after filtering
+          if (_currentPage >= announcementData.length && announcementData.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                _currentPage = announcementData.length - 1;
+              });
+              if (_pageController.hasClients) {
+                _pageController.animateToPage(
+                  _currentPage,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              }
+            });
+          }
+          
           if (announcementData.isNotEmpty) {
             return Container(
               height: MediaQuery.of(context).size.height * 0.65, // Increased height for better display
@@ -90,9 +153,12 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
                             ),
                           ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
+                        child: Stack(
+                          children: [
+                            // Main content
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
                                 children: [
                                   // User info row
                                   Row(
@@ -315,7 +381,34 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
                                 ],
                               ),
                             ),
-                          );
+                            // Close button
+                            Positioned(
+                              top: 12,
+                              right: 12,
+                              child: GestureDetector(
+                                onTap: () {
+                                  _hideAnnouncement(announcementData[index].id ?? 0);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.3),
+                                       width: 1,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                  ));
                         },
                       ),
                     );

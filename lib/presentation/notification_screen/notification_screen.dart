@@ -132,11 +132,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         Container(
                                           padding: const EdgeInsets.all(4),
                                           margin: const EdgeInsets.only(right: 8),
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             color: Colors.white,
                                             shape: BoxShape.circle,
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.all_inclusive,
                                             size: 14,
                                             color: Colors.blue,
@@ -181,11 +181,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         Container(
                                           padding: const EdgeInsets.all(4),
                                           margin: const EdgeInsets.only(right: 8),
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             color: Colors.white,
                                             shape: BoxShape.circle,
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.mark_email_unread,
                                             size: 14,
                                             color: Colors.blue,
@@ -279,7 +279,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.done_all,
                       color: Colors.white,
                       size: 20,
@@ -287,7 +287,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     const SizedBox(width: 8),
                     Text(
                       translation(context).lbl_mark_all_read,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontFamily: 'Poppins',
                         fontSize: 16,
