@@ -1,0 +1,7 @@
+# Ignore mapping files (they contain sensitive information)
+*.txt
+!README.md
+
+# Keep the directory structure
+!.gitignore
+!.gitkeep
