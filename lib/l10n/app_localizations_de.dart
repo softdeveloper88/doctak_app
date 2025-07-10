@@ -2255,4 +2255,64 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get lbl_german_language => 'Deutsch';
+
+  @override
+  String get lbl_edit_case_discussion => 'Falldiskussion bearbeiten';
+
+  @override
+  String get msg_case_discussion_updated => 'Falldiskussion erfolgreich aktualisiert!';
+
+  @override
+  String get lbl_age_years => 'Alter (Jahre)';
+
+  @override
+  String get msg_clinical_keywords_hint => 'Geben Sie klinische Schlüsselwörter getrennt durch Kommas ein (z.B. Fieber, Kopfschmerzen, Müdigkeit)';
+
+  @override
+  String get msg_clinical_keywords_example => 'Fieber, Kopfschmerzen, Brustschmerzen, Atemnot...';
+
+  @override
+  String get lbl_current_tags => 'Aktuelle Tags:';
+
+  @override
+  String get lbl_update_case => 'Fall aktualisieren';
+
+  @override
+  String get lbl_case_discussions => 'Falldiskussionen';
+
+  @override
+  String get lbl_search_case_discussions => 'Falldiskussionen suchen...';
+
+  @override
+  String get lbl_filter_by_specialty => 'Nach Fachrichtung filtern';
+
+  @override
+  String get lbl_all_specialties => 'Alle Fachrichtungen';
+
+  @override
+  String get lbl_sort_options => 'Sortieroptionen';
+
+  @override
+  String get lbl_newest_first => 'Neueste zuerst';
+
+  @override
+  String get lbl_most_popular => 'Beliebteste';
+
+  @override
+  String get lbl_most_discussed => 'Meist diskutiert';
+
+  @override
+  String get msg_error_loading_discussions => 'Fehler beim Laden der Diskussionen';
+
+  @override
+  String get msg_no_discussions_found => 'Keine Diskussionen gefunden';
+
+  @override
+  String get msg_try_adjusting_filters => 'Versuchen Sie, Ihre Filter oder Suchbegriffe anzupassen';
+
+  @override
+  String get msg_be_first_to_start_discussion => 'Seien Sie der Erste, der eine Diskussion startet!';
+
+  @override
+  String get lbl_clear_filters => 'Filter löschen';
 }

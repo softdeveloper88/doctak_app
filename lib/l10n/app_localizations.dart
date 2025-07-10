@@ -3898,7 +3898,7 @@ abstract class AppLocalizations {
   /// No description provided for @msg_please_select_specialty.
   ///
   /// In en, this message translates to:
-  /// **'Please select specialty'**
+  /// **'Please select a specialty'**
   String get msg_please_select_specialty;
 
   /// No description provided for @msg_wait_fields_loading.
@@ -4566,6 +4566,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'German'**
   String get lbl_german_language;
+
+  /// No description provided for @lbl_edit_case_discussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Case Discussion'**
+  String get lbl_edit_case_discussion;
+
+  /// No description provided for @msg_case_discussion_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Case discussion updated successfully!'**
+  String get msg_case_discussion_updated;
+
+  /// No description provided for @lbl_age_years.
+  ///
+  /// In en, this message translates to:
+  /// **'Age (years)'**
+  String get lbl_age_years;
+
+  /// No description provided for @msg_clinical_keywords_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter clinical keywords separated by commas (e.g., fever, headache, fatigue)'**
+  String get msg_clinical_keywords_hint;
+
+  /// No description provided for @msg_clinical_keywords_example.
+  ///
+  /// In en, this message translates to:
+  /// **'fever, headache, chest pain, shortness of breath...'**
+  String get msg_clinical_keywords_example;
+
+  /// No description provided for @lbl_current_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Tags:'**
+  String get lbl_current_tags;
+
+  /// No description provided for @lbl_update_case.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Case'**
+  String get lbl_update_case;
+
+  /// No description provided for @lbl_case_discussions.
+  ///
+  /// In en, this message translates to:
+  /// **'Case Discussions'**
+  String get lbl_case_discussions;
+
+  /// No description provided for @lbl_search_case_discussions.
+  ///
+  /// In en, this message translates to:
+  /// **'Search case discussions...'**
+  String get lbl_search_case_discussions;
+
+  /// No description provided for @lbl_filter_by_specialty.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Specialty'**
+  String get lbl_filter_by_specialty;
+
+  /// No description provided for @lbl_all_specialties.
+  ///
+  /// In en, this message translates to:
+  /// **'All Specialties'**
+  String get lbl_all_specialties;
+
+  /// No description provided for @lbl_sort_options.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Options'**
+  String get lbl_sort_options;
+
+  /// No description provided for @lbl_newest_first.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest First'**
+  String get lbl_newest_first;
+
+  /// No description provided for @lbl_most_popular.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Popular'**
+  String get lbl_most_popular;
+
+  /// No description provided for @lbl_most_discussed.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Discussed'**
+  String get lbl_most_discussed;
+
+  /// No description provided for @msg_error_loading_discussions.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading discussions'**
+  String get msg_error_loading_discussions;
+
+  /// No description provided for @msg_no_discussions_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No discussions found'**
+  String get msg_no_discussions_found;
+
+  /// No description provided for @msg_try_adjusting_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your filters or search terms'**
+  String get msg_try_adjusting_filters;
+
+  /// No description provided for @msg_be_first_to_start_discussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to start a discussion!'**
+  String get msg_be_first_to_start_discussion;
+
+  /// No description provided for @lbl_clear_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get lbl_clear_filters;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

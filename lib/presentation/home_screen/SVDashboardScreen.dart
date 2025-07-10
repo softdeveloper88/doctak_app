@@ -99,7 +99,12 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
       },
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
-        body: IndexedStack(index: selectedIndex, children: _fragments),
+        extendBody: true,
+        extendBodyBehindAppBar: true,
+        body: SafeArea(
+          bottom: false, // Let bottom navigation handle its own safe area
+          child: IndexedStack(index: selectedIndex, children: _fragments),
+        ),
         key: scaffoldKey,
         drawer: SVHomeDrawerComponent(),
         bottomNavigationBar: _buildModernBottomNavigationBar(),
@@ -114,7 +119,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
     return Container(
       height:
-          82 + bottomPadding, // Adjust for safe area and improved text layout
+          100 + bottomPadding, // Adjust for safe area and improved text layout
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFAFAFA),
         boxShadow: [
@@ -166,8 +171,8 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         ),
         child: Container(
           padding: EdgeInsets.only(
-            left: 8,
-            right: 8,
+            left: 4,
+            right: 4,
             top: 8,
             bottom: bottomPadding > 0 ? bottomPadding : 8,
           ),
@@ -182,12 +187,17 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           ),
           child: SafeArea(
             top: false,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: isRTL
-                  ? _buildRTLNavigationItems()
-                  : _buildLTRNavigationItems(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: isRTL
+                      ? _buildRTLNavigationItems()
+                      : _buildLTRNavigationItems(),
+                );
+              },
             ),
           ),
         ),
@@ -244,7 +254,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     final isSelected = selectedIndex == index;
     final isDark = appStore.isDarkMode;
 
-    return Expanded(
+    return Flexible(
       child: GestureDetector(
         onTap: () {
           if (selectedIndex != index) {
@@ -256,7 +266,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          height: 66,
+          constraints: const BoxConstraints(
+            minHeight: 60,
+            maxHeight: 70,
+            minWidth: 50,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -338,7 +352,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
               // Enhanced label with proper text overflow handling
               Container(
-                constraints: const BoxConstraints(maxWidth: 70),
+                constraints: const BoxConstraints(maxWidth: 60),
                 child: AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeInOutCubic,
@@ -371,7 +385,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
   Widget _buildAddButton() {
     final isDark = appStore.isDarkMode;
 
-    return Expanded(
+    return Flexible(
       child: GestureDetector(
         onTap: () {
           _fragments[2].launch(context);
@@ -381,7 +395,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          constraints: const BoxConstraints(minHeight: 64, maxHeight: 80),
+          constraints: const BoxConstraints(
+            minHeight: 60,
+            maxHeight: 70,
+            minWidth: 50,
+          ),
           child: AnimatedBuilder(
             animation: _scaleAnimation,
             builder: (context, child) {
@@ -421,7 +439,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                     // Simple text label with proper overflow handling
                     Flexible(
                       child: Container(
-                        constraints: const BoxConstraints(maxWidth: 70),
+                        constraints: const BoxConstraints(maxWidth: 60),
                         child: const Text(
                           'Create',
                           style: TextStyle(
@@ -453,7 +471,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     final isSelected = selectedIndex == 3;
     final isDark = appStore.isDarkMode;
 
-    return Expanded(
+    return Flexible(
       child: GestureDetector(
         onTap: () {
           if (selectedIndex != 3) {
@@ -465,7 +483,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          height: 66,
+          constraints: const BoxConstraints(
+            minHeight: 60,
+            maxHeight: 70,
+            minWidth: 50,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -553,7 +575,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
               // Enhanced label with proper text overflow handling
               Container(
-                constraints: const BoxConstraints(maxWidth: 70),
+                constraints: const BoxConstraints(maxWidth: 60),
                 child: AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeInOutCubic,
@@ -587,7 +609,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     const isSelected = false; // Always false since it opens as separate screen
     final isDark = appStore.isDarkMode;
 
-    return Expanded(
+    return Flexible(
       child: GestureDetector(
         onTap: () {
           ChatGptWithImageScreen(isFromMainScreen: true).launch(context);
@@ -597,7 +619,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(
-          height: 66,
+          constraints: const BoxConstraints(
+            minHeight: 60,
+            maxHeight: 70,
+            minWidth: 50,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -697,7 +723,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
               // Enhanced label with proper text overflow handling
               Container(
-                constraints: const BoxConstraints(maxWidth: 70),
+                constraints: const BoxConstraints(maxWidth: 60),
                 child: AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeInOutCubic,

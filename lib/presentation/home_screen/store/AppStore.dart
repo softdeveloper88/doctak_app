@@ -3,6 +3,7 @@ import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../utils/SVColors.dart';
+import '../../../core/utils/edge_to_edge_helper.dart';
 
 part 'AppStore.g.dart';
 
@@ -22,6 +23,9 @@ abstract class AppStoreBase with Store {
 
       defaultLoaderBgColorGlobal = Colors.white;
       shadowColorGlobal = Colors.white12;
+      
+      // Configure edge-to-edge for dark mode
+      EdgeToEdgeHelper.configureEdgeToEdgeDark();
     } else {
       textPrimaryColorGlobal = textPrimaryColor;
       textSecondaryColorGlobal = textSecondaryColor;
@@ -29,6 +33,9 @@ abstract class AppStoreBase with Store {
       defaultLoaderBgColorGlobal = Colors.white;
       appButtonBackgroundColorGlobal = SVAppColorPrimary;
       shadowColorGlobal = Colors.black12;
+      
+      // Configure edge-to-edge for light mode
+      EdgeToEdgeHelper.configureEdgeToEdge();
     }
   }
 }

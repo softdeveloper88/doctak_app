@@ -169,39 +169,41 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
     final l10n = AppLocalizations.of(context)!;
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
-    return Drawer(
-      key: const ValueKey('main_drawer'),
-      elevation: 0,
-      width: math.max(
-        280,
-        MediaQuery.of(context).size.width * 0.75,
-      ), // Responsive width with minimum
-      child: Container(
-        decoration: BoxDecoration(
-          // Brighter, cleaner background
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Colors.blue.shade50,
-              Colors.blue.shade100.withOpacity(0.5),
-              Colors.blue.shade200.withOpacity(0.3),
-            ],
-            stops: [0.0, 0.3, 0.7, 1.0],
+    return SafeArea(
+      child: Drawer(
+        key: const ValueKey('main_drawer'),
+        elevation: 0,
+        width: math.max(
+          280,
+          MediaQuery.of(context).size.width * 0.75,
+        ), // Responsive width with minimum
+        child: Container(
+          decoration: BoxDecoration(
+            // Brighter, cleaner background
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white,
+                Colors.blue.shade50,
+                Colors.blue.shade100.withOpacity(0.5),
+                Colors.blue.shade200.withOpacity(0.3),
+              ],
+              stops: [0.0, 0.3, 0.7, 1.0],
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            // Compact Professional Header
-            _buildCompactHeader(),
-
-            // Optimized Menu Content
-            Expanded(child: _buildOptimizedMenuContent()),
-
-            // Compact Footer
-            _buildCompactFooter(l10n, isRtl),
-          ],
+          child: Column(
+            children: [
+              // Compact Professional Header
+              _buildCompactHeader(),
+      
+              // Optimized Menu Content
+              Expanded(child: _buildOptimizedMenuContent()),
+      
+              // Compact Footer
+              _buildCompactFooter(l10n, isRtl),
+            ],
+          ),
         ),
       ),
     );

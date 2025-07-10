@@ -1921,7 +1921,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msg_please_select_state => 'Please select state';
 
   @override
-  String get msg_please_select_specialty => 'Please select specialty';
+  String get msg_please_select_specialty => 'Please select a specialty';
 
   @override
   String get msg_wait_fields_loading => 'Wait a moment, more fields are loading...';
@@ -2255,4 +2255,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lbl_german_language => 'German';
+
+  @override
+  String get lbl_edit_case_discussion => 'Edit Case Discussion';
+
+  @override
+  String get msg_case_discussion_updated => 'Case discussion updated successfully!';
+
+  @override
+  String get lbl_age_years => 'Age (years)';
+
+  @override
+  String get msg_clinical_keywords_hint => 'Enter clinical keywords separated by commas (e.g., fever, headache, fatigue)';
+
+  @override
+  String get msg_clinical_keywords_example => 'fever, headache, chest pain, shortness of breath...';
+
+  @override
+  String get lbl_current_tags => 'Current Tags:';
+
+  @override
+  String get lbl_update_case => 'Update Case';
+
+  @override
+  String get lbl_case_discussions => 'Case Discussions';
+
+  @override
+  String get lbl_search_case_discussions => 'Search case discussions...';
+
+  @override
+  String get lbl_filter_by_specialty => 'Filter by Specialty';
+
+  @override
+  String get lbl_all_specialties => 'All Specialties';
+
+  @override
+  String get lbl_sort_options => 'Sort Options';
+
+  @override
+  String get lbl_newest_first => 'Newest First';
+
+  @override
+  String get lbl_most_popular => 'Most Popular';
+
+  @override
+  String get lbl_most_discussed => 'Most Discussed';
+
+  @override
+  String get msg_error_loading_discussions => 'Error loading discussions';
+
+  @override
+  String get msg_no_discussions_found => 'No discussions found';
+
+  @override
+  String get msg_try_adjusting_filters => 'Try adjusting your filters or search terms';
+
+  @override
+  String get msg_be_first_to_start_discussion => 'Be the first to start a discussion!';
+
+  @override
+  String get lbl_clear_filters => 'Clear Filters';
 }

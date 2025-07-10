@@ -163,21 +163,56 @@ android {
     }
     buildTypes {
         release {
-             minifyEnabled false
-             shrinkResources false
-             multiDexEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            // Enable R8 obfuscation for production builds
+            minifyEnabled true
+            shrinkResources true
+            multiDexEnabled true
+            
+            // Configure ProGuard/R8 rules
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // Ensure mapping file is generated for crash analysis
+            debuggable false
+            
+            // Configure signing
             signingConfig = signingConfigs.release
+            
+            // Configure Firebase Crashlytics to automatically upload mapping files
+            firebaseCrashlytics {
+                mappingFileUploadEnabled true
+            }
+        }
+        
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            multiDexEnabled true
+            debuggable true
+            signingConfig = signingConfigs.debug
+            
+            // Disable mapping file upload for debug builds
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
     }
 //    ndkVersion '25.1.8937393'
 }
+// Task to copy mapping file to project root for easy access
+task copyMappingFile(type: Copy) {
+    from 'build/outputs/mapping/release/'
+    into '../mapping_files/'
+    include 'mapping.txt'
+    rename 'mapping.txt', "doctak_mapping_${android.defaultConfig.versionCode}_${new Date().format('yyyyMMdd_HHmmss')}.txt"
+}
+
+// Automatically run after R8 obfuscation
+tasks.whenTaskAdded { task ->
+    if (task.name == 'minifyReleaseWithR8') {
+        task.finalizedBy copyMappingFile
+    }
+}
+
 dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.36' // Ensure SLF4J API is included
     implementation 'org.slf4j:slf4j-simple:1.7.36' // Add a simple implementation
@@ -194,6 +229,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.core:core-ktx:1.13.1' // For edge-to-edge support
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 //    implementation 'com.google.android.gms:play-services-ads:23.2.0'
 //    implementation project(path: ':google_mobile_ads')

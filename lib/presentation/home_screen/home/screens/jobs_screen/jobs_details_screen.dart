@@ -10,7 +10,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
+import 'package:doctak_app/widgets/shimmer_widget/job_details_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -111,7 +111,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         },
         builder: (context, state) {
           if (state is PaginationLoadingState) {
-            return const ShimmerCardList();
+            return const JobDetailsShimmer();
           } else if (state is PaginationLoadedState) {
             return _buildJobDetails();
           } else if (state is DataError) {
@@ -501,7 +501,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildJobInfoCard(job) {
     return Card(
-      elevation: 3,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: context.cardColor,
       child: Padding(
@@ -577,7 +577,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildJobStatsCard(job) {
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: context.cardColor,
       child: Padding(
@@ -678,7 +678,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildSpecialtiesCard(job) {
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: context.cardColor,
       child: Padding(
@@ -743,7 +743,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildDescriptionCard(job) {
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: context.cardColor,
       child: Padding(
@@ -817,7 +817,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildUserInfoCard(user) {
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: context.cardColor,
       child: Padding(
@@ -908,7 +908,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   // Action buttons card matching job list item design
   Widget _buildActionButtonsCard(job) {
     return Card(
-      elevation: 8,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: context.cardColor,
       child: Container(

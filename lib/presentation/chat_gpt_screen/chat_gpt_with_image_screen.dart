@@ -18,7 +18,7 @@ import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_bloc.dart';
@@ -345,17 +345,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                               if (isOneTimeImageUploaded) {
                                                 toasty(context, translation(context).lbl_only_one_image_allowed);
                                               } else {
-                                                const permission = Permission.photos;
-                                                if (await permission.isGranted) {
+                                                bool hasPermission = await _checkAndRequestPermissions();
+                                                if (hasPermission) {
                                                   _showBeforeFileOptions();
-                                                } else if (await permission.isDenied) {
-                                                  final result = await permission.request();
-                                                  if (result.isGranted) {
-                                                    _showBeforeFileOptions();
-                                                  } else if (result.isPermanentlyDenied) {
-                                                    _showBeforeFileOptions();
-                                                  }
-                                                } else if (await permission.isPermanentlyDenied) {
+                                                } else {
                                                   _permissionDialog();
                                                 }
                                               }
@@ -592,18 +585,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         if (isOneTimeImageUploaded) {
                                           toasty(context, 'Only allowed one time image in one session');
                                         } else {
-                                          const permission = Permission.photos;
-                                          var status = await Permission.storage.request();
-                                          if (status.isGranted || await permission.isGranted) {
+                                          bool hasPermission = await _checkAndRequestPermissions();
+                                          if (hasPermission) {
                                             _showBeforeFileOptions();
-                                          } else if (await permission.isDenied) {
-                                            final result = await permission.request();
-                                            if (result.isGranted) {
-                                              _showBeforeFileOptions();
-                                            } else if (result.isPermanentlyDenied) {
-                                              _showBeforeFileOptions();
-                                            }
-                                          } else if (await permission.isPermanentlyDenied) {
+                                          } else {
                                             _permissionDialog();
                                           }
                                         }
@@ -1234,27 +1219,36 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
       isScrollControlled: true,
       isDismissible: true,
       enableDrag: true,
+      useSafeArea: true,
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.7,
+          initialChildSize: 0.75,
           minChildSize: 0.5,
           maxChildSize: 0.95,
+          expand: false,
           builder: (context, scrollController) {
             return Container(
               decoration: BoxDecoration(
-                color: appStore.isDarkMode ? Colors.grey[900] : Colors.grey[50],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(26),
+                    color: Colors.black.withOpacity(0.15),
                     blurRadius: 20,
-                    offset: const Offset(0, -5),
+                    offset: const Offset(0, -8),
+                    spreadRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 40,
+                    offset: const Offset(0, -20),
+                    spreadRadius: 0,
                   ),
                 ],
               ),
               child: Column(
                 children: [
-                  // Drag handle
+                  // Enhanced drag handle
                   Container(
                     margin: const EdgeInsets.only(top: 12, bottom: 8),
                     width: 40,
@@ -1264,7 +1258,96 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  // Upload area
+                  // Enhanced header
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[600],
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.cloud_upload_outlined,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Upload $imageType Images',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'Poppins',
+                                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Select up to ${imageLimit == 0 ? 'multiple' : imageLimit} medical image${imageLimit == 1 ? '' : 's'} for AI analysis',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontFamily: 'Poppins',
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.blue.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.blue[700],
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'High-quality images provide better AI analysis results',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
+                                    color: Colors.blue[700],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Upload area with enhanced styling
                   Expanded(
                     child: SingleChildScrollView(
                       controller: scrollController,
@@ -1275,19 +1358,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                             decoration: BoxDecoration(
                               color: appStore.isDarkMode
                                   ? Colors.grey[850]
-                                  : Colors.white,
+                                  : Colors.grey[50],
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: Colors.blue.withAlpha(26),
-                                width: 1.5,
+                                color: Colors.blue.withOpacity(0.15),
+                                width: 2,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withAlpha(13),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
                             ),
                             child: MultipleImageUploadWidget(
                               imageType: imageType,
@@ -1319,24 +1395,86 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            translation(context).msg_something_wrong,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.photo_library_outlined,
+                  color: Colors.orange[700],
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Photo Access Required',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.',
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'Poppins',
+              color: Colors.black54,
+              height: 1.4,
+            ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(translation(context).lbl_cancel),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(
+                translation(context).lbl_cancel,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[600],
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: Text(translation(context).lbl_try_again),
-              onPressed: () {
-                openAppSettings();
-                Navigator.of(context).pop();
-              },
+            Container(
+              margin: const EdgeInsets.only(left: 8),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[600],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Open Settings',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                onPressed: () {
+                  openAppSettings();
+                  Navigator.of(context).pop();
+                },
+              ),
             ),
           ],
         );
@@ -1354,5 +1492,38 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
         );
       }
     });
+  }
+
+  Future<bool> _checkAndRequestPermissions() async {
+    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    final int sdkInt = androidInfo.version.sdkInt;
+
+    Permission permission;
+    
+    // Handle different Android versions
+    if (sdkInt >= 33) {
+      // Android 13+ (API 33+) - Use granular permissions
+      permission = Permission.photos;
+    } else if (sdkInt >= 30) {
+      // Android 11-12 (API 30-32) - Use external storage with media access
+      permission = Permission.storage;
+    } else {
+      // Android 10 and below (API 29 and below)
+      permission = Permission.storage;
+    }
+
+    final status = await permission.status;
+    
+    if (status.isGranted) {
+      return true;
+    } else if (status.isDenied) {
+      final result = await permission.request();
+      return result.isGranted;
+    } else if (status.isPermanentlyDenied) {
+      return false;
+    }
+
+    return false;
   }
 }

@@ -1921,7 +1921,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msg_please_select_state => 'الرجاء تحديد المنطقة';
 
   @override
-  String get msg_please_select_specialty => 'الرجاء تحديد التخصص';
+  String get msg_please_select_specialty => 'يرجى اختيار التخصص';
 
   @override
   String get msg_wait_fields_loading => 'انتظر لحظة، المزيد من الحقول قيد التحميل...';
@@ -2255,4 +2255,64 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lbl_german_language => 'الألمانية';
+
+  @override
+  String get lbl_edit_case_discussion => 'تحرير مناقشة الحالة';
+
+  @override
+  String get msg_case_discussion_updated => 'تم تحديث مناقشة الحالة بنجاح!';
+
+  @override
+  String get lbl_age_years => 'العمر (بالسنوات)';
+
+  @override
+  String get msg_clinical_keywords_hint => 'أدخل الكلمات المفتاحية السريرية مفصولة بفواصل (مثل: حمى، صداع، إرهاق)';
+
+  @override
+  String get msg_clinical_keywords_example => 'حمى، صداع، ألم في الصدر، ضيق في التنفس...';
+
+  @override
+  String get lbl_current_tags => 'العلامات الحالية:';
+
+  @override
+  String get lbl_update_case => 'تحديث الحالة';
+
+  @override
+  String get lbl_case_discussions => 'مناقشات الحالات';
+
+  @override
+  String get lbl_search_case_discussions => 'البحث في مناقشات الحالات...';
+
+  @override
+  String get lbl_filter_by_specialty => 'تصفية حسب التخصص';
+
+  @override
+  String get lbl_all_specialties => 'جميع التخصصات';
+
+  @override
+  String get lbl_sort_options => 'خيارات الترتيب';
+
+  @override
+  String get lbl_newest_first => 'الأحدث أولاً';
+
+  @override
+  String get lbl_most_popular => 'الأكثر شعبية';
+
+  @override
+  String get lbl_most_discussed => 'الأكثر مناقشة';
+
+  @override
+  String get msg_error_loading_discussions => 'خطأ في تحميل المناقشات';
+
+  @override
+  String get msg_no_discussions_found => 'لم يتم العثور على مناقشات';
+
+  @override
+  String get msg_try_adjusting_filters => 'جرب تعديل المرشحات أو مصطلحات البحث';
+
+  @override
+  String get msg_be_first_to_start_discussion => 'كن أول من يبدأ المناقشة!';
+
+  @override
+  String get lbl_clear_filters => 'مسح المرشحات';
 }

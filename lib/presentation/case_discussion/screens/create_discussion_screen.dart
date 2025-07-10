@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
 import '../../../l10n/app_localizations.dart';
 import '../bloc/create_discussion_bloc.dart';
 import '../models/case_discussion_models.dart';
@@ -14,7 +13,6 @@ import '../widgets/specialty_loading_shimmer.dart';
 import '../../../localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import '../../../core/utils/app/AppData.dart';
-import '../../home_screen/utils/SVColors.dart';
 import '../../home_screen/utils/SVCommon.dart';
 
 class CreateDiscussionScreen extends StatefulWidget {
@@ -518,7 +516,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       backgroundColor: svGetBgColor(),
       appBar: DoctakAppBar(
         title: widget.existingCase != null 
-            ? 'Edit Case Discussion' 
+            ? translation(context).lbl_edit_case_discussion 
             : AppLocalizations.of(context)!.lbl_create_case_discussion,
         titleIcon: Icons.medical_information_rounded,
         actions: [
@@ -574,7 +572,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     const Icon(Icons.check_circle, color: Colors.white),
                     const SizedBox(width: 12),
                     Text(state.isUpdate 
-                        ? 'Case discussion updated successfully!' 
+                        ? translation(context).msg_case_discussion_updated 
                         : AppLocalizations.of(context)!.msg_case_discussion_created),
                   ],
                 ),
@@ -746,7 +744,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.blue.withOpacity(0.3)),
                             ),
-                            hintText: 'Age (years)',
+                            hintText: translation(context).lbl_age_years,
                             hintStyle: const TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14,
@@ -878,7 +876,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Enter clinical keywords separated by commas (e.g., fever, headache, fatigue)',
+                        translation(context).msg_clinical_keywords_hint,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12,
@@ -906,7 +904,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           ),
                           decoration: InputDecoration(
                             border: InputBorder.none,
-                            hintText: 'fever, headache, chest pain, shortness of breath...',
+                            hintText: translation(context).msg_clinical_keywords_example,
                             hintStyle: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14,
@@ -921,7 +919,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       if (_clinicalTags.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Text(
-                          'Current Tags:',
+                          translation(context).lbl_current_tags,
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 12,
@@ -1121,8 +1119,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         value: _specialties.isNotEmpty ? _selectedSpecialtyId : null,
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'Select Specialty',
-                          labelText: 'Medical Specialty',
+                          hintText: translation(context).lbl_select_specialty,
+                          labelText: translation(context).lbl_medical_specialty,
                           contentPadding: const EdgeInsets.all(16),
                           prefixIcon: Icon(
                             Icons.medical_services_rounded,
@@ -1155,7 +1153,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please select a specialty';
+                            return translation(context).msg_please_select_specialty;
                           }
                           return null;
                         },
@@ -1324,7 +1322,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                   const SizedBox(width: 8),
                                   Text(
                                     widget.existingCase != null 
-                                        ? 'Update Case' 
+                                        ? translation(context).lbl_update_case 
                                         : AppLocalizations.of(context)!.lbl_submit_case,
                                     style: const TextStyle(
                                       fontFamily: 'Poppins',

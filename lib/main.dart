@@ -62,6 +62,7 @@ import 'core/utils/pusher_service.dart';
 import 'core/utils/text_scale_helper.dart';
 import 'core/utils/simple_fixed_media_query.dart';
 import 'core/utils/fixed_sizer.dart';
+import 'core/utils/edge_to_edge_helper.dart';
 import 'firebase_options.dart';
 import 'widgets/fixed_scale_material_app.dart';
 import 'package:overlay_support/overlay_support.dart';
@@ -498,10 +499,15 @@ Future<void> main() async {
       ]),
       PrefUtils().init()
     ]);
+    
+    // Configure edge-to-edge display for Android 15+ compatibility
+    EdgeToEdgeHelper.configureEdgeToEdge();
   } catch (e) {
     debugPrint('Error setting system preferences: $e');
     // Initialize PrefUtils separately if Future.wait fails
     await PrefUtils().init();
+    // Still configure edge-to-edge even if Future.wait fails
+    EdgeToEdgeHelper.configureEdgeToEdge();
   }
 
   // Finally run the app

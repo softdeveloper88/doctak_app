@@ -1921,7 +1921,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msg_please_select_state => 'Por favor selecciona el estado';
 
   @override
-  String get msg_please_select_specialty => 'Por favor selecciona la especialidad';
+  String get msg_please_select_specialty => 'Por favor selecciona una especialidad';
 
   @override
   String get msg_wait_fields_loading => 'Espera un momento, se están cargando más campos...';
@@ -2095,13 +2095,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_case_info => 'Información del caso';
 
   @override
-  String get lbl_clinical_keywords => 'Palabras clave clínicas';
+  String get lbl_clinical_keywords => 'Palabras Clave Clínicas';
 
   @override
   String get hint_clinical_keywords => 'Ingresa palabras clave separadas por comas';
 
   @override
-  String get lbl_medical_specialty => 'Especialidad médica';
+  String get lbl_medical_specialty => 'Especialidad Médica';
 
   @override
   String get lbl_select_specialty => 'Seleccionar especialidad';
@@ -2255,4 +2255,64 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get lbl_german_language => 'Alemán';
+
+  @override
+  String get lbl_edit_case_discussion => 'Editar Discusión de Caso';
+
+  @override
+  String get msg_case_discussion_updated => '¡Discusión de caso actualizada exitosamente!';
+
+  @override
+  String get lbl_age_years => 'Edad (años)';
+
+  @override
+  String get msg_clinical_keywords_hint => 'Ingresa palabras clave clínicas separadas por comas (ej: fiebre, dolor de cabeza, fatiga)';
+
+  @override
+  String get msg_clinical_keywords_example => 'fiebre, dolor de cabeza, dolor en el pecho, falta de aliento...';
+
+  @override
+  String get lbl_current_tags => 'Etiquetas Actuales:';
+
+  @override
+  String get lbl_update_case => 'Actualizar Caso';
+
+  @override
+  String get lbl_case_discussions => 'Discusiones de Casos';
+
+  @override
+  String get lbl_search_case_discussions => 'Buscar discusiones de casos';
+
+  @override
+  String get lbl_filter_by_specialty => 'Filtrar por especialidad';
+
+  @override
+  String get lbl_all_specialties => 'Todas las Especialidades';
+
+  @override
+  String get lbl_sort_options => 'Opciones de Ordenamiento';
+
+  @override
+  String get lbl_newest_first => 'Más Recientes Primero';
+
+  @override
+  String get lbl_most_popular => 'Más Populares';
+
+  @override
+  String get lbl_most_discussed => 'Más Discutidas';
+
+  @override
+  String get msg_error_loading_discussions => 'Error al cargar las discusiones';
+
+  @override
+  String get msg_no_discussions_found => 'No se encontraron discusiones';
+
+  @override
+  String get msg_try_adjusting_filters => 'Intenta ajustar tus filtros o términos de búsqueda';
+
+  @override
+  String get msg_be_first_to_start_discussion => 'Sé el primero en iniciar una discusión';
+
+  @override
+  String get lbl_clear_filters => 'Limpiar Filtros';
 }

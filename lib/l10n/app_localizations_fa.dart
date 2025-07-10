@@ -1921,7 +1921,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_please_select_state => 'لطفاً استان را انتخاب کنید';
 
   @override
-  String get msg_please_select_specialty => 'لطفاً تخصص را انتخاب کنید';
+  String get msg_please_select_specialty => 'لطفاً یک تخصص انتخاب کنید';
 
   @override
   String get msg_wait_fields_loading => 'لطفاً صبر کنید، فیلدهای بیشتری در حال بارگذاری هستند...';
@@ -2255,4 +2255,64 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get lbl_german_language => 'آلمانی';
+
+  @override
+  String get lbl_edit_case_discussion => 'ویرایش بحث مورد';
+
+  @override
+  String get msg_case_discussion_updated => 'بحث مورد با موفقیت به‌روزرسانی شد!';
+
+  @override
+  String get lbl_age_years => 'سن (سال)';
+
+  @override
+  String get msg_clinical_keywords_hint => 'کلیدواژه‌های بالینی را با کاما جدا کنید (مثال: تب، سردرد، خستگی)';
+
+  @override
+  String get msg_clinical_keywords_example => 'تب، سردرد، درد قفسه سینه، تنگی نفس...';
+
+  @override
+  String get lbl_current_tags => 'برچسب‌های فعلی:';
+
+  @override
+  String get lbl_update_case => 'به‌روزرسانی مورد';
+
+  @override
+  String get lbl_case_discussions => 'بحث‌های مورد';
+
+  @override
+  String get lbl_search_case_discussions => 'جستجوی بحث‌های مورد';
+
+  @override
+  String get lbl_filter_by_specialty => 'فیلتر بر اساس تخصص';
+
+  @override
+  String get lbl_all_specialties => 'همه تخصص‌ها';
+
+  @override
+  String get lbl_sort_options => 'گزینه‌های مرتب‌سازی';
+
+  @override
+  String get lbl_newest_first => 'جدیدترین ابتدا';
+
+  @override
+  String get lbl_most_popular => 'محبوب‌ترین';
+
+  @override
+  String get lbl_most_discussed => 'بیشترین بحث';
+
+  @override
+  String get msg_error_loading_discussions => 'خطا در بارگیری بحث‌ها';
+
+  @override
+  String get msg_no_discussions_found => 'هیچ بحثی یافت نشد';
+
+  @override
+  String get msg_try_adjusting_filters => 'تنظیم فیلترها یا عبارات جستجو را امتحان کنید';
+
+  @override
+  String get msg_be_first_to_start_discussion => 'اولین کسی باشید که بحثی شروع می‌کند';
+
+  @override
+  String get lbl_clear_filters => 'پاک کردن فیلترها';
 }

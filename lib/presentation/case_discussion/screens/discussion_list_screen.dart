@@ -3,18 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sizer/sizer.dart';
 import '../../../core/utils/app/AppData.dart';
 import '../../../localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import '../../home_screen/utils/SVColors.dart';
 import '../../home_screen/utils/SVCommon.dart';
 import '../bloc/create_discussion_bloc.dart';
 import '../bloc/discussion_list_bloc.dart';
 import '../models/case_discussion_models.dart';
 import '../repository/case_discussion_repository.dart';
 import '../widgets/discussion_card.dart';
-import '../widgets/enhanced_discussion_search_bar.dart';
 import '../widgets/discussion_stats_bar.dart';
 import '../widgets/case_discussion_list_shimmer.dart';
 import 'discussion_detail_screen.dart';
@@ -98,7 +95,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
     return Scaffold(
       backgroundColor: svGetBgColor(),
       appBar: DoctakAppBar(
-        title: 'Case Discussions',
+        title: translation(context).lbl_case_discussions,
         titleIcon: Icons.medical_information_rounded,
         actions: [
           // Search icon button
@@ -222,7 +219,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     },
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
-                                      hintText: 'Search case discussions...',
+                                      hintText: translation(context).lbl_search_case_discussions,
                                       hintStyle: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 14,
@@ -290,7 +287,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   offset: const Offset(0, 45),
-                                  tooltip: 'Filter by Specialty',
+                                  tooltip: translation(context).lbl_filter_by_specialty,
                                   elevation: 8,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -305,7 +302,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                         const SizedBox(width: 6),
                                         Expanded(
                                           child: Text(
-                                            state.currentFilters.selectedSpecialty?.name ?? 'All Specialties',
+                                            state.currentFilters.selectedSpecialty?.name ?? translation(context).lbl_all_specialties,
                                             style: const TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
@@ -328,10 +325,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     // Add "All" option
                                     items.add(
                                       PopupMenuItem<SpecialtyFilter>(
-                                        value: SpecialtyFilter(id: 0, name: 'All Specialties', slug: 'all'),
+                                        value: SpecialtyFilter(id: 0, name: translation(context).lbl_all_specialties, slug: 'all'),
                                         height: 35,
                                         child: Text(
-                                          'All Specialties',
+                                          translation(context).lbl_all_specialties,
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontFamily: 'Poppins',
@@ -520,7 +517,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 offset: const Offset(0, 45),
-                                tooltip: 'Sort Options',
+                                tooltip: translation(context).lbl_sort_options,
                                 elevation: 8,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -555,7 +552,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            'Newest First',
+                                            translation(context).lbl_newest_first,
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
@@ -582,7 +579,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            'Most Popular',
+                                            translation(context).lbl_most_popular,
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
@@ -609,7 +606,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            'Most Discussed',
+                                            translation(context).lbl_most_discussed,
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
@@ -663,7 +660,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Error loading discussions',
+                          translation(context).msg_error_loading_discussions,
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 8),
@@ -675,7 +672,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _onRefresh,
-                          child: const Text('Retry'),
+                          child: Text(translation(context).lbl_retry),
                         ),
                       ],
                     ),
@@ -713,7 +710,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'No discussions found',
+                                      translation(context).msg_no_discussions_found,
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
@@ -723,8 +720,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     const SizedBox(height: 8),
                                     Text(
                                       _hasActiveFilters(state.currentFilters)
-                                          ? 'Try adjusting your filters or search terms'
-                                          : 'Be the first to start a discussion!',
+                                          ? translation(context).msg_try_adjusting_filters
+                                          : translation(context).msg_be_first_to_start_discussion,
                                       style: TextStyle(
                                         color: Colors.grey.shade500,
                                         fontSize: 14,
@@ -739,7 +736,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                             UpdateFilters(const CaseDiscussionFilters()),
                                           );
                                         },
-                                        child: const Text('Clear Filters'),
+                                        child: Text(translation(context).lbl_clear_filters),
                                       ),
                                     ],
                                   ],
