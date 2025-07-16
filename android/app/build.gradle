@@ -149,9 +149,7 @@ android {
         multiDexEnabled true
         minSdk = 24
         targetSdk = 35
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
-        }
+        // ndk abiFilters removed to avoid conflicts with split-per-abi builds
 
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -217,6 +215,9 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.36' // Ensure SLF4J API is included
     implementation 'org.slf4j:slf4j-simple:1.7.36' // Add a simple implementation
 
+    // Instead of deprecated Google Play Core, use Play Services Install Referrer
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+
     //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.google.firebase:firebase-messaging:21.1.0'
 //    implementation 'com.pusher:push-notifications-android:1.9.0'
@@ -237,6 +238,9 @@ dependencies {
     // For Kotlin users, also import the Kotlin extensions library for Play In-App Update:
     configurations.configureEach {
         exclude group: "com.google.errorprone", module: "error_prone_annotations"
+        // Exclude all Google Play Core modules to prevent conflicts
+        exclude group: "com.google.android.play", module: "core"
+        exclude group: "com.google.android.play", module: "core-common"
     }
 }
 flutter {

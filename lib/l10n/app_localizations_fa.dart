@@ -147,7 +147,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_network_err => 'خطای شبکه';
 
   @override
-  String get msg_something_went_wrong => 'مشکلی پیش آمد';
+  String get msg_something_went_wrong => 'مشکلی پیش آمد. لطفاً دوباره تلاش کنید...';
 
   @override
   String get err_msg_please_enter_valid_email => 'لطفاً ایمیل معتبر وارد کنید';
@@ -318,7 +318,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_clinical_summary_hint => 'خلاصه بالینی مانند سن، جنسیت، سابقه پزشکی';
 
   @override
-  String get msg_ai_disclaimer => 'هوش مصنوعی می‌تواند اشتباه کند. لطفاً اطلاعات مهم را بررسی کنید.';
+  String get msg_ai_disclaimer => 'هوش مصنوعی ممکن است اشتباه کند. بررسی اطلاعات مهم را در نظر بگیرید.';
 
   @override
   String get lbl_error => 'خطا';
@@ -399,7 +399,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_ask_medical_ai => 'از هوش مصنوعی پزشکی بپرسید';
 
   @override
-  String get msg_something_went_wrong_try_again => 'مشکلی پیش آمد. لطفاً دوباره تلاش کنید...';
+  String get msg_something_went_wrong_try_again => 'مشکلی پیش آمده است. لطفاً دوباره تلاش کنید...';
 
   @override
   String get lbl_delete_chat => 'حذف گفتگو؟';
@@ -417,7 +417,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_history_ai => 'تاریخچه';
 
   @override
-  String get lbl_new_chat => '+ گفتگوی جدید';
+  String get lbl_new_chat => 'چت جدید';
 
   @override
   String get lbl_text_copied_clipboard => 'متن در کلیپ‌بورد کپی شد';
@@ -455,7 +455,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_end_call_confirmation => 'آیا مطمئن هستید که می‌خواهید این تماس را پایان دهید؟';
 
   @override
-  String get lbl_cancel => 'لغو';
+  String get lbl_cancel => 'انصراف';
 
   @override
   String get lbl_mute => 'بی‌صدا';
@@ -872,7 +872,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get desc_medical_ai => 'دستیار پزشکی هوشمند';
 
   @override
-  String get lbl_case_discussion => 'بحث موردی';
+  String get lbl_case_discussion => 'بحث مورد';
 
   @override
   String get lbl_post_poll => 'ارسال نظرسنجی';
@@ -1268,7 +1268,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_complete_profile => 'تکمیل پروفایل';
 
   @override
-  String get msg_confirm_delete_comment => 'آیا مطمئن هستید که می‌خواهید نظر را حذف کنید؟';
+  String get msg_confirm_delete_comment => 'آیا مطمئن هستید که می‌خواهید این نظر را حذف کنید؟';
 
   @override
   String get lbl_no_name => 'بدون نام';
@@ -2315,4 +2315,654 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get lbl_clear_filters => 'پاک کردن فیلترها';
+
+  @override
+  String get msg_wait_for_ai_response => 'لطفاً منتظر پاسخ هوش مصنوعی باشید قبل از ارسال پیام دیگری';
+
+  @override
+  String get msg_cannot_access_session_settings => 'در حال حاضر نمی‌توان به تنظیمات جلسه دسترسی داشت';
+
+  @override
+  String get lbl_doctak_ai_assistant => 'دستیار هوش مصنوعی دکتاک';
+
+  @override
+  String get lbl_intelligent_medical_companion => 'همراه هوشمند پزشکی شما';
+
+  @override
+  String get lbl_quick_start => 'شروع سریع';
+
+  @override
+  String get lbl_diagnosis_support => 'پشتیبانی تشخیص';
+
+  @override
+  String get lbl_clinical_decision_assistance => 'کمک در تصمیم‌گیری بالینی';
+
+  @override
+  String get msg_diagnosis_support_prompt => 'چه بیماری‌هایی را باید برای بیماری با درد قفسه سینه و تنگی نفس در نظر بگیرم؟';
+
+  @override
+  String get lbl_drug_information => 'اطلاعات دارو';
+
+  @override
+  String get lbl_medication_safety_interactions => 'ایمنی دارو و تداخلات';
+
+  @override
+  String get msg_drug_information_prompt => 'آیا تداخلی بین وارفارین و آسپرین وجود دارد؟';
+
+  @override
+  String get lbl_treatment_plans => 'طرح‌های درمانی';
+
+  @override
+  String get lbl_evidence_based_protocols => 'پروتکل‌های مبتنی بر شواهد';
+
+  @override
+  String get msg_treatment_plans_prompt => 'پروتکل درمانی فعلی برای انفارکتوس حاد میوکارد چیست؟';
+
+  @override
+  String get lbl_medical_codes => 'کدهای پزشکی';
+
+  @override
+  String get lbl_icd_cpt_code_lookup => 'جستجوی کدهای ICD-10 و CPT';
+
+  @override
+  String get msg_medical_codes_prompt => 'چه کد ICD-10 باید برای دیابت نوع 2 با عوارض استفاده کنم؟';
+
+  @override
+  String get lbl_try_it => 'امتحان کنید';
+
+  @override
+  String get msg_loading_conversation => 'در حال بارگیری مکالمه...';
+
+  @override
+  String get msg_failed_to_send_message => 'ارسال پیام ناموفق بود';
+
+  @override
+  String get lbl_dismiss => 'نادیده گرفتن';
+
+  @override
+  String get msg_select_chat_from_menu => 'از منو چت انتخاب کنید';
+
+  @override
+  String get msg_open_menu_to_start_new_chat => 'منو را باز کنید تا چت جدید شروع کنید';
+
+  @override
+  String get lbl_just_now => 'همین الان';
+
+  @override
+  String get lbl_doctak_ai => 'دکتاک هوش مصنوعی';
+
+  @override
+  String get lbl_chat_history => 'تاریخچه چت';
+
+  @override
+  String get lbl_image_attached => 'تصویر ضمیمه شده';
+
+  @override
+  String get msg_session_creation_timeout => 'ایجاد جلسه منقضی شد. لطفاً دوباره تلاش کنید.';
+
+  @override
+  String get lbl_recent_chats => 'چت‌های اخیر';
+
+  @override
+  String get msg_loading_conversations => 'بارگیری مکالمات شما...';
+
+  @override
+  String get msg_no_chat_history => 'تاریخچه چت وجود ندارد';
+
+  @override
+  String get lbl_delete_conversation => 'حذف مکالمه';
+
+  @override
+  String msg_delete_conversation_confirm(Object sessionName) {
+    return 'آیا مطمئن هستید که می‌خواهید \"$sessionName\" را حذف کنید؟';
+  }
+
+  @override
+  String msg_conversation_deleted(Object sessionName) {
+    return 'مکالمه \"$sessionName\" حذف شد';
+  }
+
+  @override
+  String get msg_session_loading_timeout => 'بارگیری جلسه منقضی شد. لطفاً دوباره تلاش کنید.';
+
+  @override
+  String get lbl_web_search => 'جستجوی وب';
+
+  @override
+  String get lbl_low_context => 'زمینه کم';
+
+  @override
+  String get lbl_medium_context => 'زمینه متوسط';
+
+  @override
+  String get lbl_high_context => 'زمینه زیاد';
+
+  @override
+  String get msg_waiting_for_ai_response => 'در انتظار پاسخ هوش مصنوعی...';
+
+  @override
+  String get msg_ask_anything => 'هر چیزی بپرسید...';
+
+  @override
+  String get lbl_chat_settings => 'تنظیمات چت';
+
+  @override
+  String get lbl_session_name => 'نام جلسه';
+
+  @override
+  String get hint_enter_session_name => 'نام جلسه را وارد کنید';
+
+  @override
+  String get msg_session_name_length_limit => 'نام جلسه باید 50 کاراکتر یا کمتر باشد';
+
+  @override
+  String msg_renaming_session(Object newName) {
+    return 'در حال تغییر نام جلسه به \"$newName\"...';
+  }
+
+  @override
+  String msg_session_renamed(Object newName) {
+    return 'نام جلسه به \"$newName\" تغییر یافت';
+  }
+
+  @override
+  String msg_failed_to_rename_session(Object error) {
+    return 'تغییر نام جلسه ناموفق بود: $error';
+  }
+
+  @override
+  String get lbl_rename => 'تغییر نام';
+
+  @override
+  String get lbl_temperature => 'دما';
+
+  @override
+  String get lbl_precise => 'دقیق';
+
+  @override
+  String get lbl_creative => 'خلاق';
+
+  @override
+  String get lbl_response_length => 'طول پاسخ';
+
+  @override
+  String lbl_tokens_count(Object tokens) {
+    return '$tokens توکن';
+  }
+
+  @override
+  String get lbl_brief => 'مختصر';
+
+  @override
+  String get lbl_detailed => 'جزئیات';
+
+  @override
+  String get msg_copied_to_clipboard => 'در کلیپ‌بورد کپی شد';
+
+  @override
+  String get lbl_view_attachment => 'مشاهده ضمیمه';
+
+  @override
+  String get lbl_attachment => 'پیوست';
+
+  @override
+  String get msg_searching_web => 'در حال جستجوی وب...';
+
+  @override
+  String lbl_sources_count(Object count) {
+    return 'منابع ($count)';
+  }
+
+  @override
+  String get lbl_web_source => 'منبع وب';
+
+  @override
+  String get msg_message_copied_to_clipboard => 'پیام در کلیپ‌بورد کپی شد';
+
+  @override
+  String get msg_preparing_doctak_ai => 'در حال آماده‌سازی دکتاک هوش مصنوعی.';
+
+  @override
+  String get msg_generating_response => 'در حال تولید پاسخ...';
+
+  @override
+  String msg_error_with_details(Object error) {
+    return 'خطا: $error';
+  }
+
+  @override
+  String get msg_ai_assistant_ready => 'دستیار پزشکی هوش مصنوعی شما آماده کمک در تشخیص، درمان و بینش‌های پزشکی است.';
+
+  @override
+  String get lbl_identify_cpt_icd_codes => 'شناسایی کدهای CPT یا ICD';
+
+  @override
+  String get msg_code_detection_prompt => 'تشخیص کد: شناسایی کدهای CPT یا ICD';
+
+  @override
+  String get lbl_based_on_symptoms => 'بر اساس علائم';
+
+  @override
+  String get msg_diagnostic_suggestions_prompt => 'پیشنهادات تشخیصی: درخواست پیشنهادات بر اساس علائم';
+
+  @override
+  String get lbl_dosage_interactions => 'دوز و تداخلات';
+
+  @override
+  String get msg_drug_information_prompt_2 => 'اطلاعات دارو: ارائه جزئیات دوز و تداخل';
+
+  @override
+  String get lbl_evidence_based_care => 'مراقبت مبتنی بر شواهد';
+
+  @override
+  String get msg_treatment_plans_prompt_2 => 'طرح‌های درمان: پیشنهاد گزینه‌های درمانی مبتنی بر شواهد';
+
+  @override
+  String get msg_ready_to_start => 'آماده شروع؟ سؤال خود را در زیر تایپ کنید یا موضوع پیشنهادی انتخاب کنید.';
+
+  @override
+  String get msg_generating_response_2 => 'در حال تولید پاسخ...';
+
+  @override
+  String get hint_ask_medical_ai => 'از هوش مصنوعی پزشکی بپرسید...';
+
+  @override
+  String get lbl_error_generic => 'خطا';
+
+  @override
+  String get msg_image_not_found => 'تصویر یافت نشد';
+
+  @override
+  String get lbl_ai_image_analysis => 'تجزیه و تحلیل تصاویر با هوش مصنوعی';
+
+  @override
+  String get msg_upload_medical_images => 'تصاویر پزشکی را برای تجزیه و تحلیل و بینش‌های هوش مصنوعی بارگذاری کنید';
+
+  @override
+  String get lbl_select_medical_image_type => 'نوع تصویر پزشکی را انتخاب کنید';
+
+  @override
+  String get msg_only_one_image_per_session => 'در هر جلسه فقط یک تصویر مجاز است';
+
+  @override
+  String get msg_choose_medical_image_type => 'نوع تصویر پزشکی را برای تجزیه و تحلیل با هوش مصنوعی انتخاب کنید';
+
+  @override
+  String get lbl_dermatological => 'پوستی';
+
+  @override
+  String get lbl_skin_analysis => 'تجزیه و تحلیل پوست';
+
+  @override
+  String get lbl_xray => 'اشعه ایکس';
+
+  @override
+  String get lbl_radiograph_scan => 'اسکن رادیوگرافی';
+
+  @override
+  String get lbl_ct_scan => 'سی‌تی اسکن';
+
+  @override
+  String get lbl_tomography => 'توموگرافی';
+
+  @override
+  String get lbl_mri => 'ام‌آر‌آی';
+
+  @override
+  String get lbl_magnetic_scan => 'اسکن مغناطیسی';
+
+  @override
+  String get lbl_mammography => 'ماموگرافی';
+
+  @override
+  String get lbl_breast_tissue_analysis => 'تجزیه و تحلیل بافت پستان';
+
+  @override
+  String get msg_ai_powered_medical_image_analysis => 'تجزیه و تحلیل تصویر پزشکی با هوش مصنوعی';
+
+  @override
+  String lbl_upload_image_type(Object imageType) {
+    return 'بارگذاری تصاویر $imageType';
+  }
+
+  @override
+  String msg_select_images_for_analysis(Object imageLimit, Object imagePlural) {
+    return 'تا $imageLimit تصویر$imagePlural پزشکی برای تجزیه و تحلیل هوش مصنوعی انتخاب کنید';
+  }
+
+  @override
+  String get msg_high_quality_images_better_analysis => 'تصاویر با کیفیت بالا نتایج بهتری از تجزیه و تحلیل هوش مصنوعی ارائه می‌دهند';
+
+  @override
+  String get lbl_photo_access_required => 'دسترسی به تصاویر لازم است';
+
+  @override
+  String get msg_photo_permission_needed => 'دکتاک هوش مصنوعی برای تجزیه و تحلیل تصاویر پزشکی نیاز به دسترسی به عکس‌های شما دارد. لطفاً مجوزهای عکس را در تنظیمات دستگاه خود فعال کنید.';
+
+  @override
+  String get lbl_open_settings => 'باز کردن تنظیمات';
+
+  @override
+  String get msg_comment_added_successfully => 'نظر با موفقیت اضافه شد!';
+
+  @override
+  String get msg_share_functionality_coming_soon => 'قابلیت اشتراک‌گذاری به‌زودی';
+
+  @override
+  String get msg_error_loading_discussion => 'خطا در بارگیری بحث';
+
+  @override
+  String lbl_replies_count(Object count) {
+    return '$count پاسخ';
+  }
+
+  @override
+  String get msg_no_comments_yet => 'هنوز نظری وجود ندارد';
+
+  @override
+  String get msg_be_first_to_share_insights => 'اولین کسی باشید که بینش‌های پزشکی خود را در مورد این مورد به اشتراک می‌گذارید.';
+
+  @override
+  String get lbl_related_cases => 'موارد مرتبط';
+
+  @override
+  String get msg_loading_more_comments => 'بارگیری نظرات بیشتر...';
+
+  @override
+  String lbl_cases_count(Object count) {
+    return '$count مورد';
+  }
+
+  @override
+  String lbl_time_days_ago(Object count) {
+    return '$countر پیش';
+  }
+
+  @override
+  String lbl_time_hours_ago(Object count) {
+    return '$countس پیش';
+  }
+
+  @override
+  String lbl_time_minutes_ago(Object count) {
+    return '$countد پیش';
+  }
+
+  @override
+  String get lbl_time_just_now => 'همین الان';
+
+  @override
+  String get hint_share_medical_insights => 'بینش‌های پزشکی خود را به اشتراک بگذارید...';
+
+  @override
+  String get msg_share_professional_insights => 'بینش‌های حرفه‌ای را به اشتراک بگذارید و اخلاق پزشکی را حفظ کنید';
+
+  @override
+  String get lbl_medical_professional => 'متخصص پزشکی';
+
+  @override
+  String get lbl_general => 'عمومی';
+
+  @override
+  String lbl_more_tags(Object count) {
+    return '+$count برچسب بیشتر';
+  }
+
+  @override
+  String get lbl_delete_discussion => 'حذف بحث';
+
+  @override
+  String get msg_delete_discussion_confirm => 'آیا مطمئن هستید که می‌خواهید این بحث مورد را حذف کنید؟ این عمل قابل بازگشت نیست.';
+
+  @override
+  String get lbl_patient_information => 'اطلاعات بیمار';
+
+  @override
+  String msg_patient_demographics(Object age, Object gender) {
+    return '$gender، $age ساله';
+  }
+
+  @override
+  String msg_medical_history(Object history) {
+    return 'تاریخچه پزشکی: $history';
+  }
+
+  @override
+  String get lbl_clinical_tags => 'برچسب‌های بالینی';
+
+  @override
+  String get lbl_attached_files => 'فایل‌های پیوست';
+
+  @override
+  String get lbl_clinical_information => 'اطلاعات بالینی';
+
+  @override
+  String get lbl_working_diagnosis => 'تشخیص کاری';
+
+  @override
+  String get lbl_treatment_plan => 'طرح درمان';
+
+  @override
+  String get lbl_ai_clinical_summary => 'خلاصه بالینی هوش مصنوعی';
+
+  @override
+  String lbl_generated_time(Object time) {
+    return 'تولید شده $time';
+  }
+
+  @override
+  String get lbl_views => 'بازدیدها';
+
+  @override
+  String get lbl_ai_summary => 'خلاصه هوش مصنوعی';
+
+  @override
+  String lbl_confidence_score(Object score) {
+    return '$score% اطمینان';
+  }
+
+  @override
+  String get lbl_age => 'سن';
+
+  @override
+  String get lbl_patient_privacy => 'حریم خصوصی بیمار';
+
+  @override
+  String get lbl_anonymized => 'ناشناس';
+
+  @override
+  String get lbl_identified => 'شناخته‌شده';
+
+  @override
+  String get lbl_evidence_level => 'سطح شواهد';
+
+  @override
+  String lbl_time_days_ago_long(Object count) {
+    return '$count روز پیش';
+  }
+
+  @override
+  String lbl_time_hours_ago_long(Object count) {
+    return '$count ساعت پیش';
+  }
+
+  @override
+  String lbl_time_minutes_ago_long(Object count) {
+    return '$count دقیقه پیش';
+  }
+
+  @override
+  String get hint_search_discussions => 'جستجوی بحث‌ها...';
+
+  @override
+  String get lbl_general_specialty => 'عمومی';
+
+  @override
+  String get lbl_cardiology => 'قلب و عروق';
+
+  @override
+  String get lbl_neurology => 'مغز و اعصاب';
+
+  @override
+  String get lbl_orthopedics => 'ارتوپدی';
+
+  @override
+  String get lbl_pediatrics => 'اطفال';
+
+  @override
+  String get lbl_all_countries => 'همه کشورها';
+
+  @override
+  String get lbl_united_states => 'ایالات متحده';
+
+  @override
+  String get lbl_united_kingdom => 'انگلستان';
+
+  @override
+  String get lbl_canada => 'کانادا';
+
+  @override
+  String get msg_loading_discussions => 'بارگیری بحث‌ها...';
+
+  @override
+  String msg_discussions_found(Object count) {
+    return '$count بحث یافت شد';
+  }
+
+  @override
+  String get lbl_filtered => 'فیلتر شده';
+
+  @override
+  String get lbl_export_results => 'صادرات نتایج';
+
+  @override
+  String get lbl_share_filters => 'اشتراک فیلترها';
+
+  @override
+  String get lbl_total_likes => 'کل پسندها';
+
+  @override
+  String get lbl_total_comments => 'کل نظرات';
+
+  @override
+  String get lbl_total_views => 'کل بازدیدها';
+
+  @override
+  String get lbl_view_filters => 'مشاهده فیلترها';
+
+  @override
+  String get msg_export_functionality => 'قابلیت صادرات پیاده‌سازی خواهد شد';
+
+  @override
+  String get msg_share_filters_functionality => 'قابلیت اشتراک فیلترها پیاده‌سازی خواهد شد';
+
+  @override
+  String get lbl_active_filters => 'فیلترهای فعال';
+
+  @override
+  String get lbl_status => 'وضعیت';
+
+  @override
+  String get lbl_sort => 'مرتب‌سازی';
+
+  @override
+  String get hint_search_case_discussions => 'جستجوی بحث‌های مورد...';
+
+  @override
+  String get lbl_filters => 'فیلترها';
+
+  @override
+  String get lbl_clear_all => 'پاک کردن همه';
+
+  @override
+  String get lbl_apply_filters => 'اعمال فیلترها';
+
+  @override
+  String get msg_loading_specialties => 'بارگیری تخصص‌ها...';
+
+  @override
+  String get msg_select_specialty => 'انتخاب تخصص';
+
+  @override
+  String get msg_loading_countries => 'بارگیری کشورها...';
+
+  @override
+  String get msg_select_country => 'انتخاب کشور';
+
+  @override
+  String get lbl_sort_by => 'مرتب‌سازی بر اساس';
+
+  @override
+  String get lbl_sort_by_option => 'مرتب‌سازی بر اساس';
+
+  @override
+  String get lbl_default => 'پیش‌فرض';
+
+  @override
+  String get lbl_date_created => 'تاریخ ایجاد';
+
+  @override
+  String get lbl_order => 'ترتیب';
+
+  @override
+  String get lbl_desc => 'نزولی';
+
+  @override
+  String get lbl_asc => 'صعودی';
+
+  @override
+  String get msg_select_status => 'انتخاب وضعیت';
+
+  @override
+  String get lbl_all_status => 'همه وضعیت‌ها';
+
+  @override
+  String msg_sort_display(Object sortBy) {
+    return 'مرتب‌سازی: $sortBy';
+  }
+
+  @override
+  String get lbl_delete_comment => 'حذف نظر';
+
+  @override
+  String get msg_confirm_delete_discussion => 'آیا مطمئن هستید که می‌خواهید این بحث را حذف کنید؟';
+
+  @override
+  String get msg_upload_medical_images_description => 'تصاویر پزشکی را برای تجزیه و تحلیل و بینش‌های مدعوم به هوش مصنوعی آپلود کنید';
+
+  @override
+  String get lbl_x_ray => 'اشعه ایکس';
+
+  @override
+  String get msg_ai_powered_medical_analysis => 'تجزیه و تحلیل تصاویر پزشکی مدعوم به هوش مصنوعی';
+
+  @override
+  String get msg_high_quality_images_better_results => 'تصاویر با کیفیت بالا نتایج بهتری از تجزیه و تحلیل هوش مصنوعی ارائه می‌دهند';
+
+  @override
+  String get msg_photo_permission_explanation => 'دکتک هوش مصنوعی به دسترسی به تصاویر شما برای تجزیه و تحلیل تصاویر پزشکی نیاز دارد. لطفاً مجوز تصاویر را در تنظیمات دستگاه خود فعال کنید.';
+
+  @override
+  String get msg_ai_assistant_description => 'دستیار پزشکی مدعوم به هوش مصنوعی شما آماده کمک در تشخیص، درمان و بینش‌های پزشکی است.';
+
+  @override
+  String get msg_ready_to_start_instruction => 'آماده شروع هستید؟ سوال خود را در زیر تایپ کنید یا موضوع پیشنهادی انتخاب کنید.';
+
+  @override
+  String get msg_open_menu_new_chat => 'منو را باز کنید تا چت جدید شروع کنید';
+
+  @override
+  String get msg_confirm_delete_conversation => 'آیا مطمئن هستید که می‌خواهید این مکالمه را حذف کنید؟';
+
+  @override
+  String get lbl_cancel_uppercase => 'انصراف';
+
+  @override
+  String get lbl_delete_uppercase => 'حذف';
+
+  @override
+  String get msg_session_name_max_length => 'نام جلسه باید 50 کاراکتر یا کمتر باشد';
+
+  @override
+  String get msg_be_first_to_comment => 'اولین نفری باشید که بینش‌های پزشکی خود را درباره این مورد به اشتراک بگذارد.';
 }

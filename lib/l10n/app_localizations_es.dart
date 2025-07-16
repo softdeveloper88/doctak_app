@@ -147,7 +147,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msg_network_err => 'Error de red';
 
   @override
-  String get msg_something_went_wrong => 'Algo salió mal';
+  String get msg_something_went_wrong => 'Algo salió mal. Por favor intenta de nuevo...';
 
   @override
   String get err_msg_please_enter_valid_email => 'Por favor ingresa un correo electrónico válido';
@@ -318,7 +318,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msg_clinical_summary_hint => 'Resumen clínico, por ejemplo: edad, género, historia clínica';
 
   @override
-  String get msg_ai_disclaimer => 'La Inteligencia Artificial puede cometer errores. Considera verificar la información importante.';
+  String get msg_ai_disclaimer => 'La Inteligencia Artificial puede cometer errores. Considere verificar información importante.';
 
   @override
   String get lbl_error => 'Error';
@@ -363,7 +363,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_regenerate => 'Regenerar';
 
   @override
-  String get lbl_next_session => 'Siguiente sesión';
+  String get lbl_next_session => 'Siguiente Sesión';
 
   @override
   String get lbl_code_detection_question => 'Detección de códigos: Identificar códigos CPT o CIE';
@@ -384,7 +384,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_identify_cpt_icd => 'Identificar códigos CPT o CIE';
 
   @override
-  String get lbl_diagnostic_suggestions => 'Sugerencias\nDiagnósticas';
+  String get lbl_diagnostic_suggestions => 'Sugerencias de diagnóstico';
 
   @override
   String get lbl_request_suggestions => 'Solicitar sugerencias basadas en síntomas';
@@ -399,7 +399,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_ask_medical_ai => 'Preguntar a IA médica';
 
   @override
-  String get msg_something_went_wrong_try_again => 'Algo salió mal. Por favor intenta de nuevo...';
+  String get msg_something_went_wrong_try_again => 'Algo salió mal. Por favor, inténtelo de nuevo...';
 
   @override
   String get lbl_delete_chat => '¿Eliminar chat?';
@@ -417,7 +417,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_history_ai => 'Historial';
 
   @override
-  String get lbl_new_chat => '+ NUEVO CHAT';
+  String get lbl_new_chat => 'Nuevo chat';
 
   @override
   String get lbl_text_copied_clipboard => 'Texto copiado al portapapeles';
@@ -455,7 +455,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_end_call_confirmation => '¿Estás seguro de que quieres finalizar esta llamada?';
 
   @override
-  String get lbl_cancel => 'CANCELAR';
+  String get lbl_cancel => 'Cancelar';
 
   @override
   String get lbl_mute => 'Silenciar';
@@ -676,7 +676,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msg_delete_account_warning => 'Si seleccionas Eliminar, eliminaremos tu cuenta en nuestro servidor.\n\nLos datos de tu aplicación también se eliminarán y no podrás recuperarlos.\n\nDado que esta es una operación sensible de seguridad, eventualmente se te pedirá que inicies sesión antes de que tu cuenta pueda ser eliminada.';
 
   @override
-  String get lbl_delete => 'ELIMINAR';
+  String get lbl_delete => 'Eliminar';
 
   @override
   String get lbl_english_language => 'Inglés';
@@ -872,7 +872,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get desc_medical_ai => 'Asistente médico IA';
 
   @override
-  String get lbl_case_discussion => 'Discusión de casos';
+  String get lbl_case_discussion => 'Discusión de Caso';
 
   @override
   String get lbl_post_poll => 'Publicar una encuesta';
@@ -1187,7 +1187,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_send => 'Enviar';
 
   @override
-  String get lbl_likes => 'me gusta';
+  String get lbl_likes => 'Me gusta';
 
   @override
   String get lbl_comments => 'Comentarios';
@@ -1268,7 +1268,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_complete_profile => 'COMPLETAR PERFIL';
 
   @override
-  String get msg_confirm_delete_comment => '¿Estás seguro de que quieres eliminar el comentario?';
+  String get msg_confirm_delete_comment => '¿Está seguro de que desea eliminar este comentario?';
 
   @override
   String get lbl_no_name => 'Sin nombre';
@@ -2074,10 +2074,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msg_error_picking_image => 'Error al seleccionar imagen';
 
   @override
-  String get lbl_clinical_complexity => 'Complejidad clínica';
+  String get lbl_clinical_complexity => 'Complejidad Clínica';
 
   @override
-  String get lbl_teaching_value => 'Valor educativo';
+  String get lbl_teaching_value => 'Valor Educativo';
 
   @override
   String get lbl_submit_case => 'Enviar caso';
@@ -2200,7 +2200,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_got_it => 'Entendido';
 
   @override
-  String get lbl_patient_demographics => 'Datos demográficos del paciente';
+  String get lbl_patient_demographics => 'Datos Demográficos del Paciente';
 
   @override
   String get lbl_select_gender => 'Seleccionar género';
@@ -2287,7 +2287,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_filter_by_specialty => 'Filtrar por especialidad';
 
   @override
-  String get lbl_all_specialties => 'Todas las Especialidades';
+  String get lbl_all_specialties => 'Todas las especialidades';
 
   @override
   String get lbl_sort_options => 'Opciones de Ordenamiento';
@@ -2315,4 +2315,654 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get lbl_clear_filters => 'Limpiar Filtros';
+
+  @override
+  String get msg_wait_for_ai_response => 'Por favor espera a que la IA responda antes de enviar otro mensaje';
+
+  @override
+  String get msg_cannot_access_session_settings => 'No se puede acceder a la configuración de sesión ahora';
+
+  @override
+  String get lbl_doctak_ai_assistant => 'Asistente IA de DocTak';
+
+  @override
+  String get lbl_intelligent_medical_companion => 'Tu compañero médico inteligente';
+
+  @override
+  String get lbl_quick_start => 'Inicio Rápido';
+
+  @override
+  String get lbl_diagnosis_support => 'Soporte de Diagnóstico';
+
+  @override
+  String get lbl_clinical_decision_assistance => 'Asistencia en decisiones clínicas';
+
+  @override
+  String get msg_diagnosis_support_prompt => '¿Qué condiciones debo considerar para un paciente con dolor en el pecho y dificultad para respirar?';
+
+  @override
+  String get lbl_drug_information => 'Información de medicamentos';
+
+  @override
+  String get lbl_medication_safety_interactions => 'Seguridad de medicamentos e interacciones';
+
+  @override
+  String get msg_drug_information_prompt => '¿Hay alguna interacción entre warfarina y aspirina?';
+
+  @override
+  String get lbl_treatment_plans => 'Planes de tratamiento';
+
+  @override
+  String get lbl_evidence_based_protocols => 'Protocolos basados en evidencia';
+
+  @override
+  String get msg_treatment_plans_prompt => '¿Cuál es el protocolo de tratamiento actual para el infarto agudo de miocardio?';
+
+  @override
+  String get lbl_medical_codes => 'Códigos Médicos';
+
+  @override
+  String get lbl_icd_cpt_code_lookup => 'Búsqueda de códigos ICD-10 y CPT';
+
+  @override
+  String get msg_medical_codes_prompt => '¿Qué código ICD-10 debo usar para diabetes tipo 2 con complicaciones?';
+
+  @override
+  String get lbl_try_it => 'Pruébalo';
+
+  @override
+  String get msg_loading_conversation => 'Cargando conversación...';
+
+  @override
+  String get msg_failed_to_send_message => 'Error al enviar mensaje';
+
+  @override
+  String get lbl_dismiss => 'Descartar';
+
+  @override
+  String get msg_select_chat_from_menu => 'Seleccione un chat del menú';
+
+  @override
+  String get msg_open_menu_to_start_new_chat => 'Abre el menú para iniciar un nuevo chat';
+
+  @override
+  String get lbl_just_now => 'Justo ahora';
+
+  @override
+  String get lbl_doctak_ai => 'DocTak IA';
+
+  @override
+  String get lbl_chat_history => 'Historial de chat';
+
+  @override
+  String get lbl_image_attached => 'Imagen adjunta';
+
+  @override
+  String get msg_session_creation_timeout => 'Tiempo de creación de sesión agotado. Por favor intenta de nuevo.';
+
+  @override
+  String get lbl_recent_chats => 'Chats recientes';
+
+  @override
+  String get msg_loading_conversations => 'Cargando sus conversaciones...';
+
+  @override
+  String get msg_no_chat_history => 'Sin historial de chat';
+
+  @override
+  String get lbl_delete_conversation => 'Eliminar conversación';
+
+  @override
+  String msg_delete_conversation_confirm(Object sessionName) {
+    return '¿Estás seguro de que quieres eliminar \"$sessionName\"?';
+  }
+
+  @override
+  String msg_conversation_deleted(Object sessionName) {
+    return 'Conversación \"$sessionName\" eliminada';
+  }
+
+  @override
+  String get msg_session_loading_timeout => 'Tiempo de carga de sesión agotado. Por favor intenta de nuevo.';
+
+  @override
+  String get lbl_web_search => 'Búsqueda web';
+
+  @override
+  String get lbl_low_context => 'Contexto bajo';
+
+  @override
+  String get lbl_medium_context => 'Contexto medio';
+
+  @override
+  String get lbl_high_context => 'Contexto alto';
+
+  @override
+  String get msg_waiting_for_ai_response => 'Esperando respuesta de IA...';
+
+  @override
+  String get msg_ask_anything => 'Pregunta cualquier cosa...';
+
+  @override
+  String get lbl_chat_settings => 'Configuración de chat';
+
+  @override
+  String get lbl_session_name => 'Nombre de sesión';
+
+  @override
+  String get hint_enter_session_name => 'Ingrese el nombre de sesión';
+
+  @override
+  String get msg_session_name_length_limit => 'El nombre de sesión debe tener 50 caracteres o menos';
+
+  @override
+  String msg_renaming_session(Object newName) {
+    return 'Renombrando sesión a \"$newName\"...';
+  }
+
+  @override
+  String msg_session_renamed(Object newName) {
+    return 'Sesión renombrada a \"$newName\"';
+  }
+
+  @override
+  String msg_failed_to_rename_session(Object error) {
+    return 'Error al renombrar sesión: $error';
+  }
+
+  @override
+  String get lbl_rename => 'Renombrar';
+
+  @override
+  String get lbl_temperature => 'Temperatura';
+
+  @override
+  String get lbl_precise => 'Preciso';
+
+  @override
+  String get lbl_creative => 'Creativo';
+
+  @override
+  String get lbl_response_length => 'Longitud de respuesta';
+
+  @override
+  String lbl_tokens_count(Object tokens) {
+    return '$tokens tokens';
+  }
+
+  @override
+  String get lbl_brief => 'Breve';
+
+  @override
+  String get lbl_detailed => 'Detallado';
+
+  @override
+  String get msg_copied_to_clipboard => 'Copiado al portapapeles';
+
+  @override
+  String get lbl_view_attachment => 'Ver adjunto';
+
+  @override
+  String get lbl_attachment => 'Adjunto';
+
+  @override
+  String get msg_searching_web => 'Buscando en la web...';
+
+  @override
+  String lbl_sources_count(Object count) {
+    return 'Fuentes ($count)';
+  }
+
+  @override
+  String get lbl_web_source => 'Fuente web';
+
+  @override
+  String get msg_message_copied_to_clipboard => 'Mensaje copiado al portapapeles';
+
+  @override
+  String get msg_preparing_doctak_ai => 'Preparando DocTak IA.';
+
+  @override
+  String get msg_generating_response => 'Generando respuesta...';
+
+  @override
+  String msg_error_with_details(Object error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get msg_ai_assistant_ready => 'Tu asistente médico impulsado por IA está listo para ayudar con diagnósticos, tratamientos y conocimientos médicos.';
+
+  @override
+  String get lbl_identify_cpt_icd_codes => 'Identificar códigos CPT o ICD';
+
+  @override
+  String get msg_code_detection_prompt => 'Detección de Códigos: Identificar códigos CPT o ICD';
+
+  @override
+  String get lbl_based_on_symptoms => 'Basado en síntomas';
+
+  @override
+  String get msg_diagnostic_suggestions_prompt => 'Sugerencias de Diagnóstico: Solicitar sugerencias basadas en síntomas';
+
+  @override
+  String get lbl_dosage_interactions => 'Dosificación e interacciones';
+
+  @override
+  String get msg_drug_information_prompt_2 => 'Información de Medicamentos: Proporcionar detalles de dosificación e interacción';
+
+  @override
+  String get lbl_evidence_based_care => 'Atención basada en evidencia';
+
+  @override
+  String get msg_treatment_plans_prompt_2 => 'Planes de Tratamiento: Sugerir opciones de tratamiento basadas en evidencia';
+
+  @override
+  String get msg_ready_to_start => '¿Listo para comenzar? Escribe tu pregunta abajo o elige un tema sugerido.';
+
+  @override
+  String get msg_generating_response_2 => 'Generando respuesta...';
+
+  @override
+  String get hint_ask_medical_ai => 'Pregúntele a la IA médica...';
+
+  @override
+  String get lbl_error_generic => 'error';
+
+  @override
+  String get msg_image_not_found => 'Imagen no encontrada';
+
+  @override
+  String get lbl_ai_image_analysis => 'Análisis de imágenes por IA';
+
+  @override
+  String get msg_upload_medical_images => 'Sube imágenes médicas para análisis e insights impulsados por IA';
+
+  @override
+  String get lbl_select_medical_image_type => 'Seleccionar tipo de imagen médica';
+
+  @override
+  String get msg_only_one_image_per_session => 'Solo se permite una imagen por sesión';
+
+  @override
+  String get msg_choose_medical_image_type => 'Elija el tipo de imagen médica para análisis por IA';
+
+  @override
+  String get lbl_dermatological => 'Dermatológico';
+
+  @override
+  String get lbl_skin_analysis => 'Análisis de piel';
+
+  @override
+  String get lbl_xray => 'Rayos X';
+
+  @override
+  String get lbl_radiograph_scan => 'Escáner radiográfico';
+
+  @override
+  String get lbl_ct_scan => 'Tomografía computarizada';
+
+  @override
+  String get lbl_tomography => 'Tomografía';
+
+  @override
+  String get lbl_mri => 'Resonancia magnética';
+
+  @override
+  String get lbl_magnetic_scan => 'Escáner magnético';
+
+  @override
+  String get lbl_mammography => 'Mamografía';
+
+  @override
+  String get lbl_breast_tissue_analysis => 'Análisis de tejido mamario';
+
+  @override
+  String get msg_ai_powered_medical_image_analysis => 'Análisis de imágenes médicas impulsado por IA';
+
+  @override
+  String lbl_upload_image_type(Object imageType) {
+    return 'Subir Imágenes $imageType';
+  }
+
+  @override
+  String msg_select_images_for_analysis(Object imageLimit, Object imagePlural) {
+    return 'Selecciona hasta $imageLimit imagen$imagePlural médica para análisis con IA';
+  }
+
+  @override
+  String get msg_high_quality_images_better_analysis => 'Las imágenes de alta calidad proporcionan mejores resultados de análisis con IA';
+
+  @override
+  String get lbl_photo_access_required => 'Acceso a fotos requerido';
+
+  @override
+  String get msg_photo_permission_needed => 'DocTak IA necesita acceso a tus fotos para analizar imágenes médicas. Por favor habilita los permisos de fotos en la configuración de tu dispositivo.';
+
+  @override
+  String get lbl_open_settings => 'Abrir configuración';
+
+  @override
+  String get msg_comment_added_successfully => '¡Comentario agregado exitosamente!';
+
+  @override
+  String get msg_share_functionality_coming_soon => 'Funcionalidad de compartir próximamente';
+
+  @override
+  String get msg_error_loading_discussion => 'Error al cargar la discusión';
+
+  @override
+  String lbl_replies_count(Object count) {
+    return '$count respuestas';
+  }
+
+  @override
+  String get msg_no_comments_yet => 'Aún no hay comentarios';
+
+  @override
+  String get msg_be_first_to_share_insights => 'Sé el primero en compartir tus conocimientos médicos sobre este caso.';
+
+  @override
+  String get lbl_related_cases => 'Casos relacionados';
+
+  @override
+  String get msg_loading_more_comments => 'Cargando más comentarios...';
+
+  @override
+  String lbl_cases_count(Object count) {
+    return '$count casos';
+  }
+
+  @override
+  String lbl_time_days_ago(Object count) {
+    return '${count}d hace';
+  }
+
+  @override
+  String lbl_time_hours_ago(Object count) {
+    return '${count}h hace';
+  }
+
+  @override
+  String lbl_time_minutes_ago(Object count) {
+    return '${count}min hace';
+  }
+
+  @override
+  String get lbl_time_just_now => 'Ahora mismo';
+
+  @override
+  String get hint_share_medical_insights => 'Comparte tus conocimientos médicos...';
+
+  @override
+  String get msg_share_professional_insights => 'Comparte conocimientos profesionales y mantén la ética médica';
+
+  @override
+  String get lbl_medical_professional => 'Profesional Médico';
+
+  @override
+  String get lbl_general => 'General';
+
+  @override
+  String lbl_more_tags(Object count) {
+    return '+$count más etiquetas';
+  }
+
+  @override
+  String get lbl_delete_discussion => 'Eliminar discusión';
+
+  @override
+  String get msg_delete_discussion_confirm => '¿Estás seguro de que quieres eliminar esta discusión de caso? Esta acción no se puede deshacer.';
+
+  @override
+  String get lbl_patient_information => 'Información del Paciente';
+
+  @override
+  String msg_patient_demographics(Object age, Object gender) {
+    return '$gender, $age años';
+  }
+
+  @override
+  String msg_medical_history(Object history) {
+    return 'Historia Médica: $history';
+  }
+
+  @override
+  String get lbl_clinical_tags => 'Etiquetas Clínicas';
+
+  @override
+  String get lbl_attached_files => 'Archivos Adjuntos';
+
+  @override
+  String get lbl_clinical_information => 'Información Clínica';
+
+  @override
+  String get lbl_working_diagnosis => 'Diagnóstico de Trabajo';
+
+  @override
+  String get lbl_treatment_plan => 'Plan de Tratamiento';
+
+  @override
+  String get lbl_ai_clinical_summary => 'Resumen Clínico de IA';
+
+  @override
+  String lbl_generated_time(Object time) {
+    return 'Generado $time';
+  }
+
+  @override
+  String get lbl_views => 'Vistas';
+
+  @override
+  String get lbl_ai_summary => 'Resumen de IA';
+
+  @override
+  String lbl_confidence_score(Object score) {
+    return '$score% confianza';
+  }
+
+  @override
+  String get lbl_age => 'Edad';
+
+  @override
+  String get lbl_patient_privacy => 'Privacidad del Paciente';
+
+  @override
+  String get lbl_anonymized => 'ANONIMIZADO';
+
+  @override
+  String get lbl_identified => 'IDENTIFICADO';
+
+  @override
+  String get lbl_evidence_level => 'Nivel de Evidencia';
+
+  @override
+  String lbl_time_days_ago_long(Object count) {
+    return '$count días atrás';
+  }
+
+  @override
+  String lbl_time_hours_ago_long(Object count) {
+    return '$count horas atrás';
+  }
+
+  @override
+  String lbl_time_minutes_ago_long(Object count) {
+    return '$count minutos atrás';
+  }
+
+  @override
+  String get hint_search_discussions => 'Buscar discusiones...';
+
+  @override
+  String get lbl_general_specialty => 'General';
+
+  @override
+  String get lbl_cardiology => 'Cardiología';
+
+  @override
+  String get lbl_neurology => 'Neurología';
+
+  @override
+  String get lbl_orthopedics => 'Ortopedia';
+
+  @override
+  String get lbl_pediatrics => 'Pediatría';
+
+  @override
+  String get lbl_all_countries => 'Todos los Países';
+
+  @override
+  String get lbl_united_states => 'Estados Unidos';
+
+  @override
+  String get lbl_united_kingdom => 'Reino Unido';
+
+  @override
+  String get lbl_canada => 'Canadá';
+
+  @override
+  String get msg_loading_discussions => 'Cargando discusiones...';
+
+  @override
+  String msg_discussions_found(Object count) {
+    return '$count discusiones encontradas';
+  }
+
+  @override
+  String get lbl_filtered => 'Filtrado';
+
+  @override
+  String get lbl_export_results => 'Exportar Resultados';
+
+  @override
+  String get lbl_share_filters => 'Compartir Filtros';
+
+  @override
+  String get lbl_total_likes => 'Total Me gusta';
+
+  @override
+  String get lbl_total_comments => 'Total Comentarios';
+
+  @override
+  String get lbl_total_views => 'Total Vistas';
+
+  @override
+  String get lbl_view_filters => 'Ver Filtros';
+
+  @override
+  String get msg_export_functionality => 'La funcionalidad de exportación será implementada';
+
+  @override
+  String get msg_share_filters_functionality => 'La funcionalidad de compartir filtros será implementada';
+
+  @override
+  String get lbl_active_filters => 'Filtros Activos';
+
+  @override
+  String get lbl_status => 'Estado';
+
+  @override
+  String get lbl_sort => 'Ordenar';
+
+  @override
+  String get hint_search_case_discussions => 'Buscar discusiones de casos...';
+
+  @override
+  String get lbl_filters => 'Filtros';
+
+  @override
+  String get lbl_clear_all => 'Limpiar Todo';
+
+  @override
+  String get lbl_apply_filters => 'Aplicar Filtros';
+
+  @override
+  String get msg_loading_specialties => 'Cargando especialidades...';
+
+  @override
+  String get msg_select_specialty => 'Seleccionar especialidad';
+
+  @override
+  String get msg_loading_countries => 'Cargando países...';
+
+  @override
+  String get msg_select_country => 'Seleccionar país';
+
+  @override
+  String get lbl_sort_by => 'Ordenar por';
+
+  @override
+  String get lbl_sort_by_option => 'Ordenar por';
+
+  @override
+  String get lbl_default => 'Predeterminado';
+
+  @override
+  String get lbl_date_created => 'Fecha de Creación';
+
+  @override
+  String get lbl_order => 'Orden';
+
+  @override
+  String get lbl_desc => 'Descendente';
+
+  @override
+  String get lbl_asc => 'Ascendente';
+
+  @override
+  String get msg_select_status => 'Seleccionar estado';
+
+  @override
+  String get lbl_all_status => 'Todos los Estados';
+
+  @override
+  String msg_sort_display(Object sortBy) {
+    return 'Ordenar: $sortBy';
+  }
+
+  @override
+  String get lbl_delete_comment => 'Eliminar comentario';
+
+  @override
+  String get msg_confirm_delete_discussion => '¿Está seguro de que desea eliminar esta discusión?';
+
+  @override
+  String get msg_upload_medical_images_description => 'Suba imágenes médicas para análisis e insights impulsados por IA';
+
+  @override
+  String get lbl_x_ray => 'Rayos X';
+
+  @override
+  String get msg_ai_powered_medical_analysis => 'Análisis de imágenes médicas impulsado por IA';
+
+  @override
+  String get msg_high_quality_images_better_results => 'Las imágenes de alta calidad proporcionan mejores resultados de análisis por IA';
+
+  @override
+  String get msg_photo_permission_explanation => 'DocTak AI necesita acceso a sus fotos para analizar imágenes médicas. Por favor, habilite los permisos de fotos en la configuración de su dispositivo.';
+
+  @override
+  String get msg_ai_assistant_description => 'Su asistente médico impulsado por IA está listo para ayudar con diagnósticos, tratamientos e insights médicos.';
+
+  @override
+  String get msg_ready_to_start_instruction => '¿Listo para comenzar? Escriba su pregunta abajo o elija un tema sugerido.';
+
+  @override
+  String get msg_open_menu_new_chat => 'Abra el menú para iniciar un nuevo chat';
+
+  @override
+  String get msg_confirm_delete_conversation => '¿Está seguro de que desea eliminar esta conversación?';
+
+  @override
+  String get lbl_cancel_uppercase => 'CANCELAR';
+
+  @override
+  String get lbl_delete_uppercase => 'ELIMINAR';
+
+  @override
+  String get msg_session_name_max_length => 'El nombre de sesión debe tener 50 caracteres o menos';
+
+  @override
+  String get msg_be_first_to_comment => 'Sea el primero en compartir sus conocimientos médicos sobre este caso.';
 }

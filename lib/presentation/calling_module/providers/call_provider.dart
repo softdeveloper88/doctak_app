@@ -43,6 +43,9 @@ class CallProvider extends ChangeNotifier {
   bool _disposed = false;
   bool get mounted => !_disposed;
 
+  // Add token field
+  String? _channelToken;
+  
   // Constructor
   CallProvider({
     required AgoraService agoraService,
@@ -50,9 +53,11 @@ class CallProvider extends ChangeNotifier {
     required UserModel localUser,
     required UserModel remoteUser,
     required bool isVideoCall,
+    String? token, // Add token parameter
   }) : _agoraService = agoraService,
         _localUser = localUser,
         _remoteUser = remoteUser,
+        _channelToken = token,
         _callState = CallState(
           callId: callId,
           callType: isVideoCall ? CallType.video : CallType.audio,
@@ -300,29 +305,34 @@ class CallProvider extends ChangeNotifier {
   }
 
   void _handleNetworkQuality(int uid, int txQuality, int rxQuality) {
-    // Only update if significant change
+    // Only update if significant change and add debouncing to prevent rapid adjustments
     if (_callState.networkQuality != rxQuality) {
       _updateCallState(networkQuality: rxQuality);
       
-      // Platform-specific network quality optimization
-      if (Platform.isIOS) {
-        _handleIOSNetworkQuality(rxQuality);
-      } else {
-        _handleAndroidNetworkQuality(rxQuality);
-      }
+      // Add delay to prevent rapid network quality adjustments that can disrupt calls
+      Timer(const Duration(seconds: 3), () {
+        if (mounted && _callState.networkQuality == rxQuality) {
+          // Platform-specific network quality optimization (only if quality is still the same)
+          if (Platform.isIOS) {
+            _handleIOSNetworkQuality(rxQuality);
+          } else {
+            _handleAndroidNetworkQuality(rxQuality);
+          }
+        }
+      });
     }
   }
   
   // iOS-specific network quality handling
   void _handleIOSNetworkQuality(int quality) {
-    if (quality > 3 && isVideoCall) {
-      // Poor network on iOS - reduce video quality
+    if (quality > 4 && isVideoCall && !_callState.isUsingLowerVideoQuality) {
+      // Poor network on iOS - reduce video quality (only for very poor quality)
       CallDebugUtils.logWarning('NETWORK', 'Poor network on iOS, reducing video quality');
       _agoraService.getEngine()?.setVideoEncoderConfiguration(
         const VideoEncoderConfiguration(
-          dimensions: VideoDimensions(width: 320, height: 240),
-          frameRate: 10,
-          bitrate: 400,
+          dimensions: VideoDimensions(width: 480, height: 360),  // Less aggressive reduction
+          frameRate: 12,  // Maintain reasonable framerate
+          bitrate: 600,   // Conservative bitrate
           orientationMode: OrientationMode.orientationModeAdaptive,
           degradationPreference: DegradationPreference.maintainFramerate,
         ),
@@ -335,7 +345,7 @@ class CallProvider extends ChangeNotifier {
         const VideoEncoderConfiguration(
           dimensions: VideoDimensions(width: 640, height: 480),
           frameRate: 15,
-          bitrate: 900,
+          bitrate: 800,  // Slightly more conservative bitrate
           orientationMode: OrientationMode.orientationModeAdaptive,
           degradationPreference: DegradationPreference.maintainQuality,
         ),
@@ -346,14 +356,14 @@ class CallProvider extends ChangeNotifier {
   
   // Android-specific network quality handling
   void _handleAndroidNetworkQuality(int quality) {
-    if (quality > 3 && isVideoCall) {
-      // Poor network on Android - prioritize framerate
+    if (quality > 4 && isVideoCall && !_callState.isUsingLowerVideoQuality) {
+      // Poor network on Android - prioritize framerate (only for very poor quality)
       CallDebugUtils.logWarning('NETWORK', 'Poor network on Android, prioritizing framerate');
       _agoraService.getEngine()?.setVideoEncoderConfiguration(
         const VideoEncoderConfiguration(
-          dimensions: VideoDimensions(width: 320, height: 240),
-          frameRate: 12,
-          bitrate: 350,
+          dimensions: VideoDimensions(width: 480, height: 360),  // Less aggressive reduction
+          frameRate: 12,  // Maintain reasonable framerate
+          bitrate: 500,   // Conservative bitrate
           orientationMode: OrientationMode.orientationModeAdaptive,
           degradationPreference: DegradationPreference.maintainFramerate,
         ),
@@ -379,6 +389,13 @@ class CallProvider extends ChangeNotifier {
     print('🔄 Connection state changed: $state (reason: $reason)');
     _lastKnownConnectionState = state;
     
+    // Add connection stability check - don't react to rapid state changes
+    if (_callState.connectionState == CallConnectionState.connected && state == 2) {
+      // If we just connected and immediately see connecting again, wait a moment
+      print('ℹ️ Ignoring rapid CONNECTING state after CONNECTED - likely temporary');
+      return;
+    }
+    
     switch (state) {
       case 2: // Connecting
         _updateCallState(connectionState: CallConnectionState.connecting);
@@ -390,11 +407,13 @@ class CallProvider extends ChangeNotifier {
         _resourceManager.setHighPerformanceMode(true);
         break;
       case 4: // Reconnecting
+        print('🔄 Agora engine is reconnecting (reason: $reason)');
         _updateCallState(connectionState: CallConnectionState.reconnecting);
         _resourceManager.setHighPerformanceMode(false);
         _stopConnectionHealthMonitoring();
         break;
       case 5: // Failed
+        print('❌ Connection failed (reason: $reason)');
         _updateCallState(connectionState: CallConnectionState.failed);
         _stopConnectionHealthMonitoring();
         break;
@@ -635,7 +654,7 @@ class CallProvider extends ChangeNotifier {
       final bool joined = await _agoraService.joinChannel(
         channelId: _callState.callId,
         uid: 0,
-        token: '', // Add token if needed
+        token: _channelToken ?? '', // Use stored token
         isVideoCall: isVideoCall,
       );
 
@@ -681,7 +700,7 @@ class CallProvider extends ChangeNotifier {
     if (!mounted) return;
     
     print('💓 Starting connection health monitoring');
-    _connectionHealthTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+    _connectionHealthTimer = Timer.periodic(const Duration(seconds: 8), (timer) async {  // Reduced frequency
       if (!mounted || _disposed) {
         timer.cancel();
         return;
@@ -690,23 +709,21 @@ class CallProvider extends ChangeNotifier {
       try {
         final currentState = await _agoraService.getConnectionState();
         
-        // Check for state inconsistencies
-        if (currentState != 3 && _callState.connectionState == CallConnectionState.connected) {
-          print('⚠️ Connection state mismatch detected: engine=$currentState, state=${_callState.connectionState}');
+        // Only check for serious inconsistencies, allow for temporary connection states
+        if (currentState == 5 && _callState.connectionState == CallConnectionState.connected) {
+          // Only act on FAILED state when we think we're connected
+          print('⚠️ Critical connection state mismatch detected: engine=FAILED, state=CONNECTED');
           _handleConnectionInconsistency(currentState);
         }
         
-        // Check if we haven't received updates for too long
+        // Log state changes without acting on them unless critical
         if (_lastKnownConnectionState != currentState) {
           print('📊 Connection state update: $_lastKnownConnectionState -> $currentState');
           _lastKnownConnectionState = currentState;
         }
       } catch (e) {
         print('❌ Error checking connection health: $e');
-        // If we can't even check the connection, something is wrong
-        if (_callState.connectionState == CallConnectionState.connected) {
-          _handleConnectionInconsistency(-1);
-        }
+        // Don't immediately react to single check failures
       }
     });
   }
@@ -725,9 +742,14 @@ class CallProvider extends ChangeNotifier {
     if (!mounted) return;
     
     print('💓 Starting heartbeat mechanism');
-    _syncTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+    _syncTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {  // Reduced frequency
       if (!mounted || _disposed) {
         timer.cancel();
+        return;
+      }
+      
+      // Only check heartbeat if we believe we're connected and have remote user
+      if (_callState.connectionState != CallConnectionState.connected || !_callState.isRemoteUserJoined) {
         return;
       }
       
@@ -736,15 +758,20 @@ class CallProvider extends ChangeNotifier {
         // Check if we can still communicate with the engine
         final connectionState = await _agoraService.getConnectionState();
         
-        if (connectionState == 3 && _callState.isRemoteUserJoined) {
-          // Both local and remote should be connected - this is healthy
+        if (connectionState == 3) {
+          // Connection is healthy - no action needed
           print('💓 Heartbeat: Connection healthy');
-        } else if (connectionState != 3) {
+        } else if (connectionState == 4) {
+          // Engine is reconnecting - this is expected, don't interfere
+          print('💓 Heartbeat: Engine is reconnecting (normal behavior)');
+        } else if (connectionState == 5 || connectionState == 1) {
+          // Only trigger reconnection for failed or disconnected states
           print('💔 Heartbeat: Connection issue detected (state: $connectionState)');
           _handleConnectionInconsistency(connectionState);
         }
       } catch (e) {
         print('💔 Heartbeat error: $e');
+        // Only trigger reconnection if we get multiple consecutive errors
         _handleConnectionInconsistency(-1);
       }
     });
@@ -761,18 +788,24 @@ class CallProvider extends ChangeNotifier {
   void _handleConnectionInconsistency(int actualState) {
     print('🔧 Handling connection inconsistency: actualState=$actualState');
     
-    if (actualState == 4) {
-      // Engine is reconnecting but we didn't know
-      _updateCallState(connectionState: CallConnectionState.reconnecting);
-    } else if (actualState == 5 || actualState == -1) {
-      // Engine failed or unreachable
+    // Only take action for severe issues, not temporary state changes
+    if (actualState == 5) {
+      // Engine failed - this is a real problem
       print('❌ Engine connection failed, attempting recovery');
       _stopHeartbeat();
       _attemptReconnection();
-    } else if (actualState != 3) {
-      // Any other non-connected state
-      print('⚠️ Engine not fully connected (state: $actualState), monitoring closely');
-      _updateCallState(connectionState: CallConnectionState.connecting);
+    } else if (actualState == -1) {
+      // Engine unreachable - serious issue
+      print('❌ Engine unreachable, attempting recovery');
+      _stopHeartbeat();
+      _attemptReconnection();
+    } else if (actualState == 4) {
+      // Engine is reconnecting - update our state but don't interfere
+      print('🔄 Engine is reconnecting, updating state');
+      _updateCallState(connectionState: CallConnectionState.reconnecting);
+    } else {
+      // For other states (1=disconnected, 2=connecting), just log but don't take drastic action
+      print('ℹ️ Engine state change noted: $actualState - monitoring...');
     }
   }
 
@@ -998,19 +1031,33 @@ class CallProvider extends ChangeNotifier {
         throw Exception('Failed to configure media settings after 3 attempts');
       }
 
+      // CRITICAL DEBUG: Log the channel ID and user information
+      print('🔴 CRITICAL DEBUG - Channel Join Details:');
+      print('  🆔 Call ID / Channel ID: "${_callState.callId}"');
+      print('  👤 Local User: ${_localUser.name} (ID: ${_localUser.id})');
+      print('  👥 Remote User: ${_remoteUser.name} (ID: ${_remoteUser.id})');
+      print('  🎥 Call Type: ${isVideoCall ? "VIDEO" : "AUDIO"}');
+      print('  🕐 Join Time: ${DateTime.now().toIso8601String()}');
+      
       // Join channel with retry logic
       bool joined = false;
       attempts = 0;
       while (!joined && attempts < 3) {
         try {
+          print('🔄 Channel join attempt ${attempts + 1}/3...');
+          
+          // CRITICAL: Use the token passed during initialization
+          final channelToken = _channelToken ?? '';
+          print('  🔑 Using token: ${channelToken.isEmpty ? "EMPTY (No token authentication)" : "PROVIDED (${channelToken.length} chars)"}');
+          
           joined = await _agoraService.joinChannel(
             channelId: _callState.callId,
-            uid: 0,
-            token: '', // Add token if needed
+            uid: 0, // Let Agora assign UID dynamically
+            token: channelToken,
             isVideoCall: isVideoCall,
           );
           if (joined) {
-            print('✅ Joined channel on attempt ${attempts + 1}');
+            print('✅ Successfully joined channel "${_callState.callId}" on attempt ${attempts + 1}');
           }
         } catch (e) {
           attempts++;

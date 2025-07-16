@@ -143,9 +143,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
     if (_isWaitingForResponse) {
       debugPrint("Blocked message send - already waiting for response");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Please wait for the AI to respond before sending another message',
+            translation(context).msg_wait_for_ai_response,
           ),
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
@@ -254,8 +254,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
     if (state is! SessionSelected) {
       // Show error toast if we can't get session
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot access session settings right now'),
+        SnackBar(
+          content: Text(translation(context).msg_cannot_access_session_settings),
           behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 2),
         ),
@@ -374,7 +374,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
                   // Title text matching ChatGPT design
                   Text(
-                    'DocTak AI Assistant',
+                    translation(context).lbl_doctak_ai_assistant,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -393,7 +393,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      'Your intelligent medical companion',
+                      translation(context).lbl_intelligent_medical_companion,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -416,7 +416,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 children: [
                   // Section header matching ChatGPT design
                   Text(
-                    "Quick Start",
+                    translation(context).lbl_quick_start,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -448,42 +448,38 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   shrinkWrap: true,
                   children: [
                     _buildEnhancedFeatureCard(
-                      title: 'Diagnosis Support',
-                      description: 'Clinical decision assistance',
+                      title: translation(context).lbl_diagnosis_support,
+                      description: translation(context).lbl_clinical_decision_assistance,
                       icon: Icons.medical_services_rounded,
                       gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
-                      prompt:
-                          'What conditions should I consider for a patient with chest pain and shortness of breath?',
+                      prompt: translation(context).msg_diagnosis_support_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
                     _buildEnhancedFeatureCard(
-                      title: 'Drug Information',
-                      description: 'Medication safety & interactions',
+                      title: translation(context).lbl_drug_information,
+                      description: translation(context).lbl_medication_safety_interactions,
                       icon: Icons.medication_liquid_rounded,
                       gradientColors: [Colors.blue[200]!, Colors.blue[500]!],
-                      prompt:
-                          'Are there any interactions between warfarin and aspirin?',
+                      prompt: translation(context).msg_drug_information_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
                     _buildEnhancedFeatureCard(
-                      title: 'Treatment Plans',
-                      description: 'Evidence-based protocols',
+                      title: translation(context).lbl_treatment_plans,
+                      description: translation(context).lbl_evidence_based_protocols,
                       icon: Icons.assignment_turned_in_rounded,
                       gradientColors: [Colors.blue[400]!, Colors.blue[700]!],
-                      prompt:
-                          'What is the current treatment protocol for acute myocardial infarction?',
+                      prompt: translation(context).msg_treatment_plans_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
                     _buildEnhancedFeatureCard(
-                      title: 'Medical Codes',
-                      description: 'ICD-10 & CPT code lookup',
+                      title: translation(context).lbl_medical_codes,
+                      description: translation(context).lbl_icd_cpt_code_lookup,
                       icon: Icons.qr_code_scanner_rounded,
                       gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
-                      prompt:
-                          'What ICD-10 code should I use for Type 2 diabetes with complications?',
+                      prompt: translation(context).msg_medical_codes_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
@@ -664,7 +660,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Try it',
+                        translation(context).lbl_try_it,
                         style: TextStyle(
                           color: Colors.blue[600],
                           fontSize: isSmallScreen ? 10 : 12,
@@ -897,7 +893,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Loading conversation...',
+                    translation(context).msg_loading_conversation,
                     style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
@@ -931,7 +927,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Failed to send message',
+                        translation(context).msg_failed_to_send_message,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -976,7 +972,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                               }
                             },
                             icon: const Icon(Icons.refresh),
-                            label: const Text('Try Again'),
+                            label: Text(translation(context).lbl_try_again),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue[600],
                               foregroundColor: Colors.white,
@@ -992,7 +988,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           const SizedBox(width: 16),
                           TextButton.icon(
                             icon: const Icon(Icons.close),
-                            label: const Text('Dismiss'),
+                            label: Text(translation(context).lbl_dismiss),
                             onPressed: () {
                               // Clear the error state
                               context.read<AiChatBloc>().add(

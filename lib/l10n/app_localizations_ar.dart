@@ -147,7 +147,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msg_network_err => 'خطأ في الشبكة';
 
   @override
-  String get msg_something_went_wrong => 'حدث خطأ ما';
+  String get msg_something_went_wrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى...';
 
   @override
   String get err_msg_please_enter_valid_email => 'الرجاء إدخال بريد إلكتروني صحيح';
@@ -306,7 +306,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_next_image => 'الصورة التالية';
 
   @override
-  String get lbl_welcome_doctor => 'مرحبًا، دكتور!';
+  String get lbl_welcome_doctor => 'مرحباً دكتور!';
 
   @override
   String get msg_ai_assistant_intro => 'مساعدك الشخصي والطبي المدعوم بالذكاء الاصطناعي';
@@ -318,7 +318,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msg_clinical_summary_hint => 'ملخص سريري مثل العمر والجنس والتاريخ الطبي';
 
   @override
-  String get msg_ai_disclaimer => 'يمكن أن يرتكب الذكاء الاصطناعي أخطاء. يرجى التحقق من المعلومات المهمة.';
+  String get msg_ai_disclaimer => 'يمكن للذكاء الاصطناعي أن يرتكب أخطاء. فكر في التحقق من المعلومات المهمة.';
 
   @override
   String get lbl_error => 'خطأ';
@@ -378,13 +378,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_ready_to_start => 'مستعد للبدء؟ اكتب سؤالك أدناه أو اختر موضوعًا مقترحًا.';
 
   @override
-  String get lbl_code_detection => 'كشف الرمز';
+  String get lbl_code_detection => 'كشف الأكواد';
 
   @override
   String get lbl_identify_cpt_icd => 'تحديد رموز CPT أو ICD';
 
   @override
-  String get lbl_diagnostic_suggestions => 'اقتراحات \nالتشخيص';
+  String get lbl_diagnostic_suggestions => 'اقتراحات التشخيص';
 
   @override
   String get lbl_request_suggestions => 'طلب اقتراحات بناءً على الأعراض';
@@ -417,7 +417,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_history_ai => 'محادثة الذكاء الاصطناعي';
 
   @override
-  String get lbl_new_chat => '+ محادثة جديدة';
+  String get lbl_new_chat => 'محادثة جديدة';
 
   @override
   String get lbl_text_copied_clipboard => 'تم نسخ النص إلى الحافظة';
@@ -601,7 +601,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_state => 'المنطقة';
 
   @override
-  String get lbl_edit => 'تعديل';
+  String get lbl_edit => 'تحرير';
 
   @override
   String get lbl_save => 'حفظ';
@@ -872,7 +872,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get desc_medical_ai => 'مساعد ذكي طبي';
 
   @override
-  String get lbl_case_discussion => 'مناقشة الحالات';
+  String get lbl_case_discussion => 'مناقشة الحالة';
 
   @override
   String get lbl_post_poll => 'نشر استطلاع';
@@ -884,7 +884,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_meeting => 'اجتماع';
 
   @override
-  String get lbl_search => 'بحث';
+  String get lbl_search => 'البحث';
 
   @override
   String get lbl_add => 'إضافة';
@@ -1187,7 +1187,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_send => 'إرسال';
 
   @override
-  String get lbl_likes => 'إعجابات';
+  String get lbl_likes => 'الإعجابات';
 
   @override
   String get lbl_comments => 'التعليقات';
@@ -1268,7 +1268,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_complete_profile => 'إكمال الملف الشخصي';
 
   @override
-  String get msg_confirm_delete_comment => 'هل أنت متأكد أنك تريد حذف التعليق؟';
+  String get msg_confirm_delete_comment => 'هل أنت متأكد من أنك تريد حذف هذا التعليق؟';
 
   @override
   String get lbl_no_name => 'لا يوجد اسم';
@@ -1430,7 +1430,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_posts => 'المنشورات';
 
   @override
-  String get lbl_followers => 'المتابعين';
+  String get lbl_followers => 'المتابعون';
 
   @override
   String get lbl_followings => 'المتابعات';
@@ -1903,7 +1903,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msg_group_created_success => 'تم إنشاء المجموعة بنجاح';
 
   @override
-  String get lbl_error_exclamation => 'خطأ !';
+  String get lbl_error_exclamation => 'خطأ!';
 
   @override
   String get msg_group_create_error => 'حدث خطأ أثناء إنشاء المجموعة. يرجى الانتقال إلى المعلومات الأساسية وتقديم التفاصيل الصحيحة';
@@ -2263,7 +2263,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msg_case_discussion_updated => 'تم تحديث مناقشة الحالة بنجاح!';
 
   @override
-  String get lbl_age_years => 'العمر (بالسنوات)';
+  String get lbl_age_years => 'العمر (سنوات)';
 
   @override
   String get msg_clinical_keywords_hint => 'أدخل الكلمات المفتاحية السريرية مفصولة بفواصل (مثل: حمى، صداع، إرهاق)';
@@ -2315,4 +2315,654 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lbl_clear_filters => 'مسح المرشحات';
+
+  @override
+  String get msg_wait_for_ai_response => 'يرجى انتظار استجابة الذكاء الاصطناعي قبل إرسال رسالة أخرى';
+
+  @override
+  String get msg_cannot_access_session_settings => 'لا يمكن الوصول إلى إعدادات الجلسة الآن';
+
+  @override
+  String get lbl_doctak_ai_assistant => 'مساعد دكتاك الذكي';
+
+  @override
+  String get lbl_intelligent_medical_companion => 'رفيقك الطبي الذكي';
+
+  @override
+  String get lbl_quick_start => 'بداية سريعة';
+
+  @override
+  String get lbl_diagnosis_support => 'دعم التشخيص';
+
+  @override
+  String get lbl_clinical_decision_assistance => 'مساعدة في القرار السريري';
+
+  @override
+  String get msg_diagnosis_support_prompt => 'ما هي الحالات التي يجب أن أعتبرها لمريض يعاني من ألم في الصدر وضيق في التنفس؟';
+
+  @override
+  String get lbl_drug_information => 'معلومات الدواء';
+
+  @override
+  String get lbl_medication_safety_interactions => 'سلامة الأدوية والتفاعلات';
+
+  @override
+  String get msg_drug_information_prompt => 'هل هناك أي تفاعلات بين الوارفارين والأسبرين؟';
+
+  @override
+  String get lbl_treatment_plans => 'خطط العلاج';
+
+  @override
+  String get lbl_evidence_based_protocols => 'البروتوكولات القائمة على الأدلة';
+
+  @override
+  String get msg_treatment_plans_prompt => 'ما هو بروتوكول العلاج الحالي لاحتشاء عضلة القلب الحاد؟';
+
+  @override
+  String get lbl_medical_codes => 'الأكواد الطبية';
+
+  @override
+  String get lbl_icd_cpt_code_lookup => 'البحث في أكواد ICD-10 و CPT';
+
+  @override
+  String get msg_medical_codes_prompt => 'ما هو كود ICD-10 الذي يجب أن أستخدمه لداء السكري من النوع الثاني مع المضاعفات؟';
+
+  @override
+  String get lbl_try_it => 'جربه';
+
+  @override
+  String get msg_loading_conversation => 'جاري تحميل المحادثة...';
+
+  @override
+  String get msg_failed_to_send_message => 'فشل في إرسال الرسالة';
+
+  @override
+  String get lbl_dismiss => 'تجاهل';
+
+  @override
+  String get msg_select_chat_from_menu => 'اختر محادثة من القائمة';
+
+  @override
+  String get msg_open_menu_to_start_new_chat => 'افتح القائمة لبدء محادثة جديدة';
+
+  @override
+  String get lbl_just_now => 'الآن';
+
+  @override
+  String get lbl_doctak_ai => 'دكتاك الذكي';
+
+  @override
+  String get lbl_chat_history => 'سجل المحادثات';
+
+  @override
+  String get lbl_image_attached => 'صورة مرفقة';
+
+  @override
+  String get msg_session_creation_timeout => 'انتهت مهلة إنشاء الجلسة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get lbl_recent_chats => 'المحادثات الأخيرة';
+
+  @override
+  String get msg_loading_conversations => 'جارٍ تحميل محادثاتك...';
+
+  @override
+  String get msg_no_chat_history => 'لا يوجد سجل محادثات';
+
+  @override
+  String get lbl_delete_conversation => 'حذف المحادثة';
+
+  @override
+  String msg_delete_conversation_confirm(Object sessionName) {
+    return 'هل أنت متأكد أنك تريد حذف \"$sessionName\"؟';
+  }
+
+  @override
+  String msg_conversation_deleted(Object sessionName) {
+    return 'تم حذف المحادثة \"$sessionName\"';
+  }
+
+  @override
+  String get msg_session_loading_timeout => 'انتهت مهلة تحميل الجلسة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get lbl_web_search => 'البحث على الويب';
+
+  @override
+  String get lbl_low_context => 'سياق منخفض';
+
+  @override
+  String get lbl_medium_context => 'سياق متوسط';
+
+  @override
+  String get lbl_high_context => 'سياق عالي';
+
+  @override
+  String get msg_waiting_for_ai_response => 'في انتظار استجابة الذكاء الاصطناعي...';
+
+  @override
+  String get msg_ask_anything => 'اسأل أي شيء...';
+
+  @override
+  String get lbl_chat_settings => 'إعدادات المحادثة';
+
+  @override
+  String get lbl_session_name => 'اسم الجلسة';
+
+  @override
+  String get hint_enter_session_name => 'أدخل اسم الجلسة';
+
+  @override
+  String get msg_session_name_length_limit => 'يجب أن يكون اسم الجلسة 50 حرفًا أو أقل';
+
+  @override
+  String msg_renaming_session(Object newName) {
+    return 'إعادة تسمية الجلسة إلى \"$newName\"...';
+  }
+
+  @override
+  String msg_session_renamed(Object newName) {
+    return 'تم إعادة تسمية الجلسة إلى \"$newName\"';
+  }
+
+  @override
+  String msg_failed_to_rename_session(Object error) {
+    return 'فشل في إعادة تسمية الجلسة: $error';
+  }
+
+  @override
+  String get lbl_rename => 'إعادة تسمية';
+
+  @override
+  String get lbl_temperature => 'درجة الحرارة';
+
+  @override
+  String get lbl_precise => 'دقيق';
+
+  @override
+  String get lbl_creative => 'إبداعي';
+
+  @override
+  String get lbl_response_length => 'طول الاستجابة';
+
+  @override
+  String lbl_tokens_count(Object tokens) {
+    return '$tokens رمز';
+  }
+
+  @override
+  String get lbl_brief => 'مختصر';
+
+  @override
+  String get lbl_detailed => 'مفصل';
+
+  @override
+  String get msg_copied_to_clipboard => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get lbl_view_attachment => 'عرض المرفق';
+
+  @override
+  String get lbl_attachment => 'مرفق';
+
+  @override
+  String get msg_searching_web => 'البحث في الويب...';
+
+  @override
+  String lbl_sources_count(Object count) {
+    return 'المصادر ($count)';
+  }
+
+  @override
+  String get lbl_web_source => 'مصدر ويب';
+
+  @override
+  String get msg_message_copied_to_clipboard => 'تم نسخ الرسالة إلى الحافظة';
+
+  @override
+  String get msg_preparing_doctak_ai => 'جاري إعداد دكتاك الذكي.';
+
+  @override
+  String get msg_generating_response => 'جاري إنتاج الاستجابة...';
+
+  @override
+  String msg_error_with_details(Object error) {
+    return 'خطأ: $error';
+  }
+
+  @override
+  String get msg_ai_assistant_ready => 'مساعدك الطبي المدعوم بالذكاء الاصطناعي جاهز للمساعدة في التشخيص والعلاج والرؤى الطبية.';
+
+  @override
+  String get lbl_identify_cpt_icd_codes => 'تحديد أكواد CPT أو ICD';
+
+  @override
+  String get msg_code_detection_prompt => 'كشف الأكواد: تحديد أكواد CPT أو ICD';
+
+  @override
+  String get lbl_based_on_symptoms => 'بناءً على الأعراض';
+
+  @override
+  String get msg_diagnostic_suggestions_prompt => 'اقتراحات التشخيص: طلب اقتراحات بناءً على الأعراض';
+
+  @override
+  String get lbl_dosage_interactions => 'الجرعة والتفاعلات';
+
+  @override
+  String get msg_drug_information_prompt_2 => 'معلومات الدواء: تقديم تفاصيل الجرعة والتفاعل';
+
+  @override
+  String get lbl_evidence_based_care => 'رعاية قائمة على الأدلة';
+
+  @override
+  String get msg_treatment_plans_prompt_2 => 'خطط العلاج: اقتراح خيارات العلاج القائمة على الأدلة';
+
+  @override
+  String get msg_ready_to_start => 'جاهز للبدء؟ اكتب سؤالك أدناه أو اختر موضوعًا مقترحًا.';
+
+  @override
+  String get msg_generating_response_2 => 'جاري إنتاج الاستجابة...';
+
+  @override
+  String get hint_ask_medical_ai => 'اسأل الذكاء الاصطناعي الطبي...';
+
+  @override
+  String get lbl_error_generic => 'خطأ';
+
+  @override
+  String get msg_image_not_found => 'الصورة غير موجودة';
+
+  @override
+  String get lbl_ai_image_analysis => 'تحليل الصور بالذكاء الاصطناعي';
+
+  @override
+  String get msg_upload_medical_images => 'ارفع الصور الطبية للحصول على تحليل ورؤى مدعومة بالذكاء الاصطناعي';
+
+  @override
+  String get lbl_select_medical_image_type => 'اختر نوع الصورة الطبية';
+
+  @override
+  String get msg_only_one_image_per_session => 'يُسمح بصورة واحدة فقط في كل جلسة';
+
+  @override
+  String get msg_choose_medical_image_type => 'اختر نوع الصورة الطبية للتحليل بالذكاء الاصطناعي';
+
+  @override
+  String get lbl_dermatological => 'جلدية';
+
+  @override
+  String get lbl_skin_analysis => 'تحليل الجلد';
+
+  @override
+  String get lbl_xray => 'أشعة سينية';
+
+  @override
+  String get lbl_radiograph_scan => 'مسح إشعاعي';
+
+  @override
+  String get lbl_ct_scan => 'أشعة مقطعية';
+
+  @override
+  String get lbl_tomography => 'تصوير مقطعي';
+
+  @override
+  String get lbl_mri => 'رنين مغناطيسي';
+
+  @override
+  String get lbl_magnetic_scan => 'مسح مغناطيسي';
+
+  @override
+  String get lbl_mammography => 'تصوير الثدي';
+
+  @override
+  String get lbl_breast_tissue_analysis => 'تحليل أنسجة الثدي';
+
+  @override
+  String get msg_ai_powered_medical_image_analysis => 'تحليل الصور الطبية المدعوم بالذكاء الاصطناعي';
+
+  @override
+  String lbl_upload_image_type(Object imageType) {
+    return 'ارفع صور $imageType';
+  }
+
+  @override
+  String msg_select_images_for_analysis(Object imageLimit, Object imagePlural) {
+    return 'اختر حتى $imageLimit صورة طبية$imagePlural للتحليل بالذكاء الاصطناعي';
+  }
+
+  @override
+  String get msg_high_quality_images_better_analysis => 'الصور عالية الجودة توفر نتائج تحليل أفضل للذكاء الاصطناعي';
+
+  @override
+  String get lbl_photo_access_required => 'مطلوب الوصول إلى الصور';
+
+  @override
+  String get msg_photo_permission_needed => 'يحتاج دكتاك الذكي إلى الوصول إلى صورك لتحليل الصور الطبية. يرجى تمكين أذونات الصور في إعدادات جهازك.';
+
+  @override
+  String get lbl_open_settings => 'فتح الإعدادات';
+
+  @override
+  String get msg_comment_added_successfully => 'تم إضافة التعليق بنجاح!';
+
+  @override
+  String get msg_share_functionality_coming_soon => 'وظيفة المشاركة قريباً';
+
+  @override
+  String get msg_error_loading_discussion => 'خطأ في تحميل المناقشة';
+
+  @override
+  String lbl_replies_count(Object count) {
+    return '$count ردود';
+  }
+
+  @override
+  String get msg_no_comments_yet => 'لا توجد تعليقات بعد';
+
+  @override
+  String get msg_be_first_to_share_insights => 'كن أول من يشارك رؤاه الطبية في هذه الحالة.';
+
+  @override
+  String get lbl_related_cases => 'الحالات المرتبطة';
+
+  @override
+  String get msg_loading_more_comments => 'جارٍ تحميل المزيد من التعليقات...';
+
+  @override
+  String lbl_cases_count(Object count) {
+    return '$count حالات';
+  }
+
+  @override
+  String lbl_time_days_ago(Object count) {
+    return '$countد مضت';
+  }
+
+  @override
+  String lbl_time_hours_ago(Object count) {
+    return '$countس مضت';
+  }
+
+  @override
+  String lbl_time_minutes_ago(Object count) {
+    return '$countد مضت';
+  }
+
+  @override
+  String get lbl_time_just_now => 'الآن';
+
+  @override
+  String get hint_share_medical_insights => 'شارك رؤاك الطبية...';
+
+  @override
+  String get msg_share_professional_insights => 'شارك الرؤى المهنية والحفاظ على أخلاقيات الطب';
+
+  @override
+  String get lbl_medical_professional => 'متخصص طبي';
+
+  @override
+  String get lbl_general => 'عام';
+
+  @override
+  String lbl_more_tags(Object count) {
+    return '+$count المزيد من العلامات';
+  }
+
+  @override
+  String get lbl_delete_discussion => 'حذف المناقشة';
+
+  @override
+  String get msg_delete_discussion_confirm => 'هل أنت متأكد من أنك تريد حذف مناقشة الحالة هذه؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get lbl_patient_information => 'معلومات المريض';
+
+  @override
+  String msg_patient_demographics(Object age, Object gender) {
+    return '$gender، $age سنة';
+  }
+
+  @override
+  String msg_medical_history(Object history) {
+    return 'التاريخ الطبي: $history';
+  }
+
+  @override
+  String get lbl_clinical_tags => 'العلامات السريرية';
+
+  @override
+  String get lbl_attached_files => 'الملفات المرفقة';
+
+  @override
+  String get lbl_clinical_information => 'المعلومات السريرية';
+
+  @override
+  String get lbl_working_diagnosis => 'التشخيص المبدئي';
+
+  @override
+  String get lbl_treatment_plan => 'خطة العلاج';
+
+  @override
+  String get lbl_ai_clinical_summary => 'الملخص السريري للذكاء الاصطناعي';
+
+  @override
+  String lbl_generated_time(Object time) {
+    return 'تم إنشاؤه $time';
+  }
+
+  @override
+  String get lbl_views => 'المشاهدات';
+
+  @override
+  String get lbl_ai_summary => 'ملخص الذكاء الاصطناعي';
+
+  @override
+  String lbl_confidence_score(Object score) {
+    return '$score% ثقة';
+  }
+
+  @override
+  String get lbl_age => 'العمر';
+
+  @override
+  String get lbl_patient_privacy => 'خصوصية المريض';
+
+  @override
+  String get lbl_anonymized => 'مجهول الهوية';
+
+  @override
+  String get lbl_identified => 'معروف الهوية';
+
+  @override
+  String get lbl_evidence_level => 'مستوى الأدلة';
+
+  @override
+  String lbl_time_days_ago_long(Object count) {
+    return '$count أيام مضت';
+  }
+
+  @override
+  String lbl_time_hours_ago_long(Object count) {
+    return '$count ساعات مضت';
+  }
+
+  @override
+  String lbl_time_minutes_ago_long(Object count) {
+    return '$count دقائق مضت';
+  }
+
+  @override
+  String get hint_search_discussions => 'البحث في المناقشات...';
+
+  @override
+  String get lbl_general_specialty => 'عام';
+
+  @override
+  String get lbl_cardiology => 'أمراض القلب';
+
+  @override
+  String get lbl_neurology => 'الأعصاب';
+
+  @override
+  String get lbl_orthopedics => 'العظام';
+
+  @override
+  String get lbl_pediatrics => 'الأطفال';
+
+  @override
+  String get lbl_all_countries => 'جميع البلدان';
+
+  @override
+  String get lbl_united_states => 'الولايات المتحدة';
+
+  @override
+  String get lbl_united_kingdom => 'المملكة المتحدة';
+
+  @override
+  String get lbl_canada => 'كندا';
+
+  @override
+  String get msg_loading_discussions => 'جاري تحميل المناقشات...';
+
+  @override
+  String msg_discussions_found(Object count) {
+    return 'تم العثور على $count مناقشة';
+  }
+
+  @override
+  String get lbl_filtered => 'مصفى';
+
+  @override
+  String get lbl_export_results => 'تصدير النتائج';
+
+  @override
+  String get lbl_share_filters => 'مشاركة المرشحات';
+
+  @override
+  String get lbl_total_likes => 'إجمالي الإعجابات';
+
+  @override
+  String get lbl_total_comments => 'إجمالي التعليقات';
+
+  @override
+  String get lbl_total_views => 'إجمالي المشاهدات';
+
+  @override
+  String get lbl_view_filters => 'عرض المرشحات';
+
+  @override
+  String get msg_export_functionality => 'سيتم تنفيذ وظيفة التصدير';
+
+  @override
+  String get msg_share_filters_functionality => 'سيتم تنفيذ وظيفة مشاركة المرشحات';
+
+  @override
+  String get lbl_active_filters => 'المرشحات النشطة';
+
+  @override
+  String get lbl_status => 'الحالة';
+
+  @override
+  String get lbl_sort => 'الترتيب';
+
+  @override
+  String get hint_search_case_discussions => 'البحث في مناقشات الحالات...';
+
+  @override
+  String get lbl_filters => 'المرشحات';
+
+  @override
+  String get lbl_clear_all => 'مسح الكل';
+
+  @override
+  String get lbl_apply_filters => 'تطبيق المرشحات';
+
+  @override
+  String get msg_loading_specialties => 'جاري تحميل التخصصات...';
+
+  @override
+  String get msg_select_specialty => 'اختر التخصص';
+
+  @override
+  String get msg_loading_countries => 'جاري تحميل البلدان...';
+
+  @override
+  String get msg_select_country => 'اختر البلد';
+
+  @override
+  String get lbl_sort_by => 'الترتيب حسب';
+
+  @override
+  String get lbl_sort_by_option => 'الترتيب حسب';
+
+  @override
+  String get lbl_default => 'افتراضي';
+
+  @override
+  String get lbl_date_created => 'تاريخ الإنشاء';
+
+  @override
+  String get lbl_order => 'الترتيب';
+
+  @override
+  String get lbl_desc => 'تنازلي';
+
+  @override
+  String get lbl_asc => 'تصاعدي';
+
+  @override
+  String get msg_select_status => 'اختر الحالة';
+
+  @override
+  String get lbl_all_status => 'جميع الحالات';
+
+  @override
+  String msg_sort_display(Object sortBy) {
+    return 'الترتيب: $sortBy';
+  }
+
+  @override
+  String get lbl_delete_comment => 'حذف التعليق';
+
+  @override
+  String get msg_confirm_delete_discussion => 'هل أنت متأكد من أنك تريد حذف هذه المناقشة؟';
+
+  @override
+  String get msg_upload_medical_images_description => 'ارفع الصور الطبية للحصول على تحليل ورؤى مدعومة بالذكاء الاصطناعي';
+
+  @override
+  String get lbl_x_ray => 'أشعة سينية';
+
+  @override
+  String get msg_ai_powered_medical_analysis => 'تحليل طبي مدعوم بالذكاء الاصطناعي';
+
+  @override
+  String get msg_high_quality_images_better_results => 'الصور عالية الجودة توفر نتائج تحليل أفضل للذكاء الاصطناعي';
+
+  @override
+  String get msg_photo_permission_explanation => 'يحتاج دكتاك الذكي إلى الوصول إلى صورك لتحليل الصور الطبية. يرجى تمكين أذونات الصور في إعدادات جهازك.';
+
+  @override
+  String get msg_ai_assistant_description => 'مساعدك الطبي المدعوم بالذكاء الاصطناعي جاهز للمساعدة في التشخيص والعلاج والرؤى الطبية.';
+
+  @override
+  String get msg_ready_to_start_instruction => 'جاهز للبدء؟ اكتب سؤالك أدناه أو اختر موضوعاً مقترحاً.';
+
+  @override
+  String get msg_open_menu_new_chat => 'افتح القائمة لبدء محادثة جديدة';
+
+  @override
+  String get msg_confirm_delete_conversation => 'هل أنت متأكد من أنك تريد حذف هذه المحادثة؟';
+
+  @override
+  String get lbl_cancel_uppercase => 'إلغاء';
+
+  @override
+  String get lbl_delete_uppercase => 'حذف';
+
+  @override
+  String get msg_session_name_max_length => 'يجب أن يكون اسم الجلسة 50 حرفًا أو أقل';
+
+  @override
+  String get msg_be_first_to_comment => 'كن أول من يشارك رؤاه الطبية حول هذه الحالة.';
 }

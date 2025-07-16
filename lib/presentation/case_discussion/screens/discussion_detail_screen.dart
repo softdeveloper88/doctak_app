@@ -81,7 +81,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
           builder: (context, state) {
             final commentCount = state is DiscussionDetailLoaded ? state.comments.length : 0;
             return DoctakAppBar(
-              title: 'Case Discussion',
+              title: translation(context).lbl_case_discussion,
               titleIcon: Icons.medical_information_rounded,
               actions: [
                 if (commentCount > 0)
@@ -137,7 +137,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                     onPressed: () {
                       // TODO: Implement share functionality
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Share functionality coming soon')),
+                        SnackBar(content: Text(translation(context).msg_share_functionality_coming_soon)),
                       );
                     },
                   ),
@@ -175,7 +175,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Error Loading Discussion',
+                      translation(context).msg_error_loading_discussion,
                       style: TextStyle(
                         fontSize: 18,
                         fontFamily: 'Poppins',
@@ -213,7 +213,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                           Icon(Icons.refresh_rounded, size: 18),
                           const SizedBox(width: 8),
                           Text(
-                            'Retry',
+                            translation(context).lbl_retry,
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
@@ -288,7 +288,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    'Comments',
+                                    translation(context).lbl_comments,
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
@@ -358,7 +358,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                         ),
                                         const SizedBox(height: 16),
                                         Text(
-                                          'No Comments Yet',
+                                          translation(context).msg_no_comments_yet,
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600,
@@ -368,7 +368,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          'Be the first to share your medical insights on this case.',
+                                          translation(context).msg_be_first_to_comment,
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontFamily: 'Poppins',
@@ -409,7 +409,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                     ),
                                     const SizedBox(width: 12),
                                     Text(
-                                      'Related Cases',
+                                      translation(context).lbl_related_cases,
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w700,
@@ -641,19 +641,19 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Comment'),
+        title: Text(translation(context).lbl_delete_comment),
         content: const Text('Are you sure you want to delete this comment?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(translation(context).lbl_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               context.read<DiscussionDetailBloc>().add(DeleteComment(commentId));
             },
-            child: const Text('Delete'),
+            child: Text(translation(context).lbl_delete),
           ),
         ],
       ),
@@ -749,7 +749,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Comments',
+              translation(context).lbl_comments,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -836,7 +836,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'No Comments Yet',
+                translation(context).msg_no_comments_yet,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -846,7 +846,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Be the first to share your medical insights on this case.',
+                translation(context).msg_be_first_to_comment,
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: 'Poppins',
@@ -878,7 +878,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Loading more comments...',
+              translation(context).msg_loading_more_comments,
               style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -940,7 +940,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
           ),
           const SizedBox(width: 12),
           Text(
-            'Related Cases',
+            translation(context).lbl_related_cases,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,

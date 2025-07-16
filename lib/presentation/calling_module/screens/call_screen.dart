@@ -98,13 +98,14 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       avatarUrl: widget.contactAvatar,
     );
 
-    // Initialize call provider
+    // Initialize call provider with token
     _callProvider = CallProvider(
       agoraService: _agoraService,
       callId: _currentCallId,
       localUser: _localUser,
       remoteUser: _remoteUser,
       isVideoCall: widget.isVideoCall,
+      token: widget.token, // Pass the token
     );
 
     // Notify CallService that we've opened the call screen

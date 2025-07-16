@@ -382,7 +382,7 @@ abstract class AppLocalizations {
   /// No description provided for @msg_something_went_wrong.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong'**
+  /// **'Something went wrong.Please try again...'**
   String get msg_something_went_wrong;
 
   /// No description provided for @err_msg_please_enter_valid_email.
@@ -856,7 +856,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_diagnostic_suggestions.
   ///
   /// In en, this message translates to:
-  /// **'Diagnostic \nSuggestions'**
+  /// **'Diagnostic Suggestions'**
   String get lbl_diagnostic_suggestions;
 
   /// No description provided for @lbl_request_suggestions.
@@ -922,7 +922,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_new_chat.
   ///
   /// In en, this message translates to:
-  /// **'+ NEW CHAT'**
+  /// **'New Chat'**
   String get lbl_new_chat;
 
   /// No description provided for @lbl_text_copied_clipboard.
@@ -994,7 +994,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_cancel.
   ///
   /// In en, this message translates to:
-  /// **'CANCEL'**
+  /// **'Cancel'**
   String get lbl_cancel;
 
   /// No description provided for @lbl_mute.
@@ -1432,7 +1432,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_delete.
   ///
   /// In en, this message translates to:
-  /// **'DELETE'**
+  /// **'Delete'**
   String get lbl_delete;
 
   /// No description provided for @lbl_english_language.
@@ -2434,7 +2434,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_likes.
   ///
   /// In en, this message translates to:
-  /// **'likes'**
+  /// **'Likes'**
   String get lbl_likes;
 
   /// No description provided for @lbl_comments.
@@ -2596,7 +2596,7 @@ abstract class AppLocalizations {
   /// No description provided for @msg_confirm_delete_comment.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure want to delete comment?'**
+  /// **'Are you sure you want to delete this comment?'**
   String get msg_confirm_delete_comment;
 
   /// No description provided for @lbl_no_name.
@@ -3862,7 +3862,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_error_exclamation.
   ///
   /// In en, this message translates to:
-  /// **'Error !'**
+  /// **'Error!'**
   String get lbl_error_exclamation;
 
   /// No description provided for @msg_group_create_error.
@@ -4686,6 +4686,1206 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear Filters'**
   String get lbl_clear_filters;
+
+  /// No description provided for @msg_wait_for_ai_response.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait for the AI to respond before sending another message'**
+  String get msg_wait_for_ai_response;
+
+  /// No description provided for @msg_cannot_access_session_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot access session settings right now'**
+  String get msg_cannot_access_session_settings;
+
+  /// No description provided for @lbl_doctak_ai_assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'DocTak AI Assistant'**
+  String get lbl_doctak_ai_assistant;
+
+  /// No description provided for @lbl_intelligent_medical_companion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your intelligent medical companion'**
+  String get lbl_intelligent_medical_companion;
+
+  /// No description provided for @lbl_quick_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Start'**
+  String get lbl_quick_start;
+
+  /// No description provided for @lbl_diagnosis_support.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnosis Support'**
+  String get lbl_diagnosis_support;
+
+  /// No description provided for @lbl_clinical_decision_assistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinical decision assistance'**
+  String get lbl_clinical_decision_assistance;
+
+  /// No description provided for @msg_diagnosis_support_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What conditions should I consider for a patient with chest pain and shortness of breath?'**
+  String get msg_diagnosis_support_prompt;
+
+  /// No description provided for @lbl_drug_information.
+  ///
+  /// In en, this message translates to:
+  /// **'Drug Information'**
+  String get lbl_drug_information;
+
+  /// No description provided for @lbl_medication_safety_interactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication safety & interactions'**
+  String get lbl_medication_safety_interactions;
+
+  /// No description provided for @msg_drug_information_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Are there any interactions between warfarin and aspirin?'**
+  String get msg_drug_information_prompt;
+
+  /// No description provided for @lbl_treatment_plans.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment Plans'**
+  String get lbl_treatment_plans;
+
+  /// No description provided for @lbl_evidence_based_protocols.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence-based protocols'**
+  String get lbl_evidence_based_protocols;
+
+  /// No description provided for @msg_treatment_plans_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the current treatment protocol for acute myocardial infarction?'**
+  String get msg_treatment_plans_prompt;
+
+  /// No description provided for @lbl_medical_codes.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Codes'**
+  String get lbl_medical_codes;
+
+  /// No description provided for @lbl_icd_cpt_code_lookup.
+  ///
+  /// In en, this message translates to:
+  /// **'ICD-10 & CPT code lookup'**
+  String get lbl_icd_cpt_code_lookup;
+
+  /// No description provided for @msg_medical_codes_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What ICD-10 code should I use for Type 2 diabetes with complications?'**
+  String get msg_medical_codes_prompt;
+
+  /// No description provided for @lbl_try_it.
+  ///
+  /// In en, this message translates to:
+  /// **'Try it'**
+  String get lbl_try_it;
+
+  /// No description provided for @msg_loading_conversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading conversation...'**
+  String get msg_loading_conversation;
+
+  /// No description provided for @msg_failed_to_send_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send message'**
+  String get msg_failed_to_send_message;
+
+  /// No description provided for @lbl_dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get lbl_dismiss;
+
+  /// No description provided for @msg_select_chat_from_menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a chat from the menu'**
+  String get msg_select_chat_from_menu;
+
+  /// No description provided for @msg_open_menu_to_start_new_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the menu to start a new chat'**
+  String get msg_open_menu_to_start_new_chat;
+
+  /// No description provided for @lbl_just_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get lbl_just_now;
+
+  /// No description provided for @lbl_doctak_ai.
+  ///
+  /// In en, this message translates to:
+  /// **'DocTak AI'**
+  String get lbl_doctak_ai;
+
+  /// No description provided for @lbl_chat_history.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat History'**
+  String get lbl_chat_history;
+
+  /// No description provided for @lbl_image_attached.
+  ///
+  /// In en, this message translates to:
+  /// **'Image attached'**
+  String get lbl_image_attached;
+
+  /// No description provided for @msg_session_creation_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Session creation timed out. Please try again.'**
+  String get msg_session_creation_timeout;
+
+  /// No description provided for @lbl_recent_chats.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Chats'**
+  String get lbl_recent_chats;
+
+  /// No description provided for @msg_loading_conversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your conversations...'**
+  String get msg_loading_conversations;
+
+  /// No description provided for @msg_no_chat_history.
+  ///
+  /// In en, this message translates to:
+  /// **'No chat history'**
+  String get msg_no_chat_history;
+
+  /// No description provided for @lbl_delete_conversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Conversation'**
+  String get lbl_delete_conversation;
+
+  /// No description provided for @msg_delete_conversation_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{sessionName}\"?'**
+  String msg_delete_conversation_confirm(Object sessionName);
+
+  /// No description provided for @msg_conversation_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation \"{sessionName}\" deleted'**
+  String msg_conversation_deleted(Object sessionName);
+
+  /// No description provided for @msg_session_loading_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Session loading timed out. Please try again.'**
+  String get msg_session_loading_timeout;
+
+  /// No description provided for @lbl_web_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Web search'**
+  String get lbl_web_search;
+
+  /// No description provided for @lbl_low_context.
+  ///
+  /// In en, this message translates to:
+  /// **'Low context'**
+  String get lbl_low_context;
+
+  /// No description provided for @lbl_medium_context.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium context'**
+  String get lbl_medium_context;
+
+  /// No description provided for @lbl_high_context.
+  ///
+  /// In en, this message translates to:
+  /// **'High context'**
+  String get lbl_high_context;
+
+  /// No description provided for @msg_waiting_for_ai_response.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for AI response...'**
+  String get msg_waiting_for_ai_response;
+
+  /// No description provided for @msg_ask_anything.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask anything...'**
+  String get msg_ask_anything;
+
+  /// No description provided for @lbl_chat_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Settings'**
+  String get lbl_chat_settings;
+
+  /// No description provided for @lbl_session_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Session name'**
+  String get lbl_session_name;
+
+  /// No description provided for @hint_enter_session_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter session name'**
+  String get hint_enter_session_name;
+
+  /// No description provided for @msg_session_name_length_limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Session name must be 50 characters or less'**
+  String get msg_session_name_length_limit;
+
+  /// No description provided for @msg_renaming_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Renaming session to \"{newName}\"...'**
+  String msg_renaming_session(Object newName);
+
+  /// No description provided for @msg_session_renamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Session renamed to \"{newName}\"'**
+  String msg_session_renamed(Object newName);
+
+  /// No description provided for @msg_failed_to_rename_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to rename session: {error}'**
+  String msg_failed_to_rename_session(Object error);
+
+  /// No description provided for @lbl_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get lbl_rename;
+
+  /// No description provided for @lbl_temperature.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get lbl_temperature;
+
+  /// No description provided for @lbl_precise.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise'**
+  String get lbl_precise;
+
+  /// No description provided for @lbl_creative.
+  ///
+  /// In en, this message translates to:
+  /// **'Creative'**
+  String get lbl_creative;
+
+  /// No description provided for @lbl_response_length.
+  ///
+  /// In en, this message translates to:
+  /// **'Response Length'**
+  String get lbl_response_length;
+
+  /// No description provided for @lbl_tokens_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} tokens'**
+  String lbl_tokens_count(Object tokens);
+
+  /// No description provided for @lbl_brief.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief'**
+  String get lbl_brief;
+
+  /// No description provided for @lbl_detailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed'**
+  String get lbl_detailed;
+
+  /// No description provided for @msg_copied_to_clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get msg_copied_to_clipboard;
+
+  /// No description provided for @lbl_view_attachment.
+  ///
+  /// In en, this message translates to:
+  /// **'View Attachment'**
+  String get lbl_view_attachment;
+
+  /// No description provided for @lbl_attachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get lbl_attachment;
+
+  /// No description provided for @msg_searching_web.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching the web...'**
+  String get msg_searching_web;
+
+  /// No description provided for @lbl_sources_count.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources ({count})'**
+  String lbl_sources_count(Object count);
+
+  /// No description provided for @lbl_web_source.
+  ///
+  /// In en, this message translates to:
+  /// **'Web source'**
+  String get lbl_web_source;
+
+  /// No description provided for @msg_message_copied_to_clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Message copied to clipboard'**
+  String get msg_message_copied_to_clipboard;
+
+  /// No description provided for @msg_preparing_doctak_ai.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing DocTak AI.'**
+  String get msg_preparing_doctak_ai;
+
+  /// No description provided for @msg_generating_response.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating response...'**
+  String get msg_generating_response;
+
+  /// No description provided for @msg_error_with_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String msg_error_with_details(Object error);
+
+  /// No description provided for @msg_ai_assistant_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Your AI-powered medical assistant is ready to help with diagnostics, treatments, and medical insights.'**
+  String get msg_ai_assistant_ready;
+
+  /// No description provided for @lbl_identify_cpt_icd_codes.
+  ///
+  /// In en, this message translates to:
+  /// **'Identify CPT or ICD codes'**
+  String get lbl_identify_cpt_icd_codes;
+
+  /// No description provided for @msg_code_detection_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Code Detection: Identify CPT or ICD codes'**
+  String get msg_code_detection_prompt;
+
+  /// No description provided for @lbl_based_on_symptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on symptoms'**
+  String get lbl_based_on_symptoms;
+
+  /// No description provided for @msg_diagnostic_suggestions_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostic Suggestions: Request suggestions based on symptoms'**
+  String get msg_diagnostic_suggestions_prompt;
+
+  /// No description provided for @lbl_dosage_interactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Dosage & interactions'**
+  String get lbl_dosage_interactions;
+
+  /// No description provided for @msg_drug_information_prompt_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Drug Information: Provide dosage and interaction details'**
+  String get msg_drug_information_prompt_2;
+
+  /// No description provided for @lbl_evidence_based_care.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence-based care'**
+  String get lbl_evidence_based_care;
+
+  /// No description provided for @msg_treatment_plans_prompt_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment Plans: Suggest evidence-based treatment options'**
+  String get msg_treatment_plans_prompt_2;
+
+  /// No description provided for @msg_ready_to_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to start? Type your question below or choose a suggested topic.'**
+  String get msg_ready_to_start;
+
+  /// No description provided for @msg_generating_response_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating response...'**
+  String get msg_generating_response_2;
+
+  /// No description provided for @hint_ask_medical_ai.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Medical AI...'**
+  String get hint_ask_medical_ai;
+
+  /// No description provided for @lbl_error_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'error'**
+  String get lbl_error_generic;
+
+  /// No description provided for @msg_image_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Image not found'**
+  String get msg_image_not_found;
+
+  /// No description provided for @lbl_ai_image_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Image Analysis'**
+  String get lbl_ai_image_analysis;
+
+  /// No description provided for @msg_upload_medical_images.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload medical images for AI-powered analysis and insights'**
+  String get msg_upload_medical_images;
+
+  /// No description provided for @lbl_select_medical_image_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Medical Image Type'**
+  String get lbl_select_medical_image_type;
+
+  /// No description provided for @msg_only_one_image_per_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Only allowed one time image in one session'**
+  String get msg_only_one_image_per_session;
+
+  /// No description provided for @msg_choose_medical_image_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose medical image type for AI analysis'**
+  String get msg_choose_medical_image_type;
+
+  /// No description provided for @lbl_dermatological.
+  ///
+  /// In en, this message translates to:
+  /// **'Dermatological'**
+  String get lbl_dermatological;
+
+  /// No description provided for @lbl_skin_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Skin analysis'**
+  String get lbl_skin_analysis;
+
+  /// No description provided for @lbl_xray.
+  ///
+  /// In en, this message translates to:
+  /// **'X-Ray'**
+  String get lbl_xray;
+
+  /// No description provided for @lbl_radiograph_scan.
+  ///
+  /// In en, this message translates to:
+  /// **'Radiograph scan'**
+  String get lbl_radiograph_scan;
+
+  /// No description provided for @lbl_ct_scan.
+  ///
+  /// In en, this message translates to:
+  /// **'CT Scan'**
+  String get lbl_ct_scan;
+
+  /// No description provided for @lbl_tomography.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomography'**
+  String get lbl_tomography;
+
+  /// No description provided for @lbl_mri.
+  ///
+  /// In en, this message translates to:
+  /// **'MRI'**
+  String get lbl_mri;
+
+  /// No description provided for @lbl_magnetic_scan.
+  ///
+  /// In en, this message translates to:
+  /// **'Magnetic scan'**
+  String get lbl_magnetic_scan;
+
+  /// No description provided for @lbl_mammography.
+  ///
+  /// In en, this message translates to:
+  /// **'Mammography'**
+  String get lbl_mammography;
+
+  /// No description provided for @lbl_breast_tissue_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Breast tissue analysis'**
+  String get lbl_breast_tissue_analysis;
+
+  /// No description provided for @msg_ai_powered_medical_image_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-powered medical image analysis'**
+  String get msg_ai_powered_medical_image_analysis;
+
+  /// No description provided for @lbl_upload_image_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload {imageType} Images'**
+  String lbl_upload_image_type(Object imageType);
+
+  /// No description provided for @msg_select_images_for_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Select up to {imageLimit} medical image{imagePlural} for AI analysis'**
+  String msg_select_images_for_analysis(Object imageLimit, Object imagePlural);
+
+  /// No description provided for @msg_high_quality_images_better_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'High-quality images provide better AI analysis results'**
+  String get msg_high_quality_images_better_analysis;
+
+  /// No description provided for @lbl_photo_access_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Access Required'**
+  String get lbl_photo_access_required;
+
+  /// No description provided for @msg_photo_permission_needed.
+  ///
+  /// In en, this message translates to:
+  /// **'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.'**
+  String get msg_photo_permission_needed;
+
+  /// No description provided for @lbl_open_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get lbl_open_settings;
+
+  /// No description provided for @msg_comment_added_successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment added successfully!'**
+  String get msg_comment_added_successfully;
+
+  /// No description provided for @msg_share_functionality_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Share functionality coming soon'**
+  String get msg_share_functionality_coming_soon;
+
+  /// No description provided for @msg_error_loading_discussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Loading Discussion'**
+  String get msg_error_loading_discussion;
+
+  /// No description provided for @lbl_replies_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} replies'**
+  String lbl_replies_count(Object count);
+
+  /// No description provided for @msg_no_comments_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Comments Yet'**
+  String get msg_no_comments_yet;
+
+  /// No description provided for @msg_be_first_to_share_insights.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to share your medical insights on this case.'**
+  String get msg_be_first_to_share_insights;
+
+  /// No description provided for @lbl_related_cases.
+  ///
+  /// In en, this message translates to:
+  /// **'Related Cases'**
+  String get lbl_related_cases;
+
+  /// No description provided for @msg_loading_more_comments.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading more comments...'**
+  String get msg_loading_more_comments;
+
+  /// No description provided for @lbl_cases_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cases'**
+  String lbl_cases_count(Object count);
+
+  /// No description provided for @lbl_time_days_ago.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String lbl_time_days_ago(Object count);
+
+  /// No description provided for @lbl_time_hours_ago.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String lbl_time_hours_ago(Object count);
+
+  /// No description provided for @lbl_time_minutes_ago.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String lbl_time_minutes_ago(Object count);
+
+  /// No description provided for @lbl_time_just_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get lbl_time_just_now;
+
+  /// No description provided for @hint_share_medical_insights.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your medical insights...'**
+  String get hint_share_medical_insights;
+
+  /// No description provided for @msg_share_professional_insights.
+  ///
+  /// In en, this message translates to:
+  /// **'Share professional insights and maintain medical ethics'**
+  String get msg_share_professional_insights;
+
+  /// No description provided for @lbl_medical_professional.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Professional'**
+  String get lbl_medical_professional;
+
+  /// No description provided for @lbl_general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get lbl_general;
+
+  /// No description provided for @lbl_more_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more tags'**
+  String lbl_more_tags(Object count);
+
+  /// No description provided for @lbl_delete_discussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Discussion'**
+  String get lbl_delete_discussion;
+
+  /// No description provided for @msg_delete_discussion_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this case discussion? This action cannot be undone.'**
+  String get msg_delete_discussion_confirm;
+
+  /// No description provided for @lbl_patient_information.
+  ///
+  /// In en, this message translates to:
+  /// **'Patient Information'**
+  String get lbl_patient_information;
+
+  /// No description provided for @msg_patient_demographics.
+  ///
+  /// In en, this message translates to:
+  /// **'{gender}, {age} years old'**
+  String msg_patient_demographics(Object age, Object gender);
+
+  /// No description provided for @msg_medical_history.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical History: {history}'**
+  String msg_medical_history(Object history);
+
+  /// No description provided for @lbl_clinical_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinical Tags'**
+  String get lbl_clinical_tags;
+
+  /// No description provided for @lbl_attached_files.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Files'**
+  String get lbl_attached_files;
+
+  /// No description provided for @lbl_clinical_information.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinical Information'**
+  String get lbl_clinical_information;
+
+  /// No description provided for @lbl_working_diagnosis.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Diagnosis'**
+  String get lbl_working_diagnosis;
+
+  /// No description provided for @lbl_treatment_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment Plan'**
+  String get lbl_treatment_plan;
+
+  /// No description provided for @lbl_ai_clinical_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Clinical Summary'**
+  String get lbl_ai_clinical_summary;
+
+  /// No description provided for @lbl_generated_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {time}'**
+  String lbl_generated_time(Object time);
+
+  /// No description provided for @lbl_views.
+  ///
+  /// In en, this message translates to:
+  /// **'Views'**
+  String get lbl_views;
+
+  /// No description provided for @lbl_ai_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Summary'**
+  String get lbl_ai_summary;
+
+  /// No description provided for @lbl_confidence_score.
+  ///
+  /// In en, this message translates to:
+  /// **'{score}% confidence'**
+  String lbl_confidence_score(Object score);
+
+  /// No description provided for @lbl_age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get lbl_age;
+
+  /// No description provided for @lbl_patient_privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Patient Privacy'**
+  String get lbl_patient_privacy;
+
+  /// No description provided for @lbl_anonymized.
+  ///
+  /// In en, this message translates to:
+  /// **'ANONYMIZED'**
+  String get lbl_anonymized;
+
+  /// No description provided for @lbl_identified.
+  ///
+  /// In en, this message translates to:
+  /// **'IDENTIFIED'**
+  String get lbl_identified;
+
+  /// No description provided for @lbl_evidence_level.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence Level'**
+  String get lbl_evidence_level;
+
+  /// No description provided for @lbl_time_days_ago_long.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String lbl_time_days_ago_long(Object count);
+
+  /// No description provided for @lbl_time_hours_ago_long.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours ago'**
+  String lbl_time_hours_ago_long(Object count);
+
+  /// No description provided for @lbl_time_minutes_ago_long.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes ago'**
+  String lbl_time_minutes_ago_long(Object count);
+
+  /// No description provided for @hint_search_discussions.
+  ///
+  /// In en, this message translates to:
+  /// **'Search discussions...'**
+  String get hint_search_discussions;
+
+  /// No description provided for @lbl_general_specialty.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get lbl_general_specialty;
+
+  /// No description provided for @lbl_cardiology.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardiology'**
+  String get lbl_cardiology;
+
+  /// No description provided for @lbl_neurology.
+  ///
+  /// In en, this message translates to:
+  /// **'Neurology'**
+  String get lbl_neurology;
+
+  /// No description provided for @lbl_orthopedics.
+  ///
+  /// In en, this message translates to:
+  /// **'Orthopedics'**
+  String get lbl_orthopedics;
+
+  /// No description provided for @lbl_pediatrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Pediatrics'**
+  String get lbl_pediatrics;
+
+  /// No description provided for @lbl_all_countries.
+  ///
+  /// In en, this message translates to:
+  /// **'All Countries'**
+  String get lbl_all_countries;
+
+  /// No description provided for @lbl_united_states.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get lbl_united_states;
+
+  /// No description provided for @lbl_united_kingdom.
+  ///
+  /// In en, this message translates to:
+  /// **'United Kingdom'**
+  String get lbl_united_kingdom;
+
+  /// No description provided for @lbl_canada.
+  ///
+  /// In en, this message translates to:
+  /// **'Canada'**
+  String get lbl_canada;
+
+  /// No description provided for @msg_loading_discussions.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading discussions...'**
+  String get msg_loading_discussions;
+
+  /// No description provided for @msg_discussions_found.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} discussions found'**
+  String msg_discussions_found(Object count);
+
+  /// No description provided for @lbl_filtered.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtered'**
+  String get lbl_filtered;
+
+  /// No description provided for @lbl_export_results.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Results'**
+  String get lbl_export_results;
+
+  /// No description provided for @lbl_share_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Filters'**
+  String get lbl_share_filters;
+
+  /// No description provided for @lbl_total_likes.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Likes'**
+  String get lbl_total_likes;
+
+  /// No description provided for @lbl_total_comments.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Comments'**
+  String get lbl_total_comments;
+
+  /// No description provided for @lbl_total_views.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Views'**
+  String get lbl_total_views;
+
+  /// No description provided for @lbl_view_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'View Filters'**
+  String get lbl_view_filters;
+
+  /// No description provided for @msg_export_functionality.
+  ///
+  /// In en, this message translates to:
+  /// **'Export functionality will be implemented'**
+  String get msg_export_functionality;
+
+  /// No description provided for @msg_share_filters_functionality.
+  ///
+  /// In en, this message translates to:
+  /// **'Share filters functionality will be implemented'**
+  String get msg_share_filters_functionality;
+
+  /// No description provided for @lbl_active_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Filters'**
+  String get lbl_active_filters;
+
+  /// No description provided for @lbl_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get lbl_status;
+
+  /// No description provided for @lbl_sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get lbl_sort;
+
+  /// No description provided for @hint_search_case_discussions.
+  ///
+  /// In en, this message translates to:
+  /// **'Search case discussions...'**
+  String get hint_search_case_discussions;
+
+  /// No description provided for @lbl_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get lbl_filters;
+
+  /// No description provided for @lbl_clear_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get lbl_clear_all;
+
+  /// No description provided for @lbl_apply_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get lbl_apply_filters;
+
+  /// No description provided for @msg_loading_specialties.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading specialties...'**
+  String get msg_loading_specialties;
+
+  /// No description provided for @msg_select_specialty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select specialty'**
+  String get msg_select_specialty;
+
+  /// No description provided for @msg_loading_countries.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading countries...'**
+  String get msg_loading_countries;
+
+  /// No description provided for @msg_select_country.
+  ///
+  /// In en, this message translates to:
+  /// **'Select country'**
+  String get msg_select_country;
+
+  /// No description provided for @lbl_sort_by.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort By'**
+  String get lbl_sort_by;
+
+  /// No description provided for @lbl_sort_by_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get lbl_sort_by_option;
+
+  /// No description provided for @lbl_default.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get lbl_default;
+
+  /// No description provided for @lbl_date_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Created'**
+  String get lbl_date_created;
+
+  /// No description provided for @lbl_order.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get lbl_order;
+
+  /// No description provided for @lbl_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Desc'**
+  String get lbl_desc;
+
+  /// No description provided for @lbl_asc.
+  ///
+  /// In en, this message translates to:
+  /// **'Asc'**
+  String get lbl_asc;
+
+  /// No description provided for @msg_select_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Select status'**
+  String get msg_select_status;
+
+  /// No description provided for @lbl_all_status.
+  ///
+  /// In en, this message translates to:
+  /// **'All Status'**
+  String get lbl_all_status;
+
+  /// No description provided for @msg_sort_display.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: {sortBy}'**
+  String msg_sort_display(Object sortBy);
+
+  /// No description provided for @lbl_delete_comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Comment'**
+  String get lbl_delete_comment;
+
+  /// No description provided for @msg_confirm_delete_discussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this discussion?'**
+  String get msg_confirm_delete_discussion;
+
+  /// No description provided for @msg_upload_medical_images_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload medical images for AI-powered analysis and insights'**
+  String get msg_upload_medical_images_description;
+
+  /// No description provided for @lbl_x_ray.
+  ///
+  /// In en, this message translates to:
+  /// **'X-Ray'**
+  String get lbl_x_ray;
+
+  /// No description provided for @msg_ai_powered_medical_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-powered medical image analysis'**
+  String get msg_ai_powered_medical_analysis;
+
+  /// No description provided for @msg_high_quality_images_better_results.
+  ///
+  /// In en, this message translates to:
+  /// **'High-quality images provide better AI analysis results'**
+  String get msg_high_quality_images_better_results;
+
+  /// No description provided for @msg_photo_permission_explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.'**
+  String get msg_photo_permission_explanation;
+
+  /// No description provided for @msg_ai_assistant_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Your AI-powered medical assistant is ready to help with diagnostics, treatments, and medical insights.'**
+  String get msg_ai_assistant_description;
+
+  /// No description provided for @msg_ready_to_start_instruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to start? Type your question below or choose a suggested topic.'**
+  String get msg_ready_to_start_instruction;
+
+  /// No description provided for @msg_open_menu_new_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the menu to start a new chat'**
+  String get msg_open_menu_new_chat;
+
+  /// No description provided for @msg_confirm_delete_conversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this conversation?'**
+  String get msg_confirm_delete_conversation;
+
+  /// No description provided for @lbl_cancel_uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'CANCEL'**
+  String get lbl_cancel_uppercase;
+
+  /// No description provided for @lbl_delete_uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE'**
+  String get lbl_delete_uppercase;
+
+  /// No description provided for @msg_session_name_max_length.
+  ///
+  /// In en, this message translates to:
+  /// **'Session name must be 50 characters or less'**
+  String get msg_session_name_max_length;
+
+  /// No description provided for @msg_be_first_to_comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to share your medical insights on this case.'**
+  String get msg_be_first_to_comment;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../utils/constants.dart';
 import '../models/agora_callbacks.dart';
@@ -56,10 +57,17 @@ class AgoraService {
       // Create and initialize the engine
       _engine = createAgoraRtcEngine();
 
+      print('🔴 AGORA INITIALIZATION:');
+      print('  📱 App ID: "${AppConstants.agoraAppId}"');
+      print('  📱 App ID Length: ${AppConstants.agoraAppId.length}');
+      print('  🔄 Channel Profile: COMMUNICATION');
+
       await _engine?.initialize(const RtcEngineContext(
         appId: AppConstants.agoraAppId,
         channelProfile: ChannelProfileType.channelProfileCommunication,
       ));
+
+      print('✅ Agora engine initialized successfully');
 
       // Register event handlers
       _registerEventHandlers();
@@ -77,9 +85,13 @@ class AgoraService {
     _engine?.registerEventHandler(
       RtcEngineEventHandler(
           onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-            print('✅ onJoinChannelSuccess: channel=${connection.channelId}, elapsed=${elapsed}ms');
+            print('✅ onJoinChannelSuccess: channel="${connection.channelId}", uid=${connection.localUid}, elapsed=${elapsed}ms');
+            print('🔴 CRITICAL: Successfully joined Agora channel!');
+            print('  📍 Channel Name: "${connection.channelId}"');
+            print('  👤 My UID: ${connection.localUid}');
+            print('  ⏱️ Time taken: ${elapsed}ms');
             if (_onJoinChannelSuccess != null) {
-              _onJoinChannelSuccess!(0, connection.channelId ?? "", elapsed);
+              _onJoinChannelSuccess!(connection.localUid ?? 0, connection.channelId ?? "", elapsed);
             }
           },
           onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
@@ -198,73 +210,71 @@ class AgoraService {
 
   // Enhanced media configuration with better video stream handling
   Future<void> configureMediaSettings({required bool isVideoCall}) async {
-    if (_engine == null) return;
-    
+    if (_engine == null) {
+      throw Exception('Agora engine not initialized');
+    }
+
     print('🎥 Configuring media settings: isVideoCall=$isVideoCall, platform=${Platform.operatingSystem}');
-    
+
     try {
-      // Set client role first
-      await _engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
-      print('✅ Client role set to broadcaster');
-      
-      // iOS-specific audio session configuration
-      if (Platform.isIOS) {
-        await _configureIOSAudioSession();
+      // CRITICAL FIX: Check and request permissions BEFORE configuring media
+      await _validateAndRequestPermissions(isVideoCall: isVideoCall);
+
+      // Add small delay to ensure permissions are properly processed
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      print('✅ Permissions validated, proceeding with media configuration...');
+
+      // STEP 1: Set client role first (this is critical and must succeed)
+      try {
+        await _engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+        print('✅ Client role set to broadcaster');
+      } catch (e) {
+        print('❌ FAILED at setClientRole: $e');
+        throw e;
       }
 
-      // Configure audio with platform-specific settings
-      if (Platform.isIOS) {
-        // iOS optimized audio profile
+      // STEP 2: Configure basic audio settings first
+      try {
+        // Use simple, standard audio configuration
         await _engine!.setAudioProfile(
-          profile: AudioProfileType.audioProfileMusicHighQuality,
-          scenario: AudioScenarioType.audioScenarioGameStreaming, // Better for iOS
-        );
-      } else {
-        // Android optimized audio profile
-        await _engine!.setAudioProfile(
-          profile: AudioProfileType.audioProfileMusicHighQuality,
+          profile: AudioProfileType.audioProfileDefault,
           scenario: AudioScenarioType.audioScenarioDefault,
         );
+        print('✅ Basic audio profile set');
+      } catch (e) {
+        print('❌ FAILED at setAudioProfile: $e');
+        throw e;
       }
 
-      // Enable audio processing for clear audio
-      await _engine!.enableAudioVolumeIndication(
-        interval: 300,  // More frequent updates for better responsiveness
-        smooth: 3, 
-        reportVad: true
-      );
-      
-      // Audio enhancement parameters
-      await _engine!.setParameters('{"che.audio.enable_aec": true}');
-      await _engine!.setParameters('{"che.audio.enable_agc": true}');
-      await _engine!.setParameters('{"che.audio.enable_ns": true}');
-      await _engine!.setParameters('{"che.audio.aec.enable": true}');
-      await _engine!.setParameters('{"che.audio.agc.enable": true}');
-      await _engine!.setParameters('{"che.audio.ns.enable": true}');
+      // STEP 3: Enable audio volume indication (basic version)
+      try {
+        await _engine!.enableAudioVolumeIndication(
+          interval: 1000,  // Less frequent for stability
+          smooth: 3,
+          reportVad: false  // Disable VAD for now
+        );
+        print('✅ Audio volume indication enabled');
+      } catch (e) {
+        print('❌ FAILED at enableAudioVolumeIndication: $e');
+        throw e;
+      }
 
-      print('✅ Audio settings configured');
+      // STEP 4: Skip complex audio parameters for now
+      print('✅ Basic audio settings configured');
 
       if (isVideoCall) {
-        // Enhanced video configuration with platform optimization
-        await _engine!.enableVideo();
-        
-        // Platform-specific video encoder configuration
-        if (Platform.isIOS) {
-          // iOS optimized settings
-          await _engine!.setVideoEncoderConfiguration(
-            const VideoEncoderConfiguration(
-              dimensions: VideoDimensions(width: 640, height: 480),
-              frameRate: 15,
-              bitrate: 900,  // Slightly higher for iOS
-              minBitrate: 500,
-              orientationMode: OrientationMode.orientationModeAdaptive,
-              degradationPreference: DegradationPreference.maintainQuality, // iOS handles quality better
-              mirrorMode: VideoMirrorModeType.videoMirrorModeEnabled,
-              codecType: VideoCodecType.videoCodecH264,
-            ),
-          );
-        } else {
-          // Android optimized settings
+        // STEP 5: Enable video (basic)
+        try {
+          await _engine!.enableVideo();
+          print('✅ Video enabled');
+        } catch (e) {
+          print('❌ FAILED at enableVideo: $e');
+          throw e;
+        }
+
+        // STEP 6: Set basic video encoder configuration
+        try {
           await _engine!.setVideoEncoderConfiguration(
             const VideoEncoderConfiguration(
               dimensions: VideoDimensions(width: 640, height: 480),
@@ -272,56 +282,40 @@ class AgoraService {
               bitrate: 800,
               minBitrate: 400,
               orientationMode: OrientationMode.orientationModeAdaptive,
-              degradationPreference: DegradationPreference.maintainFramerate, // Android prefers framerate
+              degradationPreference: DegradationPreference.maintainQuality,
               mirrorMode: VideoMirrorModeType.videoMirrorModeEnabled,
               codecType: VideoCodecType.videoCodecH264,
             ),
           );
+          print('✅ Video encoder configuration set');
+        } catch (e) {
+          print('❌ FAILED at setVideoEncoderConfiguration: $e');
+          throw e;
         }
 
-        // Enable dual stream mode for adaptive quality
-        await _engine!.enableDualStreamMode(enabled: true);
-        
-        // Set default remote video stream to high quality - removed as it requires specific UID
-        // await _engine!.setRemoteDefaultVideoStreamType(
-        //   streamType: VideoStreamType.videoStreamHigh,
-        // );
-
-        // Platform-specific video parameters
-        if (Platform.isIOS) {
-          // iOS optimized parameters
-          await _engine!.setParameters('{"che.video.h264.profile": 77}'); // Main profile for iOS
-          await _engine!.setParameters('{"che.video.h264.preferFrameRateOverImageQuality": false}');
-          await _engine!.setParameters('{"che.video.contentHint": "motion"}');
-          await _engine!.setParameters('{"che.video.enablePreEncode": true}'); // iOS hardware acceleration
-          await _engine!.setParameters('{"che.video.lowBitRateStreamParameter": {"width":160,"height":120,"frameRate":15,"bitRate":80}}');
-        } else {
-          // Android optimized parameters
-          await _engine!.setParameters('{"che.video.h264.profile": 66}'); // Baseline profile for Android compatibility
-          await _engine!.setParameters('{"che.video.h264.preferFrameRateOverImageQuality": true}'); // Android prefers framerate
-          await _engine!.setParameters('{"che.video.contentHint": "motion"}');
-          await _engine!.setParameters('{"che.video.lowBitRateStreamParameter": {"width":160,"height":120,"frameRate":15,"bitRate":65}}');
+        // STEP 7: Enable dual stream mode (optional)
+        try {
+          await _engine!.enableDualStreamMode(enabled: true);
+          print('✅ Dual stream mode enabled');
+        } catch (e) {
+          print('⚠️ Warning: Dual stream mode failed: $e');
+          // Continue without failing, as this is optional
         }
 
-        // Platform-specific camera settings
-        if (Platform.isIOS) {
+        // STEP 8: Set basic camera configuration
+        try {
           await _engine!.setCameraCapturerConfiguration(
             const CameraCapturerConfiguration(
               cameraDirection: CameraDirection.cameraFront,
             ),
           );
-          
-          // iOS camera optimization
-          await _engine!.setParameters('{"che.video.camera.captureMode": 1}'); // Auto capture mode
-        } else {
-          await _engine!.setCameraCapturerConfiguration(
-            const CameraCapturerConfiguration(
-              cameraDirection: CameraDirection.cameraFront,
-            ),
-          );
+          print('✅ Camera configuration set');
+        } catch (e) {
+          print('❌ FAILED at setCameraCapturerConfiguration: $e');
+          throw e;
         }
 
-        // Start local video preview with error handling
+        // STEP 9: Start local video preview (essential for video calls)
         try {
           await _engine!.startPreview();
           print('✅ Video preview started');
@@ -330,34 +324,36 @@ class AgoraService {
           // Continue anyway - preview might still work during call
         }
 
-        // Platform-specific audio routing for video calls
-        if (Platform.isIOS) {
-          // iOS audio routing
+        // STEP 10: Set basic audio routing for video calls
+        try {
           await _engine!.setDefaultAudioRouteToSpeakerphone(true);
           await _engine!.setEnableSpeakerphone(true);
-          // iOS specific audio session management
-          await _engine!.setParameters('{"che.audio.keep_audiosession": true}');
-        } else {
-          // Android audio routing
-          await _engine!.setDefaultAudioRouteToSpeakerphone(true);
-          await _engine!.setEnableSpeakerphone(true);
+          print('✅ Audio routing configured for video call');
+        } catch (e) {
+          print('⚠️ Warning: Audio routing failed: $e');
+          // Continue without failing
         }
-        
-        print('✅ Video settings configured');
+
+        print('✅ Video call configuration completed');
       } else {
-        // Audio call - disable video with platform-specific settings
-        await _engine!.disableVideo();
-        
-        if (Platform.isIOS) {
-          // iOS audio call routing (to earpiece)
-          await _engine!.setDefaultAudioRouteToSpeakerphone(false);
-          await _engine!.setParameters('{"che.audio.forceAudioRoute": 0}'); // Route to earpiece
-        } else {
-          // Android audio call routing
-          await _engine!.setDefaultAudioRouteToSpeakerphone(false);
+        // STEP 5 (audio call): Disable video and configure audio routing
+        try {
+          await _engine!.disableVideo();
+          print('✅ Video disabled for audio call');
+        } catch (e) {
+          print('❌ FAILED at disableVideo: $e');
+          throw e;
         }
-        
-        print('✅ Audio-only call configured for ${Platform.operatingSystem}');
+
+        try {
+          await _engine!.setDefaultAudioRouteToSpeakerphone(false);
+          print('✅ Audio routing configured for audio call');
+        } catch (e) {
+          print('⚠️ Warning: Audio routing failed: $e');
+          // Continue without failing
+        }
+
+        print('✅ Audio call configuration completed');
       }
 
     } catch (e) {
@@ -368,14 +364,9 @@ class AgoraService {
   // iOS-specific audio session configuration
   Future<void> _configureIOSAudioSession() async {
     try {
-      // iOS audio session optimization
-      await _engine!.setParameters('{"che.audio.audioSession.category": "AVAudioSessionCategoryPlayAndRecord"}');
-      await _engine!.setParameters('{"che.audio.audioSession.categoryOptions": ["AVAudioSessionCategoryOptionAllowBluetooth", "AVAudioSessionCategoryOptionDefaultToSpeaker"]}');
-      await _engine!.setParameters('{"che.audio.audioSession.mode": "AVAudioSessionModeVideoChat"}');
-      await _engine!.setParameters('{"che.audio.enable_aec": true}');
-      await _engine!.setParameters('{"che.audio.enable_ns": true}');
-      await _engine!.setParameters('{"che.audio.enable_agc": true}');
-      print('✅ iOS audio session configured');
+      // Simplified iOS audio session - use default settings only
+      print('ℹ️ Using default iOS audio session settings');
+      // Removed complex setParameters calls that were causing AgoraRtcException(-3, null)
     } catch (e) {
       print('❌ Error configuring iOS audio session: $e');
     }
@@ -654,7 +645,7 @@ class AgoraService {
   bool _isEngineValid() {
     return _engine != null;
   }
-  
+
   // Helper method to get connection state name for debugging
   String _getConnectionStateName(int state) {
     switch (state) {
@@ -666,7 +657,7 @@ class AgoraService {
       default: return 'UNKNOWN($state)';
     }
   }
-  
+
   // Helper method to get connection reason name for debugging
   String _getConnectionReasonName(int reason) {
     switch (reason) {
@@ -694,14 +685,14 @@ class AgoraService {
       default: return 'UNKNOWN($reason)';
     }
   }
-  
+
   // Log current engine state for debugging
   Future<void> _logEngineState() async {
     if (_engine == null) {
       print('❌ Engine is null');
       return;
     }
-    
+
     try {
       final connectionState = await _engine!.getConnectionState();
       print('📊 Engine connection state: ${connectionState.index} (${_getConnectionStateName(connectionState.index)})');
@@ -715,7 +706,7 @@ class AgoraService {
     print('📋 Current media settings:');
     print('  - Call type: ${isVideoCall ? 'VIDEO' : 'AUDIO'}');
     print('  - Engine initialized: ${_engine != null}');
-    
+
     if (_engine != null) {
       try {
         final connectionState = await _engine!.getConnectionState();
@@ -739,45 +730,52 @@ class AgoraService {
     }
 
     try {
-      print('🚀 Joining channel: $channelId with UID: $uid, isVideo: $isVideoCall');
+      print('🚀 CRITICAL: Joining Agora channel with following details:');
+      print('  📍 Channel ID: "$channelId" (length: ${channelId.length})');
+      print('  👤 UID: $uid');
+      print('  🎥 Is Video Call: $isVideoCall');
+      print('  🔑 Token: "${token ?? 'NULL'}" (empty: ${token?.isEmpty ?? true})');
+      print('  📱 Platform: ${Platform.operatingSystem}');
+      print('  🕐 Timestamp: ${DateTime.now().toIso8601String()}');
+
+      // Log engine state
       print('📊 Current engine state before join:');
       await _logEngineState();
       await _logMediaSettings(isVideoCall: isVideoCall);
-      
-      // Enhanced channel media options for better compatibility
+
+      // CRITICAL FIX: Use simpler channel options for better compatibility
       final options = ChannelMediaOptions(
-        // Publishing options
+        // Publishing options - simplified
         publishCameraTrack: isVideoCall,
         publishMicrophoneTrack: true,
-        publishCustomVideoTrack: false,
-        publishCustomAudioTrack: false,
         publishScreenTrack: false,
-        
-        // Subscription options
+
+        // Subscription options - ensure we subscribe to remote streams
         autoSubscribeAudio: true,
         autoSubscribeVideo: isVideoCall,
-        
+
         // Channel configuration
         channelProfile: ChannelProfileType.channelProfileCommunication,
         clientRoleType: ClientRoleType.clientRoleBroadcaster,
-        
-        // Audio/Video quality options for better performance
-        audioDelayMs: 0,
+
+        // Remove potentially problematic options
         enableBuiltInMediaEncryption: false,
-        
-        // Additional options for stability
-        isInteractiveAudience: false,
       );
 
+      // CRITICAL: Use the provided token or empty string
+      // final actualToken = token ?? '';
+
+      // print('🔐 Using token: "${actualToken.isEmpty ? "EMPTY" : "PROVIDED"}"');
+
       await _engine!.joinChannel(
-        token: token ?? '',
+        token: '',
         channelId: channelId,
         uid: uid,
         options: options,
       );
 
       print('✅ Successfully initiated channel join');
-      
+
       // Log channel options for debugging
       print('📋 Channel options used:');
       print('  - publishCameraTrack: ${options.publishCameraTrack}');
@@ -786,11 +784,58 @@ class AgoraService {
       print('  - autoSubscribeVideo: ${options.autoSubscribeVideo}');
       print('  - channelProfile: ${options.channelProfile?.index}');
       print('  - clientRoleType: ${options.clientRoleType?.index}');
-      
+
       return true;
     } catch (e) {
       print('❌ Error joining channel: $e');
       return false;
+    }
+  }
+
+  /// CRITICAL FIX: Validate and request permissions before media configuration
+  Future<void> _validateAndRequestPermissions({required bool isVideoCall}) async {
+    print('🔒 Validating permissions for ${isVideoCall ? 'video' : 'audio'} call...');
+
+    try {
+      // Check microphone permission (required for all calls)
+      PermissionStatus micStatus = await Permission.microphone.status;
+      if (!micStatus.isGranted) {
+        print('🎤 Requesting microphone permission...');
+        micStatus = await Permission.microphone.request();
+        if (!micStatus.isGranted) {
+          throw Exception('Microphone permission is required for calls');
+        }
+      }
+      print('✅ Microphone permission granted');
+
+      // Check camera permission for video calls
+      if (isVideoCall) {
+        PermissionStatus cameraStatus = await Permission.camera.status;
+        if (!cameraStatus.isGranted) {
+          print('📹 Requesting camera permission...');
+          cameraStatus = await Permission.camera.request();
+          if (!cameraStatus.isGranted) {
+            throw Exception('Camera permission is required for video calls');
+          }
+        }
+        print('✅ Camera permission granted');
+      }
+
+      // Additional notification permission for Android 13+
+      if (Platform.isAndroid) {
+        PermissionStatus notificationStatus = await Permission.notification.status;
+        if (!notificationStatus.isGranted) {
+          print('🔔 Requesting notification permission...');
+          await Permission.notification.request();
+          // Don't fail if notification permission is denied, it's not critical for calling
+        }
+      }
+
+      print('✅ All required permissions validated successfully');
+
+    } catch (e) {
+      print('❌ Permission validation failed: $e');
+      throw Exception('Permission validation failed: $e');
     }
   }
 }
