@@ -1,0 +1,5 @@
+{
+  "ar": [
+    "msg_ai_powered_medical_analysis"
+  ]
+}
