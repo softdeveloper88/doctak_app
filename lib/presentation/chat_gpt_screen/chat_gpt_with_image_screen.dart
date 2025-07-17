@@ -1495,22 +1495,28 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   }
 
   Future<bool> _checkAndRequestPermissions() async {
-    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    final int sdkInt = androidInfo.version.sdkInt;
-
     Permission permission;
     
-    // Handle different Android versions
-    if (sdkInt >= 33) {
-      // Android 13+ (API 33+) - Use granular permissions
+    if (Platform.isIOS) {
+      // iOS uses photos permission for accessing photo library
       permission = Permission.photos;
-    } else if (sdkInt >= 30) {
-      // Android 11-12 (API 30-32) - Use external storage with media access
-      permission = Permission.storage;
     } else {
-      // Android 10 and below (API 29 and below)
-      permission = Permission.storage;
+      // Android permission handling
+      final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      final int sdkInt = androidInfo.version.sdkInt;
+      
+      // Handle different Android versions
+      if (sdkInt >= 33) {
+        // Android 13+ (API 33+) - Use granular permissions
+        permission = Permission.photos;
+      } else if (sdkInt >= 30) {
+        // Android 11-12 (API 30-32) - Use external storage with media access
+        permission = Permission.storage;
+      } else {
+        // Android 10 and below (API 29 and below)
+        permission = Permission.storage;
+      }
     }
 
     final status = await permission.status;
