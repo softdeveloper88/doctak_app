@@ -32,8 +32,11 @@ class ChatGptWithImageScreen extends StatefulWidget {
   bool isFromMainScreen;
   String? question;
 
-  ChatGptWithImageScreen(
-      {super.key, this.isFromMainScreen = true, this.question});
+  ChatGptWithImageScreen({
+    super.key,
+    this.isFromMainScreen = true,
+    this.question,
+  });
 
   @override
   ChatGPTScreenState createState() => ChatGPTScreenState();
@@ -73,29 +76,28 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     if (question.isEmpty) return;
 
     var myMessage = Messages(
-        id: -1,
-        gptSessionId: selectedSessionId.toString(),
-        question: question,
-        response: translation(context).lbl_generating_response,
-        createdAt: DateTime.now().toString(),
-        updatedAt: DateTime.now().toString());
+      id: -1,
+      gptSessionId: selectedSessionId.toString(),
+      question: question,
+      response: translation(context).lbl_generating_response,
+      createdAt: DateTime.now().toString(),
+      updatedAt: DateTime.now().toString(),
+    );
 
     state1.response1.messages!.add(myMessage);
 
-    BlocProvider.of<ChatGPTBloc>(context).add(
-      GetPost(
-        sessionId: selectedSessionId.toString(),
-        question: question,
-      ),
-    );
+    BlocProvider.of<ChatGPTBloc>(
+      context,
+    ).add(GetPost(sessionId: selectedSessionId.toString(), question: question));
     textController.clear();
     scrollToBottom();
-    
+
     try {
       isWriting = false;
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -126,10 +128,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
           // History button
           IconButton(
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 36,
-            ),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -149,7 +148,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                     BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
                     Navigator.of(context).pop();
                     isOneTimeImageUploaded = false;
-                    selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                    selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                      context,
+                    ).newChatSessionId;
                   } catch (e) {
                     print(e);
                   }
@@ -161,9 +162,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                   selectedSessionId = session.id;
                   isLoadingMessages = true;
                   isOneTimeImageUploaded = true;
-                  BlocProvider.of<ChatGPTBloc>(context).add(
-                    GetMessages(sessionId: selectedSessionId.toString()),
-                  );
+                  BlocProvider.of<ChatGPTBloc>(
+                    context,
+                  ).add(GetMessages(sessionId: selectedSessionId.toString()));
                   Navigator.of(context).pop();
                 },
               ).launch(context);
@@ -174,384 +175,247 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
             margin: const EdgeInsets.only(right: 16),
             child: IconButton(
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
-                  ),
-                  icon: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-
-                      Icons.add_photo_alternate_rounded,
-                      color: Colors.blue[600],
-                      size: 16,
-                    ),
-                  ),
-                  onPressed: () {
-                    isOneTimeImageUploaded = false;
-                    try {
-                      BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                      selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
-                    } catch (e) {
-                      print(e);
-                    }
-                  },
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add_photo_alternate_rounded,
+                  color: Colors.blue[600],
+                  size: 16,
                 ),
               ),
-            ],
+              onPressed: () {
+                isOneTimeImageUploaded = false;
+                try {
+                  BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                    context,
+                  ).newChatSessionId;
+                } catch (e) {
+                  print(e);
+                }
+              },
+            ),
           ),
+        ],
+      ),
       body: BlocBuilder<ChatGPTBloc, ChatGPTState>(
-              builder: (context, state1) {
-                  if (selectedSessionId == 0 && state1 is DataLoaded) {
-                    selectedSessionId = state1.response.newSessionId;
-                    chatWithAi = state1.response.sessions?.first.name ?? translation(context).lbl_preparing_ai;
-                  } else if (state1 is DataError) {
-                    showToast(translation(context).msg_something_wrong);
-                    if (isError) {
-                      try {
-                        BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                        isOneTimeImageUploaded = false;
-                        isError = false;
-                        selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
-                      } catch (e) {
-                        // Error logging suppressed
-                      }
-                    }
-                  }
-                  
-                  if (state1 is DataInitial || state1 is DataLoading) {
-                    return ChatShimmerLoader();
-                  } else if (state1 is DataLoaded) {
-                    // Check if messages exist and are not null
-                    isEmpty = state1.response1.messages?.isEmpty ?? true;
-                    
-                    if (!widget.isFromMainScreen) {
-                      if (isAlreadyAsk) {
-                        setState(() {
-                          isEmpty = false;
-                        });
-                        isAlreadyAsk = false;
-                        drugsAskQuestion(state1, context);
-                      }
-                    }
-                    
-                    return Column(
-                      children: [
-                        if (isEmpty)
-                          Expanded(
-                            child: Container(
-                              color: svGetScaffoldColor(),
-                              child: SafeArea(
-                                child: SingleChildScrollView(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      const SizedBox(height: 20),
-                                      
-                                      // Hero Icon - simplified
-                                      Container(
-                                        width: 80,
-                                        height: 80,
-                                        margin: const EdgeInsets.only(bottom: 20),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue[600],
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.blue.withOpacity(0.3),
-                                              spreadRadius: 2,
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: const Center(
-                                          child: Icon(
-                                            Icons.image_search_rounded,
-                                            color: Colors.white,
-                                            size: 40,
-                                          ),
-                                        ),
-                                      ),
-                                      
-                                      // Welcome Text
-                                      Text(
-                                        translation(context).lbl_welcome_doctor,
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Poppins',
-                                          letterSpacing: 0.5,
-                                          color: appStore.isDarkMode ? Colors.white : Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      
-                                      // Description
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                                        child: Text(
-                                          "Upload medical images for AI-powered analysis and insights",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: 'Poppins',
-                                            height: 1.5,
-                                            color: appStore.isDarkMode 
-                                                ? Colors.white70
-                                                : Colors.black.withAlpha(179),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      
-                                      // Upload Section
-                                      Text(
-                                        "Select Medical Image Type",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          fontFamily: 'Poppins',
-                                          color: Colors.blue[800],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      
-                                      // Upload Button - simplified
-                                      Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(24),
-                                          color: Colors.blue[600],
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.blue.withOpacity(0.3),
-                                              offset: const Offset(0, 4),
-                                              blurRadius: 12,
-                                              spreadRadius: 0,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            borderRadius: BorderRadius.circular(24),
-                                            onTap: () async {
-                                              if (isOneTimeImageUploaded) {
-                                                toasty(context, translation(context).lbl_only_one_image_allowed);
-                                              } else {
-                                                bool hasPermission = await _checkAndRequestPermissions();
-                                                if (hasPermission) {
-                                                  _showBeforeFileOptions();
-                                                } else {
-                                                  _permissionDialog();
-                                                }
-                                              }
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Container(
-                                                    padding: const EdgeInsets.all(6),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white.withOpacity(0.2),
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: const Icon(
-                                                      Icons.add_photo_alternate_rounded, 
-                                                      color: Colors.white,
-                                                      size: 24
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 16),
-                                                  Text(
-                                                    translation(context).lbl_medical_images,
-                                                    style: const TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w600,
-                                                      fontFamily: 'Poppins',
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      
-                                      const SizedBox(height: 20),
-                                      
-                                      // Info Container - simplified
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: appStore.isDarkMode
-                                              ? Colors.blue.withOpacity(0.1)
-                                              : Colors.blue.withOpacity(0.05),
-                                          borderRadius: BorderRadius.circular(16),
-                                          border: Border.all(
-                                            color: Colors.blue.withOpacity(0.2),
-                                            width: 1.5,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.blue.withOpacity(0.05),
-                                              offset: const Offset(0, 2),
-                                              blurRadius: 8,
-                                              spreadRadius: 0,
-                                            ),
-                                          ],
-                                        ),
-                                        padding: const EdgeInsets.all(12),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(6),
-                                              decoration: BoxDecoration(
-                                                color: Colors.amber.withOpacity(0.2),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                Icons.lightbulb_rounded,
-                                                color: Colors.amber[700],
-                                                size: 16,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                translation(context).msg_upload_images_prompt,
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.blue[800],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+        builder: (context, state1) {
+          if (selectedSessionId == 0 && state1 is DataLoaded) {
+            selectedSessionId = state1.response.newSessionId;
+            chatWithAi =
+                state1.response.sessions?.first.name ??
+                translation(context).lbl_preparing_ai;
+          } else if (state1 is DataError) {
+            showToast(translation(context).msg_something_wrong);
+            if (isError) {
+              try {
+                BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                isOneTimeImageUploaded = false;
+                isError = false;
+                selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                  context,
+                ).newChatSessionId;
+              } catch (e) {
+                // Error logging suppressed
+              }
+            }
+          }
+
+          if (state1 is DataInitial || state1 is DataLoading) {
+            return ChatShimmerLoader();
+          } else if (state1 is DataLoaded) {
+            // Check if messages exist and are not null
+            isEmpty = state1.response1.messages?.isEmpty ?? true;
+
+            if (!widget.isFromMainScreen) {
+              if (isAlreadyAsk) {
+                setState(() {
+                  isEmpty = false;
+                });
+                isAlreadyAsk = false;
+                drugsAskQuestion(state1, context);
+              }
+            }
+
+            return Column(
+              children: [
+                if (isEmpty)
+                  Expanded(
+                    child: Container(
+                      color: svGetScaffoldColor(),
+                      child: SafeArea(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 20),
+
+                              // Hero Icon - simplified
+                              Container(
+                                width: 80,
+                                height: 80,
+                                margin: const EdgeInsets.only(bottom: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[600],
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.3),
+                                      spreadRadius: 2,
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_search_rounded,
+                                    color: Colors.white,
+                                    size: 40,
                                   ),
                                 ),
                               ),
-                            ),
-                          )
-                        else
-                          Expanded(
-                            child: Container(
-                              color: svGetScaffoldColor(),
-                              child: ListView.builder(
-                                controller: _scrollController,
-                                padding: const EdgeInsets.all(12),
-                                itemCount: state1.response1.messages?.length,
-                                itemBuilder: (context, index) {
-                                  Messages message = state1.response1.messages?[index] ?? Messages();
-                                  return Column(
-                                    children: [
-                                      ChatBubble(
-                                        text: message.question ?? '',
-                                        isUserMessage: true,
-                                        imageUrl1: index != 0
-                                            ? null
-                                            : selectedImageFiles.isNotEmpty
-                                                ? File(selectedImageFiles.first.path)
-                                                : null,
-                                        imageUrl2: index != 0
-                                            ? null
-                                            : selectedImageFiles.isNotEmpty
-                                                ? selectedImageFiles.length == 2
-                                                    ? File(selectedImageFiles.last.path)
-                                                    : null
-                                                : null,
-                                        responseImageUrl1: index != 0 ? '' : message.imageUrl1 ?? '',
-                                        responseImageUrl2: index != 0 ? '' : message.imageUrl2 ?? '',
+
+                              // Welcome Text
+                              Text(
+                                translation(context).lbl_welcome_doctor,
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 0.5,
+                                  color: appStore.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Description
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Text(
+                                  "Upload medical images for AI-powered analysis and insights",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Poppins',
+                                    height: 1.5,
+                                    color: appStore.isDarkMode
+                                        ? Colors.white70
+                                        : Colors.black.withAlpha(179),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              // Upload Section
+                              Text(
+                                "Select Medical Image Type",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: Colors.blue[800],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Upload Button - simplified
+                              Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  color: Colors.blue[600],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.3),
+                                      offset: const Offset(0, 4),
+                                      blurRadius: 12,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(24),
+                                    onTap: () async {
+                                      if (isOneTimeImageUploaded) {
+                                        toasty(
+                                          context,
+                                          translation(
+                                            context,
+                                          ).lbl_only_one_image_allowed,
+                                        );
+                                      } else {
+                                        bool hasPermission =
+                                            await _checkAndRequestPermissions();
+                                        if (hasPermission) {
+                                          _showBeforeFileOptions();
+                                        } else {
+                                          _permissionDialog();
+                                        }
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0,
                                       ),
-                                      ChatBubble(
-                                        text: message.response ?? "",
-                                        isUserMessage: false,
-                                        imageUrl1: selectedImageFiles.isNotEmpty
-                                            ? File(selectedImageFiles.first.path)
-                                            : null,
-                                        imageUrl2: selectedImageFiles.isNotEmpty
-                                            ? selectedImageFiles.length == 2
-                                                ? File(selectedImageFiles.last.path)
-                                                : null
-                                            : null,
-                                        responseImageUrl1: message.imageUrl1 ?? '',
-                                        responseImageUrl2: message.imageUrl2 ?? '',
-                                        onTapReginarate: () {
-                                          String question = message.question ?? "";
-                                          if (question.isEmpty) return;
-                                          
-                                          setState(() {
-                                            var myMessage = Messages(
-                                                id: -1,
-                                                gptSessionId: selectedSessionId.toString(),
-                                                question: question,
-                                                imageUrl1: message.imageUrl1,
-                                                imageUrl2: message.imageUrl2,
-                                                response: translation(context).lbl_generating_response,
-                                                createdAt: DateTime.now().toString(),
-                                                updatedAt: DateTime.now().toString());
-                                            state1.response1.messages!.add(myMessage);
-                                            BlocProvider.of<ChatGPTBloc>(context).add(
-                                              GetPost(
-                                                sessionId: selectedSessionId.toString(),
-                                                question: question,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(
+                                                0.2,
                                               ),
-                                            );
-                                            textController.clear();
-                                            scrollToBottom();
-                                          });
-                                          
-                                          try {
-                                            isWriting = false;
-                                          } catch (e) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Error: $e')));
-                                          }
-                                        },
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.add_photo_alternate_rounded,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Text(
+                                            translation(
+                                              context,
+                                            ).lbl_medical_images,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'Poppins',
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  );
-                                },
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        
-                        // Image Preview Section - redesigned
-                        _buildImagePreview(),
-                        
-                        // Input Section - completely redesigned using drugs_list pattern
-                        Container(
-                          decoration: BoxDecoration(
-                            color: svGetScaffoldColor(),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withAlpha(13),
-                                offset: const Offset(0, -3),
-                                blurRadius: 8,
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          child: Column(
-                            children: [
+
+                              const SizedBox(height: 20),
+
+                              // Info Container - simplified
                               Container(
                                 decoration: BoxDecoration(
                                   color: appStore.isDarkMode
-                                      ? Colors.blueGrey[800]
-                                      : Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(24.0),
+                                      ? Colors.blue.withOpacity(0.1)
+                                      : Colors.blue.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: Colors.blue.withOpacity(0.2),
                                     width: 1.5,
@@ -565,211 +429,443 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                     ),
                                   ],
                                 ),
+                                padding: const EdgeInsets.all(12),
                                 child: Row(
                                   children: [
-                                    // Attachment button
-                                    IconButton(
-                                      icon: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue.withOpacity(0.1),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.attach_file_rounded,
-                                          color: Colors.blue[600],
-                                          size: 20,
-                                        ),
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.withOpacity(0.2),
+                                        shape: BoxShape.circle,
                                       ),
-                                      onPressed: () async {
-                                        if (isOneTimeImageUploaded) {
-                                          toasty(context, 'Only allowed one time image in one session');
-                                        } else {
-                                          bool hasPermission = await _checkAndRequestPermissions();
-                                          if (hasPermission) {
-                                            _showBeforeFileOptions();
-                                          } else {
-                                            _permissionDialog();
-                                          }
-                                        }
-                                      },
+                                      child: Icon(
+                                        Icons.lightbulb_rounded,
+                                        color: Colors.amber[700],
+                                        size: 16,
+                                      ),
                                     ),
-                                    
-                                    // Text input
+                                    const SizedBox(width: 8),
                                     Expanded(
-                                      child: TextField(
-                                        focusNode: focusNode,
-                                        controller: textController,
-                                        minLines: 1,
-                                        maxLines: 4,
+                                      child: Text(
+                                        translation(
+                                          context,
+                                        ).msg_upload_images_prompt,
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
-                                          fontSize: 16,
-                                          color: appStore.isDarkMode 
-                                              ? Colors.white
-                                              : Colors.black87,
-                                        ),
-                                        decoration: InputDecoration(
-                                          hintStyle: TextStyle(
-                                            color: appStore.isDarkMode
-                                                ? Colors.white60
-                                                : Colors.black54,
-                                            fontFamily: 'Poppins',
-                                          ),
-                                          hintText: translation(context).msg_clinical_summary_hint,
-                                          border: InputBorder.none,
-                                          contentPadding: const EdgeInsets.symmetric(
-                                            horizontal: 8.0, 
-                                            vertical: 16.0
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    
-                                    // Send button
-                                    Container(
-                                      margin: const EdgeInsets.only(right: 8.0),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.blue[600],
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.blue.withOpacity(0.3),
-                                            offset: const Offset(0, 2),
-                                            blurRadius: 8,
-                                            spreadRadius: 0,
-                                          ),
-                                        ],
-                                      ),
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          borderRadius: BorderRadius.circular(30),
-                                          onTap: () async {
-                                            isError = true;
-                                            focusNode.unfocus();
-                                            
-                                            if (selectedImageFiles.isEmpty) {
-                                              return;
-                                            } else if (imageUploadBloc.imagefiles.isEmpty && isOneTimeImageUploaded) {
-                                              String question = textController.text.trim();
-                                              if (question != '') {
-                                                setState(() {
-                                                  isOneTimeImageUploaded = true;
-                                                  var myMessage = Messages(
-                                                    id: -1,
-                                                    gptSessionId: selectedSessionId.toString(),
-                                                    question: question,
-                                                    response: translation(context).lbl_generating_response,
-                                                    createdAt: DateTime.now().toString(),
-                                                    updatedAt: DateTime.now().toString(),
-                                                    imageUrl1: '',
-                                                    imageUrl2: '',
-                                                  );
-                                                  state1.response1.messages!.add(myMessage);
-
-                                                  BlocProvider.of<ChatGPTBloc>(context).add(
-                                                    GetPost(
-                                                        sessionId: selectedSessionId.toString(),
-                                                        question: question,
-                                                        imageUrl1: null,
-                                                        imageUrl2: null,
-                                                        imageType: imageType),
-                                                  );
-                                                  imageUploadBloc.imagefiles.clear();
-                                                  textController.clear();
-                                                  scrollToBottom();
-                                                });
-
-                                                try {
-                                                  isWriting = false;
-                                                } catch (e) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                      SnackBar(content: Text('Error: $e')));
-                                                }
-                                              } else {
-                                                toasty(context, translation(context).lbl_please_ask_question);
-                                              }
-                                            } else if (imageUploadBloc.imagefiles.isNotEmpty && !isOneTimeImageUploaded) {
-                                              String question = textController.text.trim();
-                                              setState(() {
-                                                isOneTimeImageUploaded = true;
-                                                var myMessage = Messages(
-                                                  id: -1,
-                                                  gptSessionId: selectedSessionId.toString(),
-                                                  question: question,
-                                                  response: translation(context).lbl_generating_response,
-                                                  createdAt: DateTime.now().toString(),
-                                                  updatedAt: DateTime.now().toString(),
-                                                  imageUrl1: imageUploadBloc.imagefiles.first.path,
-                                                  imageUrl2: imageUploadBloc.imagefiles.first.path,
-                                                );
-                                                state1.response1.messages!.add(myMessage);
-
-                                                BlocProvider.of<ChatGPTBloc>(context).add(
-                                                  GetPost(
-                                                      sessionId: selectedSessionId.toString(),
-                                                      question: question == ""
-                                                          ? translation(context).lbl_analyse_image
-                                                          : question,
-                                                      imageUrl1: imageUploadBloc.imagefiles.first.path,
-                                                      imageUrl2: imageUploadBloc.imagefiles.last.path,
-                                                      imageType: imageType),
-                                                );
-                                                imageUploadBloc.imagefiles.clear();
-                                                textController.clear();
-                                                scrollToBottom();
-                                              });
-                                              try {
-                                                isWriting = false;
-                                              } catch (e) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(content: Text('Error: $e')));
-                                              }
-                                            }
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(12.0),
-                                            child: isWriting
-                                              ? const TypingIndicators(
-                                                  color: Colors.white,
-                                                  size: 3.0,
-                                                )
-                                              : const Icon(
-                                                  Icons.send_rounded,
-                                                  color: Colors.white,
-                                                  size: 20,
-                                                ),
-                                          ),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.blue[800],
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                translation(context).msg_ai_disclaimer,
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 11,
-                                  color: Colors.grey[600],
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
                             ],
                           ),
                         ),
-                      ],
-                    );
-                  } else if (state1 is DataError) {
-                    return _buildErrorState(context, state1.errorMessage.toString());
-                  } else {
-                    return Text(translation(context).lbl_error);
-                  }
-                }
-              ),
+                      ),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: Container(
+                      color: svGetScaffoldColor(),
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(12),
+                        itemCount: state1.response1.messages?.length,
+                        itemBuilder: (context, index) {
+                          Messages message =
+                              state1.response1.messages?[index] ?? Messages();
+                          return Column(
+                            children: [
+                              ChatBubble(
+                                text: message.question ?? '',
+                                isUserMessage: true,
+                                imageUrl1: index != 0
+                                    ? null
+                                    : selectedImageFiles.isNotEmpty
+                                    ? File(selectedImageFiles.first.path)
+                                    : null,
+                                imageUrl2: index != 0
+                                    ? null
+                                    : selectedImageFiles.isNotEmpty
+                                    ? selectedImageFiles.length == 2
+                                          ? File(selectedImageFiles.last.path)
+                                          : null
+                                    : null,
+                                responseImageUrl1: index != 0
+                                    ? ''
+                                    : message.imageUrl1 ?? '',
+                                responseImageUrl2: index != 0
+                                    ? ''
+                                    : message.imageUrl2 ?? '',
+                              ),
+                              ChatBubble(
+                                text: message.response ?? "",
+                                isUserMessage: false,
+                                imageUrl1: selectedImageFiles.isNotEmpty
+                                    ? File(selectedImageFiles.first.path)
+                                    : null,
+                                imageUrl2: selectedImageFiles.isNotEmpty
+                                    ? selectedImageFiles.length == 2
+                                          ? File(selectedImageFiles.last.path)
+                                          : null
+                                    : null,
+                                responseImageUrl1: message.imageUrl1 ?? '',
+                                responseImageUrl2: message.imageUrl2 ?? '',
+                                onTapReginarate: () {
+                                  String question = message.question ?? "";
+                                  if (question.isEmpty) return;
+
+                                  setState(() {
+                                    var myMessage = Messages(
+                                      id: -1,
+                                      gptSessionId: selectedSessionId
+                                          .toString(),
+                                      question: question,
+                                      imageUrl1: message.imageUrl1,
+                                      imageUrl2: message.imageUrl2,
+                                      response: translation(
+                                        context,
+                                      ).lbl_generating_response,
+                                      createdAt: DateTime.now().toString(),
+                                      updatedAt: DateTime.now().toString(),
+                                    );
+                                    state1.response1.messages!.add(myMessage);
+                                    BlocProvider.of<ChatGPTBloc>(context).add(
+                                      GetPost(
+                                        sessionId: selectedSessionId.toString(),
+                                        question: question,
+                                      ),
+                                    );
+                                    textController.clear();
+                                    scrollToBottom();
+                                  });
+
+                                  try {
+                                    isWriting = false;
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error: $e')),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                // Image Preview Section - redesigned
+                _buildImagePreview(),
+
+                // Input Section - completely redesigned using drugs_list pattern
+                Container(
+                  decoration: BoxDecoration(
+                    color: svGetScaffoldColor(),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withAlpha(13),
+                        offset: const Offset(0, -3),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: appStore.isDarkMode
+                              ? Colors.blueGrey[800]
+                              : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(24.0),
+                          border: Border.all(
+                            color: Colors.blue.withOpacity(0.2),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.05),
+                              offset: const Offset(0, 2),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            // Attachment button
+                            IconButton(
+                              icon: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.attach_file_rounded,
+                                  color: Colors.blue[600],
+                                  size: 20,
+                                ),
+                              ),
+                              onPressed: () async {
+                                if (isOneTimeImageUploaded) {
+                                  toasty(
+                                    context,
+                                    'Only allowed one time image in one session',
+                                  );
+                                } else {
+                                  bool hasPermission =
+                                      await _checkAndRequestPermissions();
+                                  if (hasPermission) {
+                                    _showBeforeFileOptions();
+                                  } else {
+                                    _permissionDialog();
+                                  }
+                                }
+                              },
+                            ),
+
+                            // Text input
+                            Expanded(
+                              child: TextField(
+                                focusNode: focusNode,
+                                controller: textController,
+                                minLines: 1,
+                                maxLines: 4,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: appStore.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
+                                ),
+                                decoration: InputDecoration(
+                                  hintStyle: TextStyle(
+                                    color: appStore.isDarkMode
+                                        ? Colors.white60
+                                        : Colors.black54,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                  hintText: translation(
+                                    context,
+                                  ).msg_clinical_summary_hint,
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                    vertical: 16.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Send button
+                            Container(
+                              margin: const EdgeInsets.only(right: 8.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.blue[600],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.3),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 8,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(30),
+                                  onTap: () async {
+                                    isError = true;
+                                    focusNode.unfocus();
+
+                                    if (selectedImageFiles.isEmpty) {
+                                      return;
+                                    } else if (imageUploadBloc
+                                            .imagefiles
+                                            .isEmpty &&
+                                        isOneTimeImageUploaded) {
+                                      String question = textController.text
+                                          .trim();
+                                      if (question != '') {
+                                        setState(() {
+                                          isOneTimeImageUploaded = true;
+                                          var myMessage = Messages(
+                                            id: -1,
+                                            gptSessionId: selectedSessionId
+                                                .toString(),
+                                            question: question,
+                                            response: translation(
+                                              context,
+                                            ).lbl_generating_response,
+                                            createdAt: DateTime.now()
+                                                .toString(),
+                                            updatedAt: DateTime.now()
+                                                .toString(),
+                                            imageUrl1: '',
+                                            imageUrl2: '',
+                                          );
+                                          state1.response1.messages!.add(
+                                            myMessage,
+                                          );
+
+                                          BlocProvider.of<ChatGPTBloc>(
+                                            context,
+                                          ).add(
+                                            GetPost(
+                                              sessionId: selectedSessionId
+                                                  .toString(),
+                                              question: question,
+                                              imageUrl1: null,
+                                              imageUrl2: null,
+                                              imageType: imageType,
+                                            ),
+                                          );
+                                          imageUploadBloc.imagefiles.clear();
+                                          textController.clear();
+                                          scrollToBottom();
+                                        });
+
+                                        try {
+                                          isWriting = false;
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Error: $e'),
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        toasty(
+                                          context,
+                                          translation(
+                                            context,
+                                          ).lbl_please_ask_question,
+                                        );
+                                      }
+                                    } else if (imageUploadBloc
+                                            .imagefiles
+                                            .isNotEmpty &&
+                                        !isOneTimeImageUploaded) {
+                                      String question = textController.text
+                                          .trim();
+                                      setState(() {
+                                        isOneTimeImageUploaded = true;
+                                        var myMessage = Messages(
+                                          id: -1,
+                                          gptSessionId: selectedSessionId
+                                              .toString(),
+                                          question: question,
+                                          response: translation(
+                                            context,
+                                          ).lbl_generating_response,
+                                          createdAt: DateTime.now().toString(),
+                                          updatedAt: DateTime.now().toString(),
+                                          imageUrl1: imageUploadBloc
+                                              .imagefiles
+                                              .first
+                                              .path,
+                                          imageUrl2: imageUploadBloc
+                                              .imagefiles
+                                              .first
+                                              .path,
+                                        );
+                                        state1.response1.messages!.add(
+                                          myMessage,
+                                        );
+
+                                        BlocProvider.of<ChatGPTBloc>(
+                                          context,
+                                        ).add(
+                                          GetPost(
+                                            sessionId: selectedSessionId
+                                                .toString(),
+                                            question: question == ""
+                                                ? translation(
+                                                    context,
+                                                  ).lbl_analyse_image
+                                                : question,
+                                            imageUrl1: imageUploadBloc
+                                                .imagefiles
+                                                .first
+                                                .path,
+                                            imageUrl2: imageUploadBloc
+                                                .imagefiles
+                                                .last
+                                                .path,
+                                            imageType: imageType,
+                                          ),
+                                        );
+                                        imageUploadBloc.imagefiles.clear();
+                                        textController.clear();
+                                        scrollToBottom();
+                                      });
+                                      try {
+                                        isWriting = false;
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(content: Text('Error: $e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: isWriting
+                                        ? const TypingIndicators(
+                                            color: Colors.white,
+                                            size: 3.0,
+                                          )
+                                        : const Icon(
+                                            Icons.send_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        translation(context).msg_ai_disclaimer,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          } else if (state1 is DataError) {
+            return _buildErrorState(context, state1.errorMessage.toString());
+          } else {
+            return Text(translation(context).lbl_error);
+          }
+        },
+      ),
     );
   }
 
@@ -778,80 +874,86 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     return Container(
       color: svGetScaffoldColor(),
       child: BlocBuilder<ImageUploadBloc, ImageUploadState>(
-          bloc: imageUploadBloc,
-          builder: (context, state) {
-        if (state is FileLoadedState && imageUploadBloc.imagefiles.isNotEmpty) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: Row(
-              children: imageUploadBloc.imagefiles.map((imageone) {
-                return Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.blue.withOpacity(0.2),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+        bloc: imageUploadBloc,
+        builder: (context, state) {
+          if (state is FileLoadedState &&
+              imageUploadBloc.imagefiles.isNotEmpty) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: Row(
+                children: imageUploadBloc.imagefiles.map((imageone) {
+                  return Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.blue.withOpacity(0.2),
+                              width: 2,
                             ),
-                          ],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: buildMediaItem(File(imageone.path)),
+                          ),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: buildMediaItem(File(imageone.path)),
-                        ),
-                      ),
-                      Positioned(
-                        top: -4,
-                        right: -4,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {});
-                            selectedImageFiles.remove(imageone);
-                            imageUploadBloc.add(SelectedFiles(
-                                pickedfiles: imageone, isRemove: true));
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.red[500],
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.red.withAlpha(77),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                        Positioned(
+                          top: -4,
+                          right: -4,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {});
+                              selectedImageFiles.remove(imageone);
+                              imageUploadBloc.add(
+                                SelectedFiles(
+                                  pickedfiles: imageone,
+                                  isRemove: true,
                                 ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.close_rounded,
-                              color: Colors.white,
-                              size: 12,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.red[500],
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.red.withAlpha(77),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                                size: 12,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          );
-        } else {
-          return Container();
-        }
-      }),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          } else {
+            return Container();
+          }
+        },
+      ),
     );
   }
 
@@ -914,7 +1016,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                 try {
                   BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
                   isOneTimeImageUploaded = false;
-                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                    context,
+                  ).newChatSessionId;
                 } catch (e) {
                   debugPrint(e.toString());
                 }
@@ -922,7 +1026,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[600],
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -942,7 +1049,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     );
   }
 
-  // File Options Dialog - redesigned using drugs_list pattern  
+  // File Options Dialog - redesigned using drugs_list pattern
   void _showBeforeFileOptions() {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -1002,7 +1109,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'Poppins',
-                              color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                              color: appStore.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black87,
                             ),
                           ),
                           Text(
@@ -1143,10 +1252,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
           decoration: BoxDecoration(
             color: appStore.isDarkMode ? Colors.grey[800] : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: color.withOpacity(0.2),
-              width: 1,
-            ),
+            border: Border.all(color: color.withOpacity(0.2), width: 1),
             boxShadow: [
               BoxShadow(
                 color: color.withOpacity(0.1),
@@ -1171,11 +1277,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                     ),
                   ],
                 ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: Icon(icon, color: Colors.white, size: 24),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1212,7 +1314,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     } else {
       imageLimit = 1;
     }
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1230,7 +1332,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
             return Container(
               decoration: BoxDecoration(
                 color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
@@ -1295,7 +1399,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
                                       fontFamily: 'Poppins',
-                                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                                      color: appStore.isDarkMode
+                                          ? Colors.white
+                                          : Colors.black87,
                                     ),
                                   ),
                                   Text(
@@ -1368,11 +1474,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                             child: MultipleImageUploadWidget(
                               imageType: imageType,
                               imageUploadBloc,
-                              imageLimit: imageLimit, (imageFiles) {
+                              imageLimit: imageLimit,
+                              (imageFiles) {
                                 selectedImageFiles = imageFiles;
                                 setState(() {});
                                 Navigator.pop(context);
-                              }
+                              },
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -1438,7 +1545,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
               ),
               child: Text(
                 translation(context).lbl_cancel,
@@ -1458,7 +1568,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[600],
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1495,41 +1608,93 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   }
 
   Future<bool> _checkAndRequestPermissions() async {
-    Permission permission;
-    
-    if (Platform.isIOS) {
-      // iOS uses photos permission for accessing photo library
-      permission = Permission.photos;
-    } else {
-      // Android permission handling
-      final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-      final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      final int sdkInt = androidInfo.version.sdkInt;
-      
-      // Handle different Android versions
-      if (sdkInt >= 33) {
-        // Android 13+ (API 33+) - Use granular permissions
-        permission = Permission.photos;
-      } else if (sdkInt >= 30) {
-        // Android 11-12 (API 30-32) - Use external storage with media access
-        permission = Permission.storage;
-      } else {
-        // Android 10 and below (API 29 and below)
-        permission = Permission.storage;
-      }
-    }
+    try {
+      if (Platform.isIOS) {
+        // iOS permission handling
+        final photosPermission = Permission.photos;
+        final status = await photosPermission.status;
 
-    final status = await permission.status;
-    
-    if (status.isGranted) {
-      return true;
-    } else if (status.isDenied) {
-      final result = await permission.request();
-      return result.isGranted;
-    } else if (status.isPermanentlyDenied) {
+        if (status.isGranted || status.isLimited) {
+          // iOS 14+ limited access is acceptable for our use case
+          return true;
+        } else if (status.isDenied) {
+          final result = await photosPermission.request();
+          return result.isGranted || result.isLimited;
+        } else if (status.isPermanentlyDenied) {
+          return false;
+        }
+        return false;
+      } else {
+        // Android permission handling
+        final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+        final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        final int sdkInt = androidInfo.version.sdkInt;
+
+        if (sdkInt >= 34) {
+          // Android 14+ (API 34+) - Check visual user selected permission first
+          final visualUserSelected = Permission.photos;
+          final visualStatus = await visualUserSelected.status;
+
+          if (visualStatus.isGranted || visualStatus.isLimited) {
+            return true;
+          } else if (visualStatus.isDenied) {
+            final result = await visualUserSelected.request();
+            return result.isGranted || result.isLimited;
+          }
+
+          // Fallback to regular photos permission
+          final photosPermission = Permission.photos;
+          final photosStatus = await photosPermission.status;
+
+          if (photosStatus.isGranted || photosStatus.isLimited) {
+            return true;
+          } else if (photosStatus.isDenied) {
+            final result = await photosPermission.request();
+            return result.isGranted || result.isLimited;
+          }
+
+          return false;
+        } else if (sdkInt >= 33) {
+          // Android 13 (API 33) - Use granular media permissions
+          final photosPermission = Permission.photos;
+          final status = await photosPermission.status;
+
+          if (status.isGranted || status.isLimited) {
+            return true;
+          } else if (status.isDenied) {
+            final result = await photosPermission.request();
+            return result.isGranted || result.isLimited;
+          }
+          return false;
+        } else if (sdkInt >= 30) {
+          // Android 11-12 (API 30-32) - Scoped storage with legacy support
+          final storagePermission = Permission.storage;
+          final status = await storagePermission.status;
+
+          if (status.isGranted) {
+            return true;
+          } else if (status.isDenied) {
+            final result = await storagePermission.request();
+            return result.isGranted;
+          }
+          return false;
+        } else {
+          // Android 10 and below (API 29 and below)
+          final storagePermission = Permission.storage;
+          final status = await storagePermission.status;
+
+          if (status.isGranted) {
+            return true;
+          } else if (status.isDenied) {
+            final result = await storagePermission.request();
+            return result.isGranted;
+          }
+          return false;
+        }
+      }
+    } catch (e) {
+      print('Permission check error: $e');
       return false;
     }
-
-    return false;
   }
 }

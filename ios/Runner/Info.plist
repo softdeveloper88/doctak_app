@@ -94,6 +94,8 @@
 	<string>Microphone access is required for voice calls, video meetings, and recording voice messages for professional medical communication and consultations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Photo library access is needed to share medical images, case studies, and other visual content during professional discussions and meetings.</string>
+	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Local network access is required to establish direct peer-to-peer connections for improved call quality during meetings and video calls with medical professionals.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
