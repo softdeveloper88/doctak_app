@@ -105,34 +105,65 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              CustomDropdownButtonFormField(
-                                items: state.firstDropdownValues,
-                                value: state.firstDropdownValues.first,
-                                width: double.infinity,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 0,
+                              const SizedBox(height: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
-                                itemBuilder: (item) => Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      item.countryName ?? '',
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                    ),
-                                    Text(
-                                      item.flag ?? '',
-                                    ),
-                                  ],
+                                child: CustomDropdownButtonFormField(
+                                  items: state.firstDropdownValues,
+                                  value: state.firstDropdownValues.isNotEmpty 
+                                      ? state.firstDropdownValues.firstWhere(
+                                          (country) => country.countryName == state.selectedFirstDropdownValue,
+                                          orElse: () => state.firstDropdownValues.first,
+                                        )
+                                      : null,
+                                  width: double.infinity,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  itemBuilder: (item) => Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.countryName ?? '',
+                                          style: const TextStyle(color: Colors.black),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Text(
+                                        item.flag ?? '',
+                                      ),
+                                    ],
+                                  ),
+                                  selectedItemBuilder: (context) =>
+                                      state.firstDropdownValues.map((item) {
+                                        return Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            item.countryName ?? '',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                  onChanged: (newValue) {
+                                    profileBloc.country =
+                                        newValue?.countryName ?? '';
+                                    profileBloc.add(UpdateSecondDropdownValues(
+                                        newValue?.countryName ?? ''));
+                                  },
                                 ),
-                                onChanged: (newValue) {
-                                  profileBloc.country =
-                                      newValue?.countryName ?? '';
-                                  profileBloc.add(UpdateSecondDropdownValues(
-                                      newValue?.countryName ?? ''));
-                                },
                               ),
                               const SizedBox(height: 10),
                               Text(
@@ -142,23 +173,50 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              CustomDropdownButtonFormField(
-                                itemBuilder: (item) => Text(
-                                  item ?? '',
-                                  style: const TextStyle(color: Colors.black),
+                              const SizedBox(height: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
-                                items: state.secondDropdownValues,
-                                value: state.selectedSecondDropdownValue,
-                                width: double.infinity,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 0,
+                                child: CustomDropdownButtonFormField(
+                                  itemBuilder: (item) => Text(
+                                    item ?? '',
+                                    style: const TextStyle(color: Colors.black),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  selectedItemBuilder: (context) => state
+                                      .secondDropdownValues
+                                      .map((item) {
+                                        return Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            item ?? '',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        );
+                                      })
+                                      .toList(),
+                                  items: state.secondDropdownValues,
+                                  value: state.selectedSecondDropdownValue,
+                                  width: double.infinity,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  onChanged: (String? newValue) {
+                                    profileBloc.stateName = newValue!;
+                                    profileBloc.add(
+                                        UpdateSpecialtyDropdownValue(newValue));
+                                  },
                                 ),
-                                onChanged: (String? newValue) {
-                                  profileBloc.stateName = newValue!;
-                                  profileBloc.add(
-                                      UpdateSpecialtyDropdownValue(newValue));
-                                },
                               ),
                               const SizedBox(height: 10),
                               if (AppData.userType == 'doctor') Text(
@@ -169,21 +227,49 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                 ),
                               ),
                               if (AppData.userType == 'doctor')
-                                CustomDropdownButtonFormField(
-                                  itemBuilder: (item) => Text(
-                                    item ?? '',
-                                    style: const TextStyle(color: Colors.black),
+                                const SizedBox(height: 8),
+                              if (AppData.userType == 'doctor')
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
                                   ),
-                                  items: state.specialtyDropdownValue,
-                                  value: state.selectedSpecialtyDropdownValue,
-                                  width: double.infinity,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 0,
+                                  child: CustomDropdownButtonFormField(
+                                    itemBuilder: (item) => Text(
+                                      item ?? '',
+                                      style: const TextStyle(color: Colors.black),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    selectedItemBuilder: (context) => state
+                                        .specialtyDropdownValue
+                                        .map((item) {
+                                          return Container(
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              item ?? '',
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          );
+                                        })
+                                        .toList(),
+                                    items: state.specialtyDropdownValue,
+                                    value: state.selectedSpecialtyDropdownValue,
+                                    width: double.infinity,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                    onChanged: (String? newValue) {
+                                      profileBloc.specialtyName = newValue!;
+                                    },
                                   ),
-                                  onChanged: (String? newValue) {
-                                    profileBloc.specialtyName = newValue!;
-                                  },
                                 ),
                               const SizedBox(height: 10),
                             ],

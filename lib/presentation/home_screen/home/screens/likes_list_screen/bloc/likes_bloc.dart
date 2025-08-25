@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
 import 'package:doctak_app/data/models/post_model/post_likes_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +9,7 @@ part 'likes_event.dart';
 part 'likes_state.dart';
 
 class LikesBloc extends Bloc<LikesEvent, LikesState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<PostComments> postList = [];
@@ -27,7 +27,7 @@ class LikesBloc extends Bloc<LikesEvent, LikesState> {
 
     // }
     try {
-      postLikesList = await postService.getPostUserLikes(
+      postLikesList = await apiManager.getPostUserLikes(
         'Bearer ${AppData.userToken}',
         event.postId.toString(),
       );

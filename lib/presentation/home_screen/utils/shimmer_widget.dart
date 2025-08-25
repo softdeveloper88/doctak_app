@@ -310,7 +310,7 @@ class ProfileListShimmer extends StatelessWidget {
                             period: const Duration(milliseconds: 1500),
                             child: Container(
                               height: 16,
-                              width: 120 + (index % 3) * 30,
+                              width: 120 + (index % 3) * 20,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(4),

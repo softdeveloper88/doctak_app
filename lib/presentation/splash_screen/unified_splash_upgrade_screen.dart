@@ -11,6 +11,7 @@ import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/presentation/language_selection_screen/language_selection_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
@@ -196,9 +197,9 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     try {
       var response;
       if (Platform.isAndroid) {
-        response = await http.get(Uri.parse('https://doctak.net/api/v1/version/Android'));
+        response = await http.get(Uri.parse('${AppData.remoteUrl}/version/Android'));
       } else {
-        response = await http.get(Uri.parse('https://doctak.net/api/v1/version/iOS'));
+        response = await http.get(Uri.parse('${AppData.remoteUrl}/version/iOS'));
       }
 
       if (response.statusCode == 200) {
@@ -228,6 +229,16 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   // Initialize user session
   Future<void> _initializeUserSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Check if this is the first time opening the app
+    bool isFirstTime = prefs.getBool('is_first_time') ?? true;
+    String? selectedLanguage = prefs.getString('selected_language');
+
+    // If first time or no language selected, show language selection screen
+    if (isFirstTime || selectedLanguage == null) {
+      const LanguageSelectionScreen().launch(context, isNewTask: true);
+      return;
+    }
 
     bool rememberMe = prefs.getBool('rememberMe') ?? false;
     String? userToken = prefs.getString('token');

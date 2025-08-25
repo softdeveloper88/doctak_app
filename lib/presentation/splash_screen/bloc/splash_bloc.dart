@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
@@ -12,7 +12,7 @@ import '../../../data/models/countries_model/countries_model.dart';
 import 'splash_event.dart';
 
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
 
   SplashBloc() : super(CountriesDataInitial()) {
     on<LoadDropdownData>(_listCountryList);
@@ -25,24 +25,28 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   Future<void> _listCountryList(
       LoadDropdownData event, Emitter<SplashState> emit) async {
     var firstDropdownValues = await _onGetCountries();
-    // print("DD ${firstDropdownValues!.countries!}");
-    firstDropdownValues?.countries?.add(Countries(
-      id: -1,
-      countryName:'Select Country',
-      createdAt:'',
-      updatedAt:'',
-      isRegistered:'',
-      countryCode:'',
-      countryMask:'',
-      currency:'',
-      flag:'Select Country',
-    ));
-    getNewDeviceToken();
-    emit(CountriesDataLoaded(
-        countriesModel: firstDropdownValues!,
-        countryFlag: event.countryFlag,
-        typeValue: event.typeValue,
-        searchTerms: event.searchTerms));
+    // Check if countries data was successfully loaded
+    if (firstDropdownValues != null) {
+      // print("DD ${firstDropdownValues.countries!}");
+      firstDropdownValues.countries?.add(Countries(
+        id: -1,
+        countryName:'Select Country',
+        createdAt:'',
+        updatedAt:'',
+        isRegistered:'',
+        countryCode:'',
+        countryMask:'',
+        currency:'',
+        flag:'Select Country',
+      ));
+      getNewDeviceToken();
+      emit(CountriesDataLoaded(
+          countriesModel: firstDropdownValues,
+          countryFlag: event.countryFlag,
+          typeValue: event.typeValue,
+          searchTerms: event.searchTerms));
+    }
+    // If firstDropdownValues is null, _onGetCountries already emitted an error state
     // add(LoadDropdownData(event.newValue,event.typeValue));
   }
   getNewDeviceToken() async {
@@ -99,7 +103,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   Future<CountriesModel?> _onGetCountries() async {
     // emit(DataLoading());
     try {
-      final response = await postService.getCountries();
+      final response = await apiManager.getCountries();
       // print(response.countries!.length.toString());
       // if (response.countries!.isNotEmpty) {
       // emit(DataSuccess(countriesModel: response));
@@ -116,12 +120,13 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     } catch (e) {
       print(e);
       emit(CountriesDataError('An error occurred'));
+      return null; // Explicitly return null when an error occurs
     }
   }
   Future<void> _listCountryList1(
       LoadDropdownData1 event, Emitter<SplashState> emit) async {
     try {
-      final response = await postService.getConferenceCountries(
+      final response = await apiManager.getConferenceCountries(
         'Bearer ${AppData.userToken}',
       );
       print(response.data);

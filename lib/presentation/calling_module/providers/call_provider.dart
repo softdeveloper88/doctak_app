@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import '../models/call_state.dart';
 import '../models/user_model.dart';
 import '../services/agora_service.dart';
+import '../services/call_api_service.dart';
 import '../utils/resource_manager.dart';
 import '../utils/call_debug_utils.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 /// Main provider for call state management
 class CallProvider extends ChangeNotifier {
@@ -86,6 +88,42 @@ class CallProvider extends ChangeNotifier {
   // Get Agora Engine (used in VideoView)
   RtcEngine? getAgoraEngine() {
     return _agoraService.getEngine();
+  }
+
+  // Generate or get Agora token for secure channel access
+  Future<String> _getAgoraToken() async {
+    // If we already have a token, use it
+    if (_channelToken != null && _channelToken!.isNotEmpty) {
+      print('✅ Using existing token (length: ${_channelToken!.length})');
+      return _channelToken!;
+    }
+
+    try {
+      print('🔑 Generating new Agora token for channel: ${_callState.callId}');
+      
+      // Create API service instance
+      final apiService = CallApiService(baseUrl: AppData.remoteUrl3);
+      
+      // Generate token with 1 hour expiration
+      final token = await apiService.generateAgoraToken(
+        channelId: _callState.callId,
+        uid: 0, // Use 0 to let Agora assign UID
+        expirationTime: 3600, // 1 hour
+      );
+
+      if (token.isNotEmpty) {
+        _channelToken = token;
+        print('✅ Token generated and cached (length: ${token.length})');
+        return token;
+      } else {
+        print('⚠️ Empty token received, using development mode');
+        return '';
+      }
+    } catch (e) {
+      print('❌ Failed to generate Agora token: $e');
+      print('⚠️ Continuing with development mode (no token)');
+      return '';
+    }
   }
 
   // Initialize call
@@ -650,11 +688,12 @@ class CallProvider extends ChangeNotifier {
       await _agoraService.configureForReconnection();
       await Future.delayed(const Duration(milliseconds: 300));
 
-      // Rejoin channel with fresh state
+      // Rejoin channel with fresh token
+      final channelToken = await _getAgoraToken();
       final bool joined = await _agoraService.joinChannel(
         channelId: _callState.callId,
         uid: 0,
-        token: _channelToken ?? '', // Use stored token
+        token: channelToken,
         isVideoCall: isVideoCall,
       );
 
@@ -911,18 +950,38 @@ class CallProvider extends ChangeNotifier {
     // Configure media settings for the remote user
     _configureRemoteUserMedia(remoteUid);
     
-    // Start heartbeat to maintain connection sync
-    _startHeartbeat();
-
-    // Show controls for video calls with delay to allow video to load
+    // CRITICAL FIX: Force UI refreshes for video calls to ensure video displays
     if (isVideoCall) {
-      Future.delayed(const Duration(milliseconds: 500), () {
+      // Immediate UI refresh
+      notifyListeners();
+      
+      // Progressive UI refreshes to handle video rendering delays
+      Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
+          notifyListeners();
+          print('🔄 UI refresh #1 for video rendering');
+        }
+      });
+      
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) {
+          notifyListeners();
+          print('🔄 UI refresh #2 for video rendering');
+        }
+      });
+      
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          notifyListeners();
           _startControlsAutoHideTimer();
           CallDebugUtils.logDebug('UI', 'Video call controls auto-hide timer started');
+          print('🔄 Final UI refresh for video rendering');
         }
       });
     }
+    
+    // Start heartbeat to maintain connection sync
+    _startHeartbeat();
   }
   
   // Configure media settings for remote user
@@ -931,30 +990,44 @@ class CallProvider extends ChangeNotifier {
       print('🎥 Configuring media for remote user $remoteUid');
       
       if (isVideoCall) {
-        // Set remote video stream type and rendering mode with retry
+        // CRITICAL FIX: Enhanced remote video configuration
         int attempts = 0;
         bool configured = false;
         
         while (!configured && attempts < 3) {
           try {
+            // Force subscribe to remote video stream
+            await _agoraService.getEngine()?.muteRemoteVideoStream(uid: remoteUid, mute: false);
+            
+            // Set high quality video stream
             await _agoraService.getEngine()?.setRemoteVideoStreamType(
               uid: remoteUid,
               streamType: VideoStreamType.videoStreamHigh,
             );
             
+            // Configure rendering mode for better display
             await _agoraService.getEngine()?.setRemoteRenderMode(
               uid: remoteUid,
               renderMode: RenderModeType.renderModeFit,
               mirrorMode: VideoMirrorModeType.videoMirrorModeDisabled,
             );
             
+            // CRITICAL: Set remote subscription for this specific user
+            await _agoraService.getEngine()?.setRemoteVideoSubscriptionOptions(
+              uid: remoteUid, 
+              options: VideoSubscriptionOptions(
+                type: VideoStreamType.videoStreamHigh,
+                encodedFrameOnly: false,
+              ),
+            );
+            
             configured = true;
-            print('✅ Video configuration set on attempt ${attempts + 1}');
+            print('✅ Enhanced video configuration set for user $remoteUid on attempt ${attempts + 1}');
           } catch (e) {
             attempts++;
             print('❌ Video config attempt $attempts failed: $e');
             if (attempts < 3) {
-              await Future.delayed(Duration(milliseconds: 200 * attempts));
+              await Future.delayed(Duration(milliseconds: 300 * attempts));
             }
           }
         }
@@ -1046,9 +1119,9 @@ class CallProvider extends ChangeNotifier {
         try {
           print('🔄 Channel join attempt ${attempts + 1}/3...');
           
-          // CRITICAL: Use the token passed during initialization
-          final channelToken = _channelToken ?? '';
-          print('  🔑 Using token: ${channelToken.isEmpty ? "EMPTY (No token authentication)" : "PROVIDED (${channelToken.length} chars)"}');
+          // Generate or get secure token
+          final channelToken = await _getAgoraToken();
+          print('  🔑 Using token: ${channelToken.isEmpty ? "EMPTY (Development mode)" : "PROVIDED (${channelToken.length} chars)"}');
           
           joined = await _agoraService.joinChannel(
             channelId: _callState.callId,

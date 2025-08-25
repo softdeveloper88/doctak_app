@@ -2,6 +2,7 @@
 // // Add this code to your main.dart file
 //
 // // 1. ADD THESE IMPORTS at the top of main.dart:
+// import 'package:doctak_app/core/utils/app/AppData.dart';
 // import 'package:doctak_app/presentation/case_discussion/bloc/discussion_detail_bloc.dart';
 // import 'package:doctak_app/presentation/case_discussion/bloc/create_discussion_bloc.dart';
 // import 'package:doctak_app/presentation/case_discussion/screens/discussion_list_screen.dart';
@@ -14,7 +15,7 @@
 // // BlocProvider(
 // //     create: (context) => DiscussionListBloc(
 // //         repository: CaseDiscussionRepository(
-// //             baseUrl: 'https://doctak.net',
+// //             baseUrl: AppData.base2,
 // //             getAuthToken: () {
 // //                 return AppData.userToken ?? "";
 // //             }),
@@ -24,7 +25,7 @@
 // BlocProvider(
 //     create: (context) => DiscussionDetailBloc(
 //         repository: CaseDiscussionRepository(
-//             baseUrl: 'https://doctak.net',
+//             baseUrl: AppData.base2,
 //             getAuthToken: () {
 //                 return AppData.userToken ?? "";
 //             }),
@@ -32,7 +33,7 @@
 // BlocProvider(
 //     create: (context) => CreateDiscussionBloc(
 //         repository: CaseDiscussionRepository(
-//             baseUrl: 'https://doctak.net',
+//             baseUrl: AppData.base2,
 //             getAuthToken: () {
 //                 return AppData.userToken ?? "";
 //             }),

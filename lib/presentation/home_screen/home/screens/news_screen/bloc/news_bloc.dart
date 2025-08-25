@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/news_model/news_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'news_state.dart';
 
 class NewsBloc extends Bloc<NewsEvent, NewsState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   // List<NewsModel> bbcNews = [];
@@ -22,11 +22,11 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
   _onGetNewsData(GetPost event, Emitter<NewsState> emit) async {
     emit(PaginationLoadingState());
     // try {
-    var response1 = await postService.newsChannel(
+    var response1 = await apiManager.newsChannel(
       'Bearer ${AppData.userToken}',
       'bbc-news',
     );
-    var response2 = await postService.newsChannel(
+    var response2 = await apiManager.newsChannel(
       'Bearer ${AppData.userToken}',
       'cnn-news',
     );

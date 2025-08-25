@@ -205,6 +205,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight + 80),
       child: Column(
         children: [
           Stack(

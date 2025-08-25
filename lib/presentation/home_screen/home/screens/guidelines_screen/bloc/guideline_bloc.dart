@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> guidelinesList = [];
@@ -37,7 +37,7 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
-      GuidelinesModel response = await postService.guideline(
+      GuidelinesModel response = await apiManager.guideline(
           'Bearer ${AppData.userToken}',
           '${pageNumber}',
           event.searchTerm ?? '');
@@ -64,7 +64,7 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
 
     // emit(PaginationLoadingState());
     try {
-      GuidelinesModel response = await postService.guideline(
+      GuidelinesModel response = await apiManager.guideline(
         'Bearer ${AppData.userToken}',
         "1",
         event.searchTerm,

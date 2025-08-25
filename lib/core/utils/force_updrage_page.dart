@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -49,10 +50,10 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
     try {
       var response;
       if (Platform.isAndroid) {
-        response = await http.get(Uri.parse('https://doctak.net/api/v1/version/Android'));
+        response = await http.get(Uri.parse('${AppData.remoteUrl}/version/Android'));
       } else {
         response =
-        await http.get(Uri.parse('https://doctak.net/api/v1/version/iOS'));
+        await http.get(Uri.parse('${AppData.remoteUrl}/version/iOS'));
       }
       print(response.body);
       if (response.statusCode == 200) {

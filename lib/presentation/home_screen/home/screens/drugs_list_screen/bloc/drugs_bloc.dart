@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/errors/failures.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,7 +11,7 @@ import 'drugs_event.dart';
 import 'drugs_state.dart';
 
 class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> drugsData = [];
@@ -42,7 +42,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
 
     // ProgressDialogUtils.showProgressDialog();
     // try {
-    DrugsModel response = await postService.getDrugsList(
+    DrugsModel response = await apiManager.getDrugsList(
         'Bearer ${AppData.userToken}',
         '${pageNumber}',
         event.countryId ?? "1",
@@ -72,7 +72,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
     print('33' + event.type);
     // emit(PaginationLoadingState());
     // try {
-    final response = await postService.getDrugsList(
+    final response = await apiManager.getDrugsList(
         'Bearer ${AppData.userToken}',
         "1",
         event.countryId,

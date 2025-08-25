@@ -170,9 +170,9 @@ class Data {
     preferredLanguage = json['preferred_language'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    userId = json['user_id'];
+    userId = json['user_id']?.toString();
     jobImage = json['job_image'];
-    countryId = json['country_id'];
+    countryId = json['country_id']?.toString();
     lastDate = json['last_date'];
     totalJobs = json['total_jobs'];
     specialty = json['specialty'];
@@ -196,7 +196,7 @@ class Data {
     }
     user = json['user'] != null ? User.fromJson(json['user']) : null;
   }
-  int? id;
+  dynamic? id;
   String? jobTitle;
   String? companyName;
   String? experience;
@@ -216,8 +216,8 @@ class Data {
   dynamic postedAt;
   String? salaryRange;
   bool? promoted;
-  int? views;
-  int? clicks;
+  dynamic views;
+  dynamic clicks;
   List<Specialties>? specialties;
   List<Applicants>? applicants;
   User? user;
@@ -269,7 +269,7 @@ class User {
       this.profilePic,});
 
   User.fromJson(dynamic json) {
-    id = json['id'];
+    id = json['id']?.toString();
     name = json['name'];
     profilePic = json['profile_pic'];
   }
@@ -329,7 +329,7 @@ class Applicants {
       this.pivot,});
 
   Applicants.fromJson(dynamic json) {
-    id = json['id'];
+    id = json['id']?.toString();
     firstName = json['first_name'];
     lastName = json['last_name'];
     emailVerifiedAt = json['email_verified_at'];
@@ -387,7 +387,7 @@ class Applicants {
   String? profilePic;
   String? practicingCountry;
   dynamic otpCode;
-  int? balance;
+  String? balance;
   String? title;
   String? city;
   String? country;
@@ -396,9 +396,9 @@ class Applicants {
   String? updatedAt;
   String? activeStatus;
   dynamic avatar;
-  int? darkMode;
+  String? darkMode;
   dynamic messengerColor;
-  int? isPremium;
+  String? isPremium;
   String? background;
   String? lastActivity;
   Pivot? pivot;
@@ -457,8 +457,8 @@ class Pivot {
       this.isViewedByAdmin,});
 
   Pivot.fromJson(dynamic json) {
-    jobId = json['job_id'];
-    userId = json['user_id'];
+    jobId = json['job_id']?.toString();
+    userId = json['user_id']?.toString();
     isViewedByAdmin = json['is_viewed_by_admin'];
   }
   String? jobId;
@@ -486,7 +486,7 @@ class Specialties {
       this.pivot,});
 
   Specialties.fromJson(dynamic json) {
-    id = json['id'];
+    id = json['id']?.toString();
     name = json['name'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];

@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/data/models/profile_model/interest_model.dart';
@@ -17,7 +17,7 @@ import 'profile_event.dart';
 import 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   UserProfile? userProfile;
   List<InterestModel>? interestList = [];
   bool isMe = true;
@@ -65,7 +65,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
 
     try {
-      PostDataModel response = await postService.getMyPosts(
+      PostDataModel response = await apiManager.getMyPosts(
           'Bearer ${AppData.userToken}', '$pageNumber', AppData.logInUserId);
       print('repsones$response');
       numberOfPage = response.posts?.lastPage ?? 0;
@@ -101,23 +101,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   _onGetProfile(LoadPageEvent event, Emitter<ProfileState> emit) async {
     emit(PaginationLoadingState());
-    // try {
+    try {
     if (pageNumber == 1) {
       print("data ${event.userId}");
-      PostDataModel postDataModelResponse = await postService.getMyPosts(
+      PostDataModel postDataModelResponse = await apiManager.getMyPosts(
           'Bearer ${AppData.userToken}', '1', event.userId ?? '');
       print('repsones$postDataModelResponse');
-      UserProfile response = await postService.getProfile(
+      UserProfile response = await apiManager.getProfile(
           'Bearer ${AppData.userToken}', event.userId!);
       print(response.toJson());
-      List<InterestModel> response1 = await postService.getInterests(
+      List<InterestModel> response1 = await apiManager.getInterests(
           'Bearer ${AppData.userToken}', event.userId!);
       add(UpdateSecondDropdownValues(''));
 
-      // var  response3 = await postService.getAboutMe(
+      // var  response3 = await apiManager.getAboutMe(
       //     'Bearer ${AppData.userToken}');
 
-      List<WorkEducationModel> response2 = await postService.getWorkEducation(
+      List<WorkEducationModel> response2 = await apiManager.getWorkEducation(
           'Bearer ${AppData.userToken}', event.userId!);
       numberOfPage = postDataModelResponse.posts?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
@@ -165,29 +165,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         userProfile?.user?.specialty ?? (specialtyList?.isNotEmpty == true ? specialtyList!.first : ''),
         [],
         ''));
-    // add(UpdateSecondDropdownValues(countriesList.first));
-    // emit(PaginationLoadedState(
-    //   (state as PaginationLoadedState).firstDropdownValues,
-    //   (state as PaginationLoadedState).selectedFirstDropdownValue,
-    //   // secondDropdownValues,
-    //   // secondDropdownValues.first,
-    //   (state as PaginationLoadedState).secondDropdownValues,
-    //   (state as PaginationLoadedState).selectedSecondDropdownValue,
-    //
-    //   (state as PaginationLoadedState).specialtyDropdownValue,
-    //   (state as PaginationLoadedState).selectedSpecialtyDropdownValue,
-    //   [],
-    //   ''
-    // ));
-    // emit(PaginationLoadedState());
-    // emit(DataLoaded(postList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   // emit(PaginationLoadedState(e.toString()));
-    //
-    //   emit(DataError('An error occurred $e'));
-    // }
+    } catch (e) {
+      print(e);
+      emit(DataError('An error occurred $e'));
+    }
   }
 
   Future<void> _updateFirstDropdownValue(
@@ -207,14 +188,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProgressDialogUtils.showProgressDialog();
 
     if (event.isProfilePicture ?? false) {
-      response = await postService.uploadProfilePicture(
+      response = await apiManager.uploadProfilePicture(
           'Bearer ${AppData.userToken}', event.filePath!);
     } else {
       print(event.isProfilePicture);
-      response = await postService.uploadCoverPicture(
+      response = await apiManager.uploadCoverPicture(
           'Bearer ${AppData.userToken}', event.filePath!);
     }
-    UserProfile response1 = await postService.getProfile(
+    UserProfile response1 = await apiManager.getProfile(
         'Bearer ${AppData.userToken}', AppData.logInUserId);
     print(AppData.userToken);
     userProfile = response1;
@@ -252,7 +233,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       print('privacy ${e.recordType}');
     });
     if (event.updateProfileSection == 1) {
-      final response = await postService.getProfileUpdate(
+      final response = await apiManager.getProfileUpdate(
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
         event.userProfile?.user?.lastName ?? "",
@@ -293,7 +274,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             : 'globe',
       );
     } else if (event.updateProfileSection == 2) {
-      final response = await postService.getProfileUpdate(
+      final response = await apiManager.getProfileUpdate(
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
         event.userProfile?.user?.lastName ?? "",
@@ -333,7 +314,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             ? event.userProfile?.privacySetting![12].visibility ?? 'globe'
             : 'globe',
       );
-      final response2 = await postService.updateAboutMe(
+      final response2 = await apiManager.updateAboutMe(
         'Bearer ${AppData.userToken}',
         event.userProfile?.profile?.aboutMe ?? '...',
         event.userProfile?.profile?.address ?? '...',
@@ -360,11 +341,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             : 'lock',
       );
     } else if (event.updateProfileSection == 3) {
-      // final response1 = await postService.getWorkEducationUpdate(
+      // final response1 = await apiManager.getWorkEducationUpdate(
       //     'Bearer ${AppData.userToken}', event.workEducationModel ?? []);
       //
       // print(response1.data);
-      // final response3 = await postService.getInterestsUpdate(
+      // final response3 = await apiManager.getInterestsUpdate(
       //     'Bearer ${AppData.userToken}', event.interestModel!);
       //
       //   String dobPrivacy,
@@ -385,7 +366,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // privacyLength >= 11 ? event.userProfile?.privacySetting![11].visibility ?? 'globe' : 'globe';
       // privacyLength >= 12 ? event.userProfile?.privacySetting![12].visibility ?? 'globe' : 'globe';
       print(privacyLength);
-      final response = await postService.getProfileUpdate(
+      final response = await apiManager.getProfileUpdate(
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
         event.userProfile?.user?.lastName ?? "",
@@ -427,7 +408,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             : 'globe',
       );
       print(event.userProfile?.profile?.aboutMe ?? '');
-      final response2 = await postService.updateAboutMe(
+      final response2 = await apiManager.updateAboutMe(
         'Bearer ${AppData.userToken}',
         event.userProfile?.profile?.aboutMe ?? '...',
         event.userProfile?.profile?.address ?? '...',
@@ -456,7 +437,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       print(response2.response);
     }
 
-    // final response3 = await postService.getPlacesLivedUpdate(
+    // final response3 = await apiManager.getPlacesLivedUpdate(
     //   'Bearer ${AppData.userToken}',
     //   '','',
     //   event.userProfile?.privacySetting?[0].visibility??'lock'
@@ -573,7 +554,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     print(event.currentStatus);
     print(event.description);
     print(event.privacy);
-    var response = await postService.updateAddWorkEduction(
+    var response = await apiManager.updateAddWorkEduction(
         'Bearer ${AppData.userToken}',
         event.id,
         event.companyName,
@@ -588,7 +569,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.description,
         event.privacy);
 
-    List<WorkEducationModel> response2 = await postService.getWorkEducation(
+    List<WorkEducationModel> response2 = await apiManager.getWorkEducation(
         'Bearer ${AppData.userToken}', AppData.logInUserId);
     workEducationList!.clear();
     workEducationList!.addAll(response2);
@@ -619,7 +600,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     print(event.favt_books);
     print(event.favt_music_bands);
 
-    var response = await postService.updateAddHobbiesInterest(
+    var response = await apiManager.updateAddHobbiesInterest(
       'Bearer ${AppData.userToken}',
       event.id,
       event.favt_tv_shows,
@@ -630,7 +611,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       event.favt_games,
     );
 
-    List<InterestModel> response1 = await postService.getInterests(
+    List<InterestModel> response1 = await apiManager.getInterests(
         'Bearer ${AppData.userToken}', AppData.logInUserId!);
     interestList!.clear();
     interestList!.addAll(response1);
@@ -651,9 +632,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   void _deleteAddWorkEduction(
       DeleteWorkEducationEvent event, Emitter<ProfileState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
-    var response = await postService.deleteWorkEduction(
+    var response = await apiManager.deleteWorkEduction(
         'Bearer ${AppData.userToken}', event.id);
-    List<WorkEducationModel> response2 = await postService.getWorkEducation(
+    List<WorkEducationModel> response2 = await apiManager.getWorkEducation(
         'Bearer ${AppData.userToken}', AppData.logInUserId);
     workEducationList!.clear();
     workEducationList!.addAll(response2);
@@ -697,7 +678,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<List<Countries>?> _onGetCountries() async {
     // emit(DataLoading());
     try {
-      final response = await postService.getCountries();
+      final response = await apiManager.getCountries();
       print(response.countries!.length.toString());
       if (response.countries!.isNotEmpty) {
         // emit(DataSuccess(countriesModel: response));
@@ -720,22 +701,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<List<String>?> _onGetSpecialty() async {
     // emit(DataLoading());
     try {
-      final response = await postService.getSpecialty();
-      if (response.data!.isNotEmpty) {
-        // emit(DataSuccess(countriesModel: response));
+      final response = await apiManager.getSpecialty();
+      // response is now a List directly, not wrapped in an object with .data
+      if (response != null && response.isNotEmpty) {
         List<String> list = [];
         list.add('Select Specialty');
-        response.data!.forEach((element) {
-          list.add(element['name']!);
-        });
+        for (var element in response) {
+          if (element is Map && element['name'] != null) {
+            list.add(element['name']!);
+          }
+        }
         return list;
       } else {
         return [];
-        // emit(DataFailure(error: 'Failed to load data'));
       }
     } catch (e) {
       print(e);
-      // emit(DataFailure(error: 'An error occurred'));
+      return null; // Return null on error
     }
   }
 
@@ -748,12 +730,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
       
       print('Fetching states for country: $value');
-      final response = await postService.getStates(value);
+      final response = await apiManager.getStates(value);
 
       List<String> list = [];
       
-      if (response.data != null && response.data!.isNotEmpty) {
-        response.data?.forEach((element) {
+      // response is already the data (Map with 'data' key containing the list)
+      if (response != null && response['data'] != null && response['data'].isNotEmpty) {
+        response['data'].forEach((element) {
           if (element != null && element['state_name'] != null) {
             list.add(element['state_name'].toString());
           }
@@ -774,7 +757,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   // Future<List<String>>? _onGetUniversities(String value) async {
   //   // emit(DataLoading());
   //   try {
-  //     final response = await postService.getUniversityByStates(value);
+  //     final response = await apiManager.getUniversityByStates(value);
   //     print(response.data);
   //     // if (response.data!.isNotEmpty) {
   //     // emit(DataSuccess(countriesModel: response));
@@ -806,7 +789,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       event.userId,
     );
     try {
-      var response = await postService.setUserFollow(
+      var response = await apiManager.setUserFollow(
           'Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
       // setLoading(false);
       emit(PaginationLoadedState(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 class CustomDropdownButtonFormField<T> extends StatelessWidget {
-  CustomDropdownButtonFormField({
+  const CustomDropdownButtonFormField({
     required this.items,
     required this.value,
     required this.onChanged,
@@ -64,8 +64,8 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
                 return Container(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    item.toString(),
-                    style: TextStyle(
+                    item?.toString() ?? '',
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -102,11 +102,11 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
     return InputDecoration(
       hintText: hint ?? '',
       hintStyle: _setFontStyle(),
-      border: _outLinedInputBorder(),
-      enabledBorder: _outLinedInputBorder(),
-      focusedBorder: _outLinedInputBorder(),
-      fillColor: AppDecoration.fillGray.color,
-      filled: true,
+      border: InputBorder.none,
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      fillColor: Colors.transparent,
+      filled: false,
       isDense: true,
       contentPadding:
           contentPadding ??

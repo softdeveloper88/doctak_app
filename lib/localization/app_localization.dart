@@ -39,13 +39,18 @@ const String URDU = 'ur';
 
 Future<Locale> setLocale(String languageCode) async {
   SharedPreferences _prefs = await SharedPreferences.getInstance();
+  // Set both keys for backward compatibility
   await _prefs.setString(LAGUAGE_CODE, languageCode);
+  await _prefs.setString('selected_language', languageCode);
   return _locale(languageCode);
 }
 
 Future<Locale> getLocale() async {
   SharedPreferences _prefs = await SharedPreferences.getInstance();
-  String languageCode = _prefs.getString(LAGUAGE_CODE) ?? ENGLISH;
+  // First check for the new selected_language key (from language selection screen)
+  String languageCode = _prefs.getString('selected_language') ?? 
+                       _prefs.getString(LAGUAGE_CODE) ?? 
+                       ENGLISH;
   return _locale(languageCode);
 }
 

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/check_in_search_model/check_in_search_model.dart';
 import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +17,7 @@ import 'add_post_event.dart';
 part 'add_post_state.dart';
 
 class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<UserData> searchPeopleData = [];
@@ -55,7 +55,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       emit(PaginationLoadingState());
     }
     try {
-      CheckInSearchModel response = await postService.checkInSearch(
+      CheckInSearchModel response = await apiManager.checkInSearch(
           'Bearer ${AppData.userToken}',
           '$pageNumber',
           event.name ?? '',
@@ -80,7 +80,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     // try {
-    SearchUserTagModel response = await postService.searchTagFriend(
+    SearchUserTagModel response = await apiManager.searchTagFriend(
         'Bearer ${AppData.userToken}', '$pageNumber', event.name ?? '');
     numberOfPage = response.data!.lastPage ?? 0;
     if (pageNumber < numberOfPage + 1) {
@@ -316,7 +316,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
 //
 //   // emit(PaginationLoadingState());
 //   try {
-//     SearchUserTagModel response = await postService.getSearchPeople(
+//     SearchUserTagModel response = await apiManager.getSearchPeople(
 //       'Bearer ${AppData.userToken}',
 //       "1",
 //       '',

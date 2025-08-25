@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
 import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_resp.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_state.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -10,7 +9,6 @@ import '../../../core/utils/app/AppData.dart';
 import 'login_event.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final ApiService apiService = ApiService(Dio());
 
   LoginBloc() : super(LoginInitial()) {
     on<LoginButtonPressed>(_onLoginButtonPressed);

@@ -93,7 +93,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 if (jobsBloc.jobDetailModel.job != null) {
                   createDynamicLink(
                     '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
-                    'https://doctak.net/job/${jobsBloc.jobDetailModel.job?.id}',
+                    '${AppData.base}job/${jobsBloc.jobDetailModel.job?.id}',
                     jobsBloc.jobDetailModel.job?.link ?? '',
                   );
                 }

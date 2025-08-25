@@ -1,12 +1,8 @@
-import 'dart:developer';
-
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/jobs_model/job_applicants_model.dart';
 import 'package:doctak_app/data/models/jobs_model/job_detail_model.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
-import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:overlay_support/overlay_support.dart';
 
@@ -14,7 +10,7 @@ import 'jobs_event.dart';
 import 'jobs_state.dart';
 
 class JobsBloc extends Bloc<JobsEvent, JobsState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> drugsData = [];
@@ -50,7 +46,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
-    JobsModel response = await postService.getJobsList(
+    JobsModel response = await apiManager.getJobsList(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
         event.countryId ?? "1",
@@ -74,44 +70,20 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
 
   _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
     emit(PaginationLoadingState());
-    // try {
     print('jobId ${event.jobId}');
     try {
-
-      Dio dio = Dio();
-
-        Response response = await dio.post(
-          '${AppData.remoteUrl2}/job_detail?job_id=${event.jobId}', // Add query parameters
-          options: Options(headers: {
-            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-          }),
-        );
-        log(response.data.toString());
-        jobDetailModel=JobDetailModel.fromJson(response.data);
+      // Use the SharedApiService directly for job details
+      final response = await apiManager.sharedApi.getJobDetails(jobId: event.jobId.toString());
+      if (response.success) {
+        jobDetailModel = response.data!; // response.data is already a JobDetailModel
         emit(PaginationLoadedState());
-
-
-      // emit(DataLoaded(drugsData));
+      } else {
+        emit(DataError(response.message ?? 'Failed to get job details'));
+      }
     } catch (e) {
-      emit(DataError('No Data Found'));
-
-      // ProgressDialogUtils.hideProgressDialog();
-      print(e);
+      print('Error getting job details: $e');
       emit(DataError('No Data Found'));
     }
-    // JobDetailModel response = await postService.getJobsDetails(
-    //     'Bearer ${AppData.userToken}', event.jobId.toString());
-    // jobDetailModel = response;
-    // log(jobDetailModel.toJson().toString());
-    // emit(PaginationLoadedState());
-    // emit(DataLoaded(drugsData));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   // emit(PaginationLoadedState());
-    //
-    //   emit(DataError('No Data Found'));
-    // }
   }
 
   _onGetJobs1(GetPost event, Emitter<JobsState> emit) async {
@@ -120,7 +92,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
 
     // emit(PaginationLoadingState());
     try {
-      JobsModel response = await postService.getJobsList(
+      JobsModel response = await apiManager.getJobsList(
           'Bearer ${AppData.userToken}',
           "1",
           event.countryId,
@@ -140,67 +112,44 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     }
   }
   _withDrawApplicant(WithDrawApplicant event, Emitter<JobsState> emit) async {
-    // emit(PaginationInitialState());
-    // ProgressDialogUtils.showProgressDialog();
-
     emit(PaginationLoadingState());
     try {
-      Dio dio = Dio();
-
-      try {
-        Response response = await dio.post(
-          '${AppData.remoteUrl2}/jobs-applicants/${event.jobId}/withdraw-application', // Add query parameters
-          options: Options(headers: {
-            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-          }),
-        );
-        toast(response.data['success']);
+      // Use the SharedApiService for withdrawing application
+      final response = await apiManager.sharedApi.withdrawJobApplication(jobId: event.jobId.toString());
+      if (response.success) {
+        toast(response.data?['message'] ?? 'Application withdrawn successfully');
         print("response ${response.data}");
         
         // Reload job details after successful withdrawal
         add(JobDetailPageEvent(jobId: event.jobId));
         return; // Return early to let JobDetailPageEvent handle the emission
-      } catch (e) {
+      } else {
         emit(PaginationLoadedState());
-        print('Error: $e');
+        toast(response.message ?? 'Failed to withdraw application');
       }
-      emit(PaginationLoadedState());
-      // emit(DataLoaded(drugsData));
     } catch (e) {
-      // ProgressDialogUtils.hideProgressDialog();
-      print(e);
-
+      print('Error withdrawing application: $e');
       emit(PaginationLoadedState());
+      toast('Failed to withdraw application');
     }
   }
   _showApplicant(ShowApplicantEvent event, Emitter<JobsState> emit) async {
-    // emit(PaginationInitialState());
-    // ProgressDialogUtils.showProgressDialog();
-
     emit(PaginationLoadingState());
-    // try {
-      Dio dio = Dio();
-
-
-        var response = await dio.get(
-          '${AppData.remoteUrl2}/jobs-applicants/${event.jobId}/applicants', // Add query parameters
-          options: Options(headers: {
-            'Authorization': 'Bearer ${AppData.userToken}',  // Set headers
-          }),
-        );
-      jobApplicantsModel=JobApplicantsModel.fromJson(response.data);
-        // showToast('message');
-        print(response.data);
-        //
-      emit(PaginationLoadedState());
-      // emit(DataLoaded(drugsData));
-    // } catch (e) {
-    //   // ProgressDialogUtils.hideProgressDialog();
-    //   print(e);
-    //   emit(PaginationLoadedState());
-    //
-    //   // emit(DataError('No Data Found'));
-    // }
+    try {
+      // Use the SharedApiService for getting job applicants
+      final response = await apiManager.sharedApi.getJobApplicants(jobId: event.jobId.toString());
+      if (response.success) {
+        jobApplicantsModel = response.data!; // response.data is already a JobApplicantsModel
+        print("Applicants data: ${response.data}");
+        emit(PaginationLoadedState());
+      } else {
+        print('Error getting applicants: ${response.message}');
+        emit(DataError(response.message ?? 'Failed to get job applicants'));
+      }
+    } catch (e) {
+      print('Error getting applicants: $e');
+      emit(DataError('Failed to get job applicants'));
+    }
   }
 
 }

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/group_model/group_about_model.dart';
 import 'package:doctak_app/data/models/group_model/group_details_model.dart';
 import 'package:doctak_app/data/models/group_model/group_list_model.dart';
@@ -14,7 +14,7 @@ import 'group_event.dart';
 import 'group_state.dart';
 
 class GroupBloc extends Bloc<GroupEvent, GroupState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   String? specialtyName;
   List<String>? specialtyList;
   String? name;
@@ -68,12 +68,12 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   void _groupDetails(GroupDetailsEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
     groupDetailsModel =
-        await postService.groupDetails('Bearer ${AppData.userToken}', event.id);
+        await apiManager.groupDetails('Bearer ${AppData.userToken}', event.id);
     groupAboutModel =
-        await postService.groupAbout('Bearer ${AppData.userToken}', event.id);
-    groupPostModel = await postService.groupPost(
+        await apiManager.groupAbout('Bearer ${AppData.userToken}', event.id);
+    groupPostModel = await apiManager.groupPost(
         'Bearer ${AppData.userToken}', event.id, '0');
-    var response = await postService.groupNotificationUpdate(
+    var response = await apiManager.groupNotificationUpdate(
         'Bearer ${AppData.userToken}', 'get', '', '');
     print(response);
     print(AppData.logInUserId);
@@ -86,7 +86,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   void _groupNotification(
       GroupNotificationEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    var response = await postService.groupNotificationUpdate(
+    var response = await apiManager.groupNotificationUpdate(
         'Bearer ${AppData.userToken}',
         event.type,
         event.groupNotificationPush,
@@ -100,7 +100,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   void _groupMemberRequest(
       GroupMemberRequestEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupMemberRequestModel = await postService.groupMemberRequest(
+    groupMemberRequestModel = await apiManager.groupMemberRequest(
         'Bearer ${AppData.userToken}', event.id);
     print(groupMemberRequestModel?.toJson());
     emit(PaginationLoadedState(
@@ -112,7 +112,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   void _groupPostRequest(
       GroupPostRequestEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupPostModelRequest = await postService.groupPostRequest(
+    groupPostModelRequest = await apiManager.groupPostRequest(
         'Bearer ${AppData.userToken}', event.id, event.offset);
     print(groupPostModelRequest?.toJson());
     emit(PaginationLoadedState(
@@ -123,7 +123,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
 
   void _groupMembers(GroupMembersEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupMemberModel = await postService.groupMembers(
+    groupMemberModel = await apiManager.groupMembers(
         'Bearer ${AppData.userToken}', event.id, event.keyword);
     print(groupMemberRequestModel?.toJson());
     emit(PaginationLoadedState(
@@ -138,7 +138,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     print(event.groupId);
     print(event.id);
     print(event.status);
-    var response = await postService.groupMemberRequestUpdate(
+    var response = await apiManager.groupMemberRequestUpdate(
         'Bearer ${AppData.userToken}', event.id, event.groupId, event.status);
     print(response.data);
     emit(PaginationLoadedState(
@@ -150,7 +150,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   void _listGroups(ListGroupsEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
 
-    groupListModel = await postService.listGroup(
+    groupListModel = await apiManager.listGroup(
         'Bearer ${AppData.userToken}', AppData.logInUserId);
     emit(PaginationLoadedState(
       [],
@@ -213,7 +213,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       profilePicture.toString(),
     );
     try {
-      final response = await postService.groupStore(
+      final response = await apiManager.groupStore(
           'Bearer ${AppData.userToken}',
           name ?? '',
           selectSpecialtyList.toString(),
@@ -248,22 +248,23 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   Future<List<String>?> _onGetSpecialty() async {
     // emit(DataLoading());
     try {
-      final response = await postService.getSpecialty();
-      if (response.data!.isNotEmpty) {
-        // emit(DataSuccess(countriesModel: response));
+      final response = await apiManager.getSpecialty();
+      // response is now a List directly, not wrapped in an object with .data
+      if (response != null && response.isNotEmpty) {
         List<String> list = [];
         list.add('Select Specialty');
-        response.data!.forEach((element) {
-          list.add(element['name']!);
-        });
+        for (var element in response) {
+          if (element is Map && element['name'] != null) {
+            list.add(element['name']!);
+          }
+        }
         return list;
       } else {
         return [];
-        // emit(DataFailure(error: 'Failed to load data'));
       }
     } catch (e) {
       print(e);
-      // emit(DataFailure(error: 'An error occurred'));
+      return null; // Return null on error
     }
   }
 }

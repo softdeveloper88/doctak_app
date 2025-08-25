@@ -12,7 +12,7 @@ class CustomAlertDialog extends StatelessWidget {
   final String? yesButtonText;
   final String? mainTitle;
 
-   CustomAlertDialog(
+   const CustomAlertDialog(
       {Key? key, required this.title, required this.callback,this.callbackNegative,this.yesButtonText,this.noButtonText,this.mainTitle})
       : super(key: key);
 

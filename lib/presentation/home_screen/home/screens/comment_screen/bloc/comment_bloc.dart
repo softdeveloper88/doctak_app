@@ -1,7 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
 import 'package:doctak_app/data/models/post_comment_model/reply_comment_model.dart';
 import 'package:doctak_app/data/models/post_comment_model/reply_comment_response.dart';
@@ -15,7 +15,7 @@ part 'comment_event.dart';
 part 'comment_state.dart';
 
 class CommentBloc extends Bloc<CommentEvent, CommentState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<PostComments> postList = [];
@@ -180,7 +180,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         ),
       ),
     );
-    var response = await postService.makeComment(
+    var response = await apiManager.makeComment(
       'Bearer ${AppData.userToken}',
       event.postId.toString(),
       event.comment ?? "",
@@ -408,7 +408,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // }
     print(event.commentId);
     try {
-      var response = await postService.deleteComments(
+      var response = await apiManager.deleteComments(
         'Bearer ${AppData.userToken}',
         event.commentId.toString(),
       );

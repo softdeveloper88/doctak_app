@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/localization/app_localization.dart';
@@ -265,7 +266,7 @@ class _SearchJobListState extends State<SearchJobList> {
               createDynamicLink(
                 '${jobData.jobTitle ?? ""} \n Apply Link: ${jobData.link ??
                     ''}',
-                'https://doctak.net/job/${jobData.id}',
+                '${AppData.base}job/${jobData.id}',
                 jobData.link ?? '',
               );
             },

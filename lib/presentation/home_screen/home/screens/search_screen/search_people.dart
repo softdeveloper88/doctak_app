@@ -35,13 +35,11 @@ class SearchPeopleList extends StatelessWidget {
       builder: (context, state) {
         print("state $state");
         if (state is SearchPeoplePaginationLoadingState) {
-          return Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
-              ),
-              child: const ProfileListShimmer(),
+          return Container(
+            decoration: BoxDecoration(
+              color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
             ),
+            child: const ProfileListShimmer(),
           );
         } else if (state is SearchPeoplePaginationLoadedState) {
           final bloc = searchPeopleBloc;
@@ -115,8 +113,7 @@ class SearchPeopleList extends StatelessWidget {
               ),
             );
           } else {
-            return Expanded(
-              child: Center(
+            return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -136,13 +133,11 @@ class SearchPeopleList extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            );
+              );
           }
         }
         if (state is SearchPeopleDataError) {
-          return Expanded(
-            child: Center(
+          return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -200,11 +195,9 @@ class SearchPeopleList extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          );
+            );
         } else {
-          return Expanded(
-            child: Center(
+          return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -224,8 +217,7 @@ class SearchPeopleList extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          );
+            );
         }
       },
     );

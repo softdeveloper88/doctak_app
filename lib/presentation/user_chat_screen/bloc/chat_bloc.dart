@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/chat_model/contacts_model.dart';
 import 'package:doctak_app/data/models/chat_model/message_model.dart';
 import 'package:doctak_app/data/models/chat_model/search_contacts_model.dart';
@@ -21,7 +21,7 @@ part 'chat_event.dart';
 part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   List<XFile> imagefiles = [];
   int pageNumber = 1;
   int numberOfPage = 1;
@@ -78,7 +78,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       emit(PaginationLoadingState());
     }
     try {
-      ContactsModel response = await postService.getContacts(
+      ContactsModel response = await apiManager.getContacts(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
       );
@@ -107,10 +107,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       emit(PaginationLoadingState());
     }
     try {
-      SearchContactsModel response = await postService.searchContacts(
+      print('🔍 Searching contacts with keyword: "${event.keyword ?? ''}", page: $contactPageNumber');
+      
+      SearchContactsModel response = await apiManager.searchContacts(
           'Bearer ${AppData.userToken}',
           '$contactPageNumber',
           event.keyword ?? '');
+      
+      print('✅ Search response received - Success: ${response.success}, Records: ${response.records?.data?.length ?? 0}');
+      
       contactNumberOfPage = response.lastPage ?? 0;
       if (contactPageNumber < contactNumberOfPage + 1) {
         contactPageNumber = contactPageNumber + 1;
@@ -121,18 +126,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       // emit(DataLoaded(contactsList));
     } catch (e) {
-      print(e);
-
-      emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
+      print('❌ Search contacts error: $e');
+      emit(DataError('Failed to search contacts: $e'));
     }
   }
   _updateChatReadStatus(ChatReadStatusEvent event, Emitter<ChatState> emit) async {
 
     try {
       if(event.roomId !='') {
-        await postService.updateReadStatus(
+        await apiManager.updateReadStatus(
             'Bearer ${AppData.userToken}',
             event.userId ?? "", event.roomId ?? '');
       }
@@ -174,14 +176,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       print(event.page);
 
-      MessageModel response = await postService.getRoomMessenger(
+      MessageModel response = await apiManager.getRoomMessenger(
           'Bearer ${AppData.userToken}',
           '$messagePageNumber',
           event.userId??"",
           event.roomId??"");
 
       roomId = response.roomId.toString();
-      await postService.updateReadStatus(
+      await apiManager.updateReadStatus(
           'Bearer ${AppData.userToken}',
           event.userId ?? "", roomId ?? event.roomId??'');
       print(roomId);
@@ -259,7 +261,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       });
       
       print("=== SENDING FILE UPLOAD REQUEST ===");
-      print("URL: https://doctak.net/api/v1/send-message");
+      print("URL: ${AppData.remoteUrl}/send-message");
       print("File path: $filePath");
       print("File name: $fileName");
       print("Attachment type: $attachmentType");
@@ -281,7 +283,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
       
       final response = await dio.post(
-        'https://doctak.net/api/v1/send-message',
+        '${AppData.remoteUrl}/send-message',
         data: formData,
         options: Options(
           headers: {
@@ -331,7 +333,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           
           // Try using the original API service method
           try {
-            response = await postService.sendMessage(
+            response = await apiManager.sendMessage(
               'Bearer ${AppData.userToken}',
               event.userId ?? '',
               event.roomId ?? '',
@@ -368,7 +370,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         } else {
           print("File does not exist: ${event.file}");
           // Send without file if file doesn't exist
-          response = await postService.sendMessageWithoutFile(
+          response = await apiManager.sendMessageWithoutFile(
             'Bearer ${AppData.userToken}',
             event.userId!,
             event.roomId!,
@@ -383,7 +385,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           emit(FileUploadingState());
         }
         
-        response = await postService.sendMessageWithoutFile(
+        response = await apiManager.sendMessageWithoutFile(
           'Bearer ${AppData.userToken}',
           event.userId!,
           event.roomId!,
@@ -444,7 +446,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
     // try {
 
-    await postService.deleteMessage(
+    await apiManager.deleteMessage(
       'Bearer ${AppData.userToken}',
       event.id ?? '',
     );

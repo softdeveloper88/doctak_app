@@ -5,6 +5,7 @@ import 'package:doctak_app/data/models/meeting_model/create_meeting_model.dart';
 import 'package:doctak_app/data/models/meeting_model/fetching_meeting_model.dart';
 import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart' show MeetingDetailsModel;
 import 'package:doctak_app/data/models/meeting_model/search_user_model.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart';
 
 import 'api_response.dart';
@@ -20,7 +21,8 @@ import 'api_response.dart';
 Future<CreateMeetingModel> startMeetings() async {
 
   return CreateMeetingModel.fromJson(await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/create-meeting', method: networkUtils.HttpMethod.POST)));
-}
+
+ }
 Future<MeetingDetailsModel> joinMeetings(String meetingCode) async {
 
   return MeetingDetailsModel.fromJson(await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/join-meeting?meeting_channel=$meetingCode', method: networkUtils.HttpMethod.GET)));
@@ -94,18 +96,18 @@ Future<ApiResponse> rejectJoinMeet(context,meetingId,userId) async {
 }
 Future<ApiResponse> endMeeting(context,meetingId) async {
   try {
-    ProgressDialogUtils.showProgressDialog();
+    // Don't show progress dialog here - let the caller handle UI feedback
     Map<String ,dynamic> response= await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/close-meeting', method: networkUtils.HttpMethod.POST,request: {
       'meeting_id':meetingId
     }));
 
-    ProgressDialogUtils.hideProgressDialog();
-
     return ApiResponse.success(response);
   } on ApiException catch (e) {
-    ProgressDialogUtils.hideProgressDialog();
-    print('Error: ${e.statusCode} - ${e.message}');
-    return ApiResponse.error("Something went wrong");
+    debugPrint('End meeting API error: ${e.statusCode} - ${e.message}');
+    return ApiResponse.error("Failed to end meeting: ${e.message}");
+  } catch (e) {
+    debugPrint('Unexpected error ending meeting: $e');
+    return ApiResponse.error("Unexpected error occurred while ending meeting");
   }
 }
 Future<ApiResponse> sendMessage(meetingId,message,senderId) async {

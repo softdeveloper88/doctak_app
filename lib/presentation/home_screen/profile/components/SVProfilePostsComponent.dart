@@ -271,12 +271,10 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
 
 /// Section Widget
 Widget _buildScrollview(BuildContext context, profileBloc) {
-  return SingleChildScrollView(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [_buildColumnlockone(context, profileBloc)],
-      ),
+  return Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      children: [_buildColumnlockone(context, profileBloc)],
     ),
   );
 }

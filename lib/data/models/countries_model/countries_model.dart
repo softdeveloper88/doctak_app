@@ -78,4 +78,9 @@ class Countries {
     map['flag'] = flag;
     return map;
   }
+
+  @override
+  String toString() {
+    return countryName ?? '';
+  }
 }

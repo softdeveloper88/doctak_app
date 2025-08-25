@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/errors/failures.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -10,7 +10,7 @@ import 'conference_event.dart';
 import 'conference_state.dart';
 
 class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> conferenceList = [];
@@ -39,7 +39,7 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
-      SearchConferenceModel response = await postService.searchConferences(
+      SearchConferenceModel response = await apiManager.searchConferences(
           'Bearer ${AppData.userToken}',
           '$pageNumber',
           event.countryName ?? "all",
@@ -66,7 +66,7 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
   //   // ProgressDialogUtils.showProgressDialog();
   //   // emit(PaginationLoadingState());
   //   try {
-  //     final response = await postService.searchConferences(
+  //     final response = await apiManager.searchConferences(
   //         'Bearer ${AppData.userToken}',
   //         "1",
   //         "USA",
@@ -86,7 +86,7 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
   Future<void> _listCountryList(
       LoadDropdownData event, Emitter<ConferenceState> emit) async {
     try {
-      final response = await postService.getConferenceCountries(
+      final response = await apiManager.getConferenceCountries(
         'Bearer ${AppData.userToken}',
       );
       print('333s${response.data['countries']}');
@@ -104,7 +104,7 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
   // Future<List<String>> _onGetCountries() async {
   //   // emit(DataLoading());
   //   try {
-  //     final response = await postService.getConferenceCountries(
+  //     final response = await apiManager.getConferenceCountries(
   //       'Bearer ${AppData.userToken}',
   //     );
   //

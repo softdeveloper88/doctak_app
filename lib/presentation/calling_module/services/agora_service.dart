@@ -743,22 +743,28 @@ class AgoraService {
       await _logEngineState();
       await _logMediaSettings(isVideoCall: isVideoCall);
 
-      // CRITICAL FIX: Use simpler channel options for better compatibility
+      // CRITICAL FIX: Enhanced channel options for better video support
       final options = ChannelMediaOptions(
-        // Publishing options - simplified
+        // Publishing options - explicit configuration
         publishCameraTrack: isVideoCall,
         publishMicrophoneTrack: true,
         publishScreenTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
 
-        // Subscription options - ensure we subscribe to remote streams
+        // Subscription options - force subscribe to remote streams
         autoSubscribeAudio: true,
         autoSubscribeVideo: isVideoCall,
 
-        // Channel configuration
-        channelProfile: ChannelProfileType.channelProfileCommunication,
+        // Channel configuration - use LiveBroadcasting for better video
+        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
         clientRoleType: ClientRoleType.clientRoleBroadcaster,
 
-        // Remove potentially problematic options
+        // Audio/Video configuration
+        enableAudioRecordingOrPlayout: true,
+        
+        // Disable encryption for empty token compatibility
         enableBuiltInMediaEncryption: false,
       );
 
@@ -768,13 +774,27 @@ class AgoraService {
       // print('🔐 Using token: "${actualToken.isEmpty ? "EMPTY" : "PROVIDED"}"');
 
       await _engine!.joinChannel(
-        token: '',
+        token: token ?? '',
         channelId: channelId,
         uid: uid,
         options: options,
       );
 
       print('✅ Successfully initiated channel join');
+      
+      // CRITICAL FIX: Force video subscription after join (for empty token compatibility)
+      if (isVideoCall) {
+        // Add a delay to allow channel join to complete
+        Future.delayed(const Duration(milliseconds: 500), () async {
+          try {
+            await _engine!.enableVideo();
+            await _engine!.startPreview();
+            print('🎥 Video enabled and preview started post-join');
+          } catch (e) {
+            print('⚠️ Post-join video setup failed: $e');
+          }
+        });
+      }
 
       // Log channel options for debugging
       print('📋 Channel options used:');

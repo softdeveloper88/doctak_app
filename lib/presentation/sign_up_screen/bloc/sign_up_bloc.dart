@@ -6,7 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_req.dart';
 import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_resp.dart';
 import 'package:equatable/equatable.dart';
@@ -23,7 +23,7 @@ part 'sign_up_state.dart';
 /// A bloc that manages the state of a SignUp according to the event that is dispatched to it.
 
 class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
-  final ApiService apiService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   bool isVisiblePassword = false;
   bool isDoctorRole = true;
 
@@ -84,7 +84,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         deviceType="ios";
         deviceId=iosInfo.identifierForVendor.toString();
       }
-      // final response1 = await apiService.register(
+      // final response1 = await apiManager.register(
       //     event.firstName,
       //     event.lastName,
       //     event.username,
@@ -243,7 +243,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     ProgressDialogUtils.showProgressDialog();
     try {
       print(event.token);
-      final response = await apiService.completeProfile(
+      final response = await apiManager.completeProfile(
           'Bearer ${event.token}',
           event.firstName,
           event.lastName,

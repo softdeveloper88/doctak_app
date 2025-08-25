@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_ask_question_response.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
@@ -14,7 +14,7 @@ import 'chat_gpt_event.dart';
 import 'chat_gpt_state.dart';
 
 class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int newChatSessionId = 0;
   bool isWait = false;
   bool isLoadingHistory = false;
@@ -30,14 +30,14 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // emit(DataInitial());
     // try {
       // Load session list first
-      ChatGptSession response = await postService.gptChatSession(
+      ChatGptSession response = await apiManager.gptChatSession(
         'Bearer ${AppData.userToken}',
       );
       
       // Load messages for the first session if available
       ChatGptMessageHistory response1;
       if (response.sessions?.isNotEmpty == true) {
-        response1 = await postService.gptChatMessages(
+        response1 = await apiManager.gptChatMessages(
             'Bearer ${AppData.userToken}',
             response.sessions!.first.id.toString());
       } else {
@@ -62,13 +62,13 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       print('screen ${event.imageType}');
       if(event.imageUrl1?.isNotEmpty??false) {
        response =
-      await postService.askQuestionFromGpt(
+      await apiManager.askQuestionFromGpt(
           'Bearer ${AppData.userToken}', event.sessionId, event.question,
           event.imageType ?? "",event.imageUrl1 ?? "",event.imageUrl2 ?? "");
     }else{
         print(event.question);
        response =
-      await postService.askQuestionFromGptWithoutImage(
+      await apiManager.askQuestionFromGptWithoutImage(
           'Bearer ${AppData.userToken}', event.sessionId, event.question
          );
     }
@@ -169,7 +169,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     } else {
       // Load session data first if we don't have it
       print('State is ${state.runtimeType}, loading session data first...');
-      sessionData = await postService.gptChatSession('Bearer ${AppData.userToken}');
+      sessionData = await apiManager.gptChatSession('Bearer ${AppData.userToken}');
       questionResponse = ChatGptAskQuestionResponse();
     }
     
@@ -183,7 +183,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       isWait = false;
       
       // Load messages for the specific session
-      ChatGptMessageHistory response = await postService.gptChatMessages(
+      ChatGptMessageHistory response = await apiManager.gptChatMessages(
           'Bearer ${AppData.userToken}', event.sessionId);
       ProgressDialogUtils.hideProgressDialog();
       
@@ -205,10 +205,10 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     ProgressDialogUtils.showProgressDialog();
     try {
       emit(DataLoaded(ChatGptSession(), ChatGptMessageHistory(),ChatGptAskQuestionResponse()) );
-      var response = await postService.newChat('Bearer ${AppData.userToken}');
-      ChatGptMessageHistory response1 = await postService.gptChatMessages(
+      var response = await apiManager.newChat('Bearer ${AppData.userToken}');
+      ChatGptMessageHistory response1 = await apiManager.gptChatMessages(
           'Bearer ${AppData.userToken}', response.response.data['session_id']);
-      ChatGptSession responseSession = await postService.gptChatSession(
+      ChatGptSession responseSession = await apiManager.gptChatSession(
         'Bearer ${AppData.userToken}',
       );
       print(response.response.data['session_id']);
@@ -232,10 +232,10 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
-      var response = await postService.deleteChatgptSession(
+      var response = await apiManager.deleteChatgptSession(
           'Bearer ${AppData.userToken}', event.sessionId.toString());
       print(response.response.data);
-      ChatGptSession response1 = await postService.gptChatSession(
+      ChatGptSession response1 = await apiManager.gptChatSession(
         'Bearer ${AppData.userToken}',
       );
       print('data');

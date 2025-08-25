@@ -587,7 +587,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                 : '';
                             createDynamicLink(
                               removeHtmlTags(post.title ?? ''),
-                              'https://doctak.net/post/${post.id}',
+                              '${AppData.base}post/${post.id}',
                               mediaLink,
                             );
                           },

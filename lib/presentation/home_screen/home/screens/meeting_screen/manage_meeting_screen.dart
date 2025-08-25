@@ -208,11 +208,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                                   Container(
                                     padding: const EdgeInsets.all(4),
                                     margin: const EdgeInsets.only(right: 6),
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.videocam_outlined,
                                       size: 12,
                                       color: Colors.blue,
@@ -255,11 +255,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                                   Container(
                                     padding: const EdgeInsets.all(4),
                                     margin: const EdgeInsets.only(right: 6),
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.calendar_today_outlined,
                                       size: 12,
                                       color: Colors.blue,
@@ -302,11 +302,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                                   Container(
                                     padding: const EdgeInsets.all(4),
                                     margin: const EdgeInsets.only(right: 6),
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.history_outlined,
                                       size: 12,
                                       color: Colors.blue,
@@ -407,12 +407,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                     await joinMeetings(
                             createMeeting.data?.meeting?.meetingChannel ?? '')
                         .then((joinMeetingData) {
+                          print('Meeting data${joinMeetingData.toJson()}');
                       ProgressDialogUtils.hideProgressDialog();
                       VideoCallScreen(
                         meetingDetailsModel: joinMeetingData,
                         isHost: true,
-                      ).launch(context,
-                          pageRouteAnimation: PageRouteAnimation.Slide);
+                      ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                     });
                   });
                 } catch (error) {

@@ -17,4 +17,7 @@ class FollowersPaginationLoadedState extends FollowersState {}
 
 class FollowersPaginationLoadingState extends FollowersState {}
 
-class FollowersPaginationErrorState extends FollowersState {}
+class FollowersPaginationErrorState extends FollowersState {
+  final String error;
+  FollowersPaginationErrorState({required this.error});
+}

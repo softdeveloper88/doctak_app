@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/anousment_model/announcement_detail_model.dart';
 import 'package:doctak_app/data/models/anousment_model/announcement_model.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
@@ -14,7 +14,7 @@ import 'notification_event.dart';
 
 
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> notificationsList = [];
@@ -56,7 +56,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     print('status ${event.readStatus}');
 
     if(event.readStatus=='') {
-       response = await postService.getMyNotifications(
+       response = await apiManager.getMyNotifications(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
       );
@@ -69,7 +69,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
 
     }else if(event.readStatus=='mark-read'){
-      var response = await postService.readAllSelectedNotifications(
+      var response = await apiManager.readAllSelectedNotifications(
           'Bearer ${AppData.userToken}',
 
       );
@@ -96,7 +96,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     try {
 
 
-     var response = await postService.readNotification(
+     var response = await apiManager.readNotification(
         'Bearer ${AppData.userToken}',
         event.notificationId??""
       );
@@ -235,7 +235,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   _onGetJobDetail(NotificationDetailPageEvent event, Emitter<NotificationState> emit) async {
     emit(PaginationLoadingState());
     // try {
-    // JobDetailModel response = await postService.getJobsDetails(
+    // JobDetailModel response = await apiManager.getJobsDetails(
     //     'Bearer ${AppData.userToken}', event.jobId.toString());
     // jobDetailModel = response;
     // emit(PaginationLoadedState());
@@ -255,7 +255,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
     // emit(PaginationLoadingState());
     // try {
-    //   JobsModel response = await postService.getJobsList(
+    //   JobsModel response = await apiManager.getJobsList(
     //       'Bearer ${AppData.userToken}',
     //       "1",
     //       event.countryId,

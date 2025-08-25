@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_event.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'suggestion_state.dart';
 
 class SuggestionBloc extends Bloc<SuggestionEvent, SuggestionState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
 
   SuggestionBloc() : super(PaginationInitialState()) {
     on<SaveSuggestion>(_onSaveSuggestionData);
@@ -22,7 +22,7 @@ class SuggestionBloc extends Bloc<SuggestionEvent, SuggestionState> {
     // try {
     ProgressDialogUtils.showProgressDialog();
 
-    var response = await postService.saveSuggestion(
+    var response = await apiManager.saveSuggestion(
         'Bearer ${AppData.userToken}',
         event.name,
         event.phone,

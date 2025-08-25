@@ -1,7 +1,6 @@
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,7 +11,7 @@ part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Post> postList = [];
@@ -40,7 +39,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(PostPaginationLoadingState());
     }
     try {
-      var response1 = await postService.getPosts(
+      var response1 = await apiManager.getPosts(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
       );
@@ -70,10 +69,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       if (event.commentId != 0) {
         print(event.commentId);
-        postData = await postService.getDetailsPosts(
+        postData = await apiManager.getDetailsPosts(
             'Bearer ${AppData.userToken}', event.commentId.toString());
       } else {
-        postData = await postService.getDetailsLikesPosts(
+        postData = await apiManager.getDetailsLikesPosts(
             'Bearer ${AppData.userToken}', event.postId.toString());
       }
       print('post $postData');
@@ -93,7 +92,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(PostPaginationLoadingState());
     }
     try {
-      PostDataModel response = await postService.getSearchPostList(
+      PostDataModel response = await apiManager.getSearchPostList(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
         event.search ?? '',
@@ -122,7 +121,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     // }
     try {
-      var response = await postService.like(
+      var response = await apiManager.like(
         'Bearer ${AppData.userToken}',
         event.postId.toString(),
       );
@@ -167,7 +166,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   _onDeletePost(DeletePostEvent event, Emitter<HomeState> emit) async {
     // try {
-    var response = await postService.deletePost(
+    var response = await apiManager.deletePost(
       'Bearer ${AppData.userToken}',
       event.postId.toString(),
     );
@@ -212,9 +211,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     print('call ads api');
     try {
     AppData.adsSettingModel =
-        await postService.advertisementSetting('Bearer ${AppData.userToken}');
+        await apiManager.advertisementSetting('Bearer ${AppData.userToken}');
     print("ads data  ${AppData.adsSettingModel.toJson()}");
-    AppData.listAdsType = await postService.advertisementTypes(
+    AppData.listAdsType = await apiManager.advertisementTypes(
       'Bearer ${AppData.userToken}',
     );
 

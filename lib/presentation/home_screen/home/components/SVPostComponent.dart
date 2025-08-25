@@ -124,7 +124,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                       : '';
                   createDynamicLink(
                     removeHtmlTags(post.title ?? ''),
-                    'https://doctak.net/post/${post.id}',
+                    '${AppData.base}post/${post.id}',
                     mediaLink,
                   );
                 },

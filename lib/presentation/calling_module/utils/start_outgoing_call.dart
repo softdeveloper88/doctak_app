@@ -165,7 +165,7 @@ Future<void> startOutgoingCall(String userId, String username, String profilePic
                                contactAvatar: "${AppData.imageUrl}$profilePic",
                                isIncoming: false,
                                isVideoCall: isVideoCall,
-                               token: callData['token']?.toString() ?? '',
+                               token: callData['token']?.toString(), // Will be generated in CallProvider if null
                              ),
                        ),
                      );

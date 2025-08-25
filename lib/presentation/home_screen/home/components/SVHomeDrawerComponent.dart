@@ -464,11 +464,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   String _getInitials(String name) {
     if (name.isEmpty) return 'U';
 
-    List<String> nameParts = name.split(' ');
+    List<String> nameParts = name.split(' ').where((part) => part.isNotEmpty).toList();
     if (nameParts.length >= 2) {
       return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
+    } else if (nameParts.isNotEmpty) {
+      return nameParts[0].substring(0, math.min(2, nameParts[0].length)).toUpperCase();
     } else {
-      return name.substring(0, math.min(2, name.length)).toUpperCase();
+      return 'U';
     }
   }
 
@@ -913,7 +915,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             MaterialPageRoute(
               builder: (context) => WebPageScreen(
                 page_name: AppLocalizations.of(context)!.lbl_privacy_policy,
-                url: 'https://doctak.net/privacy-policy',
+                url: '${AppData.base}privacy-policy',
               ),
             ),
           );

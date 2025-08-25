@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
@@ -402,7 +403,7 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
   void _shareConference() {
     createDynamicLink(
       '${widget.conference.title ?? ""} \n  Register Link: ${widget.conference.conferenceAgendaLink ?? ''}',
-      'https://doctak.net/conference/${widget.conference.id}',
+      '${AppData.base}conference/${widget.conference.id}',
       widget.conference.thumbnail ?? '',
     );
   }

@@ -135,7 +135,7 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
     // Use the createDynamicLink function
     createDynamicLink(
       "$jobTitle\nApply Link: $jobLink",
-      "https://doctak.net/job/$jobId",
+      "${AppData.base}job/$jobId",
       jobLink,
     );
   }

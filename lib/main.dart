@@ -146,7 +146,7 @@ Future<void> _checkForShorebirdUpdates(ShorebirdCodePush shorebirdCodePush) asyn
 Future<String> _getBaseUrlFromPrefs() async {
   try {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('api_base_url') ?? 'https://doctak.net/api/v3';
+    return prefs.getString('api_base_url') ?? AppData.remoteUrl3;
   } catch (e) {
     debugPrint('Error getting base URL from prefs: $e');
     return AppData.remoteUrl3;
@@ -296,6 +296,10 @@ Future<void> main() async {
 
   // Initialize needed services
   try {
+    // Initialize nb_utils SharedPreferences first
+    await initialize();
+    debugPrint('nb_utils SharedPreferences initialized');
+    
     await initializeAsync();
     AppData.initializePusher();
     await PusherService().initialize();
@@ -994,7 +998,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                                     widget.message?.notification?.title ?? "",
                                 profilePic: widget.message?.data['image'] ??
                                     ''.replaceAll(
-                                        'https://doctak-file.s3.ap-south-1.amazonaws.com/',
+                                        AppData.imageUrl,
                                         ''),
                               ),
                             );
@@ -1029,7 +1033,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                                     widget.message?.notification?.title ?? "",
                                 profilePic: widget.message?.data['image'] ??
                                     ''.replaceAll(
-                                        'https://doctak-file.s3.ap-south-1.amazonaws.com/',
+                                        AppData.imageUrl,
                                         ''),
                               ),
                           '/comments_on_posts': (context) => PostDetailsScreen(

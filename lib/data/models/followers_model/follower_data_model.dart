@@ -234,7 +234,7 @@ class User {
   String? phone;
   String? licenseNo;
   String? specialty;
-  String? status;
+  dynamic status;
   String? role;
   String? gender;
   String? dob;

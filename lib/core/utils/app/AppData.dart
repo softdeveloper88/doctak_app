@@ -5,14 +5,14 @@ import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dar
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 class AppData {
-  // https://pharmadoc.net/
+  // http://pharmadoc.net/
   static var base = "https://doctak.net/";
   static var base2 = "https://doctak.net";
   static var basePath = "https://doctak.net/public/";
-  static var imageUrl = "https://doctak-file.s3.ap-south-1.amazonaws.com/";
-  static var remoteUrl = "https://doctak.net/api/v1";
-  static var remoteUrl2 = "https://doctak.net/api/v2";
-  static var remoteUrl3 = "https://doctak.net/api/v3";
+  static var imageUrl = "http://doctak-file.s3.ap-south-1.amazonaws.com/";
+  static var remoteUrl = "https://doctak.net/api/v4";
+  static var remoteUrl2 = "https://doctak.net/api/v4";
+  static var remoteUrl3 = "https://doctak.net/api/v4";
   static var userProfileUrl = "https://doctak.net/";
   static const chatifyUrl = "https://doctak.net/chatify/api/";
 

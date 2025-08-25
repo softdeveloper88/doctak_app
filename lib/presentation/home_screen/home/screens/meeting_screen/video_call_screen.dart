@@ -1458,7 +1458,7 @@
 //                   child: ListTile(
 //                     trailing: const Icon(Icons.link, color: Colors.white),
 //                     title: Text(
-//                         "Send Invitation link : https://doctak.net/$channelName",
+//                         "Send Invitation link : ${AppData.base2}/$channelName",
 //                         style: const TextStyle(color: Colors.white)),
 //                   ),
 //                 ),
@@ -2876,13 +2876,19 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           });
 
           if (removedUser?.id != null) {
-            _showSystemMessage(
-                '${removedUser?.firstName ?? ""} ${removedUser?.lastName ?? ""} left the meeting');
+
+            _showSystemMessage('${removedUser?.firstName ?? ""} ${removedUser?.lastName ?? ""} left the meeting');
+
           } else {
+
             _showSystemMessage('A participant left the meeting');
+
           }
 
           _updateParticipantCount();
+          
+          // Check if user is now alone in the meeting and auto-end if host
+          _checkAndHandleAloneInMeeting();
         },
         onError: (ErrorCodeType err, String msg) {
           debugPrint("Agora error: $msg");
@@ -3019,6 +3025,134 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   void _updateParticipantCount() {
     // Update the participant count if needed.
     _participantCount.value = _remoteVideos.length + 1; // including local user.
+  }
+  
+  // Check if user is alone in meeting and handle accordingly
+  void _checkAndHandleAloneInMeeting() {
+    if (_remoteVideos.isEmpty && (widget.isHost ?? false)) {
+      // User is alone and is host - offer to end meeting
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted && _remoteVideos.isEmpty) {
+          _showAloneInMeetingDialog();
+        }
+      });
+    }
+  }
+  
+  // Show dialog when user is alone in meeting
+  void _showAloneInMeetingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(translation(context).lbl_meeting),
+          content: const Text('You are the only participant left in the meeting. Would you like to end it?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(translation(context).lbl_cancel),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Close dialog
+                await _endMeetingProperly();
+              },
+              child: Text(translation(context).lbl_end_meeting, style: const TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  // Properly end meeting with error handling
+  Future<void> _endMeetingProperly() async {
+    try {
+      // Disable wakelock when ending the call
+      WakelockPlus.disable();
+      
+      // Clear chat messages
+      AppData.chatMessages.clear();
+      
+      if (widget.isHost ?? false) {
+        // Show loading indicator
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const Center(
+              child: Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Ending meeting...'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+        
+        // Call the API to end meeting
+        final resp = await endMeeting(context, widget.meetingDetailsModel?.data?.meeting?.id);
+        
+        // Dismiss loading dialog
+        if (mounted) {
+          Navigator.pop(context);
+        }
+        
+        debugPrint("End meeting response: ${resp}");
+        
+        if (resp.success) {
+          // Success - navigate back
+          if (mounted) {
+            Navigator.pop(context); // Exit meeting screen
+          }
+        } else {
+          // API call failed but still allow user to leave
+          debugPrint("End meeting API failed but allowing user to exit");
+          if (mounted) {
+            // Show error but still navigate back
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Failed to end meeting on server, but you have left the meeting.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            Navigator.pop(context); // Exit meeting screen anyway
+          }
+        }
+      } else {
+        // Non-host user - just leave the meeting
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      debugPrint("Error ending meeting: $e");
+      
+      // Dismiss loading dialog if still showing
+      if (mounted) {
+        Navigator.pop(context);
+        
+        // Show error but still allow user to leave
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error ending meeting, but you have left the meeting.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        
+        // Navigate back anyway
+        Navigator.pop(context);
+      }
+    }
   }
 
   void _startCallTimer() {
@@ -3751,7 +3885,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           value: 4,
           child: ListTile(
             trailing: const Icon(Icons.link, color: Colors.white),
-            title: Text("${translation(context).lbl_send_invitation_link} : https://doctak.net/$channelName",
+            title: Text("${translation(context).lbl_send_invitation_link} : ${AppData.base2}/$channelName",
                 style: const TextStyle(color: Colors.white)),
           ),
         ),
@@ -4081,25 +4215,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         title: const Text("Meeting"),
         content: Text(translation(context).msg_confirm_end_call),
         actions: [
-          TextButton(
+           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(translation(context).lbl_cancel),
           ),
           TextButton(
             onPressed: () async {
-              // Disable wakelock when ending the call
-              WakelockPlus.disable();
-              
-              if (widget.isHost ?? false) {
-                Navigator.pop(context); // Close dialog
-                Navigator.pop(context);
-                await endMeeting(context, widget.meetingDetailsModel?.data?.meeting?.id).then((resp) {
-                  debugPrint("End meeting response: ${resp}");
-                });
-              }
-              AppData.chatMessages.clear();
-              // Navigator.pop(context); // Close dialog
-              // Navigator.pop(context); // Exit meeting screen
+              Navigator.pop(context); // Close dialog first
+              await _endMeetingProperly();
             },
             child: const Text('End meeting', style: TextStyle(color: Colors.red)),
           ),

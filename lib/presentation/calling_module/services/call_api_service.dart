@@ -344,4 +344,46 @@ class CallApiService {
       rethrow;
     }
   }
+
+  /// Generate Agora token for secure channel access
+  Future<String> generateAgoraToken({
+    required String channelId,
+    required int uid,
+    int expirationTime = 3600, // Default 1 hour
+  }) async {
+    try {
+      final headers = await _getHeadersAsync();
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/generate-agora-token'),
+        headers: headers,
+        body: jsonEncode({
+          'channelId': channelId,
+          'uid': uid,
+          'expirationTime': expirationTime,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+      debugPrint('Generate Agora token response: ${response.statusCode}');
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        final token = responseData['token']?.toString() ?? '';
+        if (token.isNotEmpty) {
+          debugPrint('✅ Agora token generated successfully (length: ${token.length})');
+          return token;
+        } else {
+          throw Exception('Empty token received from server');
+        }
+      } else {
+        final errorMsg = responseData['message'] ?? 'Failed to generate Agora token';
+        debugPrint('❌ Token generation failed: $errorMsg');
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      debugPrint('❌ Error generating Agora token: $e');
+      // Return empty string as fallback (allows for development without token server)
+      return '';
+    }
+  }
 }

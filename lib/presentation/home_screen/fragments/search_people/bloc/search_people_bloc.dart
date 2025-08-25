@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> searchPeopleData = [];
@@ -57,7 +57,7 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
-      SearchPeopleModel response = await postService.getSearchPeople(
+      SearchPeopleModel response = await apiManager.getSearchPeople(
           'Bearer ${AppData.userToken}', '$pageNumber', event.searchTerm ?? '');
       numberOfPage = response.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
@@ -81,7 +81,7 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     // ProgressDialogUtils.showProgressDialog();
 
     try {
-      var response = await postService.setUserFollow(
+      var response = await apiManager.setUserFollow(
           'Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
       setLoading(false);
       emit(SearchPeoplePaginationLoadedState());
@@ -98,7 +98,7 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
 
     // emit(PaginationLoadingState());
     try {
-      SearchPeopleModel response = await postService.getSearchPeople(
+      SearchPeopleModel response = await apiManager.getSearchPeople(
         'Bearer ${AppData.userToken}',
         "1",
         '',

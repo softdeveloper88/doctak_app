@@ -394,12 +394,12 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                                 createDynamicLink(
                                     removeHtmlTags(
                                         homeBloc.postData?.post?.title ?? ''),
-                                    'https://doctak.net/post/${homeBloc.postData?.post?.id}',
+                                    '${AppData.base}post/${homeBloc.postData?.post?.id}',
                                     mediaLink);
                                 // _handleIncomingLinks();
                                 //   Share.share('${removeHtmlTags(widget
                                 //     .homeBloc
-                                //     .postData?.title??'')}\n https://doctak.net/post/${widget
+                                //     .postData?.title??'')}\n ${AppData.base}post/${widget
                                 //       .homeBloc
                                 //       .postData?.id} \n'
                                 //       '${AppData.imageUrl}$mediaLink');

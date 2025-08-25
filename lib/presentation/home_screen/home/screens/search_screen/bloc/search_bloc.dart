@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/core/errors/failures.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
-import 'package:doctak_app/data/apiClient/api_service.dart';
+import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,7 +10,7 @@ import 'search_event.dart';
 import 'search_state.dart';
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  final ApiService postService = ApiService(Dio());
+  final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
   List<Data> drugsData = [];
@@ -38,8 +38,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       print(event.type);
     }
     // ProgressDialogUtils.showProgressDialog();
-    try {
-      JobsModel response = await postService.getSearchJobsList(
+    // try {
+      JobsModel response = await apiManager.getSearchJobsList(
           'Bearer ${AppData.userToken}',
           '${pageNumber}',
           event.countryId ?? "1",
@@ -52,13 +52,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       emit(PaginationLoadedState());
 
       // emit(DataLoaded(drugsData));
-    } catch (e) {
-      print(e);
-
-      // emit(PaginationLoadedState());
-
-      emit(DataError('An error occurred $e'));
-    }
+    // } catch (e) {
+    //   print(e);
+    //
+    //   // emit(PaginationLoadedState());
+    //
+    //   emit(DataError('An error occurred $e'));
+    // }
   }
 
   _onGetJobs1(GetPost event, Emitter<SearchState> emit) async {
@@ -67,7 +67,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     print('33' + event.type);
     // emit(PaginationLoadingState());
     try {
-      final response = await postService.getJobsList(
+      final response = await apiManager.getJobsList(
           'Bearer ${AppData.userToken}',
           "1",
           event.countryId,

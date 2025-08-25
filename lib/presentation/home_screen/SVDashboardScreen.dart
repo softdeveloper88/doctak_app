@@ -101,10 +101,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         backgroundColor: svGetScaffoldColor(),
         extendBody: true,
         extendBodyBehindAppBar: true,
-        body: SafeArea(
-          bottom: false, // Let bottom navigation handle its own safe area
-          child: IndexedStack(index: selectedIndex, children: _fragments),
-        ),
+        body: IndexedStack(index: selectedIndex, children: _fragments),
         key: scaffoldKey,
         drawer: SVHomeDrawerComponent(),
         bottomNavigationBar: _buildModernBottomNavigationBar(),
@@ -118,8 +115,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
-      height:
-          100 + bottomPadding, // Adjust for safe area and improved text layout
+      // height: 120 + bottomPadding, // Adjust for safe area and improved text layout
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFAFAFA),
         boxShadow: [
@@ -185,20 +181,17 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
               width: 0.5,
             ),
           ),
-          child: SafeArea(
-            top: false,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: isRTL
-                      ? _buildRTLNavigationItems()
-                      : _buildLTRNavigationItems(),
-                );
-              },
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: isRTL
+                    ? _buildRTLNavigationItems()
+                    : _buildLTRNavigationItems(),
+              );
+            },
           ),
         ),
       ),
@@ -435,28 +428,28 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                         size: 24,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 1),
                     // Simple text label with proper overflow handling
-                    Flexible(
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 60),
-                        child: const Text(
-                          'Create',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Poppins',
-                            letterSpacing: 0.2,
-                            height: 1.0,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          softWrap: false,
-                        ),
-                      ),
-                    ),
+                    // Flexible(
+                    //   child: Container(
+                    //     constraints: const BoxConstraints(maxWidth: 60),
+                    //     child: const Text(
+                    //       'Create',
+                    //       style: TextStyle(
+                    //         color: Colors.blue,
+                    //         fontSize: 9.0,
+                    //         fontWeight: FontWeight.w700,
+                    //         fontFamily: 'Poppins',
+                    //         letterSpacing: 0.2,
+                    //         height: 0.9,
+                    //       ),
+                    //       maxLines: 1,
+                    //       overflow: TextOverflow.ellipsis,
+                    //       textAlign: TextAlign.center,
+                    //       softWrap: false,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               );
