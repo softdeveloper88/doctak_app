@@ -14,6 +14,8 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:video_player/video_player.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
 
 import '../../../../../main.dart';
 
@@ -39,14 +41,62 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
+      // Check and request permissions first
+      PermissionStatus status;
+      if (Platform.isIOS) {
+        status = await Permission.photos.request();
+        if (status == PermissionStatus.limited) {
+          // iOS 14+ limited access - still allow proceeding
+          print("Limited photo access granted");
+        }
+      } else {
+        // Android
+        if (Platform.isAndroid && await Permission.storage.isPermanentlyDenied) {
+          status = await Permission.photos.request();
+        } else {
+          status = await Permission.storage.request();
+        }
+      }
+
+      if (status == PermissionStatus.denied) {
+        _showErrorMessage("Gallery access denied. Please allow access in settings.");
+        setState(() {
+          _isPickingMedia = false;
+        });
+        return;
+      }
+
+      if (status == PermissionStatus.permanentlyDenied) {
+        _showErrorMessage("Gallery access permanently denied. Please enable in settings.");
+        await openAppSettings();
+        setState(() {
+          _isPickingMedia = false;
+        });
+        return;
+      }
+
       // Try pickMultipleMedia first, fallback to pickMultiImage if not supported
       List<XFile> pickedfiles = [];
 
       try {
-        pickedfiles = await imgpicker.pickMultipleMedia();
+        pickedfiles = await imgpicker.pickMultipleMedia(
+          imageQuality: 85,
+        );
       } catch (e) {
+        print("pickMultipleMedia failed, trying pickMultiImage: $e");
         // Fallback to pickMultiImage for older devices
-        pickedfiles = await imgpicker.pickMultiImage();
+        try {
+          pickedfiles = await imgpicker.pickMultiImage(
+            imageQuality: 85,
+          );
+        } catch (e2) {
+          print("pickMultiImage also failed: $e2");
+          _showErrorMessage("Failed to open gallery. Please try again.");
+          setState(() {
+            _isPickingMedia = false;
+          });
+          return;
+        }
       }
 
       if (pickedfiles.isNotEmpty) {
@@ -112,7 +162,32 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
+      // Check camera and microphone permissions for video recording
+      var cameraStatus = await Permission.camera.request();
+      var microphoneStatus = await Permission.microphone.request();
+      
+      if (cameraStatus == PermissionStatus.denied || microphoneStatus == PermissionStatus.denied) {
+        _showErrorMessage("Camera or microphone access denied. Please allow access in settings.");
+        setState(() {
+          _isPickingMedia = false;
+        });
+        return;
+      }
+
+      if (cameraStatus == PermissionStatus.permanentlyDenied || 
+          microphoneStatus == PermissionStatus.permanentlyDenied) {
+        _showErrorMessage("Camera or microphone access permanently denied. Please enable in settings.");
+        await openAppSettings();
+        setState(() {
+          _isPickingMedia = false;
+        });
+        return;
+      }
+
+      var pickedfiles = await imgpicker.pickVideo(
+        source: ImageSource.camera,
+        maxDuration: const Duration(minutes: 10),
+      );
       if (pickedfiles != null) {
         imagefiles.add(pickedfiles);
         widget.searchPeopleBloc.add(
@@ -140,7 +215,30 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera);
+      // Check camera permission
+      PermissionStatus status = await Permission.camera.request();
+      
+      if (status == PermissionStatus.denied) {
+        _showErrorMessage("Camera access denied. Please allow access in settings.");
+        setState(() {
+          _isPickingMedia = false;
+        });
+        return;
+      }
+
+      if (status == PermissionStatus.permanentlyDenied) {
+        _showErrorMessage("Camera access permanently denied. Please enable in settings.");
+        await openAppSettings();
+        setState(() {
+          _isPickingMedia = false;
+        });
+        return;
+      }
+
+      var pickedfiles = await imgpicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
       if (pickedfiles != null) {
         imagefiles.add(pickedfiles);
         widget.searchPeopleBloc.add(

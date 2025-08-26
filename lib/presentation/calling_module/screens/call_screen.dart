@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/calling_module/models/user_model.dart';
 import 'package:doctak_app/presentation/calling_module/services/permission_service.dart';
@@ -18,7 +19,6 @@ import '../widgets/call_controls.dart';
 import '../widgets/connecting_view.dart';
 import '../widgets/status_bar.dart';
 import '../widgets/video_view.dart';
-
 /// Main call screen that integrates all call components
 class CallScreen extends StatefulWidget {
   // Add a global key to access this widget's state from anywhere
@@ -97,6 +97,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       name: widget.contactName,
       avatarUrl: widget.contactAvatar,
     );
+
+    // Setup Pusher listeners for call events
+    _setupPusherListeners();
 
     // Initialize call provider with token
     _callProvider = CallProvider(
@@ -310,8 +313,89 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     }
   }
 
+  // Setup Pusher listeners for remote call events
+  void _setupPusherListeners() {
+    try {
+      final pusherService = PusherService();
+      final userChannel = "user.${AppData.logInUserId}";
+      
+      // Subscribe to user channel if not already subscribed
+      pusherService.subscribeToChannel(userChannel);
+      
+      // Listen for call ended events from remote side
+      pusherService.registerEventListener('call.ended', _handleRemoteCallEnded);
+      pusherService.registerEventListener('Call_Ended', _handleRemoteCallEnded);
+      
+      print('Pusher listeners setup for call events on channel: $userChannel');
+    } catch (e) {
+      print('Error setting up Pusher listeners: $e');
+    }
+  }
+
+  // Handle remote call ended event
+  void _handleRemoteCallEnded(dynamic data) {
+    print('Received remote call ended event: $data');
+    
+    try {
+      // Parse the event data
+      Map<String, dynamic> callData = {};
+      if (data is String) {
+        callData = jsonDecode(data);
+      } else if (data is Map<String, dynamic>) {
+        callData = data;
+      }
+
+      // Check if this event is for the current call
+      final remoteCallId = callData['call_id']?.toString() ?? 
+                          callData['id']?.toString() ?? 
+                          callData['callId']?.toString();
+      
+      print('Remote call ID: $remoteCallId, Current call ID: $_currentCallId');
+      
+      // Only handle if this is for our current call or if no specific call ID is provided
+      // (some systems might send generic call end events)
+      final isForCurrentCall = remoteCallId == null || 
+                              remoteCallId.isEmpty || 
+                              remoteCallId == _currentCallId;
+      
+      if (isForCurrentCall) {
+        print('Remote side ended the call, cleaning up locally');
+        
+        // Update call state to indicate remote ended call
+        if (mounted) {
+          setState(() {
+            _callEstablished = false;
+          });
+        }
+        
+        // End the call immediately without confirmation since remote ended it
+        if (mounted && !_isEndingCall) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _endCallAndCleanup();
+          });
+        }
+      }
+    } catch (e) {
+      print('Error handling remote call ended event: $e');
+      // On error, still try to end the call if we're in an active call state
+      if (mounted && !_isEndingCall && _callEstablished) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _endCallAndCleanup();
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
+    // Clean up Pusher listeners first
+    try {
+      final pusherService = PusherService();
+      pusherService.unregisterEventListener('call.ended', _handleRemoteCallEnded);
+      pusherService.unregisterEventListener('Call_Ended', _handleRemoteCallEnded);
+    } catch (e) {
+      print('Error cleaning up Pusher listeners: $e');
+    }
     // Make sure to clean up properly
     _callProvider.removeListener(_onCallStateChanged);
     WidgetsBinding.instance.removeObserver(this);
