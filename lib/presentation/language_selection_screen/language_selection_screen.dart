@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_screen.dart';
@@ -179,7 +178,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF4A90E2).withOpacity(0.3),
+                                      color: const Color(0xFF4A90E2).withValues(alpha: 0.3),
                                       blurRadius: 12,
                                       spreadRadius: 0,
                                       offset: const Offset(0, 4),
@@ -231,7 +230,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.06),
+                                      color: Colors.black.withValues(alpha: 0.06),
                                       blurRadius: 12,
                                       spreadRadius: 0,
                                       offset: const Offset(0, 2),
@@ -255,7 +254,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                         bottom: isLast ? 0 : 6,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: isSelected ? const Color(0xFF4A90E2).withOpacity(0.1) : Colors.transparent,
+                                        color: isSelected ? const Color(0xFF4A90E2).withValues(alpha: 0.1) : Colors.transparent,
                                         borderRadius: BorderRadius.circular(10),
                                         border: isSelected ? Border.all(
                                           color: const Color(0xFF4A90E2),
@@ -312,7 +311,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                                           language.nativeName,
                                                           style: TextStyle(
                                                             fontSize: isSmallScreen ? 10 : 11,
-                                                            color: isSelected ? const Color(0xFF4A90E2).withOpacity(0.8) : const Color(0xFF6B7280),
+                                                            color: isSelected ? const Color(0xFF4A90E2).withValues(alpha: 0.8) : const Color(0xFF6B7280),
                                                             fontFamily: 'Poppins',
                                                           ),
                                                         ),
