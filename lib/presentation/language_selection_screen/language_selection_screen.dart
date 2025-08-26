@@ -150,87 +150,100 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
               opacity: _fadeInAnimation,
               child: SlideTransition(
                 position: _slideAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    children: [
-                      // Compact header section
-                      SizedBox(height: isSmallScreen ? 20 : 30),
-                      
-                      // App Logo or Icon
-                      Container(
-                        width: isSmallScreen ? 60 : 70,
-                        height: isSmallScreen ? 60 : 70,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF4A90E2), Color(0xFF357ABD)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF4A90E2).withValues(alpha: 0.3),
-                              blurRadius: 15,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                        child: Icon(
-                          Icons.language_rounded,
-                          size: isSmallScreen ? 30 : 36,
-                          color: Colors.white,
-                        ),
-                      ),
-                      
-                      SizedBox(height: isSmallScreen ? 16 : 20),
-                      
-                      // Welcome text
-                      Text(
-                        'Choose Your Language',
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 20 : 22,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1A1D29),
-                          fontFamily: 'Poppins',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      SizedBox(height: isSmallScreen ? 6 : 8),
-                      
-                      Text(
-                        'Select your preferred language to continue',
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 12 : 14,
-                          color: const Color(0xFF6B7280),
-                          fontFamily: 'Poppins',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      SizedBox(height: isSmallScreen ? 20 : 24),
-                      
-                      // Language Options - Expanded to fill remaining space
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 15,
-                                spreadRadius: 0,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: ListView.builder(
-                            itemCount: languages.length,
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: IntrinsicHeight(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Compact header section
+                                SizedBox(height: isSmallScreen ? 16 : 20),
+                                
+                                // App Logo or Icon
+                                Container(
+                                  width: isSmallScreen ? 50 : 60,
+                                  height: isSmallScreen ? 50 : 60,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF4A90E2), Color(0xFF357ABD)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF4A90E2).withValues(alpha: 0.3),
+                                        blurRadius: 12,
+                                        spreadRadius: 0,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.language_rounded,
+                                    size: isSmallScreen ? 24 : 28,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                
+                                SizedBox(height: isSmallScreen ? 12 : 16),
+                                
+                                // Welcome text
+                                Text(
+                                  'Choose Your Language',
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 18 : 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1A1D29),
+                                    fontFamily: 'Poppins',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                
+                                SizedBox(height: isSmallScreen ? 4 : 6),
+                                
+                                Text(
+                                  'Select your preferred language to continue',
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 11 : 13,
+                                    color: const Color(0xFF6B7280),
+                                    fontFamily: 'Poppins',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                
+                                SizedBox(height: isSmallScreen ? 16 : 20),
+                                
+                                // Language Options
+                                Container(
+                                  constraints: BoxConstraints(
+                                    maxHeight: constraints.maxHeight * 0.6, // Limit height to 60% of screen
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.06),
+                                        blurRadius: 12,
+                                        spreadRadius: 0,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ListView.builder(
+                                    itemCount: languages.length,
+                                    shrinkWrap: true,
+                                    physics: const BouncingScrollPhysics(),
+                                    padding: const EdgeInsets.symmetric(vertical: 6),
                             itemBuilder: (context, index) {
                               LanguageOption language = languages[index];
                               bool isSelected = selectedLanguageCode == language.code;
@@ -238,13 +251,13 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                               
                               return Container(
                                 margin: EdgeInsets.only(
-                                  left: 12,
-                                  right: 12,
-                                  bottom: isLast ? 0 : 8,
+                                  left: 10,
+                                  right: 10,
+                                  bottom: isLast ? 0 : 6,
                                 ),
                                 decoration: BoxDecoration(
                                   color: isSelected ? const Color(0xFF4A90E2).withValues(alpha: 0.1) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(10),
                                   border: isSelected ? Border.all(
                                     color: const Color(0xFF4A90E2),
                                     width: 1.5,
@@ -253,32 +266,32 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                 child: Material(
                                   color: Colors.transparent,
                                   child: InkWell(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(10),
                                     onTap: () => _selectLanguage(language.code),
                                     child: Padding(
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: isSmallScreen ? 10 : 12,
+                                        horizontal: 14,
+                                        vertical: isSmallScreen ? 8 : 10,
                                       ),
                                       child: Row(
                                         children: [
                                           // Flag
                                           Container(
-                                            width: isSmallScreen ? 32 : 36,
-                                            height: isSmallScreen ? 32 : 36,
+                                            width: isSmallScreen ? 28 : 32,
+                                            height: isSmallScreen ? 28 : 32,
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFF3F4F6),
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(6),
                                             ),
                                             child: Center(
                                               child: Text(
                                                 language.flag,
-                                                style: TextStyle(fontSize: isSmallScreen ? 16 : 18),
+                                                style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                                               ),
                                             ),
                                           ),
                                           
-                                          const SizedBox(width: 12),
+                                          const SizedBox(width: 10),
                                           
                                           // Language names
                                           Expanded(
@@ -288,7 +301,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                                 Text(
                                                   language.name,
                                                   style: TextStyle(
-                                                    fontSize: isSmallScreen ? 13 : 14,
+                                                    fontSize: isSmallScreen ? 12 : 13,
                                                     fontWeight: FontWeight.w600,
                                                     color: isSelected ? const Color(0xFF4A90E2) : const Color(0xFF1A1D29),
                                                     fontFamily: 'Poppins',
@@ -299,7 +312,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                                   Text(
                                                     language.nativeName,
                                                     style: TextStyle(
-                                                      fontSize: isSmallScreen ? 11 : 12,
+                                                      fontSize: isSmallScreen ? 10 : 11,
                                                       color: isSelected ? const Color(0xFF4A90E2).withValues(alpha: 0.8) : const Color(0xFF6B7280),
                                                       fontFamily: 'Poppins',
                                                     ),
@@ -312,8 +325,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                           // Selection indicator
                                           AnimatedContainer(
                                             duration: const Duration(milliseconds: 200),
-                                            width: isSmallScreen ? 18 : 20,
-                                            height: isSmallScreen ? 18 : 20,
+                                            width: isSmallScreen ? 16 : 18,
+                                            height: isSmallScreen ? 16 : 18,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: isSelected ? const Color(0xFF4A90E2) : Colors.transparent,
@@ -325,7 +338,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                                             child: isSelected
                                                 ? Icon(
                                                     Icons.check,
-                                                    size: isSmallScreen ? 10 : 12,
+                                                    size: isSmallScreen ? 8 : 10,
                                                     color: Colors.white,
                                                   )
                                                 : null,
@@ -338,31 +351,33 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                               );
                             },
                           ),
-                        ),
-                      ),
-                      
-                      // Bottom section
-                      SizedBox(height: isSmallScreen ? 16 : 20),
-                      
-                      // Skip button (optional)
-                      TextButton(
-                        onPressed: () => _selectLanguage('en'), // Default to English
-                        child: Text(
-                          'Skip (Use English)',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 12 : 14,
-                            color: const Color(0xFF6B7280),
-                            fontFamily: 'Poppins',
+                                  ),
+                                ),
+                                
+                                // Bottom section
+                                SizedBox(height: isSmallScreen ? 12 : 16),
+                                
+                                // Skip button (optional)
+                                TextButton(
+                                  onPressed: () => _selectLanguage('en'), // Default to English
+                                  child: Text(
+                                    'Skip (Use English)',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 11 : 13,
+                                      color: const Color(0xFF6B7280),
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                ),
+                                
+                                SizedBox(height: isSmallScreen ? 12 : 16),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      
-                      SizedBox(height: isSmallScreen ? 16 : 20),
-                    ],
+                    },
                   ),
                 ),
-              ),
-            );
           },
         ),
       ),
