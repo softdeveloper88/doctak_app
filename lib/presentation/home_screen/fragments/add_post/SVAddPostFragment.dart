@@ -29,7 +29,7 @@ class SVAddPostFragment extends StatefulWidget {
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
 }
 
-class _SVAddPostFragmentState extends State<SVAddPostFragment> {
+class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindingObserver {
   String image = '';
 
   List<String> colorListHex = [
@@ -72,6 +72,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
   void initState() {
     currentColor = SVDividerColor;
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     afterBuildCreated(() {
       setStatusBarColor(context.cardColor);
     });
@@ -79,10 +80,26 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     setStatusBarColor(
       appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground,
     );
     super.dispose();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('SVAddPost: App lifecycle changed to: $state');
+    if (state == AppLifecycleState.resumed) {
+      print('SVAddPost: App resumed from background');
+      // Force a UI refresh when returning from gallery
+      if (mounted) {
+        setState(() {
+          // This will trigger a rebuild with updated images
+          print('SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files');
+        });
+      }
+    }
   }
 
   bool _validatePost() {

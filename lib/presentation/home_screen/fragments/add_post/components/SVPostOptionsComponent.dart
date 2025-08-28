@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:doctak_app/core/app_export.dart';
@@ -32,6 +33,32 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
   final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
   bool _isPickingMedia = false;
+  late StreamSubscription addPostSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    print('SVPostOptions: Setting up BLoC stream listener');
+    // Sync local imagefiles with BLoC whenever state changes
+    addPostSubscription = widget.searchPeopleBloc.stream.listen((state) {
+      print('SVPostOptions: *** BLoC STREAM EVENT *** state: ${state.runtimeType}');
+      if (state is PaginationLoadedState) {
+        print('SVPostOptions: PaginationLoadedState - BLoC has ${widget.searchPeopleBloc.imagefiles.length} files');
+        if (mounted) {
+          setState(() {
+            imagefiles = List.from(widget.searchPeopleBloc.imagefiles);
+          });
+        }
+        print('SVPostOptions: Local imagefiles synced to ${imagefiles.length} files');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    addPostSubscription.cancel();
+    super.dispose();
+  }
 
   openImages() async {
     if (_isPickingMedia) return;
@@ -75,54 +102,73 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         return;
       }
 
-      // Try pickMultipleMedia first, fallback to pickMultiImage if not supported
+      // Use the same reliable strategy that worked in chat GPT screen
       List<XFile> pickedfiles = [];
 
       try {
-        pickedfiles = await imgpicker.pickMultipleMedia(
+        print("SVPostOptions: *** OPENING GALLERY ***");
+        print("SVPostOptions: Using reliable single picker approach");
+        
+        // Use single image picker - the most reliable method
+        final singleFile = await imgpicker.pickImage(
+          source: ImageSource.gallery,
           imageQuality: 85,
+          maxWidth: 1920,
+          maxHeight: 1080,
         );
-      } catch (e) {
-        print("pickMultipleMedia failed, trying pickMultiImage: $e");
-        // Fallback to pickMultiImage for older devices
-        try {
-          pickedfiles = await imgpicker.pickMultiImage(
-            imageQuality: 85,
-          );
-        } catch (e2) {
-          print("pickMultiImage also failed: $e2");
-          _showErrorMessage("Failed to open gallery. Please try again.");
-          setState(() {
-            _isPickingMedia = false;
-          });
-          return;
+        
+        print("SVPostOptions: Single picker completed");
+        
+        if (singleFile != null) {
+          pickedfiles = [singleFile];
+          print("SVPostOptions: Single picker returned file: ${singleFile.path}");
+        } else {
+          print("SVPostOptions: Single picker returned null");
         }
+        
+      } catch (e) {
+        print("SVPostOptions: Single picker failed: $e");
+        _showErrorMessage("Failed to open gallery. Please try again.");
+        setState(() {
+          _isPickingMedia = false;
+        });
+        return;
       }
 
       if (pickedfiles.isNotEmpty) {
+        print("SVPostOptions: Processing ${pickedfiles.length} selected files");
         // Filter supported formats
         List<XFile> validFiles = [];
         for (var element in pickedfiles) {
           if (_isValidMediaFile(element.path)) {
             validFiles.add(element);
+            print("SVPostOptions: Valid file added: ${element.path}");
+          } else {
+            print("SVPostOptions: Invalid file skipped: ${element.path}");
           }
         }
 
         if (validFiles.isNotEmpty) {
+          print("SVPostOptions: Adding ${validFiles.length} valid files to BLoC");
           for (var element in validFiles) {
             imagefiles.add(element);
+            print("SVPostOptions: Adding file to BLoC: ${element.path}");
             widget.searchPeopleBloc.add(
               SelectedFiles(pickedfiles: element, isRemove: false),
             );
+            print("SVPostOptions: SelectedFiles event sent to BLoC");
           }
+          print("SVPostOptions: BLoC should have ${widget.searchPeopleBloc.imagefiles.length} files now");
           setState(() {});
+          print("SVPostOptions: setState() called - UI should refresh");
+          print("SVPostOptions: Local imagefiles has ${imagefiles.length} total files");
         } else {
           _showErrorMessage(
             "No valid image files selected. Please select JPG, PNG, WebP, or GIF files.",
           );
         }
       } else {
-        print("No image is selected.");
+        print("SVPostOptions: No images selected by user");
       }
     } catch (e) {
       print("Error while picking file: $e");
@@ -280,8 +326,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
           BlocBuilder<AddPostBloc, AddPostState>(
             bloc: widget.searchPeopleBloc,
             builder: (context, state) {
+              print('SVPostOptions: BlocBuilder state: ${state.runtimeType}, BLoC files: ${widget.searchPeopleBloc.imagefiles.length}');
               if (state is PaginationLoadedState &&
                   widget.searchPeopleBloc.imagefiles.isNotEmpty) {
+                print('SVPostOptions: Rendering ${widget.searchPeopleBloc.imagefiles.length} images in UI');
                 return Container(
                   margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                   padding: const EdgeInsets.all(8),

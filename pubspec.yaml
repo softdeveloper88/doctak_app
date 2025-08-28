@@ -131,20 +131,20 @@ dependencies:
   flutter_slidable: ^3.0.1
   #  pusher_client_fixed: ^0.0.2
   sizer: ^2.0.15
-  retrofit_generator: ^8.0.6
+#  retrofit_generator: ^8.0.6
   bloc: ^8.1.2
-  retrofit: ^4.0.3
+#  retrofit: ^4.0.3
   logger: any  #for logging purpose
-  json_annotation: ^4.8.1
+#  json_annotation: ^4.8.1
   build_runner: ^2.4.8
-  json_serializable: ^6.7.1
+#  json_serializable: ^6.7.1
 #  audioplayers: ^6.0.0
   flutter_markdown: ^0.7.3
 #  social_share_plugin: ^0.4.2+2
   share_plus: ^10.0.0
   clear_all_notifications: ^1.0.0
   device_info_plus: ^10.1.2
-  file_picker: ^8.1.2
+  file_picker: ^10.3.2
   photo_manager: ^3.0.0
   just_audio: ^0.9.40
   app_badge_plus: ^1.1.5

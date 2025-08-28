@@ -16,13 +16,16 @@ class ImageUploadBloc
 
   _SelectedFile(SelectedFiles event, Emitter<ImageUploadState> emit) async {
     if (event.isRemove) {
+      print('BLoC: Removing image ${event.pickedfiles.path}');
       imagefiles.remove(event.pickedfiles);
+      print('BLoC: Now have ${imagefiles.length} images after removal');
       emit(FileLoadedState());
     } else {
+      print('BLoC: Adding image ${event.pickedfiles.path}');
       imagefiles.add(event.pickedfiles);
-      // print(imagefiles);
+      print('BLoC: Now have ${imagefiles.length} images after addition');
+      print('BLoC: Emitting FileLoadedState');
       emit(FileLoadedState());
     }
-    // emit(DataLoaded(searchPeopleData));
   }
 }

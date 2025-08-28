@@ -40,69 +40,155 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
   int selectTab = 0;
   final ImagePicker imgpicker = ImagePicker();
   openImages() async {
+    print('MultiWidget: *** OPENING GALLERY ***');
     try {
-      // Enhanced permission handling for different Android versions
+      // Enhanced permission handling for iOS and Android
+      print('MultiWidget: Checking permissions...');
       bool hasPermission = await _checkAndRequestPermissions();
+      print('MultiWidget: Permission result: $hasPermission');
       if (!hasPermission) {
-        _permissionDialog(context);
+        print('MultiWidget: Permission denied, showing dialog');
+        // Only show dialog if truly permanently denied
+        if (Platform.isIOS) {
+          final status = await Permission.photos.status;
+          if (status.isPermanentlyDenied) {
+            _permissionDialog(context);
+          } else {
+            // Try once more with direct request
+            final result = await Permission.photos.request();
+            if (!result.isGranted && !result.isLimited) {
+              _permissionDialog(context);
+            }
+          }
+        } else {
+          _permissionDialog(context);
+        }
         return;
       }
 
       var pickedfiles;
-      print(widget.imageLimit);
-      if (widget.imageLimit == 0 || widget.imageLimit == 1) {
-        pickedfiles = await imgpicker.pickMultipleMedia(
-          imageQuality: 85, // Optimize for performance
-          maxWidth: 1920,
-          maxHeight: 1080,
-          requestFullMetadata: false, // Better performance and privacy
-        );
-      } else {
-        pickedfiles = await imgpicker.pickMultipleMedia(
-          limit: widget.imageLimit,
+      print('MultiWidget: Image limit: ${widget.imageLimit}');
+      print('MultiWidget: Calling image picker...');
+      
+      // Workaround: Use pickImage for single image selection
+      if (widget.imageLimit == 1) {
+        print('MultiWidget: Using pickImage (single) for limit=1');
+        final singleFile = await imgpicker.pickImage(
+          source: ImageSource.gallery,
           imageQuality: 85,
           maxWidth: 1920,
           maxHeight: 1080,
-          requestFullMetadata: false, // Better performance and privacy
         );
+        if (singleFile != null) {
+          pickedfiles = [singleFile];
+        }
+      } else if (widget.imageLimit == 2) {
+        print('MultiWidget: Using pickMultipleMedia with limit=2');
+        try {
+          pickedfiles = await imgpicker.pickMultipleMedia(
+            limit: 2,
+            imageQuality: 85,
+            maxWidth: 1920,
+            maxHeight: 1080,
+            requestFullMetadata: false,
+          );
+        } catch (e) {
+          print('MultiWidget: Error with pickMultipleMedia: $e');
+          // Fallback to single image if multiple fails
+          final singleFile = await imgpicker.pickImage(
+            source: ImageSource.gallery,
+            imageQuality: 85,
+            maxWidth: 1920,
+            maxHeight: 1080,
+          );
+          if (singleFile != null) {
+            pickedfiles = [singleFile];
+          }
+        }
+      } else {
+        print('MultiWidget: Using pickMultipleMedia (no limit)');
+        pickedfiles = await imgpicker.pickMultipleMedia(
+          imageQuality: 85,
+          maxWidth: 1920,
+          maxHeight: 1080,
+          requestFullMetadata: false,
+        );
+      }
+      print('MultiWidget: Picker returned: ${pickedfiles?.length ?? 0} files');
+      if (pickedfiles != null && pickedfiles.isNotEmpty) {
+        print('MultiWidget: First file path: ${pickedfiles.first.path}');
       }
 
       if (pickedfiles != null) {
+        print('Gallery: Selected ${pickedfiles.length} files from gallery');
         for (var element in pickedfiles) {
           if (widget.imageLimit == 0 ||
               widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
+            print('Gallery: Adding image ${element.path} to BLoC');
             widget.imageUploadBloc.add(
               SelectedFiles(pickedfiles: element, isRemove: false),
             );
+            print('Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images');
           }
         }
+        print('Gallery: Calling setState');
         setState(() {});
       } else {
         print("No image is selected.");
       }
     } catch (e) {
-      _permissionDialog(context);
-      print("error while picking file.$e");
+      print('MultiWidget: ERROR in openImages: $e');
+      print('MultiWidget: Error stack trace:');
+      print(StackTrace.current);
+      // Only show permission dialog if it's actually a permission issue
+      if (e.toString().contains('permission') || e.toString().contains('denied')) {
+        _permissionDialog(context);
+      } else {
+        // Show generic error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error selecting images: ${e.toString()}')),
+        );
+      }
     }
   }
 
   Future<bool> _checkAndRequestPermissions() async {
     try {
       if (Platform.isIOS) {
-        // iOS permission handling
+        // Enhanced iOS permission handling
         final photosPermission = Permission.photos;
         final status = await photosPermission.status;
-
+        
+        // Debug logging
+        print('iOS Photo Permission Status: $status');
+        
+        // Check if permission is already granted or limited (both are acceptable)
         if (status.isGranted || status.isLimited) {
-          // iOS 14+ limited access is acceptable for our use case
+          print('iOS Photo Permission: Already granted/limited, proceeding to gallery');
           return true;
-        } else if (status.isDenied) {
+        }
+        
+        // Only request if not yet determined
+        if (status.isDenied || status.isRestricted) {
+          print('iOS Photo Permission: Requesting permission');
           final result = await photosPermission.request();
-          return result.isGranted || result.isLimited;
-        } else if (status.isPermanentlyDenied) {
+          print('iOS Photo Permission Result: $result');
+          
+          // Accept both granted and limited states
+          if (result.isGranted || result.isLimited) {
+            return true;
+          }
+        }
+        
+        // Check if permanently denied (user needs to go to settings)
+        if (status.isPermanentlyDenied) {
+          print('iOS Photo Permission: Permanently denied');
           return false;
         }
-        return false;
+        
+        // Default case - try one more time
+        final finalStatus = await photosPermission.status;
+        return finalStatus.isGranted || finalStatus.isLimited;
       } else {
         // Android permission handling
         final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();

@@ -143,14 +143,19 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
 
   _SelectedFile(SelectedFiles event, Emitter<AddPostState> emit) async {
     if (event.isRemove) {
+      print('AddPostBloc: Removing image ${event.pickedfiles.path}');
       imagefiles.remove(event.pickedfiles);
+      print('AddPostBloc: Now have ${imagefiles.length} images after removal');
       emit(PaginationLoadedState());
+      print('AddPostBloc: Emitted PaginationLoadedState after removal');
     } else {
+      print('AddPostBloc: Adding image ${event.pickedfiles.path}');
       imagefiles.add(event.pickedfiles);
-      // print(imagefiles);
+      print('AddPostBloc: Now have ${imagefiles.length} images after addition');
+      print('AddPostBloc: Emitting PaginationLoadedState');
       emit(PaginationLoadedState());
+      print('AddPostBloc: PaginationLoadedState emitted successfully');
     }
-    // emit(DataLoaded(searchPeopleData));
   }
 
   _addPostData(AddPostDataEvent event, Emitter<AddPostState> emit) async {

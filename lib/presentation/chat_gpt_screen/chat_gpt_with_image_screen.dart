@@ -42,7 +42,7 @@ class ChatGptWithImageScreen extends StatefulWidget {
   ChatGPTScreenState createState() => ChatGPTScreenState();
 }
 
-class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
+class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   List<ChatGPTResponse> messages = [];
   late Future<List<Session>> futureSessions;
@@ -63,12 +63,37 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   String imageType = '';
   List<XFile> selectedImageFiles = [];
   ImageUploadBloc imageUploadBloc = ImageUploadBloc();
+  late StreamSubscription imageUploadSubscription;
 
   @override
   void initState() {
     super.initState();
+    // Add lifecycle observer
+    WidgetsBinding.instance.addObserver(this);
+    
     // Initialize the ChatGPT bloc with LoadDataValues event
     BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
+    
+    // Sync selectedImageFiles whenever the BLoC state changes
+    print('Main: Setting up BLoC stream listener');
+    imageUploadSubscription = imageUploadBloc.stream.listen((state) {
+      print('Main: *** BLoC STREAM EVENT *** state: ${state.runtimeType}');
+      if (state is FileLoadedState) {
+        print('Main: FileLoadedState detected - BLoC has ${imageUploadBloc.imagefiles.length} files');
+        for (int i = 0; i < imageUploadBloc.imagefiles.length; i++) {
+          print('Main: BLoC file $i: ${imageUploadBloc.imagefiles[i].path}');
+        }
+        if (mounted) {
+          setState(() {
+            selectedImageFiles = List.from(imageUploadBloc.imagefiles);
+          });
+        }
+        print('Main: selectedImageFiles updated to ${selectedImageFiles.length} files');
+        for (int i = 0; i < selectedImageFiles.length; i++) {
+          print('Main: selectedImageFiles file $i: ${selectedImageFiles[i].path}');
+        }
+      }
+    });
   }
 
   void drugsAskQuestion(state1, context) {
@@ -111,10 +136,28 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     focusNode.unfocus();
     _scrollController.dispose();
     textController.dispose();
+    imageUploadSubscription.cancel();
     super.dispose();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('Main: App lifecycle changed to: $state');
+    if (state == AppLifecycleState.resumed) {
+      print('Main: App resumed from background');
+      // Force a UI refresh when returning from gallery
+      if (mounted) {
+        setState(() {
+          // Sync with current BLoC state
+          selectedImageFiles = List.from(imageUploadBloc.imagefiles);
+          print('Main: Force refresh - selectedImageFiles has ${selectedImageFiles.length} files');
+        });
+      }
+    }
   }
 
   @override
@@ -148,6 +191,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                     BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
                     Navigator.of(context).pop();
                     isOneTimeImageUploaded = false;
+                    selectedImageFiles.clear();
+                    imageUploadBloc.imagefiles.clear();
                     selectedSessionId = BlocProvider.of<ChatGPTBloc>(
                       context,
                     ).newChatSessionId;
@@ -190,6 +235,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               ),
               onPressed: () {
                 isOneTimeImageUploaded = false;
+                selectedImageFiles.clear();
+                imageUploadBloc.imagefiles.clear();
                 try {
                   BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
                   selectedSessionId = BlocProvider.of<ChatGPTBloc>(
@@ -216,6 +263,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
               try {
                 BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
                 isOneTimeImageUploaded = false;
+                selectedImageFiles.clear();
+                imageUploadBloc.imagefiles.clear();
                 isError = false;
                 selectedSessionId = BlocProvider.of<ChatGPTBloc>(
                   context,
@@ -362,7 +411,19 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                         if (hasPermission) {
                                           _showBeforeFileOptions();
                                         } else {
-                                          _permissionDialog();
+                                          // Only show permission dialog if truly needed
+                                          final status = await Permission.photos.status;
+                                          if (status.isPermanentlyDenied) {
+                                            _permissionDialog();
+                                          } else {
+                                            // Try requesting permission directly
+                                            final result = await Permission.photos.request();
+                                            if (result.isGranted || result.isLimited) {
+                                              _showBeforeFileOptions();
+                                            } else {
+                                              _permissionDialog();
+                                            }
+                                          }
                                         }
                                       }
                                     },
@@ -628,7 +689,19 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                   if (hasPermission) {
                                     _showBeforeFileOptions();
                                   } else {
-                                    _permissionDialog();
+                                    // Only show permission dialog if truly needed
+                                    final status = await Permission.photos.status;
+                                    if (status.isPermanentlyDenied) {
+                                      _permissionDialog();
+                                    } else {
+                                      // Try requesting permission directly
+                                      final result = await Permission.photos.request();
+                                      if (result.isGranted || result.isLimited) {
+                                        _showBeforeFileOptions();
+                                      } else {
+                                        _permissionDialog();
+                                      }
+                                    }
                                   }
                                 }
                               },
@@ -733,6 +806,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                             ),
                                           );
                                           imageUploadBloc.imagefiles.clear();
+                                          selectedImageFiles.clear();
                                           textController.clear();
                                           scrollToBottom();
                                         });
@@ -810,6 +884,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                                           ),
                                         );
                                         imageUploadBloc.imagefiles.clear();
+                                        selectedImageFiles.clear();
                                         textController.clear();
                                         scrollToBottom();
                                       });
@@ -869,19 +944,16 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
     );
   }
 
-  // Image Preview Widget - redesigned using drugs_list pattern
+  // Image Preview Widget - simplified to use selectedImageFiles directly
   Widget _buildImagePreview() {
+    print('Main: _buildImagePreview - selectedImageFiles has ${selectedImageFiles.length} images');
     return Container(
       color: svGetScaffoldColor(),
-      child: BlocBuilder<ImageUploadBloc, ImageUploadState>(
-        bloc: imageUploadBloc,
-        builder: (context, state) {
-          if (state is FileLoadedState &&
-              imageUploadBloc.imagefiles.isNotEmpty) {
-            return Container(
+      child: selectedImageFiles.isNotEmpty
+          ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Row(
-                children: imageUploadBloc.imagefiles.map((imageone) {
+                children: selectedImageFiles.map((imageone) {
                   return Container(
                     margin: const EdgeInsets.only(right: 8),
                     child: Stack(
@@ -948,12 +1020,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                   );
                 }).toList(),
               ),
-            );
-          } else {
-            return Container();
-          }
-        },
-      ),
+            )
+          : Container(),
     );
   }
 
@@ -1016,6 +1084,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                 try {
                   BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
                   isOneTimeImageUploaded = false;
+                  selectedImageFiles.clear();
+                  imageUploadBloc.imagefiles.clear();
                   selectedSessionId = BlocProvider.of<ChatGPTBloc>(
                     context,
                   ).newChatSessionId;
@@ -1476,7 +1546,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
                               imageUploadBloc,
                               imageLimit: imageLimit,
                               (imageFiles) {
-                                selectedImageFiles = imageFiles;
+                                print('Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images');
+                                selectedImageFiles = List.from(imageUploadBloc.imagefiles);
+                                print('Main: selectedImageFiles updated to ${selectedImageFiles.length} images');
                                 setState(() {});
                                 Navigator.pop(context);
                               },
@@ -1610,20 +1682,40 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> {
   Future<bool> _checkAndRequestPermissions() async {
     try {
       if (Platform.isIOS) {
-        // iOS permission handling
+        // Enhanced iOS permission handling
         final photosPermission = Permission.photos;
         final status = await photosPermission.status;
-
+        
+        // Debug logging
+        print('iOS Photo Permission Status: $status');
+        
+        // Check if permission is already granted or limited (both are acceptable)
         if (status.isGranted || status.isLimited) {
-          // iOS 14+ limited access is acceptable for our use case
+          print('iOS Photo Permission: Already granted/limited, proceeding to gallery');
           return true;
-        } else if (status.isDenied) {
+        }
+        
+        // Only request if not yet determined
+        if (status.isDenied || status.isRestricted) {
+          print('iOS Photo Permission: Requesting permission');
           final result = await photosPermission.request();
-          return result.isGranted || result.isLimited;
-        } else if (status.isPermanentlyDenied) {
+          print('iOS Photo Permission Result: $result');
+          
+          // Accept both granted and limited states
+          if (result.isGranted || result.isLimited) {
+            return true;
+          }
+        }
+        
+        // Check if permanently denied (user needs to go to settings)
+        if (status.isPermanentlyDenied) {
+          print('iOS Photo Permission: Permanently denied');
           return false;
         }
-        return false;
+        
+        // Default case - try one more time
+        final finalStatus = await photosPermission.status;
+        return finalStatus.isGranted || finalStatus.isLimited;
       } else {
         // Android permission handling
         final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
