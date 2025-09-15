@@ -5,15 +5,13 @@ ChatGptSession chatGptSessionFromJson(String str) =>
 String chatGptSessionToJson(ChatGptSession data) => json.encode(data.toJson());
 
 class ChatGptSession {
-  ChatGptSession({
-    this.success,
-    this.newSessionId,
-    this.sessions,
-  });
+  ChatGptSession({this.success, this.newSessionId, this.sessions});
 
+  /// Accepts either 'newSessionId' or legacy 'session_id' and supports int or String values.
   ChatGptSession.fromJson(dynamic json) {
     success = json['success'];
-    newSessionId = json['newSessionId'];
+    final dynamic rawId = json['newSessionId'] ?? json['session_id'];
+    newSessionId = _asInt(rawId);
     if (json['sessions'] != null) {
       sessions = [];
       json['sessions'].forEach((v) {
@@ -22,7 +20,7 @@ class ChatGptSession {
     }
   }
   bool? success;
-  int? newSessionId;
+  dynamic newSessionId;
   List<Sessions>? sessions;
 
   Map<String, dynamic> toJson() {
@@ -40,22 +38,16 @@ Sessions sessionsFromJson(String str) => Sessions.fromJson(json.decode(str));
 String sessionsToJson(Sessions data) => json.encode(data.toJson());
 
 class Sessions {
-  Sessions({
-    this.id,
-    this.userId,
-    this.name,
-    this.createdAt,
-    this.updatedAt,
-  });
+  Sessions({this.id, this.userId, this.name, this.createdAt, this.updatedAt});
 
   Sessions.fromJson(dynamic json) {
-    id = json['id'];
-    userId = json['userId'];
+    id = _asInt(json['id']);
+    userId = json['userId']?.toString();
     name = json['name'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
-  int? id;
+  dynamic id;
   String? userId;
   String? name;
   String? createdAt;
@@ -70,4 +62,14 @@ class Sessions {
     map['updated_at'] = updatedAt;
     return map;
   }
+}
+
+int? _asInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is String) {
+    return int.tryParse(value);
+  }
+  // Attempt toString parse for other numeric types
+  return int.tryParse(value.toString());
 }

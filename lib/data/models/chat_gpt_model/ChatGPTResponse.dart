@@ -1,5 +1,5 @@
 class ChatGPTResponse {
-  final int id;
+  final dynamic id;
   final String gptSessionId;
   final String question;
   final String response;
@@ -16,13 +16,14 @@ class ChatGPTResponse {
   });
 
   factory ChatGPTResponse.fromJson(Map<String, dynamic> json) {
+    final rawSessionId = json['gptSessionId'] ?? json['session_id'];
     return ChatGPTResponse(
       id: json['id'],
-      gptSessionId: json['gptSessionId'],
-      question: json['question'],
-      response: json['response'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      gptSessionId: rawSessionId?.toString() ?? '',
+      question: json['question'] ?? '',
+      response: json['response'] ?? '',
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
     );
   }
 }

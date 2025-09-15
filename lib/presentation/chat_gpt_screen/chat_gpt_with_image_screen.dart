@@ -18,7 +18,8 @@ import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:doctak_app/utils/permission_utils.dart';
 
 import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_bloc.dart';
@@ -29,8 +30,8 @@ import '../../widgets/shimmer_widget/chat_shimmer_loader.dart';
 
 @immutable
 class ChatGptWithImageScreen extends StatefulWidget {
-  bool isFromMainScreen;
-  String? question;
+  final bool isFromMainScreen;
+  final String? question;
 
   ChatGptWithImageScreen({
     super.key,
@@ -42,7 +43,8 @@ class ChatGptWithImageScreen extends StatefulWidget {
   ChatGPTScreenState createState() => ChatGPTScreenState();
 }
 
-class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindingObserver {
+class ChatGPTScreenState extends State<ChatGptWithImageScreen>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   List<ChatGPTResponse> messages = [];
   late Future<List<Session>> futureSessions;
@@ -70,16 +72,18 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
     super.initState();
     // Add lifecycle observer
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Initialize the ChatGPT bloc with LoadDataValues event
     BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
-    
+
     // Sync selectedImageFiles whenever the BLoC state changes
     print('Main: Setting up BLoC stream listener');
     imageUploadSubscription = imageUploadBloc.stream.listen((state) {
       print('Main: *** BLoC STREAM EVENT *** state: ${state.runtimeType}');
       if (state is FileLoadedState) {
-        print('Main: FileLoadedState detected - BLoC has ${imageUploadBloc.imagefiles.length} files');
+        print(
+          'Main: FileLoadedState detected - BLoC has ${imageUploadBloc.imagefiles.length} files',
+        );
         for (int i = 0; i < imageUploadBloc.imagefiles.length; i++) {
           print('Main: BLoC file $i: ${imageUploadBloc.imagefiles[i].path}');
         }
@@ -88,9 +92,13 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
             selectedImageFiles = List.from(imageUploadBloc.imagefiles);
           });
         }
-        print('Main: selectedImageFiles updated to ${selectedImageFiles.length} files');
+        print(
+          'Main: selectedImageFiles updated to ${selectedImageFiles.length} files',
+        );
         for (int i = 0; i < selectedImageFiles.length; i++) {
-          print('Main: selectedImageFiles file $i: ${selectedImageFiles[i].path}');
+          print(
+            'Main: selectedImageFiles file $i: ${selectedImageFiles[i].path}',
+          );
         }
       }
     });
@@ -143,7 +151,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
     imageUploadSubscription.cancel();
     super.dispose();
   }
-  
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('Main: App lifecycle changed to: $state');
@@ -154,7 +162,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
         setState(() {
           // Sync with current BLoC state
           selectedImageFiles = List.from(imageUploadBloc.imagefiles);
-          print('Main: Force refresh - selectedImageFiles has ${selectedImageFiles.length} files');
+          print(
+            'Main: Force refresh - selectedImageFiles has ${selectedImageFiles.length} files',
+          );
         });
       }
     }
@@ -406,23 +416,21 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                           ).lbl_only_one_image_allowed,
                                         );
                                       } else {
-                                        bool hasPermission =
-                                            await _checkAndRequestPermissions();
-                                        if (hasPermission) {
+                                        final granted =
+                                            await PermissionUtils.ensurePhotoPermission();
+                                        if (granted) {
                                           _showBeforeFileOptions();
                                         } else {
-                                          // Only show permission dialog if truly needed
-                                          final status = await Permission.photos.status;
+                                          final status =
+                                              await Permission.photos.status;
                                           if (status.isPermanentlyDenied) {
                                             _permissionDialog();
                                           } else {
-                                            // Try requesting permission directly
-                                            final result = await Permission.photos.request();
-                                            if (result.isGranted || result.isLimited) {
-                                              _showBeforeFileOptions();
-                                            } else {
-                                              _permissionDialog();
-                                            }
+                                            // Provide non-intrusive feedback instead of forcing settings.
+                                            toasty(
+                                              context,
+                                              'Photo access denied. Please allow to continue.',
+                                            );
                                           }
                                         }
                                       }
@@ -684,23 +692,21 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                     'Only allowed one time image in one session',
                                   );
                                 } else {
-                                  bool hasPermission =
-                                      await _checkAndRequestPermissions();
-                                  if (hasPermission) {
+                                  final granted =
+                                      await PermissionUtils.ensurePhotoPermission();
+                                  if (granted) {
                                     _showBeforeFileOptions();
                                   } else {
-                                    // Only show permission dialog if truly needed
-                                    final status = await Permission.photos.status;
+                                    final status =
+                                        await Permission.photos.status;
                                     if (status.isPermanentlyDenied) {
                                       _permissionDialog();
                                     } else {
-                                      // Try requesting permission directly
-                                      final result = await Permission.photos.request();
-                                      if (result.isGranted || result.isLimited) {
-                                        _showBeforeFileOptions();
-                                      } else {
-                                        _permissionDialog();
-                                      }
+                                      // Fallback when user denies without permanent denial.
+                                      toasty(
+                                        context,
+                                        'Photo permission denied',
+                                      );
                                     }
                                   }
                                 }
@@ -946,7 +952,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
 
   // Image Preview Widget - simplified to use selectedImageFiles directly
   Widget _buildImagePreview() {
-    print('Main: _buildImagePreview - selectedImageFiles has ${selectedImageFiles.length} images');
+    print(
+      'Main: _buildImagePreview - selectedImageFiles has ${selectedImageFiles.length} images',
+    );
     return Container(
       color: svGetScaffoldColor(),
       child: selectedImageFiles.isNotEmpty
@@ -1546,9 +1554,15 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                               imageUploadBloc,
                               imageLimit: imageLimit,
                               (imageFiles) {
-                                print('Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images');
-                                selectedImageFiles = List.from(imageUploadBloc.imagefiles);
-                                print('Main: selectedImageFiles updated to ${selectedImageFiles.length} images');
+                                print(
+                                  'Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images',
+                                );
+                                selectedImageFiles = List.from(
+                                  imageUploadBloc.imagefiles,
+                                );
+                                print(
+                                  'Main: selectedImageFiles updated to ${selectedImageFiles.length} images',
+                                );
                                 setState(() {});
                                 Navigator.pop(context);
                               },
@@ -1679,114 +1693,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
     });
   }
 
-  Future<bool> _checkAndRequestPermissions() async {
-    try {
-      if (Platform.isIOS) {
-        // Enhanced iOS permission handling
-        final photosPermission = Permission.photos;
-        final status = await photosPermission.status;
-        
-        // Debug logging
-        print('iOS Photo Permission Status: $status');
-        
-        // Check if permission is already granted or limited (both are acceptable)
-        if (status.isGranted || status.isLimited) {
-          print('iOS Photo Permission: Already granted/limited, proceeding to gallery');
-          return true;
-        }
-        
-        // Only request if not yet determined
-        if (status.isDenied || status.isRestricted) {
-          print('iOS Photo Permission: Requesting permission');
-          final result = await photosPermission.request();
-          print('iOS Photo Permission Result: $result');
-          
-          // Accept both granted and limited states
-          if (result.isGranted || result.isLimited) {
-            return true;
-          }
-        }
-        
-        // Check if permanently denied (user needs to go to settings)
-        if (status.isPermanentlyDenied) {
-          print('iOS Photo Permission: Permanently denied');
-          return false;
-        }
-        
-        // Default case - try one more time
-        final finalStatus = await photosPermission.status;
-        return finalStatus.isGranted || finalStatus.isLimited;
-      } else {
-        // Android permission handling
-        final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-        final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        final int sdkInt = androidInfo.version.sdkInt;
-
-        if (sdkInt >= 34) {
-          // Android 14+ (API 34+) - Check visual user selected permission first
-          final visualUserSelected = Permission.photos;
-          final visualStatus = await visualUserSelected.status;
-
-          if (visualStatus.isGranted || visualStatus.isLimited) {
-            return true;
-          } else if (visualStatus.isDenied) {
-            final result = await visualUserSelected.request();
-            return result.isGranted || result.isLimited;
-          }
-
-          // Fallback to regular photos permission
-          final photosPermission = Permission.photos;
-          final photosStatus = await photosPermission.status;
-
-          if (photosStatus.isGranted || photosStatus.isLimited) {
-            return true;
-          } else if (photosStatus.isDenied) {
-            final result = await photosPermission.request();
-            return result.isGranted || result.isLimited;
-          }
-
-          return false;
-        } else if (sdkInt >= 33) {
-          // Android 13 (API 33) - Use granular media permissions
-          final photosPermission = Permission.photos;
-          final status = await photosPermission.status;
-
-          if (status.isGranted || status.isLimited) {
-            return true;
-          } else if (status.isDenied) {
-            final result = await photosPermission.request();
-            return result.isGranted || result.isLimited;
-          }
-          return false;
-        } else if (sdkInt >= 30) {
-          // Android 11-12 (API 30-32) - Scoped storage with legacy support
-          final storagePermission = Permission.storage;
-          final status = await storagePermission.status;
-
-          if (status.isGranted) {
-            return true;
-          } else if (status.isDenied) {
-            final result = await storagePermission.request();
-            return result.isGranted;
-          }
-          return false;
-        } else {
-          // Android 10 and below (API 29 and below)
-          final storagePermission = Permission.storage;
-          final status = await storagePermission.status;
-
-          if (status.isGranted) {
-            return true;
-          } else if (status.isDenied) {
-            final result = await storagePermission.request();
-            return result.isGranted;
-          }
-          return false;
-        }
-      }
-    } catch (e) {
-      print('Permission check error: $e');
-      return false;
-    }
-  }
+  // Deprecated: kept for backward compatibility; now using PermissionUtils.ensurePhotoPermission
+  @Deprecated('Use PermissionUtils.ensurePhotoPermission instead')
+  Future<bool> _checkAndRequestPermissions() =>
+      PermissionUtils.ensurePhotoPermission(); // ignore: unused_element
 }

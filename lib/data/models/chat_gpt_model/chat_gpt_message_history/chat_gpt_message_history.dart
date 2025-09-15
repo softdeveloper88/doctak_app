@@ -6,10 +6,7 @@ String chatGptMessageHistoryToJson(ChatGptMessageHistory data) =>
     json.encode(data.toJson());
 
 class ChatGptMessageHistory {
-  ChatGptMessageHistory({
-    this.success,
-    this.messages,
-  });
+  ChatGptMessageHistory({this.success, this.messages});
 
   ChatGptMessageHistory.fromJson(dynamic json) {
     success = json['success'];
@@ -50,7 +47,8 @@ class Messages {
 
   Messages.fromJson(dynamic json) {
     id = json['id'];
-    gptSessionId = json['gptSessionId'];
+    final dynamic rawSessionId = json['gptSessionId'] ?? json['session_id'];
+    gptSessionId = rawSessionId?.toString();
     question = json['question'];
     response = json['response'];
     createdAt = json['created_at'];
