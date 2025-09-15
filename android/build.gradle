@@ -9,7 +9,17 @@ allprojects {
         google()
         mavenCentral()
     }
+}
 
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                ndkVersion = "28.1.13356709"
+
+            }
+        }
+    }
 }
 configurations.all {
     resolutionStrategy {

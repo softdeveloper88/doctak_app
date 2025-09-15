@@ -150,6 +150,7 @@ android {
         minSdk = 24
         targetSdk = 35
         // ndk abiFilters removed to avoid conflicts with split-per-abi builds
+        ndkVersion = "28.1.13356709"
 
         versionCode = flutter.versionCode
         versionName = flutter.versionName
