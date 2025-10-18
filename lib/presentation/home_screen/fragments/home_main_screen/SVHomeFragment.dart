@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
 import '../../../../core/utils/image_constant.dart';
 import '../../../../localization/app_localization.dart';
@@ -23,7 +24,7 @@ import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
   SVHomeFragment({required this.homeBloc, required this.openDrawer, Key? key})
-      : super(key: key);
+    : super(key: key);
   Function openDrawer;
   HomeBloc homeBloc;
 
@@ -40,11 +41,12 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   String? emailVerified = '';
   bool isInCompleteProfile = false;
   getSharedPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    emailVerified = prefs.getString('email_verified_at') ?? '';
-    String? specialty = prefs.getString('specialty') ?? '';
-    String? countryName = prefs.getString('country') ?? '';
-    String? city = prefs.getString('city') ?? '';
+    final prefs = SecureStorageService.instance;
+    await prefs.initialize();
+    emailVerified = await prefs.getString('email_verified_at') ?? '';
+    String? specialty = await prefs.getString('specialty') ?? '';
+    String? countryName = await prefs.getString('country') ?? '';
+    String? city = await prefs.getString('city') ?? '';
     isInCompleteProfile = specialty == '' || countryName == '' || city == '';
     setState(() {});
   }
@@ -67,10 +69,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     _receivePort = ReceivePort();
 
     // Spawn the isolate and pass the SendPort of the ReceivePort
-    _isolate = await Isolate.spawn(
-      isolateEntry,
-      _receivePort!.sendPort,
-    );
+    _isolate = await Isolate.spawn(isolateEntry, _receivePort!.sendPort);
 
     // Listen to messages from the isolate
     _receivePort!.listen((message) {
@@ -114,7 +113,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       widget.homeBloc.add(PostLoadPageEvent(page: 1));
       widget.homeBloc.add(AdsSettingEvent());
       notificationBloc.add(NotificationCounter());
-      notificationBloc.add(AnnouncementEvent(),);
+      notificationBloc.add(AnnouncementEvent());
     });
   }
 
@@ -124,37 +123,36 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
         emailVerified == '' || isInCompleteProfile;
 
     return Scaffold(
-        // resizeToAvoidBottomInset: false,
-        key: scaffoldKey,
-        backgroundColor: svGetBgColor(),
-        appBar: _buildModernAppBar(context),
-        body: GestureDetector(
-          onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
-          child: RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView(
-                controller: _mainScrollController,
-                physics: const ClampingScrollPhysics(),
-                // More controlled scrolling
-                children: [
-                  UserChatComponent(),
-                  const UserAnnouncementScreen(),
-                  if (showIncompleteProfile)
-                    IncompleteProfileCard(
-                      emailVerified == '',
-                      isInCompleteProfile,
-                    ),
-                  SVPostComponent(widget.homeBloc)
-                ]),
+      // resizeToAvoidBottomInset: false,
+      key: scaffoldKey,
+      backgroundColor: svGetBgColor(),
+      appBar: _buildModernAppBar(context),
+      body: GestureDetector(
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: RefreshIndicator(
+          onRefresh: _refresh,
+          child: ListView(
+            controller: _mainScrollController,
+            physics: const ClampingScrollPhysics(),
+            // More controlled scrolling
+            children: [
+              UserChatComponent(),
+              const UserAnnouncementScreen(),
+              if (showIncompleteProfile)
+                IncompleteProfileCard(emailVerified == '', isInCompleteProfile),
+              SVPostComponent(widget.homeBloc),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   PreferredSizeWidget _buildModernAppBar(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return PreferredSize(
       preferredSize: const Size.fromHeight(70),
       child: Container(
@@ -251,9 +249,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     required VoidCallback onPressed,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4,vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
@@ -294,7 +292,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
 
   Widget _buildNotificationButton(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: Material(
@@ -314,19 +312,19 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: isDark 
+              color: isDark
                   ? Colors.white.withOpacity(0.08)
                   : Colors.blue.withOpacity(0.04),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark 
+                color: isDark
                     ? Colors.white.withOpacity(0.1)
                     : Colors.blue.withOpacity(0.4),
                 width: 0.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isDark 
+                  color: isDark
                       ? Colors.black.withOpacity(0.2)
                       : Colors.blue.withOpacity(0.2),
                   blurRadius: 8,
@@ -338,11 +336,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(
-                  CupertinoIcons.bell,
-                  size: 24,
-                  color: context.iconColor,
-                ),
+                Icon(CupertinoIcons.bell, size: 24, color: context.iconColor),
                 Positioned(
                   right: 8,
                   top: 8,

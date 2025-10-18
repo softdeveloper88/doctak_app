@@ -28,19 +28,32 @@ Color getColorFromHex(String hexColor, {Color? defaultColor}) {
   return Color(int.parse(hexColor, radix: 16));
 }
 
-void toast(String? value, {ToastGravity? gravity, length = Toast.LENGTH_SHORT, Color? bgColor, Color? textColor, bool print = false}) {
-  if (value!.isEmpty || (!kIsWeb && Platform.isLinux)) {
-    log(value);
+void toast(
+  String? value, {
+  ToastGravity? gravity,
+  length = Toast.LENGTH_SHORT,
+  Color? bgColor,
+  Color? textColor,
+  bool print = false,
+}) {
+  // Handle null or empty value safely without using nb_utils extensions
+  final message = value ?? '';
+  if (message.isEmpty || (!kIsWeb && Platform.isLinux)) {
+    log(message.isEmpty ? 'Empty toast message' : message);
   } else {
-    Fluttertoast.showToast(
-      msg: value.validate(),
-      gravity: gravity??ToastGravity.CENTER,
-      toastLength: length,
-      backgroundColor: bgColor,
-      textColor: textColor,
-      timeInSecForIosWeb: 2,
-    );
-    if (print) log(value);
+    try {
+      Fluttertoast.showToast(
+        msg: message,
+        gravity: gravity ?? ToastGravity.CENTER,
+        toastLength: length,
+        backgroundColor: bgColor,
+        textColor: textColor,
+        timeInSecForIosWeb: 2,
+      );
+      if (print) log(message);
+    } catch (e) {
+      log('Toast error: $e - Message: $message');
+    }
   }
 }
 
@@ -65,18 +78,14 @@ MaterialColor createMaterialColor(Color color) {
   return MaterialColor(color.value, swatch);
 }
 
-
-
 class DefaultValues {
   final String defaultLanguage = "en";
 }
 
 Future<void> launchInBrowser(Uri url) async {
-  if (!await launchUrl(
-    url,
-    mode: LaunchMode.externalApplication,
-  )) {
+  if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
     throw Exception('Could not launch $url');
   }
 }
+
 DefaultValues defaultValues = DefaultValues();

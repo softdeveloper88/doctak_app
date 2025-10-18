@@ -1947,6 +1947,7 @@ import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:doctak_app/core/utils/call_permission_handler.dart';
 import 'package:http/http.dart' as http;
 
 import 'meeting_chat_screen.dart';
@@ -1958,7 +1959,8 @@ const appId = "f2cf99f1193a40e69546157883b2159f";
 String token = '';
 
 // Constants for audio level detection
-const int SPEAKING_THRESHOLD = 30; // Audio volume threshold to consider as speaking
+const int SPEAKING_THRESHOLD =
+    30; // Audio volume threshold to consider as speaking
 const int SPEAKING_INTERVAL_MS = 1000; // Interval to check audio levels
 
 class VideoCallScreen extends StatefulWidget {
@@ -1976,7 +1978,8 @@ class VideoCallScreen extends StatefulWidget {
   State<VideoCallScreen> createState() => _VideoCallScreenState();
 }
 
-class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProviderStateMixin {
+class _VideoCallScreenState extends State<VideoCallScreen>
+    with SingleTickerProviderStateMixin {
   late RtcEngine _agoraEngine;
   final List<RemoteVideoData> _remoteVideos = [];
   final ValueNotifier<int> _participantCount = ValueNotifier(0);
@@ -2039,17 +2042,21 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       duration: const Duration(milliseconds: 750),
       vsync: this,
     )..repeat(reverse: true);
-    _speakingAnimation = Tween<double>(begin: 1.0, end: 1.8).animate(
-        _speakingAnimationController);
+    _speakingAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.8,
+    ).animate(_speakingAnimationController);
 
     // Set channel name based on host/participant role
     if (widget.isHost ?? true) {
-      channelName = widget.meetingDetailsModel?.data?.meeting?.meetingChannel ??
+      channelName =
+          widget.meetingDetailsModel?.data?.meeting?.meetingChannel ??
           defaultChannel;
       // Extract Agora token from meeting details.
       token = widget.meetingDetailsModel?.data?.meeting?.meetingToken ?? '';
     } else {
-      channelName = widget.meetingDetailsModel?.data?.meeting?.meetingChannel ??
+      channelName =
+          widget.meetingDetailsModel?.data?.meeting?.meetingChannel ??
           defaultChannel;
       // In participant case token may be provided similarly.
       token = widget.meetingDetailsModel?.data?.meeting?.meetingToken ?? '';
@@ -2072,7 +2079,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     if (users != null) {
       for (var user in users) {
         if (user.id != AppData.logInUserId) {
-          _remoteUserStates[int.tryParse(user.id ?? '0') ?? 0] = RemoteUserState(
+          _remoteUserStates[int.tryParse(user.id ?? '0') ??
+              0] = RemoteUserState(
             userId: user.id ?? '',
             isVideoOn: user.meetingDetails?.single.isVideoOn == 1,
             isMicOn: user.meetingDetails?.single.isMicOn == 1,
@@ -2117,22 +2125,24 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   void _initializePusher() async {
     try {
       await pusher.init(
-          apiKey: PusherConfig.key,
-          cluster: PusherConfig.cluster,
-          useTLS: false,
-          onSubscriptionSucceeded: onSubscriptionSucceeded,
-          onSubscriptionError: onSubscriptionError,
-          onMemberAdded: onMemberAdded,
-          onMemberRemoved: onMemberRemoved,
-          onDecryptionFailure: onDecryptionFailure,
-          onError: onError,
-          onSubscriptionCount: onSubscriptionCount,
-          onAuthorizer: null);
+        apiKey: PusherConfig.key,
+        cluster: PusherConfig.cluster,
+        useTLS: false,
+        onSubscriptionSucceeded: onSubscriptionSucceeded,
+        onSubscriptionError: onSubscriptionError,
+        onMemberAdded: onMemberAdded,
+        onMemberRemoved: onMemberRemoved,
+        onDecryptionFailure: onDecryptionFailure,
+        onError: onError,
+        onSubscriptionCount: onSubscriptionCount,
+        onAuthorizer: null,
+      );
 
       pusher.connect();
 
       clientListenChannel = await pusher.subscribe(
-        channelName: "meeting-channel${widget.meetingDetailsModel?.data?.meeting?.id}",
+        channelName:
+            "meeting-channel${widget.meetingDetailsModel?.data?.meeting?.id}",
         onMemberAdded: (member) {
           // Handle when a new member is added if needed.
         },
@@ -2150,44 +2160,53 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             case 'new-user-join':
               if (widget.isHost ?? false) {
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return MeetingJoinRejectDialog(
-                        joinName: '${jsonMap['first_name']} ${jsonMap['last_name']}',
-                        title: ' wants to join the meeting?',
-                        yesButtonText: "Accept",
-                        profilePic: '${AppData.imageUrl}${jsonMap['profile_pic']}',
-                        callback: () async {
-                          // Allow join request via API call.
-                          ProgressDialogUtils.showProgressDialog(context: context);
-                          await allowJoinMeet(context, widget
-                              .meetingDetailsModel?.data?.meeting?.id,
-                              jsonMap['id'])
-                              .then((resp) async {
-                            debugPrint("Allow join response: ${resp}");
-                            // Refresh meeting details after successful join.
-                            _refreshMeetingDetailsDebounced();
-                            ProgressDialogUtils.hideProgressDialog();
-                          });
-
-                          Navigator.of(context).pop();
-                        },
-                        noButtonText: 'Reject',
-                        callbackNegative: () async {
-                          ProgressDialogUtils.showProgressDialog(context: context);
-
-                          // Reject join request via API call.
-                          await rejectJoinMeet(context, jsonMap['id'], widget
-                              .meetingDetailsModel?.data?.meeting?.id)
-                              .then((resp) {
-                            debugPrint("Reject join response: ${resp}");
-                          });
+                  context: context,
+                  builder: (BuildContext context) {
+                    return MeetingJoinRejectDialog(
+                      joinName:
+                          '${jsonMap['first_name']} ${jsonMap['last_name']}',
+                      title: ' wants to join the meeting?',
+                      yesButtonText: "Accept",
+                      profilePic:
+                          '${AppData.imageUrl}${jsonMap['profile_pic']}',
+                      callback: () async {
+                        // Allow join request via API call.
+                        ProgressDialogUtils.showProgressDialog(
+                          context: context,
+                        );
+                        await allowJoinMeet(
+                          context,
+                          widget.meetingDetailsModel?.data?.meeting?.id,
+                          jsonMap['id'],
+                        ).then((resp) async {
+                          debugPrint("Allow join response: ${resp}");
+                          // Refresh meeting details after successful join.
+                          _refreshMeetingDetailsDebounced();
                           ProgressDialogUtils.hideProgressDialog();
+                        });
 
-                          Navigator.of(context).pop();
-                        },
-                      );
-                    }
+                        Navigator.of(context).pop();
+                      },
+                      noButtonText: 'Reject',
+                      callbackNegative: () async {
+                        ProgressDialogUtils.showProgressDialog(
+                          context: context,
+                        );
+
+                        // Reject join request via API call.
+                        await rejectJoinMeet(
+                          context,
+                          jsonMap['id'],
+                          widget.meetingDetailsModel?.data?.meeting?.id,
+                        ).then((resp) {
+                          debugPrint("Reject join response: ${resp}");
+                        });
+                        ProgressDialogUtils.hideProgressDialog();
+
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
                 );
               }
               break;
@@ -2196,13 +2215,22 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               toast("Join request allowed");
               break;
             case 'new-message':
-              if(AppData.logInUserId != jsonMap['user_id']) {
-                AppData.chatMessages.add(Message(text: jsonMap['message'], senderId: jsonMap['user_id'],profilePic: jsonMap['profile_pic'],name: '',timestamp: DateTime.timestamp(), isSentByMe: false));
+              if (AppData.logInUserId != jsonMap['user_id']) {
+                AppData.chatMessages.add(
+                  Message(
+                    text: jsonMap['message'],
+                    senderId: jsonMap['user_id'],
+                    profilePic: jsonMap['profile_pic'],
+                    name: '',
+                    timestamp: DateTime.timestamp(),
+                    isSentByMe: false,
+                  ),
+                );
               }
               setState(() {});
               break;
             case 'meeting-status':
-            // IMPROVED: Handling meeting status updates more efficiently
+              // IMPROVED: Handling meeting status updates more efficiently
               final String userId = jsonMap['user_id'].toString();
               final String action = jsonMap['action'].toString();
               final bool status = jsonMap['status'] == true;
@@ -2217,7 +2245,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               }
 
               // Show toast for debugging
-              toast("Meeting status changed: $action for user $userId to $status");
+              toast(
+                "Meeting status changed: $action for user $userId to $status",
+              );
               break;
             default:
               break;
@@ -2226,16 +2256,24 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       );
     } catch (e) {
       debugPrint('Pusher initialization error: $e');
-      _showErrorDialog('Pusher Connection Error',
-          'Failed to connect to messaging service. Please try again.');
+      _showErrorDialog(
+        'Pusher Connection Error',
+        'Failed to connect to messaging service. Please try again.',
+      );
     }
   }
 
   // Helper method to update meeting details model based on status change
-  bool _updateMeetingDetailsForStatus(String userId, String action, bool status) {
+  bool _updateMeetingDetailsForStatus(
+    String userId,
+    String action,
+    bool status,
+  ) {
     try {
-      final userToUpdate = widget.meetingDetailsModel?.data?.users
-          ?.firstWhere((user) => user.id == userId, orElse: () => Users());
+      final userToUpdate = widget.meetingDetailsModel?.data?.users?.firstWhere(
+        (user) => user.id == userId,
+        orElse: () => Users(),
+      );
 
       if (userToUpdate == null || userToUpdate.id == null) {
         debugPrint("User not found in meeting details: $userId");
@@ -2282,8 +2320,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     if (uidValue <= 0) return;
 
     // Create or update user state
-    final userState = _remoteUserStates[uidValue] ??
-        RemoteUserState(userId: userId, userData: Users(id: userId));
+    final userState =
+        _remoteUserStates[uidValue] ??
+        RemoteUserState(
+          userId: userId,
+          userData: Users(id: userId),
+        );
 
     // Update the state based on action
     switch (action) {
@@ -2363,69 +2405,74 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       await _requestPermissions();
 
       _agoraEngine = createAgoraRtcEngine();
-      await _agoraEngine.initialize(const RtcEngineContext(
-        appId: appId,
-        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-      ));
+      await _agoraEngine.initialize(
+        const RtcEngineContext(
+          appId: appId,
+          channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+        ),
+      );
       _setupEventHandlers();
       await _configureVideoSettings();
       await _joinChannel();
     } catch (e) {
       debugPrint('Agora initialization error: $e');
-      _showErrorDialog('Initialization Error',
-          'Failed to initialize video call. Please check your connection and try again.');
+      _showErrorDialog(
+        'Initialization Error',
+        'Failed to initialize video call. Please check your connection and try again.',
+      );
     }
   }
 
-  // Request permissions with better error handling
+  // Request permissions with professional UI handling
   Future<void> _requestPermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.microphone,
-      Permission.camera,
-    ].request();
-
-    List<String> deniedPermissions = [];
-
-    if (statuses[Permission.microphone] != PermissionStatus.granted) {
-      deniedPermissions.add('Microphone');
-    }
-
-    if (statuses[Permission.camera] != PermissionStatus.granted) {
-      deniedPermissions.add('Camera');
-    }
-
-    if (deniedPermissions.isNotEmpty) {
-      _showPermissionDialog(deniedPermissions);
-    }
-  }
-
-  void _showPermissionDialog(List<String> deniedPermissions) {
     if (!mounted) return;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(translation(context).lbl_call_permission_error),
-            content: Text('${deniedPermissions.join(
-                ', ')} ${translation(context).lbl_you_want_enable_permission}'),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  await openAppSettings();
-                },
-                child: Text(translation(context).lbl_retry),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(translation(context).lbl_join),
-              ),
-            ],
-          ),
+    // Use the professional CallPermissionHandler
+    final result = await callPermissionHandler.showInCallPermissionDialog(
+      context,
+      isVideoCall: true,
+    );
+
+    // Handle the result
+    if (result != CallPermissionResult.granted) {
+      // Show appropriate feedback based on result
+      if (result == CallPermissionResult.permanentlyDenied && mounted) {
+        // User was shown settings dialog, permissions might be granted after returning
+        // Re-check permissions after a delay (user may have enabled them in settings)
+        await Future.delayed(const Duration(seconds: 1));
+        final hasPermissions = await callPermissionHandler.hasCallPermissions(
+          isVideoCall: true,
+        );
+        if (!hasPermissions && mounted) {
+          _showPermissionRequiredSnackbar();
+        }
+      } else if (result == CallPermissionResult.denied && mounted) {
+        _showPermissionRequiredSnackbar();
+      }
+    }
+  }
+
+  void _showPermissionRequiredSnackbar() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Camera and microphone access is required for video calls',
+          style: TextStyle(fontFamily: 'Poppins'),
+        ),
+        backgroundColor: Colors.orange[600],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Settings',
+          textColor: Colors.white,
+          onPressed: () => openAppSettings(),
+        ),
+      ),
     );
   }
 
@@ -2466,15 +2513,17 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   void _setupEventHandlers() {
     _agoraEngine.registerEventHandler(
       RtcEngineEventHandler(
-        onVideoPublishStateChanged: (source, oldState, newState, newState2,
-            extra) {
+        onVideoPublishStateChanged: (source, oldState, newState, newState2, extra) {
           // Handle video publish state changes
-          debugPrint('Video publish state changed from $oldState to $newState for $source');
+          debugPrint(
+            'Video publish state changed from $oldState to $newState for $source',
+          );
 
           // If local video publishing succeeded, make sure UI reflects this
           // Handle different Agora SDK versions that might use different enum values
           // Using integers directly to avoid compilation errors with enum names
-          final int publishedState = 2; // Published state value in most Agora SDK versions
+          final int publishedState =
+              2; // Published state value in most Agora SDK versions
           if (source == VideoSourceType.videoSourceCamera &&
               newState == publishedState) {
             if (mounted) {
@@ -2484,8 +2533,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             }
           }
         },
-        onUserJoined: (RtcConnection connection, int remoteUid,
-            int elapsed) async {
+        onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) async {
           debugPrint('User joined: $remoteUid');
           try {
             // Get user account for this UID
@@ -2494,14 +2542,16 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               debugPrint('Failed to get userAccount for UID: $remoteUid');
               // Add a placeholder user to show something while we wait for user info
               setState(() {
-                _remoteVideos.add(RemoteVideoData(
-                  uid: remoteUid,
-                  joinUser: Users(firstName: "User", lastName: "$remoteUid"),
-                  isScreenShare: false,
-                  isSpeaking: false,
-                  position: _getNextPosition(),
-                  scale: 1.0,
-                ));
+                _remoteVideos.add(
+                  RemoteVideoData(
+                    uid: remoteUid,
+                    joinUser: Users(firstName: "User", lastName: "$remoteUid"),
+                    isScreenShare: false,
+                    isSpeaking: false,
+                    position: _getNextPosition(),
+                    scale: 1.0,
+                  ),
+                );
 
                 // Initialize speaking level
                 _userSpeakingLevels[remoteUid] = 0;
@@ -2514,28 +2564,32 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             }
 
             // First find if we already have user information in the meeting details
-            Users? apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
-                    (u) => u.id == userAccount, orElse: () => Users());
+            Users? apiUser = widget.meetingDetailsModel?.data?.users
+                ?.firstWhere((u) => u.id == userAccount, orElse: () => Users());
 
             if (apiUser?.id == null) {
               // User not found in current meeting details, refresh to get updated info
               await _refreshMeetingDetails();
               // Try again to find the user
               apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
-                      (u) => u.id == userAccount, orElse: () => Users());
+                (u) => u.id == userAccount,
+                orElse: () => Users(),
+              );
             }
 
             if (apiUser?.id != null) {
               // Add remote video with real user information
               setState(() {
-                _remoteVideos.add(RemoteVideoData(
-                  uid: remoteUid,
-                  joinUser: apiUser,
-                  isScreenShare: false,
-                  isSpeaking: false,
-                  position: _getNextPosition(),
-                  scale: 1.0,
-                ));
+                _remoteVideos.add(
+                  RemoteVideoData(
+                    uid: remoteUid,
+                    joinUser: apiUser,
+                    isScreenShare: false,
+                    isSpeaking: false,
+                    position: _getNextPosition(),
+                    scale: 1.0,
+                  ),
+                );
 
                 // Initialize speaking level
                 _userSpeakingLevels[remoteUid] = 0;
@@ -2546,7 +2600,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                   userId: apiUser!.id ?? '',
                   isVideoOn: apiUser.meetingDetails?.single.isVideoOn == 1,
                   isMicOn: apiUser.meetingDetails?.single.isMicOn == 1,
-                  isScreenShared: apiUser.meetingDetails?.single.isScreenShared == 1,
+                  isScreenShared:
+                      apiUser.meetingDetails?.single.isScreenShared == 1,
                   isHandUp: apiUser.meetingDetails?.single.isHandUp == 1,
                   userData: apiUser,
                 );
@@ -2554,7 +2609,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
               // Show welcome message
               _showSystemMessage(
-                  '${apiUser?.firstName ?? ""} ${apiUser?.lastName ?? ""} joined the meeting');
+                '${apiUser?.firstName ?? ""} ${apiUser?.lastName ?? ""} joined the meeting',
+              );
 
               // Update participant count
               _updateParticipantCount();
@@ -2566,120 +2622,146 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         // onTokenPrivilegeWillExpire: (connection, token) {
         //   _renewToken();
         // },
-        onConnectionStateChanged: (RtcConnection connection,
-            ConnectionStateType state, ConnectionChangedReasonType reason) {
-          debugPrint('Connection state changed: $state, reason: $reason');
+        onConnectionStateChanged:
+            (
+              RtcConnection connection,
+              ConnectionStateType state,
+              ConnectionChangedReasonType reason,
+            ) {
+              debugPrint('Connection state changed: $state, reason: $reason');
 
-          // Handle reconnection scenarios
-          if (state == ConnectionStateType.connectionStateReconnecting) {
-            setState(() {
-              _isReconnecting = true;
-              _reconnectionAttempts++;
-            });
+              // Handle reconnection scenarios
+              if (state == ConnectionStateType.connectionStateReconnecting) {
+                setState(() {
+                  _isReconnecting = true;
+                  _reconnectionAttempts++;
+                });
 
-            _showSystemMessage('Attempting to reconnect...');
+                _showSystemMessage('Attempting to reconnect...');
 
-            if (_reconnectionAttempts >= _maxReconnectionAttempts) {
-              _showErrorDialog(
-                  'Connection Lost',
-                  'Failed to reconnect after multiple attempts. Please check your network connection and try rejoining the meeting.'
-              );
-            }
-          } else if (state == ConnectionStateType.connectionStateConnected) {
-            if (_isReconnecting) {
-              _showSystemMessage('Successfully reconnected to the meeting');
-              // Refresh meeting details after reconnection
-              _refreshMeetingDetailsDebounced();
-            }
+                if (_reconnectionAttempts >= _maxReconnectionAttempts) {
+                  _showErrorDialog(
+                    'Connection Lost',
+                    'Failed to reconnect after multiple attempts. Please check your network connection and try rejoining the meeting.',
+                  );
+                }
+              } else if (state ==
+                  ConnectionStateType.connectionStateConnected) {
+                if (_isReconnecting) {
+                  _showSystemMessage('Successfully reconnected to the meeting');
+                  // Refresh meeting details after reconnection
+                  _refreshMeetingDetailsDebounced();
+                }
 
-            setState(() {
-              _isReconnecting = false;
-              _reconnectionAttempts = 0;
-            });
-          } else if (state == ConnectionStateType.connectionStateFailed ||
-              state == ConnectionStateType.connectionStateDisconnected) {
-            if (reason !=
-                ConnectionChangedReasonType.connectionChangedLeaveChannel) {
-              _showSystemMessage('Connection lost. Please check your network.');
-            }
-          }
-        },
-        onUserEnableVideo: (RtcConnection connection, int remoteUid,
-            bool isVideoEnabled) async {
-          debugPrint('User ${remoteUid} video enabled: ${isVideoEnabled}');
-
-          String? id = await _getCachedUserAccount(remoteUid);
-          if (id != null) {
-            try {
-              // Update meeting details model
-              widget.meetingDetailsModel?.data?.users
-                  ?.singleWhere((user) => user.id == id, orElse: () => Users())
-                  .meetingDetails
-                  ?.single
-                  .isVideoOn = isVideoEnabled ? 1 : 0;
-
-              // Update remote user state
-              if (_remoteUserStates.containsKey(remoteUid)) {
-                _remoteUserStates[remoteUid]!.isVideoOn = isVideoEnabled;
+                setState(() {
+                  _isReconnecting = false;
+                  _reconnectionAttempts = 0;
+                });
+              } else if (state == ConnectionStateType.connectionStateFailed ||
+                  state == ConnectionStateType.connectionStateDisconnected) {
+                if (reason !=
+                    ConnectionChangedReasonType.connectionChangedLeaveChannel) {
+                  _showSystemMessage(
+                    'Connection lost. Please check your network.',
+                  );
+                }
               }
+            },
+        onUserEnableVideo:
+            (
+              RtcConnection connection,
+              int remoteUid,
+              bool isVideoEnabled,
+            ) async {
+              debugPrint('User ${remoteUid} video enabled: ${isVideoEnabled}');
 
-              setState(() {});
-            } catch (e) {
-              debugPrint('Error updating video state: $e');
-            }
-          }
-        },
-        onUserMuteAudio: (RtcConnection connection, int remoteUid,
-            bool isMuted) async {
-          debugPrint('User ${remoteUid} audio muted: ${isMuted}');
+              String? id = await _getCachedUserAccount(remoteUid);
+              if (id != null) {
+                try {
+                  // Update meeting details model
+                  widget.meetingDetailsModel?.data?.users
+                      ?.singleWhere(
+                        (user) => user.id == id,
+                        orElse: () => Users(),
+                      )
+                      .meetingDetails
+                      ?.single
+                      .isVideoOn = isVideoEnabled
+                      ? 1
+                      : 0;
 
-          String? id = await _getCachedUserAccount(remoteUid);
-          if (id != null) {
-            try {
-              // Update meeting details model
-              widget.meetingDetailsModel?.data?.users
-                  ?.singleWhere((user) => user.id == id, orElse: () => Users())
-                  .meetingDetails
-                  ?.single
-                  .isMicOn = isMuted ? 0 : 1;
+                  // Update remote user state
+                  if (_remoteUserStates.containsKey(remoteUid)) {
+                    _remoteUserStates[remoteUid]!.isVideoOn = isVideoEnabled;
+                  }
 
-              // Update remote user state
-              if (_remoteUserStates.containsKey(remoteUid)) {
-                _remoteUserStates[remoteUid]!.isMicOn = !isMuted;
+                  setState(() {});
+                } catch (e) {
+                  debugPrint('Error updating video state: $e');
+                }
               }
+            },
+        onUserMuteAudio:
+            (RtcConnection connection, int remoteUid, bool isMuted) async {
+              debugPrint('User ${remoteUid} audio muted: ${isMuted}');
 
-              setState(() {});
-            } catch (e) {
-              debugPrint('Error updating mic state: $e');
-            }
-          }
-        },
-        onUserMuteVideo: (RtcConnection connection, int remoteUid,
-            bool isVideoMuted) async {
-          debugPrint('User ${remoteUid} video muted: ${isVideoMuted}');
+              String? id = await _getCachedUserAccount(remoteUid);
+              if (id != null) {
+                try {
+                  // Update meeting details model
+                  widget.meetingDetailsModel?.data?.users
+                      ?.singleWhere(
+                        (user) => user.id == id,
+                        orElse: () => Users(),
+                      )
+                      .meetingDetails
+                      ?.single
+                      .isMicOn = isMuted
+                      ? 0
+                      : 1;
 
-          String? id = await _getCachedUserAccount(remoteUid);
-          if (id != null) {
-            try {
-              // Update meeting details model
-              widget.meetingDetailsModel?.data?.users
-                  ?.singleWhere((user) => user.id == id, orElse: () => Users())
-                  .meetingDetails
-                  ?.single
-                  .isVideoOn = isVideoMuted ? 0 : 1;
+                  // Update remote user state
+                  if (_remoteUserStates.containsKey(remoteUid)) {
+                    _remoteUserStates[remoteUid]!.isMicOn = !isMuted;
+                  }
 
-              // Update remote user state
-              if (_remoteUserStates.containsKey(remoteUid)) {
-                _remoteUserStates[remoteUid]!.isVideoOn = !isVideoMuted;
+                  setState(() {});
+                } catch (e) {
+                  debugPrint('Error updating mic state: $e');
+                }
               }
+            },
+        onUserMuteVideo:
+            (RtcConnection connection, int remoteUid, bool isVideoMuted) async {
+              debugPrint('User ${remoteUid} video muted: ${isVideoMuted}');
 
-              setState(() {});
-            } catch (e) {
-              debugPrint('Error updating video mute state: $e');
-            }
-          }
-        },
-        onAudioVolumeIndication: (connection, speakers, totalVolume,s) {
+              String? id = await _getCachedUserAccount(remoteUid);
+              if (id != null) {
+                try {
+                  // Update meeting details model
+                  widget.meetingDetailsModel?.data?.users
+                      ?.singleWhere(
+                        (user) => user.id == id,
+                        orElse: () => Users(),
+                      )
+                      .meetingDetails
+                      ?.single
+                      .isVideoOn = isVideoMuted
+                      ? 0
+                      : 1;
+
+                  // Update remote user state
+                  if (_remoteUserStates.containsKey(remoteUid)) {
+                    _remoteUserStates[remoteUid]!.isVideoOn = !isVideoMuted;
+                  }
+
+                  setState(() {});
+                } catch (e) {
+                  debugPrint('Error updating video mute state: $e');
+                }
+              }
+            },
+        onAudioVolumeIndication: (connection, speakers, totalVolume, s) {
           if (speakers.isEmpty) return;
 
           // First, mark all users as not speaking by default
@@ -2690,7 +2772,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             // Process all active speakers
             for (var speaker in speakers) {
               // Consider someone as speaking if their volume is above threshold
-              if ((speaker.volume??0) > 50) {
+              if ((speaker.volume ?? 0) > 50) {
                 if (speaker.uid == 0) {
                   // Local user is speaking
                   foundLocalUser = true;
@@ -2698,31 +2780,41 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
                   // Reset speaking state after a delay if no more audio
                   _localUserSpeakingTimer?.cancel();
-                  _localUserSpeakingTimer = Timer(const Duration(milliseconds: 800), () {
-                    if (mounted) setState(() => _isLocalUserSpeaking = false);
-                  });
+                  _localUserSpeakingTimer = Timer(
+                    const Duration(milliseconds: 800),
+                    () {
+                      if (mounted) setState(() => _isLocalUserSpeaking = false);
+                    },
+                  );
                 } else {
                   // Remote user is speaking - find and update their status
                   for (var i = 0; i < _remoteVideos.length; i++) {
                     if (_remoteVideos[i].uid == speaker.uid) {
-                      _remoteVideos[i] = _remoteVideos[i].copyWith(isSpeaking: true);
+                      _remoteVideos[i] = _remoteVideos[i].copyWith(
+                        isSpeaking: true,
+                      );
 
                       // Cancel any existing timer for this user
                       _speakingTimers[speaker.uid]?.cancel();
 
                       // Create a timer to reset speaking state after delay
-                      _speakingTimers[speaker.uid!] = Timer(const Duration(milliseconds: 800), () {
-                        if (mounted) {
-                          setState(() {
-                            for (var j = 0; j < _remoteVideos.length; j++) {
-                              if (_remoteVideos[j].uid == speaker.uid) {
-                                _remoteVideos[j] = _remoteVideos[j].copyWith(isSpeaking: false);
-                                break;
+                      _speakingTimers[speaker.uid!] = Timer(
+                        const Duration(milliseconds: 800),
+                        () {
+                          if (mounted) {
+                            setState(() {
+                              for (var j = 0; j < _remoteVideos.length; j++) {
+                                if (_remoteVideos[j].uid == speaker.uid) {
+                                  _remoteVideos[j] = _remoteVideos[j].copyWith(
+                                    isSpeaking: false,
+                                  );
+                                  break;
+                                }
                               }
-                            }
-                          });
-                        }
-                      });
+                            });
+                          }
+                        },
+                      );
                       break;
                     }
                   }
@@ -2736,75 +2828,131 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             }
           });
         },
-        onRemoteVideoStateChanged: (RtcConnection connection, int remoteUid,
-            RemoteVideoState state, RemoteVideoStateReason reason,
-            int elapsed) async {
-          debugPrint('Remote video state changed for UID: $remoteUid to state: $state, reason: $reason');
+        onRemoteVideoStateChanged:
+            (
+              RtcConnection connection,
+              int remoteUid,
+              RemoteVideoState state,
+              RemoteVideoStateReason reason,
+              int elapsed,
+            ) async {
+              debugPrint(
+                'Remote video state changed for UID: $remoteUid to state: $state, reason: $reason',
+              );
 
-          if (state == RemoteVideoState.remoteVideoStateStarting) {
-            debugPrint('Remote video state starting for UID: $remoteUid');
-            // Check if we already have this remote user
-            final existingIndex = _remoteVideos.indexWhere((v) => v.uid == remoteUid);
-
-            if (existingIndex == -1) {
-              // New user with video - add them
-              final userAccount = await _getCachedUserAccount(remoteUid);
-              var apiUser = Users();
-
-              if (userAccount != null) {
-                apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
-                        (u) => u.id == userAccount, orElse: () => Users()) ?? Users();
-              }
-
-              if (apiUser.id == null) {
-                // Try refreshing meeting details
-                await _refreshMeetingDetails();
-                if (userAccount != null) {
-                  apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
-                          (u) => u.id == userAccount, orElse: () => Users()) ?? Users();
-                }
-              }
-
-              // If we still don't have user info, use a placeholder
-              if (apiUser.id == null) {
-                apiUser = Users(
-                    id: userAccount,
-                    firstName: "User",
-                    lastName: "$remoteUid",
-                    meetingDetails: [MeetingDetails(isVideoOn: 1, isMicOn: 1)]
+              if (state == RemoteVideoState.remoteVideoStateStarting) {
+                debugPrint('Remote video state starting for UID: $remoteUid');
+                // Check if we already have this remote user
+                final existingIndex = _remoteVideos.indexWhere(
+                  (v) => v.uid == remoteUid,
                 );
-              }
 
-              setState(() {
-                _remoteVideos.add(RemoteVideoData(
-                  uid: remoteUid,
-                  joinUser: apiUser,
-                  isScreenShare: false,
-                  isSpeaking: false,
-                  position: _getNextPosition(),
-                  scale: 1.0,
-                ));
+                if (existingIndex == -1) {
+                  // New user with video - add them
+                  final userAccount = await _getCachedUserAccount(remoteUid);
+                  var apiUser = Users();
 
-                // Initialize speaking level
-                _userSpeakingLevels[remoteUid] = 0;
-                _userSpeakingStatus[remoteUid] = false;
-              });
-            } else {
-              // Update existing user
-              final existingVideo = _remoteVideos[existingIndex];
-              if (existingVideo.joinUser?.meetingDetails?.single.isVideoOn == 0) {
-                // Update video state if needed
+                  if (userAccount != null) {
+                    apiUser =
+                        widget.meetingDetailsModel?.data?.users?.firstWhere(
+                          (u) => u.id == userAccount,
+                          orElse: () => Users(),
+                        ) ??
+                        Users();
+                  }
+
+                  if (apiUser.id == null) {
+                    // Try refreshing meeting details
+                    await _refreshMeetingDetails();
+                    if (userAccount != null) {
+                      apiUser =
+                          widget.meetingDetailsModel?.data?.users?.firstWhere(
+                            (u) => u.id == userAccount,
+                            orElse: () => Users(),
+                          ) ??
+                          Users();
+                    }
+                  }
+
+                  // If we still don't have user info, use a placeholder
+                  if (apiUser.id == null) {
+                    apiUser = Users(
+                      id: userAccount,
+                      firstName: "User",
+                      lastName: "$remoteUid",
+                      meetingDetails: [
+                        MeetingDetails(isVideoOn: 1, isMicOn: 1),
+                      ],
+                    );
+                  }
+
+                  setState(() {
+                    _remoteVideos.add(
+                      RemoteVideoData(
+                        uid: remoteUid,
+                        joinUser: apiUser,
+                        isScreenShare: false,
+                        isSpeaking: false,
+                        position: _getNextPosition(),
+                        scale: 1.0,
+                      ),
+                    );
+
+                    // Initialize speaking level
+                    _userSpeakingLevels[remoteUid] = 0;
+                    _userSpeakingStatus[remoteUid] = false;
+                  });
+                } else {
+                  // Update existing user
+                  final existingVideo = _remoteVideos[existingIndex];
+                  if (existingVideo
+                          .joinUser
+                          ?.meetingDetails
+                          ?.single
+                          .isVideoOn ==
+                      0) {
+                    // Update video state if needed
+                    final userAccount = await _getCachedUserAccount(remoteUid);
+                    if (userAccount != null) {
+                      try {
+                        widget.meetingDetailsModel?.data?.users
+                                ?.singleWhere(
+                                  (user) => user.id == userAccount,
+                                  orElse: () => Users(),
+                                )
+                                .meetingDetails
+                                ?.single
+                                .isVideoOn =
+                            1;
+
+                        if (_remoteUserStates.containsKey(remoteUid)) {
+                          _remoteUserStates[remoteUid]!.isVideoOn = true;
+                        }
+
+                        setState(() {});
+                      } catch (e) {
+                        debugPrint('Error updating remote video state: $e');
+                      }
+                    }
+                  }
+                }
+              } else if (state == RemoteVideoState.remoteVideoStateStopped) {
+                // Video stopped - update state
                 final userAccount = await _getCachedUserAccount(remoteUid);
                 if (userAccount != null) {
                   try {
                     widget.meetingDetailsModel?.data?.users
-                        ?.singleWhere((user) => user.id == userAccount, orElse: () => Users())
-                        .meetingDetails
-                        ?.single
-                        .isVideoOn = 1;
+                            ?.singleWhere(
+                              (user) => user.id == userAccount,
+                              orElse: () => Users(),
+                            )
+                            .meetingDetails
+                            ?.single
+                            .isVideoOn =
+                        0;
 
                     if (_remoteUserStates.containsKey(remoteUid)) {
-                      _remoteUserStates[remoteUid]!.isVideoOn = true;
+                      _remoteUserStates[remoteUid]!.isVideoOn = false;
                     }
 
                     setState(() {});
@@ -2812,33 +2960,13 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                     debugPrint('Error updating remote video state: $e');
                   }
                 }
+              } else if (state == RemoteVideoState.remoteVideoStateFailed) {
+                // Handle video failure if needed
+                debugPrint(
+                  'Remote video failed for UID: $remoteUid, reason: $reason',
+                );
               }
-            }
-          } else if (state == RemoteVideoState.remoteVideoStateStopped) {
-            // Video stopped - update state
-            final userAccount = await _getCachedUserAccount(remoteUid);
-            if (userAccount != null) {
-              try {
-                widget.meetingDetailsModel?.data?.users
-                    ?.singleWhere((user) => user.id == userAccount, orElse: () => Users())
-                    .meetingDetails
-                    ?.single
-                    .isVideoOn = 0;
-
-                if (_remoteUserStates.containsKey(remoteUid)) {
-                  _remoteUserStates[remoteUid]!.isVideoOn = false;
-                }
-
-                setState(() {});
-              } catch (e) {
-                debugPrint('Error updating remote video state: $e');
-              }
-            }
-          } else if (state == RemoteVideoState.remoteVideoStateFailed) {
-            // Handle video failure if needed
-            debugPrint('Remote video failed for UID: $remoteUid, reason: $reason');
-          }
-        },
+            },
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
           debugPrint('Successfully joined channel: ${connection.channelId}');
           setState(() => _isJoined = true);
@@ -2846,65 +2974,76 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
           // Start audio volume detection
           _agoraEngine.enableAudioVolumeIndication(
-              interval: 500, // Check every 500ms
-              smooth: 3, // Smoothing factor
-              reportVad: true // Voice activity detection
+            interval: 500, // Check every 500ms
+            smooth: 3, // Smoothing factor
+            reportVad: true, // Voice activity detection
           );
 
           // Subscribe to all remote users immediately after joining
           _subscribeToAllRemoteUsers();
         },
-        onUserOffline: (RtcConnection connection, int remoteUid,
-            UserOfflineReasonType reason) async {
-          debugPrint('User offline: $remoteUid, reason: $reason');
+        onUserOffline:
+            (
+              RtcConnection connection,
+              int remoteUid,
+              UserOfflineReasonType reason,
+            ) async {
+              debugPrint('User offline: $remoteUid, reason: $reason');
 
-          String? userId = await _getCachedUserAccount(remoteUid);
-          var removedUser = widget.meetingDetailsModel?.data?.users
-              ?.firstWhere(
-                  (user) => user.id == userId,
-              orElse: () => Users());
+              String? userId = await _getCachedUserAccount(remoteUid);
+              var removedUser = widget.meetingDetailsModel?.data?.users
+                  ?.firstWhere(
+                    (user) => user.id == userId,
+                    orElse: () => Users(),
+                  );
 
-          // Clean up our maps
-          _userSpeakingLevels.remove(remoteUid);
-          _userSpeakingStatus.remove(remoteUid);
-          _remoteUserStates.remove(remoteUid);
-          _speakingTimers[remoteUid]?.cancel();
-          _speakingTimers.remove(remoteUid);
+              // Clean up our maps
+              _userSpeakingLevels.remove(remoteUid);
+              _userSpeakingStatus.remove(remoteUid);
+              _remoteUserStates.remove(remoteUid);
+              _speakingTimers[remoteUid]?.cancel();
+              _speakingTimers.remove(remoteUid);
 
-          setState(() {
-            _remoteVideos.removeWhere((v) => v.uid == remoteUid);
-          });
+              setState(() {
+                _remoteVideos.removeWhere((v) => v.uid == remoteUid);
+              });
 
-          if (removedUser?.id != null) {
+              if (removedUser?.id != null) {
+                _showSystemMessage(
+                  '${removedUser?.firstName ?? ""} ${removedUser?.lastName ?? ""} left the meeting',
+                );
+              } else {
+                _showSystemMessage('A participant left the meeting');
+              }
 
-            _showSystemMessage('${removedUser?.firstName ?? ""} ${removedUser?.lastName ?? ""} left the meeting');
+              _updateParticipantCount();
 
-          } else {
-
-            _showSystemMessage('A participant left the meeting');
-
-          }
-
-          _updateParticipantCount();
-          
-          // Check if user is now alone in the meeting and auto-end if host
-          _checkAndHandleAloneInMeeting();
-        },
+              // Check if user is now alone in the meeting and auto-end if host
+              _checkAndHandleAloneInMeeting();
+            },
         onError: (ErrorCodeType err, String msg) {
           debugPrint("Agora error: $msg");
 
           // Only show UI error for significant issues
           if (err != ErrorCodeType.errOk) {
-            _showErrorDialog('Video Call Error', 'Error code: ${err.name}. Please try reconnecting if issues persist.');
+            _showErrorDialog(
+              'Video Call Error',
+              'Error code: ${err.name}. Please try reconnecting if issues persist.',
+            );
           }
         },
         onRtcStats: (RtcConnection connection, RtcStats stats) {
           // Can be used to show call quality metrics if needed
         },
-        onNetworkQuality: (RtcConnection connection, int uid,
-            QualityType txQuality, QualityType rxQuality) {
-          setState(() => _networkQuality = rxQuality.index);
-        },
+        onNetworkQuality:
+            (
+              RtcConnection connection,
+              int uid,
+              QualityType txQuality,
+              QualityType rxQuality,
+            ) {
+              setState(() => _networkQuality = rxQuality.index);
+            },
       ),
     );
   }
@@ -2929,7 +3068,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       // In a production app, you would call your backend to get a new token
       // For now, show a message that token is expiring
       _showSystemMessage(
-          'Session token expiring soon. You may need to rejoin.');
+        'Session token expiring soon. You may need to rejoin.',
+      );
 
       // Call your token renewal API and update the engine token.
       // var newToken = await fetchNewAgoraToken(); // Implement this function as needed.
@@ -2943,14 +3083,17 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     try {
       await _agoraEngine.enableVideo();
       await _agoraEngine.setVideoEncoderConfiguration(
-          const VideoEncoderConfiguration(
-            dimensions: VideoDimensions(width: 640, height: 480),
-            frameRate: 15,
-            bitrate: 2000,
-          ));
+        const VideoEncoderConfiguration(
+          dimensions: VideoDimensions(width: 640, height: 480),
+          frameRate: 15,
+          bitrate: 2000,
+        ),
+      );
 
       // Set more aggressive parameters for better performance
-      await _agoraEngine.setParameters('{"che.video.lowBitRateStreamParameter":{"width":320,"height":180,"frameRate":15,"bitRate":140}}');
+      await _agoraEngine.setParameters(
+        '{"che.video.lowBitRateStreamParameter":{"width":320,"height":180,"frameRate":15,"bitRate":140}}',
+      );
 
       // Optimize for network conditions
       await _agoraEngine.setParameters('{"rtc.using_ui_smaller_size":true}');
@@ -2959,7 +3102,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       // Start camera preview initially
       await _agoraEngine.startPreview();
       await _agoraEngine.setClientRole(
-          role: ClientRoleType.clientRoleBroadcaster);
+        role: ClientRoleType.clientRoleBroadcaster,
+      );
       await _agoraEngine.enableVideo();
 
       // Enable dual-stream mode for better bandwidth adaptation
@@ -2972,20 +3116,28 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       );
 
       // Enable automatic fallback options for poor network
-      await _agoraEngine.setLocalPublishFallbackOption(StreamFallbackOptions.streamFallbackOptionAudioOnly);
-      await _agoraEngine.setRemoteSubscribeFallbackOption(StreamFallbackOptions.streamFallbackOptionAudioOnly);
+      await _agoraEngine.setLocalPublishFallbackOption(
+        StreamFallbackOptions.streamFallbackOptionAudioOnly,
+      );
+      await _agoraEngine.setRemoteSubscribeFallbackOption(
+        StreamFallbackOptions.streamFallbackOptionAudioOnly,
+      );
 
       // Set default speaker mode
       await _agoraEngine.setDefaultAudioRouteToSpeakerphone(true);
     } catch (e) {
       debugPrint('Error configuring video settings: $e');
-      _showErrorDialog('Setup Error',
-          'Failed to configure video settings. Please try again.');
+      _showErrorDialog(
+        'Setup Error',
+        'Failed to configure video settings. Please try again.',
+      );
     }
   }
 
   Future<void> _joinChannel() async {
-    debugPrint('Joining channel: $channelName with user ID: ${AppData.logInUserId}');
+    debugPrint(
+      'Joining channel: $channelName with user ID: ${AppData.logInUserId}',
+    );
     try {
       // Pre-populate our user ID to UID mapping
       _userIdToUidMap[AppData.logInUserId] = 0; // Local user has UID 0
@@ -3007,8 +3159,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       );
     } catch (e) {
       debugPrint('Join channel error: $e');
-      _showErrorDialog('Connection Error',
-          'Failed to join the meeting. Please check your connection and try again.');
+      _showErrorDialog(
+        'Connection Error',
+        'Failed to join the meeting. Please check your connection and try again.',
+      );
     }
   }
 
@@ -3026,7 +3180,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     // Update the participant count if needed.
     _participantCount.value = _remoteVideos.length + 1; // including local user.
   }
-  
+
   // Check if user is alone in meeting and handle accordingly
   void _checkAndHandleAloneInMeeting() {
     if (_remoteVideos.isEmpty && (widget.isHost ?? false)) {
@@ -3038,7 +3192,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       });
     }
   }
-  
+
   // Show dialog when user is alone in meeting
   void _showAloneInMeetingDialog() {
     showDialog(
@@ -3047,7 +3201,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(translation(context).lbl_meeting),
-          content: const Text('You are the only participant left in the meeting. Would you like to end it?'),
+          content: const Text(
+            'You are the only participant left in the meeting. Would you like to end it?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -3058,23 +3214,26 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 Navigator.pop(context); // Close dialog
                 await _endMeetingProperly();
               },
-              child: Text(translation(context).lbl_end_meeting, style: const TextStyle(color: Colors.red)),
+              child: Text(
+                translation(context).lbl_end_meeting,
+                style: const TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );
       },
     );
   }
-  
+
   // Properly end meeting with error handling
   Future<void> _endMeetingProperly() async {
     try {
       // Disable wakelock when ending the call
       WakelockPlus.disable();
-      
+
       // Clear chat messages
       AppData.chatMessages.clear();
-      
+
       if (widget.isHost ?? false) {
         // Show loading indicator
         if (mounted) {
@@ -3098,17 +3257,20 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             ),
           );
         }
-        
+
         // Call the API to end meeting
-        final resp = await endMeeting(context, widget.meetingDetailsModel?.data?.meeting?.id);
-        
+        final resp = await endMeeting(
+          context,
+          widget.meetingDetailsModel?.data?.meeting?.id,
+        );
+
         // Dismiss loading dialog
         if (mounted) {
           Navigator.pop(context);
         }
-        
+
         debugPrint("End meeting response: ${resp}");
-        
+
         if (resp.success) {
           // Success - navigate back
           if (mounted) {
@@ -3121,7 +3283,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             // Show error but still navigate back
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Failed to end meeting on server, but you have left the meeting.'),
+                content: Text(
+                  'Failed to end meeting on server, but you have left the meeting.',
+                ),
                 backgroundColor: Colors.orange,
               ),
             );
@@ -3136,19 +3300,21 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       }
     } catch (e) {
       debugPrint("Error ending meeting: $e");
-      
+
       // Dismiss loading dialog if still showing
       if (mounted) {
         Navigator.pop(context);
-        
+
         // Show error but still allow user to leave
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Error ending meeting, but you have left the meeting.'),
+            content: Text(
+              'Error ending meeting, but you have left the meeting.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
-        
+
         // Navigate back anyway
         Navigator.pop(context);
       }
@@ -3178,7 +3344,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       // Check if screen sharing is allowed by settings or host privilege.
       if (widget.meetingDetailsModel?.data?.settings?.shareScreen == '1' ||
           widget.isHost == true) {
-
         // When currently screen sharing, revert to normal camera video.
         if (_isScreenSharing) {
           // Stop the screen capture.
@@ -3200,29 +3365,33 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           );
           // Update meeting status for camera being active.
           await changeMeetingStatus(
-            context,
-            widget.meetingDetailsModel?.data?.meeting?.id,
-            AppData.logInUserId,
-            'cam',
-            true,
-          ).then((resp) {
-            debugPrint("Change status (camera) response: $resp");
-          }).catchError((error) {
-            debugPrint("Error changing meeting status: $error");
-          });
+                context,
+                widget.meetingDetailsModel?.data?.meeting?.id,
+                AppData.logInUserId,
+                'cam',
+                true,
+              )
+              .then((resp) {
+                debugPrint("Change status (camera) response: $resp");
+              })
+              .catchError((error) {
+                debugPrint("Error changing meeting status: $error");
+              });
 
           // Update meeting status for screen share being off
           await changeMeetingStatus(
-            context,
-            widget.meetingDetailsModel?.data?.meeting?.id,
-            AppData.logInUserId,
-            'screen',
-            false,
-          ).then((resp) {
-            debugPrint("Change status (screen) response: $resp");
-          }).catchError((error) {
-            debugPrint("Error changing meeting status: $error");
-          });
+                context,
+                widget.meetingDetailsModel?.data?.meeting?.id,
+                AppData.logInUserId,
+                'screen',
+                false,
+              )
+              .then((resp) {
+                debugPrint("Change status (screen) response: $resp");
+              })
+              .catchError((error) {
+                debugPrint("Error changing meeting status: $error");
+              });
 
           // Set the state to reflect that we are no longer screen sharing.
           setState(() => _isScreenSharing = false);
@@ -3263,28 +3432,32 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           // Update the meeting status accordingly:
           // Indicate that the camera is off.
           await changeMeetingStatus(
-            context,
-            widget.meetingDetailsModel?.data?.meeting?.id,
-            AppData.logInUserId,
-            'cam',
-            false,
-          ).then((resp) {
-            debugPrint("Change status (camera) response: $resp");
-          }).catchError((error) {
-            debugPrint("Error changing meeting status: $error");
-          });
+                context,
+                widget.meetingDetailsModel?.data?.meeting?.id,
+                AppData.logInUserId,
+                'cam',
+                false,
+              )
+              .then((resp) {
+                debugPrint("Change status (camera) response: $resp");
+              })
+              .catchError((error) {
+                debugPrint("Error changing meeting status: $error");
+              });
           // Indicate that the screen share is on.
           await changeMeetingStatus(
-            context,
-            widget.meetingDetailsModel?.data?.meeting?.id,
-            AppData.logInUserId,
-            'screen',
-            true,
-          ).then((resp) {
-            debugPrint("Change status (screen) response: $resp");
-          }).catchError((error) {
-            debugPrint("Error changing meeting status: $error");
-          });
+                context,
+                widget.meetingDetailsModel?.data?.meeting?.id,
+                AppData.logInUserId,
+                'screen',
+                true,
+              )
+              .then((resp) {
+                debugPrint("Change status (screen) response: $resp");
+              })
+              .catchError((error) {
+                debugPrint("Error changing meeting status: $error");
+              });
           // Set the state to reflect that screen sharing is now active.
           setState(() => _isScreenSharing = true);
         }
@@ -3307,12 +3480,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     final secs = seconds % 60;
 
     if (hours > 0) {
-      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(
-          2, '0')}:${secs.toString().padLeft(2, '0')}';
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     }
 
-    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(
-        2, '0')}';
+    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
   void _showSystemMessage(String message) {
@@ -3334,15 +3505,16 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context),
-                  child: Text(translation(context).lbl_ok)),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(translation(context).lbl_ok),
           ),
+        ],
+      ),
     );
   }
 
@@ -3361,34 +3533,19 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           fit: StackFit.loose,
           children: [
             // Main video area that adapts based on number of participants
-            Positioned.fill(
-              top: 30,
-              child: _buildMainVideoArea(),
-            ),
+            Positioned.fill(top: 30, child: _buildMainVideoArea()),
 
             // Local video preview
             if (_isJoined) _buildLocalPreview(),
 
             // Floating control options
-            Positioned(
-              bottom: 30,
-              right: 20,
-              child: _buildFloatingControls(),
-            ),
+            Positioned(bottom: 95, right: 20, child: _buildFloatingControls()),
 
             // Top right Popup Menu
-            Positioned(
-              top: 50,
-              right: 20,
-              child: _buildPopupMenu(),
-            ),
+            Positioned(top: 50, right: 20, child: _buildPopupMenu()),
 
             // Top left back button
-            Positioned(
-              top: 50,
-              left: 16,
-              child: _buildBackButton(),
-            ),
+            Positioned(top: 50, left: 16, child: _buildBackButton()),
 
             // Call timer display
             Positioned(
@@ -3396,7 +3553,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               left: 70,
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 6),
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(16),
@@ -3427,7 +3586,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                       Text(
                         'Reconnecting... (Attempt $_reconnectionAttempts)',
                         style: const TextStyle(
-                            color: Colors.white, fontSize: 16),
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                       ),
                     ],
                   ),
@@ -3443,14 +3604,16 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   Widget _buildMainVideoArea() {
     if (_remoteVideos.isEmpty) {
       // No remote videos, show waiting message or local preview fullscreen
-      return  Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.people, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(translation(context).msg_no_user_found,
-                style: const TextStyle(fontSize: 18, color: Colors.grey)),
+            Text(
+              translation(context).msg_no_user_found,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
           ],
         ),
       );
@@ -3513,7 +3676,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         crossAxisCount: _getGridCrossAxisCount(),
         mainAxisSpacing: 4,
         crossAxisSpacing: 4,
-        childAspectRatio: 3/4,
+        childAspectRatio: 3 / 4,
       ),
       itemCount: _remoteVideos.length,
       itemBuilder: (context, index) {
@@ -3523,7 +3686,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               _selectedUserId = _remoteVideos[index].uid;
             });
           },
-          child: _buildVideoWindow(_remoteVideos[index], getColorByIndex(index)),
+          child: _buildVideoWindow(
+            _remoteVideos[index],
+            getColorByIndex(index),
+          ),
         );
       },
     );
@@ -3532,12 +3698,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   Widget _buildFocusedView() {
     // Find the selected user
     final selectedVideoData = _remoteVideos.firstWhere(
-          (video) => video.uid == _selectedUserId,
+      (video) => video.uid == _selectedUserId,
       orElse: () => _remoteVideos.first,
     );
 
     // All other videos for the carousel
-    final otherVideos = _remoteVideos.where((video) => video.uid != _selectedUserId).toList();
+    final otherVideos = _remoteVideos
+        .where((video) => video.uid != _selectedUserId)
+        .toList();
 
     return Column(
       children: [
@@ -3546,7 +3714,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           flex: 5,
           child: Container(
             margin: const EdgeInsets.fromLTRB(4, 4, 4, 2),
-            child: _buildVideoWindow(selectedVideoData, getColorByIndex(0), isFocused: true),
+            child: _buildVideoWindow(
+              selectedVideoData,
+              getColorByIndex(0),
+              isFocused: true,
+            ),
           ),
         ),
 
@@ -3568,7 +3740,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                   child: Container(
                     width: 160,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
-                    child: _buildVideoWindow(otherVideos[index], getColorByIndex(index + 1)),
+                    child: _buildVideoWindow(
+                      otherVideos[index],
+                      getColorByIndex(index + 1),
+                    ),
                   ),
                 );
               },
@@ -3590,16 +3765,23 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   }
 
   // IMPROVED: More robust video window with better status checking
-  Widget _buildVideoWindow(RemoteVideoData videoData, Color color, {bool isFocused = false}) {
+  Widget _buildVideoWindow(
+    RemoteVideoData videoData,
+    Color color, {
+    bool isFocused = false,
+  }) {
     // Get the latest state from our map if possible
     final remoteState = _remoteUserStates[videoData.uid];
 
     // Determine display states prioritizing real-time data from our state map
-    final bool isVideoEnabled = remoteState?.isVideoOn ??
+    final bool isVideoEnabled =
+        remoteState?.isVideoOn ??
         (videoData.joinUser?.meetingDetails?.single.isVideoOn == 1);
-    final bool isScreenShared = remoteState?.isScreenShared ??
+    final bool isScreenShared =
+        remoteState?.isScreenShared ??
         (videoData.joinUser?.meetingDetails?.single.isScreenShared == 1);
-    final bool isMicOn = remoteState?.isMicOn ??
+    final bool isMicOn =
+        remoteState?.isMicOn ??
         (videoData.joinUser?.meetingDetails?.single.isMicOn == 1);
 
     // Get user name for display
@@ -3625,18 +3807,17 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     return Container(
       decoration: BoxDecoration(
         color: Colors.black,
-        border: Border.all(
-          color: borderColor,
-          width: borderWidth,
-        ),
+        border: Border.all(color: borderColor, width: borderWidth),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: videoData.isSpeaking ? [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.5),
-            blurRadius: 10,
-            spreadRadius: 2,
-          )
-        ] : [],
+        boxShadow: videoData.isSpeaking
+            ? [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.5),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ]
+            : [],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
@@ -3644,29 +3825,43 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           children: [
             // Main video content - show video, screen share, or avatar
             Positioned.fill(
-              child: (isVideoEnabled || isScreenShared)
+              child: isScreenShared
                   ? AgoraVideoView(
-                controller: VideoViewController.remote(
-                  rtcEngine: _agoraEngine,
-                  canvas: VideoCanvas(
-                    uid: videoData.uid,
-                    sourceType: VideoSourceType.videoSourceRemote,
-                  ),
-                  connection: RtcConnection(channelId: channelName),
-                  useFlutterTexture: true,
-                  useAndroidSurfaceView: true,
-                ),
-              )
+                      controller: VideoViewController.remote(
+                        rtcEngine: _agoraEngine,
+                        canvas: VideoCanvas(
+                          uid: videoData.uid,
+                          sourceType: VideoSourceType.videoSourceRemote,
+                        ),
+                        connection: RtcConnection(channelId: channelName),
+                        useFlutterTexture: true,
+                        useAndroidSurfaceView: true,
+                      ),
+                    )
+                  : isVideoEnabled
+                  ? AgoraVideoView(
+                      controller: VideoViewController.remote(
+                        rtcEngine: _agoraEngine,
+                        canvas: VideoCanvas(
+                          uid: videoData.uid,
+                          sourceType: VideoSourceType.videoSourceRemote,
+                        ),
+                        connection: RtcConnection(channelId: channelName),
+                        useFlutterTexture: true,
+                        useAndroidSurfaceView: true,
+                      ),
+                    )
                   : Container(
-                color: color,
-                child: Center(
-                  child: CircleAvatar(
-                    radius: isFocused ? 80 : 40,
-                    backgroundImage: NetworkImage(
-                        '${AppData.imageUrl}${videoData.joinUser?.profilePic}'),
-                  ),
-                ),
-              ),
+                      color: color,
+                      child: Center(
+                        child: CircleAvatar(
+                          radius: isFocused ? 80 : 40,
+                          backgroundImage: NetworkImage(
+                            '${AppData.imageUrl}${videoData.joinUser?.profilePic}',
+                          ),
+                        ),
+                      ),
+                    ),
             ),
 
             // User info overlay at bottom
@@ -3677,9 +3872,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 children: [
                   // Mic status icon
                   Icon(
-                    isMicOn
-                        ? CupertinoIcons.mic
-                        : CupertinoIcons.mic_off,
+                    isMicOn ? CupertinoIcons.mic : CupertinoIcons.mic_off,
                     color: isMicOn ? Colors.white : Colors.red,
                     size: isFocused ? 20 : 16,
                   ),
@@ -3734,19 +3927,31 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.screen_share, color: Colors.white, size: 14),
+                      const Icon(
+                        Icons.screen_share,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                       if (isFocused) ...[
                         const SizedBox(width: 4),
-                        Text(translation(context).lbl_screen_sharing,
-                            style: const TextStyle(color: Colors.white, fontSize: 12)),
-                      ]
+                        Text(
+                          translation(context).lbl_screen_sharing,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -3764,20 +3969,28 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           heroTag: "more_fab_tag_${UniqueKey()}",
           elevation: 0,
           backgroundColor: Colors.blueGrey.withOpacity(0.4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
           onPressed: () {
             setState(() {
               _showFloatingOptions = !_showFloatingOptions;
             });
           },
-          child: Icon(_showFloatingOptions ? CupertinoIcons.chevron_down : CupertinoIcons.chevron_up),
+          child: Icon(
+            _showFloatingOptions
+                ? CupertinoIcons.chevron_down
+                : CupertinoIcons.chevron_up,
+          ),
         ),
         if (_showFloatingOptions) ...[
           FloatingActionButton(
             heroTag: "hand_fab_tag_${UniqueKey()}",
             elevation: 0,
             backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
             onPressed: () {
               // Implement any hand-raise functionality if needed.
             },
@@ -3787,27 +4000,41 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             heroTag: "audio_fab_tag_${UniqueKey()}",
             elevation: 0,
             backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
             onPressed: _toggleAudio,
-            child: Icon(_isMuted ? CupertinoIcons.mic_off : CupertinoIcons.mic, color: Colors.white),
+            child: Icon(
+              _isMuted ? CupertinoIcons.mic_off : CupertinoIcons.mic,
+              color: Colors.white,
+            ),
           ),
           FloatingActionButton(
             heroTag: "camera_fab_tag_${UniqueKey()}",
             elevation: 0,
             backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
             onPressed: _toggleVideo,
-            child: Icon(_isLocalVideoEnabled ? Icons.videocam : Icons.videocam_off, color: Colors.white),
+            child: Icon(
+              _isLocalVideoEnabled ? Icons.videocam : Icons.videocam_off,
+              color: Colors.white,
+            ),
           ),
 
           FloatingActionButton(
             heroTag: "switch_camera_fab_tag_${UniqueKey()}",
             elevation: 0,
             backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
             onPressed: _switchCamera,
             child: Icon(
-              _isFrontCamera ? CupertinoIcons.camera_rotate : CupertinoIcons.camera_rotate_fill,
+              _isFrontCamera
+                  ? CupertinoIcons.camera_rotate
+                  : CupertinoIcons.camera_rotate_fill,
               color: Colors.white,
             ),
           ),
@@ -3815,9 +4042,15 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             heroTag: "wifi_fab_tag_${UniqueKey()}",
             elevation: 0,
             backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            onPressed: (){},
-            child: Icon(Icons.network_check, color: _getNetworkQualityColor(), size: 18),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            onPressed: () {},
+            child: Icon(
+              Icons.network_check,
+              color: _getNetworkQualityColor(),
+              size: 18,
+            ),
           ),
         ],
       ],
@@ -3830,8 +4063,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       icon: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-            color: Colors.blueGrey.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(50)),
+          color: Colors.blueGrey.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(50),
+        ),
         child: const Icon(Icons.more_vert, color: Colors.white),
       ),
       color: const Color(0xFF263238),
@@ -3839,12 +4073,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       itemBuilder: (context) => [
         PopupMenuItem(
           onTap: () {
-            MeetingInfoScreen().launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+            MeetingInfoScreen().launch(
+              context,
+              pageRouteAnimation: PageRouteAnimation.Slide,
+            );
           },
           value: 1,
           child: ListTile(
             trailing: const Icon(Icons.info, color: Colors.white),
-            title: Text(translation(context).lbl_information, style: const TextStyle(color: Colors.white)),
+            title: Text(
+              translation(context).lbl_information,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
         PopupMenuItem(
@@ -3860,52 +4100,65 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           value: 2,
           child: ListTile(
             trailing: const Icon(Icons.settings, color: Colors.white),
-            title: Text(translation(context).lbl_setting, style: const TextStyle(color: Colors.white)),
+            title: Text(
+              translation(context).lbl_setting,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
         PopupMenuItem(
           value: 3,
           child: ListTile(
-            trailing: IconButton(
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: channelName));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(translation(context).msg_meeting_code_copied)),
-                );
-              },
-              icon: const Icon(Icons.copy, color: Colors.white),
+            trailing: const Icon(Icons.copy, color: Colors.white),
+            title: Text(
+              "${translation(context).lbl_meeting_id} : $channelName",
+              style: const TextStyle(color: Colors.white),
             ),
-            title: Text("${translation(context).lbl_meeting_id} : $channelName", style: const TextStyle(color: Colors.white)),
           ),
         ),
         PopupMenuItem(
           onTap: () {
-            SearchUserScreen(channel: channelName).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+            SearchUserScreen(
+              channel: channelName,
+            ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
           },
           value: 4,
           child: ListTile(
             trailing: const Icon(Icons.link, color: Colors.white),
-            title: Text("${translation(context).lbl_send_invitation_link} : ${AppData.base2}/$channelName",
-                style: const TextStyle(color: Colors.white)),
+            title: Text(
+              "${translation(context).lbl_send_invitation_link} : ${AppData.base2}/$channelName",
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
       ],
-      onSelected: (value) {},
+      onSelected: (value) {
+        if (value == 3) {
+          Clipboard.setData(ClipboardData(text: channelName));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(translation(context).msg_meeting_code_copied),
+            ),
+          );
+        }
+      },
     );
   }
 
   Widget _buildBackButton() {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-            color: Colors.blueGrey.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(50)),
-        child: const Icon(CupertinoIcons.back, color: Colors.white),
-      ).onTap(() {
-        _confirmEndCall();
-      }),
+      child:
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.blueGrey.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: const Icon(CupertinoIcons.back, color: Colors.white),
+          ).onTap(() {
+            _confirmEndCall();
+          }),
     );
   }
 
@@ -3966,18 +4219,21 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       left: _localVideoPosition.dx,
       top: _localVideoPosition.dy,
       child: GestureDetector(
-        onPanUpdate: (details) => setState(() => _localVideoPosition += details.delta),
-        onDoubleTap: () => setState(() => _localVideoScale = _localVideoScale == 1.0 ? 1.5 : 1.0),
+        onPanUpdate: (details) =>
+            setState(() => _localVideoPosition += details.delta),
+        onDoubleTap: () => setState(
+          () => _localVideoScale = _localVideoScale == 1.0 ? 1.5 : 1.0,
+        ),
         child: Container(
           width: 120,
           height: 180,
           decoration: BoxDecoration(
             color: Colors.black,
             border: Border.all(
-                color: _isLocalUserSpeaking
-                    ? Colors.green.withOpacity(0.8)
-                    : Colors.white.withOpacity(0.6),
-                width: _isLocalUserSpeaking ? 2.5 : 1.5
+              color: _isLocalUserSpeaking
+                  ? Colors.green.withOpacity(0.8)
+                  : Colors.white.withOpacity(0.6),
+              width: _isLocalUserSpeaking ? 2.5 : 1.5,
             ),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
@@ -3998,32 +4254,34 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 Positioned.fill(
                   child: _isScreenSharing
                       ? AgoraVideoView(
-                    controller: VideoViewController(
-                      useAndroidSurfaceView: true,
-                      useFlutterTexture: true,
-                      rtcEngine: _agoraEngine,
-                      canvas: const VideoCanvas(
-                        uid: 0,
-                        sourceType: VideoSourceType.videoSourceScreen,
-                      ),
-                    ),
-                  )
+                          controller: VideoViewController(
+                            useAndroidSurfaceView: true,
+                            useFlutterTexture: true,
+                            rtcEngine: _agoraEngine,
+                            canvas: const VideoCanvas(
+                              uid: 0,
+                              sourceType: VideoSourceType.videoSourceScreen,
+                            ),
+                          ),
+                        )
                       : !_isLocalVideoEnabled
                       ? Container(
-                    color: Colors.blueGrey.shade800,
-                    child: Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundImage: NetworkImage('${AppData.imageUrl}${AppData.profile_pic}'),
-                      ),
-                    ),
-                  )
+                          color: Colors.blueGrey.shade800,
+                          child: Center(
+                            child: CircleAvatar(
+                              radius: 40,
+                              backgroundImage: NetworkImage(
+                                '${AppData.imageUrl}${AppData.profile_pic}',
+                              ),
+                            ),
+                          ),
+                        )
                       : AgoraVideoView(
-                    controller: VideoViewController(
-                      rtcEngine: _agoraEngine,
-                      canvas: const VideoCanvas(uid: 0),
-                    ),
-                  ),
+                          controller: VideoViewController(
+                            rtcEngine: _agoraEngine,
+                            canvas: const VideoCanvas(uid: 0),
+                          ),
+                        ),
                 ),
 
                 // Name label with gradient background
@@ -4032,12 +4290,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                   left: 0,
                   right: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
-                        colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+                        colors: [
+                          Colors.black.withOpacity(0.7),
+                          Colors.transparent,
+                        ],
                         stops: const [0.0, 1.0],
                       ),
                     ),
@@ -4046,10 +4310,16 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                       children: [
                         const Text(
                           "You",
-                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         Icon(
-                          _isMuted ? CupertinoIcons.mic_slash : CupertinoIcons.mic,
+                          _isMuted
+                              ? CupertinoIcons.mic_slash
+                              : CupertinoIcons.mic,
                           color: _isMuted ? Colors.red : Colors.white,
                           size: 14,
                         ),
@@ -4064,7 +4334,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                     top: 4,
                     right: 4,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.withOpacity(0.7),
                         borderRadius: BorderRadius.circular(8),
@@ -4087,56 +4360,93 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   Widget _buildControlBar() {
     return Container(
       width: 100.w,
-      height: 90,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFF263238),
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 10,
+        bottom: MediaQuery.of(context).padding.bottom + 10,
       ),
+      decoration: const BoxDecoration(color: Color(0xFF263238)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // Chat button
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               MaterialButton(
                 color: const Color(0xFF3D4D55),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 onPressed: () {
-                  MeetingChatScreen(channelId: widget.meetingDetailsModel?.data?.meeting?.id ?? "")
-                      .launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+                  MeetingChatScreen(
+                    channelId:
+                        widget.meetingDetailsModel?.data?.meeting?.id ?? "",
+                  ).launch(
+                    context,
+                    pageRouteAnimation: PageRouteAnimation.Slide,
+                  );
                 },
                 child: SvgPicture.asset(icChat, color: Colors.white),
               ),
-              Text(translation(context).lbl_chat, style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
+              Text(
+                translation(context).lbl_chat,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
           // Screen share button
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               MaterialButton(
-                color: _isScreenSharing
-                    ? Colors.blue
-                    : const Color(0xFF3D4D55),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                color: _isScreenSharing ? Colors.blue : const Color(0xFF3D4D55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 onPressed: _toggleScreenSharing,
                 child: Icon(
-                  _isScreenSharing ? Icons.stop_screen_share : Icons.screen_share,
+                  _isScreenSharing
+                      ? Icons.stop_screen_share
+                      : Icons.screen_share,
                   color: Colors.white,
                 ),
               ),
-              Text(translation(context).lbl_share, style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
+              Text(
+                translation(context).lbl_share,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
           // End meeting button
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               MaterialButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 color: Colors.red,
                 onPressed: _confirmEndCall,
                 child: const Icon(Icons.call_end, color: Colors.white),
               ),
-              Text(translation(context).lbl_end_meeting, style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500))
+              Text(
+                translation(context).lbl_end_meeting,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ],
@@ -4148,7 +4458,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   // Audio & Video Toggle Functions
   // --------------------
   Future<void> _toggleAudio() async {
-    if (widget.meetingDetailsModel?.data?.settings?.toggleMicrophone == 1 || widget.isHost == true) {
+    if (widget.meetingDetailsModel?.data?.settings?.toggleMicrophone == 1 ||
+        widget.isHost == true) {
       setState(() => _isMuted = !_isMuted);
       await _agoraEngine.muteLocalAudioStream(_isMuted);
 
@@ -4163,8 +4474,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         debugPrint("Change mic status response: ${resp}");
 
         // Update local model to stay in sync
-        final currentUser = widget.meetingDetailsModel?.data?.users
-            ?.firstWhere((user) => user.id == AppData.logInUserId, orElse: () => Users());
+        final currentUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
+          (user) => user.id == AppData.logInUserId,
+          orElse: () => Users(),
+        );
         if (currentUser?.meetingDetails?.isNotEmpty ?? false) {
           currentUser!.meetingDetails!.single.isMicOn = _isMuted ? 0 : 1;
         }
@@ -4175,7 +4488,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   }
 
   Future<void> _toggleVideo() async {
-    if (widget.meetingDetailsModel?.data?.settings?.toggleVideo == 1 || widget.isHost == true) {
+    if (widget.meetingDetailsModel?.data?.settings?.toggleVideo == 1 ||
+        widget.isHost == true) {
       setState(() => _isLocalVideoEnabled = !_isLocalVideoEnabled);
       await _agoraEngine.muteLocalVideoStream(!_isLocalVideoEnabled);
       await _agoraEngine.enableLocalVideo(_isLocalVideoEnabled);
@@ -4191,10 +4505,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         debugPrint("Change cam status response: ${resp}");
 
         // Update local model to stay in sync
-        final currentUser = widget.meetingDetailsModel?.data?.users
-            ?.firstWhere((user) => user.id == AppData.logInUserId, orElse: () => Users());
+        final currentUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
+          (user) => user.id == AppData.logInUserId,
+          orElse: () => Users(),
+        );
         if (currentUser?.meetingDetails?.isNotEmpty ?? false) {
-          currentUser!.meetingDetails!.single.isVideoOn = _isLocalVideoEnabled ? 1 : 0;
+          currentUser!.meetingDetails!.single.isVideoOn = _isLocalVideoEnabled
+              ? 1
+              : 0;
         }
       });
     } else {
@@ -4215,7 +4533,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         title: const Text("Meeting"),
         content: Text(translation(context).msg_confirm_end_call),
         actions: [
-           TextButton(
+          TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(translation(context).lbl_cancel),
           ),
@@ -4224,7 +4542,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
               Navigator.pop(context); // Close dialog first
               await _endMeetingProperly();
             },
-            child: const Text('End meeting', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'End meeting',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

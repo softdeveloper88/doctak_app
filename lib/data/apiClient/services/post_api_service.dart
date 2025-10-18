@@ -18,9 +18,7 @@ class PostApiService {
   PostApiService._internal();
 
   /// Get posts feed with pagination
-  Future<ApiResponse<PostDataModel>> getPosts({
-    required String page,
-  }) async {
+  Future<ApiResponse<PostDataModel>> getPosts({required String page}) async {
     try {
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse1(
@@ -108,21 +106,19 @@ class PostApiService {
     String? feelings,
   }) async {
     try {
-      final request = <String, dynamic>{
-        'title': title,
-        'name': name,
-      };
-      
+      final request = <String, dynamic>{'title': title, 'name': name};
+
       if (locationName != null) request['location_name'] = locationName;
       if (lat != null) request['lat'] = lat;
       if (lng != null) request['lng'] = lng;
-      if (backgroundColor != null) request['background_color'] = backgroundColor;
+      if (backgroundColor != null)
+        request['background_color'] = backgroundColor;
       if (tagging != null) request['tagging'] = tagging;
       if (feelings != null) request['feelings'] = feelings;
-      
+
       // Note: File uploads need special handling in network_utils
       // This would need to be enhanced for actual file upload
-      
+
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse1(
           '/new_post',
@@ -162,15 +158,29 @@ class PostApiService {
     required String postId,
   }) async {
     try {
+      // The server expects GET for this route (405 returned for POST).
+      // Send postId as query parameter.
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse1(
-          '/getPostLikes',
-          method: networkUtils.HttpMethod.POST,
-          request: {'postId': postId},
+          '/getPostLikes?postId=$postId',
+          method: networkUtils.HttpMethod.GET,
         ),
       );
-      final List<dynamic> likesData = response as List<dynamic>;
-      final likes = likesData.map((json) => PostLikesModel.fromJson(json)).toList();
+
+      // Handle response - API may return List directly or wrapped in a Map with 'data' key
+      List<dynamic> likesData;
+      if (response is List) {
+        likesData = response;
+      } else if (response is Map) {
+        // Handle wrapped response like {"data": [...]} or {"likes": [...]}
+        likesData = response['data'] ?? response['likes'] ?? [];
+      } else {
+        likesData = [];
+      }
+
+      final likes = likesData
+          .map((json) => PostLikesModel.fromJson(json))
+          .toList();
       return ApiResponse.success(likes);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -244,8 +254,12 @@ class PostApiService {
           method: networkUtils.HttpMethod.GET,
         ),
       );
-      final List<dynamic> adsData = response is List ? response : response['data'] ?? [];
-      final adTypes = adsData.map((json) => AdsTypeModel.fromJson(json)).toList();
+      final List<dynamic> adsData = response is List
+          ? response
+          : response['data'] ?? [];
+      final adTypes = adsData
+          .map((json) => AdsTypeModel.fromJson(json))
+          .toList();
       return ApiResponse.success(adTypes);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -330,11 +344,7 @@ class PostApiService {
         await networkUtils.buildHttpResponse1(
           '/save-suggestion',
           method: networkUtils.HttpMethod.POST,
-          request: {
-            'name': name,
-            'email': email,
-            'suggestion': suggestion,
-          },
+          request: {'name': name, 'email': email, 'suggestion': suggestion},
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -356,7 +366,9 @@ class PostApiService {
           method: networkUtils.HttpMethod.GET,
         ),
       );
-      final List<dynamic> newsData = response is List ? response : response['data'] ?? [];
+      final List<dynamic> newsData = response is List
+          ? response
+          : response['data'] ?? [];
       final news = newsData.map((json) => NewsModel.fromJson(json)).toList();
       return ApiResponse.success(news);
     } on ApiException catch (e) {

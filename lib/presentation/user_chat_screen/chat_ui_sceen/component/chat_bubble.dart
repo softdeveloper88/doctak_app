@@ -15,6 +15,7 @@ class ChatBubble extends StatefulWidget {
   final bool isMe;
   final String profile;
   final String? attachmentJson;
+  final String? attachmentType;
   final String? createAt;
   final int? seen;
 
@@ -25,6 +26,7 @@ class ChatBubble extends StatefulWidget {
     required this.createAt,
     required this.profile,
     this.attachmentJson,
+    this.attachmentType,
     this.seen,
   }) : super(key: key);
 
@@ -221,10 +223,39 @@ class _ChatBubbleState extends State<ChatBubble> {
     try {
       // Null safety check
       if (widget.attachmentJson == null || widget.attachmentJson!.isEmpty) {
+        debugPrint('Attachment is null or empty');
         return const SizedBox.shrink();
       }
 
-      // Robust audio file type detection
+      debugPrint('Building attachment: ${widget.attachmentJson}, type: ${widget.attachmentType}');
+
+      // Check attachmentType first (more reliable than extension)
+      final attachmentType = widget.attachmentType?.toString().toLowerCase() ?? '';
+
+      // Handle voice/audio messages
+      if (attachmentType.contains('audio') ||
+          attachmentType.contains('voice') ||
+          attachmentType == 'audio' ||
+          attachmentType == 'voice') {
+        debugPrint('Rendering voice/audio message');
+        final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
+        return VoiceMessagePrecacher(
+          audioUrl: audioUrl,
+          child: CustomAudioPlayer(
+            audioUrl: audioUrl,
+            isMe: widget.isMe,
+          ),
+        );
+      }
+
+      // Handle video messages
+      if (attachmentType.contains('video') || attachmentType == 'video') {
+        debugPrint('Rendering video message');
+        return VideoPlayerWidget(
+            videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
+      }
+
+      // Fallback to extension-based detection if attachmentType is not available
       final audioExtensions = [
         'mp3',
         'm4a',
@@ -235,19 +266,20 @@ class _ChatBubbleState extends State<ChatBubble> {
         'amr'
       ];
       final videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp'];
-      // Image extensions for reference (not used in current logic)
-      // final imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
 
       // Safe file extension extraction
       final parts = widget.attachmentJson!.split('.');
       if (parts.isEmpty) {
+        debugPrint('No file extension found');
         return _buildErrorAttachment();
       }
 
       final fileExtension = parts.last.toLowerCase();
+      debugPrint('File extension: $fileExtension');
 
       if (audioExtensions.contains(fileExtension)) {
         // Use custom audio player with pre-caching for better performance
+        debugPrint('Rendering audio by extension');
         final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
         return VoiceMessagePrecacher(
           audioUrl: audioUrl,
@@ -257,9 +289,12 @@ class _ChatBubbleState extends State<ChatBubble> {
           ),
         );
       } else if (videoExtensions.contains(fileExtension)) {
+        debugPrint('Rendering video by extension');
         return VideoPlayerWidget(
             videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
       } else {
+        // Default to image
+        debugPrint('Rendering as image (default)');
         return InkWell(
           onTap: () {
             Navigator.push(

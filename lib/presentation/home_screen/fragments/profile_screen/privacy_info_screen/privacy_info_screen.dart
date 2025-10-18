@@ -26,7 +26,8 @@ class PrivacyInfoScreen extends StatefulWidget {
 
 bool isEditModeMap = false;
 
-class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTickerProviderStateMixin {
+class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -41,10 +42,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
     _animationController.forward();
@@ -69,10 +67,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
           if (widget.profileBloc.isMe)
             IconButton(
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -102,6 +97,9 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom + 16,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -185,11 +183,26 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
   Widget _buildPrivacyInfoFields() {
     // Group privacy settings by category
     final personalSettings = widget.profileBloc.userProfile!.privacySetting!
-        .where((item) => ['dob', 'first_name', 'last_name', 'phone', 'license_no'].contains(item.recordType))
+        .where(
+          (item) => [
+            'dob',
+            'first_name',
+            'last_name',
+            'phone',
+            'license_no',
+          ].contains(item.recordType),
+        )
         .toList();
 
     final professionalSettings = widget.profileBloc.userProfile!.privacySetting!
-        .where((item) => ['specialty', 'about_me', 'current_workplace', 'work'].contains(item.recordType))
+        .where(
+          (item) => [
+            'specialty',
+            'about_me',
+            'current_workplace',
+            'work',
+          ].contains(item.recordType),
+        )
         .toList();
 
     final locationSettings = widget.profileBloc.userProfile!.privacySetting!
@@ -197,9 +210,21 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
         .toList();
 
     final otherSettings = widget.profileBloc.userProfile!.privacySetting!
-        .where((item) => !['dob', 'first_name', 'last_name', 'phone', 'license_no',
-      'specialty', 'about_me', 'current_workplace', 'work',
-      'country', 'state'].contains(item.recordType))
+        .where(
+          (item) => ![
+            'dob',
+            'first_name',
+            'last_name',
+            'phone',
+            'license_no',
+            'specialty',
+            'about_me',
+            'current_workplace',
+            'work',
+            'country',
+            'state',
+          ].contains(item.recordType),
+        )
         .toList();
 
     return Column(
@@ -234,8 +259,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
         ),
 
         // Other privacy settings
-        if (otherSettings.isNotEmpty)
-          const SizedBox(height: 16),
+        if (otherSettings.isNotEmpty) const SizedBox(height: 16),
 
         if (otherSettings.isNotEmpty)
           _buildPrivacyCategory(
@@ -253,7 +277,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
     required String title,
     required IconData icon,
     required Color iconColor,
-    required List<PrivacySetting> settings
+    required List<PrivacySetting> settings,
   }) {
     if (settings.isEmpty) return const SizedBox.shrink();
 
@@ -277,11 +301,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                     color: iconColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 18,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 18),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -300,10 +320,11 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
             ...settings.map((item) {
               // Handle null/empty visibility by defaulting to 'lock'
               String effectiveVisibility = item.visibility ?? 'lock';
-              if (effectiveVisibility.isEmpty || effectiveVisibility.trim().isEmpty) {
+              if (effectiveVisibility.isEmpty ||
+                  effectiveVisibility.trim().isEmpty) {
                 effectiveVisibility = 'lock';
               }
-              
+
               var selectValue = effectiveVisibility == 'lock'
                   ? translation(context).lbl_only_me
                   : effectiveVisibility == 'group'
@@ -325,7 +346,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                 options: [
                   translation(context).lbl_only_me,
                   translation(context).lbl_friends,
-                  translation(context).lbl_public
+                  translation(context).lbl_public,
                 ],
                 colorScheme: _getColorForPrivacyLevel(selectValue),
               );
@@ -341,7 +362,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
     if (recordType == null || recordType.isEmpty) {
       return translation(context).lbl_unknown_state;
     }
-    
+
     switch (recordType.toLowerCase()) {
       case 'dob':
         return translation(context).lbl_date_of_birth;
@@ -401,141 +422,143 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
     required List<String> options,
     required ColorScheme colorScheme,
   }) {
-    options = options.where((opt) => opt.isNotEmpty && opt.trim().isNotEmpty).toList();
+    options = options
+        .where((opt) => opt.isNotEmpty && opt.trim().isNotEmpty)
+        .toList();
 
     return isEditModeMap
         ? Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              capitalizeWords(label.replaceAll('_', ' ')),
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[800],
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: CustomDropdownButtonFormField(
-              items: options,
-              value: value,
-              width: double.infinity,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
-              itemBuilder: (item) => Row(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: _getColorForPrivacyLevel(item).surface,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Icon(
-                        item == translation(context).lbl_only_me
-                            ? Icons.lock_outline
-                            : item == translation(context).lbl_friends
-                            ? Icons.people_outline
-                            : Icons.public,
-                        color: _getColorForPrivacyLevel(item).primary,
-                        size: 14,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    item,
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              onChanged: (String? selectedValue) {
-                if (selectedValue != value) {
-                  onSave?.call(selectedValue!);
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    )
-        : Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              capitalizeWords(label),
-              style: TextStyle(
-                color: Colors.grey[700],
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  value == translation(context).lbl_only_me
-                      ? Icons.lock_outline
-                      : value == translation(context).lbl_friends
-                      ? Icons.people_outline
-                      : Icons.public,
-                  color: colorScheme.primary,
-                  size: 14,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    capitalizeWords(label.replaceAll('_', ' ')),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[800],
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  capitalizeWords(value),
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: CustomDropdownButtonFormField(
+                    items: options,
+                    value: value,
+                    width: double.infinity,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    itemBuilder: (item) => Row(
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: _getColorForPrivacyLevel(item).surface,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              item == translation(context).lbl_only_me
+                                  ? Icons.lock_outline
+                                  : item == translation(context).lbl_friends
+                                  ? Icons.people_outline
+                                  : Icons.public,
+                              color: _getColorForPrivacyLevel(item).primary,
+                              size: 14,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(item, style: const TextStyle(color: Colors.black)),
+                      ],
+                    ),
+                    onChanged: (String? selectedValue) {
+                      if (selectedValue != value) {
+                        onSave?.call(selectedValue!);
+                      }
+                    },
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          )
+        : Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    capitalizeWords(label),
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        value == translation(context).lbl_only_me
+                            ? Icons.lock_outline
+                            : value == translation(context).lbl_friends
+                            ? Icons.people_outline
+                            : Icons.public,
+                        color: colorScheme.primary,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        capitalizeWords(value),
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 
   void _saveChanges() {
-    widget.profileBloc.add(UpdateProfileEvent(
-      updateProfileSection: 3,
-      userProfile: widget.profileBloc.userProfile,
-      interestModel: widget.profileBloc.interestList,
-      workEducationModel: widget.profileBloc.workEducationList,
-      userProfilePrivacyModel: UserProfilePrivacyModel(),
-    ));
+    widget.profileBloc.add(
+      UpdateProfileEvent(
+        updateProfileSection: 3,
+        userProfile: widget.profileBloc.userProfile,
+        interestModel: widget.profileBloc.interestList,
+        workEducationModel: widget.profileBloc.workEducationList,
+        userProfilePrivacyModel: UserProfilePrivacyModel(),
+      ),
+    );
 
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -543,9 +566,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
         content: Text(translation(context).msg_privacy_settings_updated),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

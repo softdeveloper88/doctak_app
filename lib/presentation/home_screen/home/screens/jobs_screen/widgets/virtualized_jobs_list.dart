@@ -31,7 +31,7 @@ class VirtualizedJobsList extends StatefulWidget {
 class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
   // Keep track of visible items for optimization
   final Set<int> _visibleJobIndices = {};
-  
+
   @override
   void dispose() {
     _visibleJobIndices.clear();
@@ -43,14 +43,15 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
     final bloc = widget.jobsBloc;
 
     if (bloc.drugsData.isEmpty) {
-      return Center(
-        child: Text(translation(context).msg_no_jobs_found),
-      );
+      return Center(child: Text(translation(context).msg_no_jobs_found));
     }
 
     return ListView.builder(
       controller: widget.scrollController,
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(
+        top: 10,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
       itemCount: bloc.drugsData.length,
       // Using a larger cacheExtent for smooth scrolling
       cacheExtent: 800,
@@ -81,8 +82,8 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
       child: MemoryOptimizedJobItem(
         jobData: widget.jobsBloc.drugsData[index],
         onJobTap: () => _openJobDetails(
-          context, 
-          widget.jobsBloc.drugsData[index].id.toString()
+          context,
+          widget.jobsBloc.drugsData[index].id.toString(),
         ),
         onShareTap: () => _shareJob(widget.jobsBloc.drugsData[index]),
         onApplyTap: (id) => _showApplyDialog(context, id),
@@ -106,7 +107,7 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
     } else {
       _visibleJobIndices.remove(index);
     }
-    
+
     // Can be used for analytics or future optimizations
   }
 
@@ -131,13 +132,13 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
     final jobTitle = job.jobTitle ?? "";
     final jobLink = job.link ?? "";
     final jobId = job.id?.toString() ?? "";
-    
+
     // Use the createDynamicLink function
-    createDynamicLink(
-      "$jobTitle\nApply Link: $jobLink",
-      "${AppData.base}job/$jobId",
-      jobLink,
-    );
+    // createDynamicLink(
+    //   "$jobTitle\nApply Link: $jobLink",
+    //   "${AppData.base}job/$jobId",
+    //   jobLink,
+    // );
   }
 
   // Show job application dialog

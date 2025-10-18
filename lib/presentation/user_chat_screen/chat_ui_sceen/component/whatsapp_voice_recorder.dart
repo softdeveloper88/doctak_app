@@ -140,11 +140,16 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
 
   @override
   Widget build(BuildContext context) {
+    // Get the bottom padding for system navigation bars
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+    final keyboardPadding = MediaQuery.of(context).viewInsets.bottom;
+
     return Container(
-      height: 60,
+      // Add padding for system navigation bars
+      padding: EdgeInsets.only(bottom: keyboardPadding > 0 ? 0 : bottomPadding),
       decoration: BoxDecoration(
-        color: appStore.isDarkMode 
-            ? const Color(0xFF1A1A1A) 
+        color: appStore.isDarkMode
+            ? const Color(0xFF1A1A1A)
             : Colors.white,
         boxShadow: [
           BoxShadow(
@@ -156,7 +161,9 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
           ),
         ],
       ),
-      child: Stack(
+      child: Container(
+        height: 60,
+        child: Stack(
         children: [
           // Slide to cancel
           Positioned(
@@ -262,6 +269,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
             ),
           ),
         ],
+        ),
       ),
     );
   }

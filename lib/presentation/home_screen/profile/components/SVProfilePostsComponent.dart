@@ -65,6 +65,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
         color: context.cardColor,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Improved tab selector
           Container(
@@ -175,7 +176,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
             ),
           ),
 
-          // Tab content with fade animation
+          // Tab content with fade animation (removed Expanded)
           FadeTransition(
             opacity: _fadeAnimation,
             child: selectedIndex == 0

@@ -35,7 +35,10 @@ class _SearchJobListState extends State<SearchJobList> {
             color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
           ),
           child: ListView.builder(
-            padding: const EdgeInsets.only(top: 10),
+            padding: EdgeInsets.only(
+              top: 10,
+              bottom: MediaQuery.of(context).padding.bottom + 16,
+            ),
             itemCount: widget.drugsBloc.drugsData.length,
             cacheExtent: 800,
             itemBuilder: (context, index) {
@@ -48,7 +51,7 @@ class _SearchJobListState extends State<SearchJobList> {
                 }
               }
               if (widget.drugsBloc.numberOfPage !=
-                  widget.drugsBloc.pageNumber - 1 &&
+                      widget.drugsBloc.pageNumber - 1 &&
                   index >= widget.drugsBloc.drugsData.length - 1) {
                 return Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -89,8 +92,9 @@ class _SearchJobListState extends State<SearchJobList> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: appStore.isDarkMode ? Colors.white70 : Colors
-                        .grey[700],
+                    color: appStore.isDarkMode
+                        ? Colors.white70
+                        : Colors.grey[700],
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -99,8 +103,9 @@ class _SearchJobListState extends State<SearchJobList> {
                   'Try adjusting your search criteria',
                   style: TextStyle(
                     fontSize: 14,
-                    color: appStore.isDarkMode ? Colors.white54 : Colors
-                        .grey[500],
+                    color: appStore.isDarkMode
+                        ? Colors.white54
+                        : Colors.grey[500],
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -209,8 +214,9 @@ class _SearchJobListState extends State<SearchJobList> {
                 Text(
                   jobData.companyName ?? 'N/A',
                   style: TextStyle(
-                    color: appStore.isDarkMode ? Colors.white70 : Colors
-                        .black87,
+                    color: appStore.isDarkMode
+                        ? Colors.white70
+                        : Colors.black87,
                     fontSize: 14,
                     fontFamily: 'Poppins',
                   ),
@@ -239,7 +245,9 @@ class _SearchJobListState extends State<SearchJobList> {
                     if (jobData.promoted != null && jobData.promoted != 0)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.orange.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -263,12 +271,11 @@ class _SearchJobListState extends State<SearchJobList> {
           // Actions (Share)
           IconButton(
             onPressed: () {
-              createDynamicLink(
-                '${jobData.jobTitle ?? ""} \n Apply Link: ${jobData.link ??
-                    ''}',
-                '${AppData.base}job/${jobData.id}',
-                jobData.link ?? '',
-              );
+              // createDynamicLink(
+              //   '${jobData.jobTitle ?? ""} \n Apply Link: ${jobData.link ?? ''}',
+              //   '${AppData.base}job/${jobData.id}',
+              //   jobData.link ?? '',
+              // );
             },
             icon: Container(
               padding: const EdgeInsets.all(6),
@@ -297,10 +304,7 @@ class _SearchJobListState extends State<SearchJobList> {
             ? Colors.grey[800]?.withOpacity(0.3)
             : Colors.grey.withOpacity(0.05),
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
         ),
       ),
       child: Row(
@@ -332,8 +336,9 @@ class _SearchJobListState extends State<SearchJobList> {
                         jobData.experience ?? 'Not specified',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: appStore.isDarkMode ? Colors.white70 : Colors
-                              .black87,
+                          color: appStore.isDarkMode
+                              ? Colors.white70
+                              : Colors.black87,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -373,8 +378,9 @@ class _SearchJobListState extends State<SearchJobList> {
                         jobData.preferredLanguage ?? 'Any',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: appStore.isDarkMode ? Colors.white70 : Colors
-                              .black87,
+                          color: appStore.isDarkMode
+                              ? Colors.white70
+                              : Colors.black87,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -402,10 +408,7 @@ class _SearchJobListState extends State<SearchJobList> {
       decoration: BoxDecoration(
         color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
         ),
       ),
       child: Column(
@@ -466,8 +469,9 @@ class _SearchJobListState extends State<SearchJobList> {
                       textStyle: TextStyle(
                         fontSize: 13,
                         fontFamily: 'Poppins',
-                        color: appStore.isDarkMode ? Colors.white60 : Colors
-                            .grey[700],
+                        color: appStore.isDarkMode
+                            ? Colors.white60
+                            : Colors.grey[700],
                         height: 1.4,
                       ),
                     ),
@@ -505,28 +509,25 @@ class _SearchJobListState extends State<SearchJobList> {
   }
 
   // Helper method to build date info
-  Widget _buildDateInfo(String title, String? date, IconData icon,
-      Color color) {
+  Widget _buildDateInfo(
+    String title,
+    String? date,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: color,
-              ),
+              Icon(icon, size: 16, color: color),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -567,10 +568,7 @@ class _SearchJobListState extends State<SearchJobList> {
             ? Colors.grey[800]?.withOpacity(0.3)
             : Colors.grey.withOpacity(0.05),
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
         ),
       ),
       child: Row(
@@ -629,8 +627,9 @@ class _SearchJobListState extends State<SearchJobList> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                          translation(context).msg_leaving_app_canceled ??
-                              'Leaving the app canceled.'),
+                        translation(context).msg_leaving_app_canceled ??
+                            'Leaving the app canceled.',
+                      ),
                     ),
                   );
                 }
@@ -669,22 +668,23 @@ class _SearchJobListState extends State<SearchJobList> {
   Future<bool?> _showConfirmationDialog(BuildContext context) async {
     return showDialog<bool>(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(translation(context).lbl_leave_app ?? 'Leave App'),
-            content: Text(translation(context).msg_open_link_confirm ??
-                'Would you like to leave the app to view this content?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(translation(context).lbl_no_answer ?? 'No'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text(translation(context).lbl_yes ?? 'Yes'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(translation(context).lbl_leave_app ?? 'Leave App'),
+        content: Text(
+          translation(context).msg_open_link_confirm ??
+              'Would you like to leave the app to view this content?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(translation(context).lbl_no_answer ?? 'No'),
           ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(translation(context).lbl_yes ?? 'Yes'),
+          ),
+        ],
+      ),
     );
   }
 }

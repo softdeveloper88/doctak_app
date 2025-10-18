@@ -246,8 +246,8 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         color: Colors.grey[700],
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -267,8 +267,8 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                         color: widget.value != null && widget.value!.isNotEmpty
                             ? Colors.grey[900]
                             : Colors.grey[500],
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
                         fontStyle: widget.value != null && widget.value!.isNotEmpty
                             ? FontStyle.normal
                             : FontStyle.italic,

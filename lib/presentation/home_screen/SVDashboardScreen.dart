@@ -10,6 +10,7 @@ import '../../core/utils/app/AppData.dart';
 import '../../localization/app_localization.dart';
 import '../../main.dart' show appStore;
 import 'fragments/add_post/SVAddPostFragment.dart';
+import 'fragments/add_post/bloc/add_post_bloc.dart';
 import 'fragments/home_main_screen/SVHomeFragment.dart';
 import 'fragments/home_main_screen/bloc/home_bloc.dart';
 import 'fragments/profile_screen/SVProfileFragment.dart';
@@ -28,6 +29,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedIndex = 0;
   final HomeBloc homeBloc = HomeBloc();
+  final AddPostBloc addPostBloc = AddPostBloc();
   late final List<Widget> _fragments;
   late final AnimationController _animationController;
   late final Animation<double> _scaleAnimation;
@@ -49,6 +51,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
+    addPostBloc.close();
     // TODO: implement dispose
     super.dispose();
   }
@@ -77,6 +80,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           setState(() => selectedIndex = 0);
           homeBloc.add(PostLoadPageEvent(page: 1));
         },
+        addPostBloc: addPostBloc,
       ),
       // SVSearchFragment(
       //   backPress: () => setState(() => selectedIndex = 0),

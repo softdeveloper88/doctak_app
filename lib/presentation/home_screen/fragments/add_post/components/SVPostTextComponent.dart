@@ -11,14 +11,16 @@ import '../../../../../main.dart';
 import '../bloc/add_post_event.dart';
 
 class SVPostTextComponent extends StatefulWidget {
-  Function? onColorChange;
-  Color? colorValue;
-  AddPostBloc searchPeopleBloc;
+  final Function? onColorChange;
+  final Color? colorValue;
+  final AddPostBloc searchPeopleBloc;
+  final TextEditingController? textController;
 
-  SVPostTextComponent({
+  const SVPostTextComponent({
     this.onColorChange,
     this.colorValue,
     required this.searchPeopleBloc,
+    this.textController,
     Key? key,
   }) : super(key: key);
 
@@ -27,11 +29,20 @@ class SVPostTextComponent extends StatefulWidget {
 }
 
 class _SVPostTextComponentState extends State<SVPostTextComponent> {
-  TextEditingController textEditingController = TextEditingController();
+  late TextEditingController textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+    textEditingController = widget.textController ?? TextEditingController();
+  }
 
   @override
   void dispose() {
-    textEditingController.dispose();
+    // Only dispose if we created the controller
+    if (widget.textController == null) {
+      textEditingController.dispose();
+    }
     super.dispose();
   }
 

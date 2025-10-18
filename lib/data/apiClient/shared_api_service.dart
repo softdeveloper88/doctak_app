@@ -768,9 +768,49 @@ class SharedApiService {
           method: networkUtils.HttpMethod.POST,
         ),
       );
+
+      // If the server returned a structured error (success: false) or an explicit message,
+      // convert that into an ApiResponse.error so UI can display a friendly message.
+      try {
+        if (response is Map) {
+          // Server returned a success flag but with failure
+          if (response.containsKey('success') && response['success'] == false) {
+            final serverMsg = (response['message'] ?? response['error'])?.toString() ?? 'Job not found';
+            return ApiResponse.error(serverMsg);
+          }
+
+          // Server returned without a job payload - treat as 'removed/not found'
+          if (response.containsKey('job') && response['job'] == null) {
+            final serverMsg = (response['message'] ?? response['error'])?.toString() ?? 'This job is no longer available';
+            return ApiResponse.error(serverMsg);
+          }
+        }
+      } catch (_) {
+        // ignore parsing issues and continue with model mapping
+      }
+
       return ApiResponse.success(JobDetailModel.fromJson(response));
     } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
+      // Try to extract a useful server message from the API error response
+      String serverMessage = e.message;
+      try {
+        if (e.response != null) {
+          if (e.response is Map) {
+            final Map resp = e.response as Map;
+            if (resp.containsKey('message') && resp['message'] != null) {
+              serverMessage = resp['message'].toString();
+            } else if (resp.containsKey('error') && resp['error'] != null) {
+              serverMessage = resp['error'].toString();
+            }
+          } else if (e.response is String) {
+            serverMessage = e.response as String;
+          }
+        }
+      } catch (_) {
+        // ignore parsing errors and fallback to ApiException message
+      }
+
+      return ApiResponse.error(serverMessage, statusCode: e.statusCode);
     } catch (e) {
       return ApiResponse.error('Failed to get job details: $e');
     }
@@ -898,31 +938,62 @@ class SharedApiService {
     required String countryOriginPrivacy,
   }) async {
     try {
+      // Build a sanitized request map: trim strings, ensure values are strings,
+      // and omit invalid/empty optional fields (notably 'dob' when not a valid date).
+      final Map<String, dynamic> requestMap = {};
+
+      void put(String key, String? value) {
+        if (value == null) return;
+        final v = value.trim();
+        // include empty strings for fields that should be set to empty string explicitly
+        requestMap[key] = v;
+      }
+
+      // Required / common fields
+      put('first_name', firstName);
+      put('last_name', lastName);
+
+      // Phone and license should be string values (send empty string if blank)
+      requestMap['phone'] = phone.trim();
+      requestMap['license_no'] = licenseNo.trim();
+
+      put('specialty', specialty);
+
+      // dob: only include if it parses as a valid date. Format as YYYY-MM-DD.
+      final dobTrim = dob.trim();
+      if (dobTrim.isNotEmpty) {
+        DateTime? parsed;
+        try {
+          parsed = DateTime.tryParse(dobTrim);
+        } catch (_) {
+          parsed = null;
+        }
+        if (parsed != null) {
+          requestMap['dob'] = parsed.toIso8601String().split('T').first;
+        }
+      }
+
+      put('gender', gender);
+      put('country', country);
+      put('city', city);
+      put('country_origin', countryOrigin);
+
+      // Privacy fields (include even if blank)
+      requestMap['dob_privacy'] = dobPrivacy.trim();
+      requestMap['email_privacy'] = emailPrivacy.trim();
+      requestMap['gender_privacy'] = genderPrivacy.trim();
+      requestMap['phone_privacy'] = phonePrivacy.trim();
+      requestMap['license_no_privacy'] = licenseNoPrivacy.trim();
+      requestMap['specialty_privacy'] = specialtyPrivacy.trim();
+      requestMap['country_privacy'] = countryPrivacy.trim();
+      requestMap['city_privacy'] = cityPrivacy.trim();
+      requestMap['country_origin_privacy'] = countryOriginPrivacy.trim();
+
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
           '/profile/update',
           method: networkUtils.HttpMethod.POST,
-          request: {
-            'first_name': firstName,
-            'last_name': lastName,
-            'phone': phone,
-            'license_no': licenseNo,
-            'specialty': specialty,
-            'dob': dob,
-            'gender': gender,
-            'country': country,
-            'city': city,
-            'country_origin': countryOrigin,
-            'dob_privacy': dobPrivacy,
-            'email_privacy': emailPrivacy,
-            'gender_privacy': genderPrivacy,
-            'phone_privacy': phonePrivacy,
-            'license_no_privacy': licenseNoPrivacy,
-            'specialty_privacy': specialtyPrivacy,
-            'country_privacy': countryPrivacy,
-            'city_privacy': cityPrivacy,
-            'country_origin_privacy': countryOriginPrivacy,
-          },
+          request: requestMap,
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -1156,7 +1227,7 @@ class SharedApiService {
   Future<ApiResponse<Map<String, dynamic>>> testConnection() async {
     try {
       print('🔗 Testing API connectivity...');
-      final response = await networkUtils.handleResponse(
+      await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
           '/country-list',
           method: networkUtils.HttpMethod.GET,

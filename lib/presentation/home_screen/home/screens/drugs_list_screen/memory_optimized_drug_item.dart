@@ -15,10 +15,28 @@ class MemoryOptimizedDrugItem extends StatefulWidget {
   });
 
   @override
-  State<MemoryOptimizedDrugItem> createState() => _MemoryOptimizedDrugItemState();
+  State<MemoryOptimizedDrugItem> createState() =>
+      _MemoryOptimizedDrugItemState();
 }
 
 class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
+  /// Remove duplicate currency symbols (e.g., "4.5 AED AED" -> "4.5 AED")
+  String _formatPrice(String price) {
+    if (price.isEmpty) return '0';
+
+    // Remove duplicate AED occurrences
+    // Example: "4.5 AED AED" -> "4.5 AED"
+    final regex = RegExp(r'(\s+AED)+$', caseSensitive: false);
+    String formatted = price.replaceAll(regex, ' AED');
+
+    // If no AED found after cleanup, return original
+    if (!formatted.toUpperCase().contains('AED')) {
+      formatted = price;
+    }
+
+    return formatted.trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
@@ -47,10 +65,10 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
               children: [
                 // Drug Header
                 _buildDrugHeader(),
-                
+
                 // Drug Info
                 _buildDrugInfo(),
-                
+
                 // Action Row
                 _buildActionRow(),
               ],
@@ -65,9 +83,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
   Widget _buildDrugHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-      ),
+      decoration: const BoxDecoration(color: Colors.white),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -104,7 +120,8 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.drug.tradeName ?? translation(context).lbl_not_available,
+                  widget.drug.tradeName ??
+                      translation(context).lbl_not_available,
                   style: const TextStyle(
                     color: Colors.black87,
                     fontSize: 14,
@@ -119,7 +136,10 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                   runSpacing: 4,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -136,7 +156,10 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -169,10 +192,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
       decoration: BoxDecoration(
         color: Colors.grey.withOpacity(0.05),
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
         ),
       ),
       child: Row(
@@ -217,20 +237,17 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
               ],
             ),
           ),
-          
+
           // Price Info
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.blue.withOpacity(0.3),
-                width: 1,
-              ),
+              border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
             ),
             child: Text(
-              widget.drug.mrp ?? '0',
+              _formatPrice(widget.drug.mrp ?? '0'),
               style: TextStyle(
                 color: Colors.blue[700],
                 fontSize: 14,
@@ -251,10 +268,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
         ),
       ),
       child: Row(
@@ -313,10 +327,10 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
           children: [
             // Dialog Header
             _buildDialogHeader(context, genericName),
-            
+
             // Dialog Content
             _buildDialogContent(context, genericName),
-            
+
             // Dialog Footer
             _buildDialogFooter(context),
           ],
@@ -387,67 +401,67 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
             ),
             const SizedBox(height: 16),
             _buildQuestion(
-              context, 
-              translation(context).lbl_all_information, 
+              context,
+              translation(context).lbl_all_information,
               genericName,
               "icInfo",
               Icons.info_outline,
               Colors.blue[700]!,
-              clickable: true
+              clickable: true,
             ),
             _buildQuestion(
-              context, 
-              translation(context).lbl_mechanism, 
+              context,
+              translation(context).lbl_mechanism,
               genericName,
               "icMechanisam",
               Icons.settings_outlined,
               Colors.purple[700]!,
-              clickable: true
+              clickable: true,
             ),
             _buildQuestion(
-              context, 
-              translation(context).lbl_indications, 
+              context,
+              translation(context).lbl_indications,
               genericName,
               "icIndication",
               Icons.assignment_outlined,
               Colors.green[700]!,
-              clickable: true
+              clickable: true,
             ),
             _buildQuestion(
-              context, 
-              translation(context).lbl_dosage, 
+              context,
+              translation(context).lbl_dosage,
               genericName,
               "icDosage",
               Icons.access_time_filled_outlined,
               Colors.orange[700]!,
-              clickable: true
+              clickable: true,
             ),
             _buildQuestion(
-              context, 
-              translation(context).lbl_drug_interactions, 
+              context,
+              translation(context).lbl_drug_interactions,
               genericName,
               "icDrug",
               Icons.compare_arrows_outlined,
               Colors.red[700]!,
-              clickable: true
+              clickable: true,
             ),
             _buildQuestion(
-              context, 
-              translation(context).lbl_special_populations, 
+              context,
+              translation(context).lbl_special_populations,
               genericName,
               "icSpecial",
               Icons.people_outline,
               Colors.teal[700]!,
-              clickable: true
+              clickable: true,
             ),
             _buildQuestion(
-              context, 
-              translation(context).lbl_side_effects, 
+              context,
+              translation(context).lbl_side_effects,
               genericName,
               "icSideEffect",
               Icons.report_problem_outlined,
               Colors.amber[700]!,
-              clickable: true
+              clickable: true,
             ),
           ],
         ),
@@ -466,10 +480,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
           bottomRight: Radius.circular(20),
         ),
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
         ),
       ),
       child: ElevatedButton(
@@ -506,14 +517,14 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
 
   // Question item widget
   Widget _buildQuestion(
-    BuildContext context, 
-    String question, 
-    String genericName, 
+    BuildContext context,
+    String question,
+    String genericName,
     String iconAsset,
     IconData iconData,
-    Color iconColor,
-    {bool clickable = false}
-  ) {
+    Color iconColor, {
+    bool clickable = false,
+  }) {
     return GestureDetector(
       onTap: clickable
           ? () {
@@ -539,14 +550,12 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
           child: Material(
             color: Colors.transparent,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 16.0,
+              ),
               decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: iconColor,
-                    width: 4,
-                  ),
-                ),
+                border: Border(left: BorderSide(color: iconColor, width: 4)),
               ),
               child: Row(
                 children: [
@@ -556,11 +565,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                       color: iconColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      iconData,
-                      color: iconColor,
-                      size: 22,
-                    ),
+                    child: Icon(iconData, color: iconColor, size: 22),
                   ),
                   const SizedBox(width: 16),
                   Expanded(

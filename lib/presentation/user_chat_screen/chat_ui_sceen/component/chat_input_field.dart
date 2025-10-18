@@ -71,13 +71,17 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    // Get proper padding for edge-to-edge support
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+    final keyboardPadding = MediaQuery.of(context).viewInsets.bottom;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           decoration: BoxDecoration(
-            color: appStore.isDarkMode 
-                ? const Color(0xFF1A1A1A) 
+            color: appStore.isDarkMode
+                ? const Color(0xFF1A1A1A)
                 : Colors.white,
             boxShadow: [
               BoxShadow(
@@ -93,7 +97,8 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
             left: 16,
             right: 16,
             top: 8,
-            bottom: MediaQuery.of(context).padding.bottom + 8,
+            // Use viewPadding when keyboard is hidden, don't add extra padding when keyboard is shown
+            bottom: (keyboardPadding > 0 ? 0 : bottomPadding) + 8,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,

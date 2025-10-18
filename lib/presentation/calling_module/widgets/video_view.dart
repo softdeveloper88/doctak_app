@@ -1,4 +1,5 @@
 // lib/presentation/call_module/widgets/video_view.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
@@ -345,12 +346,18 @@ class WaitingForRemoteView extends StatelessWidget {
             CircleAvatar(
               radius: 70,
               backgroundColor: Colors.grey.shade800,
-              backgroundImage: remoteUser.avatarUrl.isNotEmpty
-                  ? NetworkImage(remoteUser.avatarUrl)
-                  : null,
-              child: remoteUser.avatarUrl.isEmpty
-                  ? const Icon(Icons.person, size: 70, color: Colors.white)
-                  : null,
+              child: remoteUser.avatarUrl.isNotEmpty
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: remoteUser.avatarUrl,
+                        width: 140,
+                        height: 140,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Icon(Icons.person, size: 70, color: Colors.white),
+                        errorWidget: (context, url, error) => const Icon(Icons.person, size: 70, color: Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.person, size: 70, color: Colors.white),
             ),
             const SizedBox(height: 24),
             Text(

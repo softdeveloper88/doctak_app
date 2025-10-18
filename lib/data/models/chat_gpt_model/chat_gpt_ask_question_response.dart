@@ -9,11 +9,11 @@ class ChatGptAskQuestionResponse {
   ChatGptAskQuestionResponse({
     this.content,
     this.responseMessageId,
-    this.imageUrl
+    this.imageUrl,
   });
 
   ChatGptAskQuestionResponse.fromJson(dynamic json) {
-    content = json['content'];
+    content = json['content'] ?? '';
     responseMessageId = json['responseMessageId'];
     imageUrl = json['image_url'];
   }

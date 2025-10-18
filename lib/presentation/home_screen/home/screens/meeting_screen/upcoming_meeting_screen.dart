@@ -16,34 +16,41 @@ class UpcomingMeetingScreen extends StatefulWidget {
 }
 
 class _UpcomingMeetingScreenState extends State<UpcomingMeetingScreen> {
-  MeetingBloc meetingBloc=MeetingBloc();
+  MeetingBloc meetingBloc = MeetingBloc();
   @override
   void initState() {
-  meetingBloc.add(FetchMeetings());
+    meetingBloc.add(FetchMeetings());
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
-    return  BlocBuilder<MeetingBloc, MeetingState>(
+    return BlocBuilder<MeetingBloc, MeetingState>(
       bloc: meetingBloc,
-          builder: (context, state) {
-            if (state is MeetingsLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is MeetingsError) {
-              return Center(child: Text(state.message));
-            } else if (state is MeetingsLoaded) {
-              return _buildMeetingList(meetingBloc.meetings!);
-            }
-            return Center(child: Text(translation(context).msg_no_meetings_scheduled));
-          },
-
-      );
+      builder: (context, state) {
+        if (state is MeetingsLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is MeetingsError) {
+          return Center(child: Text(state.message));
+        } else if (state is MeetingsLoaded) {
+          return _buildMeetingList(context, meetingBloc.meetings!);
+        }
+        return Center(
+          child: Text(translation(context).msg_no_meetings_scheduled),
+        );
+      },
+    );
   }
 }
 
-Widget _buildMeetingList(GetMeetingModel meetingsData) {
+Widget _buildMeetingList(BuildContext context, GetMeetingModel meetingsData) {
   return ListView.builder(
-    padding: const EdgeInsets.all(16),
+    padding: EdgeInsets.only(
+      left: 16,
+      right: 16,
+      top: 16,
+      bottom: MediaQuery.of(context).padding.bottom + 16,
+    ),
     itemCount: meetingsData.getMeetingModelList.length ?? 0,
     itemBuilder: (context, index) {
       return Column(
@@ -55,10 +62,7 @@ Widget _buildMeetingList(GetMeetingModel meetingsData) {
             decoration: BoxDecoration(
               color: Colors.blue.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.blue.withOpacity(0.2),
-                width: 1,
-              ),
+              border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1),
             ),
             child: Row(
               children: [
@@ -86,27 +90,26 @@ Widget _buildMeetingList(GetMeetingModel meetingsData) {
               title: session.title,
               meetingId: session.channel.toString(),
               onJoin: () {
-                MeetingDetailScreen(sessions: session,date:meetingsData.getMeetingModelList[index].date).launch(context,
-                    pageRouteAnimation: PageRouteAnimation.Slide);
+                MeetingDetailScreen(
+                  sessions: session,
+                  date: meetingsData.getMeetingModelList[index].date,
+                ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('${translation(context).lbl_joining} ${session.title}'),
+                    content: Text(
+                      '${translation(context).lbl_joining} ${session.title}',
+                    ),
                   ),
                 );
               },
             );
           }).toList(),
-          Divider(
-            thickness: 1,
-            height: 32,
-            color: Colors.grey.shade200,
-          ),
+          Divider(thickness: 1, height: 32, color: Colors.grey.shade200),
         ],
       );
     },
   );
 }
-
 
 class MeetingItem extends StatelessWidget {
   final String time;
@@ -160,7 +163,7 @@ class MeetingItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            
+
             // Meeting info
             Expanded(
               child: Column(
@@ -199,7 +202,7 @@ class MeetingItem extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Join button
             Container(
               decoration: BoxDecoration(
@@ -221,7 +224,10 @@ class MeetingItem extends StatelessWidget {
                   onTap: onJoin,
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

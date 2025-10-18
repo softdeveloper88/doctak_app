@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class UserShimmer extends StatelessWidget {
-   const UserShimmer({super.key});
+  const UserShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +15,7 @@ class UserShimmer extends StatelessWidget {
         baseColor: Colors.grey[200]!,
         highlightColor: Colors.grey[200]!,
         child: ListTile(
-          leading: const CircleAvatar(
-            backgroundColor: Colors.white,
-          ),
+          leading: const CircleAvatar(backgroundColor: Colors.white),
           title: Container(
             height: 10,
             width: double.infinity,
@@ -60,14 +58,10 @@ class NotificationShimmer extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
               // Match real notification background colors
-              color:  Colors.blue.withOpacity(0.08),
+              color: Colors.blue.withOpacity(0.08),
 
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color:  Colors.blue.withOpacity(0.2),
-
-                width: 1,
-              ),
+              border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.04),
@@ -107,10 +101,7 @@ class NotificationShimmer extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _getShimmerNotificationColor(index),
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
-                            ),
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
                           child: Container(
                             width: 8,
@@ -135,7 +126,8 @@ class NotificationShimmer extends StatelessWidget {
                           height: 14,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).brightness == Brightness.dark
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
                                 ? Colors.grey[600]
                                 : Colors.grey[300],
                             borderRadius: BorderRadius.circular(2),
@@ -147,7 +139,8 @@ class NotificationShimmer extends StatelessWidget {
                           height: 14,
                           width: MediaQuery.of(context).size.width * 0.45,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).brightness == Brightness.dark
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
                                 ? Colors.grey[600]
                                 : Colors.grey[300],
                             borderRadius: BorderRadius.circular(2),
@@ -161,7 +154,9 @@ class NotificationShimmer extends StatelessWidget {
                               width: 14,
                               height: 14,
                               decoration: BoxDecoration(
-                                color: Theme.of(context).brightness == Brightness.dark
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
                                     ? Colors.grey[600]
                                     : Colors.grey[400],
                                 borderRadius: BorderRadius.circular(2),
@@ -170,9 +165,14 @@ class NotificationShimmer extends StatelessWidget {
                             const SizedBox(width: 4),
                             Container(
                               height: 12,
-                              width: 70 + (index % 3) * 15, // Variable width for realism
+                              width:
+                                  70 +
+                                  (index % 3) *
+                                      15, // Variable width for realism
                               decoration: BoxDecoration(
-                                color: Theme.of(context).brightness == Brightness.dark
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
                                     ? Colors.grey[600]
                                     : Colors.grey[400],
                                 borderRadius: BorderRadius.circular(2),
@@ -214,7 +214,7 @@ class NotificationShimmer extends StatelessWidget {
   Color _getShimmerNotificationColor(int index) {
     final colors = [
       Colors.green,
-      Colors.red, 
+      Colors.red,
       Colors.blue,
       Colors.purple,
       Colors.orange,
@@ -237,12 +237,12 @@ class ProfileListShimmer extends StatelessWidget {
       itemBuilder: (context, index) {
         // Alternate follow status for realism
         final isFollowed = index % 3 == 0;
-        
+
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? Colors.grey[900] 
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[900]
                 : Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
@@ -264,7 +264,8 @@ class ProfileListShimmer extends StatelessWidget {
                   baseColor: Theme.of(context).brightness == Brightness.dark
                       ? Colors.grey[800]!
                       : Colors.grey[300]!,
-                  highlightColor: Theme.of(context).brightness == Brightness.dark
+                  highlightColor:
+                      Theme.of(context).brightness == Brightness.dark
                       ? Colors.grey[700]!
                       : Colors.grey[100]!,
                   period: const Duration(milliseconds: 1500),
@@ -299,21 +300,29 @@ class ProfileListShimmer extends StatelessWidget {
                       // Name row with optional follow indicator
                       Row(
                         children: [
-                          // Name shimmer
-                          Shimmer.fromColors(
-                            baseColor: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey[800]!
-                                : Colors.grey[300]!,
-                            highlightColor: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey[700]!
-                                : Colors.grey[100]!,
-                            period: const Duration(milliseconds: 1500),
-                            child: Container(
-                              height: 16,
-                              width: 120 + (index % 3) * 20,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(4),
+                          // Name shimmer - wrapped in Flexible to prevent overflow
+                          Flexible(
+                            child: Shimmer.fromColors(
+                              baseColor:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey[800]!
+                                  : Colors.grey[300]!,
+                              highlightColor:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey[700]!
+                                  : Colors.grey[100]!,
+                              period: const Duration(milliseconds: 1500),
+                              child: Container(
+                                height: 16,
+                                constraints: BoxConstraints(
+                                  maxWidth: 120 + (index % 3) * 20,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
                               ),
                             ),
                           ),
@@ -321,10 +330,14 @@ class ProfileListShimmer extends StatelessWidget {
                             const SizedBox(width: 6),
                             // Follow indicator shimmer
                             Shimmer.fromColors(
-                              baseColor: Theme.of(context).brightness == Brightness.dark
+                              baseColor:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
                                   ? Colors.grey[800]!
                                   : Colors.grey[300]!,
-                              highlightColor: Theme.of(context).brightness == Brightness.dark
+                              highlightColor:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
                                   ? Colors.grey[700]!
                                   : Colors.grey[100]!,
                               period: const Duration(milliseconds: 1500),
@@ -343,10 +356,12 @@ class ProfileListShimmer extends StatelessWidget {
                       const SizedBox(height: 4),
                       // Specialty/Role shimmer
                       Shimmer.fromColors(
-                        baseColor: Theme.of(context).brightness == Brightness.dark
+                        baseColor:
+                            Theme.of(context).brightness == Brightness.dark
                             ? Colors.grey[800]!
                             : Colors.grey[300]!,
-                        highlightColor: Theme.of(context).brightness == Brightness.dark
+                        highlightColor:
+                            Theme.of(context).brightness == Brightness.dark
                             ? Colors.grey[700]!
                             : Colors.grey[100]!,
                         period: const Duration(milliseconds: 1500),
@@ -368,7 +383,8 @@ class ProfileListShimmer extends StatelessWidget {
                   baseColor: Theme.of(context).brightness == Brightness.dark
                       ? Colors.grey[800]!
                       : Colors.grey[300]!,
-                  highlightColor: Theme.of(context).brightness == Brightness.dark
+                  highlightColor:
+                      Theme.of(context).brightness == Brightness.dark
                       ? Colors.grey[700]!
                       : Colors.grey[100]!,
                   period: const Duration(milliseconds: 1500),

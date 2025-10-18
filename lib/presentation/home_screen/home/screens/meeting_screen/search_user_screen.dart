@@ -151,8 +151,6 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                   return Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.all(8),
-                      shrinkWrap: true,
-                      // physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         if (bloc.contactPageNumber <=
                             bloc.contactNumberOfPage) {

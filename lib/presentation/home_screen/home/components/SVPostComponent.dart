@@ -19,7 +19,7 @@ import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../fragments/home_main_screen/post_widget/find_likes.dart';
 import '../../fragments/home_main_screen/post_widget/post_item_widget.dart';
-import '../screens/comment_screen/SVCommentScreen.dart';
+import '../screens/comment_screen/sv_comment_screen.dart';
 import '../screens/comment_screen/bloc/comment_bloc.dart';
 
 class SVPostComponent extends StatefulWidget {
@@ -41,133 +41,151 @@ class _SVPostComponentState extends State<SVPostComponent>
       bloc: widget.homeBloc,
       builder: (context, state) {
         if (state is PostPaginationLoadingState) {
-          return  const PostShimmerLoader(itemCount: 5);
+          return const PostShimmerLoader(itemCount: 5);
           // return const Center(child: CircularProgressIndicator(color: svGetBodyColor(),));
         } else if (state is PostPaginationLoadedState) {
           return widget.homeBloc.postList.isEmpty
               ? Center(child: Text(translation(context).msg_no_posts))
-              :ListView.builder(
-            scrollDirection: Axis.vertical,
-            physics: const BouncingScrollPhysics(),
-            itemCount: widget.homeBloc.postList.length +
-                (widget.homeBloc.numberOfPage != widget.homeBloc.pageNumber - 1 ? 1 : 0),
-            itemBuilder: (context, index) {
-              // Trigger data fetching when reaching nextPageTrigger
-              if (index ==
-                  widget.homeBloc.postList.length -
-                      widget.homeBloc.nextPageTrigger &&
-                  widget.homeBloc.pageNumber <= widget.homeBloc.numberOfPage) {
-                widget.homeBloc.add(PostCheckIfNeedMoreDataEvent(index: index));
-              }
-
-              // Show shimmer loader for pagination
-              if (index >= widget.homeBloc.postList.length) {
-                return const PostShimmerLoader(itemCount: 3);
-              }
-
-              // Insert ad widgets after every 5 posts
-              if ((index % 8 == 0 && index != 0) && AppData.isShowGoogleNativeAds) {
-                return  NativeAdWidget();
-              }
-
-              // Fetch post data
-              final post = widget.homeBloc.postList[index];
-
-              // Build post item widget
-              return PostItemWidget(
-                postData: post,
-                profilePicUrl: '${AppData.imageUrl}${post.user?.profilePic}',
-                userName: post.user?.name ?? '',
-                createdAt: timeAgo.format(DateTime.parse(post.createdAt!)),
-                title: post.title,
-                backgroundColor: post.backgroundColor,
-                image: post.image,
-                media: post.media,
-                likes: post.likes,
-                comments: post.comments,
-                postId: post.id ?? 0,
-                isLiked: findIsLiked(post.likes),
-                isCurrentUser: post.userId == AppData.logInUserId,
-                isShowComment: isShowComment == index,
-                onProfileTap: () {
-                  SVProfileFragment(userId: post.user?.id).launch(context);
-                },
-                onDeleteTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return CustomAlertDialog(
-                        title: translation(context).msg_confirm_delete_post,
-                        callback: () {
-                          widget.homeBloc.add(DeletePostEvent(postId: post.id));
-                          Navigator.of(context).pop();
-                        },
+              : ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount:
+                      widget.homeBloc.postList.length +
+                      (widget.homeBloc.numberOfPage !=
+                              widget.homeBloc.pageNumber - 1
+                          ? 1
+                          : 0),
+                  itemBuilder: (context, index) {
+                    // Trigger data fetching when reaching nextPageTrigger
+                    if (index ==
+                            widget.homeBloc.postList.length -
+                                widget.homeBloc.nextPageTrigger &&
+                        widget.homeBloc.pageNumber <=
+                            widget.homeBloc.numberOfPage) {
+                      widget.homeBloc.add(
+                        PostCheckIfNeedMoreDataEvent(index: index),
                       );
-                    },
-                  );
-                },
-                onLikeTap: () {
-                  widget.homeBloc.add(PostLikeEvent(postId: post.id));
-                },
-                onViewLikesTap: () {
-                  LikesListScreen(id: post.id.toString()).launch(context);
-                },
-                onViewCommentsTap: () {
-                  SVCommentScreen(
-                      homeBloc: widget.homeBloc,
-                      id: post.id ?? 0
-                  ).launch(context);
-                },
-                onShareTap: () {
-                  String? mediaLink = post.media?.isNotEmpty == true
-                      ? post.media![0].mediaPath
-                      : '';
-                  createDynamicLink(
-                    removeHtmlTags(post.title ?? ''),
-                    '${AppData.base}post/${post.id}',
-                    mediaLink,
-                  );
-                },
-                onAddComment: (value) {
-                  CommentBloc().add(
-                    PostCommentEvent(
-                      postId: post.id ?? 0,
-                      comment: value,
-                    ),
-                  );
-                  setState(() {
-                    post.comments?.add(Comments());
-                    isShowComment = -1;
-                  });
-                },
-                onToggleComment: () {
-                  setState(() {
-                    isShowComment = isShowComment == index ? -1 : index;
-                  });
-                },
-                onCommentTap: () {},
-              );
-            },
-            shrinkWrap: true,
-          );
+                    }
 
+                    // Show shimmer loader for pagination
+                    if (index >= widget.homeBloc.postList.length) {
+                      return const PostShimmerLoader(itemCount: 3);
+                    }
+
+                    // Insert ad widgets after every 5 posts
+                    if ((index % 8 == 0 && index != 0) &&
+                        AppData.isShowGoogleNativeAds) {
+                      return NativeAdWidget();
+                    }
+
+                    // Fetch post data
+                    final post = widget.homeBloc.postList[index];
+
+                    // Build post item widget
+                    return PostItemWidget(
+                      postData: post,
+                      profilePicUrl:
+                          '${AppData.imageUrl}${post.user?.profilePic}',
+                      userName: post.user?.name ?? '',
+                      createdAt: timeAgo.format(
+                        DateTime.parse(post.createdAt!),
+                      ),
+                      title: post.title,
+                      backgroundColor: post.backgroundColor,
+                      image: post.image,
+                      media: post.media,
+                      likes: post.likes,
+                      comments: post.comments,
+                      postId: post.id ?? 0,
+                      isLiked: findIsLiked(post.likes),
+                      isCurrentUser: post.userId == AppData.logInUserId,
+                      isShowComment: isShowComment == index,
+                      onProfileTap: () {
+                        SVProfileFragment(
+                          userId: post.user?.id,
+                        ).launch(context);
+                      },
+                      onDeleteTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return CustomAlertDialog(
+                              title: translation(
+                                context,
+                              ).msg_confirm_delete_post,
+                              callback: () {
+                                widget.homeBloc.add(
+                                  DeletePostEvent(postId: post.id),
+                                );
+                                Navigator.of(context).pop();
+                              },
+                            );
+                          },
+                        );
+                      },
+                      onLikeTap: () {
+                        widget.homeBloc.add(PostLikeEvent(postId: post.id));
+                      },
+                      onViewLikesTap: () {
+                        LikesListScreen(id: post.id.toString()).launch(context);
+                      },
+                      onViewCommentsTap: () {
+                        SVCommentScreen(
+                          homeBloc: widget.homeBloc,
+                          id: post.id ?? 0,
+                        ).launch(context);
+                      },
+                      onShareTap: () {
+                        String? mediaLink = post.media?.isNotEmpty == true
+                            ? post.media![0].mediaPath
+                            : '';
+                        // createDynamicLink(
+                        //   removeHtmlTags(post.title ?? ''),
+                        //   '${AppData.base}post/${post.id}',
+                        //   mediaLink,
+                        // );
+                      },
+                      onAddComment: (value) {
+                        CommentBloc().add(
+                          PostCommentEvent(
+                            postId: post.id ?? 0,
+                            comment: value,
+                          ),
+                        );
+                        setState(() {
+                          post.comments?.add(Comments());
+                          isShowComment = -1;
+                        });
+                      },
+                      onToggleComment: () {
+                        setState(() {
+                          isShowComment = isShowComment == index ? -1 : index;
+                        });
+                      },
+                      onCommentTap: () {},
+                    );
+                  },
+                );
         } else if (state is PostDataError) {
           return RetryWidget(
-              errorMessage: translation(context).msg_something_went_wrong_retry,
-              onRetry: () {
-                try {
-                  widget.homeBloc.add(PostLoadPageEvent(page: 1));
-                } catch (e) {
-                  debugPrint(e.toString());
-                }
-              });
+            errorMessage: translation(context).msg_something_went_wrong_retry,
+            onRetry: () {
+              try {
+                widget.homeBloc.add(PostLoadPageEvent(page: 1));
+              } catch (e) {
+                debugPrint(e.toString());
+              }
+            },
+          );
         } else {
           return Center(child: Text(translation(context).lbl_search_post));
         }
       },
     );
   }
-/**
+
+  /**
     // Widget _buildPlaceholderWithoutFile(
     //     context, title, backgroundColor, image, media, int index) {
     //   String fullText = title ?? '';

@@ -307,17 +307,30 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
   Future<void> _pickImageFromGallery() async {
     try {
-      final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        setState(() {
-          _selectedImages.add(File(pickedFile.path));
-          _selectedImageNames.add(pickedFile.name);
-        });
+      // Use pickMultipleMedia with requestFullMetadata: false for limited access support
+      final pickedFiles = await _imagePicker.pickMultipleMedia(
+        imageQuality: 85,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        requestFullMetadata: false, // Critical for limited access
+      );
+
+      if (pickedFiles.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            for (var pickedFile in pickedFiles) {
+              _selectedImages.add(File(pickedFile.path));
+              _selectedImageNames.add(pickedFile.name);
+            }
+          });
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')),
+        );
+      }
     }
   }
 

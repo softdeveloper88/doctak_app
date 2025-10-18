@@ -16,7 +16,7 @@ class PusherService {
   int _reconnectAttempts = 0;
   Timer? _reconnectTimer;
   Timer? _connectionWatchdog;
-  
+
   static const int _maxReconnectAttempts = 10;
   static const Duration _reconnectInterval = Duration(seconds: 3);
   static const Duration _watchdogInterval = Duration(seconds: 30);
@@ -46,26 +46,29 @@ class PusherService {
         onSubscriptionCount: _onSubscriptionCount,
       );
 
-      _pusher.onConnectionStateChange = (String currentState, String previousState) {
-        log('Pusher connection state: $previousState -> $currentState');
-        
-        if (currentState == 'CONNECTED') {
-          _isConnected = true;
-          _isReconnecting = false;
-          _reconnectAttempts = 0;
-          _startConnectionWatchdog();
-          
-          // Re-subscribe to channels after reconnection
-          if (previousState == 'DISCONNECTED' || previousState == 'RECONNECTING') {
-            Future.delayed(const Duration(milliseconds: 500), () {
-              _resubscribeToChannels();
-            });
-          }
-        } else if (currentState == 'DISCONNECTED' || currentState == 'RECONNECTING') {
-          _isConnected = false;
-          _scheduleReconnection();
-        }
-      };
+      _pusher.onConnectionStateChange =
+          (String currentState, String previousState) {
+            log('Pusher connection state: $previousState -> $currentState');
+
+            if (currentState == 'CONNECTED') {
+              _isConnected = true;
+              _isReconnecting = false;
+              _reconnectAttempts = 0;
+              _startConnectionWatchdog();
+
+              // Re-subscribe to channels after reconnection
+              if (previousState == 'DISCONNECTED' ||
+                  previousState == 'RECONNECTING') {
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  _resubscribeToChannels();
+                });
+              }
+            } else if (currentState == 'DISCONNECTED' ||
+                currentState == 'RECONNECTING') {
+              _isConnected = false;
+              _scheduleReconnection();
+            }
+          };
     } catch (e) {
       log('Failed to initialize Pusher: $e');
       _scheduleReconnection();
@@ -99,30 +102,44 @@ class PusherService {
 
   Future<PusherChannel?> subscribeToChannel(String channelName) async {
     try {
+      log('📡 PusherService: Attempting to subscribe to channel: $channelName');
+      log('📡 PusherService: Current connection status: $_isConnected');
+
       // Wait for connection if not connected
       if (!_isConnected) {
+        log('📡 PusherService: Not connected, waiting for connection...');
         await _waitForConnection();
       }
 
+      // Check if already subscribed
+      if (_channels.containsKey(channelName)) {
+        log('📡 PusherService: Already subscribed to channel: $channelName');
+        return _channels[channelName];
+      }
+
+      log('📡 PusherService: Subscribing to new channel: $channelName');
       final channel = await _pusher.subscribe(
         channelName: channelName,
         onEvent: _handleEvent,
       );
       _channels[channelName] = channel;
+      log('📡 PusherService: Successfully subscribed to channel: $channelName');
       return channel;
     } catch (e) {
-      log('Failed to subscribe to channel $channelName: $e');
+      log('📡 PusherService: Failed to subscribe to channel $channelName: $e');
       return null;
     }
   }
 
-  Future<void> _waitForConnection({Duration timeout = const Duration(seconds: 10)}) async {
+  Future<void> _waitForConnection({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
     final stopwatch = Stopwatch()..start();
-    
+
     while (!_isConnected && stopwatch.elapsed < timeout) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    
+
     if (!_isConnected) {
       throw Exception('Pusher connection timeout');
     }
@@ -130,10 +147,10 @@ class PusherService {
 
   Future<void> _resubscribeToChannels() async {
     if (_channels.isEmpty) return;
-    
+
     log('Re-subscribing to ${_channels.length} channels...');
     final channelNames = List<String>.from(_channels.keys);
-    
+
     for (final channelName in channelNames) {
       try {
         await subscribeToChannel(channelName);
@@ -152,24 +169,120 @@ class PusherService {
 
   void registerEventListener(String eventName, Function(dynamic) callback) {
     _eventListeners.putIfAbsent(eventName, () => []).add(callback);
+    log(
+      '📡 Pusher: Registered listener for event: $eventName (total listeners: ${_eventListeners[eventName]?.length ?? 0})',
+    );
   }
 
   void unregisterEventListener(String eventName, Function(dynamic) callback) {
     if (_eventListeners.containsKey(eventName)) {
       _eventListeners[eventName]!.remove(callback);
+      log('📡 Pusher: Unregistered listener for event: $eventName');
     }
   }
 
   void _handleEvent(event) {
     final eventName = event.eventName;
-    print('dataaaa $event');
+    log('📡 ========================================');
+    log('📡 PUSHER EVENT RECEIVED');
+    log('📡 Event Name: $eventName');
+    log('📡 Channel: ${event.channelName}');
+    log('📡 Raw Data: ${event.data}');
+    log('📡 ========================================');
 
-    final data = jsonDecode(event.data.toString());
-    print('dataaaa $data');
-    if (_eventListeners.containsKey(eventName)) {
-      for (final callback in _eventListeners[eventName]!) {
-        callback(data);
+    try {
+      dynamic data;
+      try {
+        data = jsonDecode(event.data.toString());
+      } catch (e) {
+        // If JSON decode fails, use raw data
+        data = event.data;
+        log('📡 JSON decode failed, using raw data');
       }
+      log('📡 Parsed Data: $data');
+      log('📡 Registered listeners: ${_eventListeners.keys.toList()}');
+
+      bool handlerFound = false;
+
+      // Check for exact event name match
+      if (_eventListeners.containsKey(eventName)) {
+        handlerFound = true;
+        log(
+          '📡 Found ${_eventListeners[eventName]!.length} listeners for exact match: $eventName',
+        );
+        for (final callback in List.from(_eventListeners[eventName]!)) {
+          try {
+            callback(data);
+          } catch (e) {
+            log('📡 Error in callback for $eventName: $e');
+          }
+        }
+      }
+
+      // Also check for case-insensitive match
+      final eventNameLower = eventName.toString().toLowerCase();
+      for (final registeredEvent in List.from(_eventListeners.keys)) {
+        if (registeredEvent.toLowerCase() == eventNameLower &&
+            registeredEvent != eventName) {
+          handlerFound = true;
+          log(
+            '📡 Found case-insensitive match: $registeredEvent for event $eventName',
+          );
+          for (final callback in List.from(_eventListeners[registeredEvent]!)) {
+            try {
+              callback(data);
+            } catch (e) {
+              log('📡 Error in callback for $registeredEvent: $e');
+            }
+          }
+        }
+      }
+
+      // Check if this is a call-related event based on name patterns
+      if (eventNameLower.contains('call') ||
+          eventNameLower.contains('accepted') ||
+          eventNameLower.contains('ringing') ||
+          eventNameLower.contains('status')) {
+        log('📡 *** CALL-RELATED EVENT DETECTED: $eventName ***');
+      }
+
+      if (!handlerFound) {
+        log('📡 No direct listeners for event: $eventName');
+      }
+
+      // Also trigger generic handlers that might handle this event
+      // Check if event contains call status info and trigger call.status handlers
+      if (data is Map &&
+          (data.containsKey('status') ||
+              data.containsKey('callData') ||
+              data.containsKey('statusData') ||
+              data.containsKey('call_status') ||
+              data.containsKey('data'))) {
+        if (_eventListeners.containsKey('call.status')) {
+          log('📡 Also triggering call.status handlers for event $eventName');
+          for (final callback in List.from(_eventListeners['call.status']!)) {
+            try {
+              callback(data);
+            } catch (e) {
+              log('📡 Error in call.status callback: $e');
+            }
+          }
+        }
+
+        // Also trigger Call_Status handlers (uppercase variant)
+        if (_eventListeners.containsKey('Call_Status')) {
+          log('📡 Also triggering Call_Status handlers for event $eventName');
+          for (final callback in List.from(_eventListeners['Call_Status']!)) {
+            try {
+              callback(data);
+            } catch (e) {
+              log('📡 Error in Call_Status callback: $e');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      log('📡 Error handling event $eventName: $e');
     }
   }
 
@@ -182,17 +295,20 @@ class PusherService {
     _cancelReconnectTimer();
 
     // Calculate exponential backoff with jitter
-    final backoffMs = _reconnectInterval.inMilliseconds * 
+    final backoffMs =
+        _reconnectInterval.inMilliseconds *
         (1 << _reconnectAttempts.clamp(0, 5)); // Cap exponential growth
     final jitter = (backoffMs * 0.2).round(); // 20% jitter
-    final delayMs = backoffMs + 
-        (DateTime.now().millisecondsSinceEpoch % jitter);
-    
-    log('Scheduling reconnection attempt ${_reconnectAttempts + 1}/$_maxReconnectAttempts in ${delayMs}ms');
+    final delayMs =
+        backoffMs + (DateTime.now().millisecondsSinceEpoch % jitter);
+
+    log(
+      'Scheduling reconnection attempt ${_reconnectAttempts + 1}/$_maxReconnectAttempts in ${delayMs}ms',
+    );
 
     _reconnectTimer = Timer(Duration(milliseconds: delayMs), () async {
       _reconnectAttempts++;
-      
+
       try {
         // Check network connectivity first
         if (await _hasNetworkConnection()) {
@@ -219,7 +335,7 @@ class PusherService {
 
   void _startConnectionWatchdog() {
     _stopConnectionWatchdog();
-    
+
     _connectionWatchdog = Timer.periodic(_watchdogInterval, (timer) {
       if (!_isConnected && !_isReconnecting) {
         log('Connection watchdog: Connection lost, attempting to reconnect...');
@@ -262,11 +378,12 @@ class PusherService {
 
   void _onError(String message, int? code, dynamic e) {
     log('Pusher error: $message (code: $code)', error: e);
-    
+
     // Only reconnect on specific error codes that indicate connection issues
-    if (code == null || 
+    if (code == null ||
         code >= 4000 && code < 4100 || // Client errors that may be recoverable
-        code >= 4200 && code < 4300) { // Connection errors
+        code >= 4200 && code < 4300) {
+      // Connection errors
       _scheduleReconnection();
     }
   }

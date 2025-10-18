@@ -35,12 +35,14 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
       // API call to submit the suggestion
 
       setState(() => _isLoading = true); // Start loading
-      suggestionBloc.add(SaveSuggestion(
-        name: _nameController.text,
-        phone: _phoneController.text,
-        email: _emailController.text,
-        message: _messageController.text,
-      ));
+      suggestionBloc.add(
+        SaveSuggestion(
+          name: _nameController.text,
+          phone: _phoneController.text,
+          email: _emailController.text,
+          message: _messageController.text,
+        ),
+      );
       // final response = await http.post(
       //   Uri.parse("${AppData.remoteUrl}/save-suggestion"),
       //   headers: {
@@ -113,7 +115,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: MediaQuery.of(context).padding.bottom + 16,
+            ),
             children: <Widget>[
               // Header Card
               Container(
@@ -209,7 +216,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                           return translation(context).msg_please_enter_name;
                         }
                         return null;
-                      }
+                      },
                     ),
                     _buildTextField(
                       '03xxxxxxxx',
@@ -221,7 +228,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                           return translation(context).msg_please_enter_phone;
                         }
                         return null;
-                      }
+                      },
                     ),
                     _buildTextField(
                       'info@doctak.net',
@@ -233,10 +240,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                           return translation(context).msg_please_enter_email;
                         }
                         if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                          return translation(context).err_msg_please_enter_valid_email;
+                          return translation(
+                            context,
+                          ).err_msg_please_enter_valid_email;
                         }
                         return null;
-                      }
+                      },
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -260,7 +269,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                           return translation(context).msg_please_enter_message;
                         }
                         return null;
-                      }
+                      },
                     ),
                   ],
                 ),
@@ -294,17 +303,16 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                               strokeWidth: 2,
                             ),
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
-                                Icons.send_rounded,
-                                size: 20,
-                              ),
+                              const Icon(Icons.send_rounded, size: 20),
                               const SizedBox(width: 8),
                               Text(
                                 translation(context).lbl_submit,
@@ -386,7 +394,9 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                     const SizedBox(height: 16),
                     InkWell(
                       onTap: () async {
-                        final Uri url = Uri.parse('https://wa.me/+971504957572');
+                        final Uri url = Uri.parse(
+                          'https://wa.me/+971504957572',
+                        );
                         bool? confirm = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) {
@@ -421,7 +431,8 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
                                   style: TextButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
@@ -438,7 +449,8 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                                   ),
                                 ),
                                 ElevatedButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green,
                                     foregroundColor: Colors.white,
@@ -520,7 +532,6 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
     );
   }
 
-
   Widget _buildTextField(
     String hint,
     TextEditingController controller,
@@ -552,11 +563,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
               color: Colors.blue.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: Colors.blue[600],
-            ),
+            child: Icon(icon, size: 18, color: Colors.blue[600]),
           ),
           labelStyle: TextStyle(
             fontFamily: 'Poppins',
@@ -584,10 +591,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.blue,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: Colors.blue, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -598,15 +602,10 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Colors.red,
-              width: 2,
-            ),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
           filled: true,
-          fillColor: appStore.isDarkMode
-              ? Colors.grey[800]
-              : Colors.grey[50],
+          fillColor: appStore.isDarkMode ? Colors.grey[800] : Colors.grey[50],
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16,
             vertical: maxLines > 1 ? 16 : 14,

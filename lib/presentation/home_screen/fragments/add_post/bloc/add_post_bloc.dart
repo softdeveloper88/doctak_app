@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
@@ -41,11 +43,68 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     on<SelectedLocation>(_selectedLocation);
     on<AddPostDataEvent>(_addPostData);
     on<TextFieldEvent>(_addTitle);
+    on<RestoreFilesEvent>((event, emit) => emit(PaginationLoadedState()));
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == searchPeopleData.length - nextPageTrigger) {
         add(LoadPageEvent(page: pageNumber));
       }
     });
+
+    // Attempt to load persisted selected files
+    _loadPersistedFiles();
+  }
+
+  // Persist selected image file paths to cache to survive lifecycle events
+  Future<File> _persistenceFile() async {
+    final dir = await getTemporaryDirectory();
+    return File('${dir.path}/doctak_addpost_selected_files.json');
+  }
+
+  Future<void> _loadPersistedFiles() async {
+    try {
+      final file = await _persistenceFile();
+      print('AddPostBloc: Checking persistence file at ${file.path}');
+      if (await file.exists()) {
+        print('AddPostBloc: Persistence file exists');
+        final contents = await file.readAsString();
+        print('AddPostBloc: Raw persisted contents: $contents');
+        final List<dynamic> paths = json.decode(contents);
+        imagefiles.clear();
+        for (var p in paths) {
+          try {
+            final xf = XFile(p.toString());
+            imagefiles.add(xf);
+            print('AddPostBloc: Restored file path: ${xf.path}');
+          } catch (ex) {
+            print('AddPostBloc: Failed to restore path $p: $ex');
+            // ignore invalid entries
+          }
+        }
+        print('AddPostBloc: Total restored files: ${imagefiles.length}');
+        if (imagefiles.isNotEmpty) add(RestoreFilesEvent());
+      } else {
+        print('AddPostBloc: Persistence file does not exist');
+      }
+    } catch (e) {
+      print('AddPostBloc: Error loading persisted files: $e');
+    }
+  }
+
+  Future<void> _persistFiles() async {
+    try {
+      final file = await _persistenceFile();
+      final paths = imagefiles.map((e) => e.path).toList();
+      print('AddPostBloc: Persisting ${paths.length} files to ${file.path}');
+      print('AddPostBloc: Persist paths: $paths');
+      await file.writeAsString(json.encode(paths));
+    } catch (e) {
+      print('AddPostBloc: Error persisting files: $e');
+    }
+  }
+
+  /// Public API to force reloading persisted files (call on app resume)
+  Future<void> restorePersistedFiles() async {
+    await _loadPersistedFiles();
   }
 
   _checkInSearch(PlaceAddEvent event, Emitter<AddPostState> emit) async {
@@ -144,17 +203,60 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
   _SelectedFile(SelectedFiles event, Emitter<AddPostState> emit) async {
     if (event.isRemove) {
       print('AddPostBloc: Removing image ${event.pickedfiles.path}');
-      imagefiles.remove(event.pickedfiles);
+      // Try to remove the file object matching the path
+      imagefiles.removeWhere((x) => x.path == event.pickedfiles.path);
+      // Also attempt to delete the backing file if it exists in app cache
+      try {
+        final f = File(event.pickedfiles.path);
+        if (await f.exists()) {
+          await f.delete();
+          print('AddPostBloc: Deleted persisted file at ${f.path}');
+        }
+      } catch (ex) {
+        print('AddPostBloc: Failed to delete persisted file: $ex');
+      }
       print('AddPostBloc: Now have ${imagefiles.length} images after removal');
       emit(PaginationLoadedState());
       print('AddPostBloc: Emitted PaginationLoadedState after removal');
+      await _persistFiles();
     } else {
       print('AddPostBloc: Adding image ${event.pickedfiles.path}');
-      imagefiles.add(event.pickedfiles);
-      print('AddPostBloc: Now have ${imagefiles.length} images after addition');
-      print('AddPostBloc: Emitting PaginationLoadedState');
-      emit(PaginationLoadedState());
-      print('AddPostBloc: PaginationLoadedState emitted successfully');
+      try {
+        // Copy the picked file into app temporary directory to ensure we have
+        // a stable, readable path across lifecycle and limited storage access.
+        final dir = await getTemporaryDirectory();
+        final srcPath = event.pickedfiles.path;
+        final name = basename(srcPath);
+        final targetPath = '${dir.path}/doctak_addpost_${DateTime.now().millisecondsSinceEpoch}_$name';
+
+        // Attempt direct file copy; if source isn't a regular file, fall back to bytes
+        final srcFile = File(srcPath);
+        if (await srcFile.exists()) {
+          await srcFile.copy(targetPath);
+          print('AddPostBloc: Copied file to $targetPath');
+        } else {
+          // Some platforms return URIs that aren't directly addressable as files.
+          // Use XFile.readAsBytes() to obtain data and write to target.
+          try {
+            final bytes = await event.pickedfiles.readAsBytes();
+            final targetFile = File(targetPath);
+            await targetFile.writeAsBytes(bytes);
+            print('AddPostBloc: Wrote bytes to $targetPath');
+          } catch (ex) {
+            print('AddPostBloc: Failed to copy picked file bytes: $ex');
+          }
+        }
+
+        final newXf = XFile(targetPath);
+        imagefiles.add(newXf);
+        print('AddPostBloc: Now have ${imagefiles.length} images after addition');
+        print('AddPostBloc: Emitting PaginationLoadedState');
+        emit(PaginationLoadedState());
+        print('AddPostBloc: PaginationLoadedState emitted successfully');
+        await _persistFiles();
+      } catch (e) {
+        print('AddPostBloc: Error while handling picked file: $e');
+      }
     }
   }
 
@@ -181,8 +283,8 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     ProgressDialogUtils.showProgressDialog();
     print(tagFriends.toString());
 
-    _uploadPost(title, locationName, latitude, longitude, backgroundColor,
-        tagFriends.toString(), feeling ?? '');
+    await _uploadPost(title, locationName, latitude, longitude, backgroundColor,
+      tagFriends.toString(), feeling ?? '', emit);
   }
 
   _addTitle(TextFieldEvent event, Emitter<AddPostState> emit) async {
@@ -201,14 +303,15 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     // );
   }
 
-  Future<void> _uploadPost(
+    Future<void> _uploadPost(
       String title,
       String locationName,
       String lat,
       String lng,
       String backgroundColor,
       String tagging,
-      String feeling) async {
+      String feeling,
+      Emitter<AddPostState> emit) async {
     var uri = Uri.parse("${AppData.remoteUrl}/new_post");
     var request = http.MultipartRequest('POST', uri)
       ..fields['title'] = title
@@ -252,8 +355,11 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       var streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
       print('hiii${response.body}');
+      
+      // Always hide progress dialog after getting response (success or failure)
+      ProgressDialogUtils.hideProgressDialog();
+      
       if (response.statusCode == 200) {
-        ProgressDialogUtils.hideProgressDialog();
         // emit(ResponseLoadedState(response.body));
         // selectedFiles.clear(); // Clear all selected files
         // _captionController.clear();
@@ -283,9 +389,6 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
         //   ),
         // );
       } else {
-        // ProgressDialogUtils.hideProgressDialog();
-        // emit(ResponseLoadedState(response.body));
-
         print(response.statusCode);
         // ScaffoldMessenger.of(context).showSnackBar(
         //   const SnackBar(content: Text('Failed to upload post')),
@@ -294,13 +397,13 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       emit(ResponseLoadedState(response.body));
 
     } catch (e) {
+      // Ensure dialog is hidden on exception too
+      ProgressDialogUtils.hideProgressDialog();
+      print('Error uploading post: $e');
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(content: Text('Error: $e')),
       // );
-    } finally {
-      // setState(() {
-      //   _isUploading = false;
-      // });
+      emit(DataError('Error uploading post: $e'));
     }
   }
 

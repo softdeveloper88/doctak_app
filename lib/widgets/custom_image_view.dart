@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../core/network/custom_cache_manager.dart';
 import '../presentation/home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
 
 class CustomImageView extends StatelessWidget {
@@ -53,10 +54,15 @@ class CustomImageView extends StatelessWidget {
   Widget _buildWidget() {
     return Padding(
       padding: margin ?? EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        child: _buildCircleImage(),
-      ),
+      child: onTap != null
+          ? Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                child: _buildCircleImage(),
+              ),
+            )
+          : _buildCircleImage(),
     );
   }
 
@@ -118,6 +124,7 @@ class CustomImageView extends StatelessWidget {
             fit: fit,
             imageUrl: imagePath!,
             color: color,
+            cacheManager: CustomCacheManager(),
             httpHeaders: const {
               'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
               'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',

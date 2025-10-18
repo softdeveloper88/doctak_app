@@ -19,10 +19,12 @@ class VirtualizedConferencesList extends StatefulWidget {
   });
 
   @override
-  State<VirtualizedConferencesList> createState() => _VirtualizedConferencesListState();
+  State<VirtualizedConferencesList> createState() =>
+      _VirtualizedConferencesListState();
 }
 
-class _VirtualizedConferencesListState extends State<VirtualizedConferencesList> {
+class _VirtualizedConferencesListState
+    extends State<VirtualizedConferencesList> {
   // Track which conference items are currently visible for optimization
   final Set<int> _visibleConferenceIndices = {};
 
@@ -58,10 +60,13 @@ class _VirtualizedConferencesListState extends State<VirtualizedConferencesList>
   // Virtualized list implementation
   Widget _buildVirtualizedConferencesList() {
     final bloc = widget.conferenceBloc;
-    
+
     return ListView.builder(
       controller: widget.scrollController,
-      padding: const EdgeInsets.only(top: 10, bottom: 16),
+      padding: EdgeInsets.only(
+        top: 10,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
       itemCount: bloc.conferenceList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,
@@ -72,15 +77,12 @@ class _VirtualizedConferencesListState extends State<VirtualizedConferencesList>
             bloc.add(CheckIfNeedMoreDataEvent(index: index));
           }
         }
-        
+
         // Show shimmer loader at the bottom if loading more
         if (bloc.numberOfPage != bloc.pageNumber - 1 &&
             index >= bloc.conferenceList.length - 1) {
-          return SizedBox(
-            height: 400,
-            child: ConferencesShimmerLoader()
-          );
-        } 
+          return SizedBox(height: 400, child: ConferencesShimmerLoader());
+        }
         // Show ads every 5 items
         else if ((index % 5 == 0 && index != 0) &&
             AppData.isShowGoogleNativeAds) {
@@ -97,7 +99,9 @@ class _VirtualizedConferencesListState extends State<VirtualizedConferencesList>
   // Lazy loading conference item implementation
   Widget _buildLazyLoadConferenceItem(int index) {
     return VisibilityDetector(
-      key: Key('conference_visibility_${widget.conferenceBloc.conferenceList[index].id}'),
+      key: Key(
+        'conference_visibility_${widget.conferenceBloc.conferenceList[index].id}',
+      ),
       onVisibilityChanged: (visibilityInfo) {
         final isVisible = visibilityInfo.visibleFraction > 0.1;
         _handleVisibilityChanged(index, isVisible);
@@ -115,7 +119,7 @@ class _VirtualizedConferencesListState extends State<VirtualizedConferencesList>
     } else {
       _visibleConferenceIndices.remove(index);
     }
-    
+
     // Can be used for analytics or optimization in the future
   }
 }

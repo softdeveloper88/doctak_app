@@ -1,8 +1,9 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
 class AppSharedPreferences {
   Future<void> clearSharedPreferencesData(context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = SecureStorageService.instance;
+    await prefs.initialize();
     await prefs.remove('rememberMe');
     await prefs.remove('token');
     await prefs.remove('token');

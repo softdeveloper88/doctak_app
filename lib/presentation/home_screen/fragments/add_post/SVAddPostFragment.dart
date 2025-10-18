@@ -22,8 +22,9 @@ import 'components/SVPostTextComponent.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
-  SVAddPostFragment({required this.refresh, Key? key}) : super(key: key);
-  Function refresh;
+  SVAddPostFragment({required this.refresh, this.addPostBloc, Key? key}) : super(key: key);
+  final Function refresh;
+  final AddPostBloc? addPostBloc;
 
   @override
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
@@ -65,13 +66,18 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     });
   }
 
-  AddPostBloc searchPeopleBloc = AddPostBloc();
+  late final AddPostBloc searchPeopleBloc;
+  late final bool _createdBloc;
   final QuillController _controller = QuillController.basic();
+  final TextEditingController _postTextController = TextEditingController();
 
   @override
   void initState() {
     currentColor = SVDividerColor;
     super.initState();
+    // Use provided bloc if available to preserve state across navigation
+    _createdBloc = widget.addPostBloc == null;
+    searchPeopleBloc = widget.addPostBloc ?? AddPostBloc();
     WidgetsBinding.instance.addObserver(this);
     afterBuildCreated(() {
       setStatusBarColor(context.cardColor);
@@ -84,6 +90,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     setStatusBarColor(
       appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground,
     );
+    _postTextController.dispose();
+    // Close the bloc if this widget created it
+    if (_createdBloc) {
+      searchPeopleBloc.close();
+    }
     super.dispose();
   }
   
@@ -93,6 +104,12 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     if (state == AppLifecycleState.resumed) {
       print('SVAddPost: App resumed from background');
       // Force a UI refresh when returning from gallery
+      // Try restoring persisted files explicitly (in case they were cleared from memory)
+      try {
+        searchPeopleBloc.restorePersistedFiles();
+      } catch (e) {
+        print('SVAddPost: restorePersistedFiles failed: $e');
+      }
       if (mounted) {
         setState(() {
           // This will trigger a rebuild with updated images
@@ -140,21 +157,81 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
             listener: (BuildContext context, AddPostState state) {
               if (state is ResponseLoadedState) {
                 print("State: ${state.toString()}");
-                Map<String, dynamic> jsonMap = json.decode(state.message);
-                if (jsonMap['success'] == true) {
-                  searchPeopleBloc.selectedSearchPeopleData.clear();
-                  searchPeopleBloc.imagefiles.clear();
-                  searchPeopleBloc.title = '';
-                  searchPeopleBloc.feeling = '';
-                  searchPeopleBloc.backgroundColor = '';
-                  showToast(jsonMap['message']);
-                  print('Success: ${jsonMap['message']}');
-                  widget.refresh();
-                  Navigator.of(context).pop('');
-                } else {
-                  showToast(jsonMap['message']);
-                  print('Error: ${jsonMap['message']}');
+                print("Response message: ${state.message}");
+                try {
+                  Map<String, dynamic> jsonMap = json.decode(state.message);
+                  
+                  // Helper function to extract message from response
+                  String extractMessage(dynamic messageData, String defaultMsg) {
+                    if (messageData == null) return defaultMsg;
+                    if (messageData is String) return messageData;
+                    if (messageData is List && messageData.isNotEmpty) {
+                      return messageData.first.toString();
+                    }
+                    return defaultMsg;
+                  }
+                  
+                  if (jsonMap['success'] == true) {
+                    final message = extractMessage(jsonMap['message'], 'Post created successfully!');
+                    showToast(message);
+                    print('Success: $message');
+                    
+                    // Schedule clearing and navigation for next frame to avoid state conflicts
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      
+                      // Clear BLoC data
+                      searchPeopleBloc.selectedSearchPeopleData.clear();
+                      searchPeopleBloc.imagefiles.clear();
+                      searchPeopleBloc.title = '';
+                      searchPeopleBloc.feeling = '';
+                      searchPeopleBloc.backgroundColor = '';
+                      
+                      // Clear text field and reset color
+                      _postTextController.clear();
+                      setState(() {
+                        currentColor = SVDividerColor;
+                        currentSetColor = '';
+                      });
+                      
+                      // Navigate to home after clearing
+                      Future.delayed(const Duration(milliseconds: 300), () {
+                        if (mounted) {
+                          widget.refresh();
+                        }
+                      });
+                    });
+                  } else {
+                    final errorMsg = extractMessage(jsonMap['message'], 'Failed to create post');
+                    showToast(errorMsg);
+                    print('Error: $errorMsg');
+                  }
+                } catch (e) {
+                  print('Error parsing response: $e');
+                  showToast('Post created successfully!');
+                  
+                  // Schedule clearing and navigation for next frame to avoid state conflicts
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    
+                    // Clear form on success
+                    _postTextController.clear();
+                    setState(() {
+                      currentColor = SVDividerColor;
+                      currentSetColor = '';
+                    });
+                    
+                    // Fallback: assume success and refresh home
+                    Future.delayed(const Duration(milliseconds: 300), () {
+                      if (mounted) {
+                        widget.refresh();
+                      }
+                    });
+                  });
                 }
+              } else if (state is DataError) {
+                print("Error State: ${state.errorMessage}");
+                showToast(state.errorMessage);
               }
             },
             child: Container(
@@ -250,7 +327,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppData.name ?? '',
+                                AppData.name,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -279,6 +356,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   ),
                   // Post Text Input Section
                   SVPostTextComponent(
+                    textController: _postTextController,
                     onColorChange: changeColor,
                     colorValue: currentColor,
                     searchPeopleBloc: searchPeopleBloc,

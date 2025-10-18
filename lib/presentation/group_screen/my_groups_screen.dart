@@ -74,7 +74,7 @@ class _MyGroupsScreenState extends State<MyGroupsScreen> {
                 ));
               } else if (state is PaginationLoadedState) {
                 return ListView.builder(
-                  shrinkWrap: true,
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
                   itemCount: groupBloc.groupListModel?.groups?.length ??
                       0, // Replace with the actual number of items
                   itemBuilder: (context, index) {

@@ -87,3 +87,8 @@ class CheckIfNeedMoreDataEvent extends AddPostEvent {
   @override
   List<Object?> get props => [index];
 }
+
+class RestoreFilesEvent extends AddPostEvent {
+  @override
+  List<Object?> get props => [];
+}

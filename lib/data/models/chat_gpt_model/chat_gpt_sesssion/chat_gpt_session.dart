@@ -20,7 +20,7 @@ class ChatGptSession {
     }
   }
   bool? success;
-  dynamic newSessionId;
+  int? newSessionId;
   List<Sessions>? sessions;
 
   Map<String, dynamic> toJson() {

@@ -319,6 +319,20 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
     final mimeType = widget.message.mimeType ?? '';
     
     if (mimeType.startsWith('image/')) {
+      // Validate image path before attempting to load
+      if (widget.message.filePath == null || widget.message.filePath!.trim().isEmpty) {
+        return Container(
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Center(
+            child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+          ),
+        );
+      }
+      
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Image.network(
@@ -326,6 +340,15 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
           height: 150,
           width: double.infinity,
           fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              height: 150,
+              color: Colors.grey.shade200,
+              child: const Center(
+                child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+              ),
+            );
+          },
         ),
       );
     } else {

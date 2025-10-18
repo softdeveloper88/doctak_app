@@ -3,11 +3,11 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
 class TermsAndConditionScreen extends StatefulWidget {
   const TermsAndConditionScreen({super.key});
-  
+
   @override
   State<TermsAndConditionScreen> createState() =>
       _TermsAndConditionScreenState();
@@ -27,7 +27,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
             title: translation(context).lbl_terms_and_conditions,
             titleIcon: Icons.description_outlined,
           ),
-          
+
           // Content
           Expanded(
             child: Container(
@@ -61,7 +61,10 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                           children: [
                             // Header
                             Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.blue.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
@@ -88,9 +91,9 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                                 ],
                               ),
                             ),
-                            
+
                             const SizedBox(height: 20),
-                            
+
                             // Terms Content
                             Text(
                               '''Terms of Service for DocTak.net
@@ -174,7 +177,7 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                       ),
                     ),
                   ),
-                  
+
                   // Agreement Section
                   Container(
                     width: double.infinity,
@@ -198,9 +201,9 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _isChecked 
-                                ? Colors.blue.withAlpha(100)
-                                : Colors.grey.withAlpha(50),
+                              color: _isChecked
+                                  ? Colors.blue.withAlpha(100)
+                                  : Colors.grey.withAlpha(50),
                               width: 1.5,
                             ),
                           ),
@@ -209,9 +212,9 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                               Container(
                                 padding: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
-                                  color: _isChecked 
-                                    ? Colors.blue.withOpacity(0.1)
-                                    : Colors.transparent,
+                                  color: _isChecked
+                                      ? Colors.blue.withOpacity(0.1)
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Checkbox(
@@ -230,49 +233,53 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  translation(context).lbl_agree_terms_conditions,
+                                  translation(
+                                    context,
+                                  ).lbl_agree_terms_conditions,
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     fontFamily: 'Poppins',
-                                    color: _isChecked 
-                                      ? Colors.blue[800]
-                                      : const Color(0xFF6B7280),
+                                    color: _isChecked
+                                        ? Colors.blue[800]
+                                        : const Color(0xFF6B7280),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // Accept Button
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: _isChecked ? [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ] : [],
+                            boxShadow: _isChecked
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                : [],
                           ),
                           child: ElevatedButton(
                             onPressed: _isChecked
                                 ? () async {
-                                    SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
+                                    final prefs = SecureStorageService.instance;
+                                    await prefs.initialize();
                                     await prefs.setBool('acceptTerms', true);
                                     Navigator.pop(context);
                                   }
                                 : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _isChecked 
-                                ? Colors.blue[600]
-                                : Colors.grey[300],
+                              backgroundColor: _isChecked
+                                  ? Colors.blue[600]
+                                  : Colors.grey[300],
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
@@ -284,11 +291,13 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
-                                  _isChecked 
-                                    ? Icons.check_circle_outline
-                                    : Icons.radio_button_unchecked,
+                                  _isChecked
+                                      ? Icons.check_circle_outline
+                                      : Icons.radio_button_unchecked,
                                   size: 20,
-                                  color: _isChecked ? Colors.white : Colors.grey[600],
+                                  color: _isChecked
+                                      ? Colors.white
+                                      : Colors.grey[600],
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
@@ -297,7 +306,9 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                     fontFamily: 'Poppins',
-                                    color: _isChecked ? Colors.white : Colors.grey[600],
+                                    color: _isChecked
+                                        ? Colors.white
+                                        : Colors.grey[600],
                                   ),
                                 ),
                               ],

@@ -43,6 +43,8 @@ class Messages {
     this.imageUrl1,
     this.imageUrl2,
     this.updatedAt,
+    this.imageBytes1,
+    this.imageBytes2,
   });
 
   Messages.fromJson(dynamic json) {
@@ -64,6 +66,8 @@ class Messages {
   String? imageUrl1;
   String? imageUrl2;
   String? updatedAt;
+  List<int>? imageBytes1;
+  List<int>? imageBytes2;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

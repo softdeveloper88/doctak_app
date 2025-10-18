@@ -73,7 +73,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
   void _onSearch(String query) {
     final bloc = context.read<DiscussionListBloc>();
     final currentState = bloc.state;
-    
+
     if (currentState is DiscussionListLoaded) {
       final updatedFilters = currentState.currentFilters.copyWith(
         searchQuery: query.isEmpty ? null : query,
@@ -101,10 +101,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
           // Search icon button
           IconButton(
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 36,
-            ),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -132,10 +129,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
             margin: const EdgeInsets.only(right: 16),
             child: IconButton(
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -166,106 +160,125 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
                     child: isSearchShow
-                      ? Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                          decoration: BoxDecoration(
-                            color: AppData.isShowGoogleBannerAds ?? false
-                                ? Colors.blueGrey[800]
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(24.0),
-                            border: Border.all(
-                              color: Colors.blue.withOpacity(0.2),
-                              width: 1.5,
+                        ? Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 16.0,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.05),
-                                offset: const Offset(0, 2),
-                                blurRadius: 6,
-                                spreadRadius: 0,
+                            decoration: BoxDecoration(
+                              color: AppData.isShowGoogleBannerAds ?? false
+                                  ? Colors.blueGrey[800]
+                                  : Colors.grey[100],
+                              borderRadius: BorderRadius.circular(24.0),
+                              border: Border.all(
+                                color: Colors.blue.withOpacity(0.2),
+                                width: 1.5,
                               ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24.0),
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                  child: Icon(
-                                    Icons.search_rounded,
-                                    color: Colors.blue.withOpacity(0.6),
-                                    size: 24,
-                                  ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.05),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 6,
+                                  spreadRadius: 0,
                                 ),
-                                Expanded(
-                                  child: AppTextField(
-                                    controller: _searchController,
-                                    textFieldType: TextFieldType.NAME,
-                                    textStyle: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 14,
-                                      color: AppData.isShowGoogleBannerAds ?? false
-                                          ? Colors.white
-                                          : Colors.black87,
-                                    ),
-                                    onChanged: (searchTxt) async {
-                                      if (_debounce?.isActive ?? false)
-                                        _debounce?.cancel();
-                                      _debounce = Timer(
-                                          const Duration(milliseconds: 500), () {
-                                        _onSearch(searchTxt);
-                                      });
-                                    },
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: translation(context).lbl_search_case_discussions,
-                                      hintStyle: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14,
-                                        color: AppData.isShowGoogleBannerAds ?? false
-                                            ? Colors.white60
-                                            : Colors.black54,
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                                    ),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    _searchController.clear();
-                                    _onSearch('');
-                                  },
-                                  borderRadius: const BorderRadius.only(
-                                    topRight: Radius.circular(24),
-                                    bottomRight: Radius.circular(24),
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.1),
-                                      borderRadius: const BorderRadius.only(
-                                        topRight: Radius.circular(24),
-                                        bottomRight: Radius.circular(24),
-                                      ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24.0),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12.0,
                                     ),
                                     child: Icon(
-                                      Icons.clear,
+                                      Icons.search_rounded,
                                       color: Colors.blue.withOpacity(0.6),
                                       size: 24,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  Expanded(
+                                    child: AppTextField(
+                                      controller: _searchController,
+                                      textFieldType: TextFieldType.NAME,
+                                      textStyle: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 14,
+                                        color:
+                                            AppData.isShowGoogleBannerAds ??
+                                                false
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                      onChanged: (searchTxt) async {
+                                        if (_debounce?.isActive ?? false)
+                                          _debounce?.cancel();
+                                        _debounce = Timer(
+                                          const Duration(milliseconds: 500),
+                                          () {
+                                            _onSearch(searchTxt);
+                                          },
+                                        );
+                                      },
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: translation(
+                                          context,
+                                        ).lbl_search_case_discussions,
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14,
+                                          color:
+                                              AppData.isShowGoogleBannerAds ??
+                                                  false
+                                              ? Colors.white60
+                                              : Colors.black54,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              vertical: 14.0,
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      _searchController.clear();
+                                      _onSearch('');
+                                    },
+                                    borderRadius: const BorderRadius.only(
+                                      topRight: Radius.circular(24),
+                                      bottomRight: Radius.circular(24),
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.1),
+                                        borderRadius: const BorderRadius.only(
+                                          topRight: Radius.circular(24),
+                                          bottomRight: Radius.circular(24),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.clear,
+                                        color: Colors.blue.withOpacity(0.6),
+                                        size: 24,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        )
-                      : const SizedBox(),
+                          )
+                        : const SizedBox(),
                   ),
                 ),
                 // Filter options section
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                   child: BlocBuilder<DiscussionListBloc, DiscussionListState>(
                     builder: (context, state) {
                       if (state is DiscussionListLoaded) {
@@ -287,12 +300,18 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   offset: const Offset(0, 45),
-                                  tooltip: translation(context).lbl_filter_by_specialty,
+                                  tooltip: translation(
+                                    context,
+                                  ).lbl_filter_by_specialty,
                                   elevation: 8,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.medical_services_outlined,
@@ -302,7 +321,13 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                         const SizedBox(width: 6),
                                         Expanded(
                                           child: Text(
-                                            state.currentFilters.selectedSpecialty?.name ?? translation(context).lbl_all_specialties,
+                                            state
+                                                    .currentFilters
+                                                    .selectedSpecialty
+                                                    ?.name ??
+                                                translation(
+                                                  context,
+                                                ).lbl_all_specialties,
                                             style: const TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
@@ -320,29 +345,46 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     ),
                                   ),
                                   itemBuilder: (BuildContext context) {
-                                    final items = <PopupMenuEntry<SpecialtyFilter>>[];
-                                    
+                                    final items =
+                                        <PopupMenuEntry<SpecialtyFilter>>[];
+
                                     // Add "All" option
                                     items.add(
                                       PopupMenuItem<SpecialtyFilter>(
-                                        value: SpecialtyFilter(id: 0, name: translation(context).lbl_all_specialties, slug: 'all'),
+                                        value: SpecialtyFilter(
+                                          id: 0,
+                                          name: translation(
+                                            context,
+                                          ).lbl_all_specialties,
+                                          slug: 'all',
+                                        ),
                                         height: 35,
                                         child: Text(
-                                          translation(context).lbl_all_specialties,
+                                          translation(
+                                            context,
+                                          ).lbl_all_specialties,
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontFamily: 'Poppins',
-                                            color: state.currentFilters.selectedSpecialty == null
+                                            color:
+                                                state
+                                                        .currentFilters
+                                                        .selectedSpecialty ==
+                                                    null
                                                 ? Colors.blue[800]
                                                 : Colors.black87,
-                                            fontWeight: state.currentFilters.selectedSpecialty == null
+                                            fontWeight:
+                                                state
+                                                        .currentFilters
+                                                        .selectedSpecialty ==
+                                                    null
                                                 ? FontWeight.w600
                                                 : FontWeight.w400,
                                           ),
                                         ),
                                       ),
                                     );
-                                    
+
                                     // Add specialty options
                                     items.addAll(
                                       state.specialties.map((specialty) {
@@ -354,10 +396,20 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
-                                              color: state.currentFilters.selectedSpecialty?.id == specialty.id
+                                              color:
+                                                  state
+                                                          .currentFilters
+                                                          .selectedSpecialty
+                                                          ?.id ==
+                                                      specialty.id
                                                   ? Colors.blue[800]
                                                   : Colors.black87,
-                                              fontWeight: state.currentFilters.selectedSpecialty?.id == specialty.id
+                                              fontWeight:
+                                                  state
+                                                          .currentFilters
+                                                          .selectedSpecialty
+                                                          ?.id ==
+                                                      specialty.id
                                                   ? FontWeight.w600
                                                   : FontWeight.w400,
                                             ),
@@ -366,16 +418,23 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                         );
                                       }).toList(),
                                     );
-                                    
+
                                     return items;
                                   },
-                                  onSelected: (SpecialtyFilter? selectedSpecialty) {
-                                    final updatedFilters = state.currentFilters.copyWith(
-                                      selectedSpecialty: selectedSpecialty?.id == 0 ? null : selectedSpecialty,
-                                      clearSpecialty: selectedSpecialty?.id == 0,
-                                    );
-                                    _onFiltersChanged(updatedFilters);
-                                  },
+                                  onSelected:
+                                      (SpecialtyFilter? selectedSpecialty) {
+                                        final updatedFilters = state
+                                            .currentFilters
+                                            .copyWith(
+                                              selectedSpecialty:
+                                                  selectedSpecialty?.id == 0
+                                                  ? null
+                                                  : selectedSpecialty,
+                                              clearSpecialty:
+                                                  selectedSpecialty?.id == 0,
+                                            );
+                                        _onFiltersChanged(updatedFilters);
+                                      },
                                 ),
                               ),
                             ),
@@ -520,7 +579,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                 tooltip: translation(context).lbl_sort_options,
                                 elevation: 8,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -552,14 +614,20 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            translation(context).lbl_newest_first,
+                                            translation(
+                                              context,
+                                            ).lbl_newest_first,
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
-                                              color: state.currentFilters.sortBy == 'newest'
+                                              color:
+                                                  state.currentFilters.sortBy ==
+                                                      'newest'
                                                   ? Colors.blue[800]
                                                   : Colors.black87,
-                                              fontWeight: state.currentFilters.sortBy == 'newest'
+                                              fontWeight:
+                                                  state.currentFilters.sortBy ==
+                                                      'newest'
                                                   ? FontWeight.w600
                                                   : FontWeight.w400,
                                             ),
@@ -579,14 +647,20 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            translation(context).lbl_most_popular,
+                                            translation(
+                                              context,
+                                            ).lbl_most_popular,
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
-                                              color: state.currentFilters.sortBy == 'popular'
+                                              color:
+                                                  state.currentFilters.sortBy ==
+                                                      'popular'
                                                   ? Colors.blue[800]
                                                   : Colors.black87,
-                                              fontWeight: state.currentFilters.sortBy == 'popular'
+                                              fontWeight:
+                                                  state.currentFilters.sortBy ==
+                                                      'popular'
                                                   ? FontWeight.w600
                                                   : FontWeight.w400,
                                             ),
@@ -606,14 +680,20 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            translation(context).lbl_most_discussed,
+                                            translation(
+                                              context,
+                                            ).lbl_most_discussed,
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
-                                              color: state.currentFilters.sortBy == 'comments'
+                                              color:
+                                                  state.currentFilters.sortBy ==
+                                                      'comments'
                                                   ? Colors.blue[800]
                                                   : Colors.black87,
-                                              fontWeight: state.currentFilters.sortBy == 'comments'
+                                              fontWeight:
+                                                  state.currentFilters.sortBy ==
+                                                      'comments'
                                                   ? FontWeight.w600
                                                   : FontWeight.w400,
                                             ),
@@ -624,9 +704,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                   ];
                                 },
                                 onSelected: (String? sortBy) {
-                                  final updatedFilters = state.currentFilters.copyWith(
-                                    sortBy: sortBy,
-                                  );
+                                  final updatedFilters = state.currentFilters
+                                      .copyWith(sortBy: sortBy);
                                   _onFiltersChanged(updatedFilters);
                                 },
                               ),
@@ -695,7 +774,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                         currentFilters: state.currentFilters,
                         isLoading: state.isLoadingMore,
                       ),
-                      
+
                       // Content
                       Expanded(
                         child: state.discussions.isEmpty
@@ -710,7 +789,9 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      translation(context).msg_no_discussions_found,
+                                      translation(
+                                        context,
+                                      ).msg_no_discussions_found,
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
@@ -720,23 +801,37 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     const SizedBox(height: 8),
                                     Text(
                                       _hasActiveFilters(state.currentFilters)
-                                          ? translation(context).msg_try_adjusting_filters
-                                          : translation(context).msg_be_first_to_start_discussion,
+                                          ? translation(
+                                              context,
+                                            ).msg_try_adjusting_filters
+                                          : translation(
+                                              context,
+                                            ).msg_be_first_to_start_discussion,
                                       style: TextStyle(
                                         color: Colors.grey.shade500,
                                         fontSize: 14,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                                    if (_hasActiveFilters(state.currentFilters)) ...[
+                                    if (_hasActiveFilters(
+                                      state.currentFilters,
+                                    )) ...[
                                       const SizedBox(height: 16),
                                       ElevatedButton(
                                         onPressed: () {
-                                          context.read<DiscussionListBloc>().add(
-                                            UpdateFilters(const CaseDiscussionFilters()),
-                                          );
+                                          context
+                                              .read<DiscussionListBloc>()
+                                              .add(
+                                                UpdateFilters(
+                                                  const CaseDiscussionFilters(),
+                                                ),
+                                              );
                                         },
-                                        child: Text(translation(context).lbl_clear_filters),
+                                        child: Text(
+                                          translation(
+                                            context,
+                                          ).lbl_clear_filters,
+                                        ),
                                       ),
                                     ],
                                   ],
@@ -746,8 +841,17 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                 onRefresh: () async => _onRefresh(),
                                 child: ListView.builder(
                                   controller: _scrollController,
-                                  padding: const EdgeInsets.all(16),
-                                  itemCount: state.discussions.length + (state.hasReachedMax ? 0 : 1),
+                                  padding: EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    top: 16,
+                                    bottom:
+                                        MediaQuery.of(context).padding.bottom +
+                                        16,
+                                  ),
+                                  itemCount:
+                                      state.discussions.length +
+                                      (state.hasReachedMax ? 0 : 1),
                                   itemBuilder: (context, index) {
                                     if (index >= state.discussions.length) {
                                       // Simple shimmer for load more
@@ -760,7 +864,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           child: Container(
                                             decoration: BoxDecoration(
                                               color: Colors.white,
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                           ),
                                         ),
@@ -770,9 +875,13 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     final discussion = state.discussions[index];
                                     return DiscussionCard(
                                       discussion: discussion,
-                                      onTap: () => _navigateToDiscussionDetail(discussion.id),
-                                      onLike: () => _likeDiscussion(discussion.id),
-                                      onDelete: () => _deleteDiscussion(discussion.id),
+                                      onTap: () => _navigateToDiscussionDetail(
+                                        discussion.id,
+                                      ),
+                                      onLike: () =>
+                                          _likeDiscussion(discussion.id),
+                                      onDelete: () =>
+                                          _deleteDiscussion(discussion.id),
                                       onEdit: () => _editDiscussion(discussion),
                                     );
                                   },
@@ -803,7 +912,12 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
   void _navigateToCreateDiscussion() {
     BlocProvider(
       create: (context) => CreateDiscussionBloc(
-        repository: CaseDiscussionRepository(baseUrl:AppData.base2,getAuthToken: (){return AppData.userToken??"";}),
+        repository: CaseDiscussionRepository(
+          baseUrl: AppData.base2,
+          getAuthToken: () {
+            return AppData.userToken ?? "";
+          },
+        ),
       ),
       child: const CreateDiscussionScreen(),
     ).launch(context).then((created) {
@@ -823,7 +937,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
 
   void _editDiscussion(CaseDiscussionListItem discussion) async {
     print('🔄 Navigating to edit mode for case: ${discussion.id}');
-    
+
     // For editing, we need to convert list item to full case discussion
     // For now, create a basic CaseDiscussion from the list item data
     final caseDiscussion = CaseDiscussion(
@@ -838,7 +952,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
       stats: discussion.stats,
       symptoms: discussion.parsedTags,
     );
-    
+
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => BlocProvider(
@@ -856,9 +970,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
     // Refresh the list if the case was updated
     if (result == true) {
       print('✅ Case updated successfully, refreshing list');
-      context.read<DiscussionListBloc>().add(LoadDiscussionList(
-        refresh: true,
-      ));
+      context.read<DiscussionListBloc>().add(LoadDiscussionList(refresh: true));
     }
   }
 

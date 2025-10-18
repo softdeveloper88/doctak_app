@@ -82,10 +82,12 @@ class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTicker
           } else if (state is PaginationLoadedState) {
             return FadeTransition(
               opacity: _fadeAnimation,
-              child: SVProfileHeaderComponent(
-                userProfile: profileBloc.userProfile,
-                profileBoc: profileBloc,
-                isMe: widget.userId == null,
+              child: SizedBox.expand(
+                child: SVProfileHeaderComponent(
+                  userProfile: profileBloc.userProfile,
+                  profileBoc: profileBloc,
+                  isMe: widget.userId == null,
+                ),
               ),
             );
           } else if (state is DataError) {

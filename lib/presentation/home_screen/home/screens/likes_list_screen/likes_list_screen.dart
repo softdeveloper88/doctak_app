@@ -84,7 +84,6 @@ class _LikesListScreenState extends State<LikesListScreen> {
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),
                     itemCount: likesBloc.postLikesList.length,
                     itemBuilder: (context, index) {

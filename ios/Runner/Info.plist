@@ -65,6 +65,8 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>doctak.net</key>
@@ -108,14 +110,15 @@
 	<string>Speech recognition may be used for voice commands and meeting transcription features during medical consultations.</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Media library access is required for playing notification sounds and managing audio sessions during video calls.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Location access may be used to enhance meeting security and provide location-based medical services when permitted.</string>
+
 	<key>NSContactsUsageDescription</key>
 	<string>Contacts access allows you to easily invite medical colleagues to meetings and discussions from your address book.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>
 		<string>INStartCallIntent</string>
+		<string>INStartAudioCallIntent</string>
+		<string>INStartVideoCallIntent</string>
 	</array>
 	<key>GADApplicationIdentifier</key>
     <string>ca-app-pub-9354893692913823~4368543936</string>
@@ -327,11 +330,10 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-		<string>voip</string>
 		<string>audio</string>
-		<string>processing</string>
+		<string>voip</string>
+		<string>remote-notification</string>
+		<string>fetch</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

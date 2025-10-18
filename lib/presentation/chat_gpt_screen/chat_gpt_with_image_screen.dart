@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
@@ -66,42 +67,63 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
   List<XFile> selectedImageFiles = [];
   ImageUploadBloc imageUploadBloc = ImageUploadBloc();
   late StreamSubscription imageUploadSubscription;
-
+  List<int>? imageBytes1;
+  List<int>? imageBytes2;
   @override
   void initState() {
     super.initState();
-    // Add lifecycle observer
     WidgetsBinding.instance.addObserver(this);
 
     // Initialize the ChatGPT bloc with LoadDataValues event
-    BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
+    try {
+      BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
+    } catch (_) {}
 
-    // Sync selectedImageFiles whenever the BLoC state changes
-    print('Main: Setting up BLoC stream listener');
+    // Listen for image upload bloc updates
     imageUploadSubscription = imageUploadBloc.stream.listen((state) {
-      print('Main: *** BLoC STREAM EVENT *** state: ${state.runtimeType}');
       if (state is FileLoadedState) {
-        print(
-          'Main: FileLoadedState detected - BLoC has ${imageUploadBloc.imagefiles.length} files',
-        );
-        for (int i = 0; i < imageUploadBloc.imagefiles.length; i++) {
-          print('Main: BLoC file $i: ${imageUploadBloc.imagefiles[i].path}');
-        }
         if (mounted) {
           setState(() {
             selectedImageFiles = List.from(imageUploadBloc.imagefiles);
           });
-        }
-        print(
-          'Main: selectedImageFiles updated to ${selectedImageFiles.length} files',
-        );
-        for (int i = 0; i < selectedImageFiles.length; i++) {
-          print(
-            'Main: selectedImageFiles file $i: ${selectedImageFiles[i].path}',
-          );
+          // Read image bytes asynchronously
+          _readImageBytes();
         }
       }
     });
+  }
+
+  // Helper used with compute() to read file bytes on a background isolate
+  static Future<List<int>?> _readFileBytesIsolate(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) return await file.readAsBytes();
+    } catch (_) {}
+    return null;
+  }
+
+  // Read image bytes to avoid file access issues on Android
+  Future<void> _readImageBytes() async {
+    imageBytes1 = null;
+    imageBytes2 = null;
+    if (selectedImageFiles.isNotEmpty) {
+      try {
+        final path1 = selectedImageFiles.first.path;
+        imageBytes1 = await compute(_readFileBytesIsolate, path1);
+        print('Read imageBytes1: ${imageBytes1?.length ?? 0} bytes');
+      } catch (e) {
+        print('Error reading first image bytes: $e');
+      }
+      if (selectedImageFiles.length == 2) {
+        try {
+          final path2 = selectedImageFiles.last.path;
+          imageBytes2 = await compute(_readFileBytesIsolate, path2);
+          print('Read imageBytes2: ${imageBytes2?.length ?? 0} bytes');
+        } catch (e) {
+          print('Error reading second image bytes: $e');
+        }
+      }
+    }
   }
 
   void drugsAskQuestion(state1, context) {
@@ -415,23 +437,32 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                             context,
                                           ).lbl_only_one_image_allowed,
                                         );
+                                        return;
+                                      }
+
+                                      // Try opening the picker/options directly first.
+                                      // On iOS PHPicker does not require explicit photo permission
+                                      // and will present the system UI.
+                                      try {
+                                        _showBeforeFileOptions();
+                                        return;
+                                      } catch (e) {
+                                        debugPrint('chat_gpt: picker failed, falling back to permission request: $e');
+                                      }
+
+                                      // If picker failed, request permission and then open options.
+                                      final granted = await PermissionUtils.ensurePhotoPermission();
+                                      if (granted) {
+                                        _showBeforeFileOptions();
                                       } else {
-                                        final granted =
-                                            await PermissionUtils.ensurePhotoPermission();
-                                        if (granted) {
-                                          _showBeforeFileOptions();
+                                        final status = await Permission.photos.status;
+                                        if (status.isPermanentlyDenied) {
+                                          _permissionDialog();
                                         } else {
-                                          final status =
-                                              await Permission.photos.status;
-                                          if (status.isPermanentlyDenied) {
-                                            _permissionDialog();
-                                          } else {
-                                            // Provide non-intrusive feedback instead of forcing settings.
-                                            toasty(
-                                              context,
-                                              'Photo access denied. Please allow to continue.',
-                                            );
-                                          }
+                                          toasty(
+                                            context,
+                                            'Photo access denied. Please allow to continue.',
+                                          );
                                         }
                                       }
                                     },
@@ -564,6 +595,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                           ? File(selectedImageFiles.last.path)
                                           : null
                                     : null,
+                                imageBytes1: index != 0 ? null : (message.imageBytes1 ?? imageBytes1),
+                                imageBytes2: index != 0 ? null : (message.imageBytes2 ?? imageBytes2),
                                 responseImageUrl1: index != 0
                                     ? ''
                                     : message.imageUrl1 ?? '',
@@ -582,6 +615,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                           ? File(selectedImageFiles.last.path)
                                           : null
                                     : null,
+                                imageBytes1: message.imageBytes1 ?? imageBytes1,
+                                imageBytes2: message.imageBytes2 ?? imageBytes2,
                                 responseImageUrl1: message.imageUrl1 ?? '',
                                 responseImageUrl2: message.imageUrl2 ?? '',
                                 onTapReginarate: () {
@@ -766,8 +801,11 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(30),
                                   onTap: () async {
+                                    // Dismiss keyboard reliably on both iOS and Android
+                                    FocusScope.of(context).unfocus();
+                                    FocusManager.instance.primaryFocus?.unfocus();
+
                                     isError = true;
-                                    focusNode.unfocus();
 
                                     if (selectedImageFiles.isEmpty) {
                                       return;
@@ -794,6 +832,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                                 .toString(),
                                             imageUrl1: '',
                                             imageUrl2: '',
+                                            imageBytes1: imageBytes1,
+                                            imageBytes2: imageBytes2,
                                           );
                                           state1.response1.messages!.add(
                                             myMessage,
@@ -842,58 +882,83 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                         !isOneTimeImageUploaded) {
                                       String question = textController.text
                                           .trim();
+
+                                      // mark used immediately (sync); heavy work below
                                       setState(() {
                                         isOneTimeImageUploaded = true;
-                                        var myMessage = Messages(
-                                          id: -1,
-                                          gptSessionId: selectedSessionId
+                                      });
+
+                                      // Read bytes off the UI thread so the optimistic
+                                      // message includes in-memory bytes (stable UI).
+                                      List<int>? outgoingBytes1;
+                                      List<int>? outgoingBytes2;
+                                      try {
+                                        final path1 = imageUploadBloc.imagefiles.first.path;
+                                        outgoingBytes1 = await compute(_readFileBytesIsolate, path1);
+                                        if (imageUploadBloc.imagefiles.length > 1) {
+                                          final path2 = imageUploadBloc.imagefiles.last.path;
+                                          outgoingBytes2 = await compute(_readFileBytesIsolate, path2);
+                                        }
+                                      } catch (e) {
+                                        try {
+                                          final f1 = File(imageUploadBloc.imagefiles.first.path);
+                                          if (await f1.exists()) outgoingBytes1 = await f1.readAsBytes();
+                                          if (imageUploadBloc.imagefiles.length > 1) {
+                                            final f2 = File(imageUploadBloc.imagefiles.last.path);
+                                            if (await f2.exists()) outgoingBytes2 = await f2.readAsBytes();
+                                          }
+                                        } catch (_) {
+                                          outgoingBytes1 = null;
+                                          outgoingBytes2 = null;
+                                        }
+                                      }
+
+                                      var myMessage = Messages(
+                                        id: -1,
+                                        gptSessionId: selectedSessionId.toString(),
+                                        question: question,
+                                        response: translation(
+                                          context,
+                                        ).lbl_generating_response,
+                                        createdAt: DateTime.now().toString(),
+                                        updatedAt: DateTime.now().toString(),
+                                        imageUrl1: imageUploadBloc.imagefiles.first.path,
+                                        imageUrl2: imageUploadBloc.imagefiles.length > 1
+                                            ? imageUploadBloc.imagefiles.last.path
+                                            : imageUploadBloc.imagefiles.first.path,
+                                        imageBytes1: outgoingBytes1 ?? imageBytes1,
+                                        imageBytes2: outgoingBytes2 ?? imageBytes2,
+                                      );
+
+                                      // Add the optimistic message and start the request
+                                      state1.response1.messages!.add(myMessage);
+                                      BlocProvider.of<ChatGPTBloc>(
+                                        context,
+                                      ).add(
+                                        GetPost(
+                                          sessionId: selectedSessionId
                                               .toString(),
-                                          question: question,
-                                          response: translation(
-                                            context,
-                                          ).lbl_generating_response,
-                                          createdAt: DateTime.now().toString(),
-                                          updatedAt: DateTime.now().toString(),
+                                          question: question == ""
+                                              ? translation(
+                                                  context,
+                                                ).lbl_analyse_image
+                                              : question,
                                           imageUrl1: imageUploadBloc
                                               .imagefiles
                                               .first
                                               .path,
                                           imageUrl2: imageUploadBloc
                                               .imagefiles
-                                              .first
+                                              .last
                                               .path,
-                                        );
-                                        state1.response1.messages!.add(
-                                          myMessage,
-                                        );
+                                          imageType: imageType,
+                                        ),
+                                      );
 
-                                        BlocProvider.of<ChatGPTBloc>(
-                                          context,
-                                        ).add(
-                                          GetPost(
-                                            sessionId: selectedSessionId
-                                                .toString(),
-                                            question: question == ""
-                                                ? translation(
-                                                    context,
-                                                  ).lbl_analyse_image
-                                                : question,
-                                            imageUrl1: imageUploadBloc
-                                                .imagefiles
-                                                .first
-                                                .path,
-                                            imageUrl2: imageUploadBloc
-                                                .imagefiles
-                                                .last
-                                                .path,
-                                            imageType: imageType,
-                                          ),
-                                        );
-                                        imageUploadBloc.imagefiles.clear();
-                                        selectedImageFiles.clear();
-                                        textController.clear();
-                                        scrollToBottom();
-                                      });
+                                      imageUploadBloc.imagefiles.clear();
+                                      selectedImageFiles.clear();
+                                      textController.clear();
+                                      scrollToBottom();
                                       try {
                                         isWriting = false;
                                       } catch (e) {
@@ -1553,6 +1618,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                               imageType: imageType,
                               imageUploadBloc,
                               imageLimit: imageLimit,
+                              autoOpenGallery: imageType == 'X-ray',
                               (imageFiles) {
                                 print(
                                   'Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images',
@@ -1606,7 +1672,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Photo Access Required',
                   style: TextStyle(
@@ -1619,7 +1685,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               ),
             ],
           ),
-          content: Text(
+          content: const Text(
             'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.',
             style: TextStyle(
               fontSize: 14,
@@ -1662,7 +1728,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Open Settings',
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -1692,9 +1758,4 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
       }
     });
   }
-
-  // Deprecated: kept for backward compatibility; now using PermissionUtils.ensurePhotoPermission
-  @Deprecated('Use PermissionUtils.ensurePhotoPermission instead')
-  Future<bool> _checkAndRequestPermissions() =>
-      PermissionUtils.ensurePhotoPermission(); // ignore: unused_element
 }

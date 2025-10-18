@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "975716064608-7r8mor94abkkvm7cfqjsbljr7gtt9la2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kt.doctak",
+            "certificate_hash": "501db467a1d32d8aede23906e7dd6a496141ab17"
+          }
+        },
+        {
           "client_id": "975716064608-l220b110f8b4b34tch898ieq273jesea.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -48,16 +56,17 @@
               "client_type": 3
             },
             {
-              "client_id": "975716064608-coi3ro178313fuatut7octgh5ju0tn3h.apps.googleusercontent.com",
+              "client_id": "975716064608-d2ff219g0j77e33vdmaft9euhn8nqlad.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.dinosoftlabs.POPUP",
-                "app_store_id": "231231231"
+                "bundle_id": "com.doctak.ios",
+                "app_store_id": "6448684340"
               }
             }
           ]
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-9354893692913823~5473742044"
     }
   ],
   "configuration_version": "1"

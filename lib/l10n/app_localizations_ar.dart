@@ -541,6 +541,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_error_starting_call => 'خطأ في بدء المكالمة. يرجى المحاولة مرة أخرى.';
 
   @override
+  String get lbl_call_ended => 'انتهت المكالمة';
+
+  @override
+  String get lbl_connection_lost => 'فُقد الاتصال';
+
+  @override
+  String get lbl_call_failed => 'فشلت المكالمة';
+
+  @override
+  String get lbl_permission_denied => 'تم رفض الإذن';
+
+  @override
+  String get lbl_disconnecting_in => 'قطع الاتصال خلال';
+
+  @override
+  String get lbl_seconds => 'ثانية';
+
+  @override
+  String get lbl_waiting_for_answer => 'بانتظار الرد';
+
+  @override
   String get lbl_signup_title => 'إنشاء حساب';
 
   @override

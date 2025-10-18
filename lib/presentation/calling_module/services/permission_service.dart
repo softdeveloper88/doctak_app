@@ -126,8 +126,8 @@ class PermissionService {
   }
 
   // Open app settings
-  static Future<bool> openAppSettings() async {
-    return openAppSettings();
+  static Future<bool> openSettings() async {
+    return await openAppSettings();
   }
 
   // Get permission status summary

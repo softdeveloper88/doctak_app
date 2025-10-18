@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/localization/app_localization.dart';
@@ -28,20 +29,28 @@ class _FileUploadOptionState extends State<FileUploadOption> {
   List<XFile> imagefiles = [];
   openImages() async {
     try {
-      var pickedfiles = await imgpicker.pickMultipleMedia();
-      //you can use ImageCourse.camera for Camera capture
-      if (pickedfiles != null) {
-        pickedfiles.forEach((element) {
+      // Use pickMultipleMedia with requestFullMetadata: false for limited access support
+      var pickedfiles = await imgpicker.pickMultipleMedia(
+        imageQuality: 85,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        requestFullMetadata: false, // Critical for limited access
+      );
+
+      if (pickedfiles.isNotEmpty) {
+        for (var element in pickedfiles) {
           imagefiles.add(element);
           widget.searchPeopleBloc
               .add(SelectedFiles(pickedfiles: element, isRemove: false));
-        });
-        setState(() {});
+        }
+        if (mounted) {
+          setState(() {});
+        }
       } else {
-        print(translation(context).msg_no_image_selected);
+        debugPrint("No image selected");
       }
     } catch (e) {
-      print(translation(context).msg_error_picking_file);
+      debugPrint("Error picking file: $e");
     }
   }
 
@@ -196,25 +205,46 @@ class _FileUploadOptionState extends State<FileUploadOption> {
   }
 
   Widget buildMediaItem(File file) {
-    if (file.path.endsWith('.jpg') ||
-        file.path.endsWith('.jpeg') ||
-        file.path.endsWith('.png')) {
-      // Display image
-      return Image.file(
-        file,
-        fit: BoxFit.cover,
+    final path = file.path;
+
+    if (path.startsWith('content://') ||
+        !(path.toLowerCase().endsWith('.jpg') ||
+            path.toLowerCase().endsWith('.jpeg') ||
+            path.toLowerCase().endsWith('.png') ||
+            path.toLowerCase().endsWith('.webp') ||
+            path.toLowerCase().endsWith('.gif') ||
+            path.toLowerCase().endsWith('.heic'))) {
+      return FutureBuilder<List<int>>(
+        future: XFile(path).readAsBytes(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(color: Colors.grey[200]);
+          }
+          if (snapshot.hasError || snapshot.data == null) {
+            return Container(
+              color: Colors.grey[200],
+              child: const Center(child: Icon(Icons.broken_image_outlined)),
+            );
+          }
+          return Image.memory(Uint8List.fromList(snapshot.data!), fit: BoxFit.cover);
+        },
       );
-    } else if (file.path.endsWith('.mp4') || file.path.endsWith('.mov')) {
-      // Display video
+    }
+
+    if (path.toLowerCase().endsWith('.jpg') ||
+        path.toLowerCase().endsWith('.jpeg') ||
+        path.toLowerCase().endsWith('.png') ||
+        path.toLowerCase().endsWith('.webp') ||
+        path.toLowerCase().endsWith('.gif') ||
+        path.toLowerCase().endsWith('.heic')) {
+      return Image.file(file, fit: BoxFit.cover);
+    } else if (path.toLowerCase().endsWith('.mp4') || path.toLowerCase().endsWith('.mov')) {
       return AspectRatio(
         aspectRatio: 16 / 9,
-        child: DisplayVideo(
-          selectedByte: file,
-        ),
+        child: DisplayVideo(selectedByte: file),
       );
-    } else {
-      // Handle other types of files
-      return Text(translation(context).msg_unsupported_file);
     }
+
+    return Text(translation(context).msg_unsupported_file);
   }
 }

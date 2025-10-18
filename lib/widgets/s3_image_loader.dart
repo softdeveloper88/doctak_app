@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
+import '../core/network/custom_cache_manager.dart';
+
 /// Enhanced S3 image loader with retry logic and better error handling
 class S3ImageLoader extends StatefulWidget {
   final String imageUrl;
@@ -40,6 +42,7 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
       width: widget.width,
       height: widget.height,
       fit: widget.fit,
+      cacheManager: CustomCacheManager(),
       httpHeaders: _getS3Headers(),
       placeholder: (context, url) => widget.placeholder ?? _buildDefaultPlaceholder(),
       errorWidget: (context, url, error) => _handleError(context, url, error),

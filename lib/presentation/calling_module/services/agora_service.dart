@@ -774,7 +774,7 @@ class AgoraService {
       // print('🔐 Using token: "${actualToken.isEmpty ? "EMPTY" : "PROVIDED"}"');
 
       await _engine!.joinChannel(
-        token: token ?? '',
+        token:  '', // token should be empty
         channelId: channelId,
         uid: uid,
         options: options,

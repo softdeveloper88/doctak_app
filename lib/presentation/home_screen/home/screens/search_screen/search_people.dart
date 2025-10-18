@@ -50,7 +50,6 @@ class SearchPeopleList extends StatelessWidget {
               ),
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                shrinkWrap: true,
                 itemBuilder: (context, index) {
                   if (bloc.pageNumber <= bloc.numberOfPage) {
                     if (index ==

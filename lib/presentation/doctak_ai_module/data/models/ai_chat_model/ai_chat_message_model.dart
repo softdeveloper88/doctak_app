@@ -62,6 +62,7 @@ class AiChatMessageModel {
   final String? feedback;
   final List<Source>? sources;
   final DateTime createdAt;
+  final List<int>? fileBytes; // Store image bytes for reliable display
 
   AiChatMessageModel({
     required this.id,
@@ -73,6 +74,7 @@ class AiChatMessageModel {
     this.feedback,
     this.sources,
     required this.createdAt,
+    this.fileBytes,
   });
 
   factory AiChatMessageModel.fromJson(Map<String, dynamic> json) {
@@ -99,6 +101,7 @@ class AiChatMessageModel {
       feedback: json['feedback'],
       sources: sources,
       createdAt: DateTime.parse(json['created_at']),
+      fileBytes: json['file_bytes'] != null ? List<int>.from(json['file_bytes']) : null,
     );
   }
 
@@ -118,6 +121,7 @@ class AiChatMessageModel {
       'feedback': feedback,
       'metadata': metadata.isEmpty ? null : jsonEncode(metadata),
       'created_at': createdAt.toIso8601String(),
+      'file_bytes': fileBytes,
     };
   }
 

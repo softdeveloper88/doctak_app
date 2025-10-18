@@ -22,18 +22,20 @@ class FullScreenImagePage extends StatefulWidget {
   final int listCount;
   final List<Map<String, String>>? mediaUrls;
 
-  const FullScreenImagePage(
-      {super.key,
-      required this.listCount,
-      this.imageUrl,
-      this.post,
-      this.mediaUrls});
+  const FullScreenImagePage({
+    super.key,
+    required this.listCount,
+    this.imageUrl,
+    this.post,
+    this.mediaUrls,
+  });
 
   @override
   State<FullScreenImagePage> createState() => _FullScreenImagePageState();
 }
 
-class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerProviderStateMixin {
+class _FullScreenImagePageState extends State<FullScreenImagePage>
+    with TickerProviderStateMixin {
   Map<String, double> downloadProgress = {};
   Map<String, bool> isDownloading = {};
   late AnimationController _progressAnimationController;
@@ -50,25 +52,23 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _progressAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _progressAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _progressAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     _detailsAnimationController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _detailsAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _detailsAnimationController,
-      curve: Curves.easeOutBack,
-    ));
+    _detailsAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _detailsAnimationController,
+        curve: Curves.easeOutBack,
+      ),
+    );
   }
 
   @override
@@ -91,6 +91,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
       return false;
     }
   }
+
   Future<void> _downloadMedia(String url, BuildContext context) async {
     // Check if already downloading
     if (isDownloading[url] == true) {
@@ -100,7 +101,11 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
 
     final hasPermission = await _requestPermissions();
     if (!hasPermission) {
-      _showToast("Permission denied. Please grant storage access.", Icons.error, Colors.red);
+      _showToast(
+        "Permission denied. Please grant storage access.",
+        Icons.error,
+        Colors.red,
+      );
       return;
     }
 
@@ -108,13 +113,14 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
       isDownloading[url] = true;
       downloadProgress[url] = 0.0;
     });
-    
+
     _progressAnimationController.forward();
 
     final Dio dio = Dio();
     final isVideo = _isVideoUrl(url);
     final extension = isVideo ? '.mp4' : '.jpg';
-    final fileName = 'DocTak_${DateTime.now().millisecondsSinceEpoch}$extension';
+    final fileName =
+        'DocTak_${DateTime.now().millisecondsSinceEpoch}$extension';
 
     try {
       final dir = await getTemporaryDirectory();
@@ -139,11 +145,11 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
       } else {
         await Gal.putImage(filePath);
       }
-      
+
       _showToast(
         isVideo ? "Video saved to gallery" : "Image saved to gallery",
         Icons.check_circle,
-        Colors.green
+        Colors.green,
       );
 
       // Clean up temporary file
@@ -151,9 +157,12 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
       if (await file.exists()) {
         await file.delete();
       }
-
     } catch (e) {
-      _showToast("Failed to download. Please try again.", Icons.error, Colors.red);
+      _showToast(
+        "Failed to download. Please try again.",
+        Icons.error,
+        Colors.red,
+      );
     } finally {
       setState(() {
         isDownloading[url] = false;
@@ -192,7 +201,15 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
   }
 
   bool _isVideoUrl(String url) {
-    final videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.wmv', '.flv', '.webm'];
+    final videoExtensions = [
+      '.mp4',
+      '.mov',
+      '.avi',
+      '.mkv',
+      '.wmv',
+      '.flv',
+      '.webm',
+    ];
     final lowerUrl = url.toLowerCase();
     return videoExtensions.any((ext) => lowerUrl.contains(ext));
   }
@@ -200,10 +217,14 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
   bool isShown = true;
 
   Widget _buildProgressOverlay() {
-    final hasDownloading = isDownloading.values.any((downloading) => downloading);
+    final hasDownloading = isDownloading.values.any(
+      (downloading) => downloading,
+    );
     if (!hasDownloading) return const SizedBox.shrink();
 
-    final currentUrl = isDownloading.keys.firstWhere((key) => isDownloading[key] == true);
+    final currentUrl = isDownloading.keys.firstWhere(
+      (key) => isDownloading[key] == true,
+    );
     final progress = downloadProgress[currentUrl] ?? 0.0;
     final isVideo = _isVideoUrl(currentUrl);
 
@@ -291,7 +312,9 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                     child: LinearProgressIndicator(
                       value: progress,
                       backgroundColor: Colors.white.withOpacity(0.2),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.blue,
+                      ),
                       minHeight: 6,
                     ),
                   ),
@@ -307,6 +330,8 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -337,55 +362,82 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                     ),
                     // options: CarouselOptions(height: 400.0),
                     items: widget.mediaUrls?.map((i) {
-                      return Builder(builder: (BuildContext context) {
-                        if (i['type'] == "image") {
-                          return Stack(children: [
-                            Center(
-                              child: Image.network(
-                                i['url']!,
-                                fit: BoxFit.contain,
-                                width: double.infinity,
-                                height: double.infinity,
-                                loadingBuilder: (BuildContext context,
-                                    Widget child,
-                                    ImageChunkEvent? loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
+                      return Builder(
+                        builder: (BuildContext context) {
+                          if (i['type'] == "image") {
+                            return Stack(
+                              children: [
+                                Center(
+                                  child: Image.network(
+                                    i['url']!,
+                                    fit: BoxFit.contain,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.grey.shade200,
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            size: 64,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    loadingBuilder:
+                                        (
+                                          BuildContext context,
+                                          Widget child,
+                                          ImageChunkEvent? loadingProgress,
+                                        ) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              value:
                                                   loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            Positioned(
-                              right: 16,
-                              top: 80,
-                              child: _buildDownloadButton(i['url']!, context),
-                            ),
-                          ]);
-                        } else {
-                          return Stack(children: [
-                            Center(
-                              child: VideoPlayerWidget(
-                                videoUrl: i['url']!,
-                              ),
-                            ),
-                            Positioned(
-                              right: 16,
-                              top: 80,
-                              child: _buildDownloadButton(i['url']!, context),
-                            ),
-                          ]);
-                        }
-                      });
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 16,
+                                  top: 80,
+                                  child: _buildDownloadButton(
+                                    i['url']!,
+                                    context,
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Stack(
+                              children: [
+                                Center(
+                                  child: VideoPlayerWidget(videoUrl: i['url']!),
+                                ),
+                                Positioned(
+                                  right: 16,
+                                  top: 80,
+                                  child: _buildDownloadButton(
+                                    i['url']!,
+                                    context,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      );
                     }).toList(),
                   )
                 : Image.network(
@@ -393,24 +445,43 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                     fit: BoxFit.contain,
                     width: double.infinity,
                     height: double.infinity,
-                    loadingBuilder: (BuildContext context, Widget child,
-                        ImageChunkEvent? loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
                         ),
                       );
                     },
+                    loadingBuilder:
+                        (
+                          BuildContext context,
+                          Widget child,
+                          ImageChunkEvent? loadingProgress,
+                        ) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
                   ),
           ),
           // Enhanced Header
           SafeArea(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -448,7 +519,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                       ),
                     ),
                   ),
-                  
+
                   // Download button for single image
                   if (widget.listCount == 1)
                     _buildDownloadButton(widget.imageUrl!, context),
@@ -458,49 +529,53 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
           ),
           // Progress overlay
           _buildProgressOverlay(),
-          
+
           // Enhanced floating action button for post details
           if (widget.post != null)
             Positioned(
-              bottom: 30,
-              right: 20,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showDetails = !_showDetails;
-                  });
-                  if (_showDetails) {
-                    _detailsAnimationController.forward();
-                  } else {
-                    _detailsAnimationController.reverse();
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.blue[600]!,
-                        Colors.purple[600]!,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.4),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                        spreadRadius: 2,
+              bottom: 0,
+              right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 30, right: 20),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _showDetails = !_showDetails;
+                      });
+                      if (_showDetails) {
+                        _detailsAnimationController.forward();
+                      } else {
+                        _detailsAnimationController.reverse();
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.blue[600]!, Colors.purple[600]!],
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.4),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: AnimatedRotation(
-                    turns: _showDetails ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 300),
-                    child: Icon(
-                      _showDetails ? Icons.close_rounded : Icons.info_outline_rounded,
-                      color: Colors.white,
-                      size: 28,
+                      child: AnimatedRotation(
+                        turns: _showDetails ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 300),
+                        child: Icon(
+                          _showDetails
+                              ? Icons.close_rounded
+                              : Icons.info_outline_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -508,8 +583,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
             ),
 
           // Post details overlay
-          if (widget.post != null)
-            _buildPostDetailsOverlay(),
+          if (widget.post != null) _buildPostDetailsOverlay(),
           // Post Title, Likes, and Comments
           // Positioned(
           //   bottom: 20,
@@ -554,7 +628,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
   Widget _buildDownloadButton(String url, BuildContext context) {
     final isDownloadingCurrent = isDownloading[url] == true;
     final currentProgress = downloadProgress[url] ?? 0.0;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.black87,
@@ -572,41 +646,43 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(30),
-          onTap: isDownloadingCurrent 
-            ? null 
-            : () => _downloadMedia(url, context),
+          onTap: isDownloadingCurrent
+              ? null
+              : () => _downloadMedia(url, context),
           child: Container(
             padding: const EdgeInsets.all(14),
             child: isDownloadingCurrent
-              ? Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: CircularProgressIndicator(
-                        value: currentProgress,
-                        strokeWidth: 3,
-                        backgroundColor: Colors.white24,
-                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                ? Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          value: currentProgress,
+                          strokeWidth: 3,
+                          backgroundColor: Colors.white24,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.blue,
+                          ),
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${(currentProgress * 100).toInt()}%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
+                      Text(
+                        '${(currentProgress * 100).toInt()}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              : const Icon(
-                  Icons.download_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                    ],
+                  )
+                : const Icon(
+                    Icons.download_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
           ),
         ),
       ),
@@ -625,10 +701,11 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
     return AnimatedBuilder(
       animation: _detailsAnimation,
       builder: (context, child) {
+        final bottomPadding = MediaQuery.of(context).padding.bottom;
         return Positioned(
           left: 20,
           right: 20,
-          bottom: 100 + (50 * (1 - _detailsAnimation.value)),
+          bottom: 100 + bottomPadding + (50 * (1 - _detailsAnimation.value)),
           child: Transform.scale(
             scale: (0.5 + (0.5 * _detailsAnimation.value)).clamp(0.5, 1.2),
             child: Opacity(
@@ -674,7 +751,10 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Colors.blue[400]!, Colors.purple[400]!],
+                                  colors: [
+                                    Colors.blue[400]!,
+                                    Colors.purple[400]!,
+                                  ],
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -698,9 +778,9 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Post content
                         Container(
                           width: double.infinity,
@@ -721,8 +801,12 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                                   fullText,
                                   onTapUrl: (link) async {
                                     if (link.contains('doctak/jobs-detail')) {
-                                      String jobID = Uri.parse(link).pathSegments.last;
-                                      JobsDetailsScreen(jobId: jobID).launch(context);
+                                      String jobID = Uri.parse(
+                                        link,
+                                      ).pathSegments.last;
+                                      JobsDetailsScreen(
+                                        jobId: jobID,
+                                      ).launch(context);
                                     } else {
                                       PostUtils.launchURL(context, link);
                                     }
@@ -740,7 +824,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                                     height: 1.6,
                                   ),
                                 ),
-                              
+
                               // Show more/less button
                               if (words.length > 25)
                                 Padding(
@@ -750,10 +834,16 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                                       _isExpanded = !_isExpanded;
                                     }),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
-                                          colors: [Colors.blue[400]!, Colors.purple[400]!],
+                                          colors: [
+                                            Colors.blue[400]!,
+                                            Colors.purple[400]!,
+                                          ],
                                         ),
                                         borderRadius: BorderRadius.circular(25),
                                         boxShadow: [
@@ -768,7 +858,9 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            _isExpanded ? 'Show Less' : 'Show More',
+                                            _isExpanded
+                                                ? 'Show Less'
+                                                : 'Show More',
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 14,
@@ -778,7 +870,9 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                                           ),
                                           const SizedBox(width: 6),
                                           Icon(
-                                            _isExpanded ? Icons.expand_less : Icons.expand_more,
+                                            _isExpanded
+                                                ? Icons.expand_less
+                                                : Icons.expand_more,
                                             color: Colors.white,
                                             size: 18,
                                           ),
@@ -790,9 +884,9 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Engagement stats
                         Container(
                           width: double.infinity,
@@ -858,8 +952,12 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
     );
   }
 
-
-  Widget _buildStatItem(IconData icon, String count, String label, Color color) {
+  Widget _buildStatItem(
+    IconData icon,
+    String count,
+    String label,
+    Color color,
+  ) {
     return Column(
       children: [
         Container(
@@ -868,11 +966,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerPr
             color: color.withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          child: Icon(icon, color: color, size: 24),
         ),
         const SizedBox(height: 8),
         Text(

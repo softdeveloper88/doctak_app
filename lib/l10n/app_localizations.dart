@@ -11,6 +11,8 @@ import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
 import 'app_localizations_fa.dart';
 import 'app_localizations_fr.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_ur.dart';
 
 // ignore_for_file: type=lint
 
@@ -100,7 +102,9 @@ abstract class AppLocalizations {
     Locale('en'),
     Locale('es'),
     Locale('fa'),
-    Locale('fr')
+    Locale('fr'),
+    Locale('hi'),
+    Locale('ur')
   ];
 
   /// No description provided for @lbl_home.
@@ -1158,6 +1162,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error starting call. Please try again.'**
   String get lbl_error_starting_call;
+
+  /// No description provided for @lbl_call_ended.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Ended'**
+  String get lbl_call_ended;
+
+  /// No description provided for @lbl_connection_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Lost'**
+  String get lbl_connection_lost;
+
+  /// No description provided for @lbl_call_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Failed'**
+  String get lbl_call_failed;
+
+  /// No description provided for @lbl_permission_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Denied'**
+  String get lbl_permission_denied;
+
+  /// No description provided for @lbl_disconnecting_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnecting in'**
+  String get lbl_disconnecting_in;
+
+  /// No description provided for @lbl_seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'seconds'**
+  String get lbl_seconds;
+
+  /// No description provided for @lbl_waiting_for_answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for answer'**
+  String get lbl_waiting_for_answer;
 
   /// No description provided for @lbl_signup_title.
   ///
@@ -5897,7 +5943,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'de', 'en', 'es', 'fa', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'de', 'en', 'es', 'fa', 'fr', 'hi', 'ur'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -5914,6 +5960,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     case 'es': return AppLocalizationsEs();
     case 'fa': return AppLocalizationsFa();
     case 'fr': return AppLocalizationsFr();
+    case 'hi': return AppLocalizationsHi();
+    case 'ur': return AppLocalizationsUr();
   }
 
   throw FlutterError(

@@ -303,28 +303,14 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   right: 16,
                   child: IconButton(
                     onPressed: () async {
-                      const permission = Permission.storage;
-                      const permission1 = Permission.photos;
-                      var status = await permission.status;
-                      print(status);
-                      if (await permission1.isGranted) {
+                      // Use PermissionUtils for proper permission handling on both iOS and Android
+                      final hasPermission = await PermissionUtils.requestGalleryPermissionWithUI(
+                        context,
+                        showRationale: false,
+                      );
+
+                      if (hasPermission) {
                         _showFileOptions(false);
-                      } else if (await permission1.isDenied) {
-                        final result = await permission1.request();
-                        if (status.isGranted) {
-                          _showFileOptions(false);
-                          print("isGranted");
-                        } else if (result.isGranted) {
-                          _showFileOptions(false);
-                          print("isGranted");
-                        } else if (result.isDenied) {
-                          final result = await permission.request();
-                          print("isDenied");
-                        } else if (result.isPermanentlyDenied) {
-                          print("isPermanentlyDenied");
-                        }
-                      } else if (await permission.isPermanentlyDenied) {
-                        print("isPermanentlyDenied");
                       }
                     },
                     icon: Container(
@@ -435,28 +421,14 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                             color: Colors.transparent,
                             child: InkWell(
                               onTap: () async {
-                                const permission = Permission.storage;
-                                const permission1 = Permission.photos;
-                                var status = await permission.status;
-                                print(status);
-                                if (await permission1.isGranted) {
+                                // Use PermissionUtils for proper permission handling on both iOS and Android
+                                final hasPermission = await PermissionUtils.requestGalleryPermissionWithUI(
+                                  context,
+                                  showRationale: false,
+                                );
+
+                                if (hasPermission) {
                                   _showFileOptions(true);
-                                } else if (await permission1.isDenied) {
-                                  final result = await permission1.request();
-                                  if (status.isGranted) {
-                                    _showFileOptions(true);
-                                    print("isGranted");
-                                  } else if (result.isGranted) {
-                                    _showFileOptions(true);
-                                    print("isGranted");
-                                  } else if (result.isDenied) {
-                                    final result = await permission.request();
-                                    print("isDenied");
-                                  } else if (result.isPermanentlyDenied) {
-                                    print("isPermanentlyDenied");
-                                  }
-                                } else if (await permission.isPermanentlyDenied) {
-                                  print("isPermanentlyDenied");
                                 }
                               },
                               borderRadius: BorderRadius.circular(20),
@@ -826,8 +798,17 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
         ),
       ),
       builder: (BuildContext context) {
+        // Get bottom padding for system navigation bars
+        final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+
         return Container(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.only(
+            left: 24.0,
+            right: 24.0,
+            top: 24.0,
+            // Add extra padding for system navigation bars on old devices
+            bottom: 24.0 + bottomPadding,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -863,7 +844,6 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   File? file = await _pickFile(ImageSource.gallery);
                   if (file != null) {
                     setState(() {
-                      print('ddd${file.path}');
                       _selectedFile = file;
                       widget.profileBoc!.add(UpdateProfilePicEvent(
                           filePath: file.path, isProfilePicture: isProfilePic));
@@ -889,14 +869,19 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                 ),
                 onTap: () async {
                   Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.camera);
-                  if (file != null) {
-                    setState(() {
-                      print('ddd${file.path}');
-                      _selectedFile = file;
-                      widget.profileBoc!.add(UpdateProfilePicEvent(
-                          filePath: file.path, isProfilePicture: isProfilePic));
-                    });
+
+                  // Request camera permission before opening camera
+                  final hasCameraPermission = await PermissionUtils.requestCameraPermissionWithUI(context);
+
+                  if (hasCameraPermission) {
+                    File? file = await _pickFile(ImageSource.camera);
+                    if (file != null) {
+                      setState(() {
+                        _selectedFile = file;
+                        widget.profileBoc!.add(UpdateProfilePicEvent(
+                            filePath: file.path, isProfilePicture: isProfilePic));
+                      });
+                    }
                   }
                 },
               ),

@@ -17,37 +17,37 @@ class JobDetailsShimmer extends StatelessWidget {
           children: [
             // Top action buttons shimmer
             _buildActionButtonsShimmer(),
-            
+
             // Hero Card - Job Header shimmer
             _buildJobHeaderCardShimmer(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Job Info Card shimmer
             _buildJobInfoCardShimmer(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Job Statistics Card shimmer
             _buildJobStatsCardShimmer(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Specialties Card shimmer
             _buildSpecialtiesCardShimmer(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Description Card shimmer
             _buildDescriptionCardShimmer(),
-            
+
             const SizedBox(height: 16),
-            
+
             // User Info Card shimmer
             _buildUserInfoCardShimmer(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Action Buttons Card shimmer
             _buildActionButtonsCardShimmer(),
           ],
@@ -136,7 +136,10 @@ class JobDetailsShimmer extends StatelessWidget {
                   const SizedBox(width: 12),
                   // Sponsored Badge Placeholder
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(20),
@@ -294,7 +297,7 @@ class JobDetailsShimmer extends StatelessWidget {
               // Experience Row
               _buildInfoRowShimmer(
                 iconSize: 16,
-                titleWidth: 80, // "Experience" 
+                titleWidth: 80, // "Experience"
                 valueWidth: 65.w, // Realistic experience description
               ),
               const SizedBox(height: 20),
@@ -356,7 +359,8 @@ class JobDetailsShimmer extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey[200], // Light background like actual blue.withOpacity(0.1)
+            color: Colors
+                .grey[200], // Light background like actual blue.withOpacity(0.1)
             shape: BoxShape.circle,
           ),
           child: Container(
@@ -419,9 +423,9 @@ class JobDetailsShimmer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: isFromDate 
-                    ? Colors.blue.withOpacity(0.1)  // Blue for start date
-                    : Colors.red.withOpacity(0.1),  // Red for end date (expired)
+                color: isFromDate
+                    ? Colors.blue.withOpacity(0.1) // Blue for start date
+                    : Colors.red.withOpacity(0.1), // Red for end date (expired)
                 shape: BoxShape.circle,
               ),
               child: Container(
@@ -474,21 +478,27 @@ class JobDetailsShimmer extends StatelessWidget {
               const SizedBox(height: 20),
               Row(
                 children: [
-                  Expanded(child: _buildStatItemShimmer(
-                    color: Colors.blue,
-                    value: "120", // Views count simulation
-                    label: "Views",
-                  )),
-                  Expanded(child: _buildStatItemShimmer(
-                    color: Colors.green,
-                    value: "45", // Clicks count simulation
-                    label: "Clicks",
-                  )),
-                  Expanded(child: _buildStatItemShimmer(
-                    color: Colors.orange,
-                    value: "12", // Applicants count simulation
-                    label: "Applicants",
-                  )),
+                  Expanded(
+                    child: _buildStatItemShimmer(
+                      color: Colors.blue,
+                      value: "120", // Views count simulation
+                      label: "Views",
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildStatItemShimmer(
+                      color: Colors.green,
+                      value: "45", // Clicks count simulation
+                      label: "Clicks",
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildStatItemShimmer(
+                      color: Colors.orange,
+                      value: "12", // Applicants count simulation
+                      label: "Applicants",
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -507,7 +517,9 @@ class JobDetailsShimmer extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1), // Colored background matching actual design
+        color: color.withOpacity(
+          0.1,
+        ), // Colored background matching actual design
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
@@ -572,7 +584,9 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.1), // Purple theme for medical
+                      color: Colors.purple.withOpacity(
+                        0.1,
+                      ), // Purple theme for medical
                       shape: BoxShape.circle,
                     ),
                     child: Container(
@@ -606,7 +620,9 @@ class JobDetailsShimmer extends StatelessWidget {
                   _buildSpecialtyChipShimmer(width: 110), // "Internal Medicine"
                   _buildSpecialtyChipShimmer(width: 75), // "Surgery"
                   _buildSpecialtyChipShimmer(width: 90), // "Pediatrics"
-                  _buildSpecialtyChipShimmer(width: 105), // "Emergency Medicine"
+                  _buildSpecialtyChipShimmer(
+                    width: 105,
+                  ), // "Emergency Medicine"
                 ],
               ),
             ],
@@ -654,7 +670,9 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.teal.withOpacity(0.1), // Teal theme like actual
+                      color: Colors.teal.withOpacity(
+                        0.1,
+                      ), // Teal theme like actual
                       shape: BoxShape.circle,
                     ),
                     child: Container(
@@ -797,7 +815,9 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.indigo.withOpacity(0.1), // Indigo theme like actual
+                      color: Colors.indigo.withOpacity(
+                        0.1,
+                      ), // Indigo theme like actual
                       shape: BoxShape.circle,
                     ),
                     child: Container(
@@ -831,8 +851,8 @@ class JobDetailsShimmer extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.indigo.withOpacity(0.3), 
-                        width: 2
+                        color: Colors.indigo.withOpacity(0.3),
+                        width: 2,
                       ),
                     ),
                     child: Container(
@@ -897,7 +917,9 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1), // Green theme like actual
+                      color: Colors.green.withOpacity(
+                        0.1,
+                      ), // Green theme like actual
                       shape: BoxShape.circle,
                     ),
                     child: Container(
@@ -930,7 +952,9 @@ class JobDetailsShimmer extends StatelessWidget {
                       height: 48,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.8), // Blue for apply button
+                        color: Colors.blue.withOpacity(
+                          0.8,
+                        ), // Blue for apply button
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
@@ -964,7 +988,10 @@ class JobDetailsShimmer extends StatelessWidget {
                       height: 48,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1.5),
+                        border: Border.all(
+                          color: Colors.blue.withOpacity(0.3),
+                          width: 1.5,
+                        ),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
@@ -1000,7 +1027,9 @@ class JobDetailsShimmer extends StatelessWidget {
                 height: 48,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.8), // Green for view applicants
+                  color: Colors.green.withOpacity(
+                    0.8,
+                  ), // Green for view applicants
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(

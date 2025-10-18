@@ -541,6 +541,27 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_error_starting_call => 'خطا در شروع تماس. لطفاً دوباره تلاش کنید.';
 
   @override
+  String get lbl_call_ended => 'تماس پایان یافت';
+
+  @override
+  String get lbl_connection_lost => 'اتصال قطع شد';
+
+  @override
+  String get lbl_call_failed => 'تماس ناموفق';
+
+  @override
+  String get lbl_permission_denied => 'مجوز رد شد';
+
+  @override
+  String get lbl_disconnecting_in => 'قطع اتصال در';
+
+  @override
+  String get lbl_seconds => 'ثانیه';
+
+  @override
+  String get lbl_waiting_for_answer => 'در انتظار پاسخ';
+
+  @override
   String get lbl_signup_title => 'ثبت‌نام';
 
   @override

@@ -9,7 +9,8 @@ class AppData {
   static var base = "https://doctak.net/";
   static var base2 = "https://doctak.net";
   static var basePath = "https://doctak.net/public/";
-  static var imageUrl = "http://doctak-file.s3.ap-south-1.amazonaws.com/";
+  // FIXED: Changed to HTTPS for better compatibility with Android security restrictions
+  static var imageUrl = "https://doctak-file.s3.ap-south-1.amazonaws.com/";
   static var remoteUrl = "https://doctak.net/api/v4";
   static var remoteUrl2 = "https://doctak.net/api/v4";
   static var remoteUrl3 = "https://doctak.net/api/v4";
@@ -46,37 +47,74 @@ class AppData {
   static String? iosBannerAdsId;
 
   /// Native Ads Setting
-  static bool isShowGoogleNativeAds=false;
+  static bool isShowGoogleNativeAds = false;
   static String? androidNativeAdsId;
   static String? iosNativeAdsId;
   static List<Message> chatMessages = [];
 
-  static String deviceToken='';
+  static String deviceToken = '';
 
-  static late PusherChannelsFlutter pusher;
+  static PusherChannelsFlutter? _pusherInstance;
 
-  // Initialize Pusher in your app startup:
-  static Future<void> initializePusher() async {
-    pusher = PusherChannelsFlutter.getInstance();
-
-    try {
-      await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        onConnectionStateChange: onConnectionStateChange,
-        onError: onError,
-        onSubscriptionSucceeded: onSubscriptionSucceeded,
-        onEvent: onEvent,
+  static PusherChannelsFlutter get pusher {
+    if (_pusherInstance == null) {
+      throw Exception(
+        'Pusher not initialized. Call initializePusherIfNeeded() first.',
       );
+    }
+    return _pusherInstance!;
+  }
 
-      await pusher.connect();
-    } catch (e) {
-      print("Error initializing Pusher: $e");
+  // Lazily initialize Pusher with retry mechanism when first needed
+  static Future<void> initializePusherIfNeeded() async {
+    if (isPusherInitialized && _pusherInstance != null) return;
+
+    const int maxRetries = 5;
+    int attempt = 0;
+
+    while (attempt < maxRetries) {
+      attempt++;
+      try {
+        print("Pusher initialization attempt $attempt of $maxRetries");
+
+        // Add delay before first attempt and between retries
+        if (attempt > 1) {
+          await Future.delayed(Duration(milliseconds: 300 * attempt));
+        }
+
+        _pusherInstance = PusherChannelsFlutter.getInstance();
+
+        await _pusherInstance!.init(
+          apiKey: PusherConfig.key,
+          cluster: PusherConfig.cluster,
+          onConnectionStateChange: onConnectionStateChange,
+          onError: onError,
+          onSubscriptionSucceeded: onSubscriptionSucceeded,
+          onEvent: onEvent,
+        );
+
+        await _pusherInstance!.connect();
+        isPusherInitialized = true;
+        print("Pusher initialized successfully on attempt $attempt");
+        return;
+      } catch (e) {
+        print("Error initializing Pusher (attempt $attempt): $e");
+        _pusherInstance = null;
+
+        if (attempt >= maxRetries) {
+          print("Failed to initialize Pusher after $maxRetries attempts");
+          isPusherInitialized = false;
+          // Don't rethrow - allow app to continue without Pusher
+        }
+      }
     }
   }
 
   // Callback functions
-  static void onConnectionStateChange(dynamic currentState, dynamic previousState) {
+  static void onConnectionStateChange(
+    dynamic currentState,
+    dynamic previousState,
+  ) {
     print("Connection: $currentState from $previousState");
   }
 
@@ -91,6 +129,7 @@ class AppData {
   static void onEvent(dynamic event) {
     print("Event received: $event");
   }
+
   static bool isPusherInitialized = false;
 
   // Optional map to track active subscriptions
@@ -110,7 +149,8 @@ class AppData {
   static void markChannelInactive(String channelName) {
     _activeChannels.remove(channelName);
   }
-// LocalInvitation? _localInvitation;
+
+  // LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
   // static AgoraRtmClient? _client;
   //

@@ -77,6 +77,11 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
           event.question,
         );
       }
+
+      // Validate response
+      if (response.content == null || response.content!.isEmpty) {
+        throw Exception('Received empty response from AI');
+      }
       // var myMessage = Messages(anly
       //     id: -1,
       //     gptSessionId: event.sessionId,
@@ -162,7 +167,20 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       // emit(QuestionResponseLoaded(response));
     } catch (e) {
       print("eee$e");
-      emit(DataError(e.toString()));
+      isWait = false;
+      // Remove the temporary message with id -1
+      if (state is DataLoaded) {
+        final currentState = state as DataLoaded;
+        currentState.response1.messages?.removeWhere((msg) => msg.id == -1);
+      }
+      // Extract meaningful error message
+      String errorMessage = "Failed to get response from AI";
+      if (e.toString().contains("Exception:")) {
+        errorMessage = e.toString().replaceAll("Exception:", "").trim();
+      } else if (e.toString().contains("error")) {
+        errorMessage = e.toString();
+      }
+      emit(DataError(errorMessage));
     }
   }
 

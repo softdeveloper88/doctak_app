@@ -257,8 +257,16 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
       );
     }
 
+    // Add bottom padding for system navigation bars
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+
     return GridView.builder(
-      padding: const EdgeInsets.all(4),
+      padding: EdgeInsets.only(
+        left: 4,
+        right: 4,
+        top: 4,
+        bottom: 4 + bottomPadding,
+      ),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 4,
@@ -436,10 +444,15 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   }
 
   Widget _buildCameraOption() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    // Add bottom padding for system navigation bars
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomPadding),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
           GestureDetector(
             onTap: () async {
               try {
@@ -525,13 +538,22 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
             ),
           ),
         ],
+        ),
       ),
     );
   }
 
   Widget _buildVideoOption() {
+    // Add bottom padding for system navigation bars
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16 + bottomPadding,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -716,8 +738,16 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   }
 
   Widget _buildDocumentOption() {
+    // Add bottom padding for system navigation bars
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16 + bottomPadding,
+      ),
       child: Column(
         children: [
           Expanded(

@@ -10,7 +10,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVP
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/SVCommentScreen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/sv_comment_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart'
     as comment_bloc;
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
@@ -56,7 +56,10 @@ class _MyPostComponentState extends State<MyPostComponent> {
       },
     );
     Widget continueButton = TextButton(
-      child: Text(translation(context).lbl_yes, style: const TextStyle(color: Colors.black)),
+      child: Text(
+        translation(context).lbl_yes,
+        style: const TextStyle(color: Colors.black),
+      ),
       onPressed: () async {
         homeBloc.add(DeletePostEvent(postId: id));
         profileBloc.postList.removeWhere((post) => post.id == id);
@@ -65,9 +68,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              translation(context).msg_post_deleted_successfully,
-            ),
+            content: Text(translation(context).msg_post_deleted_successfully),
           ),
         );
         // } else {
@@ -90,10 +91,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
     return AlertDialog(
       title: Text(translation(context).lbl_warning),
       content: Text(translation(context).msg_delete_confirm),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
+      actions: [cancelButton, continueButton],
     );
 
     // show the dialog
@@ -124,21 +122,21 @@ class _MyPostComponentState extends State<MyPostComponent> {
                     child: Text(translation(context).msg_no_post_found),
                   ),
                 )
-              : Container(
-                  color: svGetBgColor(),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 10),
-                    physics: const NeverScrollableScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: widget.profileBloc.postList.length,
+                : ListView.builder(
+                  padding: const EdgeInsets.only(top: 10),
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  itemCount: widget.profileBloc.postList.length,
                     itemBuilder: (context, index) {
                       if (widget.profileBloc.pageNumber <=
                           widget.profileBloc.numberOfPage) {
                         if (index ==
                             widget.profileBloc.postList.length -
                                 widget.profileBloc.nextPageTrigger) {
-                          widget.profileBloc
-                              .add(CheckIfNeedMoreDataEvent(index: index));
+                          widget.profileBloc.add(
+                            CheckIfNeedMoreDataEvent(index: index),
+                          );
                         }
                       }
 
@@ -520,8 +518,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
                           profilePicUrl:
                               '${AppData.imageUrl}${post.user?.profilePic}',
                           userName: post.user?.name ?? '',
-                          createdAt:
-                              timeAgo.format(DateTime.parse(post.createdAt!)),
+                          createdAt: timeAgo.format(
+                            DateTime.parse(post.createdAt!),
+                          ),
                           title: post.title,
                           backgroundColor: post.backgroundColor,
                           image: post.image,
@@ -533,8 +532,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
                           isCurrentUser: post.userId == AppData.logInUserId,
                           isShowComment: isShowComment == index,
                           onProfileTap: () {
-                            SVProfileFragment(userId: post.user?.id)
-                                .launch(context);
+                            SVProfileFragment(
+                              userId: post.user?.id,
+                            ).launch(context);
                           },
                           onDeleteTap: () {
                             showDialog(
@@ -544,8 +544,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
                                   title:
                                       'Are you sure you want to delete this post?',
                                   callback: () {
-                                    HomeBloc()
-                                        .add(DeletePostEvent(postId: post.id));
+                                    HomeBloc().add(
+                                      DeletePostEvent(postId: post.id),
+                                    );
                                     Navigator.of(context).pop();
                                   },
                                 );
@@ -555,41 +556,47 @@ class _MyPostComponentState extends State<MyPostComponent> {
                           onLikeTap: () {
                             setState(() {});
                             if (findIsLiked(
-                                widget.profileBloc.postList[index].likes)) {
+                              widget.profileBloc.postList[index].likes,
+                            )) {
                               print('object unlike');
                               widget.profileBloc.postList[index].likes!
                                   .removeWhere(
-                                      (e) => e.userId == AppData.logInUserId);
+                                    (e) => e.userId == AppData.logInUserId,
+                                  );
                             } else {
                               widget.profileBloc.postList[index].likes!.add(
-                                  Likes(
-                                      id: index,
-                                      userId: AppData.logInUserId,
-                                      postId: widget
-                                          .profileBloc.postList[index].id
-                                          .toString(),
-                                      createdAt: '',
-                                      updatedAt: ''));
+                                Likes(
+                                  id: index,
+                                  userId: AppData.logInUserId,
+                                  postId: widget.profileBloc.postList[index].id
+                                      .toString(),
+                                  createdAt: '',
+                                  updatedAt: '',
+                                ),
+                              );
                             }
                             HomeBloc().add(PostLikeEvent(postId: post.id));
                           },
                           onViewLikesTap: () {
-                            LikesListScreen(id: post.id.toString())
-                                .launch(context);
+                            LikesListScreen(
+                              id: post.id.toString(),
+                            ).launch(context);
                           },
                           onViewCommentsTap: () {
                             SVCommentScreen(
-                                    homeBloc: HomeBloc(), id: post.id ?? 0).launch(context);
+                              homeBloc: HomeBloc(),
+                              id: post.id ?? 0,
+                            ).launch(context);
                           },
                           onShareTap: () {
                             String? mediaLink = post.media?.isNotEmpty == true
                                 ? post.media![0].mediaPath
                                 : '';
-                            createDynamicLink(
-                              removeHtmlTags(post.title ?? ''),
-                              '${AppData.base}post/${post.id}',
-                              mediaLink,
-                            );
+                            // createDynamicLink(
+                            //   removeHtmlTags(post.title ?? ''),
+                            //   '${AppData.base}post/${post.id}',
+                            //   mediaLink,
+                            // );
                           },
                           onAddComment: (value) {
                             print('object');
@@ -606,8 +613,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
                           },
                           onToggleComment: () {
                             setState(() {
-                              isShowComment =
-                                  isShowComment == index ? -1 : index;
+                              isShowComment = isShowComment == index
+                                  ? -1
+                                  : index;
                             });
                           },
                           onCommentTap: () {},
@@ -615,22 +623,15 @@ class _MyPostComponentState extends State<MyPostComponent> {
                         );
                       }
                     },
-                    shrinkWrap: true,
-                    // physics: const NeverScrollableScrollPhysics(),
-                  ),
-                );
+                  );
         } else if (state is DataError) {
-          return Expanded(
-            child: Center(
-              child: Text(state.errorMessage),
-            ),
-          );
+          return Expanded(child: Center(child: Text(state.errorMessage)));
         } else {
           return const Expanded(
-              child: Center(child: Text('Something went wrong')));
+            child: Center(child: Text('Something went wrong')),
+          );
         }
       },
     );
   }
-
 }

@@ -1,5 +1,5 @@
-
 // lib/presentation/call_module/widgets/audio_call_view.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -177,12 +177,18 @@ class _SpeakingAvatarState extends State<SpeakingAvatar> with SingleTickerProvid
               child: CircleAvatar(
                 radius: 70,
                 backgroundColor: Colors.grey.shade800,
-                backgroundImage: widget.avatarUrl.isNotEmpty
-                    ? NetworkImage(widget.avatarUrl)
-                    : null,
-                child: widget.avatarUrl.isEmpty
-                    ? const Icon(Icons.person, size: 70, color: Colors.white)
-                    : null,
+                child: widget.avatarUrl.isNotEmpty
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: widget.avatarUrl,
+                          width: 140,
+                          height: 140,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Icon(Icons.person, size: 70, color: Colors.white),
+                          errorWidget: (context, url, error) => const Icon(Icons.person, size: 70, color: Colors.white),
+                        ),
+                      )
+                    : const Icon(Icons.person, size: 70, color: Colors.white),
               ),
             ),
           ],

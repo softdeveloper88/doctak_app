@@ -17,6 +17,17 @@ enum CallConnectionState {
   failed
 }
 
+/// Enum representing the reason why a call ended
+enum CallEndReason {
+  none,                    // Call is still active
+  userEnded,               // User intentionally ended the call
+  remoteUserEnded,         // Remote user ended the call
+  remoteUserNoAnswer,      // Remote user did not answer (timeout)
+  networkDisconnect,       // Call ended due to network issues
+  callFailed,              // Call failed to connect
+  permissionDenied,        // Permissions were denied
+}
+
 /// Model representing the state of a call
 class CallState {
   final String callId;
@@ -36,6 +47,8 @@ class CallState {
   final bool isLocalUserSpeaking;
   final bool isRemoteUserSpeaking;
   final bool isUsingLowerVideoQuality;
+  final CallEndReason callEndReason;
+  final int reconnectCountdown; // Countdown seconds shown during reconnection
 
   CallState({
     required this.callId,
@@ -55,6 +68,8 @@ class CallState {
     this.isLocalUserSpeaking = false,
     this.isRemoteUserSpeaking = false,
     this.isUsingLowerVideoQuality = false,
+    this.callEndReason = CallEndReason.none,
+    this.reconnectCountdown = 0,
   });
 
   /// Create a copy of this CallState with the given fields replaced with new values
@@ -76,6 +91,8 @@ class CallState {
     bool? isLocalUserSpeaking,
     bool? isRemoteUserSpeaking,
     bool? isUsingLowerVideoQuality,
+    CallEndReason? callEndReason,
+    int? reconnectCountdown,
   }) {
     return CallState(
       callId: callId ?? this.callId,
@@ -95,6 +112,8 @@ class CallState {
       isLocalUserSpeaking: isLocalUserSpeaking ?? this.isLocalUserSpeaking,
       isRemoteUserSpeaking: isRemoteUserSpeaking ?? this.isRemoteUserSpeaking,
       isUsingLowerVideoQuality: isUsingLowerVideoQuality ?? this.isUsingLowerVideoQuality,
+      callEndReason: callEndReason ?? this.callEndReason,
+      reconnectCountdown: reconnectCountdown ?? this.reconnectCountdown,
     );
   }
 

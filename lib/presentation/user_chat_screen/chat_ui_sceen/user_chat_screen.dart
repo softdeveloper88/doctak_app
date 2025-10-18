@@ -546,7 +546,7 @@ class _UserChatScreenState extends State<UserChatScreen>
                     if (chatBloc.contactsList.isNotEmpty)
                       Expanded(
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.only(left: 16, right: 16, bottom: MediaQuery.of(context).padding.bottom + 16),
                           itemCount: chatBloc.contactsList.length,
                           itemBuilder: (context, index) {
                             var bloc = chatBloc;

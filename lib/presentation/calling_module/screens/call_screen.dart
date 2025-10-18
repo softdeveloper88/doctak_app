@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
+import 'package:doctak_app/core/utils/call_permission_handler.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/calling_module/models/user_model.dart';
 import 'package:doctak_app/presentation/calling_module/services/permission_service.dart';
@@ -19,10 +21,12 @@ import '../widgets/call_controls.dart';
 import '../widgets/connecting_view.dart';
 import '../widgets/status_bar.dart';
 import '../widgets/video_view.dart';
+
 /// Main call screen that integrates all call components
 class CallScreen extends StatefulWidget {
   // Add a global key to access this widget's state from anywhere
-  static final GlobalKey<CallScreenState> globalKey = GlobalKey<CallScreenState>();
+  static final GlobalKey<CallScreenState> globalKey =
+      GlobalKey<CallScreenState>();
 
   final String callId;
   final String contactId;
@@ -31,7 +35,8 @@ class CallScreen extends StatefulWidget {
   final bool isIncoming;
   final bool isVideoCall;
   final String? token; // Optional token for secure connections
-  final bool isWaitingForCallData; // New flag to indicate we're waiting for real call data
+  final bool
+  isWaitingForCallData; // New flag to indicate we're waiting for real call data
 
   const CallScreen({
     Key? key,
@@ -42,7 +47,8 @@ class CallScreen extends StatefulWidget {
     required this.isIncoming,
     required this.isVideoCall,
     this.token,
-    this.isWaitingForCallData = false, // Default to false for backward compatibility
+    this.isWaitingForCallData =
+        false, // Default to false for backward compatibility
   }) : super(key: key);
 
   @override
@@ -52,7 +58,8 @@ class CallScreen extends StatefulWidget {
 class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   // Services
   late AgoraService _agoraService;
-  PusherChannelsFlutter get pusher => AppData.pusher;
+  PusherChannelsFlutter? get pusher =>
+      AppData.isPusherInitialized ? AppData.pusher : null;
 
   // Add global CallService instance
   final CallService _callService = CallService();
@@ -74,6 +81,10 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   // Add state for call status
   bool _callEstablished = false;
+
+  // Timer for auto-closing call ended screen
+  Timer? _autoCloseTimer;
+  CallEndReason? _lastCallEndReason;
 
   @override
   void initState() {
@@ -165,8 +176,8 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   Future<void> _checkPermissionsAndStartCall() async {
     if (_hasInitializedCall) return; // Prevent multiple initializations
 
-    // Check required permissions
-    final hasPermissions = await PermissionService.hasRequiredPermissions(
+    // Check required permissions using the professional handler
+    final hasPermissions = await callPermissionHandler.hasCallPermissions(
       isVideoCall: widget.isVideoCall,
     );
 
@@ -178,33 +189,22 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       // Listen for call state changes to track when call is established
       _callProvider.addListener(_onCallStateChanged);
     } else {
-      // Request permissions
-      final permissions = await PermissionService.requestCallPermissions(
+      // Request permissions with professional UI
+      if (!mounted) return;
+
+      final result = await callPermissionHandler.showInCallPermissionDialog(
+        context,
         isVideoCall: widget.isVideoCall,
       );
 
-      // Check if all required permissions are granted
-      if (widget.isVideoCall) {
-        if (permissions[Permission.microphone] == true &&
-            permissions[Permission.camera] == true) {
-          _hasInitializedCall = true;
-          _callProvider.initializeCall();
+      if (result == CallPermissionResult.granted) {
+        _hasInitializedCall = true;
+        _callProvider.initializeCall();
 
-          // Listen for call state changes
-          _callProvider.addListener(_onCallStateChanged);
-        } else {
-          _showPermissionErrorSnackbar();
-        }
+        // Listen for call state changes
+        _callProvider.addListener(_onCallStateChanged);
       } else {
-        if (permissions[Permission.microphone] == true) {
-          _hasInitializedCall = true;
-          _callProvider.initializeCall();
-
-          // Listen for call state changes
-          _callProvider.addListener(_onCallStateChanged);
-        } else {
-          _showPermissionErrorSnackbar();
-        }
+        _showPermissionErrorSnackbar();
       }
     }
   }
@@ -217,18 +217,60 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         _callEstablished = true;
       });
     }
+
+    // Check if call has ended and start auto-close timer
+    final callEndReason = _callProvider.callState.callEndReason;
+    if (callEndReason != CallEndReason.none &&
+        _lastCallEndReason != callEndReason &&
+        _autoCloseTimer == null &&
+        !_isEndingCall) {
+
+      _lastCallEndReason = callEndReason;
+
+      print('📞 CallScreen: Call ended with reason: $callEndReason, starting auto-close timer');
+
+      // Start a 2.5 second timer to auto-close the screen
+      _autoCloseTimer = Timer(const Duration(milliseconds: 2500), () {
+        if (mounted && !_isEndingCall) {
+          print('📞 CallScreen: Auto-closing call screen after call ended');
+          _endCallAndCleanup();
+        }
+      });
+    }
   }
 
-  // Show permission error
+  // Show permission error with professional styling
   void _showPermissionErrorSnackbar() {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(translation(context).lbl_call_permission_error),
+        content: Text(
+          translation(context).lbl_call_permission_error,
+          style: const TextStyle(fontFamily: 'Poppins'),
+        ),
+        backgroundColor: Colors.orange[600],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 5),
         action: SnackBarAction(
           label: translation(context).lbl_try_again,
-          onPressed: _checkPermissionsAndStartCall,
+          textColor: Colors.white,
+          onPressed: () async {
+            // Re-request permissions with UI
+            if (mounted) {
+              final granted = await callPermissionHandler.requestWithUI(
+                context,
+                isVideoCall: widget.isVideoCall,
+                showRationale: false,
+              );
+              if (granted) {
+                _checkPermissionsAndStartCall();
+              }
+            }
+          },
         ),
       ),
     );
@@ -238,6 +280,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   Future<void> _endCallAndCleanup() async {
     // Prevent multiple end call attempts
     if (_isEndingCall) return;
+
+    // Check if widget is still mounted before calling setState
+    if (!mounted) return;
 
     setState(() {
       _isEndingCall = true;
@@ -262,9 +307,12 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         Navigator.of(context).pop();
       }
     } finally {
-      setState(() {
-        _isEndingCall = false;
-      });
+      // Only call setState if still mounted
+      if (mounted) {
+        setState(() {
+          _isEndingCall = false;
+        });
+      }
     }
   }
 
@@ -294,7 +342,10 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
               Navigator.pop(context); // Close dialog
               _endCallAndCleanup();
             },
-            child: Text(translation(context).lbl_end_call, style: const TextStyle(color: Colors.red)),
+            child: Text(
+              translation(context).lbl_end_call,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -318,24 +369,28 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     try {
       final pusherService = PusherService();
       final userChannel = "user.${AppData.logInUserId}";
-      
+
+      print('📞 CallScreen: Setting up Pusher listeners for channel: $userChannel');
+
       // Subscribe to user channel if not already subscribed
       pusherService.subscribeToChannel(userChannel);
-      
+
       // Listen for call ended events from remote side
       pusherService.registerEventListener('call.ended', _handleRemoteCallEnded);
       pusherService.registerEventListener('Call_Ended', _handleRemoteCallEnded);
-      
-      print('Pusher listeners setup for call events on channel: $userChannel');
+
+      print('📞 CallScreen: Pusher listeners registered for call.ended and Call_Ended events');
     } catch (e) {
-      print('Error setting up Pusher listeners: $e');
+      print('📞 CallScreen: Error setting up Pusher listeners: $e');
     }
   }
 
   // Handle remote call ended event
   void _handleRemoteCallEnded(dynamic data) {
-    print('Received remote call ended event: $data');
-    
+    print('📞 CallScreen: ====== REMOTE CALL ENDED EVENT RECEIVED ======');
+    print('📞 CallScreen: Raw data type: ${data.runtimeType}');
+    print('📞 CallScreen: Raw data: $data');
+
     try {
       // Parse the event data
       Map<String, dynamic> callData = {};
@@ -345,29 +400,33 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         callData = data;
       }
 
+      print('📞 CallScreen: Parsed call data: $callData');
+
       // Check if this event is for the current call
-      final remoteCallId = callData['call_id']?.toString() ?? 
-                          callData['id']?.toString() ?? 
-                          callData['callId']?.toString();
-      
-      print('Remote call ID: $remoteCallId, Current call ID: $_currentCallId');
-      
+      final remoteCallId =
+          callData['call_id']?.toString() ??
+          callData['id']?.toString() ??
+          callData['callId']?.toString();
+
+      print('📞 CallScreen: Remote call ID: $remoteCallId, Current call ID: $_currentCallId');
+
       // Only handle if this is for our current call or if no specific call ID is provided
       // (some systems might send generic call end events)
-      final isForCurrentCall = remoteCallId == null || 
-                              remoteCallId.isEmpty || 
-                              remoteCallId == _currentCallId;
-      
+      final isForCurrentCall =
+          remoteCallId == null ||
+          remoteCallId.isEmpty ||
+          remoteCallId == _currentCallId;
+
       if (isForCurrentCall) {
         print('Remote side ended the call, cleaning up locally');
-        
+
         // Update call state to indicate remote ended call
         if (mounted) {
           setState(() {
             _callEstablished = false;
           });
         }
-        
+
         // End the call immediately without confirmation since remote ended it
         if (mounted && !_isEndingCall) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -388,11 +447,21 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    // Cancel auto-close timer if it's running
+    _autoCloseTimer?.cancel();
+    _autoCloseTimer = null;
+
     // Clean up Pusher listeners first
     try {
       final pusherService = PusherService();
-      pusherService.unregisterEventListener('call.ended', _handleRemoteCallEnded);
-      pusherService.unregisterEventListener('Call_Ended', _handleRemoteCallEnded);
+      pusherService.unregisterEventListener(
+        'call.ended',
+        _handleRemoteCallEnded,
+      );
+      pusherService.unregisterEventListener(
+        'Call_Ended',
+        _handleRemoteCallEnded,
+      );
     } catch (e) {
       print('Error cleaning up Pusher listeners: $e');
     }
@@ -437,13 +506,15 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
                         isVideoCall: widget.isVideoCall,
                         onRetry: () {}, // No retry in this state
                         showRetry: false,
-                        customMessage: translation(context).lbl_initializing_call,
+                        customMessage: translation(
+                          context,
+                        ).lbl_initializing_call,
                       ),
                       // Call Controls with end call button only
                       Positioned(
                         left: 0,
                         right: 0,
-                        bottom: 40,
+                        bottom: MediaQuery.of(context).padding.bottom + 20,
                         child: Center(
                           child: GestureDetector(
                             onTap: _endCallAndCleanup,
@@ -478,7 +549,8 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
               return GestureDetector(
                 onTap: () {
                   // Show controls when screen is tapped in video mode
-                  if (callState.callType == CallType.video && callState.isRemoteUserJoined) {
+                  if (callState.callType == CallType.video &&
+                      callState.isRemoteUserJoined) {
                     callProvider.showControls();
                   }
                 },
@@ -493,7 +565,11 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
                       AnimatedPositioned(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        top: callState.callType == CallType.video && !callState.isControlsVisible ? -80 : 0,
+                        top:
+                            callState.callType == CallType.video &&
+                                !callState.isControlsVisible
+                            ? -80
+                            : 0,
                         left: 0,
                         right: 0,
                         child: const StatusBar(),
@@ -522,19 +598,21 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
                         curve: Curves.easeOut,
                         left: 0,
                         right: 0,
-                        bottom: (callState.isControlsVisible || callState.callType == CallType.audio) ? 40 : -100,
-                        child: CallControls(
-                          onEndCallConfirm: _confirmEndCall,
-                        ),
+                        bottom:
+                            (callState.isControlsVisible ||
+                                callState.callType == CallType.audio)
+                            ? MediaQuery.of(context).padding.bottom + 20
+                            : -100,
+                        child: CallControls(onEndCallConfirm: _confirmEndCall),
                       ),
 
                       // Reconnecting overlay
-                      if (callState.connectionState == CallConnectionState.reconnecting)
-                        _buildReconnectingOverlay(),
+                      if (callState.connectionState ==
+                          CallConnectionState.reconnecting)
+                        _buildReconnectingOverlay(callState),
 
                       // Loading overlay when ending call
-                      if (_isEndingCall)
-                        _buildEndingCallOverlay(),
+                      if (_isEndingCall) _buildEndingCallOverlay(),
                     ],
                   ),
                 ),
@@ -548,6 +626,30 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   // Build main content based on call state
   Widget _buildMainContent(CallState callState) {
+    // Check if call has ended with a reason (show end message)
+    if (callState.callEndReason != CallEndReason.none) {
+      return ConnectingView(
+        contactName: widget.contactName,
+        isIncoming: widget.isIncoming,
+        isVideoCall: widget.isVideoCall,
+        onRetry: () {}, // No retry when call ended
+        showRetry: false,
+        callEndReason: callState.callEndReason,
+      );
+    }
+
+    // Check if call failed
+    if (callState.connectionState == CallConnectionState.failed) {
+      return ConnectingView(
+        contactName: widget.contactName,
+        isIncoming: widget.isIncoming,
+        isVideoCall: widget.isVideoCall,
+        onRetry: _callProvider.initializeCall,
+        showRetry: true,
+        callEndReason: CallEndReason.callFailed,
+      );
+    }
+
     // Check connection state first
     if (callState.connectionState == CallConnectionState.connecting) {
       return ConnectingView(
@@ -572,35 +674,70 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     }
   }
 
-  // Build reconnecting overlay
-  Widget _buildReconnectingOverlay() {
+  // Build reconnecting overlay with countdown
+  Widget _buildReconnectingOverlay(CallState callState) {
     return Container(
       color: Colors.black54,
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  translation(context).lbl_reconnecting,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  translation(context).lbl_please_wait,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+                // Show countdown if available
+                if (callState.reconnectCountdown > 0) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.timer, color: Colors.orange, size: 18),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '${translation(context).lbl_disconnecting_in} ${callState.reconnectCountdown} ${translation(context).lbl_seconds}',
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              translation(context).lbl_reconnecting,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              translation(context).lbl_please_wait,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

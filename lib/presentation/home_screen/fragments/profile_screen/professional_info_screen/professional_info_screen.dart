@@ -25,7 +25,8 @@ class ProfessionalInfoScreen extends StatefulWidget {
 bool isEditModeMap = false;
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with SingleTickerProviderStateMixin {
+class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -46,10 +47,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
     _animationController.forward();
@@ -78,10 +76,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
           if (widget.profileBloc.isMe)
             IconButton(
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -113,6 +108,9 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 16,
+              ),
               child: Column(
                 children: [
                   // Information card
@@ -190,66 +188,101 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
                           // Specialty dropdown if in edit mode
                           if (isEditModeMap)
                             BlocBuilder<ProfileBloc, ProfileState>(
-                                bloc: widget.profileBloc,
-                                builder: (context, state) {
-                                  if (state is PaginationLoadedState) {
-                                    return Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        if (AppData.userType == "doctor")
-                                          const SizedBox(height: 10),
-                                        if (AppData.userType == "doctor")
-                                          Text(
-                                            translation(context).lbl_specialty,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
+                              bloc: widget.profileBloc,
+                              builder: (context, state) {
+                                if (state is PaginationLoadedState) {
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (AppData.userType == "doctor")
+                                        const SizedBox(height: 10),
+                                      if (AppData.userType == "doctor")
+                                        Text(
+                                          translation(context).lbl_specialty,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      if (AppData.userType == "doctor")
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.grey.shade300,
                                             ),
                                           ),
-                                        if (AppData.userType == "doctor")
-                                          Container(
-                                            margin: const EdgeInsets.only(top: 8),
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(color: Colors.grey.shade300),
-                                            ),
-                                            child: CustomDropdownButtonFormField(
-                                              itemBuilder: (item) => Text(
-                                                item,
-                                                style: const TextStyle(color: Colors.black),
+                                          child: CustomDropdownButtonFormField(
+                                            itemBuilder: (item) => Text(
+                                              item,
+                                              style: const TextStyle(
+                                                color: Colors.black,
                                               ),
-                                              items: state.specialtyDropdownValue,
-                                              value: state.selectedSpecialtyDropdownValue,
-                                              width: double.infinity,
-                                              contentPadding: const EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                                vertical: 4,
-                                              ),
-                                              onChanged: (String? newValue) {
-                                                print(newValue);
-                                                print("Specialty $newValue");
-                                                widget.profileBloc.specialtyName = newValue!;
-                                                widget.profileBloc.userProfile?.user?.specialty = newValue;
-                                                widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
-                                              },
                                             ),
+                                            items: state.specialtyDropdownValue,
+                                            value: state
+                                                .selectedSpecialtyDropdownValue,
+                                            width: double.infinity,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 16,
+                                                  vertical: 4,
+                                                ),
+                                            onChanged: (String? newValue) {
+                                              print(newValue);
+                                              print("Specialty $newValue");
+                                              widget.profileBloc.specialtyName =
+                                                  newValue!;
+                                              widget
+                                                      .profileBloc
+                                                      .userProfile
+                                                      ?.user
+                                                      ?.specialty =
+                                                  newValue;
+                                              widget.profileBloc.add(
+                                                UpdateSpecialtyDropdownValue(
+                                                  newValue,
+                                                ),
+                                              );
+                                            },
                                           ),
-                                      ],
-                                    );
-                                  } else {
-                                    return Text(translation(context).lbl_unknown_state);
-                                  }
+                                        ),
+                                    ],
+                                  );
+                                } else {
+                                  return Text(
+                                    translation(context).lbl_unknown_state,
+                                  );
                                 }
+                              },
                             ),
 
                           // Title and specialization in view mode
                           if (!isEditModeMap)
                             TextFieldEditWidget(
                               index: 0,
-                              label: translation(context).lbl_title_and_specialization,
-                              value: widget.profileBloc.userProfile?.user?.specialty ?? '',
-                              onSave: (value) => widget.profileBloc.userProfile?.user?.specialty = value,
+                              label: translation(
+                                context,
+                              ).lbl_title_and_specialization,
+                              value:
+                                  widget
+                                      .profileBloc
+                                      .userProfile
+                                      ?.user
+                                      ?.specialty ??
+                                  '',
+                              onSave: (value) =>
+                                  widget
+                                          .profileBloc
+                                          .userProfile
+                                          ?.user
+                                          ?.specialty =
+                                      value,
                             ),
                         ],
                       ),
@@ -308,8 +341,20 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
                             focusNode: focusNode1,
                             hints: translation(context).hint_workplace,
                             label: translation(context).lbl_current_workplace,
-                            value: widget.profileBloc.userProfile?.profile?.address ?? '',
-                            onSave: (value) => widget.profileBloc.userProfile?.profile?.address = value,
+                            value:
+                                widget
+                                    .profileBloc
+                                    .userProfile
+                                    ?.profile
+                                    ?.address ??
+                                '',
+                            onSave: (value) =>
+                                widget
+                                        .profileBloc
+                                        .userProfile
+                                        ?.profile
+                                        ?.address =
+                                    value,
                           ),
 
                           if (!isEditModeMap)
@@ -330,8 +375,20 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
                             hints: translation(context).hint_years_experience,
                             focusNode: focusNode2,
                             label: translation(context).lbl_years_experience,
-                            value: widget.profileBloc.userProfile?.profile?.aboutMe ?? '',
-                            onSave: (value) => widget.profileBloc.userProfile!.profile?.aboutMe = value,
+                            value:
+                                widget
+                                    .profileBloc
+                                    .userProfile
+                                    ?.profile
+                                    ?.aboutMe ??
+                                '',
+                            onSave: (value) =>
+                                widget
+                                        .profileBloc
+                                        .userProfile!
+                                        .profile
+                                        ?.aboutMe =
+                                    value,
                             maxLines: 1,
                           ),
                         ],
@@ -370,7 +427,9 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                translation(context).lbl_achievements_and_location,
+                                translation(
+                                  context,
+                                ).lbl_achievements_and_location,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -387,11 +446,27 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
                             icon: Icons.star_border_rounded,
                             index: 1,
                             textInputAction: TextInputAction.newline,
-                            hints: translation(context).hint_notable_achievements,
+                            hints: translation(
+                              context,
+                            ).hint_notable_achievements,
                             focusNode: focusNode3,
-                            label: translation(context).lbl_notable_achievements,
-                            value: widget.profileBloc.userProfile?.profile?.birthplace ?? '',
-                            onSave: (value) => widget.profileBloc.userProfile!.profile?.birthplace = value,
+                            label: translation(
+                              context,
+                            ).lbl_notable_achievements,
+                            value:
+                                widget
+                                    .profileBloc
+                                    .userProfile
+                                    ?.profile
+                                    ?.birthplace ??
+                                '',
+                            onSave: (value) =>
+                                widget
+                                        .profileBloc
+                                        .userProfile!
+                                        .profile
+                                        ?.birthplace =
+                                    value,
                             textInputType: TextInputType.multiline,
                           ),
 
@@ -413,8 +488,20 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
                             focusNode: focusNode4,
                             hints: translation(context).hint_location,
                             label: translation(context).lbl_location,
-                            value: widget.profileBloc.userProfile?.profile?.hobbies ?? '',
-                            onSave: (value) => widget.profileBloc.userProfile!.profile?.hobbies = value,
+                            value:
+                                widget
+                                    .profileBloc
+                                    .userProfile
+                                    ?.profile
+                                    ?.hobbies ??
+                                '',
+                            onSave: (value) =>
+                                widget
+                                        .profileBloc
+                                        .userProfile!
+                                        .profile
+                                        ?.hobbies =
+                                    value,
                             maxLines: 1,
                           ),
                         ],
@@ -470,13 +557,15 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
       _formKey.currentState!.save();
     }
 
-    widget.profileBloc.add(UpdateProfileEvent(
-      updateProfileSection: 2,
-      userProfile: widget.profileBloc.userProfile,
-      interestModel: widget.profileBloc.interestList,
-      workEducationModel: widget.profileBloc.workEducationList,
-      userProfilePrivacyModel: UserProfilePrivacyModel(),
-    ));
+    widget.profileBloc.add(
+      UpdateProfileEvent(
+        updateProfileSection: 2,
+        userProfile: widget.profileBloc.userProfile,
+        interestModel: widget.profileBloc.interestList,
+        workEducationModel: widget.profileBloc.workEducationList,
+        userProfilePrivacyModel: UserProfilePrivacyModel(),
+      ),
+    );
 
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -484,9 +573,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
         content: Text(translation(context).msg_profile_updated),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

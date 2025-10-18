@@ -49,7 +49,10 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
 
     return ListView.builder(
       controller: widget.scrollController,
-      padding: const EdgeInsets.only(top: 8, bottom: 70), // Reduced padding
+      padding: EdgeInsets.only(
+        top: 8,
+        bottom: MediaQuery.of(context).padding.bottom + 70,
+      ), // Safe area + input field padding
       itemCount: bloc.postList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,

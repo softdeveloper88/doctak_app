@@ -3,6 +3,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/presentation/about_us/about_us_screen.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
@@ -196,10 +197,10 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             children: [
               // Compact Professional Header
               _buildCompactHeader(),
-      
+
               // Optimized Menu Content
               Expanded(child: _buildOptimizedMenuContent()),
-      
+
               // Compact Footer
               _buildCompactFooter(l10n, isRtl),
             ],
@@ -464,11 +465,16 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   String _getInitials(String name) {
     if (name.isEmpty) return 'U';
 
-    List<String> nameParts = name.split(' ').where((part) => part.isNotEmpty).toList();
+    List<String> nameParts = name
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .toList();
     if (nameParts.length >= 2) {
       return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
     } else if (nameParts.isNotEmpty) {
-      return nameParts[0].substring(0, math.min(2, nameParts[0].length)).toUpperCase();
+      return nameParts[0]
+          .substring(0, math.min(2, nameParts[0].length))
+          .toUpperCase();
     } else {
       return 'U';
     }
@@ -530,12 +536,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           borderRadius: BorderRadius.circular(16),
           splashColor: const Color(0xFF4285F4).withOpacity(0.1),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 10.0,
+            ),
             decoration: BoxDecoration(
               // Notification card style background
-              color: isSelected
-                  ? Colors.blue.withOpacity(0.12)
-                  : Colors.white,
+              color: isSelected ? Colors.blue.withOpacity(0.12) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected
@@ -567,9 +574,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   child: Icon(
                     item.icon,
                     size: 18,
-                    color: isSelected
-                        ? Colors.blue[700]
-                        : Colors.blue[600],
+                    color: isSelected ? Colors.blue[700] : Colors.blue[600],
                   ),
                 ),
 
@@ -587,8 +592,11 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                           item.title,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                            color: Theme.of(context).brightness == Brightness.dark
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
                                 ? Colors.white
                                 : Colors.black87,
                             fontFamily: 'Poppins',
@@ -609,8 +617,11 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                           item.subtitle,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-                            color: Theme.of(context).brightness == Brightness.dark
+                            fontWeight: isSelected
+                                ? FontWeight.w500
+                                : FontWeight.w400,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
                                 ? Colors.white70
                                 : Colors.black54,
                             fontFamily: 'Poppins',
@@ -965,7 +976,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   deviceId = iosInfo.identifierForVendor.toString();
                 }
 
-                SharedPreferences prefs = await SharedPreferences.getInstance();
+                final prefs = SecureStorageService.instance;
+                await prefs.initialize();
                 var result = await logoutUserAccount(deviceId);
 
                 if (mounted && !_isDisposed) {

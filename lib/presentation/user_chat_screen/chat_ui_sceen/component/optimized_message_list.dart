@@ -92,12 +92,13 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
           child: ChatBubble(
             profile: message.userId == widget.userId
                 ? "${AppData.imageUrl}${AppData.profile_pic}"
-                : widget.profilePic.startsWith('http') 
-                    ? widget.profilePic 
+                : widget.profilePic.startsWith('http')
+                    ? widget.profilePic
                     : "${AppData.imageUrl}${widget.profilePic}",
             message: message.body ?? '',
             isMe: message.userId == widget.userId ? true : false,
             attachmentJson: message.attachment,
+            attachmentType: message.attachmentType?.toString(),
             createAt: message.createdAt,
             seen: message.seen,
           ),
@@ -175,11 +176,12 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
               child: ChatBubble(
-                profile: widget.profilePic.startsWith('http') 
-                    ? widget.profilePic 
+                profile: widget.profilePic.startsWith('http')
+                    ? widget.profilePic
                     : "${AppData.imageUrl}${widget.profilePic}",
                 isMe: false,
                 attachmentJson: null,
+                attachmentType: null,
                 createAt: null,
                 seen: 0,
                 message: translation(context).lbl_typing,

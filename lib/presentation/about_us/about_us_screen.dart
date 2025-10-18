@@ -18,6 +18,9 @@ class AboutUsScreen extends StatelessWidget {
         titleIcon: Icons.info_outline_rounded,
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 16,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -47,10 +50,7 @@ class AboutUsScreen extends StatelessWidget {
                   Text(
                     translation(context).msg_health_mission,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700],
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                   ),
                 ],
               ),
@@ -130,10 +130,7 @@ class AboutUsScreen extends StatelessWidget {
           title: Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
           ),
           children: [
             Padding(
@@ -142,21 +139,10 @@ class AboutUsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   svg != null
-                      ? SvgPicture.asset(
-                          svg,
-                          height: 200,
-                        )
-                      : Image.asset(
-                          image ?? '',
-                          height: 200,
-                        ),
+                      ? SvgPicture.asset(svg, height: 200)
+                      : Image.asset(image ?? '', height: 200),
                   const SizedBox(height: 10),
-                  HtmlWidget(
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                    ),
-                    content,
-                  ),
+                  HtmlWidget(textStyle: const TextStyle(fontSize: 16), content),
                   if (showContactInfo)
                     Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -171,43 +157,60 @@ class AboutUsScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               GestureDetector(
-                                  onTap: () {
-                                    PostUtils.launchURL(context,
-                                        'https://www.facebook.com/profile.php?id=100090277690568&mibextid=ZbWKwL');
-                                  },
-                                  child: Image.asset('assets/icon/face_icon.png',
-                                      height: 35, width: 35)),
+                                onTap: () {
+                                  PostUtils.launchURL(
+                                    context,
+                                    'https://www.facebook.com/profile.php?id=100090277690568&mibextid=ZbWKwL',
+                                  );
+                                },
+                                child: Image.asset(
+                                  'assets/icon/face_icon.png',
+                                  height: 35,
+                                  width: 35,
+                                ),
+                              ),
                               const SizedBox(width: 10),
                               GestureDetector(
-                                  onTap: () {
-                                    PostUtils.launchURL(context,
-                                        'https://www.linkedin.com/company/doctak-net/');
-                                  },
-                                  child: Image.asset('assets/icon/linkedin_icon.png',
-                                      height: 35, width: 35)),
+                                onTap: () {
+                                  PostUtils.launchURL(
+                                    context,
+                                    'https://www.linkedin.com/company/doctak-net/',
+                                  );
+                                },
+                                child: Image.asset(
+                                  'assets/icon/linkedin_icon.png',
+                                  height: 35,
+                                  width: 35,
+                                ),
+                              ),
                               const SizedBox(width: 10),
                               GestureDetector(
-                                  onTap: () {
-                                    PostUtils.launchURL(
-                                        context, 'https://wa.me/971504957572');
-                                  },
-                                  child: Image.asset('assets/icon/whats_icon.png',
-                                      height: 35, width: 35)),
+                                onTap: () {
+                                  PostUtils.launchURL(
+                                    context,
+                                    'https://wa.me/971504957572',
+                                  );
+                                },
+                                child: Image.asset(
+                                  'assets/icon/whats_icon.png',
+                                  height: 35,
+                                  width: 35,
+                                ),
+                              ),
                               const SizedBox(width: 10),
                               GestureDetector(
-                                  onTap: () {
-                                    _sendEmail('Info@doctak.net');
-                                  },
-                                  child: Image.asset(
-                                    'assets/icon/email.png',
-                                    height: 35,
-                                    width: 35,
-                                  )),
+                                onTap: () {
+                                  _sendEmail('Info@doctak.net');
+                                },
+                                child: Image.asset(
+                                  'assets/icon/email.png',
+                                  height: 35,
+                                  width: 35,
+                                ),
+                              ),
                             ],
                           ),
-                          const SizedBox(
-                            height: 20,
-                          )
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
@@ -222,8 +225,11 @@ class AboutUsScreen extends StatelessWidget {
   }
 
   void _sendEmail(String email) async {
-    final Uri emailLaunchUri =
-        Uri(scheme: 'mailto', path: email, queryParameters: {'subject': ''});
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {'subject': ''},
+    );
     if (await canLaunch(emailLaunchUri.toString())) {
       await launch(emailLaunchUri.toString());
     } else {

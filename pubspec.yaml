@@ -16,10 +16,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.0.6+101
+version: 3.1.1+114
 
 environment:
-  sdk: '>=3.8.1 <4.0.0'
+  sdk: '>=3.10.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -32,21 +32,22 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_bloc: ^8.1.3
-  intl_utils: ^2.8.7
+  flutter_bloc: ^9.1.1
+  intl_utils: ^2.8.12
   flutter_intl:
   connectivity_plus: ^6.0.3
-  shared_preferences: ^2.2.2
-  cached_network_image: ^3.3.0
+  # shared_preferences: ^2.2.2
+  cached_network_image: ^3.4.1
   flutter_svg: ^2.0.9
   equatable: ^2.0.5
+  flutter_secure_storage: ^10.0.0-beta.5
   comment_tree: ^0.3.0
 #
 #  flutter_login_facebook: ^1.6.2
-  google_sign_in: ^6.2.1
+  google_sign_in: ^7.2.0
   pin_code_fields: ^8.0.1
   flutter_rating_bar: ^4.0.1
-  smooth_page_indicator: ^1.1.0
+  smooth_page_indicator: ^2.0.1
   sms_autofill: ^2.4.1
   readmore: ^3.0.0
   table_calendar: ^3.0.9
@@ -56,9 +57,9 @@ dependencies:
 #  images_picker: ^1.2.11
 #  image_pickers: ^2.0.5+2
   dio: ^5.4.0
-  nb_utils: ^7.1.2
+  nb_utils: ^7.1.8
   one_context: ^4.0.0
-  package_info_plus: ^8.0.0
+  package_info_plus: ^9.0.0
   flutter_vector_icons: ^2.0.0
   # Story
   story_view: ^0.16.5
@@ -70,39 +71,39 @@ dependencies:
   markdown_widget: ^2.3.2+6
 #  pdf_viewer_plugin: ^2.0.1
   flutter_full_pdf_viewer_null_safe: ^1.0.0
-  image_picker: ^1.1.2
+  image_picker: ^1.2.1
   timeago: ^3.0.2
   flutter_linkify: ^6.0.0
   provider: ^6.0.5
   flutter_switch: ^0.3.2
   font_awesome_flutter: ^10.5.0
-  pusher_channels_flutter: ^2.5.0
-  flutter_plugin_android_lifecycle: ^2.0.16
+  pusher_channels_flutter: ^2.4.0
+  flutter_plugin_android_lifecycle: ^2.0.33
   flutter_chat_bubble: ^2.0.2
 #  agora_rtm: ^2.2.2
-  agora_rtc_engine: ^6.5.2
-  flutter_widget_from_html: ^0.15.1
+  agora_rtc_engine: ^6.5.3
+  flutter_widget_from_html: ^0.17.1
   flutter_quill: ^11.4.1
 #  quill_html_converter: ^9.4.0
 #  html_editor_enhanced: ^2.6.0
   flutter_sound_record: ^3.3.2
-  app_links: ^6.1.4
+  # app_links: ^6.4.1  # TODO: Temporarily disabled - requires SDK ^3.10.0, we have 3.9.2
 #  flutter_html: ^3.0.0-beta.2
 #  fluttertoast: ^8.2.6
 #  flutter_background_service: ^5.0.1
 #  awesome_notifications: ^0.6.5
-  permission_handler: ^11.3.1
-  firebase_auth: ^5.5.1
-  flutter_local_notifications: ^17.2.2
-  firebase_messaging: ^15.2.4
+  permission_handler: ^12.0.1
+  firebase_auth: ^6.1.2
+  flutter_local_notifications: ^19.5.0
+  firebase_messaging: ^16.0.4
   overlay_support: ^2.1.0
-  sign_in_with_apple: ^6.1.1
-  path: ^1.8.3
-  firebase_dynamic_links: ^6.0.2
+  sign_in_with_apple: ^7.0.1
+  path: ^1.9.1
+  # firebase_dynamic_links: ^6.0.2
   #  firebase_messaging: ^14.6.8
-  firebase_core: ^3.1.1
+  firebase_core: ^4.2.1
   carousel_slider: ^5.0.0
-  google_mobile_ads: ^5.2.0
+  google_mobile_ads: ^6.0.0
 #  flutter_callkeep: ^1.0.0
 #  pusher_beams: ^1.1.0
 #  pusher_client: ^2.0.0
@@ -124,15 +125,15 @@ dependencies:
 #  image_picker_plus: ^0.5.9
   photo_view: ^0.15.0
   image_editor_plus: ^1.0.3
-  mime: ^1.0.0
-  introduction_screen: ^3.1.12
+  mime: ^2.0.0
+  introduction_screen: ^4.0.0
   curved_navigation_bar: ^1.0.3
   visibility_detector: ^0.4.0+2
-  flutter_slidable: ^3.0.1
+  flutter_slidable: ^4.0.3
   #  pusher_client_fixed: ^0.0.2
-  sizer: ^2.0.15
+  sizer: ^3.1.3
 #  retrofit_generator: ^8.0.6
-  bloc: ^8.1.2
+  bloc: ^9.1.0
 #  retrofit: ^4.0.3
   logger: any  #for logging purpose
 #  json_annotation: ^4.8.1
@@ -141,17 +142,17 @@ dependencies:
 #  audioplayers: ^6.0.0
   flutter_markdown: ^0.7.3
 #  social_share_plugin: ^0.4.2+2
-  share_plus: ^10.0.0
+  share_plus: ^12.0.1
   clear_all_notifications: ^1.0.0
-  device_info_plus: ^10.1.2
+  device_info_plus: ^12.2.0
   file_picker: ^10.3.2
-  photo_manager: ^3.0.0
-  just_audio: ^0.9.40
+  photo_manager: ^3.8.3
+  just_audio: ^0.10.5
   app_badge_plus: ^1.1.5
-  firebase_crashlytics: ^4.1.3
+  firebase_crashlytics: ^5.0.5
 #  flutter_app_badger: ^1.5.0
 #  flutter_app_badge_control: ^0.0.2
-  emoji_picker_flutter: ^3.1.0
+  emoji_picker_flutter: ^4.4.0
   #  flutter_markdown_latex: ^0.3.3
 #  record: ^5.0.4
 #  record_mp3: ^3.0.0
@@ -163,22 +164,29 @@ dependencies:
 #  upgrader: ^8.1.0
   mobx: ^2.3.0+1
   flutter_mobx: ^2.0.6+5
-  flutter_callkit_incoming: ^2.5.1
-  flutter_webrtc: ^0.13.0
+  flutter_callkit_incoming: ^3.0.0
+  flutter_webrtc: ^1.2.1
   uuid: ^4.0.0
   wakelock_plus: ^1.2.11
-  get_it: ^7.6.4
+  get_it: ^9.1.0
   pretty_dio_logger: ^1.4.0
   flutter_staggered_animations: ^1.1.1
-  rxdart: ^0.27.7
-  shorebird_code_push: ^1.1.5
+  rxdart: ^0.28.0
+  shorebird_code_push: ^2.0.5
+
+dependency_overrides:
+  # Bump federated implementations to remove deprecated `dartPluginClass: none` warnings
+  quill_native_bridge_windows: ^0.0.2
+  quill_native_bridge_linux: ^0.0.2
+  # Keep core bridge current to ensure compatible transitive graph
+  quill_native_bridge: ^11.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  analyzer: ^6.2.0
-  flutter_launcher_icons: "^0.13.1"
-  flutter_lints: ^4.0.0
+  analyzer: ^8.4.1
+  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ^6.0.0
   mobx_codegen: ^2.3.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0

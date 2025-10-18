@@ -401,11 +401,11 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
 
   // Share conference details
   void _shareConference() {
-    createDynamicLink(
-      '${widget.conference.title ?? ""} \n  Register Link: ${widget.conference.conferenceAgendaLink ?? ''}',
-      '${AppData.base}conference/${widget.conference.id}',
-      widget.conference.thumbnail ?? '',
-    );
+    // createDynamicLink(
+    //   '${widget.conference.title ?? ""} \n  Register Link: ${widget.conference.conferenceAgendaLink ?? ''}',
+    //   '${AppData.base}conference/${widget.conference.id}',
+    //   widget.conference.thumbnail ?? '',
+    // );
   }
 
   // Launch registration link

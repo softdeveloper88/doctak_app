@@ -42,12 +42,17 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ensure value is in items list or set to null
+    final T? safeValue = (value != null && items.contains(value))
+        ? value
+        : null;
+
     return SizedBox(
       width: width ?? 120,
       height: height ?? 56,
       child: DropdownButtonFormField<T>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
-        value: value,
+        value: safeValue,
         dropdownColor: svGetScaffoldColor(),
         isExpanded: true,
         decoration: _buildDecoration(),

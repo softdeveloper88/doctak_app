@@ -57,7 +57,9 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appStore.isDarkMode ? const Color(0xFF0A0A0A) : const Color(0xFFF8F9FA),
+      backgroundColor: appStore.isDarkMode
+          ? const Color(0xFF0A0A0A)
+          : const Color(0xFFF8F9FA),
       appBar: DoctakAppBar(
         title: translation(context).lbl_search_contacts,
         titleIcon: Icons.person_search_rounded,
@@ -71,14 +73,8 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: appStore.isDarkMode
-                    ? [
-                        const Color(0xFF1A1A1A),
-                        const Color(0xFF0A0A0A),
-                      ]
-                    : [
-                        Colors.white,
-                        const Color(0xFFF8F9FA),
-                      ],
+                    ? [const Color(0xFF1A1A1A), const Color(0xFF0A0A0A)]
+                    : [Colors.white, const Color(0xFFF8F9FA)],
               ),
             ),
             child: Container(
@@ -131,7 +127,9 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                           fontSize: 15,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                       ),
                       cursorColor: SVAppColorPrimary,
                       textStyle: TextStyle(
@@ -188,9 +186,8 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
               if (state is DataError) {
                 showDialog(
                   context: context,
-                  builder: (context) => AlertDialog(
-                    content: Text(state.errorMessage),
-                  ),
+                  builder: (context) =>
+                      AlertDialog(content: Text(state.errorMessage)),
                 );
               }
             },
@@ -202,10 +199,15 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                 // print(state.drugsModel.length);
                 // return _buildPostList(context);
                 var bloc = chatBloc;
-                if(bloc.searchContactsList.isNotEmpty) {
+                if (bloc.searchContactsList.isNotEmpty) {
                   return Expanded(
                     child: ListView.builder(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.only(
+                        left: 8,
+                        right: 8,
+                        top: 8,
+                        bottom: MediaQuery.of(context).padding.bottom + 8,
+                      ),
                       shrinkWrap: true,
                       // physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
@@ -215,31 +217,32 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                               bloc.searchContactsList.length -
                                   bloc.contactNextPageTrigger) {
                             bloc.add(
-                                CheckIfNeedMoreContactDataEvent(index: index));
+                              CheckIfNeedMoreContactDataEvent(index: index),
+                            );
                           }
                         }
                         if (bloc.contactNumberOfPage !=
-                            bloc.contactPageNumber - 1 &&
+                                bloc.contactPageNumber - 1 &&
                             index >= bloc.searchContactsList.length - 1) {
                           return const SizedBox(
-                              height: 200,
-                              child: UserShimmer());
+                            height: 200,
+                            child: UserShimmer(),
+                          );
                         } else {
                           return Container(
                             margin: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {
                                   ChatRoomScreen(
                                     username:
-                                    '${bloc.searchContactsList[index].firstName ??
-                                        ''} ${bloc.searchContactsList[index]
-                                        .lastName ?? ""}',
+                                        '${bloc.searchContactsList[index].firstName ?? ''} ${bloc.searchContactsList[index].lastName ?? ""}',
                                     profilePic:
-                                    '${bloc.searchContactsList[index]
-                                        .profilePic}',
+                                        '${bloc.searchContactsList[index].profilePic}',
                                     id: '${bloc.searchContactsList[index].id}',
                                     roomId: '',
                                   ).launch(context);
@@ -275,11 +278,10 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                         GestureDetector(
                                           onTap: () {
                                             SVProfileFragment(
-                                                userId: bloc
-                                                    .searchContactsList[
-                                                index]
-                                                    .id)
-                                                .launch(context);
+                                              userId: bloc
+                                                  .searchContactsList[index]
+                                                  .id,
+                                            ).launch(context);
                                           },
                                           child: Stack(
                                             children: [
@@ -290,67 +292,99 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                                   shape: BoxShape.circle,
                                                   gradient: LinearGradient(
                                                     colors: [
-                                                      SVAppColorPrimary.withOpacity(0.1),
-                                                      SVAppColorPrimary.withOpacity(0.05),
+                                                      SVAppColorPrimary.withOpacity(
+                                                        0.1,
+                                                      ),
+                                                      SVAppColorPrimary.withOpacity(
+                                                        0.05,
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsets.all(2),
-                                                  child: bloc
-                                                      .searchContactsList[
-                                                  index]
-                                                      .profilePic ==
-                                                      ''
+                                                  padding: const EdgeInsets.all(
+                                                    2,
+                                                  ),
+                                                  child:
+                                                      bloc
+                                                              .searchContactsList[index]
+                                                              .profilePic ==
+                                                          ''
                                                       ? Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      gradient: LinearGradient(
-                                                        colors: [
-                                                          Colors.blue.shade400,
-                                                          Colors.blue.shade600,
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    child: const Icon(
-                                                      Icons.person,
-                                                      color: Colors.white,
-                                                      size: 28,
-                                                    ),
-                                                  )
+                                                          decoration: BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            gradient:
+                                                                LinearGradient(
+                                                                  colors: [
+                                                                    Colors
+                                                                        .blue
+                                                                        .shade400,
+                                                                    Colors
+                                                                        .blue
+                                                                        .shade600,
+                                                                  ],
+                                                                ),
+                                                          ),
+                                                          child: const Icon(
+                                                            Icons.person,
+                                                            color: Colors.white,
+                                                            size: 28,
+                                                          ),
+                                                        )
                                                       : CachedNetworkImage(
-                                                    imageUrl:
-                                                    '${AppData.imageUrl}${bloc
-                                                        .searchContactsList[index]
-                                                        .profilePic.validate()}',
-                                                    height: 52,
-                                                    width: 52,
-                                                    fit: BoxFit.cover,
-                                                    placeholder: (context, url) => Container(
-                                                      decoration: BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        color: appStore.isDarkMode
-                                                            ? Colors.white.withOpacity(0.1)
-                                                            : Colors.grey.withOpacity(0.1),
-                                                      ),
-                                                    ),
-                                                    errorWidget: (context, url, error) => Container(
-                                                      decoration: BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        gradient: LinearGradient(
-                                                          colors: [
-                                                            Colors.blue.shade400,
-                                                            Colors.blue.shade600,
-                                                          ],
+                                                          imageUrl:
+                                                              '${AppData.imageUrl}${bloc.searchContactsList[index].profilePic.validate()}',
+                                                          height: 52,
+                                                          width: 52,
+                                                          fit: BoxFit.cover,
+                                                          placeholder: (context, url) => Container(
+                                                            decoration: BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              color:
+                                                                  appStore
+                                                                      .isDarkMode
+                                                                  ? Colors.white
+                                                                        .withOpacity(
+                                                                          0.1,
+                                                                        )
+                                                                  : Colors.grey
+                                                                        .withOpacity(
+                                                                          0.1,
+                                                                        ),
+                                                            ),
+                                                          ),
+                                                          errorWidget:
+                                                              (
+                                                                context,
+                                                                url,
+                                                                error,
+                                                              ) => Container(
+                                                                decoration: BoxDecoration(
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                  gradient: LinearGradient(
+                                                                    colors: [
+                                                                      Colors
+                                                                          .blue
+                                                                          .shade400,
+                                                                      Colors
+                                                                          .blue
+                                                                          .shade600,
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                child: const Icon(
+                                                                  Icons.person,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 28,
+                                                                ),
+                                                              ),
+                                                        ).cornerRadiusWithClipRRect(
+                                                          50,
                                                         ),
-                                                      ),
-                                                      child: const Icon(
-                                                        Icons.person,
-                                                        color: Colors.white,
-                                                        size: 28,
-                                                      ),
-                                                    ),
-                                                  ).cornerRadiusWithClipRRect(50),
                                                 ),
                                               ),
                                             ],
@@ -367,19 +401,17 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                                 children: [
                                                   Expanded(
                                                     child: Text(
-                                                      "${bloc
-                                                          .searchContactsList[index]
-                                                          .firstName
-                                                          .validate()} ${bloc
-                                                          .searchContactsList[index]
-                                                          .lastName.validate()}",
-                                                      overflow: TextOverflow.ellipsis,
+                                                      "${bloc.searchContactsList[index].firstName.validate()} ${bloc.searchContactsList[index].lastName.validate()}",
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                       style: TextStyle(
                                                         fontFamily: 'Poppins',
-                                                        color: appStore.isDarkMode
+                                                        color:
+                                                            appStore.isDarkMode
                                                             ? Colors.white
                                                             : Colors.black87,
-                                                        fontWeight: FontWeight.w600,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                         fontSize: 16,
                                                       ),
                                                     ),
@@ -398,11 +430,17 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                               colors: [
-                                                SVAppColorPrimary.withOpacity(0.1),
-                                                SVAppColorPrimary.withOpacity(0.05),
+                                                SVAppColorPrimary.withOpacity(
+                                                  0.1,
+                                                ),
+                                                SVAppColorPrimary.withOpacity(
+                                                  0.05,
+                                                ),
                                               ],
                                             ),
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.chat_bubble_outline_rounded,
@@ -423,7 +461,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                       itemCount: bloc.searchContactsList.length,
                     ),
                   );
-                }else{
+                } else {
                   return Expanded(
                     child: Center(
                       child: Column(
@@ -453,7 +491,9 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                               fontFamily: 'Poppins',
-                              color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                              color: appStore.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -462,7 +502,9 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                             style: TextStyle(
                               fontSize: 14,
                               fontFamily: 'Poppins',
-                              color: appStore.isDarkMode ? Colors.white54 : Colors.black54,
+                              color: appStore.isDarkMode
+                                  ? Colors.white54
+                                  : Colors.black54,
                             ),
                           ),
                         ],
@@ -472,20 +514,25 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                 }
               } else if (state is DataError) {
                 return RetryWidget(
-                    errorMessage: translation(context).msg_something_went_wrong_retry,
-                    onRetry: () {
-                      try {
-                        chatBloc.add(LoadPageEvent(page: 1));
-                      } catch (e) {
-                        debugPrint(e.toString());
-                      }
-                    });
+                  errorMessage: translation(
+                    context,
+                  ).msg_something_went_wrong_retry,
+                  onRetry: () {
+                    try {
+                      chatBloc.add(LoadPageEvent(page: 1));
+                    } catch (e) {
+                      debugPrint(e.toString());
+                    }
+                  },
+                );
               } else {
-                return Center(child: Text(translation(context).msg_something_went_wrong));
+                return Center(
+                  child: Text(translation(context).msg_something_went_wrong),
+                );
               }
             },
           ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
 
           // Add your list or search results display here
         ],

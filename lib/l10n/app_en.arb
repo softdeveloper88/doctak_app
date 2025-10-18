@@ -201,7 +201,14 @@
 "lbl_call_accepted": "Call accepted",
 "lbl_failed_to_establish_call": "Failed to establish call. Please try again.",
 "lbl_error_starting_call": "Error starting call. Please try again.",
- 
+"lbl_call_ended": "Call Ended",
+"lbl_connection_lost": "Connection Lost",
+"lbl_call_failed": "Call Failed",
+"lbl_permission_denied": "Permission Denied",
+"lbl_disconnecting_in": "Disconnecting in",
+"lbl_seconds": "seconds",
+"lbl_waiting_for_answer": "Waiting for answer",
+
  "@_SIGNUP_SCREEN": {},
  "lbl_signup_title": "Sign Up",
  "msg_register_account": "Please Register your account to continue",

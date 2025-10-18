@@ -1,24 +1,26 @@
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
+import 'package:doctak_app/data/apiClient/services/post_api_service.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/data/models/chat_model/search_contacts_model.dart';
+import 'package:doctak_app/data/models/post_model/post_likes_model.dart';
 
 /// ApiServiceManager - Central hub for all API services
-/// 
+///
 /// This class provides a single point of access to all API services
 /// while maintaining separation of concerns and clean architecture.
-/// 
+///
 /// Usage:
 /// ```dart
 /// final apiManager = ApiServiceManager();
-/// 
+///
 /// // Authentication
 /// final loginResult = await apiManager.auth.login(...);
-/// 
+///
 /// // Posts
 /// final posts = await apiManager.posts.getPosts(...);
-/// 
+///
 /// // ChatGPT
 /// final response = await apiManager.chatGpt.askQuestion(...);
 /// ```
@@ -38,8 +40,19 @@ class ApiServiceManager {
   /// These methods delegate to the appropriate service
 
   // Auth shortcuts
-  Future<dynamic> login(String email, String password, String deviceType, String deviceId, String deviceToken) =>
-      sharedApi.login(email: email, password: password, deviceType: deviceType, deviceId: deviceId, deviceToken: deviceToken);
+  Future<dynamic> login(
+    String email,
+    String password,
+    String deviceType,
+    String deviceId,
+    String deviceToken,
+  ) => sharedApi.login(
+    email: email,
+    password: password,
+    deviceType: deviceType,
+    deviceId: deviceId,
+    deviceToken: deviceToken,
+  );
 
   // Note: Common API methods provided through backward compatibility methods below
 
@@ -73,12 +86,17 @@ class ApiServiceManager {
   Map<String, dynamic> getApiInfo() {
     return {
       'version': '3.0.0',
-      'services': [
-        'unified_shared_api_service'
-      ],
+      'services': ['unified_shared_api_service'],
       'endpoints': [
-        'auth', 'posts', 'chat', 'chatGpt', 'profile', 
-        'notifications', 'meetings', 'jobs', 'search'
+        'auth',
+        'posts',
+        'chat',
+        'chatGpt',
+        'profile',
+        'notifications',
+        'meetings',
+        'jobs',
+        'search',
       ],
       'initialized': true,
       'note': 'Using unified SharedApiService from retrofit conversion',
@@ -86,7 +104,7 @@ class ApiServiceManager {
   }
 
   // ================================== BACKWARD COMPATIBILITY METHODS ==================================
-  
+
   /// Backward compatibility methods for old retrofit API service
   /// These methods match the old API signatures and handle response extraction
 
@@ -97,10 +115,7 @@ class ApiServiceManager {
       if (response.success) {
         // Return a mock HttpResponse structure similar to retrofit
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -124,7 +139,7 @@ class ApiServiceManager {
     }
   }
 
-  /// Get post details with likes (backward compatibility) 
+  /// Get post details with likes (backward compatibility)
   Future<dynamic> getDetailsLikesPosts(String token, String postId) async {
     try {
       final response = await sharedApi.getPostDetailsWithLikes(postId: postId);
@@ -139,9 +154,16 @@ class ApiServiceManager {
   }
 
   /// Search posts (backward compatibility)
-  Future<dynamic> getSearchPostList(String token, String page, String searchTerm) async {
+  Future<dynamic> getSearchPostList(
+    String token,
+    String page,
+    String searchTerm,
+  ) async {
     try {
-      final response = await sharedApi.searchPosts(page: page, searchTerm: searchTerm);
+      final response = await sharedApi.searchPosts(
+        page: page,
+        searchTerm: searchTerm,
+      );
       if (response.success) {
         return response.data;
       } else {
@@ -158,10 +180,7 @@ class ApiServiceManager {
       final response = await sharedApi.likePost(postId: postId);
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -177,10 +196,7 @@ class ApiServiceManager {
       final response = await sharedApi.deletePost(postId: postId);
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -199,8 +215,8 @@ class ApiServiceManager {
         'data': {
           'ads_enabled': true,
           'banner_ads': true,
-          'interstitial_ads': false
-        }
+          'interstitial_ads': false,
+        },
       };
     } catch (e) {
       throw e;
@@ -214,7 +230,7 @@ class ApiServiceManager {
       return [
         {'id': 1, 'type': 'banner', 'name': 'Banner Ads'},
         {'id': 2, 'type': 'interstitial', 'name': 'Interstitial Ads'},
-        {'id': 3, 'type': 'native', 'name': 'Native Ads'}
+        {'id': 3, 'type': 'native', 'name': 'Native Ads'},
       ];
     } catch (e) {
       throw e;
@@ -237,33 +253,52 @@ class ApiServiceManager {
     }
   }
 
-  /// Search contacts (backward compatibility)  
-  Future<SearchContactsModel> searchContacts(String token, String page, String keyword) async {
+  /// Search contacts (backward compatibility)
+  Future<SearchContactsModel> searchContacts(
+    String token,
+    String page,
+    String keyword,
+  ) async {
     try {
-      print('🔄 ApiServiceManager.searchContacts called with keyword: "$keyword", page: $page');
-      
+      print(
+        '🔄 ApiServiceManager.searchContacts called with keyword: "$keyword", page: $page',
+      );
+
       // Note: This endpoint doesn't exist in SharedApiService, using searchPeople as alternative
-      final response = await sharedApi.searchPeople(page: page, searchTerm: keyword);
-      
-      print('📡 SearchPeople API response - Success: ${response.success}, Data available: ${response.data != null}');
-      
+      final response = await sharedApi.searchPeople(
+        page: page,
+        searchTerm: keyword,
+      );
+
+      print(
+        '📡 SearchPeople API response - Success: ${response.success}, Data available: ${response.data != null}',
+      );
+
       if (response.success && response.data != null) {
         // Convert SearchPeopleModel to SearchContactsModel format
         final searchPeopleData = response.data!;
-        
-        print('📊 SearchPeople data - Total: ${searchPeopleData.total}, Current page: ${searchPeopleData.currentPage}, Records: ${searchPeopleData.data?.length ?? 0}');
-        
+
+        print(
+          '📊 SearchPeople data - Total: ${searchPeopleData.total}, Current page: ${searchPeopleData.currentPage}, Records: ${searchPeopleData.data?.length ?? 0}',
+        );
+
         // Create compatible structure for SearchContactsModel
         final contactsJson = {
           'success': true,
           'records': {
             'current_page': searchPeopleData.currentPage,
-            'data': searchPeopleData.data?.map((item) => {
-              'id': item.id,
-              'first_name': item.firstName,
-              'last_name': item.lastName,
-              'profile_pic': item.profilePic,
-            }).toList() ?? [],
+            'data':
+                searchPeopleData.data
+                    ?.map(
+                      (item) => {
+                        'id': item.id,
+                        'first_name': item.firstName,
+                        'last_name': item.lastName,
+                        'profile_pic': item.profilePic,
+                      },
+                    )
+                    .toList() ??
+                [],
             'last_page': searchPeopleData.lastPage,
             'per_page': searchPeopleData.perPage,
             'total': searchPeopleData.total,
@@ -274,18 +309,26 @@ class ApiServiceManager {
             'next_page_url': searchPeopleData.nextPageUrl,
             'prev_page_url': searchPeopleData.prevPageUrl,
             'path': searchPeopleData.path,
-            'links': searchPeopleData.links?.map((link) => {
-              'url': link.url,
-              'label': link.label,
-              'active': link.active,
-            }).toList() ?? [],
+            'links':
+                searchPeopleData.links
+                    ?.map(
+                      (link) => {
+                        'url': link.url,
+                        'label': link.label,
+                        'active': link.active,
+                      },
+                    )
+                    .toList() ??
+                [],
           },
           'total': searchPeopleData.total,
           'last_page': searchPeopleData.lastPage,
         };
-        
+
         final result = SearchContactsModel.fromJson(contactsJson);
-        print('✅ Created SearchContactsModel with ${result.records?.data?.length ?? 0} contacts');
+        print(
+          '✅ Created SearchContactsModel with ${result.records?.data?.length ?? 0} contacts',
+        );
         return result;
       } else {
         print('⚠️ SearchPeople API failed or returned no data');
@@ -322,9 +365,18 @@ class ApiServiceManager {
   }
 
   /// Get room messages (backward compatibility)
-  Future<dynamic> getRoomMessenger(String token, String page, String userId, String roomId) async {
+  Future<dynamic> getRoomMessenger(
+    String token,
+    String page,
+    String userId,
+    String roomId,
+  ) async {
     try {
-      final response = await sharedApi.getChatMessages(page: page, userId: userId, roomId: roomId);
+      final response = await sharedApi.getChatMessages(
+        page: page,
+        userId: userId,
+        roomId: roomId,
+      );
       if (response.success) {
         return response.data;
       } else {
@@ -336,7 +388,15 @@ class ApiServiceManager {
   }
 
   /// Send message (backward compatibility)
-  Future<dynamic> sendMessage(String token, String userId, String roomId, String receiverId, String attachmentType, String message, dynamic files) async {
+  Future<dynamic> sendMessage(
+    String token,
+    String userId,
+    String roomId,
+    String receiverId,
+    String attachmentType,
+    String message,
+    dynamic files,
+  ) async {
     try {
       // For now, only handle text messages as SharedApiService has sendTextMessage
       final response = await sharedApi.sendTextMessage(
@@ -356,7 +416,14 @@ class ApiServiceManager {
   }
 
   /// Send message without file (backward compatibility)
-  Future<dynamic> sendMessageWithoutFile(String token, String userId, String roomId, String receiverId, String attachmentType, String message) async {
+  Future<dynamic> sendMessageWithoutFile(
+    String token,
+    String userId,
+    String roomId,
+    String receiverId,
+    String attachmentType,
+    String message,
+  ) async {
     try {
       final response = await sharedApi.sendTextMessage(
         userId: userId,
@@ -378,23 +445,21 @@ class ApiServiceManager {
   Future<dynamic> deleteMessage(String token, String messageId) async {
     try {
       // Note: This endpoint doesn't exist in SharedApiService, providing mock response
-      return {
-        'success': true,
-        'message': 'Message deleted successfully'
-      };
+      return {'success': true, 'message': 'Message deleted successfully'};
     } catch (e) {
       throw e;
     }
   }
 
   /// Update read status (backward compatibility)
-  Future<dynamic> updateReadStatus(String token, String userId, String roomId) async {
+  Future<dynamic> updateReadStatus(
+    String token,
+    String userId,
+    String roomId,
+  ) async {
     try {
       // Note: This endpoint doesn't exist in SharedApiService, providing mock response
-      return {
-        'success': true,
-        'message': 'Read status updated'
-      };
+      return {'success': true, 'message': 'Read status updated'};
     } catch (e) {
       throw e;
     }
@@ -403,15 +468,20 @@ class ApiServiceManager {
   // ================================== COMMENTS BACKWARD COMPATIBILITY ==================================
 
   /// Make comment (backward compatibility)
-  Future<dynamic> makeComment(String token, String postId, String comment, [String? replyId]) async {
+  Future<dynamic> makeComment(
+    String token,
+    String postId,
+    String comment, [
+    String? replyId,
+  ]) async {
     try {
-      final response = await sharedApi.makeComment(postId: postId, comment: comment);
+      final response = await sharedApi.makeComment(
+        postId: postId,
+        comment: comment,
+      );
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -427,10 +497,7 @@ class ApiServiceManager {
       final response = await sharedApi.deleteComment(commentId: commentId);
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -507,10 +574,10 @@ class ApiServiceManager {
           data: {
             'success': true,
             'message': 'Profile picture uploaded successfully',
-            'profile_picture_url': 'https://example.com/profile.jpg'
+            'profile_picture_url': 'https://example.com/profile.jpg',
           },
           statusCode: 200,
-        )
+        ),
       );
     } catch (e) {
       throw e;
@@ -526,10 +593,10 @@ class ApiServiceManager {
           data: {
             'success': true,
             'message': 'Cover picture uploaded successfully',
-            'cover_picture_url': 'https://example.com/cover.jpg'
+            'cover_picture_url': 'https://example.com/cover.jpg',
           },
           statusCode: 200,
-        )
+        ),
       );
     } catch (e) {
       throw e;
@@ -537,7 +604,28 @@ class ApiServiceManager {
   }
 
   /// Get profile update (backward compatibility)
-  Future<dynamic> getProfileUpdate(String token, String firstName, String lastName, String phone, String licenseNo, String specialty, String dob, String gender, String country, String city, String countryOrigin, String dobPrivacy, String emailPrivacy, String genderPrivacy, String phonePrivacy, String licenseNoPrivacy, String specialtyPrivacy, String countryPrivacy, String cityPrivacy, String countryOriginPrivacy) async {
+  Future<dynamic> getProfileUpdate(
+    String token,
+    String firstName,
+    String lastName,
+    String phone,
+    String licenseNo,
+    String specialty,
+    String dob,
+    String gender,
+    String country,
+    String city,
+    String countryOrigin,
+    String dobPrivacy,
+    String emailPrivacy,
+    String genderPrivacy,
+    String phonePrivacy,
+    String licenseNoPrivacy,
+    String specialtyPrivacy,
+    String countryPrivacy,
+    String cityPrivacy,
+    String countryOriginPrivacy,
+  ) async {
     try {
       final response = await sharedApi.updateProfile(
         firstName: firstName,
@@ -562,10 +650,7 @@ class ApiServiceManager {
       );
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -578,7 +663,13 @@ class ApiServiceManager {
   // ================================== JOBS BACKWARD COMPATIBILITY ==================================
 
   /// Get jobs list (backward compatibility with 5 parameters)
-  Future<dynamic> getJobsList(String token, String page, String countryId, String search, String type) async {
+  Future<dynamic> getJobsList(
+    String token,
+    String page,
+    String countryId,
+    String search,
+    String type,
+  ) async {
     try {
       // Use the actual SharedApiService jobs endpoint
       final response = await sharedApi.getJobsList(
@@ -643,7 +734,14 @@ class ApiServiceManager {
   }
 
   /// Ask question from GPT (backward compatibility)
-  Future<dynamic> askQuestionFromGpt(String token, String sessionId, String question, String imageType, String imageUrl1, String imageUrl2) async {
+  Future<dynamic> askQuestionFromGpt(
+    String token,
+    String sessionId,
+    String question,
+    String imageType,
+    String imageUrl1,
+    String imageUrl2,
+  ) async {
     try {
       final response = await sharedApi.askQuestionWithImages(
         sessionId: sessionId,
@@ -663,7 +761,11 @@ class ApiServiceManager {
   }
 
   /// Ask question from GPT without image (backward compatibility)
-  Future<dynamic> askQuestionFromGptWithoutImage(String token, String sessionId, String question) async {
+  Future<dynamic> askQuestionFromGptWithoutImage(
+    String token,
+    String sessionId,
+    String question,
+  ) async {
     try {
       final response = await sharedApi.askQuestionWithoutImages(
         sessionId: sessionId,
@@ -672,10 +774,15 @@ class ApiServiceManager {
       if (response.success) {
         return response.data;
       } else {
-        throw Exception(response.message);
+        // Return error message from API
+        throw Exception(response.message ?? 'Failed to get response from AI');
       }
     } catch (e) {
-      throw e;
+      // Rethrow with more context
+      if (e is Exception) {
+        throw e;
+      }
+      throw Exception('Failed to ask question: $e');
     }
   }
 
@@ -685,10 +792,7 @@ class ApiServiceManager {
       final response = await sharedApi.createNewChatSession();
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -701,13 +805,12 @@ class ApiServiceManager {
   /// Delete ChatGPT session (backward compatibility)
   Future<dynamic> deleteChatgptSession(String token, String sessionId) async {
     try {
-      final response = await sharedApi.deleteChatGptSession(sessionId: sessionId);
+      final response = await sharedApi.deleteChatGptSession(
+        sessionId: sessionId,
+      );
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -741,10 +844,10 @@ class ApiServiceManager {
         response: MockResponse(
           data: {
             'success': true,
-            'message': 'All notifications marked as read'
+            'message': 'All notifications marked as read',
           },
           statusCode: 200,
-        )
+        ),
       );
     } catch (e) {
       throw e;
@@ -754,13 +857,12 @@ class ApiServiceManager {
   /// Read notification (backward compatibility)
   Future<dynamic> readNotification(String token, String notificationId) async {
     try {
-      final response = await sharedApi.markNotificationAsRead(notificationId: notificationId);
+      final response = await sharedApi.markNotificationAsRead(
+        notificationId: notificationId,
+      );
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -797,10 +899,10 @@ class ApiServiceManager {
               {'id': 1, 'name': 'United States'},
               {'id': 2, 'name': 'Canada'},
               {'id': 3, 'name': 'United Kingdom'},
-            ]
+            ],
           },
           statusCode: 200,
-        )
+        ),
       );
     } catch (e) {
       throw e;
@@ -810,7 +912,16 @@ class ApiServiceManager {
   // ================================== REGISTRATION BACKWARD COMPATIBILITY ==================================
 
   /// Register user (backward compatibility)
-  Future<dynamic> register(String firstName, String lastName, String email, String password, String userType, String deviceToken, String deviceType, String deviceId) async {
+  Future<dynamic> register(
+    String firstName,
+    String lastName,
+    String email,
+    String password,
+    String userType,
+    String deviceToken,
+    String deviceType,
+    String deviceId,
+  ) async {
     try {
       final response = await sharedApi.register(
         firstName: firstName,
@@ -824,10 +935,7 @@ class ApiServiceManager {
       );
       if (response.success) {
         return MockHttpResponse(
-          response: MockResponse(
-            data: response.data,
-            statusCode: 200,
-          )
+          response: MockResponse(data: response.data, statusCode: 200),
         );
       } else {
         throw Exception(response.message);
@@ -838,7 +946,17 @@ class ApiServiceManager {
   }
 
   /// Complete profile (backward compatibility)
-  Future<dynamic> completeProfile(String token, String firstName, String lastName, String country, String state, String specialty, String phone, String userType, [String? deviceToken]) async {
+  Future<dynamic> completeProfile(
+    String token,
+    String firstName,
+    String lastName,
+    String country,
+    String state,
+    String specialty,
+    String phone,
+    String userType, [
+    String? deviceToken,
+  ]) async {
     try {
       final response = await sharedApi.completeProfile(
         firstName: firstName,
@@ -885,8 +1003,8 @@ class ApiServiceManager {
           'id': id,
           'name': 'Sample Group',
           'description': 'Sample group description',
-          'members_count': 0
-        }
+          'members_count': 0,
+        },
       };
     } catch (e) {
       throw e;
@@ -894,7 +1012,11 @@ class ApiServiceManager {
   }
 
   /// Guidelines (backward compatibility)
-  Future<GuidelinesModel> guideline(String token, String page, String searchTerm) async {
+  Future<GuidelinesModel> guideline(
+    String token,
+    String page,
+    String searchTerm,
+  ) async {
     try {
       // Use the actual SharedApiService guideline endpoint
       final response = await sharedApi.searchGuidelines(
@@ -918,7 +1040,7 @@ class ApiServiceManager {
           'next_page_url': null,
           'prev_page_url': null,
           'path': null,
-          'links': []
+          'links': [],
         });
       }
     } catch (e) {
@@ -936,13 +1058,18 @@ class ApiServiceManager {
         'next_page_url': null,
         'prev_page_url': null,
         'path': null,
-        'links': []
+        'links': [],
       });
     }
   }
 
   /// Search conferences (backward compatibility with 4 parameters)
-  Future<SearchConferenceModel> searchConferences(String token, String page, String country, String search) async {
+  Future<SearchConferenceModel> searchConferences(
+    String token,
+    String page,
+    String country,
+    String search,
+  ) async {
     try {
       // Use the actual SharedApiService conference endpoint
       final response = await sharedApi.searchConferences(
@@ -967,8 +1094,8 @@ class ApiServiceManager {
             'next_page_url': null,
             'prev_page_url': null,
             'path': null,
-            'links': []
-          }
+            'links': [],
+          },
         });
       }
     } catch (e) {
@@ -987,14 +1114,20 @@ class ApiServiceManager {
           'next_page_url': null,
           'prev_page_url': null,
           'path': null,
-          'links': []
-        }
+          'links': [],
+        },
       });
     }
   }
 
   /// Get drugs list (backward compatibility with 5 parameters)
-  Future<dynamic> getDrugsList(String token, String page, String countryId, String searchTerm, String type) async {
+  Future<dynamic> getDrugsList(
+    String token,
+    String page,
+    String countryId,
+    String searchTerm,
+    String type,
+  ) async {
     try {
       // Use the SharedApiService for drugs search
       final response = await sharedApi.searchDrugs(
@@ -1008,27 +1141,24 @@ class ApiServiceManager {
       } else {
         // Return empty DrugsModel if no data found
         return DrugsModel.fromJson({
-          'data': {
-            'current_page': int.parse(page),
-            'last_page': 1,
-            'data': []
-          }
+          'data': {'current_page': int.parse(page), 'last_page': 1, 'data': []},
         });
       }
     } catch (e) {
       // Return empty DrugsModel on error to prevent type casting issues
       return DrugsModel.fromJson({
-        'data': {
-          'current_page': int.parse(page),
-          'last_page': 1,
-          'data': []
-        }
+        'data': {'current_page': int.parse(page), 'last_page': 1, 'data': []},
       });
     }
   }
 
   /// Get search jobs list (backward compatibility with 4 parameters)
-  Future<dynamic> getSearchJobsList(String token, String page, String countryId, String searchTerm) async {
+  Future<dynamic> getSearchJobsList(
+    String token,
+    String page,
+    String countryId,
+    String searchTerm,
+  ) async {
     try {
       // Use the SharedApiService getJobsList for search
       final response = await sharedApi.getJobsList(
@@ -1059,8 +1189,8 @@ class ApiServiceManager {
           'title': 'Medical News Update',
           'content': 'Latest medical news content',
           'channel': news,
-          'published_at': DateTime.now().toIso8601String()
-        }
+          'published_at': DateTime.now().toIso8601String(),
+        },
       ];
     } catch (e) {
       throw e;
@@ -1068,31 +1198,36 @@ class ApiServiceManager {
   }
 
   /// Get post user likes (backward compatibility)
-  Future<dynamic> getPostUserLikes(String token, String postId) async {
+  Future<List<PostLikesModel>> getPostUserLikes(
+    String token,
+    String postId,
+  ) async {
     try {
-      // Note: This endpoint doesn't exist in SharedApiService, providing mock response
-      return {
-        'success': true,
-        'data': {
-          'likes': [],
-          'total_likes': 0
-        }
-      };
+      final postApiService = PostApiService();
+      final response = await postApiService.getPostLikes(postId: postId);
+      if (response.success && response.data != null) {
+        return response.data!;
+      }
+      return [];
     } catch (e) {
-      throw e;
+      print('Error getting post likes: $e');
+      return [];
     }
   }
 
   /// Check in search (backward compatibility)
-  Future<dynamic> checkInSearch(String token, String page, String name, String latitude, String longitude) async {
+  Future<dynamic> checkInSearch(
+    String token,
+    String page,
+    String name,
+    String latitude,
+    String longitude,
+  ) async {
     try {
       // Note: This endpoint doesn't exist in SharedApiService, providing mock response
       return {
         'success': true,
-        'data': {
-          'places': [],
-          'total': 0
-        }
+        'data': {'places': [], 'total': 0},
       };
     } catch (e) {
       throw e;
@@ -1100,9 +1235,16 @@ class ApiServiceManager {
   }
 
   /// Get search people (backward compatibility)
-  Future<dynamic> getSearchPeople(String token, String page, String searchTerm) async {
+  Future<dynamic> getSearchPeople(
+    String token,
+    String page,
+    String searchTerm,
+  ) async {
     try {
-      final response = await sharedApi.searchPeople(page: page, searchTerm: searchTerm);
+      final response = await sharedApi.searchPeople(
+        page: page,
+        searchTerm: searchTerm,
+      );
       if (response.success) {
         // Return the SearchPeopleModel directly
         return response.data;
@@ -1117,9 +1259,16 @@ class ApiServiceManager {
   // ================================== ADDITIONAL MISSING METHODS ==================================
 
   /// Search tag friend
-  Future<dynamic> searchTagFriend(String token, String page, String name) async {
+  Future<dynamic> searchTagFriend(
+    String token,
+    String page,
+    String name,
+  ) async {
     try {
-      final response = await sharedApi.searchPeople(page: page, searchTerm: name);
+      final response = await sharedApi.searchPeople(
+        page: page,
+        searchTerm: name,
+      );
       if (response.success) {
         return response.data;
       } else {
@@ -1131,8 +1280,20 @@ class ApiServiceManager {
   }
 
   /// Update about me (matches BLoC usage with 12 parameters)
-  Future<dynamic> updateAboutMe(String token, String firstName, String lastName, String phone, String licenseNo, 
-      String specialty, String dob, String gender, String country, String city, String countryOrigin, String aboutMe) async {
+  Future<dynamic> updateAboutMe(
+    String token,
+    String firstName,
+    String lastName,
+    String phone,
+    String licenseNo,
+    String specialty,
+    String dob,
+    String gender,
+    String country,
+    String city,
+    String countryOrigin,
+    String aboutMe,
+  ) async {
     try {
       // This would need to be implemented in profile service
       // For now, return a mock response
@@ -1143,8 +1304,21 @@ class ApiServiceManager {
   }
 
   /// Update work education (matches BLoC usage with 13 parameters)
-  Future<dynamic> updateAddWorkEduction(String token, String type, String title, String company, String location,
-      String startDate, String endDate, String current, String description, String privacy, String degree, String fieldOfStudy, String grade) async {
+  Future<dynamic> updateAddWorkEduction(
+    String token,
+    String type,
+    String title,
+    String company,
+    String location,
+    String startDate,
+    String endDate,
+    String current,
+    String description,
+    String privacy,
+    String degree,
+    String fieldOfStudy,
+    String grade,
+  ) async {
     try {
       // This would need to be implemented in profile service
       return {'success': true, 'message': 'Work education updated'};
@@ -1153,9 +1327,17 @@ class ApiServiceManager {
     }
   }
 
-  /// Update hobbies interest (matches BLoC usage with 8 parameters)  
-  Future<dynamic> updateAddHobbiesInterest(String token, String type, String name, String description, String startDate, 
-      String endDate, String current, String privacy) async {
+  /// Update hobbies interest (matches BLoC usage with 8 parameters)
+  Future<dynamic> updateAddHobbiesInterest(
+    String token,
+    String type,
+    String name,
+    String description,
+    String startDate,
+    String endDate,
+    String current,
+    String privacy,
+  ) async {
     try {
       // This would need to be implemented in profile service
       return {'success': true, 'message': 'Hobbies updated'};
@@ -1195,7 +1377,12 @@ class ApiServiceManager {
   }
 
   /// Group notification update
-  Future<dynamic> groupNotificationUpdate(String token, String type, String push, String email) async {
+  Future<dynamic> groupNotificationUpdate(
+    String token,
+    String type,
+    String push,
+    String email,
+  ) async {
     try {
       return {'success': true, 'data': {}};
     } catch (e) {
@@ -1213,7 +1400,11 @@ class ApiServiceManager {
   }
 
   /// Group post request
-  Future<dynamic> groupPostRequest(String token, String id, String offset) async {
+  Future<dynamic> groupPostRequest(
+    String token,
+    String id,
+    String offset,
+  ) async {
     try {
       return {'success': true, 'data': {}};
     } catch (e) {
@@ -1231,7 +1422,12 @@ class ApiServiceManager {
   }
 
   /// Group member request update
-  Future<dynamic> groupMemberRequestUpdate(String token, String id, String groupId, String status) async {
+  Future<dynamic> groupMemberRequestUpdate(
+    String token,
+    String id,
+    String groupId,
+    String status,
+  ) async {
     try {
       return {'success': true, 'data': {}};
     } catch (e) {
@@ -1249,10 +1445,26 @@ class ApiServiceManager {
   }
 
   /// Group store
-  Future<dynamic> groupStore(String token, String name, String specialties, String tags, String location, 
-      String interest, String language, String description, String memberLimit, String addAdmin, String status,
-      String postPermission, String allowInSearch, String visibility, String joinRequest, String customRules,
-      String profilePicture, String coverPicture) async {
+  Future<dynamic> groupStore(
+    String token,
+    String name,
+    String specialties,
+    String tags,
+    String location,
+    String interest,
+    String language,
+    String description,
+    String memberLimit,
+    String addAdmin,
+    String status,
+    String postPermission,
+    String allowInSearch,
+    String visibility,
+    String joinRequest,
+    String customRules,
+    String profilePicture,
+    String coverPicture,
+  ) async {
     try {
       return {'success': true, 'data': {}};
     } catch (e) {
@@ -1290,11 +1502,15 @@ class ApiServiceManager {
   }
 
   /// Set user follow
-  Future<dynamic> setUserFollow(String token, String userId, String follow) async {
+  Future<dynamic> setUserFollow(
+    String token,
+    String userId,
+    String follow,
+  ) async {
     try {
       final response = await sharedApi.followUser(
-        userId: userId, 
-        followAction: follow.toLowerCase() == 'follow' ? 'follow' : 'unfollow'
+        userId: userId,
+        followAction: follow.toLowerCase() == 'follow' ? 'follow' : 'unfollow',
       );
       if (response.success) {
         return response.data;
@@ -1309,13 +1525,16 @@ class ApiServiceManager {
   // Note: getSearchJobsList implemented above in main backward compatibility section
 
   /// Save suggestion (matches BLoC usage with 5 parameters)
-  Future<dynamic> saveSuggestion(String token, String name, String phone, String email, String message) async {
+  Future<dynamic> saveSuggestion(
+    String token,
+    String name,
+    String phone,
+    String email,
+    String message,
+  ) async {
     try {
       // Mock response for save suggestion
-      return {
-        'success': true,
-        'message': 'Suggestion saved successfully'
-      };
+      return {'success': true, 'message': 'Suggestion saved successfully'};
     } catch (e) {
       throw Exception('Save suggestion failed: ${e.toString()}');
     }
@@ -1323,12 +1542,17 @@ class ApiServiceManager {
 }
 
 /// Mock HttpResponse class to maintain compatibility
+/// Exposes data directly for backward compatibility with code that accesses .data
 class MockHttpResponse {
   final MockResponse response;
   MockHttpResponse({required this.response});
+
+  // Expose data directly for backward compatibility
+  dynamic get data => response.data;
+  int get statusCode => response.statusCode;
 }
 
-/// Mock Response class to maintain compatibility  
+/// Mock Response class to maintain compatibility
 class MockResponse {
   final dynamic data;
   final int statusCode;

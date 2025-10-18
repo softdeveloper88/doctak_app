@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:app_links/app_links.dart';
+// TODO: app_links temporarily disabled due to SDK compatibility
+// import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
@@ -25,51 +27,48 @@ class SplashScreen extends StatefulWidget {
 // Custom painter for light beam effect
 class LightBeamPainter extends CustomPainter {
   final Color color;
-  
+
   LightBeamPainter({required this.color});
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
-        colors: [
-          color.withOpacity(0.7),
-          color.withOpacity(0.05),
-        ],
+        colors: [color.withOpacity(0.7), color.withOpacity(0.05)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
-      
+
     final path = Path();
-    
+
     // Draw a gentle curve from top right to center
     path.moveTo(size.width, 0);
     path.lineTo(size.width, size.height * 0.2);
     path.quadraticBezierTo(
-      size.width * 0.7, 
-      size.height * 0.4, 
-      size.width * 0.5, 
-      size.height * 0.5
+      size.width * 0.7,
+      size.height * 0.4,
+      size.width * 0.5,
+      size.height * 0.5,
     );
-    
+
     canvas.drawPath(path, paint);
   }
-  
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   String versionNumber = '';
-  
+
   @override
   void initState() {
     _getVersionNumber();
     init();
     super.initState();
   }
-  
+
   Future<void> _getVersionNumber() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
@@ -81,7 +80,8 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  late AppLinks _appLinks;
+  // TODO: AppLinks temporarily disabled due to SDK compatibility
+  // late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
 
   @override
@@ -92,30 +92,10 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> initDeepLinks(context) async {
+    // TODO: Deep links temporarily disabled - app_links SDK incompatible
+    // For now, just navigate to dashboard
     try {
-      print('before');
-      _appLinks = AppLinks();
-      // Handle links
-      final initialLink = await _appLinks.getLatestLink();
-      if (initialLink != null) {
-        print(initialLink);
-        if (initialLink.path.contains('job')) {
-          String id = initialLink.pathSegments.last;
-          JobsDetailsScreen(isFromSplash: true, jobId: id)
-              .launch(context, isNewTask: false);
-        } else if (initialLink.path.contains('post')) {
-          SVDashboardScreen().launch(context, isNewTask: true);
-        } else {
-          ConferencesScreen(isFromSplash: true)
-              .launch(context, isNewTask: false);
-        }
-      } else {
-        const SVDashboardScreen().launch(context, isNewTask: true);
-      }
-      _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-        debugPrint('onAppLink: $uri');
-        // openAppLink(uri);
-      });
+      const SVDashboardScreen().launch(context, isNewTask: true);
     } catch (e) {
       print('error $e');
     }
@@ -125,38 +105,35 @@ class _SplashScreenState extends State<SplashScreen> {
     setStatusBarColor(Colors.transparent);
     await const Duration(seconds: 1).delay;
     finish(context);
-    BlocProvider.of<SplashBloc>(context).add(
-      LoadDropdownData('', '', '', ''),
-    );
-    BlocProvider.of<SplashBloc>(context).add(
-      LoadDropdownData1('', ''),
-    );
+    BlocProvider.of<SplashBloc>(context).add(LoadDropdownData('', '', '', ''));
+    BlocProvider.of<SplashBloc>(context).add(LoadDropdownData1('', ''));
 
     initializeAsync();
   }
 
   void initializeAsync() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = SecureStorageService.instance;
+    await prefs.initialize();
 
-    bool rememberMe = prefs.getBool('rememberMe') ?? false;
-    bool acceptTerms = prefs.getBool('acceptTerms') ?? false;
+    bool rememberMe = await prefs.getBool('rememberMe') ?? false;
+    bool acceptTerms = await prefs.getBool('acceptTerms') ?? false;
 
-    String? userToken = prefs.getString('token');
-    String? userId = prefs.getString('userId');
+    String? userToken = await prefs.getString('token');
+    String? userId = await prefs.getString('userId');
 
-    String? name = prefs.getString('name');
-    String? profile_pic = prefs.getString('profile_pic');
-    String? background = prefs.getString('background');
-    String? email = prefs.getString('email');
-    String? specialty = prefs.getString('specialty');
-    String? userType = prefs.getString('user_type') ?? '';
-    String? university = prefs.getString('university') ?? '';
-    String? countryName = prefs.getString('country') ?? '';
-    String? city = prefs.getString('city') ?? '';
-    String? currency = prefs.getString('currency') ?? '';
+    String? name = await prefs.getString('name');
+    String? profile_pic = await prefs.getString('profile_pic');
+    String? background = await prefs.getString('background');
+    String? email = await prefs.getString('email');
+    String? specialty = await prefs.getString('specialty');
+    String? userType = await prefs.getString('user_type') ?? '';
+    String? university = await prefs.getString('university') ?? '';
+    String? countryName = await prefs.getString('country') ?? '';
+    String? city = await prefs.getString('city') ?? '';
+    String? currency = await prefs.getString('currency') ?? '';
 
     if (userToken != null) {
-      AppData.deviceToken = prefs.getString('device_token')??'';
+      AppData.deviceToken = await prefs.getString('device_token') ?? '';
       AppData.userToken = userToken;
       AppData.logInUserId = userId;
       AppData.name = name ?? '';
@@ -182,7 +159,6 @@ class _SplashScreenState extends State<SplashScreen> {
         initDeepLinks(context);
         // const SVDashboardScreen().launch(context,isNewTask: true);
         // });
-
       } else {
         // Future.delayed(const Duration(seconds: 1), () {
         LoginScreen().launch(context, isNewTask: true);
@@ -193,9 +169,7 @@ class _SplashScreenState extends State<SplashScreen> {
         // );
         // });
       }
-
     } else {
-
       LoginScreen().launch(context, isNewTask: true);
 
       // TermsAndConditionScreen().launch(context, isNewTask: true);
@@ -222,12 +196,9 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // Background animated patterns
             Positioned.fill(
-              child: Opacity(
-                opacity: 0.1,
-                child: _buildBackgroundPatterns(),
-              ),
+              child: Opacity(opacity: 0.1, child: _buildBackgroundPatterns()),
             ),
-            
+
             // Decorative top design element
             Positioned(
               top: 0,
@@ -250,7 +221,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
             ),
-            
+
             // Light beam effect
             Positioned(
               top: 0,
@@ -264,7 +235,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Container(),
               ),
             ),
-            
+
             // Main content
             Center(
               child: Column(
@@ -273,21 +244,27 @@ class _SplashScreenState extends State<SplashScreen> {
                   // Logo with scale and fade animations
                   Padding(
                     padding: const EdgeInsets.all(15),
-                    child: Image.asset(
-                      'assets/logo/logo.png',
-                      width: 50.w,
-                      fit: BoxFit.contain,
-                    ).animate()
-                     .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
-                     .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), duration: 600.ms),
+                    child:
+                        Image.asset(
+                              'assets/logo/logo.png',
+                              width: 50.w,
+                              fit: BoxFit.contain,
+                            )
+                            .animate()
+                            .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
+                            .scale(
+                              begin: const Offset(0.8, 0.8),
+                              end: const Offset(1.0, 1.0),
+                              duration: 600.ms,
+                            ),
                   ),
                   const SizedBox(height: 35),
-                  
+
                   // Premium loading indicator
                   _buildPremiumLoadingIndicator(),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Tagline
                   Text(
                     "Your medical community",
@@ -298,15 +275,15 @@ class _SplashScreenState extends State<SplashScreen> {
                       fontFamily: 'Poppins',
                     ),
                   ).animate().fadeIn(delay: 400.ms, duration: 600.ms),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Version info
                   _buildVersionDisplay(),
                 ],
               ),
             ),
-            
+
             // Bottom design element
             Positioned(
               bottom: 0,
@@ -329,10 +306,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
             ),
-            
+
             // Powered by DocTak.net
             Positioned(
-              bottom: 20,
+              bottom: MediaQuery.of(context).padding.bottom + 60,
               left: 0,
               right: 0,
               child: Row(
@@ -362,7 +339,7 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
-  
+
   Widget _buildBackgroundPatterns() {
     return Stack(
       children: [
@@ -370,40 +347,54 @@ class _SplashScreenState extends State<SplashScreen> {
         Positioned(
           top: 100,
           left: 20,
-          child: Icon(
-            Icons.medical_services_outlined,
-            size: 40,
-            color: Colors.blue.shade300,
-          ).animate()
-           .fadeIn(duration: 1500.ms)
-           .slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
+          child:
+              Icon(
+                    Icons.medical_services_outlined,
+                    size: 40,
+                    color: Colors.blue.shade300,
+                  )
+                  .animate()
+                  .fadeIn(duration: 1500.ms)
+                  .slideY(
+                    begin: 0.1,
+                    end: 0,
+                    duration: const Duration(seconds: 2),
+                  ),
         ),
         Positioned(
           bottom: 120,
           right: 30,
-          child: Icon(
-            Icons.health_and_safety_outlined,
-            size: 36,
-            color: Colors.blue.shade300,
-          ).animate()
-           .fadeIn(duration: 1800.ms)
-           .slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
+          child:
+              Icon(
+                    Icons.health_and_safety_outlined,
+                    size: 36,
+                    color: Colors.blue.shade300,
+                  )
+                  .animate()
+                  .fadeIn(duration: 1800.ms)
+                  .slideY(
+                    begin: 0.1,
+                    end: 0,
+                    duration: const Duration(seconds: 2),
+                  ),
         ),
         Positioned(
           top: MediaQuery.of(context).size.height * 0.4,
           left: MediaQuery.of(context).size.width * 0.7,
-          child: Icon(
-            Icons.favorite_border,
-            size: 32,
-            color: Colors.blue.shade300,
-          ).animate()
-           .fadeIn(duration: 2000.ms)
-           .slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
+          child:
+              Icon(Icons.favorite_border, size: 32, color: Colors.blue.shade300)
+                  .animate()
+                  .fadeIn(duration: 2000.ms)
+                  .slideY(
+                    begin: 0.1,
+                    end: 0,
+                    duration: const Duration(seconds: 2),
+                  ),
         ),
       ],
     );
   }
-  
+
   Widget _buildPremiumLoadingIndicator() {
     return SizedBox(
       width: 60,
@@ -420,42 +411,44 @@ class _SplashScreenState extends State<SplashScreen> {
               borderRadius: BorderRadius.circular(3),
             ),
           ),
-          
+
           // Animated loading dot
           Positioned(
             left: 0,
-            child: Container(
-              height: 12,
-              width: 12,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.primary.withOpacity(0.7),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(6),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-            ).animate(onPlay: (controller) => controller.repeat())
-             .moveX(begin: 0, end: 48, duration: 1500.ms)
-             .then()
-             .moveX(begin: 48, end: 0, duration: 1500.ms),
+            child:
+                Container(
+                      height: 12,
+                      width: 12,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.primary.withOpacity(0.7),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    )
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .moveX(begin: 0, end: 48, duration: 1500.ms)
+                    .then()
+                    .moveX(begin: 48, end: 0, duration: 1500.ms),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildVersionDisplay() {
     if (versionNumber.isEmpty) return const SizedBox.shrink();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(

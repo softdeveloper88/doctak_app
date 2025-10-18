@@ -1335,27 +1335,54 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 // Replace your current outgoing call implementation with this
   Future<dynamic> onAuthorizer(
       String channelName, String socketId, dynamic options) async {
-    final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
+    try {
+      final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
 
-    // Build query parameters
-    final Map<String, String> queryParams = {
-      'socket_id': socketId,
-      'channel_name': channelName,
-    };
+      // Build query parameters
+      final Map<String, String> queryParams = {
+        'socket_id': socketId,
+        'channel_name': channelName,
+      };
 
-    final response = await http.post(
-      uri.replace(queryParameters: queryParams),
-      headers: {
-        'Authorization': 'Bearer ${AppData.userToken!}',
-      },
-    );
+      final response = await http.post(
+        uri.replace(queryParameters: queryParams),
+        headers: {
+          'Authorization': 'Bearer ${AppData.userToken!}',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final String data = response.body;
+      if (response.statusCode == 200) {
+        final String data = response.body;
 
-      return jsonDecode(data);
-    } else {
-      throw Exception('Failed to fetch Pusher auth data');
+        // Decode JSON and ensure it's a Map
+        final decoded = jsonDecode(data);
+
+        // Pusher expects a Map<String, dynamic> with 'auth' and optionally 'channel_data'
+        if (decoded is Map) {
+          // Convert to Map<String, dynamic> to ensure type safety
+          final Map<String, dynamic> authData = Map<String, dynamic>.from(decoded);
+
+          debugPrint('Pusher auth successful for channel: $channelName');
+          debugPrint('Auth data keys: ${authData.keys}');
+
+          return authData;
+        } else {
+          debugPrint('Pusher auth response is not a Map: ${decoded.runtimeType}');
+          throw Exception('Invalid auth response format - expected Map but got ${decoded.runtimeType}');
+        }
+      } else {
+        debugPrint('Pusher auth failed with status code: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
+        throw Exception('Failed to fetch Pusher auth data: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error in onAuthorizer: $e');
+      debugPrint('Stack trace: $stackTrace');
+      // Return a properly typed error response
+      return <String, dynamic>{
+        'error': e.toString(),
+      };
     }
   }
 

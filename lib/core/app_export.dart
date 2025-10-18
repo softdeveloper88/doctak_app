@@ -16,6 +16,7 @@ export 'package:doctak_app/widgets/custom_image_view.dart';
 export '../theme/bloc/theme_bloc.dart';
 export '../theme/custom_button_style.dart';
 export 'package:doctak_app/core/utils/permission_manager.dart';
+export 'package:doctak_app/utils/permission_utils.dart';
 export 'package:permission_handler/permission_handler.dart';
 export 'package:doctak_app/core/utils/file_upload_helper.dart';
 export 'package:doctak_app/core/utils/date_time_utils.dart';

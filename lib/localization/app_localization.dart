@@ -22,7 +22,7 @@
 // class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/l10n/app_localizations.dart';
 
 const String LAGUAGE_CODE = 'languageCode';
@@ -38,7 +38,8 @@ const String HINDI = 'hi';
 const String URDU = 'ur';
 
 Future<Locale> setLocale(String languageCode) async {
-  SharedPreferences _prefs = await SharedPreferences.getInstance();
+  final _prefs = SecureStorageService.instance;
+  await _prefs.initialize();
   // Set both keys for backward compatibility
   await _prefs.setString(LAGUAGE_CODE, languageCode);
   await _prefs.setString('selected_language', languageCode);
@@ -46,11 +47,12 @@ Future<Locale> setLocale(String languageCode) async {
 }
 
 Future<Locale> getLocale() async {
-  SharedPreferences _prefs = await SharedPreferences.getInstance();
+  final _prefs = SecureStorageService.instance;
+  await _prefs.initialize();
   // First check for the new selected_language key (from language selection screen)
-  String languageCode = _prefs.getString('selected_language') ?? 
-                       _prefs.getString(LAGUAGE_CODE) ?? 
-                       ENGLISH;
+  String? selectedLang = await _prefs.getString('selected_language');
+  String? langCode = await _prefs.getString(LAGUAGE_CODE);
+  String languageCode = selectedLang ?? langCode ?? ENGLISH;
   return _locale(languageCode);
 }
 

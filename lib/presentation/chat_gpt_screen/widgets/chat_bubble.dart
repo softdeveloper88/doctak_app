@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
@@ -20,6 +21,8 @@ class ChatBubble extends StatelessWidget {
   final File? imageUrl2;
   final String responseImageUrl1;
   final String responseImageUrl2;
+  final List<int>? imageBytes1;
+  final List<int>? imageBytes2;
 
   const ChatBubble({
     Key? key,
@@ -30,6 +33,8 @@ class ChatBubble extends StatelessWidget {
     required this.imageUrl2,
     this.responseImageUrl1 = '',
     this.responseImageUrl2 = '',
+    this.imageBytes1,
+    this.imageBytes2,
   }) : super(key: key);
 
   @override
@@ -128,13 +133,13 @@ class ChatBubble extends StatelessWidget {
                                           ),
                                           padding: const EdgeInsets.all(12),
                                           textStyle: TextStyle(
-                                            fontSize: 12.sp, // Responsive font size
+                                            fontSize: 16.sp, // Responsive font size
                                             fontFamily: 'Poppins',
                                           ),
                                         ),
                                         PConfig(
                                           textStyle: TextStyle(
-                                            fontSize: 11.sp, // Responsive font size
+                                            fontSize: 15.sp, // Responsive font size
                                             fontFamily: 'Poppins',
                                             height: 1.5,
                                             color: appStore.isDarkMode ? Colors.white : Colors.black87,
@@ -163,13 +168,13 @@ class ChatBubble extends StatelessWidget {
                                     ),
                                     padding: const EdgeInsets.all(12),
                                     textStyle: TextStyle(
-                                      fontSize: 12.sp, // Responsive font size
+                                      fontSize: 16.sp, // Responsive font size
                                       fontFamily: 'Poppins',
                                     ),
                                   ),
                                   PConfig(
                                     textStyle: TextStyle(
-                                      fontSize: 11.sp, // Responsive font size
+                                      fontSize: 15.sp, // Responsive font size
                                       fontFamily: 'Poppins',
                                       height: 1.5,
                                       color: appStore.isDarkMode ? Colors.white : Colors.black87,
@@ -177,28 +182,28 @@ class ChatBubble extends StatelessWidget {
                                   ),
                                   H1Config(
                                     style: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: 20.sp,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Poppins',
                                     ),
                                   ),
                                   H2Config(
                                     style: TextStyle(
-                                      fontSize: 14.sp,
+                                      fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Poppins',
                                     ),
                                   ),
                                   H3Config(
                                     style: TextStyle(
-                                      fontSize: 13.sp,
+                                      fontSize: 17.sp,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Poppins',
                                     ),
                                   ),
                                   CodeConfig(
                                     style: TextStyle(
-                                      fontSize: 10.sp,
+                                      fontSize: 14.sp,
                                       fontFamily: 'monospace',
                                     ),
                                   ),
@@ -295,21 +300,30 @@ class ChatBubble extends StatelessWidget {
                                               imagePath: responseImageUrl1,
                                             ))
                                       else
-                                        if (imageUrl1 != null)
+                                        if (imageBytes1 != null && imageBytes1!.isNotEmpty)
                                           SizedBox(
                                               height: 100,
                                               width: 100,
-                                              child: imageUrl1 != null
-                                                  ? Image.file(
-                                                imageUrl1!,
-                                                errorBuilder: (BuildContext
-                                                context,
+                                              child: Image.memory(
+                                                Uint8List.fromList(imageBytes1!),
+                                                errorBuilder: (BuildContext context,
                                                     Object exception,
                                                     StackTrace? stackTrace) {
                                                   return const SizedBox();
                                                 },
-                                              )
-                                                  : const SizedBox()),
+                                              ))
+                                        else if (imageUrl1 != null)
+                                          SizedBox(
+                                              height: 100,
+                                              width: 100,
+                                              child: Image.file(
+                                                imageUrl1!,
+                                                errorBuilder: (BuildContext context,
+                                                    Object exception,
+                                                    StackTrace? stackTrace) {
+                                                  return const SizedBox();
+                                                },
+                                              )),
                                       const SizedBox(
                                         width: 4,
                                       ),
@@ -321,21 +335,30 @@ class ChatBubble extends StatelessWidget {
                                               imagePath: responseImageUrl2,
                                             ))
                                       else
-                                        if (imageUrl2 != null)
+                                        if (imageBytes2 != null && imageBytes2!.isNotEmpty)
                                           SizedBox(
                                               height: 100,
                                               width: 100,
-                                              child: imageUrl2 != null
-                                                  ? Image.file(
-                                                imageUrl2!,
-                                                errorBuilder: (BuildContext
-                                                context,
+                                              child: Image.memory(
+                                                Uint8List.fromList(imageBytes2!),
+                                                errorBuilder: (BuildContext context,
                                                     Object exception,
                                                     StackTrace? stackTrace) {
                                                   return const SizedBox();
                                                 },
-                                              )
-                                                  : const SizedBox()),
+                                              ))
+                                        else if (imageUrl2 != null)
+                                          SizedBox(
+                                              height: 100,
+                                              width: 100,
+                                              child: Image.file(
+                                                imageUrl2!,
+                                                errorBuilder: (BuildContext context,
+                                                    Object exception,
+                                                    StackTrace? stackTrace) {
+                                                  return const SizedBox();
+                                                },
+                                              )),
                                     ],
                                   )
                                 else
@@ -344,20 +367,30 @@ class ChatBubble extends StatelessWidget {
                                       imagePath: responseImageUrl1,
                                     )
                                   else
-                                    if (imageUrl1 != null)
+                                    if (imageBytes1 != null && imageBytes1!.isNotEmpty)
+                                      Image.memory(
+                                        Uint8List.fromList(imageBytes1!),
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return const SizedBox();
+                                        },
+                                      )
+                                    else if (imageUrl1 != null)
                                       Image.file(
-                                        imageUrl1!, errorBuilder: (BuildContext
-                                      context,
-                                          Object exception,
-                                          StackTrace? stackTrace) {
-                                        return const SizedBox();
-                                      },),
+                                        imageUrl1!,
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return const SizedBox();
+                                        },
+                                      ),
                                 Text(text,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Poppins',
-                                        fontSize: 11.sp, // Responsive font size
-                                        fontWeight: FontWeight.w500)),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    fontSize: 15.sp, // Responsive font size
+                                    fontWeight: FontWeight.w500)),
                               ],
                             )),
                           ),

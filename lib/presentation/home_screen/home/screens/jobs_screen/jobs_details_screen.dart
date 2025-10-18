@@ -24,9 +24,9 @@ import 'bloc/jobs_state.dart';
 
 class JobsDetailsScreen extends StatefulWidget {
   const JobsDetailsScreen({
-    required this.jobId, 
-    this.isFromSplash = false, 
-    super.key
+    required this.jobId,
+    this.isFromSplash = false,
+    super.key,
   });
 
   final String jobId;
@@ -42,11 +42,18 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   @override
   void initState() {
-    jobsBloc.add(
-      JobDetailPageEvent(jobId: widget.jobId),
-    );
+    // If jobId is empty, avoid making the API call and show a friendly message
+    if (widget.jobId.trim().isEmpty) {
+      // set a local flag so build() can show a proper message
+      _invalidJobId = true;
+    } else {
+      jobsBloc.add(JobDetailPageEvent(jobId: widget.jobId));
+    }
+
     super.initState();
   }
+
+  bool _invalidJobId = false;
 
   Countries findModelByNameOrDefault(
     List<Countries> countries,
@@ -54,13 +61,33 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     Countries defaultCountry,
   ) {
     return countries.firstWhere(
-      (country) => country.countryName?.toLowerCase() == name.toLowerCase(), 
-      orElse: () => defaultCountry, 
+      (country) => country.countryName?.toLowerCase() == name.toLowerCase(),
+      orElse: () => defaultCountry,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_invalidJobId) {
+      return Scaffold(
+        backgroundColor: svGetScaffoldColor(),
+        appBar: DoctakAppBar(
+          title: translation(context).lbl_job_detail,
+          titleIcon: Icons.work_outline_rounded,
+          onBackPressed: () {
+            if (widget.isFromSplash) {
+              const SVDashboardScreen().launch(context, isNewTask: true);
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        ),
+        body: Center(
+          child: Text('This job is no longer available'),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: svGetScaffoldColor(),
       appBar: DoctakAppBar(
@@ -91,11 +118,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               ),
               onPressed: () {
                 if (jobsBloc.jobDetailModel.job != null) {
-                  createDynamicLink(
-                    '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
-                    '${AppData.base}job/${jobsBloc.jobDetailModel.job?.id}',
-                    jobsBloc.jobDetailModel.job?.link ?? '',
-                  );
+                  // createDynamicLink(
+                  //   '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
+                  //   '${AppData.base}job/${jobsBloc.jobDetailModel.job?.id}',
+                  //   jobsBloc.jobDetailModel.job?.link ?? '',
+                  // );
                 }
               },
             ),
@@ -115,11 +142,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           } else if (state is PaginationLoadedState) {
             return _buildJobDetails();
           } else if (state is DataError) {
-            return Center(
-              child: Text(state.errorMessage),
-            );
+            return Center(child: Text(state.errorMessage));
           } else {
-            return Center(child: Text(translation(context).msg_something_went_wrong));
+            return Center(
+              child: Text(translation(context).msg_something_went_wrong),
+            );
           }
         },
       ),
@@ -134,45 +161,49 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: 16.0,
+          bottom: MediaQuery.of(context).padding.bottom + 16.0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Top action buttons
             _buildActionButtons(),
-            
+
             // Hero Card - Job Header
             _buildJobHeaderCard(job),
-            
+
             const SizedBox(height: 16),
-            
+
             // Job Details Cards
             _buildJobInfoCard(job),
-            
+
             const SizedBox(height: 16),
-            
+
             // Job Statistics Card
             _buildJobStatsCard(job),
-            
+
             const SizedBox(height: 16),
-            
+
             // Specialties Card
             if (job.specialties?.isNotEmpty ?? false) ...[
               _buildSpecialtiesCard(job),
               const SizedBox(height: 16),
             ],
-            
+
             // Description Card
             _buildDescriptionCard(job),
-            
+
             const SizedBox(height: 16),
-            
+
             // User Info Card (Job Poster)
-            if (job.user != null)
-              _buildUserInfoCard(job.user!),
-            
+            if (job.user != null) _buildUserInfoCard(job.user!),
+
             const SizedBox(height: 16),
-            
+
             // Bottom action buttons - Redesigned to match job list pattern
             _buildActionButtonsCard(job),
           ],
@@ -183,7 +214,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildActionButtons() {
     if (jobsBloc.jobDetailModel.job == null) return const SizedBox.shrink();
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -221,7 +252,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     String formattedDate = date != null
         ? DateFormat('MMM dd, yyyy').format(DateTime.parse(date))
         : translation(context).lbl_not_available;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -282,11 +313,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             color: Colors.blue.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            color: Colors.blue,
-            size: 16,
-          ),
+          child: Icon(icon, color: Colors.blue, size: 16),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -342,14 +369,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Future<void> _launchInBrowser(Uri url) async {
     try {
-      await launchUrl(
-        url,
-        mode: LaunchMode.externalApplication,
-      );
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${translation(context).lbl_error}: ${e.toString()}')),
+          SnackBar(
+            content: Text('${translation(context).lbl_error}: ${e.toString()}'),
+          ),
         );
       }
     }
@@ -391,10 +417,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     ),
                   ),
                 ),
-                if ((job.promoted is bool && job.promoted == true) || 
+                if ((job.promoted is bool && job.promoted == true) ||
                     (job.promoted is int && job.promoted != 0))
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.amber,
                       borderRadius: BorderRadius.circular(20),
@@ -427,7 +456,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.business, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.business,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -452,7 +485,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.location_on, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.location_on,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -477,7 +514,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.attach_money, color: Colors.white, size: 20),
+                    child: const Icon(
+                      Icons.attach_money,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -527,7 +568,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             _buildDetailRow(
               icon: Icons.language,
               title: translation(context).lbl_preferred_language,
-              value: job.preferredLanguage ?? translation(context).lbl_not_available,
+              value:
+                  job.preferredLanguage ??
+                  translation(context).lbl_not_available,
             ),
             const SizedBox(height: 20),
             _buildDetailRow(
@@ -562,8 +605,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     title: translation(context).lbl_date_to,
                     date: job.lastDate,
                     icon: Icons.date_range_outlined,
-                    isExpired: job.lastDate != null 
-                        ? DateTime.parse(job.lastDate??'').isBefore(DateTime.now())
+                    isExpired: job.lastDate != null
+                        ? DateTime.parse(
+                            job.lastDate ?? '',
+                          ).isBefore(DateTime.now())
                         : false,
                   ),
                 ),
@@ -646,10 +691,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Icon(icon, color: Colors.white, size: 24),
           ),
           const SizedBox(height: 8),
@@ -694,7 +736,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     color: Colors.purple.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.medical_services, color: Colors.purple, size: 20),
+                  child: const Icon(
+                    Icons.medical_services,
+                    color: Colors.purple,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Text(
@@ -712,12 +758,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               spacing: 8,
               runSpacing: 8,
               children: (job.specialties ?? []).map<Widget>((specialty) {
-                String displayText = specialty.name ?? "Specialty ${specialty.id ?? 'Unknown'}";
+                String displayText =
+                    specialty.name ?? "Specialty ${specialty.id ?? 'Unknown'}";
                 if (displayText.trim().isEmpty) {
                   displayText = "Specialty ${specialty.id ?? 'Unknown'}";
                 }
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.purple.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -759,7 +809,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     color: Colors.teal.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.description, color: Colors.teal, size: 20),
+                  child: const Icon(
+                    Icons.description,
+                    color: Colors.teal,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -799,14 +853,19 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 });
               },
               icon: Icon(
-                _isDescriptionExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                _isDescriptionExpanded
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
                 color: Colors.teal,
               ),
               label: Text(
                 _isDescriptionExpanded
                     ? translation(context).lbl_show_less
                     : translation(context).lbl_show_more,
-                style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.teal,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -833,7 +892,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     color: Colors.indigo.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.person, color: Colors.indigo, size: 20),
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.indigo,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Text(
@@ -854,12 +917,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   height: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.indigo.withOpacity(0.3), width: 2),
+                    border: Border.all(
+                      color: Colors.indigo.withOpacity(0.3),
+                      width: 2,
+                    ),
                   ),
                   child: ClipOval(
-                    child: user.profilePic != null && user.profilePic!.isNotEmpty
+                    child:
+                        user.profilePic != null && user.profilePic!.isNotEmpty
                         ? CustomImageView(
-                           imagePath: '${AppData.imageUrl}${user.profilePic!}',
+                            imagePath: '${AppData.imageUrl}${user.profilePic!}',
                             fit: BoxFit.cover,
                             // errorBuilder: (context, error, stackTrace) => Container(
                             //   color: Colors.indigo.withOpacity(0.1),
@@ -868,7 +935,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                           )
                         : Container(
                             color: Colors.indigo.withOpacity(0.1),
-                            child: const Icon(Icons.person, color: Colors.indigo, size: 30),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.indigo,
+                              size: 30,
+                            ),
                           ),
                   ),
                 ),
@@ -924,7 +995,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     color: Colors.green.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.touch_app, color: Colors.green, size: 20),
+                  child: const Icon(
+                    Icons.touch_app,
+                    color: Colors.green,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -938,10 +1013,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Main action buttons row
             _buildMainActionRow(job),
-            
+
             // View applicants button (for job creator)
             if (job.user?.id == AppData.logInUserId) ...[
               const SizedBox(height: 16),
@@ -1000,7 +1075,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               ),
             ),
           ),
-        
+
         if (hasApplied && !isJobOwner)
           Expanded(
             flex: hasLink ? 1 : 1,
@@ -1047,10 +1122,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               ),
             ),
           ),
-        
+
         // Spacing between buttons
         if ((hasApplied || !isJobOwner) && hasLink) const SizedBox(width: 12),
-        
+
         // Visit site button
         if (hasLink)
           Expanded(
@@ -1065,7 +1140,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.blue[600],
-                side: BorderSide(color: Colors.blue.withOpacity(0.3), width: 1.5),
+                side: BorderSide(
+                  color: Colors.blue.withOpacity(0.3),
+                  width: 1.5,
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),

@@ -199,7 +199,31 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         'Bearer ${AppData.userToken}', AppData.logInUserId);
     print(AppData.userToken);
     userProfile = response1;
-    print("DD ${response.data}");
+    // Safely extract payload from response. Some test mocks or different HTTP clients
+    // may not provide a `.data` getter (causing NoSuchMethodError). Handle common
+    // shapes: Dio Response, Map, or raw string/object.
+    dynamic respData;
+    try {
+      if (response == null) {
+        respData = null;
+      } else if (response is Response) {
+        respData = response.data;
+      } else if (response is Map) {
+        respData = response['data'] ?? response;
+      } else {
+        // Fallback: try to access `data` via `noSuchMethod`-safe approach
+        try {
+          respData = (response as dynamic).data;
+        } catch (_) {
+          // Last-resort: use the object itself or its toString()
+          respData = response;
+        }
+      }
+    } catch (e) {
+      respData = 'error_reading_response: $e';
+    }
+
+    print("DD $respData");
     ProgressDialogUtils.hideProgressDialog();
 
     // Check if current state is PaginationLoadedState before proceeding
@@ -237,8 +261,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
         event.userProfile?.user?.lastName ?? "",
-        event.userProfile?.user?.phone ?? '',
-        event.userProfile?.user?.licenseNo ?? " ",
+        event.userProfile?.user?.phone?.toString() ?? '',
+        event.userProfile?.user?.licenseNo?.toString() ?? "No license no",
         specialtyName ?? event.userProfile?.user?.specialty ?? '',
         event.userProfile?.user?.dob ?? "",
         'male',
@@ -278,8 +302,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
         event.userProfile?.user?.lastName ?? "",
-        event.userProfile?.user?.phone ?? '',
-        event.userProfile?.user?.licenseNo ?? " ",
+        event.userProfile?.user?.phone?.toString() ?? '',
+        event.userProfile?.user?.licenseNo?.toString() ?? " ",
         specialtyName ?? event.userProfile?.user?.specialty ?? '',
         event.userProfile?.user?.dob ?? "",
         'male',
@@ -370,8 +394,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         'Bearer ${AppData.userToken}',
         event.userProfile?.user?.firstName ?? '',
         event.userProfile?.user?.lastName ?? "",
-        event.userProfile?.user?.phone ?? '',
-        event.userProfile?.user?.licenseNo ?? " ",
+        event.userProfile?.user?.phone?.toString() ?? '',
+        event.userProfile?.user?.licenseNo?.toString() ?? " ",
         specialtyName ?? event.userProfile?.user?.specialty ?? '',
         event.userProfile?.user?.dob ?? "",
         'male',
@@ -434,7 +458,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             ? event.userProfile?.privacySetting![8].visibility ?? 'globe'
             : 'globe',
       );
-      print(response2.response);
+      print('About me update response: $response2');
     }
 
     // final response3 = await apiManager.getPlacesLivedUpdate(

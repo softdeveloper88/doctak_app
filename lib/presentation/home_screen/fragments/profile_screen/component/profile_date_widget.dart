@@ -227,29 +227,38 @@ class _ProfileDateWidgetState extends State<ProfileDateWidget> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    capitalizeWords(widget.label ?? ''),
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Colors.grey[700],
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w500,
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      capitalizeWords(widget.label ?? ''),
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.grey[700],
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  Text(
-                    widget.value != null && widget.value!.isNotEmpty
-                        ? _formatDateForDisplay(widget.value) ?? ''
-                        : translation(context).lbl_not_specified,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: widget.value != null && widget.value!.isNotEmpty
-                          ? Colors.grey[900]
-                          : Colors.grey[500],
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      fontStyle: widget.value != null && widget.value!.isNotEmpty
-                          ? FontStyle.normal
-                          : FontStyle.italic,
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      widget.value != null && widget.value!.isNotEmpty
+                          ? _formatDateForDisplay(widget.value) ?? ''
+                          : translation(context).lbl_not_specified,
+                      textAlign: TextAlign.end,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: widget.value != null && widget.value!.isNotEmpty
+                            ? Colors.grey[900]
+                            : Colors.grey[500],
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        fontStyle: widget.value != null && widget.value!.isNotEmpty
+                            ? FontStyle.normal
+                            : FontStyle.italic,
+                      ),
                     ),
                   ),
                 ],

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/network/custom_cache_manager.dart';
 import 'package:doctak_app/core/utils/media_type_detector.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
 import 'package:doctak_app/widgets/s3_image_loader.dart';
@@ -61,6 +62,7 @@ class PhotoGrid extends StatelessWidget {
         fit: BoxFit.cover,
         height: height,
         width: width,
+        cacheManager: CustomCacheManager(),
         httpHeaders: const {
           'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
           'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',

@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
-import 'package:flutter/foundation.dart';
+import 'package:doctak_app/core/utils/robust_image_picker.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';
@@ -10,22 +11,23 @@ import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_state.d
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:video_player/video_player.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
 import 'bloc/image_upload_event.dart';
 
 class MultipleImageUploadWidget extends StatefulWidget {
-  ImageUploadBloc imageUploadBloc;
-  Function(List<XFile>) onTap;
-  int imageLimit;
-  String? imageType;
+  final ImageUploadBloc imageUploadBloc;
+  final Function(List<XFile>) onTap;
+  final int imageLimit;
+  final String? imageType;
+  // When true, the gallery picker opens automatically once the widget appears
+  final bool autoOpenGallery;
 
   MultipleImageUploadWidget(
     this.imageUploadBloc,
     this.onTap, {
     this.imageType,
     this.imageLimit = 0,
+    this.autoOpenGallery = false,
     super.key,
   });
 
@@ -36,359 +38,176 @@ class MultipleImageUploadWidget extends StatefulWidget {
 
 class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
   // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
-  late VideoPlayerController _controller;
   int selectTab = 0;
   final ImagePicker imgpicker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    // Optionally auto-open gallery (used for X-Ray flow per request)
+    if (widget.autoOpenGallery) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (!mounted) return;
+          // Only open if user can add more images according to imageLimit
+          final canAddMore =
+              widget.imageLimit == 0 ||
+              widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
+          if (canAddMore) {
+            openImages();
+          }
+        });
+      });
+    }
+  }
+
   openImages() async {
-    print('MultiWidget: *** OPENING GALLERY ***');
+    debugPrint('MultiWidget: *** OPENING GALLERY with RobustImagePicker ***');
     try {
-      // Enhanced permission handling for iOS and Android
-      print('MultiWidget: Checking permissions...');
-      bool hasPermission = await _checkAndRequestPermissions();
-      print('MultiWidget: Permission result: $hasPermission');
-      if (!hasPermission) {
-        print('MultiWidget: Permission denied, showing dialog');
-        // Only show dialog if truly permanently denied
-        if (Platform.isIOS) {
-          final status = await Permission.photos.status;
-          if (status.isPermanentlyDenied) {
-            _permissionDialog(context);
-          } else {
-            // Try once more with direct request
-            final result = await Permission.photos.request();
-            if (!result.isGranted && !result.isLimited) {
-              _permissionDialog(context);
-            }
-          }
-        } else {
-          _permissionDialog(context);
-        }
-        return;
-      }
+      List<XFile> pickedfiles = [];
+      debugPrint('MultiWidget: Image limit: ${widget.imageLimit}');
 
-      var pickedfiles;
-      print('MultiWidget: Image limit: ${widget.imageLimit}');
-      print('MultiWidget: Calling image picker...');
-      
-      // Workaround: Use pickImage for single image selection
-      if (widget.imageLimit == 1) {
-        print('MultiWidget: Using pickImage (single) for limit=1');
-        final singleFile = await imgpicker.pickImage(
-          source: ImageSource.gallery,
-          imageQuality: 85,
-          maxWidth: 1920,
-          maxHeight: 1080,
+      // Use RobustImagePicker which handles limited access + has photo_manager fallback
+      try {
+        debugPrint('MultiWidget: Using RobustImagePicker.showPhotoManagerPicker...');
+        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(
+          context,
+          limit: widget.imageLimit > 0 ? widget.imageLimit : null,
+          title: 'Select Photos',
         );
-        if (singleFile != null) {
-          pickedfiles = [singleFile];
-        }
-      } else if (widget.imageLimit == 2) {
-        print('MultiWidget: Using pickMultipleMedia with limit=2');
+        debugPrint('MultiWidget: showPhotoManagerPicker returned ${pickedfiles.length} files');
+      } catch (e) {
+        debugPrint('MultiWidget: showPhotoManagerPicker failed: $e, trying fallback...');
+
+        // Fallback to standard RobustImagePicker
         try {
-          pickedfiles = await imgpicker.pickMultipleMedia(
-            limit: 2,
-            imageQuality: 85,
-            maxWidth: 1920,
-            maxHeight: 1080,
-            requestFullMetadata: false,
+          pickedfiles = await RobustImagePicker.pickMultipleImages(
+            limit: widget.imageLimit > 0 ? widget.imageLimit : null,
           );
-        } catch (e) {
-          print('MultiWidget: Error with pickMultipleMedia: $e');
-          // Fallback to single image if multiple fails
-          final singleFile = await imgpicker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 85,
-            maxWidth: 1920,
-            maxHeight: 1080,
-          );
-          if (singleFile != null) {
-            pickedfiles = [singleFile];
+          debugPrint('MultiWidget: Fallback pickMultipleImages returned ${pickedfiles.length} files');
+        } catch (e2) {
+          debugPrint('MultiWidget: All pickers failed: $e2');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to open gallery: ${e2.toString()}'),
+                backgroundColor: Colors.red[600],
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
           }
+          return;
         }
-      } else {
-        print('MultiWidget: Using pickMultipleMedia (no limit)');
-        pickedfiles = await imgpicker.pickMultipleMedia(
-          imageQuality: 85,
-          maxWidth: 1920,
-          maxHeight: 1080,
-          requestFullMetadata: false,
-        );
-      }
-      print('MultiWidget: Picker returned: ${pickedfiles?.length ?? 0} files');
-      if (pickedfiles != null && pickedfiles.isNotEmpty) {
-        print('MultiWidget: First file path: ${pickedfiles.first.path}');
       }
 
-      if (pickedfiles != null) {
-        print('Gallery: Selected ${pickedfiles.length} files from gallery');
+      debugPrint('MultiWidget: Picker returned: ${pickedfiles.length} files');
+      if (pickedfiles.isNotEmpty) {
+        debugPrint('MultiWidget: First file path: ${pickedfiles.first.path}');
+      }
+
+      if (pickedfiles.isNotEmpty) {
+        debugPrint('Gallery: Selected ${pickedfiles.length} files from gallery');
         for (var element in pickedfiles) {
           if (widget.imageLimit == 0 ||
               widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
-            print('Gallery: Adding image ${element.path} to BLoC');
+            debugPrint('Gallery: Adding image ${element.path} to BLoC');
             widget.imageUploadBloc.add(
               SelectedFiles(pickedfiles: element, isRemove: false),
             );
-            print('Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images');
+            debugPrint(
+              'Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images',
+            );
           }
         }
-        print('Gallery: Calling setState');
+        debugPrint('Gallery: Calling setState');
         setState(() {});
       } else {
-        print("No image is selected.");
+        debugPrint("No image is selected (user may have cancelled).");
       }
     } catch (e) {
-      print('MultiWidget: ERROR in openImages: $e');
-      print('MultiWidget: Error stack trace:');
-      print(StackTrace.current);
-      // Only show permission dialog if it's actually a permission issue
-      if (e.toString().contains('permission') || e.toString().contains('denied')) {
-        _permissionDialog(context);
-      } else {
-        // Show generic error
+      debugPrint('MultiWidget: ERROR in openImages: $e');
+      debugPrint('MultiWidget: Error stack trace:');
+      debugPrint(StackTrace.current.toString());
+      // Show generic error
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error selecting images: ${e.toString()}')),
+          SnackBar(
+            content: Text('Error selecting images: ${e.toString()}'),
+            backgroundColor: Colors.red[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
         );
       }
     }
-  }
-
-  Future<bool> _checkAndRequestPermissions() async {
-    try {
-      if (Platform.isIOS) {
-        // Enhanced iOS permission handling
-        final photosPermission = Permission.photos;
-        final status = await photosPermission.status;
-        
-        // Debug logging
-        print('iOS Photo Permission Status: $status');
-        
-        // Check if permission is already granted or limited (both are acceptable)
-        if (status.isGranted || status.isLimited) {
-          print('iOS Photo Permission: Already granted/limited, proceeding to gallery');
-          return true;
-        }
-        
-        // Only request if not yet determined
-        if (status.isDenied || status.isRestricted) {
-          print('iOS Photo Permission: Requesting permission');
-          final result = await photosPermission.request();
-          print('iOS Photo Permission Result: $result');
-          
-          // Accept both granted and limited states
-          if (result.isGranted || result.isLimited) {
-            return true;
-          }
-        }
-        
-        // Check if permanently denied (user needs to go to settings)
-        if (status.isPermanentlyDenied) {
-          print('iOS Photo Permission: Permanently denied');
-          return false;
-        }
-        
-        // Default case - try one more time
-        final finalStatus = await photosPermission.status;
-        return finalStatus.isGranted || finalStatus.isLimited;
-      } else {
-        // Android permission handling
-        final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-        final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        final int sdkInt = androidInfo.version.sdkInt;
-
-        if (sdkInt >= 34) {
-          // Android 14+ (API 34+) - Check visual user selected permission first
-          final visualUserSelected = Permission.photos;
-          final visualStatus = await visualUserSelected.status;
-
-          if (visualStatus.isGranted || visualStatus.isLimited) {
-            return true;
-          } else if (visualStatus.isDenied) {
-            final result = await visualUserSelected.request();
-            return result.isGranted || result.isLimited;
-          }
-
-          // Fallback to regular photos permission
-          final photosPermission = Permission.photos;
-          final photosStatus = await photosPermission.status;
-
-          if (photosStatus.isGranted || photosStatus.isLimited) {
-            return true;
-          } else if (photosStatus.isDenied) {
-            final result = await photosPermission.request();
-            return result.isGranted || result.isLimited;
-          }
-
-          return false;
-        } else if (sdkInt >= 33) {
-          // Android 13 (API 33) - Use granular media permissions
-          final photosPermission = Permission.photos;
-          final status = await photosPermission.status;
-
-          if (status.isGranted || status.isLimited) {
-            return true;
-          } else if (status.isDenied) {
-            final result = await photosPermission.request();
-            return result.isGranted || result.isLimited;
-          }
-          return false;
-        } else if (sdkInt >= 30) {
-          // Android 11-12 (API 30-32) - Scoped storage with legacy support
-          final storagePermission = Permission.storage;
-          final status = await storagePermission.status;
-
-          if (status.isGranted) {
-            return true;
-          } else if (status.isDenied) {
-            final result = await storagePermission.request();
-            return result.isGranted;
-          }
-          return false;
-        } else {
-          // Android 10 and below (API 29 and below)
-          final storagePermission = Permission.storage;
-          final status = await storagePermission.status;
-
-          if (status.isGranted) {
-            return true;
-          } else if (status.isDenied) {
-            final result = await storagePermission.request();
-            return result.isGranted;
-          }
-          return false;
-        }
-      }
-    } catch (e) {
-      print('Permission check error: $e');
-      return false;
-    }
-  }
-
-  Future<void> _permissionDialog(context) async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.photo_library_outlined,
-                  color: Colors.orange[700],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Photo Access Required',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            'DocTak needs access to your photos to upload medical images for AI analysis. Please enable photo permissions in your device settings.',
-            style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'Poppins',
-              color: Colors.black54,
-              height: 1.4,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 8),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Open Settings',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onPressed: () {
-                  openAppSettings();
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   openVideo() async {
     try {
+      // Check camera and microphone permissions
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
+      if (!cameraGranted) {
+        return;
+      }
+
+      final microphoneGranted = await PermissionUtils.ensureMicrophonePermission();
+      if (!microphoneGranted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Microphone access is required for video recording.',
+                style: TextStyle(fontFamily: 'Poppins'),
+              ),
+              backgroundColor: Colors.orange[600],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
       var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
-      //you can use ImageCourse.camera for Camera capture
       if (pickedfiles != null) {
-        // pickedfiles.forEach((element) {
-        // Video files are handled directly by the BLoC
         widget.imageUploadBloc.add(
           SelectedFiles(pickedfiles: pickedfiles, isRemove: false),
         );
-        // });
-        // setState(() {
-        // });
       } else {
-        print("No image is selected.");
+        debugPrint("No video is selected.");
       }
     } catch (e) {
-      print("error while picking file.$e");
+      debugPrint("Error while picking video: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Error recording video. Please try again.',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: Colors.red[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
     }
   }
 
   openCamera() async {
     try {
-      // Enhanced permission handling for different Android versions
-      bool hasPermission = await _checkAndRequestPermissions();
-      if (!hasPermission) {
-        _permissionDialog(context);
+      // Use the professional camera permission handler
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
+      if (!cameraGranted) {
         return;
       }
 
@@ -408,11 +227,25 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
           setState(() {});
         }
       } else {
-        print("No image is selected.");
+        debugPrint("No image is selected.");
       }
     } catch (e) {
-      _permissionDialog(context);
-      print("error while picking file. $e");
+      debugPrint("Error while taking photo: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Error taking photo. Please try again.',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: Colors.red[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -503,7 +336,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 if (widget.imageType == "CT Scan" ||
                     widget.imageType == "MRI Scan" ||
                     widget.imageType == "Mammography")
-                  Text(
+                  const Text(
                     "Please upload one or two of the most relevant images for analysis.",
                     style: TextStyle(
                       fontFamily: 'Poppins',
@@ -572,7 +405,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'Choose from Gallery',
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
@@ -668,7 +501,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'Take Photo',
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
@@ -801,19 +634,82 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
 }
 
 Widget buildMediaItem(File file) {
-  if (file.path.endsWith('.jpg') ||
-      file.path.endsWith('.jpeg') ||
-      file.path.endsWith('.png')) {
-    // Display image
-    return Image.file(file, fit: BoxFit.cover);
-  } else if (file.path.endsWith('.mp4') || file.path.endsWith('.mov')) {
-    // Display video
+  final path = file.path;
+
+  // If path looks like a content URI (Android limited access), load bytes via XFile
+  if (path.startsWith('content://') ||
+      !(path.toLowerCase().endsWith('.jpg') ||
+          path.toLowerCase().endsWith('.jpeg') ||
+          path.toLowerCase().endsWith('.png') ||
+          path.toLowerCase().endsWith('.webp') ||
+          path.toLowerCase().endsWith('.gif') ||
+          path.toLowerCase().endsWith('.heic'))) {
+    // Use FutureBuilder to read bytes asynchronously and render Image.memory
+    return FutureBuilder<List<int>>(
+      future: XFile(path).readAsBytes(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            color: Colors.grey[200],
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+          debugPrint('buildMediaItem error: ${snapshot.error}');
+          return Container(
+            color: Colors.grey[200],
+            child: const Center(child: Icon(Icons.broken_image_outlined)),
+          );
+        }
+        final bytes = Uint8List.fromList(snapshot.data!);
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Image.memory error: $error');
+            return Container(
+              color: Colors.grey[200],
+              child: const Center(child: Icon(Icons.broken_image_outlined)),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Recognized image file path; use Image.file
+  if (path.toLowerCase().endsWith('.jpg') ||
+      path.toLowerCase().endsWith('.jpeg') ||
+      path.toLowerCase().endsWith('.png') ||
+      path.toLowerCase().endsWith('.webp') ||
+      path.toLowerCase().endsWith('.gif') ||
+      path.toLowerCase().endsWith('.heic')) {
+    return Image.file(
+      file,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('Image.file error: $error');
+        return Container(
+          color: Colors.grey[200],
+          child: const Center(child: Icon(Icons.broken_image_outlined)),
+        );
+      },
+    );
+  }
+
+  // Video handling
+  if (path.toLowerCase().endsWith('.mp4') || path.toLowerCase().endsWith('.mov')) {
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: DisplayVideo(selectedByte: file),
     );
-  } else {
-    // Handle other types of files
-    return const Text('Unsupported file type');
   }
+
+  return const Text('Unsupported file type');
 }

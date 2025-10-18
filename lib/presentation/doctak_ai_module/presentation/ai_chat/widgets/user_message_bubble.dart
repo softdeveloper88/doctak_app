@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../../../data/models/ai_chat_model/ai_chat_message_model.dart';
@@ -84,16 +87,85 @@ class UserMessageBubble extends StatelessWidget {
     final mimeType = message.mimeType ?? '';
     
     if (mimeType.startsWith('image/')) {
+      // Priority 1: Use fileBytes if available (most reliable)
+      if (message.fileBytes != null && message.fileBytes!.isNotEmpty) {
+        return Container(
+          margin: const EdgeInsets.only(top: 8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              Uint8List.fromList(message.fileBytes!),
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 150,
+                  color: Colors.grey.shade200,
+                  child: const Center(
+                    child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+      
+      // Priority 2: Validate and use filePath
+      if (message.filePath == null || message.filePath!.trim().isEmpty) {
+        return Container(
+          margin: const EdgeInsets.only(top: 8),
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Center(
+            child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+          ),
+        );
+      }
+      
+      // Check if path is a local file or URL
+      final isLocalFile = !message.filePath!.startsWith('http://') && 
+                          !message.filePath!.startsWith('https://');
+      
       return Container(
         margin: const EdgeInsets.only(top: 8),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            message.filePath!,
-            height: 150,
-            width: double.infinity,
-            fit: BoxFit.cover,
-          ),
+          child: isLocalFile
+              ? Image.file(
+                  File(message.filePath!),
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 150,
+                      color: Colors.grey.shade200,
+                      child: const Center(
+                        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                      ),
+                    );
+                  },
+                )
+              : Image.network(
+                  message.filePath!,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 150,
+                      color: Colors.grey.shade200,
+                      child: const Center(
+                        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                      ),
+                    );
+                  },
+                ),
         ),
       );
     } else {

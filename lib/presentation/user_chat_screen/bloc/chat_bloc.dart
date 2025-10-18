@@ -248,6 +248,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       // Create FormData for file upload
       final String fileName = filePath.split('/').last;
       
+      // Determine simple mime type from extension for better server compatibility
+      String _mimeTypeFor(String path, String attachmentType) {
+        final ext = path.split('.').last.toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) return 'image/$ext';
+        if (['mp4', 'mov', 'm4v'].contains(ext)) return 'video/${ext == 'mov' ? 'quicktime' : ext}';
+        if (['pdf'].contains(ext)) return 'application/pdf';
+        if (['mp3', 'wav', 'm4a', 'aac', 'ogg'].contains(ext)) return 'audio/$ext';
+        // fallback based on attachmentType
+        if (attachmentType == 'voice' || attachmentType == 'audio') return 'audio/mpeg';
+        return 'application/octet-stream';
+      }
+
+      final mime = _mimeTypeFor(filePath, attachmentType).split('/');
+      final contentType = MediaType(mime[0], mime[1]);
+
       final formData = FormData.fromMap({
         'user_id': userId,
         'room_id': roomId,
@@ -257,6 +272,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         'file': await MultipartFile.fromFile(
           filePath,
           filename: fileName,
+          contentType: contentType,
         ),
       });
       
@@ -330,33 +346,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           
           // Emit uploading state
           emit(FileUploadingState());
-          
-          // Try using the original API service method
-          try {
-            response = await apiManager.sendMessage(
-              'Bearer ${AppData.userToken}',
-              event.userId ?? '',
-              event.roomId ?? '',
-              event.receiverId ?? '',
-              event.attachmentType ?? '',
-              event.message ?? '',
-              file.path,
-            );
-          } catch (originalApiError) {
-            print("Original API failed: $originalApiError");
-            print("Falling back to custom method...");
-            
-            // Fallback to custom method if original fails
-            response = await _sendMessageWithFile(
-              token: 'Bearer ${AppData.userToken}',
-              userId: event.userId ?? '',
-              roomId: event.roomId ?? '',
-              receiverId: event.receiverId ?? '',
-              attachmentType: event.attachmentType ?? '',
-              message: event.message ?? '',
-              filePath: file.path,
-            );
-          }
+
+          // Use the robust file upload helper to always send multipart/form-data
+          response = await _sendMessageWithFile(
+            token: 'Bearer ${AppData.userToken}',
+            userId: event.userId ?? '',
+            roomId: event.roomId ?? '',
+            receiverId: event.receiverId ?? '',
+            attachmentType: event.attachmentType ?? '',
+            message: event.message ?? '',
+            filePath: file.path,
+          );
           
           print("=== FILE UPLOAD RESPONSE ===");
           print("Response body: ${response.body}");

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
-import 'package:app_links/app_links.dart';
+// TODO: app_links temporarily disabled due to SDK compatibility
+// import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
@@ -18,18 +18,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 enum ScreenState { loading, upgrade, splash }
+
 ScreenState _currentState = ScreenState.splash;
 
 class UnifiedSplashUpgradeScreen extends StatefulWidget {
   const UnifiedSplashUpgradeScreen({Key? key}) : super(key: key);
 
   @override
-  State<UnifiedSplashUpgradeScreen> createState() => _UnifiedSplashUpgradeScreenState();
+  State<UnifiedSplashUpgradeScreen> createState() =>
+      _UnifiedSplashUpgradeScreenState();
 }
 
 // Custom painter for light beam effect
@@ -44,10 +48,7 @@ class LightBeamPainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
-        colors: [
-          color.withOpacity(0.7),
-          color.withOpacity(0.05),
-        ],
+        colors: [color.withOpacity(0.7), color.withOpacity(0.05)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
 
@@ -60,7 +61,7 @@ class LightBeamPainter extends CustomPainter {
       size.width * 0.7,
       size.height * 0.4,
       size.width * 0.5,
-      size.height * 0.5
+      size.height * 0.5,
     );
 
     canvas.drawPath(path, paint);
@@ -70,7 +71,8 @@ class LightBeamPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen> with SingleTickerProviderStateMixin {
+class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
+    with SingleTickerProviderStateMixin {
   // Screen state management
 
   // Version information
@@ -78,14 +80,13 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   String _latestVersionString = '';
   String _currentVersionString = '';
   bool? _isSkippible;
-  bool? _isUpdateAvailable;
   PackageInfo? _packageInfo;
 
   // Animation controller
   late AnimationController _animationController;
 
-  // Deep linking
-  late AppLinks _appLinks;
+  // Deep linking - TODO: AppLinks temporarily disabled due to SDK compatibility
+  // late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
 
   @override
@@ -121,21 +122,24 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
   // Initialize package info
   Future<void> _initializePackageInfo() async {
-    try {
-      _packageInfo = await PackageInfo.fromPlatform();
-      setState(() {
-        _versionNumber = _packageInfo!.version;
-        _currentVersionString = _packageInfo!.version;
-      });
-    } catch (e) {
-      debugPrint('Error getting version info: $e');
-    }
+    // try {
+    //   _packageInfo = await PackageInfo.fromPlatform();
+    //   if (mounted) {
+    //     setState(() {
+    //       _versionNumber = _packageInfo!.version;
+    //       _currentVersionString = _packageInfo!.version;
+    //     });
+    //   }
+    // } catch (e) {
+    //   debugPrint('Error getting version info: $e');
+    // }
   }
 
   // Check if app needs updating
   Future<void> _checkAppVersion() async {
     if (_packageInfo != null) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = SecureStorageService.instance;
+      await prefs.initialize();
       final latestVersionInfo = await _fetchLatestVersion();
       var latestVersion;
       var latestVersionLocal;
@@ -144,18 +148,22 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       if (latestVersionInfo.isNotEmpty) {
         latestVersion = latestVersionInfo['data']['version'];
         await prefs.setString('latest_version', latestVersion);
-        latestVersionLocal = prefs.getString('latest_version');
+        latestVersionLocal = await prefs.getString('latest_version');
         mandatory = latestVersionInfo['data']['mandatory'];
-        setState(() {
-          _latestVersionString = latestVersionLocal ?? '';
-          _currentVersionString = _packageInfo!.version;
-        });
+        if (mounted) {
+          setState(() {
+            _latestVersionString = latestVersionLocal ?? '';
+            _currentVersionString = _packageInfo!.version;
+          });
+        }
       } else {
-        latestVersionLocal = prefs.getString('latest_version') ?? '1.0.1';
-        setState(() {
-          _latestVersionString = latestVersionLocal;
-          _currentVersionString = _packageInfo!.version;
-        });
+        latestVersionLocal = await prefs.getString('latest_version') ?? '1.0.1';
+        if (mounted) {
+          setState(() {
+            _latestVersionString = latestVersionLocal;
+            _currentVersionString = _packageInfo!.version;
+          });
+        }
       }
 
       try {
@@ -163,32 +171,40 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         Version version2 = Version.parse(latestVersionLocal);
 
         if (version1 < version2 && mandatory == 1) {
-          setState(() {
-            _isSkippible = false;
-            _isUpdateAvailable = true;
-            _currentState = ScreenState.upgrade;
-          });
+          if (mounted) {
+            setState(() {
+              _isSkippible = false;
+              _currentState = ScreenState.upgrade;
+            });
+          }
         } else if (version1 < version2 && mandatory == 0) {
-          setState(() {
-            _isSkippible = true;
-            _isUpdateAvailable = true;
-            _currentState = ScreenState.upgrade;
-          });
+          if (mounted) {
+            setState(() {
+              _isSkippible = true;
+              _currentState = ScreenState.upgrade;
+            });
+          }
         } else {
+          if (mounted) {
+            setState(() {
+              _currentState = ScreenState.splash;
+            });
+          }
+        }
+      } catch (e) {
+        debugPrint('Error comparing versions: $e');
+        if (mounted) {
           setState(() {
             _currentState = ScreenState.splash;
           });
         }
-      } catch (e) {
-        debugPrint('Error comparing versions: $e');
+      }
+    } else {
+      if (mounted) {
         setState(() {
           _currentState = ScreenState.splash;
         });
       }
-    } else {
-      setState(() {
-        _currentState = ScreenState.splash;
-      });
     }
   }
 
@@ -197,42 +213,82 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     try {
       var response;
       if (Platform.isAndroid) {
-        response = await http.get(Uri.parse('${AppData.remoteUrl}/version/Android'));
+        response = await http
+            .get(Uri.parse('${AppData.remoteUrl}/version/Android'))
+            .timeout(
+              const Duration(seconds: 10),
+              onTimeout: () {
+                debugPrint('Version check timed out');
+                return http.Response('{}', 408); // Request timeout
+              },
+            );
       } else {
-        response = await http.get(Uri.parse('${AppData.remoteUrl}/version/iOS'));
+        response = await http
+            .get(Uri.parse('${AppData.remoteUrl}/version/iOS'))
+            .timeout(
+              const Duration(seconds: 10),
+              onTimeout: () {
+                debugPrint('Version check timed out');
+                return http.Response('{}', 408);
+              },
+            );
       }
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
+        debugPrint('Version check failed with status: ${response.statusCode}');
         return <String, dynamic>{};
       }
     } catch (e) {
+      debugPrint('Error fetching version: $e');
       return <String, dynamic>{};
     }
   }
 
   // Initialize splash screen logic
   Future<void> _initializeSplashScreen() async {
-    setStatusBarColor(Colors.transparent);
-    await const Duration(seconds: 1).delay;
-    BlocProvider.of<SplashBloc>(context).add(
-      LoadDropdownData('', '', '', ''),
-    );
-    BlocProvider.of<SplashBloc>(context).add(
-      LoadDropdownData1('', ''),
-    );
+    try {
+      setStatusBarColor(Colors.transparent);
+      await const Duration(seconds: 1).delay;
 
-    await _initializeUserSession();
+      // Fire off dropdown data loads in background (non-blocking)
+      // These are for settings/forms later, not required for login/navigation
+      BlocProvider.of<SplashBloc>(
+        context,
+      ).add(LoadDropdownData('', '', '', ''));
+      BlocProvider.of<SplashBloc>(context).add(LoadDropdownData1('', ''));
+
+      // Proceed with user session initialization (with timeout)
+      await _initializeUserSession().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint(
+            'User session initialization timed out, forcing navigation',
+          );
+          // Force navigation to login on timeout
+          if (mounted) {
+            LoginScreen().launch(context, isNewTask: true);
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint('Error in splash initialization: $e');
+      // Fallback to login screen on any error
+      if (mounted) {
+        LoginScreen().launch(context, isNewTask: true);
+      }
+    }
   }
 
   // Initialize user session
   Future<void> _initializeUserSession() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = SecureStorageService.instance;
+    await prefs.initialize();
 
     // Check if this is the first time opening the app
-    bool isFirstTime = prefs.getBool('is_first_time') ?? true;
-    String? selectedLanguage = prefs.getString('selected_language');
+    bool isFirstTime = await prefs.getBool('is_first_time') ?? true;
+    String? selectedLanguage = await prefs.getString('selected_language');
 
     // If first time or no language selected, show language selection screen
     if (isFirstTime || selectedLanguage == null) {
@@ -240,25 +296,25 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       return;
     }
 
-    bool rememberMe = prefs.getBool('rememberMe') ?? false;
-    String? userToken = prefs.getString('token');
-    String? userId = prefs.getString('userId');
+    bool rememberMe = await prefs.getBool('rememberMe') ?? false;
+    String? userToken = await prefs.getString('token');
+    String? userId = await prefs.getString('userId');
 
     if (userToken != null) {
       // Initialize user data
-      AppData.deviceToken = prefs.getString('device_token') ?? '';
+      AppData.deviceToken = await prefs.getString('device_token') ?? '';
       AppData.userToken = userToken;
       AppData.logInUserId = userId;
-      AppData.name = prefs.getString('name') ?? '';
-      AppData.profile_pic = prefs.getString('profile_pic') ?? '';
-      AppData.background = prefs.getString('background') ?? '';
-      AppData.email = prefs.getString('email') ?? '';
-      AppData.specialty = prefs.getString('specialty') ?? '';
-      AppData.university = prefs.getString('university') ?? '';
-      AppData.userType = prefs.getString('user_type') ?? '';
-      AppData.city = prefs.getString('city') ?? '';
-      AppData.countryName = prefs.getString('country') ?? '';
-      AppData.currency = prefs.getString('currency') ?? '';
+      AppData.name = await prefs.getString('name') ?? '';
+      AppData.profile_pic = await prefs.getString('profile_pic') ?? '';
+      AppData.background = await prefs.getString('background') ?? '';
+      AppData.email = await prefs.getString('email') ?? '';
+      AppData.specialty = await prefs.getString('specialty') ?? '';
+      AppData.university = await prefs.getString('university') ?? '';
+      AppData.userType = await prefs.getString('user_type') ?? '';
+      AppData.city = await prefs.getString('city') ?? '';
+      AppData.countryName = await prefs.getString('country') ?? '';
+      AppData.currency = await prefs.getString('currency') ?? '';
     }
 
     if (rememberMe) {
@@ -272,30 +328,17 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     }
   }
 
-  // Deep link initialization
+  // Deep link initialization - TODO: temporarily disabled due to SDK compatibility
   Future<void> _initDeepLinks(BuildContext context) async {
+    // For now, just navigate to dashboard since app_links is incompatible
     try {
-      _appLinks = AppLinks();
-      // Handle links
-      final initialLink = await _appLinks.getLatestLink();
-      if (initialLink != null) {
-        if (initialLink.path.contains('job')) {
-          String id = initialLink.pathSegments.last;
-          JobsDetailsScreen(isFromSplash: true, jobId: id).launch(context, isNewTask: false);
-        } else if (initialLink.path.contains('post')) {
-          SVDashboardScreen().launch(context, isNewTask: true);
-        } else {
-          ConferencesScreen(isFromSplash: true).launch(context, isNewTask: false);
-        }
-      } else {
-        const SVDashboardScreen().launch(context, isNewTask: true);
-      }
-      _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-        debugPrint('onAppLink: $uri');
-      });
+      const SVDashboardScreen().launch(context, isNewTask: true);
     } catch (e) {
       debugPrint('Error initializing deep links: $e');
-      SVDashboardScreen().launch(context, isNewTask: true);
+      // Always ensure we navigate somewhere on error
+      if (mounted) {
+        const SVDashboardScreen().launch(context, isNewTask: true);
+      }
     }
   }
 
@@ -309,10 +352,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
           ? "market://details?id=$appId"
           : "https://apps.apple.com/app/id$appId",
     );
-    launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    );
+    launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -323,8 +363,8 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         child: _currentState == ScreenState.loading
             ? _buildLoadingScreen()
             : _currentState == ScreenState.upgrade
-                ? _buildUpgradeScreen()
-                : _buildSplashScreen(),
+            ? _buildUpgradeScreen()
+            : _buildSplashScreen(),
       ),
     );
   }
@@ -349,10 +389,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         children: [
           // Background animated patterns
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.1,
-              child: _buildBackgroundPatterns(),
-            ),
+            child: Opacity(opacity: 0.1, child: _buildBackgroundPatterns()),
           ),
           // Logo and animations
           Center(
@@ -361,12 +398,17 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
               children: [
                 // Logo with scale and fade animations
                 Image.asset(
-                  'assets/logo/logo.png',
-                  width: 40.w,
-                  fit: BoxFit.contain,
-                ).animate()
-                 .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
-                 .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), duration: 600.ms),
+                      'assets/logo/logo.png',
+                      width: 40.w,
+                      fit: BoxFit.contain,
+                    )
+                    .animate()
+                    .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
+                    .scale(
+                      begin: const Offset(0.8, 0.8),
+                      end: const Offset(1.0, 1.0),
+                      duration: 600.ms,
+                    ),
                 const SizedBox(height: 40),
                 // Loading indicator
                 _buildPremiumLoadingIndicator(),
@@ -409,10 +451,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         children: [
           // Background animated patterns
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.1,
-              child: _buildBackgroundPatterns(),
-            ),
+            child: Opacity(opacity: 0.1, child: _buildBackgroundPatterns()),
           ),
 
           // Decorative top design element
@@ -460,13 +499,19 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                 // Logo with scale and fade animations
                 Padding(
                   padding: const EdgeInsets.all(15),
-                  child: Image.asset(
-                    'assets/logo/logo.png',
-                    width: 40.w,
-                    fit: BoxFit.contain,
-                  ).animate()
-                   .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
-                   .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), duration: 600.ms),
+                  child:
+                      Image.asset(
+                            'assets/logo/logo.png',
+                            width: 40.w,
+                            fit: BoxFit.contain,
+                          )
+                          .animate()
+                          .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
+                          .scale(
+                            begin: const Offset(0.8, 0.8),
+                            end: const Offset(1.0, 1.0),
+                            duration: 600.ms,
+                          ),
                 ),
                 const SizedBox(height: 35),
 
@@ -519,7 +564,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
           // Powered by DocTak.net
           Positioned(
-            bottom: 20,
+            bottom: MediaQuery.of(context).padding.bottom + 40,
             left: 0,
             right: 0,
             child: Row(
@@ -642,9 +687,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                   children: [
                     // Shimmer effect
                     if (_isSkippible == false)
-                      Positioned.fill(
-                        child: _buildShimmerEffect(),
-                      ),
+                      Positioned.fill(child: _buildShimmerEffect()),
 
                     // Button
                     ElevatedButton(
@@ -660,7 +703,9 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _isSkippible ?? false ? 'Update Now' : 'Update Required',
+                            _isSkippible ?? false
+                                ? 'Update Now'
+                                : 'Update Required',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -758,35 +803,49 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         Positioned(
           top: 100,
           left: 20,
-          child: Icon(
-            Icons.medical_services_outlined,
-            size: 40,
-            color: Colors.blue.shade300,
-          ).animate()
-           .fadeIn(duration: 1500.ms)
-           .slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
+          child:
+              Icon(
+                    Icons.medical_services_outlined,
+                    size: 40,
+                    color: Colors.blue.shade300,
+                  )
+                  .animate()
+                  .fadeIn(duration: 1500.ms)
+                  .slideY(
+                    begin: 0.1,
+                    end: 0,
+                    duration: const Duration(seconds: 2),
+                  ),
         ),
         Positioned(
           bottom: 120,
           right: 30,
-          child: Icon(
-            Icons.health_and_safety_outlined,
-            size: 36,
-            color: Colors.blue.shade300,
-          ).animate()
-           .fadeIn(duration: 1800.ms)
-           .slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
+          child:
+              Icon(
+                    Icons.health_and_safety_outlined,
+                    size: 36,
+                    color: Colors.blue.shade300,
+                  )
+                  .animate()
+                  .fadeIn(duration: 1800.ms)
+                  .slideY(
+                    begin: 0.1,
+                    end: 0,
+                    duration: const Duration(seconds: 2),
+                  ),
         ),
         Positioned(
           top: MediaQuery.of(context).size.height * 0.4,
           left: MediaQuery.of(context).size.width * 0.7,
-          child: Icon(
-            Icons.favorite_border,
-            size: 32,
-            color: Colors.blue.shade300,
-          ).animate()
-           .fadeIn(duration: 2000.ms)
-           .slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
+          child:
+              Icon(Icons.favorite_border, size: 32, color: Colors.blue.shade300)
+                  .animate()
+                  .fadeIn(duration: 2000.ms)
+                  .slideY(
+                    begin: 0.1,
+                    end: 0,
+                    duration: const Duration(seconds: 2),
+                  ),
         ),
       ],
     );
@@ -813,29 +872,31 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
           // Animated loading dot
           Positioned(
             left: 0,
-            child: Container(
-              height: 12,
-              width: 12,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.primary.withOpacity(0.7),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(6),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-            ).animate(onPlay: (controller) => controller.repeat())
-             .moveX(begin: 0, end: 48, duration: 1500.ms)
-             .then()
-             .moveX(begin: 48, end: 0, duration: 1500.ms),
+            child:
+                Container(
+                      height: 12,
+                      width: 12,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.primary.withOpacity(0.7),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    )
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .moveX(begin: 0, end: 48, duration: 1500.ms)
+                    .then()
+                    .moveX(begin: 48, end: 0, duration: 1500.ms),
           ),
         ],
       ),
@@ -889,24 +950,33 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         children: [
           // Outer circle (pulsing effect)
           Container(
-            width: 220,
-            height: 220,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.1),
-                  Theme.of(context).primaryColor.withOpacity(0.05),
-                  Colors.transparent,
-                ],
-                stops: const [0.5, 0.8, 1.0],
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      Theme.of(context).primaryColor.withOpacity(0.1),
+                      Theme.of(context).primaryColor.withOpacity(0.05),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.5, 0.8, 1.0],
+                  ),
+                ),
+              )
+              .animate(onPlay: (controller) => controller.repeat())
+              .fadeIn(duration: 800.ms)
+              .scale(
+                begin: const Offset(1.0, 1.0),
+                end: const Offset(1.1, 1.1),
+                duration: 2000.ms,
+              )
+              .then()
+              .scale(
+                begin: const Offset(1.1, 1.1),
+                end: const Offset(1.0, 1.0),
+                duration: 2000.ms,
               ),
-            ),
-          ).animate(onPlay: (controller) => controller.repeat())
-           .fadeIn(duration: 800.ms)
-           .scale(begin: const Offset(1.0, 1.0), end: const Offset(1.1, 1.1), duration: 2000.ms)
-           .then()
-           .scale(begin: const Offset(1.1, 1.1), end: const Offset(1.0, 1.0), duration: 2000.ms),
 
           // Middle circle
           Container(
@@ -923,46 +993,50 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                 ),
               ],
             ),
-          ).animate()
-           .fadeIn(duration: 800.ms),
+          ).animate().fadeIn(duration: 800.ms),
 
           // Update animation effects
           _buildUpdateEffects(),
 
           // Center icon
           Container(
-            width: 110,
-            height: 110,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).primaryColor.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                width: 110,
+                height: 110,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withOpacity(0.8),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).primaryColor.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                _isSkippible ?? false
-                    ? Icons.rocket_launch_rounded
-                    : Icons.system_update_rounded,
-                size: 50,
-                color: Colors.white,
+                child: Center(
+                  child: Icon(
+                    _isSkippible ?? false
+                        ? Icons.rocket_launch_rounded
+                        : Icons.system_update_rounded,
+                    size: 50,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+              .animate()
+              .fadeIn(duration: 1000.ms)
+              .scale(
+                begin: const Offset(0.8, 0.8),
+                end: const Offset(1.0, 1.0),
+                duration: 1200.ms,
               ),
-            ),
-          ).animate()
-           .fadeIn(duration: 1000.ms)
-           .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), duration: 1200.ms),
         ],
       ),
     );
@@ -1016,29 +1090,26 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     required Duration delay,
   }) {
     return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.2),
-            blurRadius: 8,
-            spreadRadius: 1,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).primaryColor.withOpacity(0.2),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Icon(
-        icon,
-        size: size,
-        color: Theme.of(context).primaryColor,
-      ),
-    ).animate()
-     .fadeIn(delay: delay, duration: 500.ms)
-     .then()
-     .slideY(begin: 0.05, end: -0.05, duration: 2000.ms)
-     .then()
-     .slideY(begin: -0.05, end: 0.05, duration: 2000.ms);
+          child: Icon(icon, size: size, color: Theme.of(context).primaryColor),
+        )
+        .animate()
+        .fadeIn(delay: delay, duration: 500.ms)
+        .then()
+        .slideY(begin: 0.05, end: -0.05, duration: 2000.ms)
+        .then()
+        .slideY(begin: -0.05, end: 0.05, duration: 2000.ms);
   }
 
   // Version comparison row
@@ -1151,20 +1222,18 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         alignment: Alignment.center,
         children: [
           // Arrow line
-          Container(
-            height: 2,
-            color: Colors.grey.shade300,
-          ),
+          Container(height: 2, color: Colors.grey.shade300),
 
           // Animated arrow head
           Icon(
-            Icons.arrow_forward,
-            color: Theme.of(context).primaryColor,
-            size: 20,
-          ).animate(onPlay: (controller) => controller.repeat())
-           .moveX(begin: -5, end: 5, duration: 1200.ms)
-           .then()
-           .moveX(begin: 5, end: -5, duration: 1200.ms),
+                Icons.arrow_forward,
+                color: Theme.of(context).primaryColor,
+                size: 20,
+              )
+              .animate(onPlay: (controller) => controller.repeat())
+              .moveX(begin: -5, end: 5, duration: 1200.ms)
+              .then()
+              .moveX(begin: 5, end: -5, duration: 1200.ms),
         ],
       ),
     );
@@ -1176,12 +1245,12 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         ? [
             "New features and improvements",
             "Bug fixes and performance updates",
-            "Enhanced security measures"
+            "Enhanced security measures",
           ]
         : [
             "Critical security update required",
             "Important compatibility improvements",
-            "Essential bug fixes and stability enhancements"
+            "Essential bug fixes and stability enhancements",
           ];
 
     return Column(
@@ -1207,7 +1276,9 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
             border: Border.all(color: Colors.grey.shade200),
           ),
           child: Column(
-            children: features.map((feature) => _buildFeatureItem(feature)).toList(),
+            children: features
+                .map((feature) => _buildFeatureItem(feature))
+                .toList(),
           ),
         ),
       ],
@@ -1253,37 +1324,33 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   // Shimmer effect for mandatory update button
   Widget _buildShimmerEffect() {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
           // Glowing effect
-          Positioned.fill(
-            child: Container(
-              color: Colors.transparent,
-            ),
-          ),
+          Positioned.fill(child: Container(color: Colors.transparent)),
 
           // Animated shimmer
           Positioned(
             left: -100,
-            child: Container(
-              height: 54,
-              width: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.0),
-                    Colors.white.withOpacity(0.2),
-                    Colors.white.withOpacity(0.0),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
-            ).animate(onPlay: (controller) => controller.repeat())
-             .moveX(begin: 0, end: 300, duration: 1500.ms)
+            child:
+                Container(
+                      height: 54,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.0),
+                            Colors.white.withOpacity(0.2),
+                            Colors.white.withOpacity(0.0),
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
+                      ),
+                    )
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .moveX(begin: 0, end: 300, duration: 1500.ms),
           ),
         ],
       ),

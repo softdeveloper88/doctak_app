@@ -346,7 +346,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       }
       
       return ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: MediaQuery.of(context).padding.bottom + 8),
         itemCount: filteredList.length,
         itemBuilder: (context, index) {
           final notification = filteredList[index];

@@ -918,6 +918,13 @@
 "lbl_call_accepted": "تماس پذیرفته شد",
 "lbl_failed_to_establish_call": "برقراری تماس ناموفق بود. لطفاً دوباره تلاش کنید.",
 "lbl_error_starting_call": "خطا در شروع تماس. لطفاً دوباره تلاش کنید.",
+"lbl_call_ended": "تماس پایان یافت",
+"lbl_connection_lost": "اتصال قطع شد",
+"lbl_call_failed": "تماس ناموفق",
+"lbl_permission_denied": "مجوز رد شد",
+"lbl_disconnecting_in": "قطع اتصال در",
+"lbl_seconds": "ثانیه",
+"lbl_waiting_for_answer": "در انتظار پاسخ",
 
 "@_COMPLETE_PROFILE": {},
   "lbl_complete_your_profile": "پروفایل خود را تکمیل کنید",

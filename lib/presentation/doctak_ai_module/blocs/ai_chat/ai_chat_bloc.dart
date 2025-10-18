@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mime/mime.dart';
 import 'package:doctak_app/presentation/doctak_ai_module/data/models/ai_chat_model/ai_chat_message_model.dart';
 import 'package:doctak_app/presentation/doctak_ai_module/data/api/ai_chat_api.dart' as aiChatApi;
 import '../../data/local/ai_chat_local_storage.dart';
@@ -11,6 +11,12 @@ import '../../data/models/ai_chat_model/ai_chat_session_model.dart';
 
 part 'ai_chat_event.dart';
 part 'ai_chat_state.dart';
+
+// Helper to read file bytes on a background isolate via compute()
+Future<List<int>> readFileBytesForCompute(String path) async {
+  final file = File(path);
+  return await file.readAsBytes();
+}
 
 class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
   AiChatBloc() : super(AiChatInitial()) {
@@ -86,9 +92,6 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
     try {
       print("⚠️⚠️⚠️ ENTERING SENDMESSAGE FUNCTION");
       
-      // Set timeout based on model
-      int timeoutSeconds = 60;
-      
       response = await aiChatApi.sendMessage(
         sessionId: sessionId,
         message: event.message,
@@ -139,10 +142,6 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
     AiChatMessageModel aiMessage;
     List? sources;
     try {
-      if (response == null) {
-        throw "Response is null";
-      }
-      
       print("⚠️⚠️⚠️ Response contents: $response");
       
       if (!response.containsKey('message')) {
@@ -158,7 +157,7 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
     } catch (e) {
       print("⚠️⚠️⚠️ ERROR parsing response data: $e");
       print("⚠️⚠️⚠️ Response content: $response");
-      print("⚠️⚠️⚠️ Response type: ${response?.runtimeType}");
+      print("⚠️⚠️⚠️ Response type: ${response.runtimeType}");
       
       // Check if emit is still valid before emitting
       if (!emit.isDone) {
@@ -674,14 +673,30 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
     
     print("⚠️⚠️⚠️ Selected session ID: $sessionId");
 
-    // Create and add user message
+    // Create and add user message with file information if present
+    List<int>? fileBytes;
+    if (event.file != null) {
+      try {
+        // Read file bytes off the main isolate to avoid blocking UI
+        fileBytes = await compute(readFileBytesForCompute, event.file!.path);
+        print("⚠️⚠️⚠️ File bytes read successfully: ${fileBytes?.length ?? 0} bytes");
+      } catch (e) {
+        print("⚠️⚠️⚠️ Error reading file bytes: $e");
+      }
+    }
+    
     final userMessage = AiChatMessageModel(
       id: DateTime.now().millisecondsSinceEpoch, // Temporary ID
       sessionId: sessionId,
       role: MessageRole.user,
       content: event.message,
+      filePath: event.file?.path,
+      mimeType: event.file != null ? lookupMimeType(event.file!.path) : null,
+      fileBytes: fileBytes,
       createdAt: DateTime.now(),
     );
+    
+    print("⚠️⚠️⚠️ User message created with filePath: ${userMessage.filePath}, mimeType: ${userMessage.mimeType}, bytes: ${fileBytes?.length}");
     
     // Add user message to existing messages
     final updatedMessages = [...currentMessages, userMessage];

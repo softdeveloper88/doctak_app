@@ -19,7 +19,8 @@ class VirtualizedGuidelinesList extends StatefulWidget {
   });
 
   @override
-  State<VirtualizedGuidelinesList> createState() => _VirtualizedGuidelinesListState();
+  State<VirtualizedGuidelinesList> createState() =>
+      _VirtualizedGuidelinesListState();
 }
 
 class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
@@ -47,11 +48,7 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.search_off_outlined,
-            size: 48,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.search_off_outlined, size: 48, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             "No guidelines found",
@@ -69,10 +66,15 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
   // Virtualized list implementation
   Widget _buildVirtualizedGuidelinesList() {
     final bloc = widget.guidelineBloc;
-    
+
     return ListView.builder(
       controller: widget.scrollController,
-      padding: const EdgeInsets.only(top: 10, bottom: 16, left: 16, right: 16),
+      padding: EdgeInsets.only(
+        top: 10,
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
       itemCount: bloc.guidelinesList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,
@@ -83,15 +85,12 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
             bloc.add(CheckIfNeedMoreDataEvent(index: index));
           }
         }
-        
+
         // Show shimmer loader at the bottom if loading more
         if (bloc.numberOfPage != bloc.pageNumber - 1 &&
             index >= bloc.guidelinesList.length - 1) {
-          return const SizedBox(
-            height: 400,
-            child: GuidelinesShimmerLoader()
-          );
-        } 
+          return const SizedBox(height: 400, child: GuidelinesShimmerLoader());
+        }
         // Show ads every 5 items
         else if ((index % 5 == 0 && index != 0) &&
             AppData.isShowGoogleNativeAds) {
@@ -108,7 +107,9 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
   // Lazy loading guideline item implementation
   Widget _buildLazyLoadGuidelineItem(int index) {
     return VisibilityDetector(
-      key: Key('guideline_visibility_${widget.guidelineBloc.guidelinesList[index].id}'),
+      key: Key(
+        'guideline_visibility_${widget.guidelineBloc.guidelinesList[index].id}',
+      ),
       onVisibilityChanged: (visibilityInfo) {
         final isVisible = visibilityInfo.visibleFraction > 0.1;
         _handleVisibilityChanged(index, isVisible);
@@ -126,7 +127,7 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
     } else {
       _visibleGuidelineIndices.remove(index);
     }
-    
+
     // Can be used for analytics or optimization in the future
   }
 }

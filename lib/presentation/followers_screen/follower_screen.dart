@@ -16,7 +16,7 @@ class FollowerScreen extends StatefulWidget {
   final Function? backPress;
   final bool isFollowersScreen;
   final String userId;
-  
+
   const FollowerScreen({
     this.backPress,
     super.key,
@@ -33,11 +33,12 @@ class _FollowerScreenState extends State<FollowerScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
   bool isSearchShow = false;
-  
+
   @override
   void initState() {
     followersBloc.add(
-        FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId));
+      FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId),
+    );
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(svGetScaffoldColor());
@@ -57,7 +58,10 @@ class _FollowerScreenState extends State<FollowerScreen> {
     _debounce = Timer(const Duration(milliseconds: 500), () {
       followersBloc.add(
         FollowersLoadPageEvent(
-            page: 1, searchTerm: query, userId: widget.userId),
+          page: 1,
+          searchTerm: query,
+          userId: widget.userId,
+        ),
       );
     });
   }
@@ -70,20 +74,17 @@ class _FollowerScreenState extends State<FollowerScreen> {
         children: [
           // Custom AppBar with DoctakAppBar
           DoctakAppBar(
-            title: widget.isFollowersScreen 
-              ? translation(context).lbl_followers 
-              : translation(context).lbl_following,
-            titleIcon: widget.isFollowersScreen 
-              ? Icons.people_rounded
-              : Icons.person_add_rounded,
+            title: widget.isFollowersScreen
+                ? translation(context).lbl_followers
+                : translation(context).lbl_following,
+            titleIcon: widget.isFollowersScreen
+                ? Icons.people_rounded
+                : Icons.person_add_rounded,
             actions: [
               // Search icon button
               IconButton(
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 36,
-                  minHeight: 36,
-                ),
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -103,9 +104,9 @@ class _FollowerScreenState extends State<FollowerScreen> {
                       _searchController.clear();
                       followersBloc.add(
                         FollowersLoadPageEvent(
-                          page: 1, 
-                          searchTerm: '', 
-                          userId: widget.userId
+                          page: 1,
+                          searchTerm: '',
+                          userId: widget.userId,
                         ),
                       );
                     }
@@ -115,7 +116,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
               const SizedBox(width: 16),
             ],
           ),
-          
+
           // Search field with animated visibility
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -124,103 +125,112 @@ class _FollowerScreenState extends State<FollowerScreen> {
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
               child: isSearchShow
-                ? Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                    decoration: BoxDecoration(
-                      color: appStore.isDarkMode
-                          ? Colors.blueGrey[800]
-                          : Colors.grey[100],
-                      borderRadius: BorderRadius.circular(24.0),
-                      border: Border.all(
-                        color: Colors.blue.withAlpha(51),
-                        width: 1.5,
+                  ? Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withAlpha(13),
-                          offset: const Offset(0, 2),
-                          blurRadius: 6,
-                          spreadRadius: 0,
+                      decoration: BoxDecoration(
+                        color: appStore.isDarkMode
+                            ? Colors.blueGrey[800]
+                            : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(24.0),
+                        border: Border.all(
+                          color: Colors.blue.withAlpha(51),
+                          width: 1.5,
                         ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24.0),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Icon(
-                              Icons.search_rounded,
-                              color: Colors.blue.withAlpha(153),
-                              size: 24,
-                            ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withAlpha(13),
+                            offset: const Offset(0, 2),
+                            blurRadius: 6,
+                            spreadRadius: 0,
                           ),
-                          Expanded(
-                            child: AppTextField(
-                              controller: _searchController,
-                              textFieldType: TextFieldType.NAME,
-                              textStyle: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                                color: appStore.isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87,
-                              ),
-                              onChanged: _onSearchChanged,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: translation(context).lbl_search_people,
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  color: appStore.isDarkMode
-                                      ? Colors.white60
-                                      : Colors.black54,
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _searchController.clear();
-                              followersBloc.add(
-                                FollowersLoadPageEvent(
-                                  page: 1,
-                                  searchTerm: '',
-                                  userId: widget.userId
-                                ),
-                              );
-                            },
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(24),
-                              bottomRight: Radius.circular(24),
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withAlpha(26),
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(24),
-                                  bottomRight: Radius.circular(24),
-                                ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24.0),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
                               ),
                               child: Icon(
-                                Icons.clear,
+                                Icons.search_rounded,
                                 color: Colors.blue.withAlpha(153),
                                 size: 24,
                               ),
                             ),
-                          ),
-                        ],
+                            Expanded(
+                              child: AppTextField(
+                                controller: _searchController,
+                                textFieldType: TextFieldType.NAME,
+                                textStyle: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 14,
+                                  color: appStore.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
+                                ),
+                                onChanged: _onSearchChanged,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: translation(
+                                    context,
+                                  ).lbl_search_people,
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14,
+                                    color: appStore.isDarkMode
+                                        ? Colors.white60
+                                        : Colors.black54,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 14.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                _searchController.clear();
+                                followersBloc.add(
+                                  FollowersLoadPageEvent(
+                                    page: 1,
+                                    searchTerm: '',
+                                    userId: widget.userId,
+                                  ),
+                                );
+                              },
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(24),
+                                bottomRight: Radius.circular(24),
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withAlpha(26),
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(24),
+                                    bottomRight: Radius.circular(24),
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.clear,
+                                  color: Colors.blue.withAlpha(153),
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  )
-                : const SizedBox(),
+                    )
+                  : const SizedBox(),
             ),
           ),
-          
+
           // List content
           BlocConsumer<FollowersBloc, FollowersState>(
             bloc: followersBloc,
@@ -231,15 +241,13 @@ class _FollowerScreenState extends State<FollowerScreen> {
             },
             builder: (context, state) {
               if (state is FollowersPaginationLoadingState) {
-                return const Expanded(
-                  child: ProfileListShimmer()
-                );
+                return const Expanded(child: ProfileListShimmer());
               } else if (state is FollowersPaginationLoadedState) {
                 final bloc = followersBloc;
                 final itemCount = widget.isFollowersScreen
                     ? bloc.followerDataModel?.followers?.length ?? 0
                     : bloc.followerDataModel?.following?.length ?? 0;
-                
+
                 if (itemCount == 0) {
                   return Expanded(
                     child: Center(
@@ -253,9 +261,9 @@ class _FollowerScreenState extends State<FollowerScreen> {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              widget.isFollowersScreen 
-                                ? Icons.people_outline_rounded
-                                : Icons.person_add_disabled_rounded,
+                              widget.isFollowersScreen
+                                  ? Icons.people_outline_rounded
+                                  : Icons.person_add_disabled_rounded,
                               size: 48,
                               color: Colors.blue[600],
                             ),
@@ -263,8 +271,8 @@ class _FollowerScreenState extends State<FollowerScreen> {
                           const SizedBox(height: 16),
                           Text(
                             widget.isFollowersScreen
-                              ? 'No followers yet'
-                              : 'Not following anyone yet',
+                                ? 'No followers yet'
+                                : 'Not following anyone yet',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -275,8 +283,8 @@ class _FollowerScreenState extends State<FollowerScreen> {
                           const SizedBox(height: 8),
                           Text(
                             widget.isFollowersScreen
-                              ? 'When people follow you, they\'ll appear here'
-                              : 'Start following people to see them here',
+                                ? 'When people follow you, they\'ll appear here'
+                                : 'Start following people to see them here',
                             style: TextStyle(
                               fontSize: 14,
                               fontFamily: 'Poppins',
@@ -289,16 +297,15 @@ class _FollowerScreenState extends State<FollowerScreen> {
                     ),
                   );
                 }
-                
+
                 return Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.only(
+                    padding: EdgeInsets.only(
                       top: 8,
-                      bottom: 16,
+                      bottom: MediaQuery.of(context).padding.bottom + 16,
                       left: 0,
                       right: 0,
                     ),
-                    shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
                       return FollowerWidget(
@@ -309,48 +316,84 @@ class _FollowerScreenState extends State<FollowerScreen> {
                             : bloc.followerDataModel!.following![index],
                         onTap: () async {
                           if (widget.isFollowersScreen) {
-                            if (bloc.followerDataModel?.followers![index]
+                            if (bloc
+                                    .followerDataModel
+                                    ?.followers![index]
                                     .isCurrentlyFollow ??
                                 false) {
-                              bloc.add(SetUserFollow(
-                                  followersBloc.followerDataModel
-                                          ?.followers?[index].id ??
+                              bloc.add(
+                                SetUserFollow(
+                                  followersBloc
+                                          .followerDataModel
+                                          ?.followers?[index]
+                                          .id ??
                                       '',
-                                  'unfollow'));
+                                  'unfollow',
+                                ),
+                              );
 
-                              bloc.followerDataModel?.followers![index]
-                                  .isCurrentlyFollow = false;
+                              bloc
+                                      .followerDataModel
+                                      ?.followers![index]
+                                      .isCurrentlyFollow =
+                                  false;
                             } else {
-                              bloc.add(SetUserFollow(
-                                  bloc.followerDataModel
-                                          ?.followers![index].id ??
+                              bloc.add(
+                                SetUserFollow(
+                                  bloc
+                                          .followerDataModel
+                                          ?.followers![index]
+                                          .id ??
                                       '',
-                                  'follow'));
+                                  'follow',
+                                ),
+                              );
 
-                              bloc.followerDataModel!.followers![index]
-                                  .isCurrentlyFollow = true;
+                              bloc
+                                      .followerDataModel!
+                                      .followers![index]
+                                      .isCurrentlyFollow =
+                                  true;
                             }
                           } else {
-                            if (bloc.followerDataModel?.following![index]
+                            if (bloc
+                                    .followerDataModel
+                                    ?.following![index]
                                     .isCurrentlyFollow ??
                                 false) {
-                              bloc.add(SetUserFollow(
-                                  followersBloc.followerDataModel
-                                          ?.following?[index].id ??
+                              bloc.add(
+                                SetUserFollow(
+                                  followersBloc
+                                          .followerDataModel
+                                          ?.following?[index]
+                                          .id ??
                                       '',
-                                  'unfollow'));
+                                  'unfollow',
+                                ),
+                              );
 
-                              bloc.followerDataModel?.following![index]
-                                  .isCurrentlyFollow = false;
+                              bloc
+                                      .followerDataModel
+                                      ?.following![index]
+                                      .isCurrentlyFollow =
+                                  false;
                             } else {
-                              bloc.add(SetUserFollow(
-                                  bloc.followerDataModel
-                                          ?.following![index].id ??
+                              bloc.add(
+                                SetUserFollow(
+                                  bloc
+                                          .followerDataModel
+                                          ?.following![index]
+                                          .id ??
                                       '',
-                                  'follow'));
+                                  'follow',
+                                ),
+                              );
 
-                              bloc.followerDataModel!.following![index]
-                                  .isCurrentlyFollow = true;
+                              bloc
+                                      .followerDataModel!
+                                      .following![index]
+                                      .isCurrentlyFollow =
+                                  true;
                             }
                           }
                         },
@@ -401,9 +444,9 @@ class _FollowerScreenState extends State<FollowerScreen> {
                           onPressed: () {
                             followersBloc.add(
                               FollowersLoadPageEvent(
-                                page: 1, 
-                                searchTerm: '', 
-                                userId: widget.userId
+                                page: 1,
+                                searchTerm: '',
+                                userId: widget.userId,
                               ),
                             );
                           },
@@ -426,9 +469,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                   ),
                 );
               } else {
-                return const Expanded(
-                  child: ProfileListShimmer()
-                );
+                return const Expanded(child: ProfileListShimmer());
               }
             },
           ),

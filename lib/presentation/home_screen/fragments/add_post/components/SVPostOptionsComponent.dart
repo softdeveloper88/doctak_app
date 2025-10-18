@@ -1,22 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/core/utils/robust_image_picker.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';
-import 'package:doctak_app/l10n/app_localizations.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:video_player/video_player.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'dart:io' show Platform;
 
 import '../../../../../main.dart';
 
@@ -68,110 +60,72 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      // Check and request permissions first
-      PermissionStatus status;
-      if (Platform.isIOS) {
-        status = await Permission.photos.request();
-        if (status == PermissionStatus.limited) {
-          // iOS 14+ limited access - still allow proceeding
-          print("Limited photo access granted");
-        }
-      } else {
-        // Android
-        if (Platform.isAndroid && await Permission.storage.isPermanentlyDenied) {
-          status = await Permission.photos.request();
-        } else {
-          status = await Permission.storage.request();
-        }
-      }
+      debugPrint("SVPostOptions: *** OPENING GALLERY with RobustImagePicker ***");
 
-      if (status == PermissionStatus.denied) {
-        _showErrorMessage("Gallery access denied. Please allow access in settings.");
-        setState(() {
-          _isPickingMedia = false;
-        });
-        return;
-      }
-
-      if (status == PermissionStatus.permanentlyDenied) {
-        _showErrorMessage("Gallery access permanently denied. Please enable in settings.");
-        await openAppSettings();
-        setState(() {
-          _isPickingMedia = false;
-        });
-        return;
-      }
-
-      // Use the same reliable strategy that worked in chat GPT screen
+      // Use RobustImagePicker which handles limited access + has photo_manager fallback
       List<XFile> pickedfiles = [];
 
+      // First try showing the photo_manager picker directly (most reliable for limited access)
       try {
-        print("SVPostOptions: *** OPENING GALLERY ***");
-        print("SVPostOptions: Using reliable single picker approach");
-        
-        // Use single image picker - the most reliable method
-        final singleFile = await imgpicker.pickImage(
-          source: ImageSource.gallery,
-          imageQuality: 85,
-          maxWidth: 1920,
-          maxHeight: 1080,
+        debugPrint("SVPostOptions: Using RobustImagePicker.showPhotoManagerPicker...");
+        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(
+          context,
+          title: 'Select Photos',
         );
-        
-        print("SVPostOptions: Single picker completed");
-        
-        if (singleFile != null) {
-          pickedfiles = [singleFile];
-          print("SVPostOptions: Single picker returned file: ${singleFile.path}");
-        } else {
-          print("SVPostOptions: Single picker returned null");
-        }
-        
+        debugPrint("SVPostOptions: showPhotoManagerPicker returned ${pickedfiles.length} files");
       } catch (e) {
-        print("SVPostOptions: Single picker failed: $e");
-        _showErrorMessage("Failed to open gallery. Please try again.");
-        setState(() {
-          _isPickingMedia = false;
-        });
-        return;
+        debugPrint("SVPostOptions: showPhotoManagerPicker failed: $e, trying fallback...");
+
+        // Fallback to standard image picker
+        try {
+          pickedfiles = await RobustImagePicker.pickMultipleImages();
+          debugPrint("SVPostOptions: Fallback pickMultipleImages returned ${pickedfiles.length} files");
+        } catch (e2) {
+          debugPrint("SVPostOptions: All pickers failed: $e2");
+        }
       }
 
       if (pickedfiles.isNotEmpty) {
-        print("SVPostOptions: Processing ${pickedfiles.length} selected files");
+        debugPrint("SVPostOptions: Processing ${pickedfiles.length} selected files");
         // Filter supported formats
         List<XFile> validFiles = [];
         for (var element in pickedfiles) {
-          if (_isValidMediaFile(element.path)) {
+          final srcPath = element.path;
+          final srcName = element.name;
+          final isValid = _isValidMediaFile(srcPath) || _isValidMediaFile(srcName);
+          if (isValid) {
             validFiles.add(element);
-            print("SVPostOptions: Valid file added: ${element.path}");
+            debugPrint("SVPostOptions: Valid file added: ${element.path}");
           } else {
-            print("SVPostOptions: Invalid file skipped: ${element.path}");
+            debugPrint("SVPostOptions: Invalid file skipped: ${element.path} (name: ${element.name})");
           }
         }
 
         if (validFiles.isNotEmpty) {
-          print("SVPostOptions: Adding ${validFiles.length} valid files to BLoC");
+          debugPrint("SVPostOptions: Adding ${validFiles.length} valid files to BLoC");
           for (var element in validFiles) {
             imagefiles.add(element);
-            print("SVPostOptions: Adding file to BLoC: ${element.path}");
+            debugPrint("SVPostOptions: Adding file to BLoC: ${element.path}");
             widget.searchPeopleBloc.add(
               SelectedFiles(pickedfiles: element, isRemove: false),
             );
-            print("SVPostOptions: SelectedFiles event sent to BLoC");
+            debugPrint("SVPostOptions: SelectedFiles event sent to BLoC");
           }
-          print("SVPostOptions: BLoC should have ${widget.searchPeopleBloc.imagefiles.length} files now");
+          debugPrint("SVPostOptions: BLoC should have ${widget.searchPeopleBloc.imagefiles.length} files now");
           setState(() {});
-          print("SVPostOptions: setState() called - UI should refresh");
-          print("SVPostOptions: Local imagefiles has ${imagefiles.length} total files");
+          debugPrint("SVPostOptions: setState() called - UI should refresh");
+          debugPrint("SVPostOptions: Local imagefiles has ${imagefiles.length} total files");
         } else {
           _showErrorMessage(
             "No valid image files selected. Please select JPG, PNG, WebP, or GIF files.",
           );
         }
       } else {
-        print("SVPostOptions: No images selected by user");
+        debugPrint("SVPostOptions: No images selected by user");
       }
     } catch (e) {
-      print("Error while picking file: $e");
+      debugPrint("Error while picking file: $e");
+      debugPrint("Error stack trace: ${StackTrace.current}");
       _showErrorMessage("Error selecting images. Please try again.");
     } finally {
       setState(() {
@@ -181,13 +135,16 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
   }
 
   bool _isValidMediaFile(String path) {
+    if (path.isEmpty) return false;
     final lowercasePath = path.toLowerCase();
+    // Accept Android content URIs (limited access) as valid media
+    if (lowercasePath.startsWith('content://')) return true;
     return lowercasePath.endsWith('.jpg') ||
-        lowercasePath.endsWith('.jpeg') ||
-        lowercasePath.endsWith('.png') ||
-        lowercasePath.endsWith('.webp') ||
-        lowercasePath.endsWith('.gif') ||
-        lowercasePath.endsWith('.heic');
+      lowercasePath.endsWith('.jpeg') ||
+      lowercasePath.endsWith('.png') ||
+      lowercasePath.endsWith('.webp') ||
+      lowercasePath.endsWith('.gif') ||
+      lowercasePath.endsWith('.heic');
   }
 
   void _showErrorMessage(String message) {
@@ -208,22 +165,18 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      // Check camera and microphone permissions for video recording
-      var cameraStatus = await Permission.camera.request();
-      var microphoneStatus = await Permission.microphone.request();
-      
-      if (cameraStatus == PermissionStatus.denied || microphoneStatus == PermissionStatus.denied) {
-        _showErrorMessage("Camera or microphone access denied. Please allow access in settings.");
+      // Check camera and microphone permissions using professional handler
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
+      if (!cameraGranted) {
         setState(() {
           _isPickingMedia = false;
         });
         return;
       }
 
-      if (cameraStatus == PermissionStatus.permanentlyDenied || 
-          microphoneStatus == PermissionStatus.permanentlyDenied) {
-        _showErrorMessage("Camera or microphone access permanently denied. Please enable in settings.");
-        await openAppSettings();
+      final microphoneGranted = await PermissionUtils.ensureMicrophonePermission();
+      if (!microphoneGranted) {
+        _showErrorMessage("Microphone access is required for video recording.");
         setState(() {
           _isPickingMedia = false;
         });
@@ -241,10 +194,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         );
         setState(() {});
       } else {
-        print("No video is selected.");
+        debugPrint("No video is selected.");
       }
     } catch (e) {
-      print("Error while picking video: $e");
+      debugPrint("Error while picking video: $e");
       _showErrorMessage("Error recording video. Please try again.");
     } finally {
       setState(() {
@@ -261,20 +214,9 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      // Check camera permission
-      PermissionStatus status = await Permission.camera.request();
-      
-      if (status == PermissionStatus.denied) {
-        _showErrorMessage("Camera access denied. Please allow access in settings.");
-        setState(() {
-          _isPickingMedia = false;
-        });
-        return;
-      }
-
-      if (status == PermissionStatus.permanentlyDenied) {
-        _showErrorMessage("Camera access permanently denied. Please enable in settings.");
-        await openAppSettings();
+      // Check camera permission using professional handler
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
+      if (!cameraGranted) {
         setState(() {
           _isPickingMedia = false;
         });
@@ -292,10 +234,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         );
         setState(() {});
       } else {
-        print("No image is selected.");
+        debugPrint("No image is selected.");
       }
     } catch (e) {
-      print("Error while taking photo: $e");
+      debugPrint("Error while taking photo: $e");
       _showErrorMessage("Error taking photo. Please try again.");
     } finally {
       setState(() {
@@ -727,48 +669,14 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
   }
 
   Widget buildMediaItem(File file) {
-    final lowercasePath = file.path.toLowerCase();
-
-    if (lowercasePath.endsWith('.jpg') ||
-        lowercasePath.endsWith('.jpeg') ||
-        lowercasePath.endsWith('.png') ||
-        lowercasePath.endsWith('.webp') ||
-        lowercasePath.endsWith('.gif') ||
-        lowercasePath.endsWith('.heic')) {
-      // Display image with better error handling
-      return Image.file(
-        file,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey[200],
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.grey[600],
-                  size: 20,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Error loading image',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 8,
-                    fontFamily: 'Poppins',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    } else if (lowercasePath.endsWith('.mp4') ||
-        lowercasePath.endsWith('.mov') ||
-        lowercasePath.endsWith('.avi') ||
-        lowercasePath.endsWith('.mkv')) {
+    final path = file.path;
+    // First check for common video extensions
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.mp4') ||
+        lower.endsWith('.mov') ||
+        lower.endsWith('.avi') ||
+        lower.endsWith('.mkv') ||
+        lower.endsWith('.webm')) {
       // Display video with play icon overlay
       return Stack(
         children: [
@@ -790,31 +698,119 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
           ),
         ],
       );
-    } else {
-      // Handle other types of files
-      return Container(
-        color: Colors.grey[200],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.insert_drive_file_outlined,
-              color: Colors.grey[600],
-              size: 20,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Unsupported file',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 8,
-                fontFamily: 'Poppins',
+    }
+
+    // Determine if it looks like an image (by extension) or is a content URI
+    final looksLikeImage = lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.webp') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.heic') ||
+        lower.endsWith('.heif');
+
+    if (looksLikeImage || path.startsWith('content://') || path.startsWith('/data/')) {
+      // Try to read bytes and render as image; this handles content URIs and files without extension
+      return FutureBuilder<List<int>>(
+        future: XFile(path).readAsBytes(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              color: Colors.grey[200],
+              child: const Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+            );
+          }
+          if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+            debugPrint('buildMediaItem error: ${snapshot.error}');
+            return Container(
+              color: Colors.grey[200],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.insert_drive_file_outlined,
+                    color: Colors.grey[600],
+                    size: 20,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Unsupported file',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 8,
+                      fontFamily: 'Poppins',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Render image from bytes with a fallback if decoding fails
+          return Image.memory(
+            Uint8List.fromList(snapshot.data!),
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('Image.memory error: $error');
+              return Container(
+                color: Colors.grey[200],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.insert_drive_file_outlined,
+                      color: Colors.grey[600],
+                      size: 20,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Unsupported file',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 8,
+                        fontFamily: 'Poppins',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       );
     }
+
+    // Fallback: unknown file type -> show generic file icon
+    return Container(
+      color: Colors.grey[200],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.insert_drive_file_outlined,
+            color: Colors.grey[600],
+            size: 20,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Unsupported file',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 8,
+              fontFamily: 'Poppins',
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }

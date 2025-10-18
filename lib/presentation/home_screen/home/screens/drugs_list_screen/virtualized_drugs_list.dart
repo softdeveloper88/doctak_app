@@ -58,10 +58,13 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
   // Virtualized list implementation
   Widget _buildVirtualizedDrugsList() {
     final bloc = widget.drugsBloc;
-    
+
     return ListView.builder(
       controller: widget.scrollController,
-      padding: const EdgeInsets.only(top: 10, bottom: 16),
+      padding: EdgeInsets.only(
+        top: 10,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
       itemCount: bloc.drugsData.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,
@@ -72,15 +75,12 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
             bloc.add(CheckIfNeedMoreDataEvent(index: index));
           }
         }
-        
+
         // Show shimmer loader at the bottom if loading more
         if (bloc.numberOfPage != bloc.pageNumber - 1 &&
             index >= bloc.drugsData.length - 1) {
-          return const SizedBox(
-            height: 400,
-            child: DrugsShimmerLoader()
-          );
-        } 
+          return const SizedBox(height: 400, child: DrugsShimmerLoader());
+        }
         // Show ads every 5 items
         else if ((index % 5 == 0 && index != 0) &&
             AppData.isShowGoogleNativeAds) {
@@ -116,12 +116,16 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
     } else {
       _visibleDrugIndices.remove(index);
     }
-    
+
     // Can be used for analytics or optimization in the future
   }
 
   // Bottom sheet for drug details
-  void _showBottomSheet(BuildContext context, String genericName, String question) {
+  void _showBottomSheet(
+    BuildContext context,
+    String genericName,
+    String question,
+  ) {
     showModalBottomSheet(
       showDragHandle: true,
       enableDrag: true,
@@ -136,17 +140,18 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
               minChildSize: 0.9,
               maxChildSize: 1.0,
               expand: false,
-              builder: (BuildContext context, ScrollController scrollController) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: ChatDetailScreen(
-                    isFromMainScreen: false,
-                    question: '$question $genericName',
-                  ),
-                );
-              }
+              builder:
+                  (BuildContext context, ScrollController scrollController) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: ChatDetailScreen(
+                        isFromMainScreen: false,
+                        question: '$question $genericName',
+                      ),
+                    );
+                  },
             );
-          }
+          },
         );
       },
     );

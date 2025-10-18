@@ -541,6 +541,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_error_starting_call => 'Error al iniciar la llamada. Por favor intenta de nuevo.';
 
   @override
+  String get lbl_call_ended => 'Call Ended';
+
+  @override
+  String get lbl_connection_lost => 'Connection Lost';
+
+  @override
+  String get lbl_call_failed => 'Call Failed';
+
+  @override
+  String get lbl_permission_denied => 'Permission Denied';
+
+  @override
+  String get lbl_disconnecting_in => 'Disconnecting in';
+
+  @override
+  String get lbl_seconds => 'seconds';
+
+  @override
+  String get lbl_waiting_for_answer => 'Waiting for answer';
+
+  @override
   String get lbl_signup_title => 'Registrarse';
 
   @override
