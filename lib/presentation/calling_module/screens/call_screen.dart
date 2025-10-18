@@ -239,6 +239,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     // Prevent multiple end call attempts
     if (_isEndingCall) return;
 
+    // Check if widget is still mounted before calling setState
+    if (!mounted) return;
+
     setState(() {
       _isEndingCall = true;
     });
@@ -262,9 +265,12 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         Navigator.of(context).pop();
       }
     } finally {
-      setState(() {
-        _isEndingCall = false;
-      });
+      // Only call setState if still mounted
+      if (mounted) {
+        setState(() {
+          _isEndingCall = false;
+        });
+      }
     }
   }
 
@@ -632,3 +638,4 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     );
   }
 }
+

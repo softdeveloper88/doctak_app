@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/app_export.dart';
-import 'package:flutter/foundation.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';
@@ -10,22 +9,24 @@ import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_state.d
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:video_player/video_player.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
 import 'bloc/image_upload_event.dart';
 
 class MultipleImageUploadWidget extends StatefulWidget {
-  ImageUploadBloc imageUploadBloc;
-  Function(List<XFile>) onTap;
-  int imageLimit;
-  String? imageType;
+  final ImageUploadBloc imageUploadBloc;
+  final Function(List<XFile>) onTap;
+  final int imageLimit;
+  final String? imageType;
+  // When true, the gallery picker opens automatically once the widget appears
+  final bool autoOpenGallery;
 
   MultipleImageUploadWidget(
     this.imageUploadBloc,
     this.onTap, {
     this.imageType,
     this.imageLimit = 0,
+    this.autoOpenGallery = false,
     super.key,
   });
 
@@ -36,9 +37,29 @@ class MultipleImageUploadWidget extends StatefulWidget {
 
 class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
   // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
-  late VideoPlayerController _controller;
   int selectTab = 0;
   final ImagePicker imgpicker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    // Optionally auto-open gallery (used for X-Ray flow per request)
+    if (widget.autoOpenGallery) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (!mounted) return;
+          // Only open if user can add more images according to imageLimit
+          final canAddMore =
+              widget.imageLimit == 0 ||
+              widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
+          if (canAddMore) {
+            openImages();
+          }
+        });
+      });
+    }
+  }
+
   openImages() async {
     print('MultiWidget: *** OPENING GALLERY ***');
     try {
@@ -69,7 +90,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       var pickedfiles;
       print('MultiWidget: Image limit: ${widget.imageLimit}');
       print('MultiWidget: Calling image picker...');
-      
+
       // Workaround: Use pickImage for single image selection
       if (widget.imageLimit == 1) {
         print('MultiWidget: Using pickImage (single) for limit=1');
@@ -128,7 +149,9 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
             widget.imageUploadBloc.add(
               SelectedFiles(pickedfiles: element, isRemove: false),
             );
-            print('Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images');
+            print(
+              'Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images',
+            );
           }
         }
         print('Gallery: Calling setState');
@@ -141,7 +164,8 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       print('MultiWidget: Error stack trace:');
       print(StackTrace.current);
       // Only show permission dialog if it's actually a permission issue
-      if (e.toString().contains('permission') || e.toString().contains('denied')) {
+      if (e.toString().contains('permission') ||
+          e.toString().contains('denied')) {
         _permissionDialog(context);
       } else {
         // Show generic error
@@ -158,34 +182,36 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
         // Enhanced iOS permission handling
         final photosPermission = Permission.photos;
         final status = await photosPermission.status;
-        
+
         // Debug logging
         print('iOS Photo Permission Status: $status');
-        
+
         // Check if permission is already granted or limited (both are acceptable)
         if (status.isGranted || status.isLimited) {
-          print('iOS Photo Permission: Already granted/limited, proceeding to gallery');
+          print(
+            'iOS Photo Permission: Already granted/limited, proceeding to gallery',
+          );
           return true;
         }
-        
+
         // Only request if not yet determined
         if (status.isDenied || status.isRestricted) {
           print('iOS Photo Permission: Requesting permission');
           final result = await photosPermission.request();
           print('iOS Photo Permission Result: $result');
-          
+
           // Accept both granted and limited states
           if (result.isGranted || result.isLimited) {
             return true;
           }
         }
-        
+
         // Check if permanently denied (user needs to go to settings)
         if (status.isPermanentlyDenied) {
           print('iOS Photo Permission: Permanently denied');
           return false;
         }
-        
+
         // Default case - try one more time
         final finalStatus = await photosPermission.status;
         return finalStatus.isGranted || finalStatus.isLimited;
@@ -287,7 +313,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Photo Access Required',
                   style: TextStyle(
@@ -300,7 +326,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
               ),
             ],
           ),
-          content: Text(
+          content: const Text(
             'DocTak needs access to your photos to upload medical images for AI analysis. Please enable photo permissions in your device settings.',
             style: TextStyle(
               fontSize: 14,
@@ -343,7 +369,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Open Settings',
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -503,7 +529,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 if (widget.imageType == "CT Scan" ||
                     widget.imageType == "MRI Scan" ||
                     widget.imageType == "Mammography")
-                  Text(
+                  const Text(
                     "Please upload one or two of the most relevant images for analysis.",
                     style: TextStyle(
                       fontFamily: 'Poppins',
@@ -572,7 +598,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'Choose from Gallery',
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
@@ -668,7 +694,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'Take Photo',
                                         style: TextStyle(
                                           fontFamily: 'Poppins',

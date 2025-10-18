@@ -65,6 +65,8 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>doctak.net</key>
@@ -116,6 +118,8 @@
 	<array>
 		<string>INSendMessageIntent</string>
 		<string>INStartCallIntent</string>
+		<string>INStartAudioCallIntent</string>
+		<string>INStartVideoCallIntent</string>
 	</array>
 	<key>GADApplicationIdentifier</key>
     <string>ca-app-pub-9354893692913823~4368543936</string>
@@ -327,11 +331,10 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-		<string>voip</string>
 		<string>audio</string>
-		<string>processing</string>
+		<string>voip</string>
+		<string>remote-notification</string>
+		<string>fetch</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

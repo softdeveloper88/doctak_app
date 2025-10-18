@@ -173,6 +173,13 @@ dependencies:
   rxdart: ^0.27.7
   shorebird_code_push: ^1.1.5
 
+dependency_overrides:
+  # Bump federated implementations to remove deprecated `dartPluginClass: none` warnings
+  quill_native_bridge_windows: ^0.0.2
+  quill_native_bridge_linux: ^0.0.2
+  # Keep core bridge current to ensure compatible transitive graph
+  quill_native_bridge: ^11.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

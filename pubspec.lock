@@ -1870,13 +1870,13 @@ packages:
     source: hosted
     version: "2.5.0"
   quill_native_bridge:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: quill_native_bridge
-      sha256: "00752aca7d67cbd3254709a47558be78427750cb81aa42cfbed354d4a079bcfa"
+      sha256: "76a16512e398e84216f3f659f7cb18a89ec1e141ea908e954652b4ce6cf15b18"
       url: "https://pub.dev"
     source: hosted
-    version: "11.0.1"
+    version: "11.1.0"
   quill_native_bridge_android:
     dependency: transitive
     description:
@@ -1894,13 +1894,13 @@ packages:
     source: hosted
     version: "0.0.1"
   quill_native_bridge_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: quill_native_bridge_linux
-      sha256: "5fcc60cab2ab9079e0746941f05c5ca5fec85cc050b738c8c8b9da7c09da17eb"
+      sha256: "388aaa62017dbd746742ce0bfae99f4ffe1dda2462e8a866df630c67b63c54fe"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.0.2"
   quill_native_bridge_macos:
     dependency: transitive
     description:
@@ -1926,13 +1926,13 @@ packages:
     source: hosted
     version: "0.0.2"
   quill_native_bridge_windows:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: quill_native_bridge_windows
-      sha256: "60e50d74238f22ceb43113d9a42b6627451dab9fc27f527b979a32051cf1da45"
+      sha256: "3f96ced19e3206ddf4f6f7dde3eb16bdd05e10294964009ea3a806d995aa7caa"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.0.2"
   quiver:
     dependency: transitive
     description:

@@ -1553,6 +1553,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                               imageType: imageType,
                               imageUploadBloc,
                               imageLimit: imageLimit,
+                              autoOpenGallery: imageType == 'X-ray',
                               (imageFiles) {
                                 print(
                                   'Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images',
@@ -1606,7 +1607,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Photo Access Required',
                   style: TextStyle(
@@ -1619,7 +1620,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               ),
             ],
           ),
-          content: Text(
+          content: const Text(
             'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.',
             style: TextStyle(
               fontSize: 14,
@@ -1662,7 +1663,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Open Settings',
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -1692,9 +1693,4 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
       }
     });
   }
-
-  // Deprecated: kept for backward compatibility; now using PermissionUtils.ensurePhotoPermission
-  @Deprecated('Use PermissionUtils.ensurePhotoPermission instead')
-  Future<bool> _checkAndRequestPermissions() =>
-      PermissionUtils.ensurePhotoPermission(); // ignore: unused_element
 }
