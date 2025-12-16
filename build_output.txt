@@ -1,0 +1,21 @@
+Running Gradle task 'assembleRelease'...                        
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Timeout waiting to lock build logic queue. It is currently in use by another Gradle instance.
+Owner PID: 27004
+Our PID: 27543
+Owner Operation: 
+Our operation: 
+Lock file: /Users/skapple/Documents/MyProjects/doctak_app/android/.gradle/noVersion/buildLogic.lock
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 19s
+Running Gradle task 'assembleRelease'...                           80.5s
+Gradle task assembleRelease failed with exit code 1

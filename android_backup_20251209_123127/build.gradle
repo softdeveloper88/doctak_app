@@ -1,0 +1,62 @@
+plugins {
+    id 'com.google.gms.google-services' version '4.4.2' apply false
+    id 'com.google.firebase.crashlytics' version '3.0.2' apply false
+}
+
+allprojects {
+    // Shared versions for Android compilation across all modules/plugins
+    // Use a Kotlin version compatible with compiled plugin artifacts
+    ext.kotlin_version = '2.2.0' // Required by Flutter plugins and some third-party plugins
+    ext.compileSdkVersion = 36
+    ext.targetSdkVersion = 36
+    ext.minSdkVersion = 24
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                // Ensure all subprojects compile against the same SDK as the app
+                try {
+                    compileSdkVersion rootProject.ext.compileSdkVersion
+                } catch(err) {
+                    // fallback for newer Gradle plugin using 'compileSdk'
+                    compileSdk = rootProject.ext.compileSdkVersion
+                }
+
+                ndkVersion = "28.1.13356709"
+
+                // Align defaultConfig target/min SDK if present
+                try {
+                    defaultConfig {
+                        targetSdk rootProject.ext.targetSdkVersion
+                        minSdk rootProject.ext.minSdkVersion
+                    }
+                } catch(ignore) {
+                    // Some plugin projects may not expose defaultConfig; ignore
+                }
+            }
+        }
+    }
+}
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.android.gms:play-services-measurement-api:22.2.0'
+        force 'com.google.firebase:firebase-auth:23.2.0'
+    }
+}
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

@@ -1,0 +1,312 @@
+//def localProperties = new Properties()
+//def localPropertiesFile = rootProject.file('local.properties')
+//if (localPropertiesFile.exists()) {
+//    localPropertiesFile.withReader('UTF-8') { reader ->
+//        localProperties.load(reader)
+//    }
+//}
+//
+//def flutterRoot = localProperties.getProperty('flutter.sdk')
+//if (flutterRoot == null) {
+//    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+//}
+//
+//def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+//if (flutterVersionCode == null) {
+//    flutterVersionCode = '1'
+//}
+//
+//def flutterVersionName = localProperties.getProperty('flutter.versionName')
+//if (flutterVersionName == null) {
+//    flutterVersionName = '1.0'
+//}
+//
+//apply plugin: 'com.android.application'
+//apply plugin: 'kotlin-android'
+//apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+//apply plugin: 'com.google.gms.google-services'
+//
+//android {
+//    namespace "com.kt.doctak"
+////    compileSdkVersion flutter.compileSdkVersion
+//    ndkVersion '25.2.9519653'
+//    compileSdkVersion 34
+//
+////    ndkVersion flutter.ndkVersion
+////
+//
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//
+//    kotlinOptions {
+//        jvmTarget = '1.8'
+//    }
+//
+//    sourceSets {
+//        main.java.srcDirs += 'src/main/kotlin'
+//    }
+//
+//    defaultConfig {
+//        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+//
+//        applicationId "com.kt.doctak"
+//        // You can update the following values to match your application needs.
+//        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+//        minSdkVersion 24
+//        targetSdkVersion flutter.targetSdkVersion
+//        versionCode flutterVersionCode.toInteger()
+//        versionName flutterVersionName
+//    }
+//
+//    buildTypes {
+//        release {
+//
+//            minifyEnabled true
+//            shrinkResources true
+//            multiDexEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            // TODO: Add your own signing config for the release build.
+//            // Signing with the debug keys for now, so `flutter run --release` works.
+//            signingConfig signingConfigs.debug
+//        }
+//    }
+//}
+//
+//flutter {
+//    source '../..'
+//}
+//
+//dependencies {
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+////    implementation 'com.google.firebase:firebase-messaging:21.1.0'
+//    implementation 'com.pusher:push-notifications-android:1.9.0'
+//    implementation platform('com.google.firebase:firebase-bom:33.1.2')
+////    implementation 'com.facebook.android:facebook-android-sdk:[5,6)'
+//    // Add the dependency for the Firebase SDK for Google Analytics
+//    // When using the BoM, don't specify versions in Firebase dependencies
+//    implementation 'com.google.firebase:firebase-analytics'
+//    implementation 'com.google.android.gms:play-services-ads:23.2.0'
+//    implementation project(path: ':google_mobile_ads')
+//
+//    // For Kotlin users, also import the Kotlin extensions library for Play In-App Update:
+//
+//}
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+
+}
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+android {
+    signingConfigs {
+        release {
+            keyAlias = keystoreProperties['keyAlias']
+            keyPassword = keystoreProperties['keyPassword']
+            storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword = keystoreProperties['storePassword']
+        }
+    }
+    packagingOptions {
+        jniLibs {
+            excludes += ['**/libAgoraRtcWrapperSymbol.so']
+        }
+    }
+
+    namespace = "com.kt.doctak"
+    compileSdk = 36
+//    ndkVersion = '27.2.12479018'
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+                // Specify CMake version here
+                version "3.22.1"
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17
+    }
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.kt.doctak"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        multiDexEnabled true
+        minSdk = 24
+        targetSdk = 36
+        // ndk abiFilters removed to avoid conflicts with split-per-abi builds
+        ndkVersion = "28.1.13356709"
+
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    // Add 16KB page size support for Android 15
+    buildFeatures {
+        buildConfig = true
+    }
+    buildTypes {
+        release {
+            // ========================================
+            // TEMPORARILY DISABLE CODE SHRINKING FOR TESTING
+            // ========================================
+            // Set to false to test if issues are related to R8/ProGuard
+            // After testing, change back to true
+            minifyEnabled false
+            shrinkResources false
+            multiDexEnabled true
+
+            // ProGuard/R8 configuration (only used when minifyEnabled is true)
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), 'proguard-rules.pro', 'r8-rules.pro', 'proguard-additions.pro'
+
+            // Set to false for production release
+            debuggable false
+
+            // Configure signing
+            signingConfig = signingConfigs.release
+            
+            // Configure Firebase Crashlytics
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
+        }
+        
+        // Profile mode for testing (same as release but debuggable)
+        profile {
+            initWith release
+            debuggable true
+            minifyEnabled false
+            shrinkResources false
+        }
+        
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            multiDexEnabled true
+            debuggable true
+            signingConfig = signingConfigs.debug
+            
+            // Disable mapping file upload for debug builds
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
+        }
+    }
+    
+    // ========================================
+    // APP BUNDLE CONFIGURATION
+    // ========================================
+    // Prevent Play Store from doing additional code stripping
+    bundle {
+        language {
+            enableSplit = true
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
+        }
+        // Do NOT enable uncompressed native libs as it can cause issues
+        // with some plugins
+    }
+//    ndkVersion '25.1.8937393'
+}
+// Task to copy mapping file to project root for easy access
+task copyMappingFile(type: Copy) {
+    from 'build/outputs/mapping/release/'
+    into '../mapping_files/'
+    include 'mapping.txt'
+    rename 'mapping.txt', "doctak_mapping_${android.defaultConfig.versionCode}_${new Date().format('yyyyMMdd_HHmmss')}.txt"
+}
+
+// Automatically run after R8 obfuscation
+tasks.whenTaskAdded { task ->
+    if (task.name == 'minifyReleaseWithR8') {
+        task.finalizedBy copyMappingFile
+    }
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:1.7.36' // Ensure SLF4J API is included
+    implementation 'org.slf4j:slf4j-simple:1.7.36' // Add a simple implementation
+
+    // Instead of deprecated Google Play Core, use Play Services Install Referrer
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.firebase:firebase-messaging:21.1.0'
+//    implementation 'com.pusher:push-notifications-android:1.9.0'
+    implementation platform('com.google.firebase:firebase-bom:33.10.0')
+//    implementation 'com.facebook.android:facebook-android-sdk:[5,6)'
+    // Add the dependency for the Firebase SDK for Google Analytics
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging:24.1.0'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.core:core-ktx:1.13.1' // For edge-to-edge support
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+//    implementation 'com.google.android.gms:play-services-ads:23.2.0'
+//    implementation project(path: ':google_mobile_ads')
+//     implementation 'com.android.support:multidex:2.0.1'
+    // For Kotlin users, also import the Kotlin extensions library for Play In-App Update:
+    configurations.configureEach {
+        exclude group: "com.google.errorprone", module: "error_prone_annotations"
+        // Exclude all Google Play Core modules to prevent conflicts
+        exclude group: "com.google.android.play", module: "core"
+        exclude group: "com.google.android.play", module: "core-common"
+    }
+}
+
+// Force compatible dependency versions for AGP 8.3.1
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.browser:browser:1.8.0'
+        force 'androidx.activity:activity-ktx:1.9.2'
+        force 'androidx.activity:activity:1.9.2'
+        force 'androidx.core:core-ktx:1.13.1'
+        force 'androidx.core:core:1.13.1'
+    }
+}
+flutter {
+    source = "../.."
+}
+
+// Copy release APK to flutter-apk directory for Flutter tools compatibility
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleRelease') {
+        task.doLast {
+            def srcFile = file("${buildDir}/outputs/apk/release/app-release.apk")
+            def destDir = file("${buildDir}/outputs/flutter-apk")
+            def destFile = file("${destDir}/app-release.apk")
+            
+            if (srcFile.exists()) {
+                destDir.mkdirs()
+                srcFile.withInputStream { input ->
+                    destFile.withOutputStream { output ->
+                        output << input
+                    }
+                }
+                println "Copied release APK to flutter-apk directory"
+            }
+        }
+    }
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext traffic for all domains (development/testing) -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <!-- Trust system CAs -->
+            <certificates src="system" />
+            <!-- Also trust user-installed CAs (for debugging) -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Specific domain configurations for DocTak -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">doctak.net</domain>
+        <domain includeSubdomains="true">doctak-file.s3.ap-south-1.amazonaws.com</domain>
+        <domain includeSubdomains="true">s3.ap-south-1.amazonaws.com</domain>
+        <domain includeSubdomains="true">amazonaws.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
