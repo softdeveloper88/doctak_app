@@ -1,2 +1,0 @@
-/Users/skapple/Documents/MyProjects/doctak_app/android/app/.cxx/RelWithDebInfo/4dy2t16p/x86/CMakeFiles/edit_cache.dir
-/Users/skapple/Documents/MyProjects/doctak_app/android/app/.cxx/RelWithDebInfo/4dy2t16p/x86/CMakeFiles/rebuild_cache.dir
