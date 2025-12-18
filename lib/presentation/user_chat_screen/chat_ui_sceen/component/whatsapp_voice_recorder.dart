@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_sound_record/flutter_sound_record.dart';
+import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
@@ -11,11 +11,13 @@ import 'package:permission_handler/permission_handler.dart';
 class WhatsAppVoiceRecorder extends StatefulWidget {
   final Function(String path) onStop;
   final VoidCallback onCancel;
+  final bool shouldStopAndSend; // Flag to trigger stop and send
   
   const WhatsAppVoiceRecorder({
     super.key,
     required this.onStop,
     required this.onCancel,
+    this.shouldStopAndSend = false,
   });
 
   @override
@@ -24,13 +26,14 @@ class WhatsAppVoiceRecorder extends StatefulWidget {
 
 class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
     with SingleTickerProviderStateMixin {
-  final FlutterSoundRecord _audioRecorder = FlutterSoundRecord();
+  final AudioRecorder _audioRecorder = AudioRecorder();
   late AnimationController _animationController;
   late Animation<double> _animation;
   Timer? _timer;
   int _recordDuration = 0;
   double _slidePosition = 0.0;
   bool _isRecording = false;
+  bool _isRecorderInitialized = false;
   String? _recordPath;
   bool _isCancelled = false;
 
@@ -44,6 +47,21 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
     _animation = Tween(begin: 0.8, end: 1.2).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+    _initRecorder();
+  }
+
+  @override
+  void didUpdateWidget(WhatsAppVoiceRecorder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When shouldStopAndSend changes to true, stop and send the recording
+    if (widget.shouldStopAndSend && !oldWidget.shouldStopAndSend && !_isCancelled) {
+      print('📤 Stopping and sending recording...');
+      _stopRecording(save: true);
+    }
+  }
+
+  Future<void> _initRecorder() async {
+    _isRecorderInitialized = true;
     _startRecording();
   }
 
@@ -51,7 +69,11 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
   void dispose() {
     _timer?.cancel();
     _animationController.dispose();
-    _stopRecording(save: false);
+    // Clean up without sending if dispose is called directly
+    if (_isRecording) {
+      _audioRecorder.stop();
+    }
+    _audioRecorder.dispose();
     super.dispose();
   }
 
@@ -63,13 +85,21 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
         return;
       }
 
+      if (!_isRecorderInitialized) {
+        widget.onCancel();
+        return;
+      }
+
       final tempDir = await getTemporaryDirectory();
-      _recordPath = '${tempDir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.aac';
+      _recordPath = '${tempDir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
       await _audioRecorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 128000,
+          sampleRate: 44100,
+        ),
         path: _recordPath!,
-        encoder: AudioEncoder.AAC,
-        bitRate: 128000,
       );
 
       setState(() {
@@ -100,20 +130,24 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
   Future<void> _stopRecording({bool save = true}) async {
     if (!_isRecording) return;
 
+    print('🛑 Stopping recording... save: $save, cancelled: $_isCancelled');
+
     try {
       _timer?.cancel();
-      final path = await _audioRecorder.stop();
-      
+      await _audioRecorder.stop();
+
       setState(() {
         _isRecording = false;
       });
 
-      if (save && path != null && !_isCancelled) {
-        widget.onStop(path);
-      } else if (path != null) {
+      if (save && _recordPath != null && !_isCancelled) {
+        print('✅ Calling onStop with path: $_recordPath');
+        widget.onStop(_recordPath!);
+      } else if (_recordPath != null) {
+        print('❌ Recording cancelled, deleting file');
         // Delete the file if cancelled
         try {
-          await File(path).delete();
+          await File(_recordPath!).delete();
         } catch (_) {}
       }
     } catch (e) {
@@ -144,26 +178,34 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     final keyboardPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      // Add padding for system navigation bars
-      padding: EdgeInsets.only(bottom: keyboardPadding > 0 ? 0 : bottomPadding),
-      decoration: BoxDecoration(
-        color: appStore.isDarkMode
-            ? const Color(0xFF1A1A1A)
-            : Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: appStore.isDarkMode
-                ? Colors.black.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
-          ),
-        ],
-      ),
+    return Listener(
+      // Detect when user releases finger anywhere on the screen
+      onPointerUp: (event) {
+        print('👆 Pointer up detected in recorder - stopping and sending');
+        if (!_isCancelled) {
+          _stopRecording(save: true);
+        }
+      },
       child: Container(
-        height: 60,
-        child: Stack(
+        // Add padding for system navigation bars
+        padding: EdgeInsets.only(bottom: keyboardPadding > 0 ? 0 : bottomPadding),
+        decoration: BoxDecoration(
+          color: appStore.isDarkMode
+              ? const Color(0xFF1A1A1A)
+              : Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: appStore.isDarkMode
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: Container(
+          height: 60,
+          child: Stack(
         children: [
           // Slide to cancel
           Positioned(
@@ -220,11 +262,11 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
               ],
             ),
           ),
-          // Send button
+          // Release to send indicator with mic icon
           Positioned(
-            right: 16 - _slidePosition,
-            top: 6,
-            bottom: 6,
+            right: 16,
+            top: 0,
+            bottom: 0,
             child: GestureDetector(
               onHorizontalDragUpdate: (details) {
                 _handleSlide(-details.delta.dx + _slidePosition);
@@ -236,41 +278,60 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
                   });
                 }
               },
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      SVAppColorPrimary,
-                      SVAppColorPrimary.withOpacity(0.8),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: SVAppColorPrimary.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: _slidePosition),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.keyboard_arrow_up_rounded,
+                          color: Colors.grey[400],
+                          size: 20,
+                        ),
+                        Text(
+                          'Release',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.send_rounded,
-                    color: Colors.white,
-                    size: 24,
                   ),
-                  onPressed: () {
-                    _stopRecording(save: true);
-                  },
-                ),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          SVAppColorPrimary,
+                          SVAppColorPrimary.withOpacity(0.8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: SVAppColorPrimary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.mic,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
         ),
       ),
-    );
+    ));
   }
 }

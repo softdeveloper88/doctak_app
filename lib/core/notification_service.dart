@@ -15,6 +15,7 @@ import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_scr
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:doctak_app/firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -97,7 +98,9 @@ class NotificationService {
   static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
     // Ensure Flutter bindings and plugins are registered before using platform channels
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     debugPrint('PUSH RECEIVED ${message.data}');
 
     // Generate a unique notification ID
@@ -442,15 +445,31 @@ class NotificationService {
               >();
 
       if (androidPlugin != null) {
+        // Create high priority channel for all notifications
         await androidPlugin.createNotificationChannel(
           const AndroidNotificationChannel(
-            'call_channel',
-            'Call Notifications',
-            description: 'Channel for call notifications',
+            'high_importance_channel',
+            'High Priority Notifications',
+            description: 'Channel for high priority notifications including calls and messages',
             importance: Importance.max,
             playSound: true,
             enableVibration: true,
             showBadge: true,
+            enableLights: true,
+          ),
+        );
+        
+        // Create separate call channel with full screen intent
+        await androidPlugin.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'call_channel',
+            'Call Notifications',
+            description: 'Channel for incoming call notifications',
+            importance: Importance.max,
+            playSound: true,
+            enableVibration: true,
+            showBadge: true,
+            enableLights: true,
           ),
         );
       }
@@ -656,18 +675,31 @@ class NotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.createNotificationChannel(channel);
-    AndroidNotificationDetails(
+    
+    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      channel.id,
+      channel.name,
+      channelDescription: channel.description,
       channelShowBadge: true,
       icon: initializationSettingsAndroid.defaultIcon,
-      'high_importance_channel',
-      // Channel ID
-      'High Importance Notifications',
-      // Channel name
-      channelDescription: 'your_channel_description',
-      // Channel description
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
+      ongoing: false,
+      autoCancel: false,
+      timeoutAfter: 0,
+      fullScreenIntent: true,
+      category: AndroidNotificationCategory.event,
+      visibility: NotificationVisibility.public,
+      color: Colors.transparent,
+      largeIcon: largeIcon,
+      styleInformation: bannerImage != ''
+          ? BigPictureStyleInformation(
+              banner,
+              contentTitle: title,
+              summaryText: body,
+            )
+          : null,
     );
 
     // Generate a semi-unique ID for the notification to avoid overwriting previous ones
@@ -687,35 +719,7 @@ class NotificationService {
           presentSound: true,
           presentAlert: true,
         ),
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          channelShowBadge: true,
-          icon: initializationSettingsAndroid.defaultIcon,
-          channelDescription: channel.name,
-          // Channel description
-          importance: Importance.max,
-          priority: Priority.high,
-          playSound: true,
-          // importance: Importance.max,
-          // priority: Priority.high,
-          ongoing: false, // Prevent dismissal by swiping
-          autoCancel: false, // Don't auto-remove on tap
-          timeoutAfter: 0, // No automatic timeout
-          fullScreenIntent: true, // Show even when device locked
-          category: AndroidNotificationCategory.event,
-          visibility: NotificationVisibility.public,
-          color: Colors.transparent,
-          largeIcon: largeIcon,
-          styleInformation: bannerImage != ''
-              ? BigPictureStyleInformation(
-                  banner,
-                  contentTitle: title,
-                  summaryText: body,
-                )
-              : null,
-          // icon: 'ic_stat_name',
-        ),
+        android: androidPlatformChannelSpecifics,
       ),
     );
   }

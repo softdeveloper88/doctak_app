@@ -22,8 +22,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_5.dart';
-import 'package:flutter_sound_record/flutter_sound_record.dart';
+import 'package:record/record.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -99,8 +100,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   Timer? _timer;
   Timer? _timerChat;
   Timer? _ampTimer;
-  final FlutterSoundRecord _audioRecorder = FlutterSoundRecord();
-  Amplitude? _amplitude;
+  final AudioRecorder _audioRecorder = AudioRecorder();
+  bool _isRecorderInitialized = false;
+  String? _recordingPath;
   bool? isBottom = true;
 
   @override
@@ -117,11 +119,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     super.dispose();
   }
 
+  Future<void> _initRecorder() async {
+    if (!_isRecorderInitialized) {
+      _isRecorderInitialized = true;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     setStatusBarColor(svGetScaffoldColor());
     _scrollController.addListener(_checkScrollPosition);
+    _initRecorder();
     // Handle completion
     // seenSenderMessage(1);
     _isRecording = false;
@@ -179,35 +188,51 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   Future<void> _start() async {
     try {
-      if (await _audioRecorder.hasPermission()) {
-        await _audioRecorder.start();
-
-        bool isRecording = await _audioRecorder.isRecording();
-        setState(() {
-          _isRecording = isRecording;
-          _recordDuration = 0;
-        });
-        _startTimer();
+      // Check microphone permission
+      final status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        return;
       }
+
+      if (!_isRecorderInitialized) {
+        await _initRecorder();
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      _recordingPath = '${tempDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
+      await _audioRecorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 128000,
+          sampleRate: 44100,
+        ),
+        path: _recordingPath!,
+      );
+
+      setState(() {
+        _isRecording = true;
+        _recordDuration = 0;
+      });
+      _startTimer();
     } catch (e) {
-      // if (kDebugMode) {
-      //   print(e);
-      // }
+      debugPrint("Error starting recording: $e");
     }
   }
 
   Future<void> _stop() async {
     _timer?.cancel();
     _ampTimer?.cancel();
-    final String? path = await _audioRecorder.stop();
-    print(path);
+    await _audioRecorder.stop();
+
+    debugPrint(_recordingPath);
     setState(() => _isRecording = false);
     chatBloc.add(SendMessageEvent(
         userId: AppData.logInUserId,
         roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
         receiverId: widget.id,
         attachmentType: 'voice',
-        file: path,
+        file: _recordingPath,
         message: ''));
     scrollToBottom();
   }
@@ -233,11 +258,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       setState(() => _recordDuration++);
     });
-    _ampTimer =
-        Timer.periodic(const Duration(milliseconds: 200), (Timer t) async {
-      _amplitude = await _audioRecorder.getAmplitude();
-      setState(() {});
-    });
+    // Note: flutter_sound doesn't have getAmplitude() method
+    // If you need amplitude, use setSubscriptionDuration and listen to stream
   }
 
   void _log(String info) {
@@ -999,7 +1021,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   ),
                   isRecording
                       ? WhatsAppVoiceRecorder(
+                          shouldStopAndSend: _shouldStopRecording,
                           onStop: (path) {
+                            print('📨 onStop called with path: $path');
                             chatBloc.add(SendMessageEvent(
                               userId: AppData.logInUserId,
                               roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
@@ -1009,13 +1033,17 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                               message: '',
                             ));
                             setState(() {
+                              print('✅ Message sent, hiding recorder');
                               isRecording = false;
+                              _shouldStopRecording = false;
                             });
                             scrollToBottom();
                           },
                           onCancel: () {
+                            print('❌ Recording cancelled');
                             setState(() {
                               isRecording = false;
+                              _shouldStopRecording = false;
                             });
                           },
                         )
@@ -1063,8 +1091,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             }
                           },
                           onRecordStateChanged: (recording) {
+                            print('🎤 Record state changed: $recording');
                             setState(() {
-                              isRecording = recording;
+                              if (recording) {
+                                // Start recording
+                                print('▶️ Starting recording...');
+                                isRecording = true;
+                                _shouldStopRecording = false;
+                              } else {
+                                // User released - trigger stop and send
+                                print('⏹️ User released - triggering stop and send');
+                                _shouldStopRecording = true;
+                              }
                             });
                           },
                           onVoiceRecorded: (path) {
@@ -1127,6 +1165,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   }
 
   bool isPlayingMsg = false, isRecording = false, isSending = false;
+  bool _shouldStopRecording = false; // Flag to trigger stop and send
 
   Future<bool> checkPermission() async {
     if (!await Permission.microphone.isGranted) {
@@ -1140,57 +1179,50 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   // final record = AudioRecorder();
   void startRecord() async {
-    // if (await record.hasPermission()) {
-    //   // Start recording to file
-    //     recordFilePath = await getFilePath();
-    //   await record.start(const RecordConfig(), path: recordFilePath!);
-    //   final stream = await record.startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
-    //
-    // }
-    bool result = await FlutterSoundRecord().hasPermission();
-    recordFilePath = await getFilePath();
-// Start recording
-    if (result) {
-      await FlutterSoundRecord().start(
-        path: recordFilePath, // required
-        encoder: AudioEncoder.AAC, // by default
-        bitRate: 128000, // by default
-        // sampleRate: 44100, // by default
+    try {
+      // Check microphone permission
+      final status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        debugPrint("Microphone permission not granted");
+        return;
+      }
+
+      if (!_isRecorderInitialized) {
+        await _initRecorder();
+      }
+
+      recordFilePath = await getFilePath();
+
+      // Start recording
+      await _audioRecorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 128000,
+          sampleRate: 44100,
+        ),
+        path: recordFilePath ?? '',
       );
+    } catch (e) {
+      debugPrint("Error starting recording: $e");
     }
-    // bool hasPermission = await checkPermission();
-    // if (hasPermission) {
-    //   recordFilePath = await getFilePath();
-    //   RecordMp3.instance.start(recordFilePath!, (type) {
-    //     setState(() {});
-    //   });
-    // } else {}
-    // setState(() {});
   }
 
   void stopRecord() async {
     try {
-      await FlutterSoundRecord().pause();
-      String? path = await FlutterSoundRecord().stop();
-      // await FlutterSoundRecord().isRecording();
-      // bool s = RecordMp3.instance.stop();
-      // final path = await record.stop();
-// ... or cancel it (and implicitly remove file/blob).
-//       await record.cancel();
-
-      // record.dispose();
+      await _audioRecorder.stop();
+      // recordFilePath is already set from startRecord()
       // if (!await FlutterSoundRecord().isPaused()) {
       chatBloc.add(SendMessageEvent(
           userId: AppData.logInUserId,
           roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
           receiverId: widget.id,
           attachmentType: 'file',
-          file: path!,
+          file: recordFilePath,
           message: ''));
       scrollToBottom();
       // }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 

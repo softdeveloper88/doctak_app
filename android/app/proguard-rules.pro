@@ -33,9 +33,6 @@
 -keep class io.flutter.plugins.**$* { *; }
 -keep interface io.flutter.plugins.**$* { *; }
 
--keep class dev.flutter.pigeon.path_provider_android.** { *; }
--keep class io.flutter.plugins.pathprovider.** { *; }
-
 # Flutter wrapper
 -keep class io.flutter.app.** { *; }
 -keep class io.flutter.plugin.**  { *; }

@@ -201,18 +201,19 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           endIndent: 10,
                         ),
 
-                      // Phone number field
-                      TextFieldEditWidget(
-                        isEditModeMap: isEditModeMap,
-                        index: 0,
-                        icon: Icons.phone,
-                        label: translation(context).lbl_phone_number,
-                        value:
-                            widget.profileBloc.userProfile?.user?.phone ?? '',
-                        onSave: (value) =>
-                            widget.profileBloc.userProfile?.user?.phone = value,
-                      ),
-                      if (!isEditModeMap)
+                      // Phone number field - Only visible to profile owner
+                      if (widget.profileBloc.isMe)
+                        TextFieldEditWidget(
+                          isEditModeMap: isEditModeMap,
+                          index: 0,
+                          icon: Icons.phone,
+                          label: translation(context).lbl_phone_number,
+                          value:
+                              widget.profileBloc.userProfile?.user?.phone ?? '',
+                          onSave: (value) =>
+                              widget.profileBloc.userProfile?.user?.phone = value,
+                        ),
+                      if (!isEditModeMap && widget.profileBloc.isMe)
                         Divider(
                           color: Colors.grey[200],
                           thickness: 1.5,
@@ -220,18 +221,19 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           endIndent: 10,
                         ),
 
-                      // Date of birth field
-                      ProfileDateWidget(
-                        isEditModeMap: isEditModeMap,
-                        index: 0,
-                        label: translation(context).lbl_date_of_birth,
-                        value: widget.profileBloc.userProfile?.user?.dob ?? '',
-                        onSave: (value) {
-                          setState(() {
-                            widget.profileBloc.userProfile?.user?.dob = value;
-                          });
-                        },
-                      ),
+                      // Date of birth field - Only visible to profile owner
+                      if (widget.profileBloc.isMe)
+                        ProfileDateWidget(
+                          isEditModeMap: isEditModeMap,
+                          index: 0,
+                          label: translation(context).lbl_date_of_birth,
+                          value: widget.profileBloc.userProfile?.user?.dob ?? '',
+                          onSave: (value) {
+                            setState(() {
+                              widget.profileBloc.userProfile?.user?.dob = value;
+                            });
+                          },
+                        ),
                     ],
                   ),
                 ),

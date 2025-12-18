@@ -964,14 +964,12 @@ class LoginScreenState extends State<LoginScreen> {
       } else {
         await Future.delayed(const Duration(milliseconds: 500));
       }
-      // Use the new google_sign_in v7 API
-      final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-      // Optionally initialize with client ids if you use server auth
-      try {
-        await googleSignIn.initialize();
-      } catch (_) {}
+      // Configure GoogleSignIn with serverClientId (required for v6.2.2 on Android)
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: '975716064608-1edbbe269cgibdp16uq1858p665h0id7.apps.googleusercontent.com',
+      );
 
-      debugPrint('GoogleSignIn instance (v7) accessed via GoogleSignIn.instance');
+      debugPrint('GoogleSignIn configured with serverClientId for Android compatibility');
 
       // Get Firebase device token first (optional)
       String deviceToken = "";
@@ -1001,13 +999,8 @@ class LoginScreenState extends State<LoginScreen> {
             await googleSignIn.signOut();
           } catch (_) {}
 
-          // Use the new authenticate flow when supported
-          if (await googleSignIn.supportsAuthenticate()) {
-            googleUser = await googleSignIn.authenticate();
-          } else {
-            // Fallback to a lightweight attempt or other platform-specific flow
-            googleUser = await googleSignIn.attemptLightweightAuthentication();
-          }
+          // Use signIn() method (compatible with v6.2.2)
+          googleUser = await googleSignIn.signIn();
 
           if (googleUser != null) break; // Success, exit retry loop
         } on PlatformException catch (e) {

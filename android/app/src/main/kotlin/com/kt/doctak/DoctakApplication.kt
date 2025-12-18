@@ -2,8 +2,6 @@ package com.kt.doctak
 
 import android.app.Application
 import android.content.Context
-import com.google.firebase.FirebaseApp
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.io.File
 
 class DoctakApplication : Application() {
@@ -13,11 +11,7 @@ class DoctakApplication : Application() {
         // Clean up corrupted DataTransport databases
         // cleanupCorruptedDatabases()
 
-        // Initialize Firebase
-        FirebaseApp.initializeApp(this)
-
-        // Enable Crashlytics collection
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+        // Firebase initialization is handled by Flutter Firebase plugins
     }
 
     private fun cleanupCorruptedDatabases() {
