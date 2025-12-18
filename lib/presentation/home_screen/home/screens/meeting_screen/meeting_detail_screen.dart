@@ -124,6 +124,22 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
 
   void onSubscriptionCount(String channelName, int subscriptionCount) {}
 
+  // Authorizer method for Pusher - required to prevent iOS crash
+  Future<dynamic>? onAuthorizer(
+      String channelName, String socketId, dynamic options) async {
+    print(
+        "onAuthorizer called for channel: $channelName, socketId: $socketId");
+    
+    // For public channels (not starting with 'private-' or 'presence-'),
+    // return null
+    if (!channelName.startsWith('private-') &&
+        !channelName.startsWith('presence-')) {
+      return null;
+    }
+    
+    return null;
+  }
+
   void ConnectPusher(context,meetingId,channel) async {
     // Create the Pusher client
     try {
@@ -139,7 +155,7 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
           onDecryptionFailure: onDecryptionFailure,
           onError: onError,
           onSubscriptionCount: onSubscriptionCount,
-          onAuthorizer: null);
+          onAuthorizer: onAuthorizer);
 
       pusher.connect();
 

@@ -8,7 +8,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
-import 'package:doctak_app/presentation/notification_screen/user_announcement_screen.dart';
+
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +23,13 @@ import '../../../notification_screen/bloc/notification_state.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
-  SVHomeFragment({required this.homeBloc, required this.openDrawer, Key? key})
-    : super(key: key);
-  Function openDrawer;
-  HomeBloc homeBloc;
+  const SVHomeFragment({
+    required this.homeBloc,
+    required this.openDrawer,
+    Key? key,
+  }) : super(key: key);
+  final Function openDrawer;
+  final HomeBloc homeBloc;
 
   @override
   State<SVHomeFragment> createState() => _SVHomeFragmentState();
@@ -113,7 +116,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       widget.homeBloc.add(PostLoadPageEvent(page: 1));
       widget.homeBloc.add(AdsSettingEvent());
       notificationBloc.add(NotificationCounter());
-      notificationBloc.add(AnnouncementEvent());
     });
   }
 
@@ -135,11 +137,12 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           onRefresh: _refresh,
           child: ListView(
             controller: _mainScrollController,
-            physics: const ClampingScrollPhysics(),
-            // More controlled scrolling
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+            cacheExtent: 1000, // Pre-render items for smoother scrolling
             children: [
-              UserChatComponent(),
-              const UserAnnouncementScreen(),
+              const UserChatComponent(),
               if (showIncompleteProfile)
                 IncompleteProfileCard(emailVerified == '', isInCompleteProfile),
               SVPostComponent(widget.homeBloc),
@@ -342,6 +345,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                   top: 8,
                   child: BlocBuilder<NotificationBloc, NotificationState>(
                     bloc: notificationBloc,
+                    buildWhen: (previous, current) =>
+                        previous != current && current is PaginationLoadedState,
                     builder: (context, state) {
                       if (state is PaginationLoadedState) {
                         return notificationBloc.totalNotifications > 0
@@ -384,9 +389,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                                   ),
                                 ),
                               )
-                            : const SizedBox();
+                            : const SizedBox.shrink();
                       } else {
-                        return const SizedBox();
+                        return const SizedBox.shrink();
                       }
                     },
                   ),

@@ -49,7 +49,10 @@ class SearchPeopleList extends StatelessWidget {
                 color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
               ),
               child: ListView.builder(
+                key: const PageStorageKey<String>('people_list'),
                 padding: const EdgeInsets.symmetric(vertical: 8),
+                physics: const ClampingScrollPhysics(),
+                cacheExtent: 500,
                 itemBuilder: (context, index) {
                   if (bloc.pageNumber <= bloc.numberOfPage) {
                     if (index ==

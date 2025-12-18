@@ -18,6 +18,7 @@ import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
@@ -107,6 +108,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   @override
   void dispose() {
+    // Ensure we don't leak global pointer routes.
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     _timer?.cancel();
     _ampTimer?.cancel();
     _timerChat?.cancel();
@@ -128,6 +131,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   @override
   void initState() {
     super.initState();
+    // Capture finger release globally while recording.
+    // This fixes cases where the mic button widget is replaced before it receives onLongPressEnd.
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
     setStatusBarColor(svGetScaffoldColor());
     _scrollController.addListener(_checkScrollPosition);
     _initRecorder();
@@ -154,6 +160,22 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
     // fetchMessages();
     // _createClient();
+  }
+
+  void _handleGlobalPointerEvent(PointerEvent event) {
+    // Only act for the WhatsApp-style recorder flow.
+    if (!isRecording) return;
+    if (_shouldStopRecording) return;
+
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      // User released finger: request recorder to stop+send.
+      debugPrint('👆 Global pointer up/cancel detected - requesting stop+send');
+      if (mounted) {
+        setState(() {
+          _shouldStopRecording = true;
+        });
+      }
+    }
   }
   
   Future<void> _cleanOldAudioCache() async {

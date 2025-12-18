@@ -38,6 +38,10 @@ target 'Runner' do
   end
 end
 
+# NOTE: BroadcastUploadExtension target removed to avoid build conflicts.
+# The screen sharing extension will be added manually in Xcode with proper
+# framework linking from the main app's Pods. See IOS_SCREEN_SHARING_COMPLETED.md
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)

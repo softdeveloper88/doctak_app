@@ -12,7 +12,7 @@ class WhatsAppVoiceRecorder extends StatefulWidget {
   final Function(String path) onStop;
   final VoidCallback onCancel;
   final bool shouldStopAndSend; // Flag to trigger stop and send
-  
+
   const WhatsAppVoiceRecorder({
     super.key,
     required this.onStop,

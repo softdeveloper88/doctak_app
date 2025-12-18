@@ -1,8 +1,6 @@
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
@@ -11,22 +9,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-import '../../../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import '../../profile/components/SVProfileHeaderComponent.dart';
-import '../../profile/components/SVProfilePostsComponent.dart';
-import '../../utils/SVColors.dart';
 import '../../utils/SVCommon.dart';
 import 'bloc/profile_state.dart';
 
 class SVProfileFragment extends StatefulWidget {
-  SVProfileFragment({this.userId, Key? key}) : super(key: key);
-  String? userId = '';
+  const SVProfileFragment({this.userId, Key? key}) : super(key: key);
+  final String? userId;
 
   @override
   State<SVProfileFragment> createState() => _SVProfileFragmentState();
 }
 
-class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTickerProviderStateMixin {
+class _SVProfileFragmentState extends State<SVProfileFragment>
+    with SingleTickerProviderStateMixin {
   ProfileBloc profileBloc = ProfileBloc();
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -48,12 +44,10 @@ class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTicker
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: Curves.easeIn,
-      ),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
     setStatusBarColor(Colors.transparent);
     super.initState();
@@ -92,18 +86,22 @@ class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTicker
             );
           } else if (state is DataError) {
             return RetryWidget(
-                errorMessage: translation(context).msg_something_went_wrong_retry,
-                onRetry: () {
-                  try {
-                    if (widget.userId == null) {
-                      profileBloc.add(LoadPageEvent(userId: AppData.logInUserId, page: 1));
-                    } else {
-                      profileBloc.add(LoadPageEvent(userId: widget.userId, page: 1));
-                    }
-                  } catch (e) {
-                    debugPrint(e.toString());
+              errorMessage: translation(context).msg_something_went_wrong_retry,
+              onRetry: () {
+                try {
+                  if (widget.userId == null) {
+                    profileBloc.add(
+                      LoadPageEvent(userId: AppData.logInUserId, page: 1),
+                    );
+                  } else {
+                    profileBloc.add(
+                      LoadPageEvent(userId: widget.userId, page: 1),
+                    );
                   }
+                } catch (e) {
+                  debugPrint(e.toString());
                 }
+              },
             );
           } else {
             return Center(

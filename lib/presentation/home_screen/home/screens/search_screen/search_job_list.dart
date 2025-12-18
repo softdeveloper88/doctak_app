@@ -29,88 +29,86 @@ class _SearchJobListState extends State<SearchJobList> {
   @override
   Widget build(BuildContext context) {
     if (widget.drugsBloc.drugsData.isNotEmpty) {
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
+      return Container(
+        decoration: BoxDecoration(
+          color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
+        ),
+        child: ListView.builder(
+          key: const PageStorageKey<String>('jobs_list'),
+          padding: EdgeInsets.only(
+            top: 10,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
           ),
-          child: ListView.builder(
-            padding: EdgeInsets.only(
-              top: 10,
-              bottom: MediaQuery.of(context).padding.bottom + 16,
-            ),
-            itemCount: widget.drugsBloc.drugsData.length,
-            cacheExtent: 800,
-            itemBuilder: (context, index) {
-              if (widget.drugsBloc.pageNumber <=
-                  widget.drugsBloc.numberOfPage) {
-                if (index ==
-                    widget.drugsBloc.drugsData.length -
-                        widget.drugsBloc.nextPageTrigger) {
-                  widget.drugsBloc.add(CheckIfNeedMoreDataEvent(index: index));
-                }
+          itemCount: widget.drugsBloc.drugsData.length,
+          cacheExtent: 1000,
+          physics: const ClampingScrollPhysics(),
+          itemBuilder: (context, index) {
+            if (widget.drugsBloc.pageNumber <=
+                widget.drugsBloc.numberOfPage) {
+              if (index ==
+                  widget.drugsBloc.drugsData.length -
+                      widget.drugsBloc.nextPageTrigger) {
+                widget.drugsBloc.add(CheckIfNeedMoreDataEvent(index: index));
               }
-              if (widget.drugsBloc.numberOfPage !=
-                      widget.drugsBloc.pageNumber - 1 &&
-                  index >= widget.drugsBloc.drugsData.length - 1) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: const JobsShimmerLoader(),
-                );
-              } else {
-                return _buildJobItem(context, index);
-              }
-            },
-          ),
+            }
+            if (widget.drugsBloc.numberOfPage !=
+                    widget.drugsBloc.pageNumber - 1 &&
+                index >= widget.drugsBloc.drugsData.length - 1) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: const JobsShimmerLoader(),
+              );
+            } else {
+              return _buildJobItem(context, index);
+            }
+          },
         ),
       );
     } else {
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.work_off_rounded,
-                    size: 48,
-                    color: Colors.blue[400],
-                  ),
+      return Container(
+        decoration: BoxDecoration(
+          color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  translation(context).msg_no_jobs_found,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: appStore.isDarkMode
-                        ? Colors.white70
-                        : Colors.grey[700],
-                    fontFamily: 'Poppins',
-                  ),
+                child: Icon(
+                  Icons.work_off_rounded,
+                  size: 48,
+                  color: Colors.blue[400],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Try adjusting your search criteria',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: appStore.isDarkMode
-                        ? Colors.white54
-                        : Colors.grey[500],
-                    fontFamily: 'Poppins',
-                  ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                translation(context).msg_no_jobs_found,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: appStore.isDarkMode
+                      ? Colors.white70
+                      : Colors.grey[700],
+                  fontFamily: 'Poppins',
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Try adjusting your search criteria',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: appStore.isDarkMode
+                      ? Colors.white54
+                      : Colors.grey[500],
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
           ),
         ),
       );

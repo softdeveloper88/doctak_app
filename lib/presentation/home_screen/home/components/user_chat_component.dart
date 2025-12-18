@@ -1,12 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
+import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class UserChatComponent extends StatefulWidget {
+  const UserChatComponent({Key? key}) : super(key: key);
+
   @override
   State<UserChatComponent> createState() => _UserChatComponentState();
 }
@@ -67,11 +69,11 @@ class _UserChatComponentState extends State<UserChatComponent> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.3),
+                                const BoxShadow(
+                                  color: Color(0x4D9E9E9E),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(0, 3),
+                                  offset: Offset(0, 3),
                                 ),
                               ],
                             ),
@@ -83,12 +85,12 @@ class _UserChatComponentState extends State<UserChatComponent> {
                                         fit: BoxFit.cover)
                                     .cornerRadiusWithClipRRect(8)
                                     .cornerRadiusWithClipRRect(8)
-                                : CachedNetworkImage(
-                                        imageUrl:
-                                            '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
-                                        height: 56,
-                                        width: 56,
-                                        fit: BoxFit.cover)
+                                : AppCachedNetworkImage(
+                                    imageUrl:
+                                      '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
+                                    height: 56,
+                                    width: 56,
+                                    fit: BoxFit.cover)
                                     .cornerRadiusWithClipRRect(30),
                           ).onTap(() {
                             print(chatBloc.contactsList[index].id);
@@ -155,7 +157,7 @@ class _UserChatComponentState extends State<UserChatComponent> {
               ),
             );
           } else {
-            return Container();
+            return const SizedBox.shrink();
           }
         });
   }

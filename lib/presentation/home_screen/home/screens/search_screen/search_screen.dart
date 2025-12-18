@@ -217,20 +217,99 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget jobWidgetList(){
-    return  Column(
+    return BlocConsumer<SearchBloc, SearchState>(
+      bloc: drugsBloc,
+      listener: (BuildContext context, SearchState state) {
+        if (state is DataError) {
+          // Handle error state
+        }
+      },
+      builder: (context, state) {
+        debugPrint("state $state");
+        if (state is PaginationLoadingState) {
+          return const JobsShimmerLoader();
+        } else if (state is PaginationLoadedState) {
+          return _buildJobListWithCountryFilter();
+        } else if (state is DataError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  translation(context).msg_something_went_wrong_retry,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                    fontFamily: 'Poppins',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    try {
+                      searchPeopleBloc.add(
+                        SearchPeopleLoadPageEvent(
+                          page: 1,
+                          searchTerm: '',
+                        ),
+                      );
+                      homeBloc.add(LoadSearchPageEvent(page: 1, search: 'a'));
+                      drugsBloc.add(LoadPageEvent(
+                        page: 1,
+                        countryId: '',
+                        searchTerm: '',
+                      ));
+                    } catch (e) {
+                      debugPrint(e.toString());
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.refresh_rounded,
+                    size: 20,
+                  ),
+                  label: Text(
+                    translation(context).lbl_try_again,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
+  }
+  
+  Widget _buildJobListWithCountryFilter() {
+    return Column(
       children: [
         BlocBuilder<SplashBloc, SplashState>(
             builder: (context, state) {
               if (state is CountriesDataInitial) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.blue[600],
-                      strokeWidth: 3,
-                    ),
-                  ),
-                );
+                return const SizedBox(height: 12);
               } else if (state is CountriesDataLoaded) {
                 for (var element
                 in state.countriesModel.countries!) {
@@ -353,103 +432,8 @@ class _SearchScreenState extends State<SearchScreen>
                 return const SizedBox();
               }
             }),
-        BlocConsumer<SearchBloc, SearchState>(
-          bloc: drugsBloc,
-          // listenWhen: (previous, current) => current is SearchState,
-          // buildWhen: (previous, current) => current is! SearchState,
-          listener: (BuildContext context,
-              SearchState state) {
-            if (state is DataError) {
-              // showDialog(
-              //   context: context,
-              //   builder: (context) => AlertDialog(
-              //     content: Text(state.errorMessage),
-              //   ),
-              // );
-            }
-          },
-          builder: (context, state) {
-            print("state $state");
-            if (state is PaginationLoadingState) {
-              return const Expanded(
-                  child: JobsShimmerLoader());
-            } else if (state is PaginationLoadedState) {
-              // print(state.drugsModel.length);
-              return SearchJobList(drugsBloc);
-            } else if (state is DataError) {
-              return Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline_rounded,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        translation(context).msg_something_went_wrong_retry,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                          fontFamily: 'Poppins',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          try {
-                            searchPeopleBloc.add(
-                              SearchPeopleLoadPageEvent(
-                                page: 1,
-                                searchTerm: '',
-                              ),
-                            );
-                            homeBloc.add(LoadSearchPageEvent(page: 1, search: 'a'));
-                            drugsBloc.add(LoadPageEvent(
-                              page: 1,
-                              countryId: '',
-                              searchTerm: '',
-                            ));
-                          } catch (e) {
-                            debugPrint(e.toString());
-                          }
-                        },
-                        icon: const Icon(
-                          Icons.refresh_rounded,
-                          size: 20,
-                        ),
-                        label: Text(
-                          translation(context).lbl_try_again,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            } else {
-              return const Expanded(
-                  child: SizedBox());
-            }
-          },
-        ),
+        // Job list goes here
+        Expanded(child: SearchJobList(drugsBloc)),
       ],
     );
   }
@@ -684,7 +668,7 @@ class _SearchScreenState extends State<SearchScreen>
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     /// Posts search Data Here
-                    SVPostComponent(homeBloc),
+                    SVPostComponent(homeBloc, isNestedScroll: false),
                     /// Jobs Search Data Here
                     jobWidgetList(),
                     /// People search Data Here

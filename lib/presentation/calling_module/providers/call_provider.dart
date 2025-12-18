@@ -40,6 +40,11 @@ class CallProvider extends ChangeNotifier {
   Timer? _connectionHealthTimer;
   Timer? _syncTimer;
   int _lastKnownConnectionState = -1;
+  
+  // PiP/Background transition tracking
+  DateTime? _lastBackgroundTime;
+  bool _isTransitioningFromBackground = false;
+  static const int _backgroundTransitionGracePeriodMs = 5000; // 5 seconds grace period
 
   // Auto-disconnect timers (like WhatsApp behavior)
   Timer? _networkDisconnectTimer;
@@ -186,25 +191,25 @@ class CallProvider extends ChangeNotifier {
       'App going to background on ${Platform.operatingSystem}',
     );
     _isInBackground = true;
+    _lastBackgroundTime = DateTime.now(); // Track when we went to background
 
     // Platform-specific background handling
+    // Note: We no longer mute video in background to support PiP mode
     if (Platform.isIOS) {
-      // iOS background handling
-      if (isVideoCall && _agoraService.isInitialized()) {
-        // On iOS, pause video but keep audio active
-        _agoraService.muteLocalVideoStream(true);
-        _resourceManager.setHighPerformanceMode(false);
-
-        // iOS specific: Enable background audio
+      // iOS background handling - keep audio and video active for PiP
+      if (_agoraService.isInitialized()) {
+        // Keep audio session active for background
         _agoraService.getEngine()?.setParameters(
           '{"che.audio.keep_audiosession": true}',
         );
+        // Don't mute video - let PiP handle it
+        _resourceManager.setHighPerformanceMode(false);
       }
     } else {
-      // Android background handling
-      if (isVideoCall && _agoraService.isInitialized()) {
-        _agoraService.muteLocalVideoStream(true);
+      // Android background handling - keep streams active for PiP
+      if (_agoraService.isInitialized()) {
         _resourceManager.setHighPerformanceMode(false);
+        // Don't mute video - let PiP handle it
       }
     }
   }
@@ -216,18 +221,14 @@ class CallProvider extends ChangeNotifier {
       'App coming to foreground on ${Platform.operatingSystem}',
     );
     _isInBackground = false;
+    _isTransitioningFromBackground = true;
 
     // Platform-specific foreground handling
     if (Platform.isIOS) {
       // iOS foreground handling
-      if (isVideoCall &&
-          _agoraService.isInitialized() &&
-          _callState.isLocalVideoEnabled) {
-        // Restore video with iOS-specific optimizations
-        _agoraService.muteLocalVideoStream(false);
+      if (_agoraService.isInitialized()) {
         _resourceManager.setHighPerformanceMode(true);
-
-        // iOS specific: Reactivate camera if needed
+        // Reactivate camera preview if needed
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted && !_isInBackground) {
             _agoraService.getEngine()?.startPreview();
@@ -236,18 +237,25 @@ class CallProvider extends ChangeNotifier {
       }
     } else {
       // Android foreground handling
-      if (isVideoCall &&
-          _agoraService.isInitialized() &&
-          _callState.isLocalVideoEnabled) {
-        _agoraService.muteLocalVideoStream(false);
+      if (_agoraService.isInitialized()) {
         _resourceManager.setHighPerformanceMode(true);
       }
     }
 
-    // Check connection status with delay to allow network to stabilize
+    // CRITICAL FIX: Use a much longer delay before checking connection status
+    // This prevents false disconnection detection when transitioning from PiP/background
+    // The connection state might be temporarily unstable during transitions
     if (_agoraService.isInitialized() && _callState.isLocalUserJoined) {
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        if (mounted) _checkConnectionStatus();
+      Future.delayed(const Duration(milliseconds: 3000), () {
+        if (mounted && !_isInBackground) {
+          _isTransitioningFromBackground = false;
+          _checkConnectionStatus();
+        }
+      });
+    } else {
+      // Clear the flag after grace period even if no connection check
+      Future.delayed(const Duration(milliseconds: 3000), () {
+        _isTransitioningFromBackground = false;
       });
     }
   }
@@ -710,17 +718,45 @@ class CallProvider extends ChangeNotifier {
   // Check connection status when app comes to foreground
   Future<void> _checkConnectionStatus() async {
     try {
+      // CRITICAL FIX: Don't check connection status if we're in a transition state
+      // This prevents false positives when returning from PiP/background
+      if (_isTransitioningFromBackground) {
+        print('📞 CallProvider: Skipping connection check - still in transition from background');
+        return;
+      }
+      
+      // Check if we just came from background (within grace period)
+      if (_lastBackgroundTime != null) {
+        final timeSinceBackground = DateTime.now().difference(_lastBackgroundTime!).inMilliseconds;
+        if (timeSinceBackground < _backgroundTransitionGracePeriodMs) {
+          print('📞 CallProvider: Skipping connection check - within grace period (${timeSinceBackground}ms < ${_backgroundTransitionGracePeriodMs}ms)');
+          return;
+        }
+      }
+      
       final connectionState = await _agoraService.getConnectionState();
+      print('📞 CallProvider: Connection state check: $connectionState');
 
-      if (connectionState != 3) {
-        // Not connected
+      // CRITICAL FIX: Accept more connection states as valid
+      // 3 = CONNECTED, 4 = RECONNECTING (both are acceptable)
+      // Only trigger reconnection if we're DISCONNECTED (1) or FAILED (5)
+      if (connectionState == 1 || connectionState == 5) {
+        // Disconnected or Failed
         if (_callState.connectionState == CallConnectionState.connected) {
-          // If we think we're connected but we're not, trigger reconnection
+          print('📞 CallProvider: Connection lost (state: $connectionState), attempting reconnection');
+          // If we think we're connected but we're actually disconnected/failed, trigger reconnection
           _attemptReconnection();
         }
+      } else if (connectionState == 4) {
+        // Reconnecting - Agora is handling it, don't interfere
+        print('📞 CallProvider: Agora is already reconnecting, waiting...');
+      } else if (connectionState == 2) {
+        // Connecting - still in progress, wait
+        print('📞 CallProvider: Still connecting, waiting...');
       }
     } catch (e) {
       print('Error checking connection: $e');
+      // Don't attempt reconnection on errors - could be temporary
     }
   }
 

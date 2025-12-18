@@ -1357,7 +1357,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           onDecryptionFailure: _onDecryptionFailure,
           onError: _onError,
           onSubscriptionCount: _onSubscriptionCount,
-          onAuthorizer: null);
+          onAuthorizer: _onAuthorizer);
 
       pusher.connect();
 
@@ -1438,6 +1438,22 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
   }
 
   void _onSubscriptionCount(String channelName, int subscriptionCount) {}
+
+  // Authorizer method for Pusher - required to prevent iOS crash
+  Future<dynamic>? _onAuthorizer(
+      String channelName, String socketId, dynamic options) async {
+    print(
+        "_onAuthorizer called for channel: $channelName, socketId: $socketId");
+    
+    // For public channels (not starting with 'private-' or 'presence-'),
+    // return null
+    if (!channelName.startsWith('private-') &&
+        !channelName.startsWith('presence-')) {
+      return null;
+    }
+    
+    return null;
+  }
 
   void _showScheduleSuccessDialog() {
     final meetingTitle = _meetingTitleController.text.trim().isEmpty

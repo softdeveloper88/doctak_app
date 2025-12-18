@@ -324,6 +324,7 @@ class NotificationService {
           requestBadgePermission: true,
           requestSoundPermission: true,
           defaultPresentBadge: true,
+          requestCriticalPermission: true, // For critical alerts on iOS
         );
     const InitializationSettings initializationSettings =
         InitializationSettings(
@@ -347,8 +348,21 @@ class NotificationService {
           },
     );
 
-    // Initialize FCM and handle background/terminated state
-    await _firebaseMessaging.requestPermission();
+    // Initialize FCM and handle background/terminated state with proper iOS permissions
+    final settings = await _firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false, // Use normal notifications that respect device mute settings
+      provisional: false,
+      sound: true,
+    );
+
+    debugPrint('📱 FCM Permission status: ${settings.authorizationStatus}');
+    debugPrint('📱 Alert permission: ${settings.alert}');
+    debugPrint('📱 Badge permission: ${settings.badge}');
+    debugPrint('📱 Sound permission: ${settings.sound}');
 
     // Set background message handler
     FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
@@ -641,6 +655,7 @@ class NotificationService {
           requestBadgePermission: true,
           requestSoundPermission: true,
           defaultPresentBadge: true,
+          requestCriticalPermission: true, // For critical alerts
         );
     const InitializationSettings initializationSettings =
         InitializationSettings(
@@ -718,6 +733,8 @@ class NotificationService {
           presentBadge: true,
           presentSound: true,
           presentAlert: true,
+          sound: 'default', // Specify default sound
+          interruptionLevel: InterruptionLevel.timeSensitive, // Important for iOS 15+
         ),
         android: androidPlatformChannelSpecifics,
       ),

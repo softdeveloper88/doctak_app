@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CommentListShimmer extends StatelessWidget {
+  const CommentListShimmer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return  ListView.builder(
         itemCount: 20, // Number of shimmer placeholders
         itemBuilder: (context, index) {
-          return CommentShimmer();
+          return const CommentShimmer();
         },
       
     );
@@ -15,6 +17,8 @@ class CommentListShimmer extends StatelessWidget {
 }
 
 class CommentShimmer extends StatelessWidget {
+  const CommentShimmer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(

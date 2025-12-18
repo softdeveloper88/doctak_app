@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
+import 'package:doctak_app/data/apiClient/services/chat_api_service.dart';
 import 'package:doctak_app/data/apiClient/services/post_api_service.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
@@ -33,6 +34,9 @@ class ApiServiceManager {
 
   /// Unified API service - contains all actual endpoints from retrofit conversion
   SharedApiService get sharedApi => SharedApiService();
+
+  /// Chat API service (non-retrofit endpoints)
+  ChatApiService get chatApi => ChatApiService();
 
   // ================================== QUICK ACCESS METHODS ==================================
 
@@ -444,8 +448,11 @@ class ApiServiceManager {
   /// Delete message (backward compatibility)
   Future<dynamic> deleteMessage(String token, String messageId) async {
     try {
-      // Note: This endpoint doesn't exist in SharedApiService, providing mock response
-      return {'success': true, 'message': 'Message deleted successfully'};
+      final response = await chatApi.deleteMessage(messageId: messageId);
+      if (response.success) {
+        return response.data;
+      }
+      throw Exception(response.message ?? 'Failed to delete message');
     } catch (e) {
       throw e;
     }

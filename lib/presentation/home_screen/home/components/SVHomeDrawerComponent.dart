@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -337,7 +337,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(35),
-                    child: CachedNetworkImage(
+                    child: AppCachedNetworkImage(
                       imageUrl: AppData.imageUrl + AppData.profile_pic,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(

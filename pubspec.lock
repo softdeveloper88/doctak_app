@@ -609,6 +609,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  fl_pip:
+    dependency: "direct main"
+    description:
+      name: fl_pip
+      sha256: faf0ee885c368ff641d94986de42fecae95ddc78490bb1550ad02d8983aa6ad2
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
   flex_color_picker:
     dependency: transitive
     description:

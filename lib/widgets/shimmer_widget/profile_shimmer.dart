@@ -3,6 +3,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
 
 class ProfileShimmer extends StatelessWidget {
+  const ProfileShimmer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
@@ -33,10 +35,7 @@ class ProfileShimmer extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.grey[200]!,
-                            Colors.grey[300]!,
-                          ],
+                          colors: [Colors.grey[200]!, Colors.grey[300]!],
                         ),
                       ),
                     ),
@@ -57,7 +56,7 @@ class ProfileShimmer extends StatelessWidget {
                             color: Colors.black.withOpacity(0.1),
                             blurRadius: 10,
                             spreadRadius: 0,
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -79,7 +78,7 @@ class ProfileShimmer extends StatelessWidget {
                             color: Colors.black.withOpacity(0.2),
                             blurRadius: 10,
                             spreadRadius: 0,
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -104,7 +103,7 @@ class ProfileShimmer extends StatelessWidget {
                             blurRadius: 10,
                             spreadRadius: 0,
                             offset: const Offset(0, -2),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -133,7 +132,7 @@ class ProfileShimmer extends StatelessWidget {
                                   color: Colors.black.withOpacity(0.2),
                                   blurRadius: 15,
                                   spreadRadius: 0,
-                                )
+                                ),
                               ],
                             ),
                             child: Container(
@@ -153,14 +152,17 @@ class ProfileShimmer extends StatelessWidget {
                               width: 36,
                               decoration: BoxDecoration(
                                 color: Colors.blue.withOpacity(0.8),
-                                border: Border.all(color: Colors.white, width: 2),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.2),
                                     blurRadius: 5,
                                     spreadRadius: 0,
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -292,17 +294,23 @@ class ProfileShimmer extends StatelessWidget {
                 // Points Card Shimmer
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+                    border: Border.all(
+                      color: Colors.grey.withOpacity(0.2),
+                      width: 1,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
                         blurRadius: 5,
                         spreadRadius: 0,
-                      )
+                      ),
                     ],
                   ),
                   child: Column(
@@ -349,7 +357,10 @@ class ProfileShimmer extends StatelessWidget {
                   children: [
                     // Message Button Shimmer
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
@@ -359,7 +370,7 @@ class ProfileShimmer extends StatelessWidget {
                             color: Colors.black.withOpacity(0.05),
                             blurRadius: 5,
                             offset: Offset(0, 2),
-                          )
+                          ),
                         ],
                       ),
                       child: Row(
@@ -399,7 +410,7 @@ class ProfileShimmer extends StatelessWidget {
                             color: Colors.black.withOpacity(0.05),
                             blurRadius: 5,
                             offset: Offset(0, 2),
-                          )
+                          ),
                         ],
                       ),
                       child: Center(
@@ -455,10 +466,7 @@ class ProfileShimmer extends StatelessWidget {
                 ),
 
                 // Background Separator
-                Container(
-                  color: Colors.grey[100],
-                  height: 10,
-                ),
+                Container(color: Colors.grey[100], height: 10),
 
                 // Posts Section Shimmer
                 Container(
@@ -545,7 +553,7 @@ class ProfileShimmer extends StatelessWidget {
             color: Colors.black.withOpacity(0.05),
             blurRadius: 5,
             spreadRadius: 0,
-          )
+          ),
         ],
       ),
       child: Column(

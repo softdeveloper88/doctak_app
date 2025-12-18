@@ -1032,18 +1032,61 @@ class CaseDiscussionRepository {
     String? clinicalTags,
   }) async {
     try {
-      // Use the old API endpoint with form data
-      final formData = FormData.fromMap({
+      final normalizedBaseUrl = baseUrl.endsWith('/')
+          ? baseUrl.substring(0, baseUrl.length - 1)
+          : baseUrl;
+
+      final queryParameters = <String, dynamic>{
         'id': caseId.toString(),
         'comment': comment,
-      });
+        if (clinicalTags != null && clinicalTags.trim().isNotEmpty)
+          'clinical_tags': clinicalTags.trim(),
+      };
 
-      final response = await _dio.post(
-        '$baseUrl/api/v3/comment-discuss-case',
-        data: formData,
-      );
+      // Server variants observed in this codebase:
+      // - Legacy: /comment-discuss-case?id=...&comment=...
+      // - Newer:  /api/v4/comment-discuss-case
+      // - Current (broken for some envs): /api/v3/comment-discuss-case (404)
+      final endpoints = <String>[
+        '$normalizedBaseUrl/api/v4/comment-discuss-case',
+        '$normalizedBaseUrl/comment-discuss-case',
+        '$normalizedBaseUrl/api/v3/comment-discuss-case',
+      ];
 
-      // The old API might return success message
+      Response<dynamic>? response;
+
+      for (final endpoint in endpoints) {
+        try {
+          if (endpoint.endsWith('/api/v3/comment-discuss-case')) {
+            // Some servers expect form data for this path.
+            final formData = FormData.fromMap({
+              'id': caseId.toString(),
+              'comment': comment,
+              if (clinicalTags != null && clinicalTags.trim().isNotEmpty)
+                'clinical_tags': clinicalTags.trim(),
+            });
+
+            response = await _dio.post(endpoint, data: formData);
+          } else {
+            // Legacy/newer endpoints accept query params.
+            response = await _dio.post(endpoint, queryParameters: queryParameters);
+          }
+
+          // Success
+          break;
+        } on DioError catch (e) {
+          final status = e.response?.statusCode;
+          if (status == 404) {
+            continue;
+          }
+          rethrow;
+        }
+      }
+
+      if (response == null) {
+        throw Exception('Comment endpoint not found (404)');
+      }
+
       final responseData = response.data;
       print('Add comment response: $responseData');
 

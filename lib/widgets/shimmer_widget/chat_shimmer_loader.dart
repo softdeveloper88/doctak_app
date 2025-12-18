@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ChatShimmerLoader extends StatelessWidget {
+  const ChatShimmerLoader({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -13,14 +15,12 @@ class ChatShimmerLoader extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           child: Row(
-            mainAxisAlignment:
-            isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: isSent
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             children: [
               if (!isSent) ...[
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.grey[300],
-                ),
+                CircleAvatar(radius: 16, backgroundColor: Colors.grey[300]),
                 SizedBox(width: 8),
               ],
               Shimmer.fromColors(

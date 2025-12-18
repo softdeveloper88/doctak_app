@@ -95,13 +95,13 @@ confirmationMeetingJoinRejectDialog(
                                         text: TextSpan(
                                             text: joinName,
                                             style: TextStyle(
-                                                fontSize: 10.sp,
+                                                fontSize: 14.sp,
                                                 color: Colors.white,
-                                                fontWeight: FontWeight.w500),
+                                                fontWeight: FontWeight.w600),
                                             children: <TextSpan>[
                                           TextSpan(
                                               text: '  $title',
-                                              style: const TextStyle(fontSize: 14,color: Colors.grey)),
+                                              style: TextStyle(fontSize: 12.sp,color: Colors.grey,fontWeight: FontWeight.w400)),
                                         ]))),
                               ),
                             ]),
@@ -137,9 +137,9 @@ confirmationMeetingJoinRejectDialog(
                                     noButtonText ?? translation(context).lbl_cancel,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w400,
+                                      fontWeight: FontWeight.w600,
                                       color: Colors.white,
-                                      fontSize: 10.sp,
+                                      fontSize: 12.sp,
                                     ),
                                   ),
                                 ),
@@ -164,9 +164,9 @@ confirmationMeetingJoinRejectDialog(
                                     yesButtonText,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w400,
+                                      fontWeight: FontWeight.w600,
                                       color: Colors.white,
-                                      fontSize: 10.sp,
+                                      fontSize: 12.sp,
                                     ),
                                   ),
                                 ),

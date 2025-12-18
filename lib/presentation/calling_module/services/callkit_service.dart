@@ -564,11 +564,21 @@ class CallKitService {
         }
       } catch (e) {
         debugPrint('Error initiating call API: $e');
+        // Update status to available if call fails
+        await _safeUpdateCallStatus('available');
         return {
           'callId': 'error',
           'success': false,
           'message': 'Error calling API: $e',
         };
+      }
+      //
+      // Check if API returned an error
+      if (response['success'] == false || response['callId'] == 'error') {
+        debugPrint('📞 Call initiation failed: ${response['message']}');
+        // Update status to available if call fails
+        await _safeUpdateCallStatus('available');
+        return response;
       }
       //
       // Extract callId with proper null checking

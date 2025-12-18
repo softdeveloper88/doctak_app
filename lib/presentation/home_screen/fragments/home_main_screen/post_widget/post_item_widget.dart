@@ -1,29 +1,22 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/image_constant.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/l10n/app_localizations.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_comman_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/parser.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../home/components/SVCommentReplyComponent.dart';
 import 'full_screen_image_widget.dart';
-
-// import 'post_utils.dart'; // Import your PostUtils or helper methods
 import 'post_media_widget.dart';
-import 'profile_header_widget.dart'; // Import your PostMediaWidget
-// import 'jobs_details_screen.dart'; // Import your JobsDetailsScreen
+import 'profile_header_widget.dart';
 
 class PostItemWidget extends StatefulWidget {
   final String profilePicUrl;
@@ -299,7 +292,8 @@ class _PostItemWidgetState extends State<PostItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return RepaintBoundary(
+      child: Container(
       padding: const EdgeInsets.only(top: 8),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -415,6 +409,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
             ),
         ],
       ),
+    ),
     );
   }
 }
@@ -473,7 +468,7 @@ class InteractionRowWidget extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(color: Colors.grey, thickness: 0.2),
+        const Divider(color: Color(0x339E9E9E), thickness: 0.2),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

@@ -7,6 +7,7 @@ import 'package:doctak_app/core/utils/call_permission_handler.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/calling_module/models/user_model.dart';
 import 'package:doctak_app/presentation/calling_module/services/permission_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/pip_service.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -63,6 +64,15 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   // Add global CallService instance
   final CallService _callService = CallService();
+  
+  // PiP service for Picture-in-Picture support
+  final PiPService _pipService = PiPService();
+  bool _isPiPEnabled = false;
+  
+  // Track if we're in PiP/background transition to prevent false disconnections
+  bool _isInPiPTransition = false;
+  DateTime? _pipTransitionStartTime;
+  static const int _pipTransitionGracePeriodMs = 4000; // 4 seconds grace period
 
   // Add flag to prevent duplicate ending
   bool _isEndingCall = false;
@@ -86,11 +96,18 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   Timer? _autoCloseTimer;
   CallEndReason? _lastCallEndReason;
 
+  // Timestamp when call screen was initialized - used to ignore stale events
+  DateTime? _callScreenInitTime;
+  
+  // Minimum time before accepting call.ended events (in milliseconds)
+  static const int _callEndedProtectionMs = 3000;
+
   @override
   void initState() {
     super.initState();
     _currentCallId = widget.callId;
     _isWaitingForCallData = widget.isWaitingForCallData;
+    _callScreenInitTime = DateTime.now();
 
     WidgetsBinding.instance.addObserver(this);
 
@@ -109,8 +126,13 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       avatarUrl: widget.contactAvatar,
     );
 
-    // Setup Pusher listeners for call events
-    _setupPusherListeners();
+    // CRITICAL FIX: Delay Pusher listener setup to avoid catching stale events
+    // This prevents call.ended events from prior calls from ending new calls
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (mounted && !_isEndingCall) {
+        _setupPusherListeners();
+      }
+    });
 
     // Initialize call provider with token
     _callProvider = CallProvider(
@@ -131,7 +153,81 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     }
 
     // Ensure the screen stays on during a call
-    WakelockPlus.enable();
+    _enableWakelock();
+    
+    // Initialize PiP for video calls
+    _initializePiP();
+  }
+  
+  // Initialize Picture-in-Picture
+  Future<void> _initializePiP() async {
+    if (widget.isVideoCall) {
+      try {
+        final available = await _pipService.isAvailable();
+        if (available) {
+          // Enable auto-PiP when background for Android
+          if (Platform.isAndroid) {
+            await _pipService.enableAutoPiP(isVideoCall: true);
+          }
+          print('📺 CallScreen: PiP initialized');
+        }
+      } catch (e) {
+        print('📺 CallScreen: Error initializing PiP: $e');
+      }
+    }
+  }
+  
+  // Enable PiP mode
+  Future<void> _enablePiPMode() async {
+    if (!widget.isVideoCall || _isPiPEnabled) return;
+    
+    try {
+      final result = await _pipService.enablePiP(
+        contactName: widget.contactName,
+        isVideoCall: true,
+      );
+      setState(() {
+        _isPiPEnabled = result;
+      });
+      print('📺 CallScreen: PiP enabled = $result');
+    } catch (e) {
+      print('📺 CallScreen: Error enabling PiP: $e');
+    }
+  }
+  
+  // Disable PiP mode
+  Future<void> _disablePiPMode() async {
+    if (!_isPiPEnabled) return;
+    
+    try {
+      await _pipService.disablePiP();
+      setState(() {
+        _isPiPEnabled = false;
+      });
+      print('📺 CallScreen: PiP disabled');
+    } catch (e) {
+      print('📺 CallScreen: Error disabling PiP: $e');
+    }
+  }
+
+  // Enable wakelock with error handling
+  Future<void> _enableWakelock() async {
+    try {
+      await WakelockPlus.enable();
+      print('📞 CallScreen: Wakelock enabled successfully');
+    } catch (e) {
+      print('📞 CallScreen: Error enabling wakelock: $e');
+    }
+  }
+
+  // Disable wakelock with error handling
+  Future<void> _disableWakelock() async {
+    try {
+      await WakelockPlus.disable();
+      print('📞 CallScreen: Wakelock disabled successfully');
+    } catch (e) {
+      print('📞 CallScreen: Error disabling wakelock: $e');
+    }
   }
 
   // Method to update call data when it becomes available
@@ -162,13 +258,65 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // Handle app lifecycle changes
-    if (state == AppLifecycleState.paused) {
-      // App going to background
-      _callProvider.handleAppBackground();
-    } else if (state == AppLifecycleState.resumed) {
-      // App coming to foreground
-      _callProvider.handleAppForeground();
+    
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // Re-enable wakelock when app returns to foreground
+        _enableWakelock();
+        print('📞 CallScreen: App resumed - Re-enabling wakelock');
+        
+        // CRITICAL FIX: Mark that we're in a PiP/background transition
+        // This prevents aggressive connection checks during the transition
+        if (_isPiPEnabled) {
+          _isInPiPTransition = true;
+          _pipTransitionStartTime = DateTime.now();
+          print('📞 CallScreen: Starting PiP transition grace period');
+          
+          // Clear the transition state after grace period
+          Future.delayed(Duration(milliseconds: _pipTransitionGracePeriodMs), () {
+            if (mounted) {
+              _isInPiPTransition = false;
+              print('📞 CallScreen: PiP transition grace period ended');
+            }
+          });
+        }
+        
+        // Disable PiP when returning to foreground (with delay for smooth transition)
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _disablePiPMode();
+          }
+        });
+        
+        // App coming to foreground - restore call state with extra delay if from PiP
+        if (mounted && !_isEndingCall) {
+          // Use longer delay when coming from PiP to let everything stabilize
+          final delay = _isPiPEnabled ? const Duration(milliseconds: 800) : const Duration(milliseconds: 100);
+          Future.delayed(delay, () {
+            if (mounted && !_isEndingCall) {
+              _callProvider.handleAppForeground();
+            }
+          });
+        }
+        break;
+      case AppLifecycleState.paused:
+        // App going to background - enable PiP for video calls
+        print('📞 CallScreen: App paused');
+        if (widget.isVideoCall && _callEstablished && !_isEndingCall) {
+          _enablePiPMode();
+        }
+        _callProvider.handleAppBackground();
+        break;
+      case AppLifecycleState.inactive:
+        print('📞 CallScreen: App inactive');
+        // Don't enable PiP on inactive - wait for paused state
+        break;
+      case AppLifecycleState.detached:
+        print('📞 CallScreen: App detached');
+        break;
+      case AppLifecycleState.hidden:
+        print('📞 CallScreen: App hidden');
+        break;
     }
   }
 
@@ -391,6 +539,35 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     print('📞 CallScreen: Raw data type: ${data.runtimeType}');
     print('📞 CallScreen: Raw data: $data');
 
+    // CRITICAL FIX: Check if we're in a PiP transition
+    // Events during PiP transitions should be ignored to prevent false disconnections
+    if (_isInPiPTransition) {
+      if (_pipTransitionStartTime != null) {
+        final timeSinceTransition = DateTime.now().difference(_pipTransitionStartTime!).inMilliseconds;
+        if (timeSinceTransition < _pipTransitionGracePeriodMs) {
+          print('📞 CallScreen: IGNORING call.ended event - in PiP transition (${timeSinceTransition}ms < ${_pipTransitionGracePeriodMs}ms)');
+          return;
+        }
+      }
+    }
+
+    // CRITICAL FIX: Check if the call screen was just initialized
+    // Ignore call.ended events that come within the protection window
+    // This prevents stale events from previous calls from ending new calls
+    if (_callScreenInitTime != null) {
+      final timeSinceInit = DateTime.now().difference(_callScreenInitTime!).inMilliseconds;
+      if (timeSinceInit < _callEndedProtectionMs) {
+        print('📞 CallScreen: IGNORING call.ended event - call screen just initialized ${timeSinceInit}ms ago (protection: ${_callEndedProtectionMs}ms)');
+        return;
+      }
+    }
+
+    // Also check if we're still in connecting state - don't end during connection
+    if (!_callEstablished && !_isEndingCall) {
+      print('📞 CallScreen: IGNORING call.ended event - call not yet established');
+      return;
+    }
+
     try {
       // Parse the event data
       Map<String, dynamic> callData = {};
@@ -410,15 +587,17 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
       print('📞 CallScreen: Remote call ID: $remoteCallId, Current call ID: $_currentCallId');
 
-      // Only handle if this is for our current call or if no specific call ID is provided
-      // (some systems might send generic call end events)
-      final isForCurrentCall =
-          remoteCallId == null ||
-          remoteCallId.isEmpty ||
-          remoteCallId == _currentCallId;
+      // CRITICAL FIX: Only handle if this is EXPLICITLY for our current call
+      // Events without a call_id should be ignored to prevent false positives
+      if (remoteCallId == null || remoteCallId.isEmpty) {
+        print('📞 CallScreen: IGNORING call.ended event - no call_id in event data');
+        return;
+      }
+
+      final isForCurrentCall = remoteCallId == _currentCallId;
 
       if (isForCurrentCall) {
-        print('Remote side ended the call, cleaning up locally');
+        print('📞 CallScreen: Remote side ended the call, cleaning up locally');
 
         // Update call state to indicate remote ended call
         if (mounted) {
@@ -433,15 +612,13 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
             _endCallAndCleanup();
           });
         }
+      } else {
+        print('📞 CallScreen: IGNORING call.ended event - call ID mismatch (remote: $remoteCallId, current: $_currentCallId)');
       }
     } catch (e) {
       print('Error handling remote call ended event: $e');
-      // On error, still try to end the call if we're in an active call state
-      if (mounted && !_isEndingCall && _callEstablished) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _endCallAndCleanup();
-        });
-      }
+      // DON'T end the call on parse errors - this was causing issues
+      // Only end if we explicitly get a matching call.ended event
     }
   }
 
@@ -450,6 +627,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     // Cancel auto-close timer if it's running
     _autoCloseTimer?.cancel();
     _autoCloseTimer = null;
+    
+    // Disable PiP when disposing
+    _pipService.disablePiP();
 
     // Clean up Pusher listeners first
     try {
@@ -470,7 +650,7 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
 
     // Allow the screen to turn off again
-    WakelockPlus.disable();
+    _disableWakelock();
 
     // Clean up audio session
     _cleanupAudioSession();

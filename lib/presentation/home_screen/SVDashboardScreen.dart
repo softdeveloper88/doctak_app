@@ -1,5 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctak_app/core/notification_service.dart';
+import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -14,7 +13,6 @@ import 'fragments/add_post/bloc/add_post_bloc.dart';
 import 'fragments/home_main_screen/SVHomeFragment.dart';
 import 'fragments/home_main_screen/bloc/home_bloc.dart';
 import 'fragments/profile_screen/SVProfileFragment.dart';
-import 'fragments/search_people/SVSearchFragment.dart';
 import 'home/components/SVHomeDrawerComponent.dart';
 
 class SVDashboardScreen extends StatefulWidget {
@@ -85,7 +83,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
       // SVSearchFragment(
       //   backPress: () => setState(() => selectedIndex = 0),
       // ),
-      SVProfileFragment(),
+      const SVProfileFragment(),
     ];
     super.initState();
   }
@@ -380,8 +378,6 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
   }
 
   Widget _buildAddButton() {
-    final isDark = appStore.isDarkMode;
-
     return Flexible(
       child: GestureDetector(
         onTap: () {
@@ -561,9 +557,14 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
                   child: CircleAvatar(
                     radius: isSelected ? 18 : 16,
                     backgroundColor: Colors.grey[300],
-                    backgroundImage: CachedNetworkImageProvider(
-                      AppData.imageUrl + AppData.profile_pic,
-                    ),
+                    backgroundImage:
+                        (AppData.profile_pic.trim().isNotEmpty &&
+                            AppData.profile_pic.toLowerCase() != 'null')
+                        ? AppCachedNetworkImageProvider(
+                            AppData.imageUrl + AppData.profile_pic,
+                          )
+                        : const AssetImage('assets/images/person.png')
+                              as ImageProvider,
                   ),
                 ),
               ),
@@ -603,7 +604,6 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
   }
 
   Widget _buildAINavItem() {
-    const isSelected = false; // Always false since it opens as separate screen
     final isDark = appStore.isDarkMode;
 
     return Flexible(
@@ -625,92 +625,25 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Enhanced AI icon container with special treatment
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                width: isSelected ? 42 : 38,
-                height: isSelected ? 42 : 38,
+              // AI icon container
+              Container(
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
-                  // Special gradient for AI to make it stand out
-                  color: isSelected
-                      ? Colors.blue.withOpacity(0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(isSelected ? 18 : 16),
-                  border: isSelected
-                      ? Border.all(
-                          color: Colors.blue.withOpacity(0.25),
-                          width: 1.5,
-                        )
-                      : null,
-                  boxShadow: isSelected
-                      ? [
-                          // Enhanced glow for AI item
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.25),
-                            blurRadius: 16,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 4),
-                          ),
-                          // Secondary glow
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.1),
-                            blurRadius: 8,
-                            spreadRadius: -2,
-                            offset: const Offset(0, 2),
-                          ),
-                          // Pulsing effect for AI
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.05),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 6),
-                          ),
-                        ]
-                      : null,
-                  // Subtle gradient background for selected state
-                  gradient: isSelected
-                      ? LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.blue.withOpacity(0.18),
-                            Colors.blue.withOpacity(0.12),
-                            Colors.blue.withOpacity(0.08),
-                          ],
-                        )
-                      : null,
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) {
-                      return ScaleTransition(
-                        scale: animation,
-                        child: RotationTransition(
-                          turns: animation,
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      key: ValueKey(isSelected),
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        // color: isSelected
-                        //     ? Colors.white.withOpacity(0.1)
-                        //     : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Image.asset(
-                        'assets/images/docktak_ai_light.png',
-                        width: isSelected ? 24 : 22,
-                        height: isSelected ? 24 : 22,
-                        fit: BoxFit.contain,
-                        // color: isSelected
-                        //     ? Colors.blue[700]
-                        //     : (isDark ? Colors.grey[400] : Colors.grey[500]),
-                      ),
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Image.asset(
+                      'assets/images/docktak_ai_light.png',
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
@@ -718,94 +651,27 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
               const SizedBox(height: 4),
 
-              // Enhanced label with proper text overflow handling
+              // Label
               Container(
                 constraints: const BoxConstraints(maxWidth: 60),
-                child: AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOutCubic,
+                child: Text(
+                  translation(context).lbl_ai,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  softWrap: false,
                   style: TextStyle(
-                    fontSize: isSelected ? 10.5 : 9.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected
-                        ? Colors.blue[700]
-                        : (isDark ? Colors.grey[400] : Colors.grey[500]),
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.grey[400] : Colors.grey[500],
                     fontFamily: 'Poppins',
-                    letterSpacing: isSelected ? 0.2 : 0.1,
+                    letterSpacing: 0.1,
                     height: 1.1,
-                  ),
-                  child: Text(
-                    translation(context).lbl_ai,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    softWrap: false,
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  BottomNavigationBarItem _buildBottomNavigationBarItem(
-    String icon,
-    String activeIcon,
-    String label,
-  ) {
-    return BottomNavigationBarItem(
-      icon: Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: Image.asset(
-          'images/socialv/icons/$icon.png',
-          height: 24,
-          width: 24,
-          fit: BoxFit.cover,
-          color: context.iconColor,
-        ),
-      ),
-      label: label,
-      activeIcon: Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: Image.asset(
-          'images/socialv/icons/$activeIcon.png',
-          height: 24,
-          width: 24,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileAvatar() {
-    return SizedBox(
-      height: 40.0,
-      width: 40.0,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: CircleAvatar(
-          backgroundImage: CachedNetworkImageProvider(
-            AppData.imageUrl + AppData.profile_pic,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAIImageAvatar() {
-    return SizedBox(
-      height: 40.0,
-      width: 40.0,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: Image.asset(
-          'assets/images/docktak_ai_light.png',
-          width: 30,
-          height: 30,
-          fit: BoxFit.contain,
-          // color: context.iconColor,
         ),
       ),
     );

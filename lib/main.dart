@@ -1575,6 +1575,63 @@ Future<bool> _isActiveCallPending() async {
   }
 }
 
+/// Entry point for Picture-in-Picture mode
+/// This is called when PiP creates a new engine for the floating window
+@pragma('vm:entry-point')
+void pipMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const PiPCallWidget());
+}
+
+/// Widget displayed in Picture-in-Picture mode during calls
+class PiPCallWidget extends StatelessWidget {
+  const PiPCallWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          color: Colors.black87,
+          child: const SafeArea(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.videocam_rounded,
+                        color: Colors.green,
+                        size: 32,
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'On Call',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 Future<void> main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
@@ -2056,7 +2113,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             alert: true,
             badge: true,
             sound: true,
-            criticalAlert: true, // Important for call notifications
+            criticalAlert: false, // Use normal notifications that respect device mute
           );
       print('User granted permission: ${settings.authorizationStatus}');
     } catch (e) {
@@ -2263,7 +2320,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     // If handling a call, use '/call' as our home route, otherwise use the regular route
                     initialRoute: isHandlingCallAtStartup
                         ? '/call'
-                        : '/${widget.initialRoute}',
+                        : (widget.initialRoute != null ? '/${widget.initialRoute}' : '/'),
 
                     // Add onGenerateRoute to better handle deep linking for calls
                     onGenerateRoute: (settings) {

@@ -2,14 +2,15 @@ package com.kt.doctak
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
 import androidx.core.view.WindowCompat
-import io.flutter.embedding.android.FlutterActivity
+import fl.pip.FlPiPActivity
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlPiPActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Enable edge-to-edge display for Android 15+ compatibility
         WindowCompat.setDecorFitsSystemWindows(window, false)

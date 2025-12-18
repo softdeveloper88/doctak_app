@@ -36,6 +36,7 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
   late AnimationController _animationController;
   late Animation<double> _animation;
   final FocusNode _focusNode = FocusNode();
+  bool _isPressed = false; // Track if mic button is being pressed
 
   @override
   void initState() {
@@ -195,49 +196,39 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
               ),
               const SizedBox(width: 8),
               // Send/Record button
-              Listener(
-                onPointerDown: (event) {
-                  // Start recording when finger goes down (WhatsApp style)
-                  if (!widget.isLoading && widget.controller.text.trim().isEmpty) {
-                    print('👇 Pointer down - starting recording');
-                    widget.onRecordStateChanged(true);
-                  }
-                },
-                onPointerUp: (event) {
-                  // Stop recording and auto-send when finger goes up (WhatsApp style)
-                  if (widget.isRecording) {
-                    print('👆 Pointer up - stopping recording');
-                    widget.onRecordStateChanged(false);
-                  }
-                },
-                child: GestureDetector(
-                  onTap: widget.isLoading
-                      ? null
-                      : () {
-                          // Only send message if there's text
-                          if (widget.controller.text.trim().isNotEmpty) {
-                            widget.onSubmitted(widget.controller.text);
-                          }
-                        },
-                  child: Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          SVAppColorPrimary,
-                          SVAppColorPrimary.withOpacity(0.8),
-                        ],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: SVAppColorPrimary.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+              Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      SVAppColorPrimary,
+                      SVAppColorPrimary.withOpacity(0.8),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: SVAppColorPrimary.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: widget.isLoading
+                        ? null
+                        : () {
+                            if (widget.controller.text.trim().isNotEmpty) {
+                              widget.onSubmitted(widget.controller.text);
+                            } else {
+                              // For tap, just trigger record state change
+                              widget.onRecordStateChanged(true);
+                            }
+                          },
+                    borderRadius: BorderRadius.circular(24),
                     child: Center(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),

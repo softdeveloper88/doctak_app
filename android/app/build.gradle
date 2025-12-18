@@ -168,8 +168,8 @@ android {
             // ========================================
             // Set to false to test if issues are related to R8/ProGuard
             // After testing, change back to true
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             multiDexEnabled true
 
             // ProGuard/R8 configuration (only used when minifyEnabled is true)

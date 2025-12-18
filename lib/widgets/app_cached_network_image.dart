@@ -57,8 +57,14 @@ class AppCachedNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final safeUrl = imageUrl.trim();
+    // Avoid throwing/stream errors for empty or obviously invalid URLs.
+    if (safeUrl.isEmpty || safeUrl.toLowerCase() == 'null') {
+      return (errorWidget ?? _defaultErrorWidget)(context, safeUrl, 'Empty/invalid image url');
+    }
+
     return CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: safeUrl,
       width: width,
       height: height,
       fit: fit,
@@ -122,7 +128,7 @@ class AppCachedNetworkImageProvider extends CachedNetworkImageProvider {
     int? maxWidth,
     int? maxHeight,
   }) : super(
-          url,
+          url.trim(),
           headers: headers ?? AppCachedNetworkImage.defaultHeaders,
           cacheManager: CustomCacheManager(),
           maxWidth: maxWidth,

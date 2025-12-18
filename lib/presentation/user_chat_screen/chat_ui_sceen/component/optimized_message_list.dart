@@ -35,6 +35,7 @@ class OptimizedMessageList extends StatefulWidget {
 class _OptimizedMessageListState extends State<OptimizedMessageList> {
   final Map<int, Widget> _cachedMessages = {};
   final Set<int> _visibleIndices = {};
+  int _lastMessageCount = -1;
 
   @override
   void dispose() {
@@ -65,7 +66,6 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
                 title: translation(context).msg_confirm_delete_message,
                 callback: () {
                   bloc.add(DeleteMessageEvent(id: message.id.toString()));
-                  Navigator.of(context).pop();
                 },
               );
             },
@@ -123,6 +123,14 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
   @override
   Widget build(BuildContext context) {
     final bloc = widget.chatBloc;
+
+    // Important: widget.chatBloc is the same instance across rebuilds.
+    // didUpdateWidget can't reliably detect length changes, so track it here.
+    if (_lastMessageCount != bloc.messagesList.length) {
+      _cachedMessages.clear();
+      _visibleIndices.clear();
+      _lastMessageCount = bloc.messagesList.length;
+    }
 
     return CustomScrollView(
       controller: widget.scrollController,

@@ -1,11 +1,9 @@
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_comman_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
@@ -14,7 +12,6 @@ import 'package:doctak_app/widgets/shimmer_widget/post_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import '../../fragments/home_main_screen/post_widget/find_likes.dart';
@@ -23,9 +20,12 @@ import '../screens/comment_screen/sv_comment_screen.dart';
 import '../screens/comment_screen/bloc/comment_bloc.dart';
 
 class SVPostComponent extends StatefulWidget {
-  SVPostComponent(this.homeBloc, {super.key});
+  SVPostComponent(this.homeBloc, {this.isNestedScroll = true, super.key});
 
   HomeBloc homeBloc;
+  /// If true, uses shrinkWrap and NeverScrollableScrollPhysics for nested scroll contexts.
+  /// If false, uses ClampingScrollPhysics for standalone scrolling.
+  final bool isNestedScroll;
 
   @override
   State<SVPostComponent> createState() => _SVPostComponentState();
@@ -47,9 +47,15 @@ class _SVPostComponentState extends State<SVPostComponent>
           return widget.homeBloc.postList.isEmpty
               ? Center(child: Text(translation(context).msg_no_posts))
               : ListView.builder(
-                  shrinkWrap: true,
+                  key: const PageStorageKey<String>('posts_list'),
+                  shrinkWrap: widget.isNestedScroll,
                   scrollDirection: Axis.vertical,
-                  physics: const BouncingScrollPhysics(),
+                  physics: widget.isNestedScroll 
+                      ? const NeverScrollableScrollPhysics() 
+                      : const ClampingScrollPhysics(),
+                  addAutomaticKeepAlives: true,
+                  addRepaintBoundaries: true,
+                  cacheExtent: 1000,
                   itemCount:
                       widget.homeBloc.postList.length +
                       (widget.homeBloc.numberOfPage !=
@@ -83,7 +89,8 @@ class _SVPostComponentState extends State<SVPostComponent>
                     final post = widget.homeBloc.postList[index];
 
                     // Build post item widget
-                    return PostItemWidget(
+                    return RepaintBoundary(
+                      child: PostItemWidget(
                       postData: post,
                       profilePicUrl:
                           '${AppData.imageUrl}${post.user?.profilePic}',
@@ -164,6 +171,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                         });
                       },
                       onCommentTap: () {},
+                    ),
                     );
                   },
                 );

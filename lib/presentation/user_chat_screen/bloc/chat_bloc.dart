@@ -444,26 +444,28 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
-    // try {
+    try {
+      final messageId = (event.id ?? '').toString();
+      if (messageId.isEmpty) {
+        showToast('Invalid message id');
+        emit(PaginationLoadedState());
+        return;
+      }
 
-    await apiManager.deleteMessage(
-      'Bearer ${AppData.userToken}',
-      event.id ?? '',
-    );
-    print(event.id);
-    messagesList.removeWhere((message) => message.id == event.id);
-    showToast('Message deleted');
-    // print("hello${response.toJson()}");
-    emit(PaginationLoadedState());
+      await apiManager.deleteMessage(
+        'Bearer ${AppData.userToken}',
+        messageId,
+      );
 
-    // emit(DataLoaded(contactsList));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   emit(PaginationLoadedState());
-    //
-    //   // emit(DataError('An error occurred $e'));
-    // }
+      // Remove locally (handle int/string ids)
+      messagesList.removeWhere((m) => m.id?.toString() == messageId);
+      showToast('Message deleted');
+      emit(PaginationLoadedState());
+    } catch (e) {
+      debugPrint('❌ Delete message failed: $e');
+      showToast('Failed to delete message');
+      emit(PaginationLoadedState());
+    }
   }
 
   _selectedFile(SelectedFiles event, Emitter<ChatState> emit) async {

@@ -24,7 +24,15 @@ class CustomAlertDialog extends StatelessWidget {
       ),
       elevation: 0,
       backgroundColor: Colors.transparent,
-      child: confirmationCustomAlertDialog(context, title, callback,yesButtonText??translation(context).lbl_delete,mainTitle??translation(context).lbl_delete_with_question,callbackNegative,noButtonText),
+      child: confirmationCustomAlertDialog(
+        context,
+        title,
+        callback,
+        yesButtonText ?? translation(context).lbl_delete,
+        mainTitle ?? translation(context).lbl_delete_with_question,
+        callbackNegative,
+        noButtonText,
+      ),
     );
   }
 }
@@ -61,7 +69,7 @@ confirmationCustomAlertDialog(
                                 child: Text(mainTitle,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                        fontSize: 10.sp,
+                                        fontSize: 14.sp,
                                         color: svGetBodyColor(),
                                         fontWeight: FontWeight.w500)),
                               ),
@@ -76,7 +84,7 @@ confirmationCustomAlertDialog(
                           textAlign: TextAlign.center,
                           text: TextSpan(
                             style: TextStyle(
-                                fontSize: 10.sp, color: textPrimaryColor),
+                                fontSize: 13.sp, color: textPrimaryColor),
                             children: <TextSpan>[
                               // TextSpan(text: title),
                               TextSpan(
@@ -104,10 +112,10 @@ confirmationCustomAlertDialog(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
-                                onPressed: ()=>callbackNegative!=null?(){
-                                  Navigator.of(context, rootNavigator: true)
-                                      .pop('dialog');}:callbackNegative
-                                ,
+                                onPressed: () {
+                                  Navigator.of(context, rootNavigator: true).pop('dialog');
+                                  callbackNegative?.call();
+                                },
                                 child: Center(
                                   child: Text(
                                     noButtonText??translation(context).lbl_cancel,
@@ -115,7 +123,7 @@ confirmationCustomAlertDialog(
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
                                       color: Colors.black,
-                                      fontSize: 10.sp,
+                                      fontSize: 14.sp,
                                     ),
                                   ),
                                 ),
@@ -135,7 +143,10 @@ confirmationCustomAlertDialog(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
-                                onPressed: callBack,
+                                onPressed: () {
+                                  Navigator.of(context, rootNavigator: true).pop('dialog');
+                                  callBack();
+                                },
                                 child: Center(
                                   child: Text(
                                     yesButtonText,
@@ -143,7 +154,7 @@ confirmationCustomAlertDialog(
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
                                       color: Colors.red,
-                                      fontSize: 10.sp,
+                                      fontSize: 14.sp,
                                     ),
                                   ),
                                 ),

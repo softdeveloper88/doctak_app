@@ -1927,12 +1927,14 @@
 // }
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart';
+import 'package:doctak_app/presentation/calling_module/services/pip_service.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/search_user_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/seeting_host_control_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
@@ -1979,7 +1981,7 @@ class VideoCallScreen extends StatefulWidget {
 }
 
 class _VideoCallScreenState extends State<VideoCallScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late RtcEngine _agoraEngine;
   final List<RemoteVideoData> _remoteVideos = [];
   final ValueNotifier<int> _participantCount = ValueNotifier(0);
@@ -1999,6 +2001,10 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   bool _isLogin = false;
   bool _showFloatingOptions = true;
   int? _selectedUserId;
+  
+  // PiP service for Picture-in-Picture support
+  final PiPService _pipService = PiPService();
+  bool _isPiPEnabled = false;
 
   // Audio indication variables
   Map<int, int> _userSpeakingLevels = {}; // Maps user ID to audio level
@@ -2034,8 +2040,11 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   void initState() {
     super.initState();
 
+    // Add lifecycle observer
+    WidgetsBinding.instance.addObserver(this);
+
     // Keep screen awake during video call
-    WakelockPlus.enable();
+    _enableWakelock();
 
     // Initialize animation controller for speaking indication
     _speakingAnimationController = AnimationController(
@@ -2068,6 +2077,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     _initializeAgora();
     _generateDefaultPositions();
     _startCallTimer();
+    
+    // Initialize PiP for background support
+    _initializePiP();
 
     // Pre-populate remote user states from meeting details if available
     _initializeRemoteUserStates();
@@ -2090,6 +2102,110 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           );
         }
       }
+    }
+  }
+
+  // Enable wakelock with error handling
+  Future<void> _enableWakelock() async {
+    try {
+      await WakelockPlus.enable();
+      debugPrint('VideoCallScreen: Wakelock enabled successfully');
+    } catch (e) {
+      debugPrint('VideoCallScreen: Error enabling wakelock: $e');
+    }
+  }
+
+  // Disable wakelock with error handling
+  Future<void> _disableWakelock() async {
+    try {
+      await WakelockPlus.disable();
+      debugPrint('VideoCallScreen: Wakelock disabled successfully');
+    } catch (e) {
+      debugPrint('VideoCallScreen: Error disabling wakelock: $e');
+    }
+  }
+  
+  // Initialize Picture-in-Picture for meetings
+  Future<void> _initializePiP() async {
+    try {
+      final available = await _pipService.isAvailable();
+      if (available && Platform.isAndroid) {
+        // Enable auto-PiP when background for Android
+        await _pipService.enableAutoPiP(isVideoCall: true);
+        debugPrint('📺 VideoCallScreen: PiP initialized');
+      }
+    } catch (e) {
+      debugPrint('📺 VideoCallScreen: Error initializing PiP: $e');
+    }
+  }
+
+  // Handle app lifecycle changes
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // Re-enable wakelock when app returns to foreground
+        _enableWakelock();
+        // Disable PiP when returning to foreground (with delay for smooth transition)
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            _disablePiPMode();
+          }
+        });
+        debugPrint('App resumed - Re-enabling wakelock');
+        break;
+      case AppLifecycleState.paused:
+        // App going to background - enable PiP
+        debugPrint('App paused');
+        if (_isJoined) {
+          _enablePiPMode();
+        }
+        break;
+      case AppLifecycleState.inactive:
+        // Don't enable PiP on inactive - wait for paused state
+        debugPrint('App inactive');
+        break;
+      case AppLifecycleState.detached:
+        debugPrint('App detached');
+        break;
+      case AppLifecycleState.hidden:
+        debugPrint('App hidden');
+        break;
+    }
+  }
+  
+  // Enable PiP mode for meetings
+  Future<void> _enablePiPMode() async {
+    if (_isPiPEnabled) return;
+    
+    try {
+      final result = await _pipService.enablePiP(
+        contactName: 'Meeting',
+        isVideoCall: true,
+      );
+      setState(() {
+        _isPiPEnabled = result;
+      });
+      debugPrint('📺 VideoCallScreen: PiP enabled = $result');
+    } catch (e) {
+      debugPrint('📺 VideoCallScreen: Error enabling PiP: $e');
+    }
+  }
+  
+  // Disable PiP mode
+  Future<void> _disablePiPMode() async {
+    if (!_isPiPEnabled) return;
+    
+    try {
+      await _pipService.disablePiP();
+      setState(() {
+        _isPiPEnabled = false;
+      });
+      debugPrint('📺 VideoCallScreen: PiP disabled');
+    } catch (e) {
+      debugPrint('📺 VideoCallScreen: Error disabling PiP: $e');
     }
   }
 
@@ -2122,12 +2238,41 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
   void onSubscriptionCount(String channelName, int subscriptionCount) {}
 
+  // Authorizer method for Pusher - required to prevent iOS crash
+  Future<dynamic>? onAuthorizer(
+      String channelName, String socketId, dynamic options) async {
+    debugPrint(
+        "onAuthorizer called for channel: $channelName, socketId: $socketId");
+    
+    // For public channels (not starting with 'private-' or 'presence-'),
+    // return null
+    if (!channelName.startsWith('private-') &&
+        !channelName.startsWith('presence-')) {
+      return null;
+    }
+    
+    return null;
+  }
+
+  void onConnectionStateChange(String currentState, String previousState) {
+    debugPrint(
+      "Pusher Connection State Changed: $previousState -> $currentState",
+    );
+    // If connection is established, ensure we're subscribed to the channel
+    if (currentState == 'CONNECTED' && previousState != 'CONNECTED') {
+      debugPrint('Pusher connected successfully, ready to receive events');
+    } else if (currentState == 'DISCONNECTED') {
+      debugPrint('Pusher disconnected, attempting to reconnect...');
+    }
+  }
+
   void _initializePusher() async {
     try {
       await pusher.init(
         apiKey: PusherConfig.key,
         cluster: PusherConfig.cluster,
-        useTLS: false,
+        useTLS: true,
+        onConnectionStateChange: onConnectionStateChange,
         onSubscriptionSucceeded: onSubscriptionSucceeded,
         onSubscriptionError: onSubscriptionError,
         onMemberAdded: onMemberAdded,
@@ -2135,23 +2280,46 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         onDecryptionFailure: onDecryptionFailure,
         onError: onError,
         onSubscriptionCount: onSubscriptionCount,
-        onAuthorizer: null,
+        onAuthorizer: onAuthorizer,
       );
 
-      pusher.connect();
+      await pusher.connect();
+
+      final meetingId = widget.meetingDetailsModel?.data?.meeting?.id;
+      final pusherChannelName = "meeting-channel$meetingId";
+      debugPrint('Subscribing to Pusher channel: $pusherChannelName');
 
       clientListenChannel = await pusher.subscribe(
-        channelName:
-            "meeting-channel${widget.meetingDetailsModel?.data?.meeting?.id}",
+        channelName: pusherChannelName,
         onMemberAdded: (member) {
           // Handle when a new member is added if needed.
+          debugPrint("Pusher member added to channel: $member");
         },
         onMemberRemoved: (member) {
           debugPrint("Member removed: $member");
         },
         onEvent: (event) {
           String eventName = event.eventName;
-          Map<String, dynamic> jsonMap = jsonDecode(event.data.toString());
+          debugPrint(
+            'Pusher raw event received - name: $eventName, data: ${event.data}',
+          );
+
+          // Handle pusher subscription events
+          if (eventName == 'pusher:subscription_succeeded' ||
+              eventName == 'pusher_internal:subscription_succeeded') {
+            debugPrint(
+              'Successfully subscribed to Pusher channel: $pusherChannelName',
+            );
+            return;
+          }
+
+          Map<String, dynamic> jsonMap = {};
+          try {
+            jsonMap = jsonDecode(event.data.toString());
+          } catch (e) {
+            debugPrint('Error parsing Pusher event data: $e');
+            return;
+          }
 
           debugPrint('Received event: $eventName with data: $jsonMap');
 
@@ -2463,9 +2631,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         ),
         backgroundColor: Colors.orange[600],
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 4),
         action: SnackBarAction(
           label: 'Settings',
@@ -2514,24 +2680,12 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     _agoraEngine.registerEventHandler(
       RtcEngineEventHandler(
         onVideoPublishStateChanged: (source, oldState, newState, newState2, extra) {
-          // Handle video publish state changes
+          // Handle video publish state changes - for debugging only
           debugPrint(
             'Video publish state changed from $oldState to $newState for $source',
           );
-
-          // If local video publishing succeeded, make sure UI reflects this
-          // Handle different Agora SDK versions that might use different enum values
-          // Using integers directly to avoid compilation errors with enum names
-          final int publishedState =
-              2; // Published state value in most Agora SDK versions
-          if (source == VideoSourceType.videoSourceCamera &&
-              newState == publishedState) {
-            if (mounted) {
-              setState(() {
-                _isLocalVideoEnabled = true;
-              });
-            }
-          }
+          // NOTE: Don't auto-enable UI flag here - video should be OFF by default
+          // The UI flag (_isLocalVideoEnabled) is only changed when user explicitly toggles
         },
         onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) async {
           debugPrint('User joined: $remoteUid');
@@ -2981,6 +3135,21 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
           // Subscribe to all remote users immediately after joining
           _subscribeToAllRemoteUsers();
+
+          // Notify server that camera is OFF by default when joining
+          changeMeetingStatus(
+                context,
+                widget.meetingDetailsModel?.data?.meeting?.id,
+                AppData.logInUserId,
+                'cam',
+                false, // Camera OFF by default
+              )
+              .then((resp) {
+                debugPrint("Initial camera status set to OFF: ${resp}");
+              })
+              .catchError((error) {
+                debugPrint("Error setting initial camera status: $error");
+              });
         },
         onUserOffline:
             (
@@ -3125,6 +3294,13 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
       // Set default speaker mode
       await _agoraEngine.setDefaultAudioRouteToSpeakerphone(true);
+
+      // IMPORTANT: By default, disable local video so camera is OFF when user joins
+      // User must explicitly turn on their camera
+      await _agoraEngine.stopPreview();
+      await _agoraEngine.muteLocalVideoStream(true);
+      await _agoraEngine.enableLocalVideo(false);
+      debugPrint('Camera set to OFF by default - user must enable manually');
     } catch (e) {
       debugPrint('Error configuring video settings: $e');
       _showErrorDialog(
@@ -3143,7 +3319,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       _userIdToUidMap[AppData.logInUserId] = 0; // Local user has UID 0
       _uidToUserIdMap[0] = AppData.logInUserId;
 
-      // Join with optimized options
+      // Join with optimized options - camera OFF by default
       await _agoraEngine.joinChannelWithUserAccount(
         token: '',
         channelId: channelName,
@@ -3151,7 +3327,8 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         options: const ChannelMediaOptions(
           channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
           clientRoleType: ClientRoleType.clientRoleBroadcaster,
-          publishCameraTrack: true,
+          publishCameraTrack:
+              false, // Camera OFF by default - user must enable manually
           publishMicrophoneTrack: true,
           autoSubscribeAudio: true,
           autoSubscribeVideo: true,
@@ -3229,7 +3406,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   Future<void> _endMeetingProperly() async {
     try {
       // Disable wakelock when ending the call
-      WakelockPlus.disable();
+      await _disableWakelock();
 
       // Clear chat messages
       AppData.chatMessages.clear();
@@ -3395,26 +3572,55 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
           // Set the state to reflect that we are no longer screen sharing.
           setState(() => _isScreenSharing = false);
-          // Start the camera preview.
-          await _agoraEngine.startPreview();
+          // Start the camera preview if video was enabled
+          if (_isLocalVideoEnabled) {
+            await _agoraEngine.startPreview();
+          }
         }
         // Otherwise, switch to screen sharing mode.
         else {
+          debugPrint('Starting screen share...');
+          
           // Stop the camera preview.
           await _agoraEngine.stopPreview();
-          // Start screen capture with the desired parameters.
-          await _agoraEngine.startScreenCapture(
-            const ScreenCaptureParameters2(
-              captureVideo: true,
-              captureAudio: true,
-              videoParams: ScreenVideoParameters(
-                dimensions: VideoDimensions(width: 1280, height: 720),
-                frameRate: 15,
-                contentHint: VideoContentHint.contentHintMotion,
-                bitrate: 2000,
+          
+          // Platform-specific screen capture configuration
+          if (Platform.isIOS) {
+            // iOS: Use in-app screen capture (works for app content)
+            // For system-wide screen sharing, the Broadcast Extension is needed
+            debugPrint('iOS: Starting in-app screen capture');
+            
+            // Start screen capture with iOS-specific parameters
+            await _agoraEngine.startScreenCapture(
+              const ScreenCaptureParameters2(
+                captureVideo: true,
+                captureAudio: false, // iOS doesn't support app audio capture in-app
+                videoParams: ScreenVideoParameters(
+                  dimensions: VideoDimensions(width: 1280, height: 720),
+                  frameRate: 15,
+                  contentHint: VideoContentHint.contentHintDetails,
+                  bitrate: 2000,
+                ),
               ),
-            ),
-          );
+            );
+            debugPrint('iOS startScreenCapture completed');
+          } else {
+            // Android: Standard screen capture
+            debugPrint('Android: Starting screen capture');
+            await _agoraEngine.startScreenCapture(
+              const ScreenCaptureParameters2(
+                captureVideo: true,
+                captureAudio: true,
+                videoParams: ScreenVideoParameters(
+                  dimensions: VideoDimensions(width: 1280, height: 720),
+                  frameRate: 15,
+                  contentHint: VideoContentHint.contentHintMotion,
+                  bitrate: 2000,
+                ),
+              ),
+            );
+          }
+          
           // Update channel media options to disable camera track and enable screen sharing.
           await _agoraEngine.updateChannelMediaOptions(
             const ChannelMediaOptions(
@@ -3429,6 +3635,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               clientRoleType: ClientRoleType.clientRoleBroadcaster,
             ),
           );
+          
+          debugPrint('Screen share channel options updated');
+          
           // Update the meeting status accordingly:
           // Indicate that the camera is off.
           await changeMeetingStatus(
@@ -3460,15 +3669,18 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               });
           // Set the state to reflect that screen sharing is now active.
           setState(() => _isScreenSharing = true);
+          
+          _showSystemMessage('Screen sharing started');
         }
       } else {
         _showSystemMessage('Screen share permission not allowed from host');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('Screen share error: $e');
+      debugPrint('Stack trace: $stackTrace');
       _showErrorDialog(
         'Screen Share Error',
-        'Failed to ${_isScreenSharing ? 'stop' : 'start'} screen sharing. Please try again.',
+        'Failed to ${_isScreenSharing ? 'stop' : 'start'} screen sharing: $e',
       );
     }
   }
@@ -4268,12 +4480,29 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                       ? Container(
                           color: Colors.blueGrey.shade800,
                           child: Center(
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundImage: NetworkImage(
-                                '${AppData.imageUrl}${AppData.profile_pic}',
-                              ),
-                            ),
+                            child: AppData.profile_pic.isNotEmpty
+                                ? CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor: Colors.grey.shade700,
+                                    backgroundImage: NetworkImage(
+                                      '${AppData.imageUrl}${AppData.profile_pic}',
+                                    ),
+                                    onBackgroundImageError: (_, __) {},
+                                  )
+                                : CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor: Colors.blueGrey.shade600,
+                                    child: Text(
+                                      AppData.name.isNotEmpty 
+                                          ? AppData.name[0].toUpperCase()
+                                          : 'U',
+                                      style: const TextStyle(
+                                        fontSize: 32,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                           ),
                         )
                       : AgoraVideoView(
@@ -4316,12 +4545,27 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Icon(
-                          _isMuted
-                              ? CupertinoIcons.mic_slash
-                              : CupertinoIcons.mic,
-                          color: _isMuted ? Colors.red : Colors.white,
-                          size: 14,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Camera status indicator
+                            Icon(
+                              _isLocalVideoEnabled
+                                  ? CupertinoIcons.video_camera
+                                  : CupertinoIcons.video_camera_solid,
+                              color: _isLocalVideoEnabled ? Colors.white : Colors.red,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            // Mic status indicator
+                            Icon(
+                              _isMuted
+                                  ? CupertinoIcons.mic_slash
+                                  : CupertinoIcons.mic,
+                              color: _isMuted ? Colors.red : Colors.white,
+                              size: 14,
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -4554,6 +4798,12 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
   @override
   void dispose() {
+    // Remove lifecycle observer
+    WidgetsBinding.instance.removeObserver(this);
+    
+    // Disable PiP when disposing
+    _pipService.disablePiP();
+
     // Clean up all timers
     _callTimer?.cancel();
     _meetingRefreshDebouncer?.cancel();
@@ -4569,7 +4819,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     _agoraEngine.release();
 
     // Disable wakelock when leaving the call
-    WakelockPlus.disable();
+    _disableWakelock();
 
     super.dispose();
   }
