@@ -41,6 +41,15 @@ subprojects {
                 }
             }
         }
+        
+        // Fix Kotlin null-safety issues in third-party plugins
+        if (project.hasProperty('kotlin')) {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions {
+                    freeCompilerArgs += ['-Xno-call-assertions', '-Xno-receiver-assertions', '-Xno-param-assertions']
+                }
+            }
+        }
     }
 }
 configurations.all {

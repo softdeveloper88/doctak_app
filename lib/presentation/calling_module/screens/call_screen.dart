@@ -64,11 +64,11 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   // Add global CallService instance
   final CallService _callService = CallService();
-  
+
   // PiP service for Picture-in-Picture support
   final PiPService _pipService = PiPService();
   bool _isPiPEnabled = false;
-  
+
   // Track if we're in PiP/background transition to prevent false disconnections
   bool _isInPiPTransition = false;
   DateTime? _pipTransitionStartTime;
@@ -98,7 +98,7 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
   // Timestamp when call screen was initialized - used to ignore stale events
   DateTime? _callScreenInitTime;
-  
+
   // Minimum time before accepting call.ended events (in milliseconds)
   static const int _callEndedProtectionMs = 3000;
 
@@ -154,11 +154,11 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
     // Ensure the screen stays on during a call
     _enableWakelock();
-    
+
     // Initialize PiP for video calls
     _initializePiP();
   }
-  
+
   // Initialize Picture-in-Picture
   Future<void> _initializePiP() async {
     if (widget.isVideoCall) {
@@ -176,11 +176,11 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       }
     }
   }
-  
+
   // Enable PiP mode
   Future<void> _enablePiPMode() async {
     if (!widget.isVideoCall || _isPiPEnabled) return;
-    
+
     try {
       final result = await _pipService.enablePiP(
         contactName: widget.contactName,
@@ -194,11 +194,11 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       print('📺 CallScreen: Error enabling PiP: $e');
     }
   }
-  
+
   // Disable PiP mode
   Future<void> _disablePiPMode() async {
     if (!_isPiPEnabled) return;
-    
+
     try {
       await _pipService.disablePiP();
       setState(() {
@@ -258,40 +258,45 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         // Re-enable wakelock when app returns to foreground
         _enableWakelock();
         print('📞 CallScreen: App resumed - Re-enabling wakelock');
-        
+
         // CRITICAL FIX: Mark that we're in a PiP/background transition
         // This prevents aggressive connection checks during the transition
         if (_isPiPEnabled) {
           _isInPiPTransition = true;
           _pipTransitionStartTime = DateTime.now();
           print('📞 CallScreen: Starting PiP transition grace period');
-          
+
           // Clear the transition state after grace period
-          Future.delayed(Duration(milliseconds: _pipTransitionGracePeriodMs), () {
-            if (mounted) {
-              _isInPiPTransition = false;
-              print('📞 CallScreen: PiP transition grace period ended');
-            }
-          });
+          Future.delayed(
+            Duration(milliseconds: _pipTransitionGracePeriodMs),
+            () {
+              if (mounted) {
+                _isInPiPTransition = false;
+                print('📞 CallScreen: PiP transition grace period ended');
+              }
+            },
+          );
         }
-        
+
         // Disable PiP when returning to foreground (with delay for smooth transition)
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
             _disablePiPMode();
           }
         });
-        
+
         // App coming to foreground - restore call state with extra delay if from PiP
         if (mounted && !_isEndingCall) {
           // Use longer delay when coming from PiP to let everything stabilize
-          final delay = _isPiPEnabled ? const Duration(milliseconds: 800) : const Duration(milliseconds: 100);
+          final delay = _isPiPEnabled
+              ? const Duration(milliseconds: 800)
+              : const Duration(milliseconds: 100);
           Future.delayed(delay, () {
             if (mounted && !_isEndingCall) {
               _callProvider.handleAppForeground();
@@ -372,10 +377,11 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         _lastCallEndReason != callEndReason &&
         _autoCloseTimer == null &&
         !_isEndingCall) {
-
       _lastCallEndReason = callEndReason;
 
-      print('📞 CallScreen: Call ended with reason: $callEndReason, starting auto-close timer');
+      print(
+        '📞 CallScreen: Call ended with reason: $callEndReason, starting auto-close timer',
+      );
 
       // Start a 2.5 second timer to auto-close the screen
       _autoCloseTimer = Timer(const Duration(milliseconds: 2500), () {
@@ -399,9 +405,7 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         ),
         backgroundColor: Colors.orange[600],
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
           label: translation(context).lbl_try_again,
@@ -518,7 +522,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       final pusherService = PusherService();
       final userChannel = "user.${AppData.logInUserId}";
 
-      print('📞 CallScreen: Setting up Pusher listeners for channel: $userChannel');
+      print(
+        '📞 CallScreen: Setting up Pusher listeners for channel: $userChannel',
+      );
 
       // Subscribe to user channel if not already subscribed
       pusherService.subscribeToChannel(userChannel);
@@ -527,7 +533,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       pusherService.registerEventListener('call.ended', _handleRemoteCallEnded);
       pusherService.registerEventListener('Call_Ended', _handleRemoteCallEnded);
 
-      print('📞 CallScreen: Pusher listeners registered for call.ended and Call_Ended events');
+      print(
+        '📞 CallScreen: Pusher listeners registered for call.ended and Call_Ended events',
+      );
     } catch (e) {
       print('📞 CallScreen: Error setting up Pusher listeners: $e');
     }
@@ -543,9 +551,13 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     // Events during PiP transitions should be ignored to prevent false disconnections
     if (_isInPiPTransition) {
       if (_pipTransitionStartTime != null) {
-        final timeSinceTransition = DateTime.now().difference(_pipTransitionStartTime!).inMilliseconds;
+        final timeSinceTransition = DateTime.now()
+            .difference(_pipTransitionStartTime!)
+            .inMilliseconds;
         if (timeSinceTransition < _pipTransitionGracePeriodMs) {
-          print('📞 CallScreen: IGNORING call.ended event - in PiP transition (${timeSinceTransition}ms < ${_pipTransitionGracePeriodMs}ms)');
+          print(
+            '📞 CallScreen: IGNORING call.ended event - in PiP transition (${timeSinceTransition}ms < ${_pipTransitionGracePeriodMs}ms)',
+          );
           return;
         }
       }
@@ -555,16 +567,22 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     // Ignore call.ended events that come within the protection window
     // This prevents stale events from previous calls from ending new calls
     if (_callScreenInitTime != null) {
-      final timeSinceInit = DateTime.now().difference(_callScreenInitTime!).inMilliseconds;
+      final timeSinceInit = DateTime.now()
+          .difference(_callScreenInitTime!)
+          .inMilliseconds;
       if (timeSinceInit < _callEndedProtectionMs) {
-        print('📞 CallScreen: IGNORING call.ended event - call screen just initialized ${timeSinceInit}ms ago (protection: ${_callEndedProtectionMs}ms)');
+        print(
+          '📞 CallScreen: IGNORING call.ended event - call screen just initialized ${timeSinceInit}ms ago (protection: ${_callEndedProtectionMs}ms)',
+        );
         return;
       }
     }
 
     // Also check if we're still in connecting state - don't end during connection
     if (!_callEstablished && !_isEndingCall) {
-      print('📞 CallScreen: IGNORING call.ended event - call not yet established');
+      print(
+        '📞 CallScreen: IGNORING call.ended event - call not yet established',
+      );
       return;
     }
 
@@ -585,12 +603,16 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
           callData['id']?.toString() ??
           callData['callId']?.toString();
 
-      print('📞 CallScreen: Remote call ID: $remoteCallId, Current call ID: $_currentCallId');
+      print(
+        '📞 CallScreen: Remote call ID: $remoteCallId, Current call ID: $_currentCallId',
+      );
 
       // CRITICAL FIX: Only handle if this is EXPLICITLY for our current call
       // Events without a call_id should be ignored to prevent false positives
       if (remoteCallId == null || remoteCallId.isEmpty) {
-        print('📞 CallScreen: IGNORING call.ended event - no call_id in event data');
+        print(
+          '📞 CallScreen: IGNORING call.ended event - no call_id in event data',
+        );
         return;
       }
 
@@ -613,7 +635,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
           });
         }
       } else {
-        print('📞 CallScreen: IGNORING call.ended event - call ID mismatch (remote: $remoteCallId, current: $_currentCallId)');
+        print(
+          '📞 CallScreen: IGNORING call.ended event - call ID mismatch (remote: $remoteCallId, current: $_currentCallId)',
+        );
       }
     } catch (e) {
       print('Error handling remote call ended event: $e');
@@ -627,7 +651,7 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     // Cancel auto-close timer if it's running
     _autoCloseTimer?.cancel();
     _autoCloseTimer = null;
-    
+
     // Disable PiP when disposing
     _pipService.disablePiP();
 
@@ -670,134 +694,354 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
             // _confirmEndCall();
             return false; // Always prevent default back behavior
           },
-          child: Consumer<CallProvider>(
-            builder: (context, callProvider, child) {
-              final callState = callProvider.callState;
+          // Use LayoutBuilder to detect PiP mode (small window)
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isSmallWindow =
+                  constraints.maxWidth < 400 || constraints.maxHeight < 400;
 
-              // If waiting for call data, show connecting view with "Initializing call..."
-              if (_isWaitingForCallData) {
-                return SafeArea(
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ConnectingView(
-                        contactName: widget.contactName,
-                        isIncoming: widget.isIncoming,
-                        isVideoCall: widget.isVideoCall,
-                        onRetry: () {}, // No retry in this state
-                        showRetry: false,
-                        customMessage: translation(
-                          context,
-                        ).lbl_initializing_call,
-                      ),
-                      // Call Controls with end call button only
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: MediaQuery.of(context).padding.bottom + 20,
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: _endCallAndCleanup,
-                            child: Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.red.withOpacity(0.5),
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
+              // If in PiP mode (small window), show compact PiP view
+              if (_isPiPEnabled || isSmallWindow) {
+                return _buildPipModeView(context, constraints);
+              }
+
+              return Consumer<CallProvider>(
+                builder: (context, callProvider, child) {
+                  final callState = callProvider.callState;
+
+                  // If waiting for call data, show connecting view with "Initializing call..."
+                  if (_isWaitingForCallData) {
+                    return SafeArea(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ConnectingView(
+                            contactName: widget.contactName,
+                            isIncoming: widget.isIncoming,
+                            isVideoCall: widget.isVideoCall,
+                            onRetry: () {}, // No retry in this state
+                            showRetry: false,
+                            customMessage: translation(
+                              context,
+                            ).lbl_initializing_call,
+                          ),
+                          // Call Controls with end call button only
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: MediaQuery.of(context).padding.bottom + 20,
+                            child: Center(
+                              child: GestureDetector(
+                                onTap: _endCallAndCleanup,
+                                child: Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.red.withOpacity(0.5),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.call_end,
-                                color: Colors.white,
-                                size: 30,
+                                  child: const Icon(
+                                    Icons.call_end,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }
-
-              return GestureDetector(
-                onTap: () {
-                  // Show controls when screen is tapped in video mode
-                  if (callState.callType == CallType.video &&
-                      callState.isRemoteUserJoined) {
-                    callProvider.showControls();
+                    );
                   }
+
+                  return GestureDetector(
+                    onTap: () {
+                      // Show controls when screen is tapped in video mode
+                      if (callState.callType == CallType.video &&
+                          callState.isRemoteUserJoined) {
+                        callProvider.showControls();
+                      }
+                    },
+                    child: SafeArea(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Main content based on call state
+                          _buildMainContent(callState),
+
+                          // Status Bar with professional layout
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            top:
+                                callState.callType == CallType.video &&
+                                    !callState.isControlsVisible
+                                ? -80
+                                : 0,
+                            left: 0,
+                            right: 0,
+                            child: const StatusBar(),
+                          ),
+
+                          // Local Video Preview (when remote video is fullscreen)
+                          if (callState.callType == CallType.video &&
+                              callState.isLocalUserJoined &&
+                              !callState.isLocalVideoFullScreen &&
+                              callState.remoteUid != null)
+                            AnimatedPositioned(
+                              duration: const Duration(milliseconds: 300),
+                              right: 16,
+                              top: 80,
+                              child: LocalVideoPreview(
+                                isEnabled: callState.isLocalVideoEnabled,
+                                isUserSpeaking: callState.isLocalUserSpeaking,
+                                isFrontCamera: callState.isFrontCamera,
+                                onTap: callProvider.swapLocalAndRemoteVideo,
+                              ),
+                            ),
+
+                          // Call Controls with slide-up animation
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                            left: 0,
+                            right: 0,
+                            bottom:
+                                (callState.isControlsVisible ||
+                                    callState.callType == CallType.audio)
+                                ? MediaQuery.of(context).padding.bottom + 20
+                                : -100,
+                            child: CallControls(
+                              onEndCallConfirm: _confirmEndCall,
+                            ),
+                          ),
+
+                          // Reconnecting overlay
+                          if (callState.connectionState ==
+                              CallConnectionState.reconnecting)
+                            _buildReconnectingOverlay(callState),
+
+                          // Loading overlay when ending call
+                          if (_isEndingCall) _buildEndingCallOverlay(),
+                        ],
+                      ),
+                    ),
+                  );
                 },
-                child: SafeArea(
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Build compact PiP mode view for floating widget
+  Widget _buildPipModeView(BuildContext context, BoxConstraints constraints) {
+    return Consumer<CallProvider>(
+      builder: (context, callProvider, child) {
+        final callState = callProvider.callState;
+        final totalHeight = constraints.maxHeight;
+        final totalWidth = constraints.maxWidth;
+
+        // Calculate sizes based on available space
+        final isVerySmall = totalHeight < 150 || totalWidth < 150;
+        final buttonSize = (totalWidth / 5).clamp(24.0, 40.0);
+        final iconSize = (buttonSize * 0.5).clamp(12.0, 20.0);
+        final spacing = (totalWidth / 20).clamp(4.0, 8.0);
+
+        return Container(
+          color: Colors.black87,
+          child: ClipRect(
+            child: Column(
+              children: [
+                // Video/Avatar area - takes most space
+                Expanded(
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Main content based on call state
-                      _buildMainContent(callState),
-
-                      // Status Bar with professional layout
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        top:
-                            callState.callType == CallType.video &&
-                                !callState.isControlsVisible
-                            ? -80
-                            : 0,
-                        left: 0,
-                        right: 0,
-                        child: const StatusBar(),
-                      ),
-
-                      // Local Video Preview (when remote video is fullscreen)
+                      // Background or video
                       if (callState.callType == CallType.video &&
-                          callState.isLocalUserJoined &&
-                          !callState.isLocalVideoFullScreen &&
-                          callState.remoteUid != null)
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 300),
-                          right: 16,
-                          top: 80,
-                          child: LocalVideoPreview(
-                            isEnabled: callState.isLocalVideoEnabled,
-                            isUserSpeaking: callState.isLocalUserSpeaking,
-                            isFrontCamera: callState.isFrontCamera,
-                            onTap: callProvider.swapLocalAndRemoteVideo,
+                          callState.isRemoteUserJoined)
+                        const VideoView()
+                      else
+                        Container(
+                          color: const Color(0xFF1a1a2e),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  callState.callType == CallType.video
+                                      ? Icons.videocam_rounded
+                                      : Icons.phone_rounded,
+                                  color: Colors.white54,
+                                  size: isVerySmall ? 24 : 32,
+                                ),
+                                if (!isVerySmall) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _remoteUser.name,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ),
 
-                      // Call Controls with slide-up animation
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                        left: 0,
-                        right: 0,
-                        bottom:
-                            (callState.isControlsVisible ||
-                                callState.callType == CallType.audio)
-                            ? MediaQuery.of(context).padding.bottom + 20
-                            : -100,
-                        child: CallControls(onEndCallConfirm: _confirmEndCall),
-                      ),
+                      // Call timer overlay
+                      if (!isVerySmall)
+                        Positioned(
+                          top: 2,
+                          left: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.timer,
+                                  color: Colors.white,
+                                  size: 8,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  callState.formattedCallDuration,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
 
                       // Reconnecting overlay
                       if (callState.connectionState ==
                           CallConnectionState.reconnecting)
-                        _buildReconnectingOverlay(callState),
-
-                      // Loading overlay when ending call
-                      if (_isEndingCall) _buildEndingCallOverlay(),
+                        Container(
+                          color: Colors.black54,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
-              );
-            },
+
+                // Compact control bar
+                Container(
+                  height: (totalHeight * 0.25).clamp(32.0, 50.0),
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: spacing),
+                  decoration: const BoxDecoration(color: Color(0xFF263238)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      // Mute button
+                      _buildPipControlButton(
+                        icon: callState.isMuted ? Icons.mic_off : Icons.mic,
+                        color: callState.isMuted
+                            ? Colors.red
+                            : const Color(0xFF3D4D55),
+                        onPressed: callProvider.toggleMute,
+                        buttonSize: buttonSize,
+                        iconSize: iconSize,
+                      ),
+                      SizedBox(width: spacing),
+                      // Speaker button
+                      _buildPipControlButton(
+                        icon: callState.isSpeakerOn
+                            ? Icons.volume_up
+                            : Icons.volume_off,
+                        color: const Color(0xFF3D4D55),
+                        onPressed: callProvider.toggleSpeaker,
+                        buttonSize: buttonSize,
+                        iconSize: iconSize,
+                      ),
+                      SizedBox(width: spacing),
+                      // Video toggle (for video calls)
+                      if (callState.callType == CallType.video) ...[
+                        _buildPipControlButton(
+                          icon: callState.isLocalVideoEnabled
+                              ? Icons.videocam
+                              : Icons.videocam_off,
+                          color: callState.isLocalVideoEnabled
+                              ? const Color(0xFF3D4D55)
+                              : Colors.red,
+                          onPressed: callProvider.toggleLocalVideo,
+                          buttonSize: buttonSize,
+                          iconSize: iconSize,
+                        ),
+                        SizedBox(width: spacing),
+                      ],
+                      // End call button
+                      _buildPipControlButton(
+                        icon: Icons.call_end,
+                        color: Colors.red,
+                        onPressed: _endCallAndCleanup,
+                        buttonSize: buttonSize,
+                        iconSize: iconSize,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Compact control button for PiP mode
+  Widget _buildPipControlButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+    required double buttonSize,
+    required double iconSize,
+  }) {
+    return SizedBox(
+      width: buttonSize,
+      height: buttonSize,
+      child: Material(
+        color: color.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(buttonSize / 2),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(buttonSize / 2),
+          onTap: onPressed,
+          child: Center(
+            child: Icon(icon, color: Colors.white, size: iconSize),
           ),
         ),
       ),
@@ -888,7 +1132,10 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
                 if (callState.reconnectCountdown > 0) ...[
                   const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),

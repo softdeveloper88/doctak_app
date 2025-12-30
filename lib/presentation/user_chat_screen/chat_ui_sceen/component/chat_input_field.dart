@@ -31,7 +31,8 @@ class ChatInputField extends StatefulWidget {
   State<ChatInputField> createState() => _ChatInputFieldState();
 }
 
-class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProviderStateMixin {
+class _ChatInputFieldState extends State<ChatInputField>
+    with SingleTickerProviderStateMixin {
   bool _showEmoji = false;
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -81,9 +82,7 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
       children: [
         Container(
           decoration: BoxDecoration(
-            color: appStore.isDarkMode
-                ? const Color(0xFF1A1A1A)
-                : Colors.white,
+            color: appStore.isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
             boxShadow: [
               BoxShadow(
                 color: appStore.isDarkMode
@@ -129,7 +128,9 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
                       // Emoji button
                       IconButton(
                         icon: Icon(
-                          _showEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined,
+                          _showEmoji
+                              ? Icons.keyboard
+                              : Icons.emoji_emotions_outlined,
                           color: appStore.isDarkMode
                               ? Colors.white70
                               : Colors.grey[600],
@@ -154,7 +155,9 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
                             fontFamily: 'Poppins',
                           ),
                           decoration: InputDecoration(
-                            hintText: translation(context).lbl_type_message_here,
+                            hintText: translation(
+                              context,
+                            ).lbl_type_message_here,
                             hintStyle: TextStyle(
                               color: appStore.isDarkMode
                                   ? Colors.white38
@@ -195,40 +198,66 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
                 ),
               ),
               const SizedBox(width: 8),
-              // Send/Record button
-              Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      SVAppColorPrimary,
-                      SVAppColorPrimary.withOpacity(0.8),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: SVAppColorPrimary.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+              // Send/Record button with scale animation
+              AnimatedScale(
+                scale: _isPressed ? 1.2 : 1.0, // Scale up when pressed
+                duration: const Duration(milliseconds: 150),
+                child: GestureDetector(
+                  onTap: widget.isLoading
+                      ? null
+                      : () {
+                          // Only send message if there's text
+                          if (widget.controller.text.trim().isNotEmpty) {
+                            widget.onSubmitted(widget.controller.text);
+                          }
+                        },
+                  onLongPressStart:
+                      widget.isLoading ||
+                          widget.controller.text.trim().isNotEmpty
+                      ? null
+                      : (details) {
+                          // Start recording on long press (hold) - not on tap
+                          print('👇 Long press started - recording');
+                          setState(() {
+                            _isPressed = true; // Button grows
+                          });
+                          widget.onRecordStateChanged(true);
+                        },
+                  onLongPressEnd: (details) {
+                    // Stop recording when user releases finger
+                    setState(() {
+                      _isPressed = false; // Button returns to normal size
+                    });
+                    if (widget.isRecording) {
+                      print('👆 Long press ended - stopping recording');
+                      widget.onRecordStateChanged(false);
+                    }
+                  },
+                  onLongPressCancel: () {
+                    // Handle if long press is cancelled
+                    setState(() {
+                      _isPressed = false;
+                    });
+                  },
+                  child: Container(
+                    height: 48,
+                    width: 48,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          SVAppColorPrimary,
+                          SVAppColorPrimary.withOpacity(0.8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: SVAppColorPrimary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: widget.isLoading
-                        ? null
-                        : () {
-                            if (widget.controller.text.trim().isNotEmpty) {
-                              widget.onSubmitted(widget.controller.text);
-                            } else {
-                              // For tap, just trigger record state change
-                              widget.onRecordStateChanged(true);
-                            }
-                          },
-                    borderRadius: BorderRadius.circular(24),
                     child: Center(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
@@ -269,7 +298,9 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
                     child: EmojiPicker(
                       onEmojiSelected: (category, emoji) {
                         widget.controller.text += emoji.emoji;
-                        widget.controller.selection = TextSelection.fromPosition(
+                        widget
+                            .controller
+                            .selection = TextSelection.fromPosition(
                           TextPosition(offset: widget.controller.text.length),
                         );
                         if (widget.onTyping != null) {
@@ -282,7 +313,8 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
                         checkPlatformCompatibility: true,
                         viewOrderConfig: const ViewOrderConfig(),
                         emojiViewConfig: EmojiViewConfig(
-                          emojiSizeMax: 28 *
+                          emojiSizeMax:
+                              28 *
                               (foundation.defaultTargetPlatform ==
                                       TargetPlatform.iOS
                                   ? 1.2

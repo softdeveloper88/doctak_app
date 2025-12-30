@@ -351,15 +351,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             (element) =>
                 element.type == 'banner' && element.provider == 'Google',
           )
-          .single
-          .androidId;
+          .firstOrNull
+          ?.androidId;
       AppData.iosBannerAdsId = AppData.listAdsType
           .where(
             (element) =>
                 element.type == 'banner' && element.provider == 'Google',
           )
-          .single
-          .iosId;
+          .firstOrNull
+          ?.iosId;
       // native ads
       AppData.isShowGoogleNativeAds =
           (AppData.listAdsType
@@ -382,15 +382,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             (element) =>
                 element.type == 'native' && element.provider == 'Google',
           )
-          .single
-          .androidId;
+          .firstOrNull
+          ?.androidId;
       AppData.iosNativeAdsId = AppData.listAdsType
           .where(
             (element) =>
                 element.type == 'native' && element.provider == 'Google',
           )
-          .single
-          .iosId;
+          .firstOrNull
+          ?.iosId;
       print(
         AppData.listAdsType
             .where(

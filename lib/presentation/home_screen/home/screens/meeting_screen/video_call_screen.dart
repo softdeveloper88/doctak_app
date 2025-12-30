@@ -3735,6 +3735,26 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   // --------------------
   @override
   Widget build(BuildContext context) {
+    // Use LayoutBuilder to detect actual window size
+    // PiP windows are typically very small (< 400 pixels in either dimension)
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallWindow = constraints.maxWidth < 400 || constraints.maxHeight < 400;
+        
+        // Use PiP design if either:
+        // 1. _isPiPEnabled flag is true (set by PiP service)
+        // 2. Window dimensions are small (indicating PiP mode via fl_pip)
+        if (_isPiPEnabled || isSmallWindow) {
+          return _buildPipModeView();
+        } else {
+          return _buildNormalModeView();
+        }
+      },
+    );
+  }
+  
+  /// OLD design for normal/expanded mode
+  Widget _buildNormalModeView() {
     return WillPopScope(
       onWillPop: () async {
         _confirmEndCall();
@@ -3812,23 +3832,182 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       ),
     );
   }
+  
+  /// NEW responsive design for PiP/floating widget mode
+  Widget _buildPipModeView() {
+    return WillPopScope(
+      onWillPop: () async {
+        _confirmEndCall();
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFF1a1a2e),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final totalHeight = constraints.maxHeight;
+            final totalWidth = constraints.maxWidth;
+            
+            // For very small PiP windows, use minimal controls
+            final isVerySmall = totalHeight < 150 || totalWidth < 200;
+            
+            // Control bar height - smaller for tiny windows
+            final controlBarHeight = isVerySmall 
+                ? (totalHeight * 0.30).clamp(24.0, 40.0)
+                : (totalHeight * 0.25).clamp(32.0, 50.0);
+            
+            return ClipRect(
+              child: Column(
+                children: [
+                  // Main video area - takes remaining space
+                  Expanded(
+                    child: ClipRect(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Video content - clipped
+                          ClipRect(child: _buildPipVideoArea()),
+                          
+                          // Compact call timer in PiP mode
+                          if (!isVerySmall)
+                            Positioned(
+                              top: 2,
+                              left: 2,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.timer, 
+                                      color: Colors.white, 
+                                      size: 8,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      _formatDuration(_callDuration),
+                                      style: const TextStyle(
+                                        color: Colors.white, 
+                                        fontSize: 7,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
 
-  Widget _buildMainVideoArea() {
+                          // Show reconnecting indicator if needed
+                          if (_isReconnecting)
+                            Positioned.fill(
+                              child: Container(
+                                color: Colors.black54,
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(strokeWidth: 1.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Control bar at the bottom - constrained height
+                  SizedBox(
+                    height: controlBarHeight,
+                    child: ClipRect(child: _buildControlBar()),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+  
+  /// Simplified video area for PiP mode - no center/column that can overflow
+  Widget _buildPipVideoArea() {
     if (_remoteVideos.isEmpty) {
-      // No remote videos, show waiting message or local preview fullscreen
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.people, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              translation(context).msg_no_user_found,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          ],
+      // No remote videos - show simple icon only, no text
+      return Container(
+        color: const Color(0xFF1a1a2e),
+        child: const Center(
+          child: Icon(
+            Icons.videocam_off,
+            size: 24,
+            color: Colors.grey,
+          ),
         ),
       );
+    } else if (_remoteVideos.length == 1) {
+      // Single participant - fill the screen
+      return _buildVideoWindow(_remoteVideos[0], getColorByIndex(0));
+    } else {
+      // Multiple participants - show first one in PiP
+      return _buildVideoWindow(_remoteVideos[0], getColorByIndex(0));
+    }
+  }
+
+  Widget _buildMainVideoArea() {
+    // Only use PiP design when actually in PiP mode
+    final isPipMode = _isPiPEnabled;
+    
+    if (_remoteVideos.isEmpty) {
+      // No remote videos, show waiting message or local preview fullscreen
+      if (isPipMode) {
+        // NEW design for PiP mode - compact with FittedBox
+        return Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.people, 
+                    size: 24, 
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Waiting...',
+                    style: TextStyle(
+                      fontSize: 10, 
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      } else {
+        // OLD design for normal mode
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.people, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                translation(context).msg_no_user_found,
+                style: const TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            ],
+          ),
+        );
+      }
     } else if (_remoteVideos.length == 1 && _selectedUserId == null) {
       // Single participant - fill the screen
       return _buildSingleUserView(_remoteVideos[0]);
@@ -4602,6 +4781,23 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   }
 
   Widget _buildControlBar() {
+    // Use LayoutBuilder to detect if we're in a small window (PiP mode)
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallWindow = constraints.maxWidth < 400 || constraints.maxHeight < 100;
+        
+        // Use PiP design if either flag is set OR window is small
+        if (_isPiPEnabled || isSmallWindow) {
+          return _buildPipControlBar();
+        } else {
+          return _buildNormalControlBar();
+        }
+      },
+    );
+  }
+  
+  /// OLD design for normal/expanded mode
+  Widget _buildNormalControlBar() {
     return Container(
       width: 100.w,
       padding: EdgeInsets.only(
@@ -4694,6 +4890,100 @@ class _VideoCallScreenState extends State<VideoCallScreen>
             ],
           ),
         ],
+      ),
+    );
+  }
+  
+  /// NEW ultra-compact design for PiP/floating widget mode - icons only, no labels
+  Widget _buildPipControlBar() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate sizes based on available width
+        final availableWidth = constraints.maxWidth;
+        // Use very small button size that scales with PiP window
+        final buttonSize = (availableWidth / 5).clamp(24.0, 40.0);
+        final iconSize = (buttonSize * 0.5).clamp(12.0, 20.0);
+        final spacing = (availableWidth / 20).clamp(4.0, 12.0);
+        final padding = (availableWidth / 30).clamp(2.0, 8.0);
+        
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: padding / 2,
+          ),
+          decoration: const BoxDecoration(color: Color(0xFF263238)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              // Chat button - icon only
+              _buildPipIconButton(
+                icon: Icons.chat_bubble_outline,
+                color: const Color(0xFF3D4D55),
+                onPressed: () {
+                  MeetingChatScreen(
+                    channelId:
+                        widget.meetingDetailsModel?.data?.meeting?.id ?? "",
+                  ).launch(
+                    context,
+                    pageRouteAnimation: PageRouteAnimation.Slide,
+                  );
+                },
+                buttonSize: buttonSize,
+                iconSize: iconSize,
+              ),
+              SizedBox(width: spacing),
+              // Screen share button - icon only
+              _buildPipIconButton(
+                icon: _isScreenSharing
+                    ? Icons.stop_screen_share
+                    : Icons.screen_share,
+                color: _isScreenSharing ? Colors.blue : const Color(0xFF3D4D55),
+                onPressed: _toggleScreenSharing,
+                buttonSize: buttonSize,
+                iconSize: iconSize,
+              ),
+              SizedBox(width: spacing),
+              // End meeting button - icon only
+              _buildPipIconButton(
+                icon: Icons.call_end,
+                color: Colors.red,
+                onPressed: _confirmEndCall,
+                buttonSize: buttonSize,
+                iconSize: iconSize,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  
+  /// Ultra-compact icon-only button for PiP mode
+  Widget _buildPipIconButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+    required double buttonSize,
+    required double iconSize,
+  }) {
+    return SizedBox(
+      width: buttonSize,
+      height: buttonSize,
+      child: MaterialButton(
+        padding: EdgeInsets.zero,
+        minWidth: buttonSize,
+        color: color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(buttonSize / 3),
+        ),
+        onPressed: onPressed,
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: iconSize,
+        ),
       ),
     );
   }
