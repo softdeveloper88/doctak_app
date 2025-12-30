@@ -2001,7 +2001,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   bool _isLogin = false;
   bool _showFloatingOptions = true;
   int? _selectedUserId;
-  
+
   // PiP service for Picture-in-Picture support
   final PiPService _pipService = PiPService();
   bool _isPiPEnabled = false;
@@ -2077,7 +2077,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     _initializeAgora();
     _generateDefaultPositions();
     _startCallTimer();
-    
+
     // Initialize PiP for background support
     _initializePiP();
 
@@ -2124,14 +2124,15 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       debugPrint('VideoCallScreen: Error disabling wakelock: $e');
     }
   }
-  
+
   // Initialize Picture-in-Picture for meetings
   Future<void> _initializePiP() async {
     try {
       final available = await _pipService.isAvailable();
-      if (available && Platform.isAndroid) {
+      if (available && Platform.isAndroid && mounted) {
         // Enable auto-PiP when background for Android
-        await _pipService.enableAutoPiP(isVideoCall: true);
+        // Pass context so permission dialog can be shown if needed
+        await _pipService.enableAutoPiP(isVideoCall: true, context: context);
         debugPrint('📺 VideoCallScreen: PiP initialized');
       }
     } catch (e) {
@@ -2143,7 +2144,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         // Re-enable wakelock when app returns to foreground
@@ -2175,29 +2176,33 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         break;
     }
   }
-  
+
   // Enable PiP mode for meetings
   Future<void> _enablePiPMode() async {
     if (_isPiPEnabled) return;
-    
+
     try {
+      // Pass context so permission dialog can be shown if needed
       final result = await _pipService.enablePiP(
         contactName: 'Meeting',
         isVideoCall: true,
+        context: mounted ? context : null,
       );
-      setState(() {
-        _isPiPEnabled = result;
-      });
+      if (mounted) {
+        setState(() {
+          _isPiPEnabled = result;
+        });
+      }
       debugPrint('📺 VideoCallScreen: PiP enabled = $result');
     } catch (e) {
       debugPrint('📺 VideoCallScreen: Error enabling PiP: $e');
     }
   }
-  
+
   // Disable PiP mode
   Future<void> _disablePiPMode() async {
     if (!_isPiPEnabled) return;
-    
+
     try {
       await _pipService.disablePiP();
       setState(() {
@@ -2240,17 +2245,21 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
   // Authorizer method for Pusher - required to prevent iOS crash
   Future<dynamic>? onAuthorizer(
-      String channelName, String socketId, dynamic options) async {
+    String channelName,
+    String socketId,
+    dynamic options,
+  ) async {
     debugPrint(
-        "onAuthorizer called for channel: $channelName, socketId: $socketId");
-    
+      "onAuthorizer called for channel: $channelName, socketId: $socketId",
+    );
+
     // For public channels (not starting with 'private-' or 'presence-'),
     // return null
     if (!channelName.startsWith('private-') &&
         !channelName.startsWith('presence-')) {
       return null;
     }
-    
+
     return null;
   }
 
@@ -3580,21 +3589,22 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         // Otherwise, switch to screen sharing mode.
         else {
           debugPrint('Starting screen share...');
-          
+
           // Stop the camera preview.
           await _agoraEngine.stopPreview();
-          
+
           // Platform-specific screen capture configuration
           if (Platform.isIOS) {
             // iOS: Use in-app screen capture (works for app content)
             // For system-wide screen sharing, the Broadcast Extension is needed
             debugPrint('iOS: Starting in-app screen capture');
-            
+
             // Start screen capture with iOS-specific parameters
             await _agoraEngine.startScreenCapture(
               const ScreenCaptureParameters2(
                 captureVideo: true,
-                captureAudio: false, // iOS doesn't support app audio capture in-app
+                captureAudio:
+                    false, // iOS doesn't support app audio capture in-app
                 videoParams: ScreenVideoParameters(
                   dimensions: VideoDimensions(width: 1280, height: 720),
                   frameRate: 15,
@@ -3620,7 +3630,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               ),
             );
           }
-          
+
           // Update channel media options to disable camera track and enable screen sharing.
           await _agoraEngine.updateChannelMediaOptions(
             const ChannelMediaOptions(
@@ -3635,9 +3645,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               clientRoleType: ClientRoleType.clientRoleBroadcaster,
             ),
           );
-          
+
           debugPrint('Screen share channel options updated');
-          
+
           // Update the meeting status accordingly:
           // Indicate that the camera is off.
           await changeMeetingStatus(
@@ -3669,7 +3679,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               });
           // Set the state to reflect that screen sharing is now active.
           setState(() => _isScreenSharing = true);
-          
+
           _showSystemMessage('Screen sharing started');
         }
       } else {
@@ -3739,8 +3749,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     // PiP windows are typically very small (< 400 pixels in either dimension)
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isSmallWindow = constraints.maxWidth < 400 || constraints.maxHeight < 400;
-        
+        final isSmallWindow =
+            constraints.maxWidth < 400 || constraints.maxHeight < 400;
+
         // Use PiP design if either:
         // 1. _isPiPEnabled flag is true (set by PiP service)
         // 2. Window dimensions are small (indicating PiP mode via fl_pip)
@@ -3752,7 +3763,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       },
     );
   }
-  
+
   /// OLD design for normal/expanded mode
   Widget _buildNormalModeView() {
     return WillPopScope(
@@ -3832,7 +3843,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       ),
     );
   }
-  
+
   /// NEW responsive design for PiP/floating widget mode
   Widget _buildPipModeView() {
     return WillPopScope(
@@ -3846,15 +3857,15 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           builder: (context, constraints) {
             final totalHeight = constraints.maxHeight;
             final totalWidth = constraints.maxWidth;
-            
+
             // For very small PiP windows, use minimal controls
             final isVerySmall = totalHeight < 150 || totalWidth < 200;
-            
+
             // Control bar height - smaller for tiny windows
-            final controlBarHeight = isVerySmall 
+            final controlBarHeight = isVerySmall
                 ? (totalHeight * 0.30).clamp(24.0, 40.0)
                 : (totalHeight * 0.25).clamp(32.0, 50.0);
-            
+
             return ClipRect(
               child: Column(
                 children: [
@@ -3866,7 +3877,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                         children: [
                           // Video content - clipped
                           ClipRect(child: _buildPipVideoArea()),
-                          
+
                           // Compact call timer in PiP mode
                           if (!isVerySmall)
                             Positioned(
@@ -3885,15 +3896,15 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(
-                                      Icons.timer, 
-                                      color: Colors.white, 
+                                      Icons.timer,
+                                      color: Colors.white,
                                       size: 8,
                                     ),
                                     const SizedBox(width: 2),
                                     Text(
                                       _formatDuration(_callDuration),
                                       style: const TextStyle(
-                                        color: Colors.white, 
+                                        color: Colors.white,
                                         fontSize: 7,
                                       ),
                                     ),
@@ -3911,7 +3922,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                                   child: SizedBox(
                                     width: 12,
                                     height: 12,
-                                    child: CircularProgressIndicator(strokeWidth: 1.5),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -3933,7 +3946,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       ),
     );
   }
-  
+
   /// Simplified video area for PiP mode - no center/column that can overflow
   Widget _buildPipVideoArea() {
     if (_remoteVideos.isEmpty) {
@@ -3941,11 +3954,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       return Container(
         color: const Color(0xFF1a1a2e),
         child: const Center(
-          child: Icon(
-            Icons.videocam_off,
-            size: 24,
-            color: Colors.grey,
-          ),
+          child: Icon(Icons.videocam_off, size: 24, color: Colors.grey),
         ),
       );
     } else if (_remoteVideos.length == 1) {
@@ -3960,7 +3969,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   Widget _buildMainVideoArea() {
     // Only use PiP design when actually in PiP mode
     final isPipMode = _isPiPEnabled;
-    
+
     if (_remoteVideos.isEmpty) {
       // No remote videos, show waiting message or local preview fullscreen
       if (isPipMode) {
@@ -3974,18 +3983,11 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.people, 
-                    size: 24, 
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.people, size: 24, color: Colors.grey),
                   const SizedBox(height: 4),
                   const Text(
                     'Waiting...',
-                    style: TextStyle(
-                      fontSize: 10, 
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ],
               ),
@@ -4672,7 +4674,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                                     radius: 40,
                                     backgroundColor: Colors.blueGrey.shade600,
                                     child: Text(
-                                      AppData.name.isNotEmpty 
+                                      AppData.name.isNotEmpty
                                           ? AppData.name[0].toUpperCase()
                                           : 'U',
                                       style: const TextStyle(
@@ -4732,7 +4734,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                               _isLocalVideoEnabled
                                   ? CupertinoIcons.video_camera
                                   : CupertinoIcons.video_camera_solid,
-                              color: _isLocalVideoEnabled ? Colors.white : Colors.red,
+                              color: _isLocalVideoEnabled
+                                  ? Colors.white
+                                  : Colors.red,
                               size: 14,
                             ),
                             const SizedBox(width: 4),
@@ -4784,8 +4788,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     // Use LayoutBuilder to detect if we're in a small window (PiP mode)
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isSmallWindow = constraints.maxWidth < 400 || constraints.maxHeight < 100;
-        
+        final isSmallWindow =
+            constraints.maxWidth < 400 || constraints.maxHeight < 100;
+
         // Use PiP design if either flag is set OR window is small
         if (_isPiPEnabled || isSmallWindow) {
           return _buildPipControlBar();
@@ -4795,7 +4800,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       },
     );
   }
-  
+
   /// OLD design for normal/expanded mode
   Widget _buildNormalControlBar() {
     return Container(
@@ -4893,7 +4898,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       ),
     );
   }
-  
+
   /// NEW ultra-compact design for PiP/floating widget mode - icons only, no labels
   Widget _buildPipControlBar() {
     return LayoutBuilder(
@@ -4905,7 +4910,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         final iconSize = (buttonSize * 0.5).clamp(12.0, 20.0);
         final spacing = (availableWidth / 20).clamp(4.0, 12.0);
         final padding = (availableWidth / 30).clamp(2.0, 8.0);
-        
+
         return Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(
@@ -4959,7 +4964,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       },
     );
   }
-  
+
   /// Ultra-compact icon-only button for PiP mode
   Widget _buildPipIconButton({
     required IconData icon,
@@ -4979,11 +4984,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           borderRadius: BorderRadius.circular(buttonSize / 3),
         ),
         onPressed: onPressed,
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: iconSize,
-        ),
+        child: Icon(icon, color: Colors.white, size: iconSize),
       ),
     );
   }
@@ -5090,7 +5091,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   void dispose() {
     // Remove lifecycle observer
     WidgetsBinding.instance.removeObserver(this);
-    
+
     // Disable PiP when disposing
     _pipService.disablePiP();
 

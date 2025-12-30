@@ -22,7 +22,8 @@ import 'components/SVPostTextComponent.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
-  SVAddPostFragment({required this.refresh, this.addPostBloc, Key? key}) : super(key: key);
+  SVAddPostFragment({required this.refresh, this.addPostBloc, Key? key})
+    : super(key: key);
   final Function refresh;
   final AddPostBloc? addPostBloc;
 
@@ -30,7 +31,8 @@ class SVAddPostFragment extends StatefulWidget {
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
 }
 
-class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindingObserver {
+class _SVAddPostFragmentState extends State<SVAddPostFragment>
+    with WidgetsBindingObserver {
   String image = '';
 
   List<String> colorListHex = [
@@ -97,7 +99,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     }
     super.dispose();
   }
-  
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('SVAddPost: App lifecycle changed to: $state');
@@ -113,7 +115,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
       if (mounted) {
         setState(() {
           // This will trigger a rebuild with updated images
-          print('SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files');
+          print(
+            'SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files',
+          );
         });
       }
     }
@@ -160,9 +164,12 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                 print("Response message: ${state.message}");
                 try {
                   Map<String, dynamic> jsonMap = json.decode(state.message);
-                  
+
                   // Helper function to extract message from response
-                  String extractMessage(dynamic messageData, String defaultMsg) {
+                  String extractMessage(
+                    dynamic messageData,
+                    String defaultMsg,
+                  ) {
                     if (messageData == null) return defaultMsg;
                     if (messageData is String) return messageData;
                     if (messageData is List && messageData.isNotEmpty) {
@@ -170,63 +177,64 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                     }
                     return defaultMsg;
                   }
-                  
+
                   if (jsonMap['success'] == true) {
-                    final message = extractMessage(jsonMap['message'], 'Post created successfully!');
+                    final message = extractMessage(
+                      jsonMap['message'],
+                      'Post created successfully!',
+                    );
                     showToast(message);
                     print('Success: $message');
-                    
-                    // Schedule clearing and navigation for next frame to avoid state conflicts
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!mounted) return;
-                      
-                      // Clear BLoC data
-                      searchPeopleBloc.selectedSearchPeopleData.clear();
-                      searchPeopleBloc.imagefiles.clear();
-                      searchPeopleBloc.title = '';
-                      searchPeopleBloc.feeling = '';
-                      searchPeopleBloc.backgroundColor = '';
-                      
-                      // Clear text field and reset color
-                      _postTextController.clear();
+
+                    // Clear data and switch to home tab
+                    // Clear BLoC data
+                    searchPeopleBloc.selectedSearchPeopleData.clear();
+                    searchPeopleBloc.imagefiles.clear();
+                    searchPeopleBloc.title = '';
+                    searchPeopleBloc.feeling = '';
+                    searchPeopleBloc.backgroundColor = '';
+
+                    // Clear text field and reset color
+                    _postTextController.clear();
+                    if (mounted) {
                       setState(() {
                         currentColor = SVDividerColor;
                         currentSetColor = '';
                       });
-                      
-                      // Navigate to home after clearing
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        if (mounted) {
-                          widget.refresh();
-                        }
-                      });
+                    }
+
+                    // Switch to home tab and refresh feed (no Navigator.pop needed - this is a tab fragment)
+                    Future.delayed(const Duration(milliseconds: 200), () {
+                      if (mounted) {
+                        widget.refresh();
+                      }
                     });
                   } else {
-                    final errorMsg = extractMessage(jsonMap['message'], 'Failed to create post');
+                    final errorMsg = extractMessage(
+                      jsonMap['message'],
+                      'Failed to create post',
+                    );
                     showToast(errorMsg);
                     print('Error: $errorMsg');
                   }
                 } catch (e) {
                   print('Error parsing response: $e');
                   showToast('Post created successfully!');
-                  
-                  // Schedule clearing and navigation for next frame to avoid state conflicts
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
-                    
-                    // Clear form on success
-                    _postTextController.clear();
+
+                  // Clear form and switch to home tab
+                  _postTextController.clear();
+                  if (mounted) {
                     setState(() {
                       currentColor = SVDividerColor;
                       currentSetColor = '';
                     });
-                    
-                    // Fallback: assume success and refresh home
-                    Future.delayed(const Duration(milliseconds: 300), () {
-                      if (mounted) {
-                        widget.refresh();
-                      }
-                    });
+                  }
+
+                  // Fallback: assume success, switch to home tab and refresh
+                  Future.delayed(const Duration(milliseconds: 200), () {
+                    if (mounted) {
+                      widget.refresh();
+                    }
                   });
                 }
               } else if (state is DataError) {

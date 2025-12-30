@@ -166,8 +166,12 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         final available = await _pipService.isAvailable();
         if (available) {
           // Enable auto-PiP when background for Android
-          if (Platform.isAndroid) {
-            await _pipService.enableAutoPiP(isVideoCall: true);
+          // Pass context so permission dialog can be shown if needed
+          if (Platform.isAndroid && mounted) {
+            await _pipService.enableAutoPiP(
+              isVideoCall: true,
+              context: context,
+            );
           }
           print('📺 CallScreen: PiP initialized');
         }
@@ -182,13 +186,17 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     if (!widget.isVideoCall || _isPiPEnabled) return;
 
     try {
+      // Pass context so permission dialog can be shown if needed
       final result = await _pipService.enablePiP(
         contactName: widget.contactName,
         isVideoCall: true,
+        context: mounted ? context : null,
       );
-      setState(() {
-        _isPiPEnabled = result;
-      });
+      if (mounted) {
+        setState(() {
+          _isPiPEnabled = result;
+        });
+      }
       print('📺 CallScreen: PiP enabled = $result');
     } catch (e) {
       print('📺 CallScreen: Error enabling PiP: $e');

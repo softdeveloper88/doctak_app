@@ -1584,6 +1584,7 @@ void pipMain() {
 }
 
 /// Widget displayed in Picture-in-Picture mode during calls
+/// This creates a compact floating window UI that shows during active calls
 class PiPCallWidget extends StatelessWidget {
   const PiPCallWidget({super.key});
 
@@ -1592,38 +1593,61 @@ class PiPCallWidget extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          color: Colors.black87,
-          child: const SafeArea(
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.videocam_rounded,
-                        color: Colors.green,
-                        size: 32,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'On Call',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+      home: Scaffold(
+        backgroundColor: const Color(0xFF1E1E2E),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [const Color(0xFF2D2D44), const Color(0xFF1E1E2E)],
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Animated call indicator
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.green.withOpacity(0.5),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.videocam_rounded,
+                    color: Colors.green,
+                    size: 36,
                   ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                // Call status text
+                const Text(
+                  'Call in Progress',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Tap to return hint
+                Text(
+                  'Tap to return',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1658,7 +1682,7 @@ Future<void> main() async {
     // Since Hive is only used for basic caching and not critical data,
     // we can skip initialization if it fails.
     bool hiveInitialized = false;
-    
+
     try {
       String hivePath;
       if (Platform.isAndroid) {
@@ -1667,7 +1691,7 @@ Future<void> main() async {
         // The package name is com.kt.doctak from AndroidManifest.xml
         hivePath = '/data/data/com.kt.doctak/app_flutter';
         debugPrint('Using hardcoded Android path: $hivePath');
-        
+
         // Ensure directory exists
         try {
           final dir = Directory(hivePath);
@@ -1687,7 +1711,7 @@ Future<void> main() async {
         // Other platforms - use a relative path as fallback
         hivePath = '.';
       }
-      
+
       Hive.init(hivePath);
       debugPrint('Hive initialized successfully with path: $hivePath');
       hiveInitialized = true;
@@ -1696,7 +1720,7 @@ Future<void> main() async {
       // App can still run without Hive for basic functionality
       // Hive is not critical for the app to function
     }
-    
+
     // Mark hiveInitialized as used to suppress warning
     debugPrint('Hive initialized: $hiveInitialized');
 
@@ -2113,7 +2137,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             alert: true,
             badge: true,
             sound: true,
-            criticalAlert: false, // Use normal notifications that respect device mute
+            criticalAlert:
+                false, // Use normal notifications that respect device mute
           );
       print('User granted permission: ${settings.authorizationStatus}');
     } catch (e) {
@@ -2320,7 +2345,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     // If handling a call, use '/call' as our home route, otherwise use the regular route
                     initialRoute: isHandlingCallAtStartup
                         ? '/call'
-                        : (widget.initialRoute != null ? '/${widget.initialRoute}' : '/'),
+                        : (widget.initialRoute != null
+                              ? '/${widget.initialRoute}'
+                              : '/'),
 
                     // Add onGenerateRoute to better handle deep linking for calls
                     onGenerateRoute: (settings) {

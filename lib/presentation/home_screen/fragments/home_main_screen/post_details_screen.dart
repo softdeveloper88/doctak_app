@@ -646,12 +646,20 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       child: const Text("Yes", style: TextStyle(color: Colors.black)),
       onPressed: () async {
         homeBloc.add(DeletePostEvent(postId: id));
-        setState(() {
-          Navigator.of(context).pop();
-        });
+
+        // Close the dialog first
+        Navigator.of(context).pop();
+
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Post Delete Successfully')),
         );
+
+        // Navigate back to the previous screen after a short delay
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
         // } else {
         //   setState(() {
         //     _isLoading = false;
